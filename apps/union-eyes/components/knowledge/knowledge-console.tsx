@@ -19,6 +19,7 @@ import {
   Calendar,
   Search,
   ArrowRight,
+  FileText,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -36,6 +37,12 @@ export function KnowledgeConsole() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const sections: KnowledgeLink[] = [
+    {
+      href: `/${locale}/dashboard/knowledge-base`,
+      icon: <FileText size={20} className="text-teal-600" />,
+      titleKey: "sidebar.unionDocuments",
+      description: "Constitutions, bylaws, forms, and policy guides.",
+    },
     {
       href: `/${locale}/dashboard/agreements`,
       icon: <BookOpen size={20} className="text-blue-600" />,

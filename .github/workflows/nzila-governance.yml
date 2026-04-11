@@ -153,7 +153,7 @@ jobs:
       - name: Run contract tests
         run: pnpm contract-tests
 
-  # ── Union Eyes Evidence Seal (app-level) ────────────────────────────────
+  # ── UnionEyes Evidence Seal (app-level) ────────────────────────────────
   # Runs UE's own evidence scripts — separate from the monorepo-level pack.
   ue-evidence:
     runs-on: ubuntu-latest
@@ -581,7 +581,7 @@ jobs:
             exit 1
           fi
           if [[ "${{ needs.ue-evidence.result }}" == "failure" ]]; then
-            echo "❌ Union Eyes evidence seal failed"
+            echo "❌ UnionEyes evidence seal failed"
             exit 1
           fi
           if [[ "${{ needs.abr-evidence.result }}" == "failure" ]]; then

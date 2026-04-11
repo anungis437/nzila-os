@@ -36,7 +36,7 @@ export function useShell(): ShellContextValue {
 
 export interface ShellProviderProps {
   children: ReactNode;
-  /** Pre-resolved user (typically from Clerk). */
+  /** Pre-resolved user (typically from auth session). */
   user: ShellUser | null;
   /** All orgs the user belongs to. */
   availableOrgs: ShellOrg[];

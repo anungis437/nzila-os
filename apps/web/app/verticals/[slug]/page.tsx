@@ -151,11 +151,11 @@ const verticalData: Record<string, {
     heroAlt: 'Labour union workers raising hands together in solidarity',
     tam: '$50B',
     orgs: '4,773',
-    platforms: ['Union Eyes'],
+    platforms: ['UnionEyes'],
     status: 'Flagship',
     color: 'from-gold to-gold-light',
     overview:
-      'Union Eyes is Nzila\'s flagship platform — the most comprehensive union management system available. Covering 4,773 orgs, it digitises every dimension of union operations from grievance tracking to pension forecasting, with CBA intelligence and arbitration precedent research delivering decisive intelligence to labour leaders.',
+      'UnionEyes is Nzila\'s flagship platform — the most comprehensive union management system available. Covering 4,773 orgs, it digitises every dimension of union operations from grievance tracking to pension forecasting, with CBA intelligence and arbitration precedent research delivering decisive intelligence to labour leaders.',
     capabilities: [
       {
         title: 'Pension Forecasting Engine',

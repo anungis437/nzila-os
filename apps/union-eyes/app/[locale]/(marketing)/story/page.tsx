@@ -80,7 +80,7 @@ export default async function LocaleStoryPage({
                   le réparer.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed font-semibold">
-                  Union Eyes est ce qui s&apos;est passé ensuite.
+                  UnionEyes est ce qui s&apos;est passé ensuite.
                 </p>
               </>
             ) : (
@@ -104,7 +104,7 @@ export default async function LocaleStoryPage({
                   exactly what was broken. Oby knew exactly how to fix it.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed font-semibold">
-                  Union Eyes is what happened next.
+                  UnionEyes is what happened next.
                 </p>
               </>
             )}
@@ -144,7 +144,7 @@ export default async function LocaleStoryPage({
                   description="Chaque grief représente une personne lésée. Nous traitons cela avec le sérieux qu'il mérite. Pas de gamification. Pas de bonne humeur d'entreprise. Juste du respect." />
                 <PrincipleCard icon={<Handshake className="h-6 w-6" />}
                   title="Gouvernance démocratique intégrée"
-                  description="Union Eyes dispose d'une structure à actions spéciales. Les membres syndicaux élisent des représentants qui peuvent opposer leur veto à toute vente ou changement de mission. Ce n'est pas du marketing — c'est dans notre accord d'actionnaires." />
+                  description="UnionEyes dispose d'une structure à actions spéciales. Les membres syndicaux élisent des représentants qui peuvent opposer leur veto à toute vente ou changement de mission. Ce n'est pas du marketing — c'est dans notre accord d'actionnaires." />
               </>
             ) : (
               <>
@@ -159,7 +159,7 @@ export default async function LocaleStoryPage({
                   description="Every grievance represents a person who was wronged. We treat that with the seriousness it deserves. No gamification. No corporate cheerfulness. Just respect." />
                 <PrincipleCard icon={<Handshake className="h-6 w-6" />}
                   title="Democratic governance baked in"
-                  description="Union Eyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn't marketing—it's in our shareholder agreement." />
+                  description="UnionEyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn't marketing—it's in our shareholder agreement." />
               </>
             )}
           </div>
@@ -172,8 +172,8 @@ export default async function LocaleStoryPage({
           </h2>
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
             {isFr
-              ? "Nous ne faisons pas de démonstrations. Nous avons des conversations. Parlez-nous de vos défis. Nous serons honnêtes quant à savoir si Union Eyes peut vous aider."
-              : "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether Union Eyes can help — or if something else would serve you better."}
+              ? "Nous ne faisons pas de démonstrations. Nous avons des conversations. Parlez-nous de vos défis. Nous serons honnêtes quant à savoir si UnionEyes peut vous aider."
+              : "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether UnionEyes can help — or if something else would serve you better."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

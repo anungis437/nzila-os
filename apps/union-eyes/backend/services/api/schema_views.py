@@ -1,7 +1,7 @@
 """
 Schema API ViewSet
 Provides OpenAPI-style introspection of registered service endpoints,
-their models, and URL patterns for the Union Eyes services router.
+their models, and URL patterns for the UnionEyes services router.
 """
 
 from django.apps import apps

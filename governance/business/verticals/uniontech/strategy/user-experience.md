@@ -6,7 +6,7 @@
 
 ## 1. Design Philosophy
 
-Union Eyes and DiasporaCore serve users who are **not full-time software users** — they are shop stewards on factory floors, grievance officers managing caseloads between shifts, and volunteer treasurers balancing books after hours. The UX must be:
+UnionEyes and DiasporaCore serve users who are **not full-time software users** — they are shop stewards on factory floors, grievance officers managing caseloads between shifts, and volunteer treasurers balancing books after hours. The UX must be:
 
 - **Zero-training intuitive** — core workflows completable without documentation
 - **Mobile-first for field roles** — grievance intake, member lookup, campaign canvassing
@@ -17,7 +17,7 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 
 ## 2. User Personas
 
-### 2.1 Union Eyes Personas
+### 2.1 UnionEyes Personas
 
 | Persona | Role | Primary Tasks | Context | Pain Points |
 |---------|------|--------------|---------|-------------|
@@ -46,8 +46,8 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 | **Phase 1: Setup** | Days 1–14 | Account provisioning; admin configuration; SSO/directory integration; data migration kickoff | Platform accessible; admin accounts active |
 | **Phase 2: Data Migration** | Days 7–30 | Import membership rolls, grievance history, CBA documents, financial records from legacy systems | >95% data fidelity; zero duplicate members |
 | **Phase 3: Core Training** | Days 15–45 | Role-based training sessions (2 hours each): Stewards, Officers, Executives, Treasurers | >80% of trained users complete a core workflow unassisted |
-| **Phase 4: Parallel Run** | Days 30–60 | Union runs both legacy and Union Eyes simultaneously; support team monitors | <5 support tickets/week; grievance filing parity with legacy |
-| **Phase 5: Go-Live** | Days 45–75 | Legacy system decommissioned; Union Eyes is system of record | All active workflows on Union Eyes; zero data loss |
+| **Phase 4: Parallel Run** | Days 30–60 | Union runs both legacy and UnionEyes simultaneously; support team monitors | <5 support tickets/week; grievance filing parity with legacy |
+| **Phase 5: Go-Live** | Days 45–75 | Legacy system decommissioned; UnionEyes is system of record | All active workflows on UnionEyes; zero data loss |
 | **Phase 6: Optimization** | Days 60–90 | Usage analytics review; workflow customization; add-on module evaluation | Feature activation >70%; executive dashboard adoption |
 
 ### 3.2 In-App Onboarding
@@ -64,7 +64,7 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 
 ### 4.1 Platform Approach
 
-**React Native** — shared codebase for iOS and Android with native performance. Union Eyes Mobile is not a companion app but a **field-optimized interface** to the full platform.
+**React Native** — shared codebase for iOS and Android with native performance. UnionEyes Mobile is not a companion app but a **field-optimized interface** to the full platform.
 
 ### 4.2 Mobile-Priority Features
 
@@ -150,7 +150,7 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 
 | Standard | Scope | Deadline |
 |----------|-------|---------|
-| **WCAG 2.1 AA** | All web interfaces (Union Eyes + DiasporaCore) | Launch requirement |
+| **WCAG 2.1 AA** | All web interfaces (UnionEyes + DiasporaCore) | Launch requirement |
 | **AODA (Accessibility for Ontarians with Disabilities Act)** | Ontario-deployed services | Mandatory for Ontario unions |
 | **ADA / Section 508** | US market entry (2027+) | Required for US public-sector unions |
 
@@ -173,7 +173,7 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 
 ## 8. Design System
 
-**Uniontech Design System (UDS)** — shared component library across Union Eyes and DiasporaCore:
+**Uniontech Design System (UDS)** — shared component library across UnionEyes and DiasporaCore:
 
 | Component Category | Examples | Status |
 |-------------------|----------|--------|

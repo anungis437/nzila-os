@@ -21,7 +21,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
 
   {
     id: 'union-eyes',
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     description: 'Labour and union management — claims, grievances, voting, dues, pensions',
     basePath: '/union-eyes',
     tier: 'PRODUCTION',

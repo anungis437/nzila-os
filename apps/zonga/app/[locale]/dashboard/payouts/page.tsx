@@ -7,6 +7,7 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
+import { getTranslations } from 'next-intl/server'
 import { listPayouts } from '@/lib/actions/payout-actions'
 import { formatCurrencyAmount } from '@/lib/stripe'
 
@@ -39,6 +40,7 @@ export default async function PayoutsPage({
 }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
+  const t = await getTranslations('payouts')
 
   const params = await searchParams
   const { payouts, total, totalPaid } = await listPayouts({ page: Number(params.page ?? '1') })
@@ -47,14 +49,14 @@ export default async function PayoutsPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Payouts</h1>
-          <p className="text-muted-foreground mt-1">Creator earnings and payout history</p>
+          <h1 className="text-2xl font-bold text-navy">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('description')}</p>
         </div>
         <a
           href="payouts/new"
           className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
         >
-          New Payout
+          {t('newPayout')}
         </a>
       </div>
 
@@ -62,19 +64,19 @@ export default async function PayoutsPage({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <div className="p-5">
-            <p className="text-xs text-muted-foreground">Total Payouts</p>
+            <p className="text-xs text-muted-foreground">{t('totalPayouts')}</p>
             <p className="text-2xl font-bold text-navy">{total}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-muted-foreground">Total Paid Out</p>
+            <p className="text-xs text-muted-foreground">{t('totalPaidOut')}</p>
             <p className="text-2xl font-bold text-emerald-600">{formatAmount(Math.round(totalPaid * 100))}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-muted-foreground">Average Payout</p>
+            <p className="text-xs text-muted-foreground">{t('averagePayout')}</p>
             <p className="text-2xl font-bold text-navy">
               {total > 0 ? formatAmount(Math.round((totalPaid / total) * 100)) : '—'}
             </p>
@@ -86,9 +88,9 @@ export default async function PayoutsPage({
       {payouts.length === 0 ? (
         <Card>
           <div className="p-12 text-center">
-            <p className="font-semibold text-foreground text-lg">No payouts yet</p>
+            <p className="font-semibold text-foreground text-lg">{t('noPayoutsYet')}</p>
             <p className="text-muted-foreground text-sm mt-1">
-              Artist payouts will appear here once earnings have been distributed.
+              {t('noPayoutsDescription')}
             </p>
           </div>
         </Card>

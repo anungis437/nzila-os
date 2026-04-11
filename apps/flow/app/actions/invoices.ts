@@ -11,7 +11,7 @@ import {
   updateInvoiceLine,
   deleteInvoiceLine,
 } from '@nzila/commerce-db'
-import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { getDbContext, getReadContext } from '@/lib/org-resolver'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────

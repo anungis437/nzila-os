@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const metadata = {
-  title: 'Expense Management | Union Eyes',
+  title: 'Expense Management | UnionEyes',
   description: 'Submit and approve expense requests',
 };
 

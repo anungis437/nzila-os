@@ -64,7 +64,7 @@ investors@nzila.ventures
 # **15 Production Platforms Across 10+ Verticals**
 
 ### **Nzila Ventures is a multi-vertical platform company** with:
-- **4 Flagship Products** (Union Eyes, ABR Insights, CORA, 3CUO/DiasporaCore)
+- **4 Flagship Products** (UnionEyes, ABR Insights, CORA, 3CUO/DiasporaCore)
 - **11 Additional Platforms** (insurtech, legaltech, healthtech, trade, entertainment, edtech)
 - **Standardized Technical Architecture** (3 profiles, 100% Azure, shared backbone)
 - **$5.7M-$7.5M IP Portfolio** (12,000+ entities, proprietary algorithms, patents pending)
@@ -75,7 +75,7 @@ investors@nzila.ventures
 
 **✅ Vertical Depth** — Deep domain expertise (10+ years union operations, DEI consulting, AgTech research)  
 **✅ Technical Excellence** — $4M+ engineering investment, 12,000+ database entities, ML/AI integration  
-**✅ IP Defensibility** — Patents pending (pension forecasting, gamification), trademarks filed (Nzila, Memora, Union Eyes, ABR, CORA)  
+**✅ IP Defensibility** — Patents pending (pension forecasting, gamification), trademarks filed (Nzila, Memora, UnionEyes, ABR, CORA)  
 **✅ Infrastructure Leverage** — Shared backbone (8 components) enables 85% faster launches (24 weeks → 8 weeks)
 
 ---
@@ -84,9 +84,9 @@ investors@nzila.ventures
 
 ---
 
-## SLIDE 4: FLAGSHIP #1 — UNION EYES
+## SLIDE 4: FLAGSHIP #1 — UnionEyes
 
-# **Union Eyes**
+# **UnionEyes**
 ## The Modern Operating System for Labor Unions
 
 ### **What We Built:**
@@ -234,7 +234,7 @@ investors@nzila.ventures
 
 **1. django-aca-azurepg** (4 platforms)
 - Django 5, Azure PostgreSQL, Drizzle ORM, optional Clerk auth
-- **Platforms:** Union Eyes, Court Lens, AgrimoOps, CongoWave
+- **Platforms:** UnionEyes, Court Lens, AgrimoOps, CongoWave
 
 **2. nextjs-aca-azurepg-clerk** (8 platforms)
 - Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Clerk mandatory
@@ -275,8 +275,8 @@ investors@nzila.ventures
 - **Protection:** Copyright (automatic), contributor IP assignment agreements (100% coverage)
 
 **2. Proprietary Algorithms** — $700K-$900K
-- **Union Eyes Pension Forecasting** (patent pending): Actuarial ML model, $150K standalone licensing potential
-- **Union Eyes Grievance Prediction** (patent pending): Arbitration outcome ML, $100K licensing potential
+- **UnionEyes Pension Forecasting** (patent pending): Actuarial ML model, $150K standalone licensing potential
+- **UnionEyes Grievance Prediction** (patent pending): Arbitration outcome ML, $100K licensing potential
 - **ABR Gamification Engine** (patent pending): Adaptive XP progression, $120K white-label potential
 - **SentryIQ Insurance Arbitrage Engine** (trade secret): Multi-carrier rate optimization, $90K B2B licensing
 - **Trade OS Multi-Carrier Optimizer** (trade secret): FedEx/UPS/DHL parallel rate requests, $70K licensing
@@ -284,13 +284,13 @@ investors@nzila.ventures
 
 **3. Trademarks & Brand Assets** — $220K-$280K
 - ✅ **Nzila Ventures** (registered Canada #87890012)
-- ⏳ **Memora, Union Eyes, ABR Insights, CORA** (filed Canada, USPTO Q3 2026)
+- ⏳ **Memora, UnionEyes, ABR Insights, CORA** (filed Canada, USPTO Q3 2026)
 - Domain names, social media handles secured (all .com/.ca/.io)
 
 **4. Trade Secrets** — $500K-$800K
 - **Companion Prompt Library v1** (200+ GPT-4 prompts, copyright registered Canada)
 - **Companion Personality Graph** (tone adaptation algorithm, proprietary)
-- **Union Eyes ML Feature Engineering** (50+ custom features for pension/grievance models)
+- **UnionEyes ML Feature Engineering** (50+ custom features for pension/grievance models)
 - **ABR Progression Curve** (behavioral psychology-optimized XP formula, 80%+ completion)
 
 **5. Patents (Pending)** — $300K-$500K
@@ -312,7 +312,7 @@ investors@nzila.ventures
 ### **1. B2B SaaS Subscriptions (75% of ARR by 2030 → $4.5M)**
 
 **Pricing Tiers:**
-- **Union Eyes:** $15K-$25K/year (small-medium unions), $50K-$100K/year (large unions)
+- **UnionEyes:** $15K-$25K/year (small-medium unions), $50K-$100K/year (large unions)
 - **ABR Insights:** $12K-$25K/year (mid-market), $40K-$80K/year (enterprise)
 - **CORA:** $10K-$15K/year (cooperatives), $20K-$50K/year (grain elevators, processors)
 - **Other Platforms:** $5K-$20K/year avg
@@ -351,7 +351,7 @@ investors@nzila.ventures
 
 **White-Label Licensing:**
 - **ABR Gamification Engine** → LMS platforms (Cornerstone, Docebo): $120K potential
-- **Union Eyes Pension Forecasting** → HR tech vendors (ADP, Workday): $150K potential
+- **UnionEyes Pension Forecasting** → HR tech vendors (ADP, Workday): $150K potential
 - **Trade OS Rate Optimizer** → Freight brokers (C.H. Robinson, XPO): $70K potential
 
 **Post-Spinout Royalties:**
@@ -368,7 +368,7 @@ investors@nzila.ventures
 
 ### **Phase 1: Flagship Launch (2026-2027) — $350K → $1.8M ARR**
 
-**Union Eyes:**
+**UnionEyes:**
 - **Direct Sales:** Field AEs in Ontario (40% of Canadian unions), Quebec (30%), Alberta (15%)
 - **Partnerships:** Canadian Labour Congress (3.3M members, 100+ affiliated unions), Unifor (315K members)
 - **Events:** CLO Canada Conference, AFL-CIO Convention, labor law seminars
@@ -399,12 +399,12 @@ investors@nzila.ventures
 ### **Phase 3: National Scale (2028-2030) — $4.2M → $10M ARR**
 
 **U.S. Expansion:**
-- **Union Eyes:** 11,200 U.S. unions (OLMS data), target large unions (SEIU, AFSCME, UAW, Teamsters)
+- **UnionEyes:** 11,200 U.S. unions (OLMS data), target large unions (SEIU, AFSCME, UAW, Teamsters)
 - **ABR Insights:** U.S. DEI market ($8B vs Canada $1.5B), EEOC compliance, federal contractors (OFCCP)
 - **CORA:** U.S. farms (2M+ commercial operations vs Canada 189K), grain belt (Iowa, Illinois, Kansas, Nebraska)
 
 **Channel Partnerships:**
-- **HR Tech Resellers:** ADP Marketplace, Workday App Store (Union Eyes, ABR)
+- **HR Tech Resellers:** ADP Marketplace, Workday App Store (UnionEyes, ABR)
 - **AgTech Distributors:** John Deere, CNH Industrial (CORA, AgrimoOps)
 - **Insurance Brokers:** Hub International, Marsh Canada (SentryIQ)
 
@@ -414,7 +414,7 @@ investors@nzila.ventures
 
 # **First-Mover Advantages + Technical Moats**
 
-### **Union Eyes — No Direct Competitors at Scale**
+### **UnionEyes — No Direct Competitors at Scale**
 
 **Traditional Competitors:**
 - ❌ **Bargaining Power** (BargainingPower.com): Grievance tracking only, no pension/ML/campaigns
@@ -470,7 +470,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 | Year | ARR | Customers | Avg ACV | YoY Growth | EBITDA Margin | Notes |
 |------|-----|-----------|---------|------------|---------------|-------|
-| **2026** | $350K | 25 | $14K | — | -103% | Flagship launch (Union Eyes, ABR, CORA), 2 AEs |
+| **2026** | $350K | 25 | $14K | — | -103% | Flagship launch (UnionEyes, ABR, CORA), 2 AEs |
 | **2027** | $1.2M | 80 | $15K | 243% | -23% | Product-market fit, 4 AEs, marketing ramp |
 | **2028** | $2.8M | 180 | $15.6K | 133% | **+5%** ✅ | **Breakeven**, 12 platforms active, 7 AEs |
 | **2029** | $4.5M | 350 | $12.9K | 61% | +13% | Enterprise deals ($50K+ ACV), channel partnerships |
@@ -482,7 +482,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 ---
 
 ### **Revenue by Platform (2030):**
-- **Union Eyes:** $1.8M (30% of ARR)
+- **UnionEyes:** $1.8M (30% of ARR)
 - **ABR Insights:** $1.2M (20%)
 - **CORA:** $900K (15%)
 - **DiasporaCore:** $600K (10%)
@@ -492,8 +492,8 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 ### **Key Metrics (2030):**
 - **Gross Margin:** 75% (SaaS 80%, transaction fees 60%, IP licensing 95%)
-- **CAC Payback:** 6-24 months (CORA 2-4 months, Union Eyes 14-24 months)
-- **LTV/CAC:** 5-150x (CORA network effects 94-150x, Union Eyes 7x, ABR 5-8x)
+- **CAC Payback:** 6-24 months (CORA 2-4 months, UnionEyes 14-24 months)
+- **LTV/CAC:** 5-150x (CORA network effects 94-150x, UnionEyes 7x, ABR 5-8x)
 - **Net Revenue Retention (NRR):** 120-140% (seat expansion, add-on modules)
 
 ---
@@ -519,7 +519,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 | **Sales & Marketing** | 40% | $2M | 5 AEs (2026), 10 AEs (2027), national expansion (U.S. entry 2028), trade shows, content marketing |
 | **Engineering** | 25% | $1.25M | 5 full-stack engineers (Backbone build, flagship migrations, ML/AI features, platform velocity) |
 | **Operations** | 20% | $1M | CFO, VP Sales, VP Marketing, Customer Success (10 CSMs), finance/legal/HR teams |
-| **Product** | 10% | $500K | 2 Product Managers (Union Eyes + ABR/CORA), UX/UI design, user research |
+| **Product** | 10% | $500K | 2 Product Managers (UnionEyes + ABR/CORA), UX/UI design, user research |
 | **Legal & IP** | 5% | $250K | USPTO filings (U.S. trademarks), patent prosecution (3 utility patents), IP protection |
 
 ---
@@ -527,7 +527,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 ### **Key Milestones ($5M Raise):**
 
 **Year 1 (2026):**
-- ✅ Flagship launch (Union Eyes 10 unions, ABR 8 orgs, CORA 7 cooperatives)
+- ✅ Flagship launch (UnionEyes 10 unions, ABR 8 orgs, CORA 7 cooperatives)
 - ✅ $500K ARR (25 customers)
 - ✅ Hire 5 AEs, 5 engineers, CFO
 
@@ -538,7 +538,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 **Year 3 (2028):**
 - ✅ **Breakeven** ($4.2M ARR, +5% EBITDA)
-- ✅ U.S. expansion (Union Eyes 20 U.S. unions, ABR 10 U.S. customers)
+- ✅ U.S. expansion (UnionEyes 20 U.S. unions, ABR 10 U.S. customers)
 - ✅ Series B ready ($30M-$50M valuation)
 
 ---
@@ -598,7 +598,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 ### **Product Traction:**
 
-**Union Eyes:**
+**UnionEyes:**
 - ✅ **5 pilot unions** (2025) — Ontario (2), Quebec (2), Alberta (1)
 - ✅ **4,773 entities migrated** from spreadsheets/paper to cloud platform
 - ✅ **238 RLS policies deployed** (multi-tenant security validated)
@@ -628,14 +628,14 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 **IP Portfolio Documented:**
 - ✅ **3 provisional patents filed** (Q2 2026): Pension Forecasting, Grievance Prediction, Gamification
-- ✅ **5 trademarks filed** (Canada): Nzila Ventures, Memora, Union Eyes, ABR Insights, CORA
+- ✅ **5 trademarks filed** (Canada): Nzila Ventures, Memora, UnionEyes, ABR Insights, CORA
 - ✅ **$5.7M-$7.5M IP valuation** (source code, algorithms, trademarks, trade secrets, patents)
 
 ---
 
 ### **Market Validation:**
 
-**Union Eyes:**
+**UnionEyes:**
 - ✅ **Canadian Labour Congress partnership** (discussions Q1 2026)
 - ✅ **Unifor interest** (315K members, 2nd largest private-sector union in Canada)
 
@@ -653,7 +653,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 # **Macro Tailwinds + Regulatory Drivers**
 
-### **1. Union Renaissance (Union Eyes)**
+### **1. Union Renaissance (UnionEyes)**
 
 **Trend:** Union membership growing for first time in decades
 - **U.S.:** 16.2M members (2023) → 16.4M (2024), +1.2% YoY (BLS data)
@@ -704,9 +704,9 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 | Risk | Mitigation Strategy | Status |
 |------|---------------------|--------|
-| **Flagship sales slower than expected** | ✅ 3 flagships (Union Eyes, ABR, CORA) diversify revenue, pilot acceleration (5 Union Eyes pilots, 3 ABR, 2 CORA), channel partnerships (CLC, CPHR, cooperatives) | MITIGATED |
+| **Flagship sales slower than expected** | ✅ 3 flagships (UnionEyes, ABR, CORA) diversify revenue, pilot acceleration (5 UnionEyes pilots, 3 ABR, 2 CORA), channel partnerships (CLC, CPHR, cooperatives) | MITIGATED |
 | **Churn higher than projected** | ✅ Product-market fit validation (NPS >40 in pilots), embedded workflows (pension fiduciary duty, ABR compliance mandate, CORA network effects), Customer Success team (1:50 CSM ratio) | MITIGATED |
-| **Migration delays (15 platforms)** | ✅ Backbone-first strategy (build once, reuse 60-75%), automated migration (Scripts-Book Template, 85% time savings), prioritize flagships (Union Eyes, ABR, CORA first) | MITIGATED |
+| **Migration delays (15 platforms)** | ✅ Backbone-first strategy (build once, reuse 60-75%), automated migration (Scripts-Book Template, 85% time savings), prioritize flagships (UnionEyes, ABR, CORA first) | MITIGATED |
 | **Cloud costs higher than expected** | ✅ Azure Reserved Instances (40% discount), auto-scaling policies (Container Apps scale-to-zero), database optimization (PgBouncer, query tuning) | MITIGATED |
 | **Engineering talent war** | ✅ Remote-first hiring (Canada-wide, international), equity compensation (10-15% ESOP), offshore contractors (Eastern Europe, Latin America $50-$80/hr) | MITIGATED |
 | **Competitive threats (horizontal giants)** | ✅ Vertical depth > horizontal breadth (be #1 in unions/ABR/AgTech, not compete with Salesforce/SAP), IP moats (patents, algorithms, 10+ years domain expertise), first-mover advantage | MITIGATED |
@@ -719,19 +719,19 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 # **From $0 → $6M ARR → $50M+ Exit**
 
 ### **2026: Flagship Launch**
-- Union Eyes, ABR Insights, CORA commercial availability
+- UnionEyes, ABR Insights, CORA commercial availability
 - $350K ARR, 25 customers (10 unions, 8 ABR orgs, 7 cooperatives)
 - Build Backbone (8 components, 16 weeks)
 
 ### **2027: Product-Market Fit**
 - 80 customers, $1.8M ARR
 - 12 platforms active (full portfolio)
-- U.S. expansion planning (Union Eyes, ABR)
+- U.S. expansion planning (UnionEyes, ABR)
 
 ### **2028: Breakeven & Scale**
 - **$4.2M ARR, breakeven (+5% EBITDA)**
 - 180 customers, 7 AEs, 5 engineers
-- U.S. entry (Union Eyes 20 U.S. unions, ABR 10 U.S. customers)
+- U.S. entry (UnionEyes 20 U.S. unions, ABR 10 U.S. customers)
 
 ### **2029: National Dominance**
 - $7M ARR, 350 customers
@@ -768,7 +768,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 ### **What You Get:**
 - **Proven Team:** Founder with 10+ years domain expertise, $4M+ technical IP built
-- **Validated Product:** 10 pilot customers (5 Union Eyes unions, 3 ABR orgs, 2 CORA cooperatives)
+- **Validated Product:** 10 pilot customers (5 UnionEyes unions, 3 ABR orgs, 2 CORA cooperatives)
 - **Massive Markets:** $100B+ TAM ($50B uniontech, $1.5B DEI, $8.6B AgTech, $40B+ other verticals)
 - **Defensible IP:** $5.7M-$7.5M portfolio (patents pending, trademarks filed, proprietary algorithms)
 - **Clear Path to Profitability:** Breakeven Y3 (2028), $6M-$10M ARR Y5 (2030)
@@ -787,7 +787,7 @@ We win by **being #1 in underserved verticals** (unions, ABR, AgTech), not by co
 
 ### **Next Steps:**
 1. **Due Diligence:** Access to full financial model (5-year monthly projections), technical architecture docs, IP portfolio
-2. **Pilot Visits:** Meet pilot customers (Union Eyes unions, ABR school boards, CORA cooperatives)
+2. **Pilot Visits:** Meet pilot customers (UnionEyes unions, ABR school boards, CORA cooperatives)
 3. **Term Sheet:** Target close Q2 2026
 4. **Board Seat:** Lead investor (1 board seat), quarterly reporting
 

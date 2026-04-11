@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { HubSpotClient } from '@nzila/crm-hubspot';
 import { createLogger } from '@nzila/os-core/telemetry';
 
-const logger = createLogger('api:contact');
+const _logger = createLogger('api:contact');
 const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 
 const contactSchema = z.object({

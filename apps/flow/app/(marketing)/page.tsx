@@ -1,7 +1,7 @@
 /**
  * Flow — Marketing Landing Page
  * ─────────────────────────────
- * Premium, Nzila-quality public site matching the Union Eyes design standard:
+ * Premium, Nzila-quality public site matching the UnionEyes design standard:
  * scroll-triggered reveals, rich imagery, animated stats, animated features
  * grid, mission section with glass-card overlay, and CTA.
  */

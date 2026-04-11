@@ -1,4 +1,4 @@
-# Union Eyes — Pilot Scope Definition
+# UnionEyes — Pilot Scope Definition
 
 > Defines the boundaries of the CUPE pilot deployment.
 > This document is the canonical reference for what is included and excluded.

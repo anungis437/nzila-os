@@ -31,7 +31,7 @@ SQL seeds, migration generators, and data fixes.
 | `seed-cape-data.sql` | Seeds CAPE domain data |
 | `seed-commerce-dev.sql` | Seeds commerce dev data |
 | `seed-organization-members.sql` | Seeds org member data |
-| `seed-ai-profiles-ue.sql` | Seeds AI profiles for Union Eyes |
+| `seed-ai-profiles-ue.sql` | Seeds AI profiles for UnionEyes |
 | `seed-compliance-data.sql` | Seeds compliance data |
 | `seed-financial-domains.sql` | Seeds financial domain data |
 | `generate-corrective-migration.ts` | Generates corrective migration scripts |

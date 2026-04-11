@@ -22,36 +22,61 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import (AddressChangeHistory, AddressValidationCache,
-                     CountryAddressFormats, CrossOrgAccessLog, FeatureFlags,
-                     InternationalAddresses, MemberConsents,
-                     MemberContactPreferences, MemberEmploymentDetails,
-                     MemberHistoryEvents, MfaConfigurations, OauthProviders,
-                     OrganizationMembers, Organizations,
-                     OrganizationSharingGrants, OrganizationSharingSettings,
-                     OrganizationUsers, PendingProfiles, Profiles,
-                     ScimConfigurations, ScimEventsLog, SsoProviders,
-                     SsoSessions, Users, UserSessions, UserUuidMapping)
-from .serializers import (AddressChangeHistorySerializer,
-                          AddressValidationCacheSerializer,
-                          CountryAddressFormatsSerializer,
-                          CrossOrgAccessLogSerializer, FeatureFlagsSerializer,
-                          InternationalAddressesSerializer,
-                          MemberConsentsSerializer,
-                          MemberContactPreferencesSerializer,
-                          MemberEmploymentDetailsSerializer,
-                          MemberHistoryEventsSerializer,
-                          MfaConfigurationsSerializer,
-                          OauthProvidersSerializer,
-                          OrganizationMembersSerializer,
-                          OrganizationSharingGrantsSerializer,
-                          OrganizationSharingSettingsSerializer,
-                          OrganizationUsersSerializer,
-                          PendingProfilesSerializer, ProfilesSerializer,
-                          ScimConfigurationsSerializer,
-                          ScimEventsLogSerializer, SsoProvidersSerializer,
-                          SsoSessionsSerializer, UserSessionsSerializer,
-                          UsersSerializer, UserUuidMappingSerializer)
+from .models import (
+    AddressChangeHistory,
+    AddressValidationCache,
+    CountryAddressFormats,
+    CrossOrgAccessLog,
+    FeatureFlags,
+    InternationalAddresses,
+    MemberConsents,
+    MemberContactPreferences,
+    MemberEmploymentDetails,
+    MemberHistoryEvents,
+    MfaConfigurations,
+    OauthProviders,
+    OrganizationMembers,
+    Organizations,
+    OrganizationSharingGrants,
+    OrganizationSharingSettings,
+    OrganizationUsers,
+    PendingProfiles,
+    Profiles,
+    ScimConfigurations,
+    ScimEventsLog,
+    SsoProviders,
+    SsoSessions,
+    Users,
+    UserSessions,
+    UserUuidMapping,
+)
+from .serializers import (
+    AddressChangeHistorySerializer,
+    AddressValidationCacheSerializer,
+    CountryAddressFormatsSerializer,
+    CrossOrgAccessLogSerializer,
+    FeatureFlagsSerializer,
+    InternationalAddressesSerializer,
+    MemberConsentsSerializer,
+    MemberContactPreferencesSerializer,
+    MemberEmploymentDetailsSerializer,
+    MemberHistoryEventsSerializer,
+    MfaConfigurationsSerializer,
+    OauthProvidersSerializer,
+    OrganizationMembersSerializer,
+    OrganizationSharingGrantsSerializer,
+    OrganizationSharingSettingsSerializer,
+    OrganizationUsersSerializer,
+    PendingProfilesSerializer,
+    ProfilesSerializer,
+    ScimConfigurationsSerializer,
+    ScimEventsLogSerializer,
+    SsoProvidersSerializer,
+    SsoSessionsSerializer,
+    UserSessionsSerializer,
+    UsersSerializer,
+    UserUuidMappingSerializer,
+)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -612,7 +637,9 @@ def _verify_auth_webhook(request) -> bool:
     Returns:
         bool: True if signature is valid
     """
-    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(settings, "CLERK_WEBHOOK_SECRET", "")
+    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(
+        settings, "CLERK_WEBHOOK_SECRET", ""
+    )
     if not webhook_secret:
         logger.error("AUTH_WEBHOOK_SECRET not configured")
         return False
@@ -943,7 +970,7 @@ def member_profile(request):
     user = request.user
     clerk_user_id: str = (
         user.username
-    )  # ClerkAuthentication sets username = Clerk user ID
+    )  # OIDCAuthentication sets username = auth user ID
 
     # ── Claims stats from grievances ──────────────────────────────────────────
     try:

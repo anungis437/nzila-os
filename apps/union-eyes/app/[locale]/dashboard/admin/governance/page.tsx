@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import GovernanceConsole from './governance-console';
 
 export const metadata: Metadata = {
-  title: 'Governance Console | Union Eyes',
+  title: 'Governance Console | UnionEyes',
   description: 'Golden share, reserved matters, audits, and council elections',
 };
 

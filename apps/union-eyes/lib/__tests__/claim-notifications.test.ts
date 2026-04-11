@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   mockSendEmail: vi.fn(),
   mockRender: vi.fn(),
   mockGetUser: vi.fn(),
-  mockClerkClient: vi.fn(),
+  mockAdminClient: vi.fn(),
 }));
 
 vi.mock('server-only', () => ({}));
@@ -56,7 +56,7 @@ vi.mock('drizzle-orm', () => ({
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({
-  clerkClient: {
+  adminClient: {
     users: {
       getUser: mocks.mockGetUser,
     },

@@ -97,6 +97,17 @@ export const grievances = pgTable("grievances", {
   workplaceId: uuid("workplace_id"),
   workplaceName: varchar("workplace_name", { length: 255 }),
   
+  // Member details (from intake form)
+  memberPhone: varchar("member_phone", { length: 50 }),
+  memberNumber: varchar("member_number", { length: 100 }),
+  localChapter: varchar("local_chapter", { length: 255 }),
+
+  // Workplace details (from intake form)
+  department: varchar("department", { length: 255 }),
+  branch: varchar("branch", { length: 255 }),
+  supervisorName: varchar("supervisor_name", { length: 255 }),
+  incidentLocation: varchar("incident_location", { length: 500 }),
+
   // CBA Reference
   cbaId: uuid("cba_id"),
   cbaArticle: varchar("cba_article", { length: 100 }),
@@ -107,6 +118,12 @@ export const grievances = pgTable("grievances", {
   description: text("description").notNull(),
   background: text("background"),
   desiredOutcome: text("desired_outcome"),
+
+  // Sensitivity flags (from intake form)
+  workplaceSafetyFlag: boolean("workplace_safety_flag").default(false),
+  harassmentFlag: boolean("harassment_flag").default(false),
+  discriminationFlag: boolean("discrimination_flag").default(false),
+  accommodationFlag: boolean("accommodation_flag").default(false),
   
   // Dates
   incidentDate: timestamp("incident_date", { withTimezone: true }),

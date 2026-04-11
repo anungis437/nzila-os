@@ -1,4 +1,4 @@
-# Union Eyes — Workflow Realignment Discovery Audit
+# UnionEyes — Workflow Realignment Discovery Audit
 
 > **Date**: 2026-04-09  
 > **Scope**: `apps/union-eyes/` — read-only inspection  

@@ -166,7 +166,7 @@ const newEN = {
   },
   trust: {
     title: "Trust Infrastructure Dashboard",
-    subtitle: "Real-time verification of Union Eyes security and governance safeguards",
+    subtitle: "Real-time verification of UnionEyes security and governance safeguards",
     exportReport: "Export Report",
     lastUpdated: "Last updated:",
     statImmutability: "Immutability",
@@ -221,7 +221,7 @@ const newEN = {
     lastElection: "Last election:",
     classVotingRights: "Class B voting rights on strategic decisions",
     securityQuestion: "Questions about our security?",
-    securityDescriptionContact: "We're committed to transparency. If you have questions about any of these safeguards or want to discuss Union Eyes security in depth, reach out to our team.",
+    securityDescriptionContact: "We're committed to transparency. If you have questions about any of these safeguards or want to discuss UnionEyes security in depth, reach out to our team.",
     contactSecurityTeam: "Contact Security Team"
   },
   workbench: {
@@ -258,7 +258,7 @@ const newEN = {
     loading: "Loading workbench..."
   },
   apiDocs: {
-    title: "Union Eyes API Documentation",
+    title: "UnionEyes API Documentation",
     subtitle: "Interactive API reference generated from source code",
     endpoints: "Endpoints:",
     coverage: "Coverage:",
@@ -280,7 +280,7 @@ const newEN = {
   },
   mobile: {
     dashboard: {
-      appTitle: "Union Eyes",
+      appTitle: "UnionEyes",
       offlineBanner: "You're offline. Some features may be limited.",
       pendingClaims: "Pending Claims",
       activeMembers: "Active Members",
@@ -1241,7 +1241,7 @@ const newFR = {
   },
   trust: {
     title: "Tableau de bord de l'infrastructure de confiance",
-    subtitle: "Vérification en temps réel des mesures de sécurité et de gouvernance de Union Eyes",
+    subtitle: "Vérification en temps réel des mesures de sécurité et de gouvernance de UnionEyes",
     exportReport: "Exporter le rapport",
     lastUpdated: "Dernière mise à jour :",
     statImmutability: "Immuabilité",
@@ -1296,7 +1296,7 @@ const newFR = {
     lastElection: "Dernière élection :",
     classVotingRights: "Droits de vote de classe B sur les décisions stratégiques",
     securityQuestion: "Des questions sur notre sécurité ?",
-    securityDescriptionContact: "Nous nous engageons à la transparence. Si vous avez des questions sur ces mesures de protection ou souhaitez discuter en profondeur de la sécurité de Union Eyes, contactez notre équipe.",
+    securityDescriptionContact: "Nous nous engageons à la transparence. Si vous avez des questions sur ces mesures de protection ou souhaitez discuter en profondeur de la sécurité de UnionEyes, contactez notre équipe.",
     contactSecurityTeam: "Contacter l'équipe de sécurité"
   },
   workbench: {
@@ -1333,7 +1333,7 @@ const newFR = {
     loading: "Chargement du poste de travail..."
   },
   apiDocs: {
-    title: "Documentation de l'API Union Eyes",
+    title: "Documentation de l'API UnionEyes",
     subtitle: "Référence API interactive générée à partir du code source",
     endpoints: "Points d'accès :",
     coverage: "Couverture :",
@@ -1355,7 +1355,7 @@ const newFR = {
   },
   mobile: {
     dashboard: {
-      appTitle: "Union Eyes",
+      appTitle: "UnionEyes",
       offlineBanner: "Vous êtes hors ligne. Certaines fonctionnalités peuvent être limitées.",
       pendingClaims: "Réclamations en attente",
       activeMembers: "Membres actifs",

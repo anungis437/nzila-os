@@ -546,7 +546,7 @@
       },
       "missionBadge": "Notre mission",
       "missionHeading": "Une technologie au service des travailleurs en premier",
-      "missionDescription": "Union Eyes est n\u00e9 en 2023 lorsqu'une d\u00e9l\u00e9gu\u00e9e syndicale du secteur de la sant\u00e9 a perdu un grief gagnant parce que ses notes \u00e9taient dans un tableur. L'employeur avait un syst\u00e8me RH \u00e0 un million de dollars. Elle avait un cahier. Nous avons b\u00e2ti cette plateforme pour r\u00e9tablir l'\u00e9quilibre \u2014 parce que chaque travailleur m\u00e9rite des outils puissants.",
+      "missionDescription": "UnionEyes est n\u00e9 en 2023 lorsqu'une d\u00e9l\u00e9gu\u00e9e syndicale du secteur de la sant\u00e9 a perdu un grief gagnant parce que ses notes \u00e9taient dans un tableur. L'employeur avait un syst\u00e8me RH \u00e0 un million de dollars. Elle avait un cahier. Nous avons b\u00e2ti cette plateforme pour r\u00e9tablir l'\u00e9quilibre \u2014 parce que chaque travailleur m\u00e9rite des outils puissants.",
       "value1": "Centr\u00e9 sur l'humain",
       "value2": "Pas de surveillance",
       "value3": "Gouvernance d\u00e9mocratique",
@@ -557,12 +557,12 @@
     },
     "story": {
       "badge": "Construit avec les syndicats, pas pour eux",
-      "heroHeading": "Union Eyes existe parce que les travailleurs m\u00e9ritent mieux que le papier et le stylo",
+      "heroHeading": "UnionEyes existe parce que les travailleurs m\u00e9ritent mieux que le papier et le stylo",
       "heroDescription": "Cette plateforme a \u00e9t\u00e9 co-con\u00e7ue avec des d\u00e9l\u00e9gu\u00e9s syndicaux qui ont pass\u00e9 des ann\u00e9es \u00e0 g\u00e9rer des griefs dans des tableurs, \u00e0 perdre des documents et \u00e0 voir des dossiers passer \u00e0 travers les mailles du filet pendant que les employeurs avaient des syst\u00e8mes RH \u00e0 un million de dollars.",
       "readMore": "En savoir plus",
       "backToHome": "Retour \u00e0 l'accueil",
-      "pageTitle": "Notre histoire | Union Eyes",
-      "pageDescription": "Union Eyes a \u00e9t\u00e9 construit par des gens qui comprennent le travail, pas la Silicon Valley."
+      "pageTitle": "Notre histoire | UnionEyes",
+      "pageDescription": "UnionEyes a \u00e9t\u00e9 construit par des gens qui comprennent le travail, pas la Silicon Valley."
     },
     "pricing": {
       "heroHeading": "Tarification simple et transparente",
@@ -572,7 +572,7 @@
       "perMonth": "/ mois",
       "perYear": "/ an",
       "getStarted": "Commencer",
-      "pageTitle": "Tarification | Union Eyes",
+      "pageTitle": "Tarification | UnionEyes",
       "pageDescription": "Tarification simple et transparente pour les syndicats de toutes tailles."
     },
     "contact": {
@@ -584,28 +584,28 @@
       "phoneLabel": "T\u00e9l\u00e9phone",
       "officeLabel": "Bureau",
       "hoursLabel": "Heures de bureau",
-      "pageTitle": "Contactez-nous | Union Eyes",
-      "pageDescription": "Joignez l'\u00e9quipe d'Union Eyes pour des questions sur notre plateforme."
+      "pageTitle": "Contactez-nous | UnionEyes",
+      "pageDescription": "Joignez l'\u00e9quipe d'UnionEyes pour des questions sur notre plateforme."
     },
     "caseStudies": {
       "heroHeading": "Syndicats qui se d\u00e9marquent",
-      "heroDescription": "\u00c9tudes de cas concr\u00e8tes sur la fa\u00e7on dont les syndicats utilisent Union Eyes pour am\u00e9liorer leurs r\u00e9sultats.",
+      "heroDescription": "\u00c9tudes de cas concr\u00e8tes sur la fa\u00e7on dont les syndicats utilisent UnionEyes pour am\u00e9liorer leurs r\u00e9sultats.",
       "viewAll": "Voir tous",
       "readMore": "Lire l'\u00e9tude de cas",
-      "pageTitle": "\u00c9tudes de cas | Union Eyes",
-      "pageDescription": "D\u00e9couvrez comment les syndicats \u00e0 travers le Canada utilisent Union Eyes."
+      "pageTitle": "\u00c9tudes de cas | UnionEyes",
+      "pageDescription": "D\u00e9couvrez comment les syndicats \u00e0 travers le Canada utilisent UnionEyes."
     },
     "pilotRequest": {
       "heroHeading": "Demandez votre projet pilote",
-      "heroDescription": "Rejoignez des syndicats progressistes qui modernisent leurs op\u00e9rations avec Union Eyes.",
-      "pageTitle": "Demander un projet pilote | Union Eyes",
-      "pageDescription": "Soumettez une demande de projet pilote pour Union Eyes."
+      "heroDescription": "Rejoignez des syndicats progressistes qui modernisent leurs op\u00e9rations avec UnionEyes.",
+      "pageTitle": "Demander un projet pilote | UnionEyes",
+      "pageDescription": "Soumettez une demande de projet pilote pour UnionEyes."
     },
     "status": {
       "heroHeading": "Statut du syst\u00e8me",
-      "heroDescription": "\u00c9tat en temps r\u00e9el des services et de l'infrastructure d'Union Eyes",
-      "pageTitle": "Statut du syst\u00e8me | Union Eyes",
-      "pageDescription": "\u00c9tat en temps r\u00e9el des services d'Union Eyes."
+      "heroDescription": "\u00c9tat en temps r\u00e9el des services et de l'infrastructure d'UnionEyes",
+      "pageTitle": "Statut du syst\u00e8me | UnionEyes",
+      "pageDescription": "\u00c9tat en temps r\u00e9el des services d'UnionEyes."
     },
     "footer": {
       "description": "Gestion syndicale propulsée par IA, co-conçue avec les syndicats canadiens. Maintenant en pilote.",
@@ -636,7 +636,7 @@
     },
     "features": {
       "grievanceTracking": {
-        "pageTitle": "Suivi des griefs | Union Eyes",
+        "pageTitle": "Suivi des griefs | UnionEyes",
         "pageDescription": "Gestion de griefs de bout en bout — de l'admission à l'arbitrage. Files intelligentes, triage IA, dossiers de preuves et recherche de précédents conçus pour les délégués.",
         "badge": "Module principal",
         "heroHeading": "Un suivi de griefs qui fonctionne vraiment pour les délégués",
@@ -670,7 +670,7 @@
         "ctaSecondary": "Lire notre histoire"
       },
       "memberPortal": {
-        "pageTitle": "Portail des membres | Union Eyes",
+        "pageTitle": "Portail des membres | UnionEyes",
         "pageDescription": "Portail libre-service pour les membres avec suivi des réclamations, visibilité des cotisations, gestion documentaire et intégration — offrant la transparence aux membres sans surcharger les délégués.",
         "badge": "Module principal",
         "heroHeading": "Un portail que vos membres utiliseront vraiment",
@@ -705,7 +705,7 @@
         "ctaSecondary": "Voir le suivi des griefs"
       },
       "aiWorkbench": {
-        "pageTitle": "Atelier IA | Union Eyes",
+        "pageTitle": "Atelier IA | UnionEyes",
         "pageDescription": "Outils IA conçus pour les délégués syndicaux — triage de griefs, recherche de précédents, extraction de clauses de convention collective et génération de brouillons. Toujours gouverné, toujours optionnel.",
         "badge": "Outils IA",
         "heroHeading": "L'IA qui aide les délégués, pas qui les remplace",
@@ -735,7 +735,7 @@
         "ctaSecondary": "Voir le suivi des griefs"
       },
       "analytics": {
-        "pageTitle": "Analytique et rapports | Union Eyes",
+        "pageTitle": "Analytique et rapports | UnionEyes",
         "pageDescription": "Rapports personnalisés, tableaux de bord pour la direction, résumés financiers et analytique de griefs — conçus pour les dirigeants syndicaux qui ont besoin de vraies données, pas de tableaux de bord pour la forme.",
         "badge": "Module principal",
         "heroHeading": "Des données que votre conseil exécutif lira vraiment",
@@ -770,34 +770,34 @@
     "legal": {
       "lastUpdated": "Dernière mise à jour : 1er mars 2026",
       "security": {
-        "pageTitle": "Sécurité | Union Eyes",
-        "pageDescription": "Comment Union Eyes protège vos données avec le chiffrement, les contrôles d'accès et la surveillance continue de la sécurité.",
+        "pageTitle": "Sécurité | UnionEyes",
+        "pageDescription": "Comment UnionEyes protège vos données avec le chiffrement, les contrôles d'accès et la surveillance continue de la sécurité.",
         "heading": "Sécurité",
-        "intro": "Les données syndicales sont sensibles. Nous traitons la sécurité comme une exigence fondamentale, pas une réflexion après coup. Cette page décrit comment Union Eyes protège les informations de votre organisation.",
+        "intro": "Les données syndicales sont sensibles. Nous traitons la sécurité comme une exigence fondamentale, pas une réflexion après coup. Cette page décrit comment UnionEyes protège les informations de votre organisation.",
         "encryptionTitle": "Chiffrement",
         "encryptionDesc": "Toutes les données sont chiffrées en transit avec TLS 1.2+ et au repos avec AES-256. Les connexions à la base de données sont chiffrées de bout en bout. Les secrets et clés API sont stockés dans Azure Key Vault — jamais dans le code source ou les fichiers d'environnement.",
         "accessControlTitle": "Contrôle d'accès",
-        "accessControlDesc": "Union Eyes utilise le contrôle d'accès basé sur les rôles (RBAC) pour garantir que les membres ne voient que ce qu'ils sont autorisés à voir. L'authentification est gérée par Clerk avec prise en charge de l'authentification multifacteur. Les requêtes de base de données sont limitées par organisation pour assurer une isolation stricte des données entre les syndicats.",
+        "accessControlDesc": "UnionEyes utilise le contrôle d'accès basé sur les rôles (RBAC) pour garantir que les membres ne voient que ce qu'ils sont autorisés à voir. L'authentification est gérée par Clerk avec prise en charge de l'authentification multifacteur. Les requêtes de base de données sont limitées par organisation pour assurer une isolation stricte des données entre les syndicats.",
         "infrastructureTitle": "Infrastructure",
-        "infrastructureDesc": "Union Eyes est hébergé sur Microsoft Azure dans des centres de données canadiens, garantissant que vos données restent sous juridiction canadienne. Nous utilisons l'isolation par conteneurs, l'analyse automatisée de sécurité des dépendances et des images Docker, et appliquons des en-têtes stricts de politique de sécurité du contenu dans toutes les applications.",
+        "infrastructureDesc": "UnionEyes est hébergé sur Microsoft Azure dans des centres de données canadiens, garantissant que vos données restent sous juridiction canadienne. Nous utilisons l'isolation par conteneurs, l'analyse automatisée de sécurité des dépendances et des images Docker, et appliquons des en-têtes stricts de politique de sécurité du contenu dans toutes les applications.",
         "monitoringTitle": "Surveillance et audit",
         "monitoringDesc": "Tout accès aux données sensibles est journalisé avec une piste d'audit complète. Nous exécutons des analyses automatisées de vulnérabilités à chaque modification de code, incluant l'analyse statique (CodeQL), les audits de dépendances, l'analyse de secrets et l'analyse d'images de conteneurs (Trivy). La limitation de débit protège les points d'accès API contre les abus.",
         "vulnTitle": "Signalement de vulnérabilités",
         "vulnDesc": "Si vous découvrez une vulnérabilité de sécurité, veuillez la signaler de manière responsable par courriel à",
         "vulnAck": ". Nous accusons réception des signalements dans les 24 heures et fournissons un calendrier de correction dans les 72 heures. Veuillez ne pas créer de tickets publics pour les questions de sécurité.",
         "complianceTitle": "Conformité",
-        "complianceDesc": "Union Eyes est conçu pour être conforme à la LPRPDE (Loi sur la protection des renseignements personnels et les documents électroniques) et à la législation provinciale applicable en matière de vie privée. Pour plus de détails, consultez notre",
+        "complianceDesc": "UnionEyes est conçu pour être conforme à la LPRPDE (Loi sur la protection des renseignements personnels et les documents électroniques) et à la législation provinciale applicable en matière de vie privée. Pour plus de détails, consultez notre",
         "privacyPolicyLink": "Politique de confidentialité",
         "questionsTitle": "Questions ?",
         "questionsDesc": "Si vous avez des questions sur nos pratiques de sécurité, contactez-nous via notre",
         "contactPageLink": "page de contact"
       },
       "privacy": {
-        "pageTitle": "Politique de confidentialité | Union Eyes",
-        "pageDescription": "Comment Union Eyes collecte, utilise et protège vos renseignements personnels en vertu de la LPRPDE et du droit canadien de la vie privée.",
+        "pageTitle": "Politique de confidentialité | UnionEyes",
+        "pageDescription": "Comment UnionEyes collecte, utilise et protège vos renseignements personnels en vertu de la LPRPDE et du droit canadien de la vie privée.",
         "heading": "Politique de confidentialité",
         "collectTitle": "Renseignements que nous recueillons",
-        "collectDesc": "Union Eyes recueille les renseignements nécessaires pour fournir des services de gestion syndicale, notamment : nom, adresse courriel, détails d'adhésion syndicale et données d'utilisation. Nous recueillons ces renseignements lorsque vous créez un compte, utilisez notre plateforme ou interagissez avec nos services.",
+        "collectDesc": "UnionEyes recueille les renseignements nécessaires pour fournir des services de gestion syndicale, notamment : nom, adresse courriel, détails d'adhésion syndicale et données d'utilisation. Nous recueillons ces renseignements lorsque vous créez un compte, utilisez notre plateforme ou interagissez avec nos services.",
         "useTitle": "Comment nous utilisons vos renseignements",
         "useDesc": "Nous utilisons vos renseignements pour fournir et améliorer nos services, communiquer avec vous concernant votre compte, traiter les griefs et les votes, et respecter nos obligations légales. Nous ne vendons pas vos renseignements personnels à des tiers.",
         "storageTitle": "Stockage et sécurité des données",
@@ -810,27 +810,27 @@
         "contactDesc": "Si vous avez des questions sur cette politique de confidentialité, veuillez contacter notre responsable de la protection de la vie privée à"
       },
       "terms": {
-        "pageTitle": "Conditions d'utilisation | Union Eyes",
-        "pageDescription": "Conditions régissant l'utilisation de la plateforme de gestion syndicale Union Eyes.",
+        "pageTitle": "Conditions d'utilisation | UnionEyes",
+        "pageDescription": "Conditions régissant l'utilisation de la plateforme de gestion syndicale UnionEyes.",
         "heading": "Conditions d'utilisation",
         "acceptanceTitle": "Acceptation des conditions",
-        "acceptanceDesc": "En accédant ou en utilisant Union Eyes, vous acceptez d'être lié par ces conditions d'utilisation. Union Eyes est une plateforme conçue pour les organisations syndicales au Canada et est régie par le droit canadien.",
+        "acceptanceDesc": "En accédant ou en utilisant UnionEyes, vous acceptez d'être lié par ces conditions d'utilisation. UnionEyes est une plateforme conçue pour les organisations syndicales au Canada et est régie par le droit canadien.",
         "useTitle": "Utilisation du service",
-        "useDesc": "Vous pouvez utiliser Union Eyes uniquement à des fins légitimes de gestion syndicale, incluant le suivi des griefs, la communication avec les membres, le vote et l'administration organisationnelle. Vous vous engagez à ne pas abuser de la plateforme ni tenter d'y accéder par des moyens non autorisés.",
+        "useDesc": "Vous pouvez utiliser UnionEyes uniquement à des fins légitimes de gestion syndicale, incluant le suivi des griefs, la communication avec les membres, le vote et l'administration organisationnelle. Vous vous engagez à ne pas abuser de la plateforme ni tenter d'y accéder par des moyens non autorisés.",
         "billingTitle": "Abonnement et facturation",
         "billingDesc": "Les forfaits payants sont facturés mensuellement ou annuellement selon le choix effectué lors de l'inscription. Vous pouvez annuler votre abonnement à tout moment depuis les paramètres de votre compte. Les remboursements sont accordés au prorata pour les forfaits annuels.",
         "liabilityTitle": "Limitation de responsabilité",
-        "liabilityDesc": "Union Eyes est fourni \"tel quel\" sans garantie d'aucune sorte. Nous ne sommes pas responsables des dommages indirects, accessoires ou consécutifs découlant de votre utilisation de la plateforme. Notre responsabilité totale ne dépassera pas les frais que vous avez payés au cours des douze mois précédant la réclamation.",
+        "liabilityDesc": "UnionEyes est fourni \"tel quel\" sans garantie d'aucune sorte. Nous ne sommes pas responsables des dommages indirects, accessoires ou consécutifs découlant de votre utilisation de la plateforme. Notre responsabilité totale ne dépassera pas les frais que vous avez payés au cours des douze mois précédant la réclamation.",
         "terminationTitle": "Résiliation",
         "terminationDesc": "Nous pouvons suspendre ou résilier votre compte si vous enfreignez ces conditions. Lors de la résiliation, vos données seront conservées pendant 30 jours pour permettre l'exportation, après quoi elles seront définitivement supprimées.",
         "contactTitle": "Contact",
         "contactDesc": "Des questions sur ces conditions ? Contactez-nous à"
       },
       "accessibility": {
-        "pageTitle": "Accessibilité | Union Eyes",
-        "pageDescription": "Notre engagement à rendre Union Eyes accessible à tous les utilisateurs, y compris les personnes en situation de handicap.",
+        "pageTitle": "Accessibilité | UnionEyes",
+        "pageDescription": "Notre engagement à rendre UnionEyes accessible à tous les utilisateurs, y compris les personnes en situation de handicap.",
         "heading": "Déclaration d'accessibilité",
-        "intro": "Union Eyes s'engage à assurer l'accessibilité numérique pour les personnes de toutes capacités. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes.",
+        "intro": "UnionEyes s'engage à assurer l'accessibilité numérique pour les personnes de toutes capacités. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes.",
         "standardsTitle": "Conformité aux normes",
         "standardsDesc": "Nous visons la conformité aux Règles pour l'accessibilité des contenus Web (WCAG) 2.1 niveau AA et respectons la Loi canadienne sur l'accessibilité (LCA). Notre plateforme est régulièrement auditée pour la conformité en accessibilité.",
         "featuresTitle": "Fonctionnalités d'accessibilité",
@@ -844,7 +844,7 @@
         "limitationsTitle": "Limitations connues",
         "limitationsDesc": "Bien que nous visions une accessibilité complète, certains composants tiers (tels que les formulaires de paiement intégrés) peuvent avoir des limitations. Nous travaillons activement avec nos fournisseurs pour améliorer ces aspects.",
         "feedbackTitle": "Commentaires",
-        "feedbackDesc": "Nous accueillons vos commentaires sur l'accessibilité d'Union Eyes. Veuillez nous contacter à"
+        "feedbackDesc": "Nous accueillons vos commentaires sur l'accessibilité d'UnionEyes. Veuillez nous contacter à"
       }
     },
     "pricingBody": {
@@ -1435,6 +1435,7 @@
     "work": "Travail",
     "priorities": "Priorités",
     "outcomes": "Résultats",
-    "knowledge": "Savoirs"
+    "knowledge": "Savoirs",
+    "unionDocuments": "Documents syndicaux"
   }
 }

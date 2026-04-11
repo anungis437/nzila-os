@@ -118,7 +118,7 @@ const appLinks = [
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   // Server-side auth gate — runs on Node.js (not Edge) so crypto.subtle works.
-  // Middleware only sets up Clerk context; this layout enforces authentication.
+  // Middleware only sets up auth context; this layout enforces authentication.
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 

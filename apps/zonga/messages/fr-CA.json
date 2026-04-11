@@ -61,6 +61,7 @@
   },
   "payouts": {
     "title": "Paiements",
+    "description": "Revenus des artistes et historique des paiements",
     "pending": "En attente",
     "processing": "En cours",
     "completed": "Terminé",
@@ -121,26 +122,188 @@
   "marketing": {
     "hero": {
       "badge": "Musique africaine, scène mondiale",
-      "title": "Votre musique,",
-      "titleAccent": "Vos revenus",
-      "description": "La plateforme musicale équitable — redevances transparentes, paiements instantanés et pleine propriété créative pour les artistes africains."
+      "title": "Musique sans",
+      "titleAccent": "frontières",
+      "description": "Écoutez le meilleur de la musique africaine — Afrobeats, Amapiano, Highlife et plus de 40 genres. Les artistes gagnent 85 % de chaque écoute. Les labels se développent sur tout le continent.",
+      "ctaListen": "Commencer à écouter",
+      "ctaDistribute": "Distribuer votre musique"
+    },
+    "stats": {
+      "genres": "Genres africains",
+      "streaming": "Streaming",
+      "streamingValue": "Gratuit",
+      "revenueShare": "Part des revenus artiste",
+      "currencies": "Devises africaines"
+    },
+    "stakeholders": {
+      "badge": "Pour tous les acteurs de la musique",
+      "title": "Une plateforme,",
+      "titleAccent": "chaque rôle",
+      "description": "Que vous créiez, écoutiez, gériez ou organisiez — Zonga est conçu pour vous.",
+      "listeners": {
+        "title": "Pour les auditeurs",
+        "description": "Découvrez le meilleur de la musique africaine — Afrobeats, Amapiano, Highlife, Bongo et plus. Suivez des artistes, créez des playlists et écoutez gratuitement.",
+        "cta": "Commencer à écouter",
+        "highlights": ["Streaming gratuit", "Playlists sélectionnées", "Accès aux événements en direct"]
+      },
+      "artists": {
+        "title": "Pour les artistes",
+        "description": "Distribuez votre musique, gagnez 85 % des revenus et gardez vos masters — avec des paiements instantanés vers mobile money, banque ou crypto.",
+        "cta": "Commencer à distribuer",
+        "highlights": ["85 % de partage des revenus", "Paiements instantanés mobile money", "Gardez vos masters"]
+      },
+      "labels": {
+        "title": "Pour les labels",
+        "description": "Gérez vos artistes, automatisez les splits de royalties et développez la distribution sur tout le continent — en toute conformité.",
+        "cta": "En savoir plus",
+        "highlights": ["Tableau de bord multi-artistes", "Splits de royalties automatisés", "Conformité + rapports"]
+      },
+      "events": {
+        "title": "Pour les organisateurs",
+        "description": "Vendez des billets, gérez des événements et connectez-vous aux fans — propulsé par la même plateforme à laquelle les artistes font déjà confiance.",
+        "cta": "Parcourir les événements",
+        "highlights": ["Billetterie intégrée", "Tarifs multi-niveaux", "Outils d'engagement fans"]
+      }
     },
     "features": {
       "badge": "Fonctionnalités",
-      "title": "Conçu pour les",
-      "titleAccent": "artistes africains",
-      "description": "Tout ce dont vous avez besoin pour distribuer, monétiser et développer votre musique — avec transparence à chaque étape."
+      "title": "Écouter, créer,",
+      "titleAccent": "prospérer",
+      "description": "Des fonctionnalités pour les auditeurs qui veulent de la bonne musique et les créateurs qui méritent une rémunération équitable — le tout sur une seule plateforme.",
+      "items": [
+        { "title": "Écouter et découvrir", "description": "Explorez des millions de titres dans plus de 40 genres africains — de l'Afrobeats et l'Amapiano au Highlife et au Soukous. Gratuit, toujours." },
+        { "title": "Playlists sélectionnées", "description": "Playlists par genre, ambiances et collections régionales sélectionnées pour tous les goûts — mises à jour chaque semaine." },
+        { "title": "Événements en direct", "description": "Découvrez concerts, festivals et sessions live près de chez vous. Achetez des billets et suivez les artistes." },
+        { "title": "Partage équitable", "description": "Calculs de royalties transparents avec ventilation en temps réel par écoute, téléchargement, licence et synchronisation." },
+        { "title": "Paiements instantanés", "description": "Demandez un paiement à tout moment via Orange Money, M-Pesa, MTN MoMo, Flutterwave ou virement. Pas de délais de 90 jours." },
+        { "title": "Contrôle créatif total", "description": "Les artistes gardent leurs masters. Téléchargez, distribuez et gérez votre catalogue avec une propriété créative complète." }
+      ]
+    },
+    "regions": {
+      "badge": "Couverture continentale",
+      "title": "Chaque son,",
+      "titleAccent": "chaque région",
+      "description": "De Lagos à Nairobi, Johannesburg à Dakar — Zonga amplifie tout le spectre de la musique africaine."
     },
     "mission": {
       "badge": "Notre mission",
       "title": "La musique qui",
       "titleAccent": "donne du pouvoir",
-      "description": "Zonga est née d'une conviction simple : les artistes africains méritent les mêmes outils, la même transparence et le même partage de revenus que les artistes du monde entier."
+      "description": "Zonga est née d'une conviction simple : la musique africaine mérite une plateforme qui place auditeurs et créateurs en premier. Les auditeurs accèdent gratuitement au catalogue le plus riche de musique africaine. Les créateurs gagnent 85 % de chaque écoute. Les labels se développent sans effort. Tout le monde y gagne.",
+      "highlights": ["Gratuit pour les auditeurs", "85 % de revenus", "Gardez vos masters", "Portée panafricaine"]
+    },
+    "regions": {
+      "badge": "Couverture continentale",
+      "title": "Chaque son,",
+      "titleAccent": "chaque région",
+      "description": "De Lagos à Nairobi, de Johannesburg à Dakar — Zonga amplifie tout le spectre de la musique africaine.",
+      "items": [
+        { "name": "Afrique de l'Ouest", "genres": "Afrobeats · Highlife · Jùjú" },
+        { "name": "Afrique de l'Est", "genres": "Bongo Flava · Benga · Taarab" },
+        { "name": "Afrique australe", "genres": "Amapiano · Kwaito · Maskandi" },
+        { "name": "Afrique centrale", "genres": "Soukous · Ndombolo · Rumba" },
+        { "name": "Afrique du Nord", "genres": "Raï · Gnawa · Chaabi" },
+        { "name": "Diaspora", "genres": "Afro-House · Afro-R&B · Afrofusion" }
+      ]
+    },
+    "partnership": {
+      "badge": "Partenariat",
+      "title": "Construit avec des",
+      "titleAccent": "partenaires engagés",
+      "description": "Zonga collabore avec des organisations qui partagent notre engagement pour une musique équitable — de la distribution à l'impact communautaire."
+    },
+    "missionCard": {
+      "revenueShare": "Part des revenus",
+      "payouts": "Paiements",
+      "instant": "Instantané",
+      "ownership": "Propriété"
     },
     "cta": {
-      "title": "Prêt à partager votre",
-      "titleAccent": "musique ?",
-      "description": "Rejoignez des milliers d'artistes africains qui font confiance à Zonga pour des redevances transparentes, des paiements instantanés et une pleine propriété créative."
+      "title": "Prêt à rejoindre le",
+      "titleAccent": "mouvement ?",
+      "description": "Que vous écoutiez, créiez, gériez ou organisiez — Zonga est l'endroit où la musique africaine prospère. Écoutez gratuitement. Distribuez votre musique. Rejoignez le mouvement.",
+      "ctaListen": "Commencer à écouter",
+      "ctaDistribute": "Distribuez votre musique"
     }
+  },
+  "footer": {
+    "ctaTitle": "Prêt à partager votre musique ?",
+    "ctaDescription": "Rejoignez des milliers de créateurs africains sur Zonga.",
+    "ctaButton": "Commencer gratuitement",
+    "tagline": "La plateforme musicale équitable — redevances transparentes, paiements instantanés et pleine propriété créative pour les artistes et créateurs africains.",
+    "platform": "Plateforme",
+    "platformCatalog": "Catalogue",
+    "platformDistribution": "Distribution",
+    "platformAnalytics": "Analytique",
+    "platformPayouts": "Paiements",
+    "platformFingerprinting": "Empreinte audio",
+    "resources": "Ressources",
+    "resourcesDocs": "Documentation",
+    "resourcesApi": "Référence API",
+    "resourcesStatus": "Statut",
+    "resourcesSupport": "Support",
+    "legal": "Juridique",
+    "legalPrivacy": "Politique de confidentialité",
+    "legalTerms": "Conditions d'utilisation",
+    "legalCookies": "Politique de cookies",
+    "legalRoyalties": "Politique de redevances",
+    "ecosystem": "Écosystème",
+    "badgeFairRevenue": "Revenus équitables",
+    "badgeAudioVerified": "Audio vérifié",
+    "badgeGdpr": "Conforme RGPD",
+    "copyright": "© {year} Zonga — Une application NzilaOS. Tous droits réservés."
+  },
+  "signIn": {
+    "pageTitle": "Connexion | Zonga",
+    "pageDescription": "Connectez-vous à votre compte Zonga — la plateforme musicale équitable pour les créateurs africains.",
+    "tagline": "Votre musique, vos revenus",
+    "subtitle": "La plateforme musicale équitable — redevances transparentes, paiements instantanés et pleine propriété créative pour les artistes et créateurs africains.",
+    "poweredBy": "Propulsé par Nzila",
+    "partOf": "Fait partie de",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "stats": [
+      { "value": "85 %", "label": "Part des revenus pour les créateurs" },
+      { "value": "1 $", "label": "Paiement minimum" },
+      { "value": "40+", "label": "Genres africains" }
+    ],
+    "badges": [
+      { "label": "85 % de partage des revenus" },
+      { "label": "Paiements quotidiens dès 1 $" },
+      { "label": "Gardez vos droits" }
+    ],
+    "welcomeBack": "Bon retour",
+    "signInToContinue": "Connectez-vous à votre compte pour continuer",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signInButton": "Se connecter",
+    "signingIn": "Connexion en cours…",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "genericError": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "artists": "Artistes",
+    "events": "Événements",
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "signIn": "Connexion",
+    "browse": "Parcourir",
+    "search": "Rechercher",
+    "catalog": "Catalogue",
+    "releases": "Sorties",
+    "playlists": "Listes de lecture",
+    "events": "Événements",
+    "revenue": "Revenus",
+    "payouts": "Paiements",
+    "creators": "Artistes",
+    "analytics": "Analytique",
+    "notifications": "Notifications",
+    "integrity": "Intégrité",
+    "myMusic": "Ma musique",
+    "moderation": "Modération"
   }
 }

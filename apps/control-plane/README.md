@@ -1,13 +1,13 @@
 # @nzila/control-plane
 
-> Platform control plane — multi-tenant governance, AI agent workflows, anomaly detection, procurement proof, and infrastructure oversight.
+> Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.
 
 ## Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
 - **UI:** Tailwind CSS v4
-- **Packages:** `@nzila/platform-governance`, `platform-intelligence`, `platform-anomaly-engine`, `platform-agent-workflows`, `platform-ai-governance`, `deal-engine`, `observability`
+- **Packages:** `@nzila/platform-governance`, `platform-intelligence`, `platform-anomaly-engine`, `platform-agent-workflows`, `platform-policy-governance`, `deal-engine`, `observability`
 - **Port:** 3010
 - **E2E:** Playwright
 
@@ -32,4 +32,4 @@ No `.env.example` — configure `.env.local` with standard auth vars (`AUTH_SECR
 
 ## Domain
 
-Control Plane is the platform-level governance layer — managing multi-tenant accounts, AI agent orchestration, anomaly detection, change governance, procurement proof, and cross-vertical decision intelligence.
+Control Plane is the platform-level governance layer — managing multi-tenant accounts, agent orchestration, anomaly detection, change governance, procurement proof, and cross-vertical decision intelligence.

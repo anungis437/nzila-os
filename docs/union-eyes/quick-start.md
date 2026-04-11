@@ -1,10 +1,10 @@
-# Quick Start — Union Eyes
+# Quick Start — UnionEyes
 
 > Create your first case in under 2 minutes.
 
 ## Step 1: Log In
 
-Go to your Union Eyes URL and sign in with your email. If this is your first
+Go to your UnionEyes URL and sign in with your email. If this is your first
 time, you'll see a short onboarding wizard — follow the 4 steps to get oriented.
 
 ## Step 2: Create a Case

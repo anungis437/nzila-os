@@ -6,7 +6,7 @@
  * Label / creator org → personal stats: my catalog, earnings, releases.
  *
  * Server component using resolveNavContext() for org detection,
- * plus Clerk publicMetadata for listener identification.
+ * plus session publicMetadata for listener identification.
  */
 import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
@@ -216,7 +216,7 @@ async function PlatformHome({ locale }: { locale: string }) {
               { name: 'ML Pipeline', ok: true },
               { name: 'Rights Resolver', ok: true },
               { name: 'Notification Bus', ok: true },
-              { name: 'Auth (Clerk)', ok: true },
+              { name: 'Auth', ok: true },
             ].map((svc) => (
               <div key={svc.name} className="flex items-center gap-2 rounded-lg border border-border p-3">
                 <span className={`h-2 w-2 rounded-full ${svc.ok ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -235,10 +235,10 @@ async function PlatformHome({ locale }: { locale: string }) {
 async function ListenerHome({ locale }: { locale: string }) {
   const p = `/${locale}/dashboard`
 
-  // Read plan from Clerk publicMetadata (source of truth for listeners)
+  // Read plan from publicMetadata (source of truth for listeners)
   const user = await currentUser()
   const meta = user?.publicMetadata as { listenerPlan?: string; zongaRole?: string } | undefined
-  const clerkPlan = meta?.listenerPlan ?? 'free'
+  const sessionPlan = meta?.listenerPlan ?? 'free'
 
   const [profile, feed, following, playlists, trendingArtists, newReleases, listenerSub, aiRecs] =
     await Promise.all([
@@ -252,9 +252,9 @@ async function ListenerHome({ locale }: { locale: string }) {
       getRecommendationsForUser({ limit: 8 }).catch(() => ({ items: [], strategy: 'fallback' })),
     ])
 
-  // DB subscription takes precedence when available; otherwise fall back to Clerk metadata
+  // DB subscription takes precedence when available; otherwise fall back to session metadata
   const listenerPlan: ListenerPlan =
-    listenerSub?.plan === 'premium' || clerkPlan === 'premium' ? 'premium' : 'free'
+    listenerSub?.plan === 'premium' || sessionPlan === 'premium' ? 'premium' : 'free'
   const isPremium =
     listenerPlan === 'premium' &&
     (listenerSub?.subscriptionStatus === 'active' ||
@@ -694,7 +694,7 @@ export default async function DashboardPage({
 
   const { locale } = await params
 
-  // Check if this user is a listener (via Clerk publicMetadata)
+  // Check if this user is a listener (via publicMetadata)
   const user = await currentUser()
   const zongaRole = (user?.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
 

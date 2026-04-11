@@ -6,7 +6,7 @@
  *   - RequestContext propagation via AsyncLocalStorage
  *   - Structured logging on entry/exit
  *   - Uniform error envelope conversion
- *   - Optional auth guard (Clerk → AuthContext)
+ *   - Optional auth guard (platform auth → AuthContext)
  *   - Optional audit hook for governed mutations
  *
  * Usage:

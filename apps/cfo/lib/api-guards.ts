@@ -2,7 +2,7 @@
  * Shared API route guards — entity membership + platform RBAC
  *
  * Centralises the auth boilerplate for all entity-scoped API routes,
- * combining Clerk authentication, entity membership verification,
+ * combining platform authentication, entity membership verification,
  * and platform-level role checks from lib/rbac.
  *
  * Aligned with console reference implementation.

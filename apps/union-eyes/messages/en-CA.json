@@ -2567,10 +2567,10 @@
       "companionMessage": "This system is built for you. Everything you submit is private between you and your representative. Take your time — there's no rush."
     },
     "onboarding": {
-      "welcomeTitle": "Welcome to Union Eyes",
+      "welcomeTitle": "Welcome to UnionEyes",
       "welcomeSubtitle": "Let's get you set up in under 2 minutes.",
       "step1Title": "Welcome",
-      "step1Description": "Union Eyes helps you track workplace issues, communicate with your representative, and stay informed about your union.",
+      "step1Description": "UnionEyes helps you track workplace issues, communicate with your representative, and stay informed about your union.",
       "step2Title": "Your Information",
       "step2Description": "We'll use this to route your cases to the right representative.",
       "step3Title": "What You Can Do",
@@ -2787,7 +2787,7 @@
       "problemDescription": "Grievances tracked in notebooks. Finances reconciled in spreadsheets. Member records scattered across drives. Employers have million-dollar HR systems — unions have manual processes that lose cases, delay reports, and erode trust.",
       "solutionBadge": "The Solution",
       "solutionHeading": "A Platform Built for How Unions Actually Operate",
-      "solutionDescription": "Union Eyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
+      "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
       "pillar1": "Contract-Governed Deployment",
       "pillar2": "Financial Accountability",
       "pillar3": "Operational Transparency",
@@ -2830,14 +2830,14 @@
       "module5Desc": "AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.",
       "socialProofBadge": "In Production",
       "socialProofHeading": "Trusted by Canadian Unions",
-      "socialProofDescription": "Union Eyes is in controlled pilot deployment with Canadian labour organizations. Every rollout follows a structured contract, readiness assessment, and phased activation.",
+      "socialProofDescription": "UnionEyes is in controlled pilot deployment with Canadian labour organizations. Every rollout follows a structured contract, readiness assessment, and phased activation.",
       "finalCtaHeading": "Ready to See It in Action?",
       "finalCtaDescription": "No pitch deck. No sales pressure. Start with a controlled pilot scoped to your organization's real needs.",
       "finalCtaPrimary": "Start a Controlled Pilot",
       "finalCtaSecondary": "View Trust & Compliance",
       "missionBadge": "Our Mission",
       "missionHeading": "Technology That Serves Workers First",
-      "missionDescription": "Union Eyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She had a notebook. We built a governed platform to close that gap — and we deploy it through controlled pilots to get it right.",
+      "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She had a notebook. We built a governed platform to close that gap — and we deploy it through controlled pilots to get it right.",
       "value1": "Contract-Governed",
       "value2": "Audit-Ready",
       "value3": "Financially Accountable",
@@ -2852,51 +2852,51 @@
       "heroDescription": "A Labour Relations Officer turned lawyer and a CIO turned SaaS builder — together they are building the operating system that unions have never had.",
       "readMore": "Read more",
       "backToHome": "Back to home",
-      "pageTitle": "Our Story | Union Eyes",
-      "pageDescription": "Union Eyes was founded by two brothers who lived the gaps in union infrastructure — and decided to close them."
+      "pageTitle": "Our Story | UnionEyes",
+      "pageDescription": "UnionEyes was founded by two brothers who lived the gaps in union infrastructure — and decided to close them."
     },
     "pricing": {
       "heroHeading": "Contract-Based Deployment",
-      "heroDescription": "Union Eyes is deployed through governed contracts — not self-serve subscriptions. Pricing is scoped to your organization, your modules, and your rollout plan.",
+      "heroDescription": "UnionEyes is deployed through governed contracts — not self-serve subscriptions. Pricing is scoped to your organization, your modules, and your rollout plan.",
       "monthly": "Monthly",
       "yearly": "Yearly",
       "perMonth": "/ month",
       "perYear": "/ year",
       "getStarted": "Start a Pilot",
-      "pageTitle": "Pricing & Deployment | Union Eyes",
+      "pageTitle": "Pricing & Deployment | UnionEyes",
       "pageDescription": "Contract-based deployment pricing for Canadian unions. Parent-level billing with local allocation."
     },
     "contact": {
       "heroHeading": "Get in touch",
-      "heroDescription": "No sales pressure. We’re here to answer questions about deployment, compliance, and how Union Eyes fits your organization’s governance requirements.",
+      "heroDescription": "No sales pressure. We’re here to answer questions about deployment, compliance, and how UnionEyes fits your organization’s governance requirements.",
       "sendMessage": "Send us a message",
       "otherWays": "Other ways to reach us",
       "emailLabel": "Email",
       "phoneLabel": "Phone",
       "officeLabel": "Office",
       "hoursLabel": "Office Hours",
-      "pageTitle": "Contact Us | Union Eyes",
-      "pageDescription": "Get in touch with the Union Eyes team about deployment and governance."
+      "pageTitle": "Contact Us | UnionEyes",
+      "pageDescription": "Get in touch with the UnionEyes team about deployment and governance."
     },
     "caseStudies": {
       "heroHeading": "Controlled Deployments in Action",
-      "heroDescription": "How Canadian unions deploy Union Eyes through governed contracts, phased rollouts, and structured pilots.",
+      "heroDescription": "How Canadian unions deploy UnionEyes through governed contracts, phased rollouts, and structured pilots.",
       "viewAll": "View all",
       "readMore": "Read case study",
-      "pageTitle": "Case Studies | Union Eyes",
-      "pageDescription": "How Canadian unions deploy Union Eyes through governed contracts and controlled pilots."
+      "pageTitle": "Case Studies | UnionEyes",
+      "pageDescription": "How Canadian unions deploy UnionEyes through governed contracts and controlled pilots."
     },
     "pilotRequest": {
       "heroHeading": "Start a Controlled Pilot",
-      "heroDescription": "Every Union Eyes deployment begins with a scoped pilot — structured around your organization's governance, modules, and readiness.",
-      "pageTitle": "Controlled Pilot Deployment | Union Eyes",
-      "pageDescription": "Begin a governed pilot deployment of Union Eyes scoped to your organization."
+      "heroDescription": "Every UnionEyes deployment begins with a scoped pilot — structured around your organization's governance, modules, and readiness.",
+      "pageTitle": "Controlled Pilot Deployment | UnionEyes",
+      "pageDescription": "Begin a governed pilot deployment of UnionEyes scoped to your organization."
     },
     "status": {
       "heroHeading": "System Status",
-      "heroDescription": "Real-time operational status of Union Eyes platform services",
-      "pageTitle": "System Status | Union Eyes",
-      "pageDescription": "Real-time status of Union Eyes platform services."
+      "heroDescription": "Real-time operational status of UnionEyes platform services",
+      "pageTitle": "System Status | UnionEyes",
+      "pageDescription": "Real-time status of UnionEyes platform services."
     },
     "footer": {
       "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
@@ -2929,7 +2929,7 @@
     },
     "features": {
       "grievanceTracking": {
-        "pageTitle": "Case & Grievance Management | Union Eyes",
+        "pageTitle": "Case & Grievance Management | UnionEyes",
         "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
         "badge": "Platform Module",
         "heroHeading": "Grievance management with a defensible evidence chain",
@@ -2963,7 +2963,7 @@
         "ctaSecondary": "Read Our Story"
       },
       "memberPortal": {
-        "pageTitle": "Member Portal & Engagement | Union Eyes",
+        "pageTitle": "Member Portal & Engagement | UnionEyes",
         "pageDescription": "Member self-service with claims tracking, dues visibility, document management, and communications — governed by role-based access and organizational entitlements.",
         "badge": "Platform Module",
         "heroHeading": "Member transparency without compromising governance",
@@ -2998,7 +2998,7 @@
         "ctaSecondary": "See Case Management"
       },
       "aiWorkbench": {
-        "pageTitle": "Intelligence & Insights | Union Eyes",
+        "pageTitle": "Intelligence & Insights | UnionEyes",
         "pageDescription": "AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.",
         "badge": "Platform Module",
         "heroHeading": "Intelligence tools that representatives control — not the other way around",
@@ -3028,7 +3028,7 @@
         "ctaSecondary": "See Case Management"
       },
       "analytics": {
-        "pageTitle": "Financial Allocation & Billing | Union Eyes",
+        "pageTitle": "Financial Allocation & Billing | UnionEyes",
         "pageDescription": "Parent-level billing, local allocation, dues and per capita tracking, treasury reconciliation, and tax compliance — all under a single governed financial framework.",
         "badge": "Platform Module",
         "heroHeading": "Financial control from the parent down to every local",
@@ -3063,34 +3063,34 @@
     "legal": {
       "lastUpdated": "Last updated: March 1, 2026",
       "security": {
-        "pageTitle": "Security | Union Eyes",
-        "pageDescription": "How Union Eyes protects your data with encryption, access controls, and continuous security monitoring.",
+        "pageTitle": "Security | UnionEyes",
+        "pageDescription": "How UnionEyes protects your data with encryption, access controls, and continuous security monitoring.",
         "heading": "Security",
-        "intro": "Union data is sensitive. We treat security as a foundational requirement, not an afterthought. This page outlines how Union Eyes protects your organization's information.",
+        "intro": "Union data is sensitive. We treat security as a foundational requirement, not an afterthought. This page outlines how UnionEyes protects your organization's information.",
         "encryptionTitle": "Encryption",
         "encryptionDesc": "All data is encrypted in transit using TLS 1.2+ and at rest using AES-256. Database connections are encrypted end-to-end. Secrets and API keys are stored in Azure Key Vault — never in source code or environment files.",
         "accessControlTitle": "Access Control",
-        "accessControlDesc": "Union Eyes uses role-based access control (RBAC) to ensure members only see what they're authorized to see. Authentication is handled by Clerk with multi-factor authentication support. Database queries are scoped by organization to enforce strict data isolation between unions.",
+        "accessControlDesc": "UnionEyes uses role-based access control (RBAC) to ensure members only see what they're authorized to see. Authentication is handled by Clerk with multi-factor authentication support. Database queries are scoped by organization to enforce strict data isolation between unions.",
         "infrastructureTitle": "Infrastructure",
-        "infrastructureDesc": "Union Eyes is hosted on Microsoft Azure in Canadian data centres, ensuring your data stays within Canadian jurisdiction. We use container isolation, automated security scanning of dependencies and Docker images, and enforce strict Content Security Policy headers across all applications.",
+        "infrastructureDesc": "UnionEyes is hosted on Microsoft Azure in Canadian data centres, ensuring your data stays within Canadian jurisdiction. We use container isolation, automated security scanning of dependencies and Docker images, and enforce strict Content Security Policy headers across all applications.",
         "monitoringTitle": "Monitoring & Auditing",
         "monitoringDesc": "All access to sensitive data is logged with a full audit trail. We run automated vulnerability scanning on every code change, including static analysis (CodeQL), dependency audits, secret scanning, and container image scanning (Trivy). Rate limiting protects API endpoints from abuse.",
         "vulnTitle": "Vulnerability Reporting",
         "vulnDesc": "If you discover a security vulnerability, please report it responsibly by emailing",
         "vulnAck": ". We acknowledge reports within 24 hours and provide a fix timeline within 72 hours. Please do not file public issues for security matters.",
         "complianceTitle": "Compliance",
-        "complianceDesc": "Union Eyes is designed to comply with PIPEDA (Personal Information Protection and Electronic Documents Act) and applicable Canadian provincial privacy legislation. For more details, see our",
+        "complianceDesc": "UnionEyes is designed to comply with PIPEDA (Personal Information Protection and Electronic Documents Act) and applicable Canadian provincial privacy legislation. For more details, see our",
         "privacyPolicyLink": "Privacy Policy",
         "questionsTitle": "Questions?",
         "questionsDesc": "If you have questions about our security practices, contact us at",
         "contactPageLink": "contact page"
       },
       "privacy": {
-        "pageTitle": "Privacy Policy | Union Eyes",
-        "pageDescription": "How Union Eyes collects, uses, and protects your personal information under PIPEDA and Canadian privacy law.",
+        "pageTitle": "Privacy Policy | UnionEyes",
+        "pageDescription": "How UnionEyes collects, uses, and protects your personal information under PIPEDA and Canadian privacy law.",
         "heading": "Privacy Policy",
         "collectTitle": "Information We Collect",
-        "collectDesc": "Union Eyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information when you create an account, use our platform, or interact with our services.",
+        "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information when you create an account, use our platform, or interact with our services.",
         "useTitle": "How We Use Your Information",
         "useDesc": "We use your information to provide and improve our services, communicate with you about your account, process grievances and voting, and comply with legal obligations. We do not sell your personal information to third parties.",
         "storageTitle": "Data Storage & Security",
@@ -3103,27 +3103,27 @@
         "contactDesc": "If you have questions about this privacy policy, please contact our Privacy Officer at"
       },
       "terms": {
-        "pageTitle": "Terms of Service | Union Eyes",
-        "pageDescription": "Terms and conditions governing the use of Union Eyes union management platform.",
+        "pageTitle": "Terms of Service | UnionEyes",
+        "pageDescription": "Terms and conditions governing the use of UnionEyes union management platform.",
         "heading": "Terms of Service",
         "acceptanceTitle": "Acceptance of Terms",
-        "acceptanceDesc": "By accessing or using Union Eyes, you agree to be bound by these Terms of Service. Union Eyes is a platform designed for union organizations in Canada and is governed by Canadian law.",
+        "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.",
         "useTitle": "Use of Service",
-        "useDesc": "You may use Union Eyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse the platform or attempt to access it through unauthorized means.",
+        "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse the platform or attempt to access it through unauthorized means.",
         "billingTitle": "Contract & Billing",
         "billingDesc": "Deployments are billed under an organizational contract. The parent body receives a single invoice with transparent allocation across locals. Contract terms, module selection, and billing frequency are defined during onboarding.",
         "liabilityTitle": "Limitation of Liability",
-        "liabilityDesc": "Union Eyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability shall not exceed the fees paid by you in the twelve months preceding the claim.",
+        "liabilityDesc": "UnionEyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability shall not exceed the fees paid by you in the twelve months preceding the claim.",
         "terminationTitle": "Termination",
         "terminationDesc": "We may suspend or terminate your account if you violate these terms. Upon termination, your data will be retained for 30 days to allow export, after which it will be permanently deleted.",
         "contactTitle": "Contact",
         "contactDesc": "Questions about these terms? Contact us at"
       },
       "accessibility": {
-        "pageTitle": "Accessibility | Union Eyes",
-        "pageDescription": "Our commitment to making Union Eyes accessible to all users, including those with disabilities.",
+        "pageTitle": "Accessibility | UnionEyes",
+        "pageDescription": "Our commitment to making UnionEyes accessible to all users, including those with disabilities.",
         "heading": "Accessibility Statement",
-        "intro": "Union Eyes is committed to ensuring digital accessibility for people of all abilities. We are continually improving the user experience for everyone and applying relevant accessibility standards.",
+        "intro": "UnionEyes is committed to ensuring digital accessibility for people of all abilities. We are continually improving the user experience for everyone and applying relevant accessibility standards.",
         "standardsTitle": "Standards Compliance",
         "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility compliance.",
         "featuresTitle": "Accessibility Features",
@@ -3137,14 +3137,14 @@
         "limitationsTitle": "Known Limitations",
         "limitationsDesc": "While we strive for full accessibility, some third-party components may have limitations. We are actively working with our vendors to improve these areas.",
         "feedbackTitle": "Feedback",
-        "feedbackDesc": "We welcome your feedback on the accessibility of Union Eyes. Please contact us at"
+        "feedbackDesc": "We welcome your feedback on the accessibility of UnionEyes. Please contact us at"
       }
     },
     "pricingBody": {
       "heading": "Contract-Based Deployment",
       "subtitle": "One contract per organization. Parent-level billing. Transparent allocation to every local.",
       "contractHeading": "How the Contract Works",
-      "contractDesc": "Union Eyes is deployed under a single organizational contract. The parent body holds the agreement, selects modules, and sets governance controls. No per-seat pricing, no surprise tiers.",
+      "contractDesc": "UnionEyes is deployed under a single organizational contract. The parent body holds the agreement, selects modules, and sets governance controls. No per-seat pricing, no surprise tiers.",
       "parentBillingHeading": "Parent-Level Billing",
       "parentBillingDesc": "One invoice to the parent organization. Costs are allocated transparently across locals, chapters, and regions based on membership count, module usage, or a custom formula you define.",
       "allocationHeading": "Local Allocation",
@@ -3175,10 +3175,10 @@
       "trustLine2": "No per-seat pricing. No credit systems. One contract, one invoice, full transparency."
     },
     "trust": {
-      "pageTitle": "Trust & Compliance | Union Eyes",
+      "pageTitle": "Trust & Compliance | UnionEyes",
       "badge": "Governance",
       "heroHeading": "Built for the organizations that can least afford to get it wrong",
-      "heroDescription": "Union Eyes is designed for financial accountability, operational transparency, and defensible data governance. Every feature, every module, every audit trail exists because unions demanded it.",
+      "heroDescription": "UnionEyes is designed for financial accountability, operational transparency, and defensible data governance. Every feature, every module, every audit trail exists because unions demanded it.",
       "auditTitle": "Full Audit Trail",
       "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
       "rbacTitle": "Role-Based Access Control",
@@ -3653,7 +3653,7 @@
   },
   "trust": {
     "title": "Trust Infrastructure Dashboard",
-    "subtitle": "Real-time verification of Union Eyes security and governance safeguards",
+    "subtitle": "Real-time verification of UnionEyes security and governance safeguards",
     "exportReport": "Export Report",
     "lastUpdated": "Last updated:",
     "statImmutability": "Immutability",
@@ -3708,11 +3708,11 @@
     "lastElection": "Last election:",
     "classVotingRights": "Class B voting rights on strategic decisions",
     "securityQuestion": "Questions about our security?",
-    "securityDescriptionContact": "We're committed to transparency. If you have questions about any of these safeguards or want to discuss Union Eyes security in depth, reach out to our team.",
+    "securityDescriptionContact": "We're committed to transparency. If you have questions about any of these safeguards or want to discuss UnionEyes security in depth, reach out to our team.",
     "contactSecurityTeam": "Contact Security Team"
   },
   "apiDocs": {
-    "title": "Union Eyes API Documentation",
+    "title": "UnionEyes API Documentation",
     "subtitle": "Interactive API reference generated from source code",
     "endpoints": "Endpoints:",
     "coverage": "Coverage:",
@@ -3724,7 +3724,7 @@
   },
   "mobile": {
     "dashboard": {
-      "appTitle": "Union Eyes",
+      "appTitle": "UnionEyes",
       "offlineBanner": "You're offline. Some features may be limited.",
       "pendingClaims": "Pending Claims",
       "activeMembers": "Active Members",

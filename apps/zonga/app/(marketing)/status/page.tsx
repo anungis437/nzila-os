@@ -13,7 +13,7 @@ const services = [
   { name: 'Audio Fingerprinting', status: 'operational' as const },
   { name: 'Payout Processing', status: 'operational' as const },
   { name: 'Event Ticketing', status: 'operational' as const },
-  { name: 'Authentication (Clerk)', status: 'operational' as const },
+  { name: 'Authentication', status: 'operational' as const },
   { name: 'Media Storage', status: 'operational' as const },
 ];
 

@@ -7,7 +7,7 @@
 - **Framework:** Next.js 16 (App Router)
 - **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
 - **UI:** `@nzila/ui` + Tailwind CSS
-- **Packages:** `@nzila/mobility-core`, `mobility-programs`, `mobility-compliance`, `mobility-case-engine`, `mobility-ai`, `mobility-family`
+- **Packages:** `@nzila/mobility-core`, `mobility-programs`, `mobility-compliance`, `mobility-case-engine`, `mobility-family`
 - **Port:** 3010
 - **i18n:** `next-intl`
 

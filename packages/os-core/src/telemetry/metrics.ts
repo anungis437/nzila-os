@@ -87,14 +87,14 @@ export const SLO_DEFINITIONS: SloDefinition[] = [
     alertThreshold: 0.3,
   },
 
-  // ── Union Eyes ───────────────────────────────────────────────────────
+  // ── UnionEyes ───────────────────────────────────────────────────────
   {
     service: 'union-eyes',
     name: 'api-availability',
     target: 99.5,
     metric: 'http_requests_success_rate',
     windowHours: 720,
-    description: 'Union Eyes API available 99.5% of the time',
+    description: 'UnionEyes API available 99.5% of the time',
     alertThreshold: 1,
   },
   {

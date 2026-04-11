@@ -31,7 +31,7 @@ interface MemberUnionData {
 }
 
 export const metadata: Metadata = {
-  title: 'Federation Dashboard | Union Eyes',
+  title: 'Federation Dashboard | UnionEyes',
   description: 'Provincial federation executive dashboard and analytics',
 };
 

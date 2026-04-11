@@ -66,7 +66,7 @@ const DEFAULT_CHECKLIST: Omit<ChecklistItem, "completed">[] = [
   {
     id: "org_seeded",
     label: "Organization seeded",
-    description: "Your organization has been created and configured in Union Eyes.",
+    description: "Your organization has been created and configured in UnionEyes.",
     icon: Building2,
     actionLabel: "View org settings",
     actionHref: "/dashboard/settings",

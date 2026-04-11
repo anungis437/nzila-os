@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: Evidence Scripts Use @nzila/os-core
+ * Contract Test — UnionEyes: Evidence Scripts Use @nzila/os-core
  *
  * Validates that UE evidence scripts (collect, seal, verify) exist
  * and use the canonical @nzila/os-core seal/verify functions.

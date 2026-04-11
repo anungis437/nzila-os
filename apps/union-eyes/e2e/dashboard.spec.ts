@@ -2,7 +2,7 @@
  * Union-Eyes E2E — Dashboard Flow
  *
  * Tests authenticated dashboard navigation.
- * Uses test auth mode (PLAYWRIGHT_TEST_AUTH=true) to bypass Clerk.
+ * Uses test auth mode (PLAYWRIGHT_TEST_AUTH=true) to bypass auth.
  *
  * These tests require a running server and test auth mode enabled.
  * In CI, set PLAYWRIGHT_TEST_AUTH=true and TEST_USER_ID.

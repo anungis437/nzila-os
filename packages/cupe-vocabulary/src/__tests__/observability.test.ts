@@ -2,13 +2,13 @@
  * Tests for observability helpers — PR-070
  *
  * Tests correlation-ID extraction, response-header injection,
- * and W3C traceparent parsing without needing Clerk or Next.js runtime.
+ * and W3C traceparent parsing without needing auth or Next.js runtime.
  */
 
 import { describe, it, expect } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// Local mirrors (pure logic only — no AsyncLocalStorage or Clerk)
+// Local mirrors (pure logic only — no AsyncLocalStorage or auth)
 // ---------------------------------------------------------------------------
 
 function extractCorrelationId(headers: Record<string, string | undefined>): string {

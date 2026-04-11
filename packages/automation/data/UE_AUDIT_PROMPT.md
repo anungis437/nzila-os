@@ -1,17 +1,17 @@
-# Union Eyes Migration — Audit Checkpoint Prompt
+# UnionEyes Migration — Audit Checkpoint Prompt
 *Generated: 2026-02-19 | Updated: 2026-02-19 (session 2) | Source: MIGRATION_DASHBOARD.md*
 
 ---
 
 ## Purpose
 
-Use this prompt at the start of any new session to rapidly re-establish context on the Union Eyes migration. Paste it into the AI assistant or review it manually to confirm where UE stands and what to work on next.
+Use this prompt at the start of any new session to rapidly re-establish context on the UnionEyes migration. Paste it into the AI assistant or review it manually to confirm where UE stands and what to work on next.
 
 ---
 
 ## Audit Prompt
 
-> **Context**: I'm working on the Union Eyes (UE) migration from a legacy Next.js + Supabase stack to Django + PostgreSQL. Below is the verified status as of 2026-02-19. Confirm you understand the current state, then tell me the exact next action to take.
+> **Context**: I'm working on the UnionEyes (UE) migration from a legacy Next.js + Supabase stack to Django + PostgreSQL. Below is the verified status as of 2026-02-19. Confirm you understand the current state, then tell me the exact next action to take.
 >
 > ---
 >

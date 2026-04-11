@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: All Mutations Must Be Audited
+ * Contract Test — UnionEyes: All Mutations Must Be Audited
  *
  * BLOCKER: App-layer code must NOT perform direct .insert() / .update() / .delete()
  * without going through createAuditedScopedDb or withAudit().

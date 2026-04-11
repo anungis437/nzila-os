@@ -9,7 +9,7 @@
   "platforms": [
     {
       "platform_id": "union_eyes",
-      "name": "Union Eyes",
+      "name": "UnionEyes",
       "vertical": "Uniontech",
       "metrics": {
         "entity_count": 4773,
@@ -241,19 +241,19 @@
     },
     {
       "metric": "security_score",
-      "best": "Union Eyes (10.0)",
+      "best": "UnionEyes (10.0)",
       "worst": "CORA (7.0)",
       "portfolio_avg": 8.3
     },
     {
       "metric": "entity_count",
-      "best": "Union Eyes (4,773)",
+      "best": "UnionEyes (4,773)",
       "worst": "CyberLearn (30)",
       "portfolio_total": 6642
     },
     {
       "metric": "migration_complexity",
-      "highest": "Union Eyes, C3UO, ABR, CongoWave",
+      "highest": "UnionEyes, C3UO, ABR, CongoWave",
       "lowest": "CORA, Court Lens"
     }
   ],

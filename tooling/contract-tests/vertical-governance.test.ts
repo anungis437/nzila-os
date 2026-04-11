@@ -73,7 +73,7 @@ describe('INV-10 — Vertical scaffolding CLI exists', () => {
     const cmdPath = join(ROOT, 'packages', 'cli', 'src', 'commands', 'create-vertical.ts')
     const content = readFileSync(cmdPath, 'utf-8')
     expect(content).toContain('middleware.ts')
-    expect(content).toContain('clerkMiddleware')
+    expect(content).toContain('authMiddleware')
   })
 
   it('scaffolded vertical template includes no-shadow-db ESLint', () => {

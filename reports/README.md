@@ -34,8 +34,8 @@ Regenerate them by running the corresponding scripts in `scripts/` or `tooling/`
 
 | Report | Purpose |
 |--------|---------|
-| `UE_REALIGNMENT_OUTPUT.md` | Union Eyes realignment output |
-| `UE_WORKFLOW_REALIGNMENT_DISCOVERY_AUDIT.md` | Union Eyes workflow discovery |
+| `UE_REALIGNMENT_OUTPUT.md` | UnionEyes realignment output |
+| `UE_WORKFLOW_REALIGNMENT_DISCOVERY_AUDIT.md` | UnionEyes workflow discovery |
 | `validation-severity-summary.md` | Validation severity summary |
 | `integration-contract-status.md` | Integration contract status |
 | `test-coverage-portfolio.md` | Test coverage portfolio |

@@ -1,5 +1,5 @@
 /**
- * SiteNavigation — Flagship marketing navigation for Union Eyes
+ * SiteNavigation — Flagship marketing navigation for UnionEyes
  * ──────────────────────────────────────────────────────────────
  * Fixed navbar with scroll-aware transparency, Framer Motion active
  * indicator, mobile drawer with body-scroll lock, keyboard esc-close,
@@ -99,7 +99,7 @@ export default function SiteNavigation() {
             <Link href="/" className="flex items-center gap-3 group">
               <Image
                 src="/images/brand/icon.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={36}
                 height={36}
                 className="w-9 h-9 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
@@ -109,7 +109,7 @@ export default function SiteNavigation() {
                   scrolled ? 'text-navy' : 'text-white'
                 }`}
               >
-                Union Eyes
+                UnionEyes
               </span>
             </Link>
           </div>

@@ -168,8 +168,8 @@ def main():
     
     tracker = ProgressTracker(checkpoint_dir)
     
-    # Update Union Eyes
-    update_platform_progress(tracker, "ue", "Union Eyes", workspace_root)
+    # Update UnionEyes
+    update_platform_progress(tracker, "ue", "UnionEyes", workspace_root)
     
     # Update ABR Insights
     update_platform_progress(tracker, "abr", "ABR Insights", workspace_root)

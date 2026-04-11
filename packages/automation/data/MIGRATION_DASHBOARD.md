@@ -1,5 +1,5 @@
 # Migration Progress Dashboard
-*Generated: 2026-02-17 18:51 | Updated: 2026-02-19 (session 6 — Union Eyes E2E Tests Complete)*
+*Generated: 2026-02-17 18:51 | Updated: 2026-02-19 (session 6 — UnionEyes E2E Tests Complete)*
 
 ## ABR Insights
 **Overall Progress: 72%**
@@ -43,7 +43,7 @@ Started: 2026-02-17T13:32:40.978519 | Last Updated: 2026-02-18 01:30
 - ✅ **Migration Duration: 4.2s dry-run, ~20s live**
 - ✅ **Status: ✅ COMPLETE & VALIDATED** (2026-02-17 22:04)
 
-## Union Eyes
+## UnionEyes
 **Overall Progress: 98%**
 Started: 2026-02-17T13:32:40.994605 | Last Updated: 2026-02-19 (session 6)
 
@@ -353,7 +353,7 @@ All routes: Clerk auth (`auth().userId`), entity scoping, structured error respo
 ## Auth Migration Details (ABR + UE)
 - ✅ Auth migration strategy documented (`AUTH_MIGRATION_PLAN.md`, `AUTH_IMPLEMENTATION_SUMMARY.md`)
 - ✅ Production Clerk auth backend built (~700 lines): `authentication.py`, `middleware.py`, `views.py`, `urls.py`
-- ✅ **Union Eyes Backend Configured** (`C:\APPS\nzila-union-eyes\backend\`)
+- ✅ **UnionEyes Backend Configured** (`C:\APPS\nzila-union-eyes\backend\`)
   - ✅ auth_core files installed (4 files, ~700 lines)
   - ✅ Django settings.py updated: REST_FRAMEWORK, MIDDLEWARE, CORS, Redis cache, Clerk env vars
   - ✅ views.py extended: Clerk webhook handlers (~230 lines), /me/ endpoint, /health/ endpoint
@@ -376,7 +376,7 @@ All routes: Clerk auth (`auth().userId`), entity scoping, structured error respo
 - [x] ~~Validate migrations~~ ✅ DONE (100% match on all 364 tables)
 - [x] ~~Plan auth migration strategy~~ ✅ DONE (documented in `AUTH_MIGRATION_PLAN.md`)
 - [x] ~~Build production-ready Clerk auth backend~~ ✅ DONE (see `tech-repo-scaffold/django-backbone/apps/auth_core/`)
-- [x] ~~Union Eyes Auth Integration~~ ✅ DONE (backend configured with live Clerk credentials)
+- [x] ~~UnionEyes Auth Integration~~ ✅ DONE (backend configured with live Clerk credentials)
 - [x] ~~ABR Insights Auth Integration~~ ✅ DONE (backend configured with live Clerk credentials)
 - [x] ~~**Local Testing — UE**~~ ✅ DONE (2026-02-19)
   - [x] Django app layer: 0 issues
@@ -453,7 +453,7 @@ All routes: Clerk auth (`auth().userId`), entity scoping, structured error respo
 
 ### Resource Groups by Product (25 total)
 
-#### 🟡 Union Eyes (migrating to Django)
+#### 🟡 UnionEyes (migrating to Django)
 | Resource Group | Location | Resources | Action |
 |---------------|----------|-----------|--------|
 | `unioneyes-staging-rg` | Canada Central | DB, App Plan, App, ACR, Storage, KV, Speech, OpenAI x2 | 🟡 Migrate data → decommission |

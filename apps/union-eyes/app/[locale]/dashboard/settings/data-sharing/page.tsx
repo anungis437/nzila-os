@@ -320,7 +320,7 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
         <Info className="h-4 w-4" />
         <AlertTitle>Legal Notice</AlertTitle>
         <AlertDescription className="text-xs">
-          By enabling data sharing, you authorize Union Eyes to aggregate anonymized data from your
+          By enabling data sharing, you authorize UnionEyes to aggregate anonymized data from your
           organization with data from other consenting unions. You can revoke consent at any time.
           All aggregation occurs in Canada. Data is never sold or shared with employers. See our{' '}
           <Link href="/privacy" className="underline">

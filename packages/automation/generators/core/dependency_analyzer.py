@@ -782,9 +782,9 @@ def analyze_abr_dependencies(workspace_root: Path) -> DependencyReport:
 
 
 def analyze_ue_dependencies(workspace_root: Path) -> DependencyReport:
-    """Analyze Union Eyes dependencies"""
+    """Analyze UnionEyes dependencies"""
     logger.info("=" * 60)
-    logger.info("Union Eyes — Dependency Analysis")
+    logger.info("UnionEyes — Dependency Analysis")
     logger.info("=" * 60)
 
     # Try D:\APPS first (with nested structure), then fall back to workspace/legacy-codebases

@@ -60,6 +60,9 @@ export enum UserRole {
   CHIEF_STEWARD = "chief_steward",                 // Chief Steward
   OFFICER = "officer",                             // Union Officer
   
+  // ===== ADMINISTRATIVE SUPPORT =====
+  CLERK = "clerk",                                 // Admin Clerk — drafts, prepares, dispatches correspondence
+  
   // ===== FRONT-LINE REPRESENTATIVES =====
   STEWARD = "steward",                             // Union Steward
   BARGAINING_COMMITTEE = "bargaining_committee",   // Bargaining Committee Member
@@ -253,6 +256,13 @@ export enum Permission {
   MANAGE_ROLES = "manage_roles",
   SYSTEM_SETTINGS = "system_settings",
   VIEW_ADMIN_PANEL = "view_admin_panel",
+
+  // Correspondence pipeline permissions
+  VIEW_CORRESPONDENCE = "view_correspondence",
+  DRAFT_CORRESPONDENCE = "draft_correspondence",
+  MANAGE_CORRESPONDENCE = "manage_correspondence",
+  SIGN_CORRESPONDENCE = "sign_correspondence",
+  DISPATCH_CORRESPONDENCE = "dispatch_correspondence",
 }
 
 // Role definitions with their permissions
@@ -923,6 +933,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_ANALYTICS,
     Permission.VIEW_ADVANCED_ANALYTICS,
     Permission.VIEW_ADMIN_PANEL,
+    // Correspondence — executives can sign, manage, dispatch
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
+    Permission.SIGN_CORRESPONDENCE,
+    Permission.DISPATCH_CORRESPONDENCE,
   ],
 
   [UserRole.VICE_PRESIDENT]: [
@@ -946,6 +961,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_FINANCIAL,
     Permission.VIEW_ANALYTICS,
     Permission.VIEW_ADVANCED_ANALYTICS,
+    // Correspondence — VP can sign and manage
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
+    Permission.SIGN_CORRESPONDENCE,
   ],
 
   [UserRole.SECRETARY_TREASURER]: [
@@ -969,6 +988,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.AUDIT_FINANCES,
     Permission.VIEW_ANALYTICS,
     Permission.VIEW_ADVANCED_ANALYTICS,
+    // Correspondence — secretary-treasurer can sign and dispatch
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
+    Permission.SIGN_CORRESPONDENCE,
+    Permission.DISPATCH_CORRESPONDENCE,
   ],
 
   // ========================================================
@@ -990,6 +1014,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_CBA,
     Permission.VIEW_ANALYTICS,
     Permission.VIEW_ADVANCED_ANALYTICS,
+    // Correspondence — chief stewards can sign
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.SIGN_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
   ],
 
   [UserRole.OFFICER]: [
@@ -1009,6 +1037,31 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_VOTE_RESULTS,
     Permission.VIEW_CBA,
     Permission.VIEW_ANALYTICS,
+    // Correspondence — officers can review and sign
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.SIGN_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
+  ],
+
+  // ========================================================
+  // ADMINISTRATIVE SUPPORT
+  // ========================================================
+
+  [UserRole.CLERK]: [
+    // Admin Clerk — drafts, prepares, dispatches correspondence
+    Permission.VIEW_ALL_CLAIMS,
+    Permission.VIEW_OWN_CLAIMS,
+    Permission.VIEW_ALL_MEMBERS,
+    Permission.VIEW_OWN_PROFILE,
+    Permission.VIEW_VOTING,
+    Permission.CAST_VOTE,
+    Permission.VIEW_CBA,
+    Permission.VIEW_ANALYTICS,
+    // Correspondence — clerks draft, manage, and dispatch (but do NOT sign)
+    Permission.VIEW_CORRESPONDENCE,
+    Permission.DRAFT_CORRESPONDENCE,
+    Permission.MANAGE_CORRESPONDENCE,
+    Permission.DISPATCH_CORRESPONDENCE,
   ],
 
   // ========================================================
@@ -1303,6 +1356,8 @@ export function getRoleLevel(role: UserRole): number {
     // Representatives
     [UserRole.CHIEF_STEWARD]: 90,
     [UserRole.OFFICER]: 80,
+    // Administrative support
+    [UserRole.CLERK]: 70,
     [UserRole.STEWARD]: 50,
     [UserRole.BARGAINING_COMMITTEE]: 40,
     [UserRole.HEALTH_SAFETY_REP]: 30,

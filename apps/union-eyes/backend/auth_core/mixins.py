@@ -139,7 +139,7 @@ class UserScopedMixin:
 
         clerk_user_id: str = (
             user.username
-        )  # ClerkAuthentication sets username = Clerk user ID
+        )  # OIDCAuthentication sets username = auth user ID
 
         model = qs.model
         field_names = {f.name for f in model._meta.get_fields()}

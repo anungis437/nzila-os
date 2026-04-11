@@ -2,7 +2,7 @@
  * Shared API route guards — authentication + org-scoped database access.
  *
  * Centralises the auth boilerplate for all Zonga API routes, combining
- * Clerk authentication, org membership verification, and audited
+ * authentication, org membership verification, and audited
  * org-scoped database access via @nzila/db.
  *
  * Usage in API routes:
@@ -58,7 +58,7 @@ export async function authenticateUser(): Promise<
 
 /**
  * Create an audited, org-scoped database for the given org.
- * Combines Clerk auth with createAuditedScopedDb so routes get a
+ * Combines auth with createAuditedScopedDb so routes get a
  * write-enabled, auto-auditing DB in one call.
  */
 export async function getAuditedDb(orgId: string): Promise<

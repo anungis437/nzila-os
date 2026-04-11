@@ -1,6 +1,6 @@
 """
 API URL Configuration
-Generated for Union Eyes service migration
+Generated for UnionEyes service migration
 """
 
 from django.urls import path, include

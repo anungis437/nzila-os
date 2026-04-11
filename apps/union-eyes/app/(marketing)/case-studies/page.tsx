@@ -1,7 +1,7 @@
 /**
  * Case Studies Public Listing Page
  * 
- * Showcases successful Union Eyes implementations with filtering
+ * Showcases successful UnionEyes implementations with filtering
  * by category, sector, organization type, and jurisdiction.
  */
 
@@ -92,10 +92,10 @@ export default function CaseStudiesPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Union Eyes Success Stories
+            UnionEyes Success Stories
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Real unions, real results. See how Union Eyes helps locals protect
+            Real unions, real results. See how UnionEyes helps locals protect
             members and strengthen workplace power.
           </p>
         </div>
@@ -235,7 +235,7 @@ export default function CaseStudiesPage() {
         <div className="mt-16 bg-blue-600 text-white rounded-lg p-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Want to share your story?</h2>
           <p className="text-lg mb-6 text-blue-100">
-            If you&apos;re a Union Eyes pilot partner and have a success story to share,
+            If you&apos;re a UnionEyes pilot partner and have a success story to share,
             we&apos;d love to feature it here (with your approval, of course).
           </p>
           <div className="flex gap-4 justify-center">

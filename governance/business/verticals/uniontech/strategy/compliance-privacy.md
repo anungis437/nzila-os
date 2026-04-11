@@ -6,7 +6,7 @@
 
 ## 1. Regulatory Landscape Overview
 
-Uniontech platforms operate at the intersection of **labor law**, **pension regulation**, **privacy law**, and **financial services regulation** across Canadian and U.S. jurisdictions. Both Union Eyes and DiasporaCore (C3UO) must maintain compliance across overlapping regulatory frameworks.
+Uniontech platforms operate at the intersection of **labor law**, **pension regulation**, **privacy law**, and **financial services regulation** across Canadian and U.S. jurisdictions. Both UnionEyes and DiasporaCore (C3UO) must maintain compliance across overlapping regulatory frameworks.
 
 ---
 
@@ -22,22 +22,22 @@ Uniontech platforms operate at the intersection of **labor law**, **pension regu
 | **BC Labour Relations Code** | British Columbia | BC-chartered locals | Certification, expedited arbitration, essential services designation |
 | **Provincial equivalents** | All provinces | Province-chartered locals | Each province has distinct certification thresholds, timelines, and arbitration rules |
 
-**Union Eyes implementation:** Platform configurable per jurisdiction — election rules, certification thresholds, grievance step timelines, and arbitration procedures parameterized by province/territory.
+**UnionEyes implementation:** Platform configurable per jurisdiction — election rules, certification thresholds, grievance step timelines, and arbitration procedures parameterized by province/territory.
 
 ### 2.2 Pension and Benefits Regulation
 
-| Regulation | Scope | Union Eyes Obligations |
+| Regulation | Scope | UnionEyes Obligations |
 |-----------|-------|----------------------|
 | **Pension Benefits Standards Act (PBSA)** | Federally regulated pension plans | Secure storage of pension records; contribution tracking with audit trail; actuarial data integrity; member access to pension statements |
 | **Ontario Pension Benefits Act (PBA)** | Ontario pension plans | Funding status reporting; surplus/deficit disclosure; wind-up compliance |
 | **Supplemental Pension Plans Act (Quebec)** | Quebec pension plans | Solvency ratio reporting; member notification requirements |
 | **CAPSA Guidelines** | All Canadian jurisdictions | Governance self-assessment; investment monitoring; risk management framework for jointly trusteed plans |
 
-**Fiduciary compliance:** Union Eyes pension forecasting module provides projections clearly labeled as **informational estimates, not actuarial advice**. Disclaimers enforced at the UI layer. Actuarial outputs require sign-off from a certified actuary (FCIA) before distribution to members.
+**Fiduciary compliance:** UnionEyes pension forecasting module provides projections clearly labeled as **informational estimates, not actuarial advice**. Disclaimers enforced at the UI layer. Actuarial outputs require sign-off from a certified actuary (FCIA) before distribution to members.
 
 ### 2.3 Privacy Legislation
 
-| Regulation | Jurisdiction | Key Requirements | Union Eyes / DiasporaCore Impact |
+| Regulation | Jurisdiction | Key Requirements | UnionEyes / DiasporaCore Impact |
 |-----------|-------------|-----------------|--------------------------------|
 | **PIPEDA** | Federal / provinces without equivalent | Consent for collection, use, disclosure of personal information; right of access; breach notification to OPC within 72 hours | Union member PII (SIN, banking, health info for benefits); KYC data for DiasporaCore |
 | **Quebec Law 25 (Bill 64)** | Quebec | Privacy impact assessments mandatory; DPO designation required; consent stricter than PIPEDA; data portability rights; algorithmic transparency for automated decisions | ML models (pension forecasting, churn prediction) require explainability; Quebec unions trigger full PIA |
@@ -65,7 +65,7 @@ Uniontech platforms operate at the intersection of **labor law**, **pension regu
 | **National Labor Relations Act (NLRA)** | NLRB | Certification procedures; unfair labor practice charges; bargaining unit determination |
 | **Railway Labor Act** | NMB | Airline and railroad unions — distinct election and mediation procedures |
 
-**Union Eyes implementation:** LM-2/LM-3/LM-4 report generation engine with auto-population from financial transaction data. Electronic filing format compatible with OLMS e-filing system. Officer compensation disclosure automated per LMRDA s.201.
+**UnionEyes implementation:** LM-2/LM-3/LM-4 report generation engine with auto-population from financial transaction data. Electronic filing format compatible with OLMS e-filing system. Officer compensation disclosure automated per LMRDA s.201.
 
 ### 3.2 Pension and Benefits (U.S.)
 
@@ -144,7 +144,7 @@ All platforms implement append-only audit logs for regulatory compliance:
 |-----------|-----------|-------|---------|
 | **External network pentest** | Quarterly | Public-facing endpoints, APIs, CDN | Third-party certified firm |
 | **Internal network pentest** | Semi-annually | Azure VNET, ACA internal comms, Redis | Third-party certified firm |
-| **Application pentest** | Semi-annually | Union Eyes + DiasporaCore full stack | Third-party certified firm |
+| **Application pentest** | Semi-annually | UnionEyes + DiasporaCore full stack | Third-party certified firm |
 | **RLS isolation testing** | Quarterly | Cross-tenant data leakage (238 policies) | Internal security team + external validation |
 | **Social engineering** | Annually | Phishing simulation, physical access attempts | Third-party certified firm |
 
@@ -186,7 +186,7 @@ All platforms implement append-only audit logs for regulatory compliance:
 
 ## 8. Third-Party Data Processors — PIPEDA / Law 25 Assessment
 
-Union Eyes relies on third-party SaaS services that process Canadian member PII. Under PIPEDA (Principle 4.1.3) and Québec Law 25 (s. 17), Nzila must ensure all processors provide a comparable level of protection.
+UnionEyes relies on third-party SaaS services that process Canadian member PII. Under PIPEDA (Principle 4.1.3) and Québec Law 25 (s. 17), Nzila must ensure all processors provide a comparable level of protection.
 
 ### 8.1 Clerk (Authentication Provider)
 

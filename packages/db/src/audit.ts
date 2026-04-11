@@ -41,7 +41,7 @@ import { randomUUID } from 'node:crypto'
 export interface AuditedScopedDbOptions {
   /** The Org (entity) identifier to scope all queries to. */
   orgId: string
-  /** Clerk user ID or system actor performing the operation. */
+  /** Auth user ID or system actor performing the operation. */
   actorId: string
   /** Optional correlation ID for tracing across operations. */
   correlationId?: string
@@ -50,7 +50,7 @@ export interface AuditedScopedDbOptions {
 }
 
 export interface AuditContext {
-  /** Clerk user ID or system actor performing the operation */
+  /** Auth user ID or system actor performing the operation */
   actorId: string
   /** Entity being operated on (must match scopedDb.orgId) */
   orgId: string

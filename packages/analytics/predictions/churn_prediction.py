@@ -22,7 +22,7 @@ class ChurnPredictor:
         # Platform-specific churn models (based on business model)
         self.platform_models = {
             "union_eyes": {
-                "name": "Union Eyes",
+                "name": "UnionEyes",
                 "vertical": "Uniontech",
                 "customer_type": "union_organizations",
                 "contract_length_months": 12,

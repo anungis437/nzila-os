@@ -1,5 +1,5 @@
 /**
- * Union Eyes Service Worker
+ * UnionEyes Service Worker
  * 
  * Provides offline functionality and caching strategies
  * for Progressive Web App (PWA)
@@ -275,7 +275,7 @@ self.addEventListener('push', (event) => {
     try {
       data = event.data.json();
     } catch (_e) {
-      data = { title: 'Union Eyes', body: event.data.text() };
+      data = { title: 'UnionEyes', body: event.data.text() };
     }
   }
 
@@ -297,7 +297,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Union Eyes', options)
+    self.registration.showNotification(data.title || 'UnionEyes', options)
   );
 });
 

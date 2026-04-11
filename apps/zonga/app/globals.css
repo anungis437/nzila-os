@@ -223,11 +223,6 @@
   100% { background-position: -200% 0; }
 }
 
-/* ═══════════════════════ CLERK OVERRIDES ═══════════════════════ */
-.cl-internal-b3fm6y {
-  display: none !important;
-}
-
 /* ═══════════════════════ SIDEBAR SCROLLBAR ═══════════════════════ */
 .sidebar-scrollbar::-webkit-scrollbar {
   width: 4px;

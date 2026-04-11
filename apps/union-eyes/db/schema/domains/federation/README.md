@@ -444,4 +444,4 @@ For questions or contributions to the Federation schema:
 
 **Schema Version**: 1.0.0  
 **Last Updated**: February 11, 2026  
-**Author**: Union Eyes Development Team
+**Author**: UnionEyes Development Team

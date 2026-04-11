@@ -84,7 +84,7 @@ Analysis outputs and automation reports:
 
 **Verticals:**
 1. Healthtech (Memora - legacy)
-2. Uniontech (Union Eyes, C3UO)
+2. Uniontech (UnionEyes, C3UO)
 3. Insurancetech (SentryIQ)
 4. Legaltech (CourtLens)
 5. **Fintech** (Lexora, Insight-CFO) - *New vertical*

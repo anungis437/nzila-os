@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A/B Testing Framework
  * 
  * SPRINT 8: Advanced Features
@@ -393,7 +393,7 @@ export const TEST_TEMPLATES = {
     exampleVariants: [
       {
         name: 'Control (Direct)',
-        content: { subject: 'Union Eyes Pilot Application - Next Steps' },
+        content: { subject: 'UnionEyes Pilot Application - Next Steps' },
       },
       {
         name: 'Benefit-Focused',
@@ -432,7 +432,7 @@ export const TEST_TEMPLATES = {
       {
         name: 'Control (Product-Focused)',
         content: {
-          headline: 'Union Eyes: Grievance Management Built for Labor',
+          headline: 'UnionEyes: Grievance Management Built for Labor',
           subheadline: 'Track, resolve, and analyze grievances in one platform',
         },
       },

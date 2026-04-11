@@ -54,7 +54,7 @@ export interface BiometricAvailability {
 
 const DEFAULT_CONFIG: BiometricConfig = {
   rpId: 'unioneyes.app',
-  rpName: 'Union Eyes',
+  rpName: 'UnionEyes',
   timeout: 60000,
   userVerification: 'preferred',
 };

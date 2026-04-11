@@ -290,7 +290,7 @@ describe('ADVERSARIAL-2 — Financial Reconciliation Proof', () => {
       const svcFiles = walkFiles(FIN_SVC, /\.(ts|js)$/)
       const hasAuth = svcFiles.some(f => {
         const c = read(f)
-        return /verifyToken|clerkClient|Bearer|authorization|api[_-]?key/i.test(c)
+        return /verifyToken|adminClient|Bearer|authorization|api[_-]?key/i.test(c)
       })
       expect(hasAuth).toBe(true)
     })

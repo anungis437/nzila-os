@@ -265,7 +265,7 @@ export type NzilaCanonicalFinancialRecord = z.infer<typeof canonicalFinancialRec
 // ── Canonical User Context ──────────────────────────────────────────────────
 
 export const canonicalUserContextSchema = z.object({
-  /** Clerk user ID. */
+  /** Auth user ID. */
   userId: z.string().min(1),
   /** Display name. */
   displayName: z.string().optional(),

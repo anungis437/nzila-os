@@ -341,7 +341,7 @@ flake8>=7.0.0
         # Add platform-specific dependencies
         if self.platform_id == "ue":
             content += """
-# Union Eyes specific
+# UnionEyes specific
 scikit-learn>=1.4.0
 pandas>=2.2.0
 numpy>=1.26.3
@@ -368,7 +368,7 @@ def main():
 
     # Repository paths
     repos = {
-        "ue": (Path("C:/APPS/nzila-union-eyes"), "Union Eyes"),
+        "ue": (Path("C:/APPS/nzila-union-eyes"), "UnionEyes"),
         "abr": (Path("D:/APPS/nzila-abr-insights"), "ABR Insights"),
     }
 

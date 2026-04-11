@@ -23,7 +23,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 |----------|---------|--------------|----------|
 | [**Pitch Deck (2026 Series A)**](./pitch-deck-2026.md) | Core fundraising presentation | Feb 2026 | VCs, Angels, Strategic Investors |
 | [**One-Pager: Portfolio Overview**](./one-pager-portfolio.md) | Quick overview for introductions | Feb 2026 | All investors |
-| [**One-Pager: Union Eyes**](./one-pager-union-eyes.md) | 🏆 **Flagship** — 4,773 entities, union management platform | Feb 2026 | B2B SaaS, Labor Tech investors |
+| [**One-Pager: UnionEyes**](./one-pager-union-eyes.md) | 🏆 **Flagship** — 4,773 entities, union management platform | Feb 2026 | B2B SaaS, Labor Tech investors |
 | [**One-Pager: ABR Insights**](./one-pager-abr.md) | 🏆 **Flagship** — LMS + Tribunal Database, 9.1/10 production | Feb 2026 | Edtech, Legaltech, Impact investors |
 | [**One-Pager: CORA**](./one-pager-cora.md) | 🏆 **Flagship** — AgTech supply chain, 80+ entities | Feb 2026 | AgTech, Supply Chain investors |
 | [**Executive Summary**](./executive-summary.md) | 2-page business overview | Feb 2026 | First meetings, warm intros |
@@ -93,10 +93,10 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 ### Target Investor Profiles
 
 **Tier 1: Strategic Fit (Priority)**
-- **Labor Tech / Future of Work VCs**: Union Eyes (4,773 entities, pension/insurance/grievance platform)
+- **Labor Tech / Future of Work VCs**: UnionEyes (4,773 entities, pension/insurance/grievance platform)
 - **Impact/ESG Funds**: African justice systems (ABR), agriculture (CORA), diaspora empowerment
 - **AgTech Investors**: CORA supply chain ERP, AgrimoOps farm management
-- **B2B SaaS Investors**: Union Eyes, ABR Insights, Shop Quoter, Trade OS
+- **B2B SaaS Investors**: UnionEyes, ABR Insights, Shop Quoter, Trade OS
 - **Multi-Vertical Studios**: Rocket Internet-style platform investors
 
 **Tier 2: Geographic Focus**
@@ -106,7 +106,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 
 **Tier 3: Strategic Corporates**
 - **Healthcare Systems**: Partnership + investment (Memora)
-- **Labor Organizations**: Union Eyes strategic buyers
+- **Labor Organizations**: UnionEyes strategic buyers
 - **Banks/Fintechs**: DiasporaCore acquisition interest
 
 ### Target Investor List (Top 20)
@@ -171,7 +171,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 ## 📊 KEY METRICS TO HIGHLIGHT
 
 ### Traction Metrics (Current)
-- **3 flagship platforms production-ready**: Union Eyes (4,773 entities), ABR Insights (9.1/10 readiness), CORA (80+ entities)
+- **3 flagship platforms production-ready**: UnionEyes (4,773 entities), ABR Insights (9.1/10 readiness), CORA (80+ entities)
 - **15 total platforms** (code-validated across 10+ verticals)
 - **$4M+ engineering investment** (technical due diligence proof)
 - **12,000+ database entities** (sophisticated data models)
@@ -180,7 +180,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 ### Growth Metrics (2026 Targets)
 - **50,000 active users** across portfolio (Q4 2026)
 - **$250K MRR** (Q4 2026)
-- **50 enterprise clients** (Union Eyes, Shop Quoter, etc.)
+- **50 enterprise clients** (UnionEyes, Shop Quoter, etc.)
 - **3 markets** (Canada, US, select African countries)
 
 ### Financial Metrics

@@ -35,8 +35,8 @@ def _get_jwks():
         raise AuthenticationFailed("Failed to fetch JWKS")
 
 
-class ClerkAuthentication(BaseAuthentication):
-    """Authenticate requests using Clerk-issued JWTs."""
+class OIDCAuthentication(BaseAuthentication):
+    """Authenticate requests using OIDC JWTs."""
 
     def authenticate(self, request):
         auth_header = request.META.get("HTTP_AUTHORIZATION", "")

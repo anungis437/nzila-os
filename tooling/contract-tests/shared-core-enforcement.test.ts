@@ -59,8 +59,8 @@ describe('CORE-001: No duplicate platform logic patterns', () => {
       pattern: /createHash\(['"]sha256['"]\).*chain|hashChain/,
       fileGlob: 'hash',
       allowed: ['packages/'],
-      /** Signature schemas, evidence packs, and integrity UIs are OK */
-      exemptPaths: ['signature', 'evidence', 'integrity', 'nacp-integrity'],
+      /** Signature schemas, evidence packs, integrity UIs, and correspondence audit trails are OK */
+      exemptPaths: ['signature', 'evidence', 'integrity', 'nacp-integrity', 'correspondence'],
     },
     {
       name: 'custom idempotency implementation',

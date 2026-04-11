@@ -140,13 +140,12 @@ export class GovernanceService {
   }
 
   /**
-   * Helper: Get Clerk authentication headers
+   * Helper: Get authentication headers
    */
   private async getAuthHeaders(): Promise<Record<string, string>> {
-    // Use Clerk to get auth token
-    // Note: This should be imported from @clerk/nextjs
+    // Use platform auth to get auth token
     try {
-      const { auth } = await import('@clerk/nextjs/server');
+      const { auth } = await import('@nzila/platform-auth');
       const session = await auth();
       
       if (session?.sessionId) {

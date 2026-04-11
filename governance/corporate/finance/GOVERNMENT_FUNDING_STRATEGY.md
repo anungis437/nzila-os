@@ -46,7 +46,7 @@ Nzila Ventures qualifies for **$500K-$1.5M annually in non-dilutive government f
 - **Status**: ✅ **ACTIVE** — 2025 claim $140K, 2026 projected $220K
 
 **Nzila-Eligible Projects** (SR&ED Technical Narratives):
-1. **Union Eyes Pension Forecasting Algorithm** — ML model for actuarial risk prediction with seasonal labor market volatility (technical uncertainty in feature engineering)
+1. **UnionEyes Pension Forecasting Algorithm** — ML model for actuarial risk prediction with seasonal labor market volatility (technical uncertainty in feature engineering)
 2. **ABR Insights Gamification Engine** — Adaptive XP progression using behavioral psychology to achieve 80%+ completion rates (experimental psychology integration)
 3. **CORA Agricultural Supply Chain Matching** — Multi-stakeholder optimization algorithm for real-time farm-to-elevator matching with price transparency
 4. **SentryIQ360 Insurance Arbitrage Engine** — Multi-carrier API integration with automated underwriting recommendation engine
@@ -100,7 +100,7 @@ Nzila Ventures qualifies for **$500K-$1.5M annually in non-dilutive government f
 **Nzila-Eligible IRAP Projects** (Current + Future):
 1. ✅ **Memora AI Companion** ($150K pending) — Healthcare AI for cognitive wellness, dementia care
 2. ✅ **CORA Supply Chain Optimization** ($200K pending) — Canadian AgTech supply chain + carbon tracking
-3. ⏳ **Union Eyes Pension AI** ($180K planned Q3 2026) — ML actuarial modeling for union pension funds
+3. ⏳ **UnionEyes Pension AI** ($180K planned Q3 2026) — ML actuarial modeling for union pension funds
 4. ⏳ **ABR Insights Learning AI** ($120K planned Q4 2026) — GPT-4 personalized anti-racism education
 5. ⏳ **SentryIQ Insurance Automation** ($100K planned 2027) — Predictive underwriting + claims AI
 6. ⏳ **Nzila AI Backbone** ($250K planned 2027) — Shared AI/ML infrastructure for 15 platforms
@@ -338,7 +338,7 @@ Nzila Ventures qualifies for **$500K-$1.5M annually in non-dilutive government f
 | **Ontario OITC** | $50K | $70K | ✅ On Track (stacks with SR&ED) | 🔴 HIGH |
 | **IRAP — Memora** | $150K | — | ⏳ Pending (submitted Jan) | 🔴 HIGH |
 | **IRAP — CORA** | $200K | — | ⏳ Pending (submitted Feb) | 🔴 HIGH |
-| **IRAP — Union Eyes** | — | $180K | ⏳ Planned (Q3 2026) | 🟠 MEDIUM |
+| **IRAP — UnionEyes** | — | $180K | ⏳ Planned (Q3 2026) | 🟠 MEDIUM |
 | **IRAP — ABR** | — | $120K | ⏳ Planned (Q4 2026) | 🟠 MEDIUM |
 | **SDTC — CORA Climate** | — | $1M | ⏳ Planned (Q3 2026 EOI) | 🟠 MEDIUM |
 | **MITACS Accelerate** | $60K | $90K | ⏳ Planned (2 interns) | 🟢 LOW |
@@ -354,7 +354,7 @@ Nzila Ventures qualifies for **$500K-$1.5M annually in non-dilutive government f
 
 **2027 Cash Flow Impact**:
 - Q1: $220K (SR&ED 2026 refund) + $300K (SR&ED 2027 claim)
-- Q2: $180K (IRAP Union Eyes) + $500K (SDTC first milestone if approved)
+- Q2: $180K (IRAP UnionEyes) + $500K (SDTC first milestone if approved)
 - Q3: $120K (IRAP ABR) + $500K (SDTC second milestone)
 - Q4: $90K (MITACS 3 interns)
 - **Total 2027**: $1.91M-$2.91M (includes venture debt option)
@@ -440,11 +440,11 @@ Nzila Ventures qualifies for **$500K-$1.5M annually in non-dilutive government f
 - [ ] Receive IRAP Memora decision (target: $150K approval)
 - [ ] Launch University of Toronto MITACS internship ($30K, AI/ML for Memora)
 - [ ] SDTC EOI submission (September intake target)
-- [ ] IRAP Union Eyes proposal drafting (CTO + Grant Manager)
+- [ ] IRAP UnionEyes proposal drafting (CTO + Grant Manager)
 
 ### **Q3 2026**
 - [ ] Receive IRAP CORA decision (target: $200K approval)
-- [ ] Submit IRAP Union Eyes application ($180K request)
+- [ ] Submit IRAP UnionEyes application ($180K request)
 - [ ] SDTC full proposal (if EOI approved)
 - [ ] File SR&ED 2026 claim ($220K)
 

@@ -1,4 +1,4 @@
-# Union Eyes — Terminology Alignment Matrix
+# UnionEyes — Terminology Alignment Matrix
 
 > Ensures docs describe EXACT flows, UI reflects EXACT terminology,
 > and tracked events reflect REAL actions. No mismatch allowed.

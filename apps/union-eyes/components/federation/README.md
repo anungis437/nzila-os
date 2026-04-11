@@ -1,6 +1,6 @@
 # Federation Module Components
 
-Production-ready React components for the Federation module in Union Eyes application.
+Production-ready React components for the Federation module in UnionEyes application.
 
 ## 📦 Components Created (12+)
 
@@ -118,7 +118,7 @@ Shared resources library with:
 
 ## 🎨 Design Patterns
 
-All components follow Union Eyes standards:
+All components follow UnionEyes standards:
 
 ### UI Framework
 - **shadcn/ui** components (Card, Button, Badge, etc.)
@@ -283,12 +283,12 @@ Components are ready for:
 - All components are **client-side** (`"use client"`)
 - **TypeScript** interfaces provided for all data types
 - **API endpoints** need to be implemented server-side
-- Components follow **Union Eyes coding standards**
+- Components follow **UnionEyes coding standards**
 - Ready for **production deployment**
 
 ## 🔗 Related Documentation
 
-- [Union Eyes Architecture](../../docs/)
+- [UnionEyes Architecture](../../docs/)
 - [API Documentation](../../docs/api/)
 - [Component Library](../ui/)
 - [Type Definitions](../../types/)

@@ -2,7 +2,7 @@
 ## For Django Model Code Generator
 
 > **Generated for**: Nzila Automation — Django Migration Code Generator  
-> **Source Codebases**: ABR Insights (Supabase/SQL) & Union Eyes (Drizzle ORM)  
+> **Source Codebases**: ABR Insights (Supabase/SQL) & UnionEyes (Drizzle ORM)  
 > **Purpose**: Reference document for building a code generator that converts legacy schemas to Django models
 
 ---
@@ -10,7 +10,7 @@
 ## Table of Contents
 
 1. [ABR Insights — Supabase SQL Tables](#1-abr-insights--supabase-sql-tables)
-2. [Union Eyes — Drizzle ORM Tables](#2-union-eyes--drizzle-orm-tables)
+2. [UnionEyes — Drizzle ORM Tables](#2-union-eyes--drizzle-orm-tables)
 3. [ABR Insights — TypeScript Types](#3-abr-insights--typescript-types)
 4. [Shared Patterns & Conventions](#4-shared-patterns--conventions)
 5. [Django Model Mapping Guide](#5-django-model-mapping-guide)
@@ -885,7 +885,7 @@ The following migration files exist but were not fully read. They likely contain
 
 ---
 
-## 2. Union Eyes — Drizzle ORM Tables
+## 2. UnionEyes — Drizzle ORM Tables
 
 **Source Path**: `legacy-codebases/Union_Eyes_app_v1-main/Union_Eyes_app_v1-main/db/schema/`  
 **ORM**: Drizzle ORM (PostgreSQL dialect)  
@@ -2334,7 +2334,7 @@ pgTable("in_app_notifications", {
 })
 ```
 
-### 2.16 Union Eyes — Schema Files NOT Extracted
+### 2.16 UnionEyes — Schema Files NOT Extracted
 
 The following domain schema files exist but were not read. Each may contain additional tables:
 
@@ -2453,7 +2453,7 @@ import { cookies } from 'next/headers';
 
 ### Common Column Patterns
 
-| Pattern | ABR (SQL) | Union Eyes (Drizzle) |
+| Pattern | ABR (SQL) | UnionEyes (Drizzle) |
 |---------|-----------|---------------------|
 | Primary Key | `id UUID PRIMARY KEY DEFAULT uuid_generate_v4()` | `id: uuid("id").primaryKey().defaultRandom()` |
 | Created At | `created_at TIMESTAMPTZ DEFAULT NOW()` | `createdAt: timestamp("created_at", { withTimezone: true }).defaultNow()` |
@@ -2467,7 +2467,7 @@ import { cookies } from 'next/headers';
 
 ### Naming Conventions
 
-| Aspect | ABR (SQL) | Union Eyes (Drizzle) |
+| Aspect | ABR (SQL) | UnionEyes (Drizzle) |
 |--------|-----------|---------------------|
 | Table Names | snake_case | camelCase variable, snake_case SQL |
 | Column Names | snake_case | camelCase TS, snake_case SQL |
@@ -2476,7 +2476,7 @@ import { cookies } from 'next/headers';
 
 ### Authentication
 
-| Aspect | ABR | Union Eyes |
+| Aspect | ABR | UnionEyes |
 |--------|-----|-----------|
 | Auth Provider | Supabase Auth (auth.users) | Clerk (user_xxxxx IDs) |
 | User ID Type | UUID (auth.users FK) | VARCHAR/TEXT (Clerk ID) |
@@ -2592,7 +2592,7 @@ class TenantModel(BaseModel):
 
 **+ ~20 additional tables in unread migrations** (lesson_notes, watch_history, certificates, ce_credits, skills, sso_providers, ai_interaction_logs, canlii_ingestion, etc.)
 
-### Union Eyes — 55 Tables Extracted
+### UnionEyes — 55 Tables Extracted
 
 | # | Table | Domain | Schema File |
 |---|-------|--------|------------|
@@ -2655,7 +2655,7 @@ class TenantModel(BaseModel):
 
 **+ ~100 additional tables in unread schema files** across 70+ domain modules
 
-### Grand Total: **~98 tables fully extracted** (43 ABR + 55 Union Eyes) + **~120 estimated unread**
+### Grand Total: **~98 tables fully extracted** (43 ABR + 55 UnionEyes) + **~120 estimated unread**
 
 ---
 
@@ -2677,7 +2677,7 @@ class TenantModel(BaseModel):
 - `bundle_type`: compliance, investigation, training, audit, custom
 - `subscription_tier_v2`: FREE, PROFESSIONAL, BUSINESS, BUSINESS_PLUS, ENTERPRISE
 
-### Union Eyes Enums (Drizzle pgEnum)
+### UnionEyes Enums (Drizzle pgEnum)
 - `organization_type`: congress, federation, union, local, region, district
 - `ca_jurisdiction`: federal + 13 provinces/territories
 - `labour_sector`: 16 sectors

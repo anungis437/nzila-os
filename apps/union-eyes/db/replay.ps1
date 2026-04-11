@@ -1,5 +1,5 @@
 # =====================================================================
-# replay.ps1 — Union Eyes DB Replay Script
+# replay.ps1 — UnionEyes DB Replay Script
 # =====================================================================
 # Full replay from scratch: drop → create → migrate → seed → validate
 #
@@ -88,7 +88,7 @@ function Invoke-Psql {
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║  Union Eyes — Database Replay                              ║" -ForegroundColor Cyan
+Write-Host "║  UnionEyes — Database Replay                              ║" -ForegroundColor Cyan
 Write-Host "║  Database: $DbName on ${DbHost}:${DbPort}                 ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""

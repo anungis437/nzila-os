@@ -1,5 +1,5 @@
 """
-Organizations Model - Extracted from Union Eyes Legacy Codebase
+Organizations Model - Extracted from UnionEyes Legacy Codebase
 Source: D:\APPS\Union_Eyes_app_v1-main\Union_Eyes_app_v1-main\db\schema-organizations.ts
 
 This model should be inserted into auth_core/models.py for both platforms.

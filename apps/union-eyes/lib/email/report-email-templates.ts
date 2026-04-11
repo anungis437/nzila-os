@@ -62,7 +62,7 @@ async function sendViaResend(params: SendEmailParams): Promise<void> {
     const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.format}`;
 
     await client.emails.send({
-      from: getFromEmail('Union Eyes Reports'),
+      from: getFromEmail('UnionEyes Reports'),
       to: schedule.recipients,
       subject: `Scheduled Report: ${reportName}`,
       html: generateEmailHTML(schedule, fileUrl),

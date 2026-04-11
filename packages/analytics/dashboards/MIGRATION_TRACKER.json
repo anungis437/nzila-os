@@ -140,7 +140,7 @@
               "status": "pending"
             },
             {
-              "platform": "Union Eyes",
+              "platform": "UnionEyes",
               "complexity": "EXTREME",
               "profile": "nextjs-aca-azurepg-clerk",
               "batch": "Batch 2",
@@ -263,7 +263,7 @@
           "value": 4,
           "format": "number",
           "color": "red",
-          "platforms": ["Union Eyes", "DiasporaCore V2", "ABR Insights", "SentryIQ360 (partial)"]
+          "platforms": ["UnionEyes", "DiasporaCore V2", "ABR Insights", "SentryIQ360 (partial)"]
         },
         {
           "widget_id": "high_extreme",
@@ -314,7 +314,7 @@
             {"label": "Shop Quoter", "value": 45, "max": 100, "complexity": "HIGH-EXTREME"},
             {"label": "SentryIQ360", "value": 40, "max": 100, "complexity": "HIGH-EXTREME"},
             {"label": "CongoWave", "value": 35, "max": 100, "complexity": "HIGH-EXTREME"},
-            {"label": "Union Eyes", "value": 30, "max": 100, "complexity": "EXTREME"},
+            {"label": "UnionEyes", "value": 30, "max": 100, "complexity": "EXTREME"},
             {"label": "DiasporaCore V2", "value": 30, "max": 100, "complexity": "EXTREME"},
             {"label": "ABR Insights", "value": 25, "max": 100, "complexity": "EXTREME"}
           ]

@@ -10,7 +10,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import type { ZongaRole } from '@nzila/zonga-core/types'
 
-/** Clerk user IDs that always receive admin role. */
+/** User IDs that always receive admin role. */
 const PLATFORM_ADMIN_USER_IDS = new Set(
   (process.env.PLATFORM_ADMIN_USER_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
 )
@@ -70,14 +70,14 @@ export async function resolveNavContext(locale: string): Promise<NavContext | nu
   let isPlatformOrg = false
   try {
     const org = await platformDb.execute(
-      sql`SELECT id, name FROM organizations WHERE clerk_org_id = ${orgId} LIMIT 1`,
+      sql`SELECT id, name FROM organizations WHERE id = ${orgId} LIMIT 1`,
     )
 
     const row = org[0] as { id: string; name: string } | undefined
     platformOrgId = row?.id ?? null
     isPlatformOrg = row?.name?.startsWith(PLATFORM_ORG_NAME) ?? false
   } catch {
-    // DB failure — fall through to Clerk-only resolution
+    // DB failure — fall through to session-only resolution
   }
 
   // 1. PLATFORM_ADMIN_USER_IDS
@@ -110,10 +110,10 @@ export async function resolveNavContext(locale: string): Promise<NavContext | nu
     }
   }
 
-  // 4/5. Clerk metadata / orgRole
+  // 4/5. Session metadata / orgRole
   // sessionClaims may not include publicMetadata (depends on JWT template),
   // so also check currentUser() which always has it.
-  let role = mapClerkRole(orgRole, sessionClaims)
+  let role = mapSessionRole(orgRole, sessionClaims)
   if (role === 'viewer' && user) {
     const userMeta = (user.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
     if (userMeta && ['admin', 'creator', 'manager'].includes(userMeta)) {
@@ -138,7 +138,7 @@ function mapDbRole(dbRole: string): ZongaRole | null {
   }
 }
 
-function mapClerkRole(
+function mapSessionRole(
   orgRole: string | undefined | null,
   sessionClaims: Record<string, unknown> | undefined | null,
 ): ZongaRole {

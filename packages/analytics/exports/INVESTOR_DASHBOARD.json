@@ -94,7 +94,7 @@
           "title": "Flagship Platform Economics",
           "columns": ["Platform", "ACV", "CAC", "LTV", "LTV/CAC", "Payback (months)"],
           "data": [
-            {"platform": "Union Eyes", "acv": 15000, "cac": 3500, "ltv": 135000, "ltv_cac": "38.6x", "payback": 8},
+            {"platform": "UnionEyes", "acv": 15000, "cac": 3500, "ltv": 135000, "ltv_cac": "38.6x", "payback": 8},
             {"platform": "ABR Insights", "acv": 12000, "cac": 2800, "ltv": 108000, "ltv_cac": "38.6x", "payback": 8},
             {"platform": "CORA", "acv": 10000, "cac": 2200, "ltv": 90000, "ltv_cac": "40.9x", "payback": 7},
             {"platform": "DiasporaCore", "acv": 15000, "cac": 3000, "ltv": 150000, "ltv_cac": "50.0x", "payback": 6},

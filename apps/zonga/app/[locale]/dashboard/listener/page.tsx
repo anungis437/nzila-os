@@ -51,7 +51,7 @@ export default async function ListenerPage({
 
   const user = await currentUser()
   const meta = user?.publicMetadata as { listenerPlan?: string; zongaRole?: string } | undefined
-  const clerkPlan = meta?.listenerPlan ?? 'free'
+  const sessionPlan = meta?.listenerPlan ?? 'free'
 
   const [profile, feed, following, savedPlaylists, aiRecs] = await Promise.all([
     getListenerProfile(),
@@ -61,24 +61,35 @@ export default async function ListenerPage({
     getRecommendationsForUser({ limit: 8 }).catch(() => ({ items: [], strategy: 'fallback' })),
   ])
 
-  const [listenerSub, publicPlaylists, creatorRows] = await Promise.all([
+  const [listenerSub, publicPlaylists, creatorRows, orgTierRows] = await Promise.all([
     getListenerSubscription(),
     browsePublicPlaylists(),
     platformDb.execute(
       sql`SELECT id, status FROM zonga_creators WHERE user_id = ${userId} LIMIT 1`,
     ).then((r) => r as unknown as { id: string; status: string }[]).catch(() => []),
+    platformDb.execute(
+      sql`SELECT o.subscription_tier
+          FROM organizations o
+          JOIN organization_members om ON om.organization_id = o.id
+          WHERE om.user_id = ${userId}
+          LIMIT 1`,
+    ).then((r) => r as unknown as { subscription_tier: string | null }[]).catch(() => []),
   ])
 
   const playlists = publicPlaylists.playlists
 
-  // DB subscription takes precedence when available; otherwise fall back to Clerk metadata
+  // DB subscription takes precedence when available; otherwise fall back to session metadata
+  // Org-level entitlement: enterprise/business orgs grant premium to all members
+  const orgTier = orgTierRows[0]?.subscription_tier ?? null
+  const orgEntitled = orgTier === 'enterprise' || orgTier === 'business'
   const listenerPlan: ListenerPlan =
-    listenerSub?.plan === 'premium' || clerkPlan === 'premium' ? 'premium' : 'free'
+    orgEntitled || listenerSub?.plan === 'premium' || sessionPlan === 'premium' ? 'premium' : 'free'
   const isPremium =
-    listenerPlan === 'premium' &&
-    (listenerSub?.subscriptionStatus === 'active' ||
-     listenerSub?.subscriptionStatus === 'trialing' ||
-     !listenerSub)
+    orgEntitled ||
+    (listenerPlan === 'premium' &&
+     (listenerSub?.subscriptionStatus === 'active' ||
+      listenerSub?.subscriptionStatus === 'trialing' ||
+      !listenerSub))
 
   const creatorProfile = creatorRows[0] ?? null
   const hasApplied = !!creatorProfile

@@ -1,7 +1,7 @@
 {
   "name": "@nzila/cupe-vocabulary",
   "version": "0.1.0",
-  "description": "CUPE union vocabulary and taxonomy system for Union Eyes pilot",
+  "description": "CUPE union vocabulary and taxonomy system for UnionEyes pilot",
   "type": "module",
   "exports": {
     ".": {

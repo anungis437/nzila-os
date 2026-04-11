@@ -111,8 +111,8 @@ export default function ApiReferencePage() {
             <div className="glass-card-light rounded-2xl p-8">
               <h3 className="text-xl font-bold text-navy mb-4">Authentication</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                All API requests require a valid Clerk session token passed as a Bearer token in the Authorization header.
-                Requests are scoped to the active Clerk organization.
+                All API requests require a valid session token passed as a Bearer token in the Authorization header.
+                Requests are scoped to the active organization.
               </p>
               <div className="bg-navy rounded-lg p-4 font-mono text-sm text-gray-300">
                 <span className="text-electric">Authorization:</span> Bearer {'<session_token>'}

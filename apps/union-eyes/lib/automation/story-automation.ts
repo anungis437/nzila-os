@@ -253,19 +253,19 @@ function explainScore(grievance: GrievanceRow, _score: number): string {
 function generateDraftTestimonial(grievance: GrievanceRow): TestimonialCandidate['draftContent'] {
   // Generate quote (placeholder - would use NLP in production)
   const quoteTemplates = {
-    harassment: 'Union Eyes helped us handle a sensitive harassment case with dignity and speed.',
+    harassment: 'UnionEyes helped us handle a sensitive harassment case with dignity and speed.',
     discrimination: 'The platform made it easier to document and resolve a discrimination complaint.',
     safety: 'Safety concerns were escalated and resolved faster than ever before.',
-    contract: 'Contract grievance tracking became so much clearer with Union Eyes.',
+    contract: 'Contract grievance tracking became so much clearer with UnionEyes.',
     discipline: 'The timeline feature helped us build a strong case and get a favorable outcome.',
-    default: 'Union Eyes made a real difference in how we resolved this case.',
+    default: 'UnionEyes made a real difference in how we resolved this case.',
   };
 
   const quote = quoteTemplates[grievance.type as keyof typeof quoteTemplates] || quoteTemplates.default;
 
   // Generate context
   const resolutionTime = calculateResolutionTime(grievance);
-  const context = `${grievance.type} case resolved in ${resolutionTime} days using Union Eyes platform.`;
+  const context = `${grievance.type} case resolved in ${resolutionTime} days using UnionEyes platform.`;
 
   // Generate impact
   const impact = 'Case handled efficiently with positive outcome for all parties.';
@@ -337,7 +337,7 @@ ${candidate.reason}
 "${candidate.draftContent.quote}"
 
 **How It Would Be Used:**
-- Help other unions see the value of Union Eyes
+- Help other unions see the value of UnionEyes
 - Inspire confidence in the platform
 - Celebrate successful case resolutions
 - Build solidarity across the labor movement
@@ -354,7 +354,7 @@ Interested? Click here to review and submit: [Link to testimonial form]
 Not interested? No problem - just ignore this email.
 
 In solidarity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
   // Send invitation
   await notificationService.send({

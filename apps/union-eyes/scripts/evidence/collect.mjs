@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Union Eyes — Evidence Artifact Collector
+ * UnionEyes — Evidence Artifact Collector
  *
  * Scans the CI workspace for security scan outputs, test reports, and SBOM
  * files, then writes a manifest (artifacts.json) for the seal step.

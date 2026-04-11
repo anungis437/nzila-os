@@ -51,7 +51,7 @@ const ROLE_DATA: Record<string, RoleData> = {
     badge: 'For Representatives & Stewards',
     headlineLine1: 'Stop chasing paper.',
     headlineAccent: 'Start winning cases.',
-    subtitle: 'Union Eyes gives you guided intake, precedent research, and deadline tracking — so you spend less time on admin and more time representing members.',
+    subtitle: 'UnionEyes gives you guided intake, precedent research, and deadline tracking — so you spend less time on admin and more time representing members.',
     flowTitle: 'Your daily flow, simplified',
     dailyFlow: [
       { icon: Inbox, step: 'Intake', detail: 'Guided forms capture every detail — no missed fields' },
@@ -66,13 +66,13 @@ const ROLE_DATA: Record<string, RoleData> = {
       { before: 'Asking leadership for updates on your cases', after: 'Real-time status visible to you and your team' },
     ],
     ctaHeadline: 'Ready to focus on what matters?',
-    ctaSubtitle: 'See how Union Eyes helps reps move from intake to outcome with confidence.',
+    ctaSubtitle: 'See how UnionEyes helps reps move from intake to outcome with confidence.',
   },
   leadership: {
     badge: 'For Presidents & Executive Boards',
     headlineLine1: 'Lead with clarity.',
     headlineAccent: 'Not with spreadsheets.',
-    subtitle: 'Union Eyes gives you live visibility into casework, priorities, and outcomes — so you can allocate resources, spot trends, and report to your membership with confidence.',
+    subtitle: 'UnionEyes gives you live visibility into casework, priorities, and outcomes — so you can allocate resources, spot trends, and report to your membership with confidence.',
     flowTitle: 'What leadership sees every day',
     dailyFlow: [
       { icon: BarChart3, step: 'Dashboards', detail: 'Live case volumes, resolution rates, and timelines at a glance' },
@@ -87,13 +87,13 @@ const ROLE_DATA: Record<string, RoleData> = {
       { before: 'Preparing for bargaining with scattered data', after: 'Trend analysis ready for the bargaining table' },
     ],
     ctaHeadline: 'Ready to lead with data, not guesswork?',
-    ctaSubtitle: 'See how Union Eyes gives leadership the visibility they need.',
+    ctaSubtitle: 'See how UnionEyes gives leadership the visibility they need.',
   },
   federations: {
     badge: 'For Federations & National Unions',
     headlineLine1: 'See across every local.',
     headlineAccent: 'Act with one system.',
-    subtitle: 'Union Eyes gives federations cross-local visibility into casework, resources, and outcomes — so you can coordinate effectively and support locals that need it most.',
+    subtitle: 'UnionEyes gives federations cross-local visibility into casework, resources, and outcomes — so you can coordinate effectively and support locals that need it most.',
     flowTitle: 'What federation leaders see',
     dailyFlow: [
       { icon: Network, step: 'Cross-local View', detail: 'See case volumes, trends, and outcomes across all your locals' },
@@ -108,14 +108,14 @@ const ROLE_DATA: Record<string, RoleData> = {
       { before: 'National bargaining prep requires weeks of data gathering', after: 'Aggregate data ready at any time' },
     ],
     ctaHeadline: 'Ready to see across your entire federation?',
-    ctaSubtitle: 'See how Union Eyes gives national leaders the visibility they need.',
+    ctaSubtitle: 'See how UnionEyes gives national leaders the visibility they need.',
   },
   clc: {
     badge: 'For CLC & Labour Councils',
     headlineLine1: 'Coordinate the movement.',
     headlineAccent: 'From one dashboard.',
-    subtitle: 'Union Eyes gives the Canadian Labour Congress and labour councils movement-wide visibility — aggregate casework trends, campaign coordination, and impact reporting across affiliated unions.',
-    flowTitle: 'How CLC uses Union Eyes',
+    subtitle: 'UnionEyes gives the Canadian Labour Congress and labour councils movement-wide visibility — aggregate casework trends, campaign coordination, and impact reporting across affiliated unions.',
+    flowTitle: 'How CLC uses UnionEyes',
     dailyFlow: [
       { icon: Globe, step: 'Movement Data', detail: 'Aggregate casework trends across all affiliated unions' },
       { icon: Megaphone, step: 'Campaign Coordination', detail: 'Track campaign progress and participation across affiliates' },
@@ -129,13 +129,13 @@ const ROLE_DATA: Record<string, RoleData> = {
       { before: 'Policy advocacy backed by limited data', after: 'Evidence-based reporting with movement-wide statistics' },
     ],
     ctaHeadline: 'Ready to see the full picture?',
-    ctaSubtitle: 'See how Union Eyes gives the movement the data it needs to drive change.',
+    ctaSubtitle: 'See how UnionEyes gives the movement the data it needs to drive change.',
   },
   members: {
     badge: 'For Union Members',
     headlineLine1: 'Your case. Your status.',
     headlineAccent: 'Your voice.',
-    subtitle: 'Union Eyes gives members direct visibility into their cases, secure document sharing, and clear communication with their representative — no more wondering what\'s happening.',
+    subtitle: 'UnionEyes gives members direct visibility into their cases, secure document sharing, and clear communication with their representative — no more wondering what\'s happening.',
     flowTitle: 'What members can do',
     dailyFlow: [
       { icon: Search, step: 'Case Tracker', detail: 'See real-time status of your grievance or workplace issue' },
@@ -150,7 +150,7 @@ const ROLE_DATA: Record<string, RoleData> = {
       { before: 'Searching the internet for your rights', after: 'Your CBA and workplace rights in one place' },
     ],
     ctaHeadline: 'Ready to stay in the loop?',
-    ctaSubtitle: 'See how Union Eyes keeps members informed and connected.',
+    ctaSubtitle: 'See how UnionEyes keeps members informed and connected.',
   },
 };
 
@@ -212,7 +212,7 @@ export default function RolePageContent({ role }: { role: RoleKey }) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
             <h2 className="text-3xl font-bold text-navy text-center mb-14">
-              Before &amp; after Union Eyes
+              Before &amp; after UnionEyes
             </h2>
           </ScrollReveal>
           <div className="space-y-6">

@@ -1,7 +1,7 @@
-# Union Eyes — Pre-Deployment Operational Audit
+# UnionEyes — Pre-Deployment Operational Audit
 
 **Date:** 2026-04-09  
-**Scope:** Union Eyes (`apps/union-eyes`) readiness for real CUPE data ingestion  
+**Scope:** UnionEyes (`apps/union-eyes`) readiness for real CUPE data ingestion  
 **Principle:** _If real CUPE data is ingested tomorrow, the system must not break, lose data, or produce invalid cases._  
 **Classification:** READ-ONLY AUDIT — no code changes
 
@@ -430,7 +430,7 @@ Comprehensive 20+ field schema: `auditId`, `organizationId`, `userId`, `action`,
 
 ## **NOT READY**
 
-Union Eyes has strong foundational architecture — comprehensive audit trails with database-enforced immutability, strict Zod+pgEnum validation, multi-layer RBAC, a well-designed unified FSM with guard conditions, and excellent SQL injection prevention. The CBA intelligence pipeline demonstrates the system _can_ do proper idempotent ingestion with content hashing.
+UnionEyes has strong foundational architecture — comprehensive audit trails with database-enforced immutability, strict Zod+pgEnum validation, multi-layer RBAC, a well-designed unified FSM with guard conditions, and excellent SQL injection prevention. The CBA intelligence pipeline demonstrates the system _can_ do proper idempotent ingestion with content hashing.
 
 However, **6 critical blockers** prevent safe ingestion of real CUPE data:
 

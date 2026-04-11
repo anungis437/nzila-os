@@ -10,7 +10,7 @@ import { z } from 'zod'
 // ── User Identity ───────────────────────────────────────────────────────────
 
 export const userIdentitySchema = z.object({
-  /** Clerk user ID (e.g. "user_xxx"). */
+  /** Auth user ID (e.g. "user_xxx"). */
   userId: z.string().min(1),
   /** Primary email address. */
   email: z.string().email(),
@@ -27,7 +27,7 @@ export type UserIdentity = z.infer<typeof userIdentitySchema>
 // ── Session Identity ────────────────────────────────────────────────────────
 
 export const sessionIdentitySchema = z.object({
-  /** Clerk session ID. */
+  /** Auth session ID. */
   sessionId: z.string().min(1),
   /** User identity. */
   user: userIdentitySchema,

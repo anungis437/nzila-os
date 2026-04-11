@@ -40,7 +40,7 @@ class PathConfig:
         abr_frontend_env = os.environ.get("ABR_FRONTEND_DIR")
         abr_frontend = Path(abr_frontend_env) if abr_frontend_env else None
         
-        # Union Eyes
+        # UnionEyes
         ue_backend_env = os.environ.get("UE_BACKEND_DIR")
         ue_backend = Path(ue_backend_env) if ue_backend_env else None
         ue_frontend_env = os.environ.get("UE_FRONTEND_DIR")

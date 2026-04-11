@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-17  
 **Priority:** IMMEDIATE — Go-to-Market flagships  
-**Objective:** Refactor Union Eyes (CLC movement) and ABR Insights (partnerships) into clean, scaffold-ready repos that run flawlessly on the Nzila Backbone architecture
+**Objective:** Refactor UnionEyes (CLC movement) and ABR Insights (partnerships) into clean, scaffold-ready repos that run flawlessly on the Nzila Backbone architecture
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Product | Vertical | GTM Driver | Current State | Target |
 |---------|----------|------------|---------------|--------|
-| **Union Eyes (UE)** | UnionTech / Justice & Equity | Real CLC movement — active union organizing tool | Massive Next.js 15 monolith, Drizzle ORM, Clerk auth, 130+ API routes | Clean Next.js frontend + Django Backbone API |
+| **UnionEyes (UE)** | UnionTech / Justice & Equity | Real CLC movement — active union organizing tool | Massive Next.js 15 monolith, Drizzle ORM, Clerk auth, 130+ API routes | Clean Next.js frontend + Django Backbone API |
 | **ABR Insights** | EdTech / Anti-Racism | Partnership-ready learning platform | Next.js 16.1, Supabase Auth, ingestion CLI, AI coaching | Clean Next.js frontend + Django Backbone API |
 
 Both are **revenue-critical flagships** that need to work flawlessly before any other vertical migration begins.
@@ -19,7 +19,7 @@ Both are **revenue-critical flagships** that need to work flawlessly before any 
 
 ## Phase 1: Codebase Audit & Extraction (Week 1)
 
-### 1.1 Union Eyes Deep Audit
+### 1.1 UnionEyes Deep Audit
 
 | Task | Details |
 |------|---------|

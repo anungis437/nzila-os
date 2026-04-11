@@ -2,7 +2,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 
 // ── Super-admin override ────────────────────────────────────────────────────
 
-/** Emails that always receive platform_admin, regardless of Clerk metadata. */
+/** Emails that always receive platform_admin, regardless of auth metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
@@ -12,7 +12,7 @@ const SUPER_ADMIN_EMAILS = new Set([
 
 /**
  * Platform-level roles — control access to Nzila platform features.
- * Stored in Clerk publicMetadata.nzilaRole.
+ * Stored in auth session claims (nzilaRole).
  */
 export type PlatformRole =
   | 'platform_admin'   // Nzila platform administrators
@@ -26,7 +26,7 @@ export type NzilaRole = PlatformRole
 
 /**
  * Firm-level roles — control access within an accounting firm.
- * Stored in org_members.firmRole (Clerk org metadata).
+ * Stored in org_members.firmRole (org metadata).
  */
 export type FirmRole =
   | 'firm_owner'          // Managing partner — full control, billing, firm settings

@@ -39,6 +39,8 @@ const CLIENT_FACING_ROLES = [
   // Senior reps
   UserRole.OFFICER,
   UserRole.CHIEF_STEWARD,
+  // Administrative support
+  UserRole.CLERK,
   // Local executives
   UserRole.SECRETARY_TREASURER,
   UserRole.VICE_PRESIDENT,
@@ -946,12 +948,14 @@ describe('Feature flow — Cross-org analytics (CLC / Federation)', () => {
 describe('Feature flow — Claim lifecycle', () => {
   // Cross-org oversight roles (CLC/Federation) don't create claims — they review
   // APP_OWNER is a platform leadership role, not a union claimant
+  // CLERK is admin support — drafts/dispatches correspondence, not a claimant
   const CLAIM_OVERSIGHT_ROLES: UserRole[] = [
     UserRole.CLC_EXECUTIVE,
     UserRole.CLC_STAFF,
     UserRole.FED_EXECUTIVE,
     UserRole.FED_STAFF,
     UserRole.APP_OWNER,
+    UserRole.CLERK,
   ];
 
   it('local/national union roles can create claims', () => {

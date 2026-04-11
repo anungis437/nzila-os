@@ -425,7 +425,7 @@ gate('AUTH-MIDDLEWARE: All apps have auth middleware', () => {
     }
 
     const content = readFileSync(mwPath, 'utf-8')
-    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('clerkMiddleware')
+    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('authMiddleware')
     if (!hasAuth) {
       violations.push(`${appDir}: middleware.ts missing auth middleware`)
     }

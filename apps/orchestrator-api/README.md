@@ -25,7 +25,7 @@ Copy `.env` and fill required values (`ORCHESTRATOR_API_KEY`, `DATABASE_URL`).
 | `/commands` | Command dispatch |
 | `/workflows` | Workflow management |
 | `/jobs` | Background job orchestration |
-| `/runs` | AI/automation run tracking |
+| `/runs` | Automation run tracking |
 | `/proof-center` | Procurement proof operations |
 | `/metrics` | Telemetry metrics |
 | `/status` | System status |
@@ -39,4 +39,4 @@ Copy `.env` and fill required values (`ORCHESTRATOR_API_KEY`, `DATABASE_URL`).
 
 ## Domain
 
-Central orchestration service for the Nzila platform. Handles workflow dispatch, job scheduling, AI run tracking, and procurement proof-center operations. Protected by API key auth and Helmet security headers with rate limiting.
+Central orchestration service for the Nzila platform. Handles workflow dispatch, job scheduling, automation run tracking, and procurement proof-center operations. Protected by API key auth and Helmet security headers with rate limiting.

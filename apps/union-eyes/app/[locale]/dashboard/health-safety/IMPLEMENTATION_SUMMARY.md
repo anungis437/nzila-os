@@ -403,7 +403,7 @@ Check:
 
 **Status:** ✅ **Complete and Ready for Integration**
 
-All dashboard pages are created following Union Eyes patterns. Pages are production-ready with mock data and await:
+All dashboard pages are created following UnionEyes patterns. Pages are production-ready with mock data and await:
 1. Navigation integration (15 min)
 2. API endpoint implementation (varies)
 3. Translation keys addition (30 min)

@@ -91,7 +91,7 @@ export default async function TrustPage({
         <section id="system-status" className="mb-20 scroll-mt-24">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">System Status</h2>
           <p className="text-slate-600 mb-8">
-            Real-time operational status of Union Eyes platform services.
+            Real-time operational status of UnionEyes platform services.
           </p>
           <StatusPage />
         </section>

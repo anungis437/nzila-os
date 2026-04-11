@@ -1,5 +1,5 @@
 /**
- * Seed: Union Eyes Staging Demo Data
+ * Seed: UnionEyes Staging Demo Data
  *
  * Creates deterministic claims, members, assignments, and events
  * for staging environment demonstrations.
@@ -269,7 +269,7 @@ const DEMO_EVENTS = [
 // ── Main ────────────────────────────────────────────────
 
 async function main() {
-  console.log('🌱 Seeding Union Eyes staging demo data…')
+  console.log('🌱 Seeding UnionEyes staging demo data…')
 
   // Seed members (idempotent)
   for (const m of DEMO_MEMBERS) {

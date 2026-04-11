@@ -5,6 +5,7 @@
 
 import { pgTable, uuid, text, timestamp, integer, jsonb, boolean, date, pgEnum, index, uniqueIndex, type AnyPgColumn, varchar, numeric } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { applications } from './schema-applications';
 
 // =====================================================
 // ENUMS
@@ -140,6 +141,9 @@ export const organizations = pgTable(
     // Clerk Integration
     clerkOrganizationId: text('clerk_organization_id'),
 
+    // Application Registry
+    appId: uuid('app_id').references(() => applications.id),
+
     // Legacy & Migration
     legacyOrgId: uuid('legacy_tenant_id'),
     
@@ -158,6 +162,7 @@ export const organizations = pgTable(
     statusIdx: index('idx_organizations_status').on(table.status),
     clcAffiliatedIdx: index('idx_organizations_clc_affiliated').on(table.clcAffiliated),
     // jurisdictionIdx: index('idx_organizations_jurisdiction').on(table.jurisdiction), // Commented out - column does not exist
+    appIdx: index('idx_organizations_app_id').on(table.appId),
     legacyOrgIdx: index('idx_organizations_legacy_tenant').on(table.legacyOrgId),
   })
 );
@@ -236,6 +241,12 @@ export const organizationsRelations = relations(organizations, ({ one, many }) =
     relationName: 'organization_hierarchy',
   }),
 
+  // Application this org belongs to
+  application: one(applications, {
+    fields: [organizations.appId],
+    references: [applications.id],
+  }),
+
   // Relationships as parent
   childRelationships: many(organizationRelationships, {
     relationName: 'parent_org_relationships',
@@ -265,6 +276,10 @@ export const organizationRelationshipsRelations = relations(
     }),
   })
 );
+
+export const applicationsRelations = relations(applications, ({ many }) => ({
+  organizations: many(organizations),
+}));
 
 // =====================================================
 // ORGANIZATION MEMBERS (UPDATED)

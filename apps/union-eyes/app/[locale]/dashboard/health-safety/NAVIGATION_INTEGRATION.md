@@ -1,6 +1,6 @@
 # Health & Safety Navigation Integration Guide
 
-This guide explains how to add the Health & Safety module to the Union Eyes navigation sidebar.
+This guide explains how to add the Health & Safety module to the UnionEyes navigation sidebar.
 
 ## 📍 Location
 

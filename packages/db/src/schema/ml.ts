@@ -8,8 +8,8 @@
  *   mlInferenceRuns          — inference run ledger with output artifact ref
  *   mlScoresStripeDaily      — daily aggregate anomaly scores
  *   mlScoresStripeTxn        — per-transaction anomaly scores (Option B)
- *   mlScoresUECasesPriority  — per-case priority multi-class scores (Union Eyes)
- *   mlScoresUESlaRisk        — per-case SLA breach binary risk scores (Union Eyes)
+ *   mlScoresUECasesPriority  — per-case priority multi-class scores (UnionEyes)
+ *   mlScoresUESlaRisk        — per-case SLA breach binary risk scores (UnionEyes)
  *
  * All tables are entity-scoped. Apps access data through @nzila/ml-sdk,
  * never by importing these tables directly.
@@ -234,7 +234,7 @@ export const mlScoresStripeTxn = pgTable(
 )
 // ── G) mlScoresUECasesPriority ────────────────────────────────────────────────
 //
-// Per-case priority multi-class ML scores for Union Eyes.
+// Per-case priority multi-class ML scores for UnionEyes.
 // predictedPriority stores the argmax class ("low"|"medium"|"high"|"critical").
 // score stores the calibrated confidence for the predicted class (0..1).
 // actualPriority is a snapshot of the live label for post-hoc eval windows.
@@ -281,7 +281,7 @@ export const mlScoresUECasesPriority = pgTable(
 
 // ── H) mlScoresUESlaRisk ──────────────────────────────────────────────────────
 //
-// Per-case SLA breach binary risk scores for Union Eyes.
+// Per-case SLA breach binary risk scores for UnionEyes.
 // probability is the model's P(breach) — range 0..1.
 // predictedBreach is the thresholded boolean decision.
 // actualBreach is the ground-truth label snapshot for evaluation.

@@ -2,7 +2,7 @@
 /**
  * tooling/ml/build-ue-case-supervised-dataset.ts
  *
- * Builds two supervised ML datasets for Union Eyes cases:
+ * Builds two supervised ML datasets for UnionEyes cases:
  *   - ue_case_priority_dataset_v1   (multi-class: y_priority)
  *   - ue_case_sla_dataset_v1        (binary: y_sla_breached)
  *

@@ -4,7 +4,7 @@ const services = [
   { name: "API Server", endpoint: "/api/health" },
   { name: "Database", endpoint: "/api/health" },
   { name: "Blob Storage", endpoint: "/api/health" },
-  { name: "Authentication (Clerk)", endpoint: null },
+  { name: "Authentication (Entra ID)", endpoint: null },
   { name: "Background Jobs", endpoint: null },
 ];
 

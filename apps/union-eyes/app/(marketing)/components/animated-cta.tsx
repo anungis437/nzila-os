@@ -22,7 +22,7 @@ export default function AnimatedCTA() {
         Ready to lead with clarity?
       </h3>
       <p className="text-white text-lg mb-8 max-w-xl mx-auto">
-        See how Union Eyes turns day-to-day casework into
+        See how UnionEyes turns day-to-day casework into
         confident, data-backed decisions. Request a demo or start a pilot.
       </p>
 

@@ -128,7 +128,9 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         Raises:
             jwt.InvalidTokenError: If token is invalid
         """
-        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(settings, "CLERK_JWKS_URL", None)
+        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(
+            settings, "CLERK_JWKS_URL", None
+        )
         if not jwks_url:
             raise exceptions.AuthenticationFailed(
                 "AUTH_JWKS_URL not configured in Django settings"
@@ -237,10 +239,6 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             logger.error(f"Failed to sync user profile: {e}")
 
 
-# Backward compat alias
-ClerkAuthentication = OIDCAuthentication
-
-
 class APIKeyAuthentication(authentication.BaseAuthentication):
     """Authenticates service-to-service requests using API secret key.
 
@@ -254,11 +252,14 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
         Returns:
             Tuple[None, dict]: (None, {"is_service_account": True}) or None
         """
-        secret_key_header = (
-            request.META.get("HTTP_X_AUTH_SECRET", "")
-            or request.META.get("HTTP_X_CLERK_SECRET_KEY", "")  # backward compat
+        secret_key_header = request.META.get(
+            "HTTP_X_AUTH_SECRET", ""
+        ) or request.META.get(
+            "HTTP_X_CLERK_SECRET_KEY", ""
+        )  # backward compat
+        expected_key = getattr(settings, "AUTH_SECRET", "") or getattr(
+            settings, "CLERK_SECRET_KEY", ""
         )
-        expected_key = getattr(settings, "AUTH_SECRET", "") or getattr(settings, "CLERK_SECRET_KEY", "")
 
         if not secret_key_header or not expected_key:
             return None
@@ -270,11 +271,7 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
         return (None, {"is_service_account": True})
 
 
-# Backward compat alias
-ClerkAPIKeyAuthentication = APIKeyAuthentication
-
-
-# Cache user lookups by Clerk ID for 5 minutes
+# Cache user lookups by auth user ID for 5 minutes
 @lru_cache(maxsize=1000)
 def get_cached_user_by_clerk_id(clerk_user_id: str):
     """Cache user lookups for performance.

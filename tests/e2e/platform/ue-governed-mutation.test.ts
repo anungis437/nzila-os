@@ -39,7 +39,7 @@ const SCENARIO = 'ue-governed-mutation'
 
 const POLICY_SET: PolicySet = {
   id: 'ue-financial-policy',
-  name: 'Union Eyes Financial Policy',
+  name: 'UnionEyes Financial Policy',
   defaultEffect: 'deny',
   rules: [
     {

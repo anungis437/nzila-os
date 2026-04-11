@@ -95,7 +95,7 @@ The **Companion Engine** is Nzila's proprietary AI personalization layer, provid
 | **CareAI** | ⏳ Beta | Caregiver support AI (respite planning, resource recommendations) | Prompt Library |
 | **FamilySync** | ⏳ Roadmap 2027 | Family wellness coordinator (shared calendars, mood tracking, care coordination) | Prompt Library |
 | **WellLoop** | ⏳ Roadmap 2027 | Chronic disease management companion (medication reminders, symptom tracking) | Prompt Library |
-| **Union Eyes** | ⏳ Roadmap 2027 | Grievance guidance AI (contract interpretation, case outcome prediction) | Prompt Library |
+| **UnionEyes** | ⏳ Roadmap 2027 | Grievance guidance AI (contract interpretation, case outcome prediction) | Prompt Library |
 | **CORA** | ⏳ Roadmap 2028 | Farm advisory AI (crop planning, market pricing, sustainability recommendations) | Prompt Library |
 | **Companion API** | ⏳ Roadmap 2027-2028 | White-label Companion SDK (B2B offering for clinics, unions, cooperatives) | Full IP licensing |
 
@@ -246,7 +246,7 @@ All Companion deployments follow **multi-tier AI QA protocol**:
 - ⏳ Prompt Library v2 (expand to 300+ prompts, add union/ag domains)
 
 ### **2026 Q3-Q4**
-- ⏳ Union Eyes Companion (grievance guidance, contract interpretation)
+- ⏳ UnionEyes Companion (grievance guidance, contract interpretation)
 - ⏳ CORA Companion (farm advisory, crop planning, market pricing)
 - ⏳ Companion Learning Loop (Phase 3: adaptive tone based on engagement)
 - ⏳ Mood Detection (Phase 3: sentiment analysis, fatigue detection)
@@ -282,7 +282,7 @@ All Companion deployments follow **multi-tier AI QA protocol**:
 | **COMPANION_PERSONALITY_GRAPH.md** | Tone adaptation algorithm (🔴 trade secret, NDA-required) | CTO + AI Lead only |
 | **PROMPT_LIBRARY_OVERVIEW.md** | 200+ GPT-4 prompts catalogue (🔴 trade secret, NDA-required) | CTO + AI Lead + Product |
 | **AI_SAFETY_PROTOCOLS.md** | Incident response, fail-safes, testing protocols | Engineering + Product |
-| **platform-integrations/** | Platform-specific Companion implementations (Memora, ABR, Union Eyes, CORA) | Engineering + Product |
+| **platform-integrations/** | Platform-specific Companion implementations (Memora, ABR, UnionEyes, CORA) | Engineering + Product |
 
 ---
 

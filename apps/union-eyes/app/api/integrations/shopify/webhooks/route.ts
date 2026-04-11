@@ -159,7 +159,7 @@ async function handleOrderPaid(payload: Record<string, unknown>) {
   const redemptionId = extractRedemptionIdFromDiscount(discountCodes);
   
   if (!redemptionId) {
-    logger.warn('[Webhook] No Union Eyes discount code found', { orderId });
+    logger.warn('[Webhook] No UnionEyes discount code found', { orderId });
     return { status: 'ignored', reason: 'no_redemption_discount' };
   }
 

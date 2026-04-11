@@ -99,6 +99,10 @@ vi.mock('../auth/rbac-server', () => ({
   getUserRole: vi.fn().mockResolvedValue('member'),
 }));
 
+vi.mock('@/lib/auth/auth-service', () => ({
+  getAuthUser: vi.fn().mockResolvedValue(null),
+}));
+
 vi.mock('../auth/roles', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../auth/roles')>();
   return {

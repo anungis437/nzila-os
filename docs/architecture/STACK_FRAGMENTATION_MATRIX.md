@@ -25,7 +25,7 @@
 
 ## 2. Django Backend Deep Dive
 
-### 2.1 Union Eyes — Django Apps (12)
+### 2.1 UnionEyes — Django Apps (12)
 
 | # | Django App | URL Prefix | Handles |
 |---|-----------|------------|---------|

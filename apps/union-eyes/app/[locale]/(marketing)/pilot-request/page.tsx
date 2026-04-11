@@ -514,8 +514,8 @@ export default function LocalePilotRequestPage() {
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
                 {isFr
-                  ? "Merci de votre intérêt pour Union Eyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter du cadrage."
-                  : "Thank you for your interest in Union Eyes. Our deployment team will review your request and be in touch within 2\u20133 business days to discuss scoping."}
+                  ? "Merci de votre intérêt pour UnionEyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter du cadrage."
+                  : "Thank you for your interest in UnionEyes. Our deployment team will review your request and be in touch within 2\u20133 business days to discuss scoping."}
               </p>
             </div>
           )}

@@ -31,7 +31,7 @@ export default function CookiePolicyPage() {
 
             <h3>Essential Cookies</h3>
             <p>
-              Required for the platform to function. These handle authentication (Clerk session cookies), security tokens, and basic navigation. They cannot be disabled.
+              Required for the platform to function. These handle authentication (session cookies), security tokens, and basic navigation. They cannot be disabled.
             </p>
 
             <h3>Functional Cookies</h3>
@@ -46,7 +46,7 @@ export default function CookiePolicyPage() {
 
             <h2>3. Third-Party Cookies</h2>
             <p>
-              Our authentication provider (Clerk) and payment processor (Stripe) may set their own cookies necessary for their services to function. These are governed by their respective privacy policies.
+              Our authentication provider and payment processor (Stripe) may set their own cookies necessary for their services to function. These are governed by their respective privacy policies.
             </p>
 
             <h2>4. Managing Cookies</h2>

@@ -1,5 +1,5 @@
 /**
- * Django REST API Client for Union Eyes
+ * Django REST API Client for UnionEyes
  * 
  * This module provides Phase 1 critical service API clients that call
  * the Django backend instead of using Drizzle ORM database access.

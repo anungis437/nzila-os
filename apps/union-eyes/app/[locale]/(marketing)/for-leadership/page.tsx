@@ -9,9 +9,9 @@ import RolePageContent from '@/app/(marketing)/components/role-page-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'For Leadership | Union Eyes',
+    title: 'For Leadership | UnionEyes',
     description:
-      'Union Eyes gives union presidents and executive boards real-time visibility into casework, trends, and resource allocation — one system, no spreadsheets.',
+      'UnionEyes gives union presidents and executive boards real-time visibility into casework, trends, and resource allocation — one system, no spreadsheets.',
   };
 }
 

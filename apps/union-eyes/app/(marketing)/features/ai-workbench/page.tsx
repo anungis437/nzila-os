@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'AI Workbench | Union Eyes',
+  title: 'AI Workbench | UnionEyes',
   description:
     'AI tools built for union stewards — grievance triage, precedent research, CBA clause extraction, and draft generation. Always governed, always optional.',
 };

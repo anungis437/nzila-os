@@ -4,7 +4,7 @@
 
 ## Overview
 
-Every app in the Nzila OS monorepo must meet these standards before being considered production-ready. The reference implementation is **Union-Eyes**.
+Every app in the Nzila OS monorepo must meet these standards before being considered production-ready. The reference implementation is **UnionEyes**.
 
 ## Directory Structure
 
@@ -101,9 +101,9 @@ Run `pnpm governance:check` to validate all apps against this standard.
 - **Partial**: ≥50% checks pass (3+/6)
 - **Non-compliant**: <50% checks pass
 
-## Reference: Union-Eyes
+## Reference: UnionEyes
 
-Union-Eyes is the gold standard with:
+UnionEyes is the gold standard with:
 
 - 150+ library files
 - 19+ test files

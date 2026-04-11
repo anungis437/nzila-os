@@ -1,7 +1,7 @@
 /**
  * Marketing & Growth Engine Types
  * 
- * Type definitions for the Union Eyes growth infrastructure:
+ * Type definitions for the UnionEyes growth infrastructure:
  * - Impact metrics
  * - Case studies
  * - Pilot program
@@ -29,7 +29,7 @@ export interface ImpactMetric {
   organizationId: string;
   metricType: MetricType;
   value: number;
-  comparisonValue?: number; // Before Union Eyes
+  comparisonValue?: number; // Before UnionEyes
   unit: string;
   period: string; // ISO date range
   visibility: MetricVisibility;

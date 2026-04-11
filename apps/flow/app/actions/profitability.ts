@@ -6,7 +6,7 @@
  * Server actions for quote request → 3 proposals, profitability analysis,
  * and historical mandate profitability reporting.
  */
-import { getReadContext } from '@/lib/clerk-org-resolver'
+import { getReadContext } from '@/lib/org-resolver'
 import {
   generateTieredProposals,
   calculateQuoteProfitability,

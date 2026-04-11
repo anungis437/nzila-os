@@ -20,7 +20,7 @@ The AI Control Plane is the **single gateway** through which all Nzila apps acce
 
 ```
 ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│   Memora     │   │ Union Eyes  │   │    Cora      │
+│   Memora     │   │ UnionEyes  │   │    Cora      │
 │   (app)      │   │   (app)     │   │   (app)      │
 └──────┬───────┘   └──────┬──────┘   └──────┬───────┘
        │                  │                  │

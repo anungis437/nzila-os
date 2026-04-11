@@ -1,6 +1,6 @@
 # Health & Safety Module Components
 
-Comprehensive UI components for workplace health and safety management in the Union Eyes application.
+Comprehensive UI components for workplace health and safety management in the UnionEyes application.
 
 ## 📦 Installation
 
@@ -368,8 +368,8 @@ When adding new components:
 
 ## 📄 License
 
-Part of the Union Eyes application.
+Part of the UnionEyes application.
 
 ## 🆘 Support
 
-For issues or questions, refer to the main Union Eyes documentation.
+For issues or questions, refer to the main UnionEyes documentation.

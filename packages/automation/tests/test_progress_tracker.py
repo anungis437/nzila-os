@@ -510,7 +510,7 @@ class TestProgressTrackerDashboard:
     def test_generate_dashboard_specific_platform(self, tmp_path):
         tracker = ProgressTracker(checkpoint_dir=tmp_path)
         tracker.init_platform("abr", "ABR Insights")
-        tracker.init_platform("ue", "Union Eyes")
+        tracker.init_platform("ue", "UnionEyes")
 
         md = tracker.generate_dashboard(platform_id="abr")
         assert "ABR Insights" in md
@@ -581,7 +581,7 @@ class TestProgressTrackerIntegration:
         """Test tracking multiple platforms simultaneously."""
         tracker = ProgressTracker(checkpoint_dir=tmp_path)
         tracker.init_platform("abr", "ABR Insights")
-        tracker.init_platform("ue", "Union Eyes")
+        tracker.init_platform("ue", "UnionEyes")
 
         tracker.start_phase("abr", MigrationPhase.ANALYSIS)
         tracker.start_phase("ue", MigrationPhase.SCHEMA_EXTRACTION)

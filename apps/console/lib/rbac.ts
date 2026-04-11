@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 
 /**
- * Nzila RBAC roles (stored in Clerk publicMetadata or org membership).
+ * Nzila RBAC roles (stored in auth session claims or org membership).
  */
 export type NzilaRole =
   | 'platform_admin'
@@ -10,7 +10,7 @@ export type NzilaRole =
   | 'analyst'
   | 'viewer'
 
-/** Emails that always receive platform_admin, regardless of Clerk metadata. */
+/** Emails that always receive platform_admin, regardless of auth metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),

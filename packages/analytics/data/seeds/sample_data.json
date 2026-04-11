@@ -4,7 +4,7 @@
   "platforms": [
     {
       "platform_id": "union_eyes",
-      "name": "Union Eyes",
+      "name": "UnionEyes",
       "vertical": "Uniontech",
       "entity_count": 4773,
       "complexity": "EXTREME",

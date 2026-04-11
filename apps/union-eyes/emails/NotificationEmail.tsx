@@ -51,7 +51,7 @@ export default function NotificationEmail({
           )}
 
           <Text style={footer}>
-            This is an automated notification from Union Eyes. 
+            This is an automated notification from UnionEyes. 
             If you believe this was sent in error, please contact support.
           </Text>
         </Container>

@@ -22,7 +22,7 @@ Nzila OS is the digital backbone that powers every Nzila venture. It is not a st
 | **Commerce** | Flow | Multi-vertical commerce engine, order lifecycle, pricing rules |
 | **Trade** | Trade | Cross-border trade management, vehicle commerce |
 | **Finance** | CFO | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
-| **Union Management** | Union-Eyes, ABR | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
+| **Union Management** | UnionEyes, ABR | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
 | **Compliance & Exams** | NACP Exams | Examination administration, integrity proofs |
 | **Mobility** | Mobility, Mobility Client Portal | Investment migration advisory (CBI/RBI), client-facing portal |
 | **Music & Media** | Zonga | Artist management, royalties, content distribution |
@@ -453,7 +453,7 @@ Each app has its own detailed README:
 
 | App | README |
 |-----|--------|
-| **Union-Eyes** | [apps/union-eyes/README.md](apps/union-eyes/README.md) |
+| **UnionEyes** | [apps/union-eyes/README.md](apps/union-eyes/README.md) |
 
 ---
 

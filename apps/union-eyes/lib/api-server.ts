@@ -15,7 +15,7 @@ import { createLogger } from '@nzila/os-core'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
- * Server-side API client with automatic Clerk JWT injection.
+ * Server-side API client with automatic auth JWT injection.
  * Only usable from Server Components, API routes, and server actions.
  */
 class ServerApiClient {
@@ -29,7 +29,7 @@ class ServerApiClient {
       },
     });
 
-    // Request interceptor - add Clerk Bearer token
+    // Request interceptor - add auth Bearer token
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         try {
@@ -40,7 +40,7 @@ class ServerApiClient {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (error) {
-          logger.warn('Failed to get Clerk token', { error: error instanceof Error ? error.message : String(error) });
+          logger.warn('Failed to get auth token', { error: error instanceof Error ? error.message : String(error) });
         }
 
         return config;

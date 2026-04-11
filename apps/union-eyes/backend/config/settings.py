@@ -1,5 +1,5 @@
 """
-Django settings for Union Eyes
+Django settings for UnionEyes
 """
 
 import os

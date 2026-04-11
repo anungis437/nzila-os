@@ -27,7 +27,7 @@ All platform codebases owned 100% by **Nzila Ventures Inc.** (federally incorpor
 
 | Platform | Codebase Size | Entities | Key IP Elements | Protection | Valuation |
 |----------|--------------|----------|-----------------|------------|-----------|
-| **Union Eyes** | 332.81 MB | 4,773 | Pension forecasting, ML churn prediction, 238 RLS policies, CBA intelligence | Copyright + Trade Secret | $1.2M+ |
+| **UnionEyes** | 332.81 MB | 4,773 | Pension forecasting, ML churn prediction, 238 RLS policies, CBA intelligence | Copyright + Trade Secret | $1.2M+ |
 | **ABR Insights** | ~200 MB est | 132 tables | AI learning coach (GPT-4), CanLII case analysis, gamification engine, tribunal search | Copyright + Trade Secret | $800K+ |
 | **CORA** | ~150 MB est | 80+ | Agricultural supply chain matching, price transparency engine, cooperative mgmt | Copyright + Trade Secret | $600K+ |
 | **DiasporaCore V2 (C3UO)** | 9.18 MB | 485 | KYC/AML engine, cross-border remittance logic, multi-currency ledger | Copyright + Trade Secret | $450K+ |
@@ -52,14 +52,14 @@ All platform codebases owned 100% by **Nzila Ventures Inc.** (federally incorpor
 
 Core algorithms that create defensible competitive advantages:
 
-#### **Union Eyes — Pension Forecasting Algorithm**
+#### **UnionEyes — Pension Forecasting Algorithm**
 - **What**: Actuarial modeling for union pension fund sustainability (seasonal trends, contribution volatility, market scenarios)
 - **Technical Moat**: scikit-learn ML pipeline with custom feature engineering for labor market seasonality
 - **Protection**: Trade Secret (SOP documented, access restricted to 2 engineers)
 - **Patent Status**: ⏳ **PENDING** — Provisional patent application Q2 2026
 - **Commercial Value**: $150K+ standalone licensing potential
 
-#### **Union Eyes — Grievance Case Outcome Prediction**
+#### **UnionEyes — Grievance Case Outcome Prediction**
 - **What**: ML model predicting arbitration outcomes based on historical grievance data (50+ features: case type, jurisdiction, arbitrator history)
 - **Technical Moat**: Proprietary training dataset (10,000+ historical cases), custom NLP for grievance text analysis
 - **Protection**: Trade Secret + Copyright
@@ -113,7 +113,7 @@ All trademarks owned by **Nzila Ventures Inc.** with exclusive licensing to subs
 |-----------|-------------|--------|----------------|-------------|---------|------------|-------|
 | **Nzila Ventures** | Canada (Federal) | ✅ Registered | 87890012 | 2024-11-15 | 2034 | Word mark + logo | $50K+ |
 | **Memora** | Canada | ⏳ Filed | TBD | 2025-05-15 | — | Word mark (healthcare AI) | $30K+ |
-| **Union Eyes** | Canada | ⏳ Pending | TBD | 2026-02-01 | — | Word mark (uniontech) | $40K+ |
+| **UnionEyes** | Canada | ⏳ Pending | TBD | 2026-02-01 | — | Word mark (uniontech) | $40K+ |
 | **ABR Insights** | Canada | ⏳ Pending | TBD | 2026-02-10 | — | Word mark + anti-racism education | $35K+ |
 | **CORA** | Canada | ⏳ Pending | TBD | 2026-02-10 | — | Word mark (AgTech) | $30K+ |
 | **DiasporaCore** | Canada | ❌ Not Filed | — | — | — | Common law only | $20K+ |
@@ -123,7 +123,7 @@ All trademarks owned by **Nzila Ventures Inc.** with exclusive licensing to subs
 - ✅ **Domain Names**: All .com/.ca/.io domains secured for flagship platforms
 - ✅ **Social Media**: Twitter, LinkedIn handles secured (@unioneyes, @abr_insights, @coraagtech)
 - ⏳ **USPTO Filing**: Plan for U.S. trademark filings Q3 2026 (pre-Series A fundraising)
-- ⏳ **Logo Copyright**: Register visual identities for Union Eyes, ABR, CORA (Q2 2026)
+- ⏳ **Logo Copyright**: Register visual identities for UnionEyes, ABR, CORA (Q2 2026)
 
 **Total Brand Asset Value**: **$220K-$280K**
 
@@ -141,7 +141,7 @@ Trade secrets protected via:
 |--------------|-------------|-----------------|------------------|--------------|
 | **Companion Prompt Library v1** | 200+ GPT-4 prompts for Memora/ABR AI coaches | Core to Companion UX | 🔴 HIGH | ✅ Quarterly |
 | **Companion Personality Graph** | Proprietary algorithm for tone adaptation (warmth, formality, humor) | Differentiator vs competitors | 🔴 HIGH | ✅ Quarterly |
-| **Union Eyes ML Feature Engineering** | 50+ custom features for pension/grievance prediction models | Technical moat | 🟠 MEDIUM | ✅ Bi-annual |
+| **UnionEyes ML Feature Engineering** | 50+ custom features for pension/grievance prediction models | Technical moat | 🟠 MEDIUM | ✅ Bi-annual |
 | **ABR Gamification Progression Curve** | Behavioral psychology-optimized XP/leveling formula | 80%+ completion rate | 🟠 MEDIUM | ✅ Bi-annual |
 | **CORA Pricing Algorithm** | Supply-demand matching with transparency layer | Market differentiation | 🟠 MEDIUM | ✅ Bi-annual |
 | **Nzila Scripts-Book Template** | Migration automation framework (6-phase workflow, checkpointing) | Reduces migration time 85% | 🟢 LOW (open-source candidate) | ✅ Annual |
@@ -202,9 +202,9 @@ Trade secrets protected via:
 
 | Dataset | Records | Source | Business Value | Protection |
 |---------|---------|--------|----------------|------------|
-| **Union Eyes — Historical Grievance Cases** | 10,000+ | Aggregated from public tribunal records + partner unions | ML training data for outcome prediction | Trade Secret + Data Use Agreement |
+| **UnionEyes — Historical Grievance Cases** | 10,000+ | Aggregated from public tribunal records + partner unions | ML training data for outcome prediction | Trade Secret + Data Use Agreement |
 | **ABR Insights — CanLII Anti-Racism Cases** | 10,000+ | Canadian Legal Information Institute (public, curated) | Search index with AI analysis layer | Copyright (curation + analysis) |
-| **Union Eyes — Pension Fund Benchmarks** | 500+ unions | Industry surveys, partner data sharing | Forecasting model calibration | Trade Secret + NDA |
+| **UnionEyes — Pension Fund Benchmarks** | 500+ unions | Industry surveys, partner data sharing | Forecasting model calibration | Trade Secret + NDA |
 | **CORA — Agricultural Pricing Data** | Real-time | Grain elevator APIs, commodity exchanges | Price transparency engine | Licensed data (terms vary) |
 
 **Data Protection**:
@@ -241,7 +241,7 @@ Trade secrets protected via:
 
 | Action | Timeline | Budget | Status |
 |--------|----------|--------|--------|
-| **Canada Federal Filings** | Q2 2026 | $5K | ⏳ In Progress (Memora, Union Eyes, ABR, CORA) |
+| **Canada Federal Filings** | Q2 2026 | $5K | ⏳ In Progress (Memora, UnionEyes, ABR, CORA) |
 | **USPTO Filings (U.S.)** | Q3 2026 | $8K | ⏳ Planned (pre-Series A) |
 | **Logo Registrations** | Q2 2026 | $3K | ⏳ Planned |
 | **Domain Monitoring** | Ongoing | $500/year | ✅ Active (Namecheap alerts) |
@@ -288,13 +288,13 @@ Trade secrets protected via:
 
 1. **Royalty Licensing** (Post-Spinout Model)
    - Core IP (Companion Engine, ML models): 2-5% of gross revenue
-   - Brand licensing (Memora, Union Eyes names): 0.5-1% or flat-rate
+   - Brand licensing (Memora, UnionEyes names): 0.5-1% or flat-rate
    - Backend infrastructure (Supabase hosting): Optional fee
    - **Projected Revenue**: $50K-$150K annually (2027+)
 
 2. **White-Label Licensing** (Standalone IP Products)
    - ABR Gamification Engine → Other LMS platforms: $120K+ potential
-   - Union Eyes Pension Forecasting → HR tech vendors: $150K+ potential
+   - UnionEyes Pension Forecasting → HR tech vendors: $150K+ potential
    - Trade OS Rate Optimizer → Freight brokers: $70K+ potential
    - **Projected Revenue**: $100K-$300K annually (2027+)
 
@@ -341,7 +341,7 @@ Trade secrets protected via:
 
 ### **Q2 2026**
 - ✅ File 3 provisional patents (Pension Forecasting, Grievance Prediction, Gamification)
-- ✅ Complete trademark filings (Memora, Union Eyes, ABR, CORA) — Canada
+- ✅ Complete trademark filings (Memora, UnionEyes, ABR, CORA) — Canada
 - ✅ Logo copyright registrations
 - ✅ Finalize open-source strategy for Scripts-Book Template
 

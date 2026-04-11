@@ -51,7 +51,7 @@ const AUTH_PATTERNS = [
   /\bauthenticateUser\b/,       // console pattern
   /\bgetAuth\b/,                // getAuth pattern
   /\bcurrentUser\b/,            // currentUser pattern
-  /\bclerkClient\b/,            // Clerk admin client
+  /\badminClient\b/,            // Auth admin client
   /\bverifyToken\b/,            // Financial service Clerk verify
   /\bgetCurrentUser\b/,         // getCurrentUser helper
   /\bauth:\s*\{/,               // { auth: { required: true } } config

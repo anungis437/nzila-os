@@ -34,14 +34,14 @@ export async function listCreators(opts?: {
 }): Promise<CreatorListResult> {
   const ctx = await resolveOrgContext()
 
-  // Resolve Clerk org ID → DB org UUID via organizations table
+  // Resolve auth org ID → DB org UUID via organizations table
   const [orgRow] = (await platformDb.execute(
-    sql`SELECT id FROM organizations WHERE clerk_org_id = ${ctx.orgId} LIMIT 1`,
+    sql`SELECT id FROM organizations WHERE id = ${ctx.orgId} LIMIT 1`,
   )) as unknown as [{ id: string } | undefined]
-  const dbOrgId = orgRow?.id
+  const dbOrgId = orgRow?.id ?? ctx.orgId
 
   if (!dbOrgId) {
-    logger.warn('listCreators: no DB org found for Clerk org', { clerkOrgId: ctx.orgId })
+    logger.warn('listCreators: no DB org found for auth org', { orgId: ctx.orgId })
     return { creators: [], total: 0 }
   }
 

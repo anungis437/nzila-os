@@ -57,7 +57,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – payment confirmation email skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Payment Confirmed - ${params.currency} ${params.amount.toFixed(2)}`,
         html: this.generatePaymentConfirmationHTML(params),
@@ -81,7 +81,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – payment failure email skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Payment Failed - Action Required`,
         html: this.generatePaymentFailureHTML(params),
@@ -102,7 +102,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – invoice email skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Invoice ${params.invoiceNumber} - Due ${params.dueDate.toLocaleDateString()}`,
         html: this.generateInvoiceHTML(params),
@@ -135,7 +135,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – receipt email skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: `Receipt #${params.receiptNumber}`,
         html: `
@@ -180,7 +180,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – payment reminder skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject,
         html: `
@@ -219,7 +219,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – autopay confirmation skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: 'AutoPay Successfully Set Up',
         html: `
@@ -254,7 +254,7 @@ export class FinancialEmailService {
       const client = getResendClient();
       if (!client) { logger.warn('Resend not configured – autopay disabled email skipped'); return; }
       await client.emails.send({
-        from: getFromEmail('Union Eyes'),
+        from: getFromEmail('UnionEyes'),
         to: params.to,
         subject: 'AutoPay Disabled - Action Required',
         html: `
@@ -335,8 +335,8 @@ export class FinancialEmailService {
               <p style="margin-top: 30px;">If you have any questions about this payment, please contact our support team.</p>
             </div>
             <div class="footer">
-              <p>This is an automated message from Union Eyes Financial System.</p>
-              <p>© ${new Date().getFullYear()} Union Eyes. All rights reserved.</p>
+              <p>This is an automated message from UnionEyes Financial System.</p>
+              <p>© ${new Date().getFullYear()} UnionEyes. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -386,8 +386,8 @@ export class FinancialEmailService {
               <p style="margin-top: 30px;">If you need assistance, please contact us at <a href="mailto:${params.supportEmail}">${params.supportEmail}</a>.</p>
             </div>
             <div class="footer">
-              <p>This is an automated message from Union Eyes Financial System.</p>
-              <p>© ${new Date().getFullYear()} Union Eyes. All rights reserved.</p>
+              <p>This is an automated message from UnionEyes Financial System.</p>
+              <p>© ${new Date().getFullYear()} UnionEyes. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -427,7 +427,7 @@ export class FinancialEmailService {
               ` : ''}
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} Union Eyes. All rights reserved.</p>
+              <p>© ${new Date().getFullYear()} UnionEyes. All rights reserved.</p>
             </div>
           </div>
         </body>

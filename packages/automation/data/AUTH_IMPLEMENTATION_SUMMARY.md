@@ -167,11 +167,11 @@ curl -H "Authorization: Bearer YOUR_CLERK_JWT_TOKEN" http://localhost:8000/api/a
 4. Copy webhook secret → Add to `.env` as `CLERK_WEBHOOK_SECRET`
 
 ### Step 8: Frontend Integration (UE Next.js)
-UE already has `@clerk/nextjs` installed. Update API client:
+UE uses `@nzila/platform-auth`. Update API client:
 
 ```typescript
 // lib/api-client.ts
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth';
 
 export async function fetchAPI(endpoint: string, options = {}) {
   const { getToken } = auth();
@@ -204,7 +204,7 @@ ABR requires **Supabase Auth → Clerk migration** first:
 5. Bulk import to Clerk via API
 
 ### Phase 2: Frontend Migration (2-3 days)
-1. `npm install @clerk/nextjs` in ABR frontend
+1. `npm install @nzila/platform-auth` in ABR frontend
 2. `npm uninstall @supabase/ssr @supabase/auth-helpers-nextjs @node-saml/node-saml @azure/msal-node`
 3. Replace Supabase auth components with Clerk (`<SignIn>`, `<SignUp>`, etc.)
 4. Update auth middleware in `middleware.ts`

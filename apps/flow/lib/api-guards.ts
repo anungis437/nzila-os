@@ -2,7 +2,7 @@
  * Shared API route guards — authentication + request context
  *
  * Centralises the auth boilerplate for all API routes,
- * combining Clerk authentication with os-core request context
+ * combining platform authentication with os-core request context
  * (AsyncLocalStorage-based tracing + automatic log enrichment).
  *
  * Usage in API routes:
@@ -43,7 +43,7 @@ export async function authenticateUser(): Promise<
 
 /**
  * Authenticate AND resolve org context for API routes.
- * Returns userId + orgId from Clerk, or a 401/403 JSON response.
+ * Returns userId + orgId from auth session, or a 401/403 JSON response.
  */
 export async function authenticateOrgUser(): Promise<
   | { ok: true; userId: string; orgId: string }

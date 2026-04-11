@@ -35,7 +35,7 @@ export async function sendPilotApprovalNotification(
 
 Great news! Your pilot application for ${organizationName} has been approved.
 
-We&apos;re excited to have you join the Union Eyes pilot program. Here's what happens next:
+We&apos;re excited to have you join the UnionEyes pilot program. Here's what happens next:
 
 **Next Steps:**
 1. Our implementation team will contact you within 3-5 business days
@@ -51,17 +51,17 @@ ${approverNotes ? `\n**Additional Notes:**\n${approverNotes}\n` : ''}
 - Regular check-ins to ensure success
 - Opportunity to provide feedback that shapes the platform
 
-We&apos;re committed to making Union Eyes work for your members. If you have any questions in the meantime, please don&apos;t hesitate to reach out.
+We&apos;re committed to making UnionEyes work for your members. If you have any questions in the meantime, please don&apos;t hesitate to reach out.
 
 In solidarity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
     await notificationService.send({
       organizationId,
       recipientEmail: applicantEmail,
       type: 'email',
       priority: 'high',
-      subject: `Union Eyes Pilot Application Approved - ${organizationName}`,
+      subject: `UnionEyes Pilot Application Approved - ${organizationName}`,
       title: 'Pilot Application Approved',
       body,
       actionUrl: `/pilot/${pilotId}`,
@@ -111,7 +111,7 @@ export async function sendPilotRejectionNotification(
 
     const body = `Dear ${applicantName},
 
-Thank you for your interest in the Union Eyes pilot program for ${organizationName}.
+Thank you for your interest in the UnionEyes pilot program for ${organizationName}.
 
 After careful review, we&apos;re unable to move forward with your pilot application at this time${
       rejectionReason ? `. ${rejectionReason}` : ''
@@ -129,14 +129,14 @@ This decision doesn&apos;t reflect on your organization's needs or mission. We h
 We deeply appreciate your interest and remain committed to supporting labor organizing. We encourage you to reapply when the next pilot cohort opens.
 
 In solidarity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
     await notificationService.send({
       organizationId,
       recipientEmail: applicantEmail,
       type: 'email',
       priority: 'normal',
-      subject: `Union Eyes Pilot Application Update - ${organizationName}`,
+      subject: `UnionEyes Pilot Application Update - ${organizationName}`,
       title: 'Pilot Application Update',
       body,
       actionUrl: '/case-studies',
@@ -220,7 +220,7 @@ You can view movement insights in your dashboard or revoke consent anytime.
 Thank you for your solidarity.
 
 In unity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
     await notificationService.send({
       organizationId,
@@ -296,7 +296,7 @@ ${reason ? `We appreciate your feedback: "${reason}". This helps us improve our 
 Thank you for considering data sharing. We remain committed to transparency and member sovereignty.
 
 In solidarity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
     await notificationService.send({
       organizationId,
@@ -355,20 +355,20 @@ export async function sendTestimonialApprovedNotification(
 
     const body = `Dear ${submitterName},
 
-Thank you for sharing your testimonial with the Union Eyes community. We&apos;re pleased to let you know it has been approved and is now live!
+Thank you for sharing your testimonial with the UnionEyes community. We&apos;re pleased to let you know it has been approved and is now live!
 
 **Your Testimonial:**
 "${truncatedQuote}"
 
 **Where It Appears:**
-- Union Eyes origin story page
+- UnionEyes origin story page
 - Social proof section for prospective pilots
 - Community testimonials showcase
 
-Your words help other unions understand the real-world impact of Union Eyes. Thank you for contributing to the movement.
+Your words help other unions understand the real-world impact of UnionEyes. Thank you for contributing to the movement.
 
 In solidarity,
-The Union Eyes Team`;
+The UnionEyes Team`;
 
     await notificationService.send({
       organizationId,

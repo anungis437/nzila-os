@@ -4,12 +4,12 @@
 @plugin "tailwindcss-animate";
 
 /* ═══════════════════════════════════════════════════════
-   Nzila Design System — Union Eyes Brand Tokens
+   Nzila Design System — UnionEyes Brand Tokens
    Aligned with apps/web design language for portfolio cohesion
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Nzila Portfolio Tokens — aligned to Union Eyes logo palette ── */
+  /* ── Nzila Portfolio Tokens — aligned to UnionEyes logo palette ── */
   --navy: #160041;
   --navy-light: #1E0A52;
   --navy-mid: #2B1463;

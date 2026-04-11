@@ -94,8 +94,8 @@ export interface MyCreatorSubscription {
 }
 
 /**
- * Fetch the current user's creator profile & plan by Clerk user_id.
- * Does NOT require org context — avoids the Clerk-orgId→UUID mismatch.
+ * Fetch the current user's creator profile & plan by user_id.
+ * Does NOT require org context — avoids the orgId→UUID mismatch.
  */
 export async function getMyCreatorSubscription(): Promise<MyCreatorSubscription | null> {
   const ctx = await resolveListenerContext()

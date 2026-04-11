@@ -6,11 +6,11 @@
 
 ---
 
-## Union Eyes (Audience Layer)
+## UnionEyes (Audience Layer)
 
 | Document | Path | Audience |
 |---|---|---|
-| Union Eyes Hub | `docs/union-eyes/README.md` | Everyone |
+| UnionEyes Hub | `docs/union-eyes/README.md` | Everyone |
 | Quick Start | `docs/union-eyes/quick-start.md` | Members, Stewards |
 | User Guide | `docs/union-eyes/user-guide.md` | Members, Stewards |
 | Pilot Overview | `docs/union-eyes/pilot-overview.md` | Admins |
@@ -42,7 +42,7 @@
 | Monitoring & SLOs | `docs/pilot/04-monitoring-and-slos.md` | Ops |
 | Demo Script | `docs/pilot/05-demo-script.md` | PMs |
 
-## Union Eyes Developer Docs
+## UnionEyes Developer Docs
 
 | Document | Path | Audience |
 |---|---|---|
@@ -318,7 +318,7 @@
 |---|---|---|
 | Deferred Items | `docs/reference/DEFERRED_ITEMS.md` | Developers |
 | Tenant Inventory | `docs/reference/TENANT_INVENTORY.md` | Ops |
-| Union Eyes Current State | `docs/reference/UNION_EYES_CURRENT_STATE.md` | Developers |
+| UnionEyes Current State | `docs/reference/UNION_EYES_CURRENT_STATE.md` | Developers |
 | Packages | `docs/reference/packages.md` | Developers |
 
 ## Archive

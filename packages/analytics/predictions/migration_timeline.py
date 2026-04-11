@@ -38,7 +38,7 @@ class MigrationTimeline:
             },
             {
                 "id": "union_eyes",
-                "name": "Union Eyes",
+                "name": "UnionEyes",
                 "complexity": "EXTREME",
                 "orgs": 4773,
                 "dependencies": ["PostgreSQL", "Drizzle", "ML Pipeline"],

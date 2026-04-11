@@ -160,7 +160,7 @@ Each exception has an owner, justification, and expiry date.
 
 ## Appendix: Django App Inventory
 
-### Union Eyes (12 Django apps)
+### UnionEyes (12 Django apps)
 
 `ai_core`, `analytics`, `auth_core`, `bargaining`, `billing`,
 `compliance`, `content`, `core`, `grievances`, `notifications`,

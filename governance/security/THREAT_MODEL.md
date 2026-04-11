@@ -16,7 +16,7 @@ Nzila OS is a multi-Org SaaS platform comprising:
 - **4 web applications**: Console, Partners, Web, Union Eyes
 - **Supporting packages**: AI Core/SDK, ML Core/SDK, Payments (Stripe), QBO, Database, Blob Storage
 - **Infrastructure**: Azure Container Apps, PostgreSQL (Flexible Server), Azure Blob Storage, Azure Key Vault
-- **Authentication**: Clerk (OIDC) with RBAC via Org membership model
+- **Authentication**: Platform Auth (Entra ID OIDC) with RBAC via Org membership model
 
 ### Trust Boundaries
 
@@ -26,7 +26,7 @@ Nzila OS is a multi-Org SaaS platform comprising:
 | TB-02 | CDN ↔ Application | Authenticated user boundary |
 | TB-03 | Application ↔ Database | Data access boundary |
 | TB-04 | Application ↔ Azure Blob | Document/evidence storage boundary |
-| TB-05 | Application ↔ Clerk | Authentication/identity boundary |
+| TB-05 | Application ↔ Entra ID | Authentication/identity boundary |
 | TB-06 | Application ↔ Stripe API | Payment processing boundary |
 | TB-07 | Application ↔ QBO API | Financial data boundary |
 | TB-08 | Application ↔ AI Providers | AI/ML inference boundary |
@@ -41,7 +41,7 @@ Nzila OS is a multi-Org SaaS platform comprising:
 
 | ID | Threat | Component | Mitigation | Status |
 |----|--------|-----------|------------|--------|
-| S-01 | User identity spoofing | Clerk Auth | Clerk OIDC with JWT verification; `clerkMiddleware()` on all protected routes | ✅ Mitigated |
+| S-01 | User identity spoofing | Platform Auth | Entra ID OIDC with JWT verification; `authMiddleware()` on all protected routes | ✅ Mitigated |
 | S-02 | API key impersonation | Stripe webhooks | `verifyWebhookSignature()` with HMAC-SHA256 | ✅ Mitigated |
 | S-03 | Service-to-service spoofing | Inter-app calls | `x-request-id` + `traceparent` propagation; future: mTLS | ⚠️ Partial |
 | S-04 | OAuth token replay | QBO integration | Token refresh + revocation lifecycle; short-lived access tokens | ✅ Mitigated |
@@ -83,7 +83,7 @@ Nzila OS is a multi-Org SaaS platform comprising:
 
 | ID | Threat | Component | Mitigation | Status |
 |----|--------|-----------|------------|--------|
-| D-01 | API rate limiting bypass | All apps | Clerk rate limiting + Next.js middleware | ⚠️ Partial |
+| D-01 | API rate limiting bypass | All apps | Platform auth rate limiting + Next.js middleware | ⚠️ Partial |
 | D-02 | AI cost explosion | AI Gateway | Per-app/profile budget enforcement (ok/warning/blocked) | ✅ Mitigated |
 | D-03 | Database connection exhaustion | PostgreSQL | Connection pooling; ALT-050 alert rule | ✅ Mitigated |
 | D-04 | Blob storage abuse | Azure Blob | Entity-scoped upload with size limits | ✅ Mitigated |
@@ -95,7 +95,7 @@ Nzila OS is a multi-Org SaaS platform comprising:
 |----|--------|-----------|------------|--------|
 | E-01 | RBAC bypass | Policy engine | `@nzila/os-core/policy` with `requirePermission()`; contract test coverage | ✅ Mitigated |
 | E-02 | Partner cross-entity access | Partners app | Partner entitlement table with explicit entity grants | ✅ Mitigated |
-| E-03 | Admin role escalation | Clerk RBAC | No self-role-grant; owner-only promotion; audit trail | ✅ Mitigated |
+| E-03 | Admin role escalation | Platform RBAC | No self-role-grant; owner-only promotion; audit trail | ✅ Mitigated |
 | E-04 | Direct DB table bypass (AI/ML) | AI/ML SDKs | ESLint `no-shadow-ai` + `no-shadow-ml` rules; INV-01/INV-02 contract tests | ✅ Mitigated |
 | E-05 | CI privilege escalation | GitHub Actions | Minimal `permissions` blocks; no `write-all` | ✅ Mitigated |
 

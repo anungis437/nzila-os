@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, LogOut } from "lucide-react";
-import { useClerk } from '@nzila/platform-auth/entra/client';
+import { useAuthActions } from '@nzila/platform-auth/entra/client';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 
 export function HeaderActions() {
   const locale = useLocale();
-  const { signOut } = useClerk();
+  const { signOut } = useAuthActions();
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {

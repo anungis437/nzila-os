@@ -368,13 +368,12 @@ export function useOrganization(): OrgState {
   }
 }
 
-// ── useClerk() Compat Hook ──────────────────────────────────────────────────
+// ── useAuthActions() Hook ───────────────────────────────────────────────────
 
 /**
- * Clerk-compatible `useClerk()` — provides sign-out and user management.
- * Direct drop-in for `import { useClerk } from '@clerk/nextjs'`.
+ * `useAuthActions()` — provides sign-out and user management actions.
  */
-export function useClerk() {
+export function useAuthActions() {
   return {
     signOut: async (callbackUrl?: string) => {
       await nextAuthSignOut({ redirectTo: callbackUrl ?? '/' })
@@ -389,10 +388,13 @@ export function useClerk() {
   }
 }
 
+/** @deprecated Use `useAuthActions` instead */
+export const useClerk = useAuthActions
+
 // ── useSignUp() / useSignIn() Compat Hooks ──────────────────────────────────
 
 /**
- * Clerk-compatible `useSignUp()` — Entra handles signup via the same OAuth flow.
+ * `useSignUp()` — handles signup via the same OAuth flow.
  */
 export function useSignUp() {
   return {

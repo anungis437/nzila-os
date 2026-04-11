@@ -19,7 +19,7 @@ import { redirect } from 'next/navigation'
 import { NacpRole } from '@nzila/nacp-core/enums'
 import type { NacpOrgContext } from '@nzila/nacp-core/types'
 
-/** Emails that always receive admin role, regardless of auth metadata. */
+/** Emails that always receive admin role, regardless of session metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
@@ -45,8 +45,8 @@ export async function resolveOrgContext(): Promise<NacpOrgContext> {
     redirect('/select-org')
   }
 
-  // Map Clerk orgRole to NacpRole
-  let role = mapClerkRoleToNacpRole(orgRole, sessionClaims)
+  // Map auth orgRole to NacpRole
+  let role = mapAuthRoleToNacpRole(orgRole, sessionClaims)
 
   // Super-admin email override
   if (role !== NacpRole.ADMIN) {
@@ -68,10 +68,10 @@ export async function resolveOrgContext(): Promise<NacpOrgContext> {
 }
 
 /**
- * Map Clerk organization role to NacpRole.
+ * Map auth organization role to NacpRole.
  * Falls back to VIEWER for unknown roles.
  */
-function mapClerkRoleToNacpRole(
+function mapAuthRoleToNacpRole(
   orgRole: string | undefined | null,
   sessionClaims: Record<string, unknown> | undefined | null,
 ): NacpRole {

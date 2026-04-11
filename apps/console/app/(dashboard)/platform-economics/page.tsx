@@ -99,7 +99,7 @@ async function computePlatformEconomics(): Promise<PlatformEconomics> {
   // App contributions — value derived from usage volume
   const appContributions: AppContribution[] = [
     {
-      app: 'Union Eyes (Claims)',
+      app: 'UnionEyes (Claims)',
       activeOrgs: Math.min(totalOrgs, Math.ceil(claimsCount / 10)),
       valuePerOrg: claimsCount > 0 ? Math.round(revenueSum / Math.max(totalOrgs, 1) * 0.3) : 0,
       totalValue: Math.round(revenueSum * 0.3),

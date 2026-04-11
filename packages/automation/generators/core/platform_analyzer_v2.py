@@ -1037,8 +1037,8 @@ class PlatformAnalyzerV2:
         # Otherwise, calculate based on calibrated scoring
         score = 0
 
-        # Entity count scoring (CALIBRATED: Union Eyes has 4773 orgs!)
-        if profile.entity_count > 3000:  # Union Eyes level
+        # Entity count scoring (CALIBRATED: UnionEyes has 4773 orgs!)
+        if profile.entity_count > 3000:  # UnionEyes level
             score += 6
         elif profile.entity_count > 500:  # C3UO, Court Lens level
             score += 5
@@ -1054,7 +1054,7 @@ class PlatformAnalyzerV2:
         # Database complexity
         if profile.database.has_rls:
             score += 1
-            if profile.database.rls_policies > 200:  # Union Eyes has 238!
+            if profile.database.rls_policies > 200:  # UnionEyes has 238!
                 score += 2
             elif profile.database.rls_policies > 50:
                 score += 1

@@ -8,7 +8,7 @@
  */
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/api-auth-guard";
+import { requireUser, isCongressOrg } from "@/lib/api-auth-guard";
 import { OutcomesConsole } from "@/components/outcomes/outcomes-console";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,11 @@ export const metadata: Metadata = {
 export default async function OutcomesPage() {
   const user = await requireUser();
   if (!user) redirect("/sign-in");
+
+  // Congress orgs have their own CLC dashboard — no outcomes view
+  if (await isCongressOrg(user.organizationId)) {
+    redirect("/dashboard/clc");
+  }
 
   return <OutcomesConsole />;
 }

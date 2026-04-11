@@ -1,10 +1,10 @@
-# Union Eyes — Production-Ready Scaffold
+# UnionEyes — Production-Ready Scaffold
 
-This scaffold creates the `nzila-union-eyes` repository structure for the Union Eyes platform migration.
+This scaffold creates the `nzila-union-eyes` repository structure for the UnionEyes platform migration.
 
 ## Overview
 
-**Union Eyes** is the crown jewel flagship platform for union organizing, member management, grievancetracking, collective bargaining, and compliance. Built for the CLC (Canadian Labour Congress) movement.
+**UnionEyes** is the crown jewel flagship platform for union organizing, member management, grievancetracking, collective bargaining, and compliance. Built for the CLC (Canadian Labour Congress) movement.
 
 ## Architecture
 

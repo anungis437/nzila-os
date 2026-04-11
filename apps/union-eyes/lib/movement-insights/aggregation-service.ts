@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Movement Insights Aggregation Service
  * 
  * Creates privacy-preserving cross-union insights.
@@ -240,7 +240,7 @@ export function generateLegislativeBrief(
     summary: `Analysis based on anonymized data from ${participatingOrgs}+ union locals representing ${totalCases.toLocaleString()}+ cases.`,
     keyFindings: [] as string[],
     recommendations: [] as string[],
-    dataSource: `Union Eyes Movement Insights Platform - Data aggregated with privacy guarantees from consenting organizations. Minimum ${DEFAULT_CONFIG.minOrganizations} organizations and ${DEFAULT_CONFIG.minCases} cases required for all insights.`,
+    dataSource: `UnionEyes Movement Insights Platform - Data aggregated with privacy guarantees from consenting organizations. Minimum ${DEFAULT_CONFIG.minOrganizations} organizations and ${DEFAULT_CONFIG.minCases} cases required for all insights.`,
   };
 
   // Generate findings from trends

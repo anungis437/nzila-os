@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: RLS Context Sets Both User AND Org
+ * Contract Test — UnionEyes: RLS Context Sets Both User AND Org
  *
  * BLOCKER: withRLSContext() must set app.current_org_id alongside
  * app.current_user_id. If org context is missing, RLS policies

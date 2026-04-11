@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
+import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit'
@@ -13,7 +13,7 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 /**
- * Partner Portal — route protection via Clerk.
+ * Partner Portal — route protection via platform auth.
  *
  * Public routes: landing, sign-in/up, invite acceptance, webhooks.
  * /api/health is intentionally public (probe endpoints must not require auth).
@@ -32,7 +32,7 @@ const _isPublicRoute = createRouteMatcher([
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (auth, request) => {
+export default authMiddleware(async (auth, request) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =

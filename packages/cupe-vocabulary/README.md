@@ -51,7 +51,7 @@ const filed = getStatusById('filed');
 
 Customization support deferred to Phase 8 based on post-pilot feedback.
 
-## API Routes (Union Eyes Integration)
+## API Routes (UnionEyes Integration)
 
 Added to `apps/union-eyes/app/api/vocabulary/`:
 

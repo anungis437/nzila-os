@@ -13,7 +13,7 @@ migrations/
 ├── INDEX.md                  ← this file
 ├── platform/                 ← shared platform-level SQL migrations
 ├── staging/
-│   ├── union-eyes/           ← Union Eyes staging seeds & DDL (21 files)
+│   ├── union-eyes/           ← UnionEyes staging seeds & DDL (21 files)
 │   ├── zonga/                ← Zonga staging seeds & DDL (3 files)
 │   └── shared/               ← cross-app staging scripts (10 files)
 apps/
@@ -49,7 +49,7 @@ psql $DATABASE_URL -f migrations/platform/<file>.sql
 
 ---
 
-## 2. Union Eyes — Drizzle Migrations (`apps/union-eyes/db/migrations/`)
+## 2. UnionEyes — Drizzle Migrations (`apps/union-eyes/db/migrations/`)
 
 Primary schema evolution managed by Drizzle Kit. **Do not edit these files directly.**
 
@@ -98,7 +98,7 @@ pnpm drizzle-kit migrate     # run pending migrations
 
 **Not git-tracked** (excluded by `.gitignore`). Local-only scripts for populating staging/dev databases.
 
-### Union Eyes (`staging/union-eyes/`) — 21 files
+### UnionEyes (`staging/union-eyes/`) — 21 files
 
 | File | Purpose |
 |------|---------|

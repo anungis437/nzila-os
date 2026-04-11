@@ -14,7 +14,7 @@
 
 - Request ID propagation exists (`x-request-id`, `x-trace-id`, `x-org-id` headers)
 - No mutual TLS between services — communication relies on Azure VNet isolation
-- Clerk OIDC provides user authentication but not service-to-service authentication
+- Entra ID OIDC provides user authentication but not service-to-service authentication
 
 ## 2. Target Architecture
 

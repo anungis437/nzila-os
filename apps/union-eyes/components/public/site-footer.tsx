@@ -1,5 +1,5 @@
 /**
- * SiteFooter — Flagship marketing footer for Union Eyes
+ * SiteFooter — Flagship marketing footer for UnionEyes
  * ──────────────────────────────────────────────────────────
  * World-class footer with:
  *  - Pre-footer CTA strip  (drive conversions on every page)
@@ -71,7 +71,7 @@ export default function SiteFooter() {
               Ready to lead with clarity?
             </h3>
             <p className="text-gray-200 text-lg">
-              See how Union Eyes turns casework into confident, data-backed decisions.
+              See how UnionEyes turns casework into confident, data-backed decisions.
               Request a demo — no commitment.
             </p>
           </div>
@@ -100,12 +100,12 @@ export default function SiteFooter() {
             <Link href="/" className="flex items-center gap-3 group">
               <Image
                 src="/images/brand/icon.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
-              <span className="text-2xl font-bold text-white">Union Eyes</span>
+              <span className="text-2xl font-bold text-white">UnionEyes</span>
             </Link>
 
             <p className="text-gray-200 max-w-sm leading-relaxed">
@@ -172,7 +172,7 @@ export default function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">
-            &copy; {new Date().getFullYear()} Union Eyes. All rights reserved.
+            &copy; {new Date().getFullYear()} UnionEyes. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap justify-center">
             <span>

@@ -11,7 +11,7 @@
 ## By Audience
 
 ### End Users (Union Members & Stewards)
-- [Union Eyes Hub](../union-eyes/README.md)
+- [UnionEyes Hub](../union-eyes/README.md)
 - [Quick Start](../union-eyes/quick-start.md)
 - [User Guide](../union-eyes/user-guide.md)
 - [FAQ](../union-eyes/faq.md)

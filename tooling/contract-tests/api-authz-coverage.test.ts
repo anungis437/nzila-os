@@ -4,7 +4,7 @@
  * Verifies that every API route in apps/ has an authorization check:
  * - Does not return 2xx without a valid auth header
  * - Uses @nzila/os-core/policy (no direct Clerk role checks)
- * - Does not import Clerk clerkClient for role checks (must use authorize())
+ * - Does not import adminClient for role checks (must use authorize())
  *
  * These are static analysis tests — they inspect source files,
  * they do NOT make network requests.
@@ -107,11 +107,11 @@ describe('API Authorization Contract (INV-04)', () => {
     ).toEqual([])
   })
 
-  it('routes must not import Clerk clerkClient for role checks (use authorize() instead)', () => {
-    // Importing clerkClient is allowed for user lookups, but role gating
+  it('routes must not import adminClient for role checks (use authorize() instead)', () => {
+    // Importing adminClient is allowed for user lookups, but role gating
     // must go through @nzila/os-core/policy/authorize
     // Use word boundaries so getUserList (user lookup) is not flagged, only getUser() (role gating)
-    const DIRECT_ROLE_CHECK = /clerkClient.*(?:\bgetUser\b|\bgetMembership\b|\bgetRoles\b)/
+    const DIRECT_ROLE_CHECK = /adminClient.*(?:\bgetUser\b|\bgetMembership\b|\bgetRoles\b)/
     const violations: string[] = []
 
     for (const route of routes) {
@@ -123,7 +123,7 @@ describe('API Authorization Contract (INV-04)', () => {
 
     expect(
       violations,
-      `Routes using clerkClient for role gating (use authorize() instead):\n${violations.join('\n')}`,
+      `Routes using adminClient for role gating (use authorize() instead):\n${violations.join('\n')}`,
     ).toEqual([])
   })
 

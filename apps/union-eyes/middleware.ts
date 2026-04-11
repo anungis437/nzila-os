@@ -9,10 +9,10 @@
  * Layer 1: Edge Middleware (THIS FILE)
  * - Runs on Vercel Edge/Cloudflare network before request reaches application
  * - Responsibilities:
- *   1. Clerk authentication (JWT validation, session management)
+ *   1. Platform authentication (JWT validation, session management)
  *   2. i18n localization routing
  *   3. Route protection (public vs protected routes)
- *   4. Webhook authentication (cron, Stripe, Clerk webhooks)
+ *   4. Webhook authentication (cron, Stripe webhooks)
  * - Sets: userId, orgId, sessionClaims in request context
  * 
  * Layer 2: Database RLS Context (lib/db/with-rls-context.ts)
@@ -32,7 +32,7 @@
  * - Functions: hasRole(), isSystemAdmin(), hasRoleInOrganization()
  * 
  * COORDINATION:
- * - Edge middleware authenticates user via Clerk
+ * - Edge middleware authenticates user via platform auth
  * - RLS middleware sets database context using authenticated user ID
  * - RLS policies enforce row-level security automatically
  * - Application code can add additional authorization checks as needed
@@ -115,7 +115,7 @@ const _isPublicRoute = createRouteMatcher([
   "/:locale/legal(.*)",
 ]);
 
-// Clerk auth pages renamed to generic auth pages — skip intl redirect for them
+// Auth pages — skip intl redirect for them
 const isAuthPath = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
@@ -233,7 +233,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
 
     // For API routes: return 401 JSON instead of redirecting/rewriting.
     // auth.protect() in dev mode performs a "dev-browser rewrite" that renders
-    // the homepage with locale="clerk_<handshake-token>", which 404s.
+    // the homepage with locale="auth_<handshake-token>", which 404s.
     // Using auth() directly lets us return a clean 401 JSON response.
 
     // ── Idempotency-Key enforcement ('IDEMPOTENCY_KEY_REQUIRED') ────────
@@ -300,7 +300,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   
   // Check for problematic URLs that might cause 431 errors
   // This covers payment provider redirects ONLY.
-  // NOTE: __clerk_handshake must NOT be stripped — Clerk uses it to refresh
+  // NOTE: __clerk_handshake must NOT be stripped — the auth provider uses it to refresh
   // short-lived session JWTs. Stripping it breaks session refresh and forces
   // authenticated users back to the sign-in page.
   if (

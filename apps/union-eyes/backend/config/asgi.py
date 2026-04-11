@@ -1,5 +1,5 @@
 """
-ASGI config for Union Eyes
+ASGI config for UnionEyes
 """
 
 import os

@@ -2,7 +2,7 @@
 ## Nzila Portfolio — 5-Year Financial Analysis (2026-2030)
 
 **Last Updated:** February 17, 2026  
-**Scope:** All 15 platforms, 3 flagship platforms (Union Eyes, ABR Insights, CORA)  
+**Scope:** All 15 platforms, 3 flagship platforms (UnionEyes, ABR Insights, CORA)  
 **Fundraising Target:** Series A, $3M-$5M
 
 ---
@@ -13,7 +13,7 @@
 financial-models/
 ├── README.md (this file)
 ├── portfolio-5yr-projections.md          # Consolidated 5-year revenue, costs, profitability
-├── flagship-unit-economics.md            # Union Eyes, ABR, CORA detailed unit economics
+├── flagship-unit-economics.md            # UnionEyes, ABR, CORA detailed unit economics
 ├── platform-revenue-models.md            # Revenue breakdown per platform (all 15)
 ├── break-even-analysis.md                # Runway, burn rate, profitability timeline
 ├── fundraising-scenarios.md              # $3M/$5M/$8M raise impact modeling
@@ -51,7 +51,7 @@ financial-models/
 
 ## 💡 FLAGSHIP PLATFORM UNIT ECONOMICS SUMMARY
 
-### **Union Eyes** (Uniontech)
+### **UnionEyes** (Uniontech)
 - **ARPA (Average Revenue Per Account):** $18K/year (union averages ~$18K/year)
 - **CAC (Customer Acquisition Cost):** $7,500 (outbound sales, conferences, partnerships)
 - **LTV (Lifetime Value):** $180K (10-year retention, 20% annual expansion)
@@ -90,7 +90,7 @@ financial-models/
 1. **SaaS Subscriptions** (60% of revenue)
    - Monthly/annual subscriptions (per user, per organization, per seat)
    - Tiered pricing: Free, Pro, Enterprise
-   - Examples: Union Eyes ($1,500/month), ABR ($1,000/month), ClinicConnect ($800/month)
+   - Examples: UnionEyes ($1,500/month), ABR ($1,000/month), ClinicConnect ($800/month)
 
 2. **Transaction Fees** (25% of revenue)
    - Marketplace commissions (CORA 1-2%, Shop Quoter 3-5%)
@@ -100,7 +100,7 @@ financial-models/
 3. **Professional Services** (10% of revenue)
    - Implementation/onboarding fees ($5K-$20K per enterprise customer)
    - Custom integrations, data migration, training
-   - Examples: Union Eyes pension data migration, ABR custom course development
+   - Examples: UnionEyes pension data migration, ABR custom course development
 
 4. **Usage-Based Pricing** (5% of revenue)
    - API calls (Trade OS carrier integrations)
@@ -143,7 +143,7 @@ financial-models/
 
 ### **Customer Acquisition (Flagship Platforms, 2026-2027)**
 
-**Union Eyes:**
+**UnionEyes:**
 - Q1 2026: 5 pilots (anchor customers)
 - Q2 2026: 15 paying unions
 - Q3 2026: 30 paying unions
@@ -243,7 +243,7 @@ financial-models/
 
 ### **Q1 2026** (Pre-Series A)
 - Close $3M-$5M Series A
-- Launch 3 flagship platforms (Union Eyes, ABR, CORA) to first paying customers
+- Launch 3 flagship platforms (UnionEyes, ABR, CORA) to first paying customers
 - 15 total paying customers across portfolio
 - $50K MRR
 
@@ -277,7 +277,7 @@ financial-models/
 Each file in this folder provides detailed financial analysis:
 
 - **[portfolio-5yr-projections.md](portfolio-5yr-projections.md)** — Consolidated P&L, balance sheet, cash flow (2026-2030)
-- **[flagship-unit-economics.md](flagship-unit-economics.md)** — Deep dive on Union Eyes, ABR, CORA economics (CAC, LTV, payback, cohorts)
+- **[flagship-unit-economics.md](flagship-unit-economics.md)** — Deep dive on UnionEyes, ABR, CORA economics (CAC, LTV, payback, cohorts)
 - **[platform-revenue-models.md](platform-revenue-models.md)** — Revenue breakdown for all 15 platforms (SaaS, transaction, usage)
 - **[break-even-analysis.md](break-even-analysis.md)** — Runway calculator, burn rate scenarios, path to profitability
 - **[fundraising-scenarios.md](fundraising-scenarios.md)** — $3M/$5M/$8M raise impact, dilution, milestones

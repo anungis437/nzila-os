@@ -13,6 +13,7 @@ import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import HealthSafetyOverview from "@/components/health-safety/HealthSafetyOverview";
+import { checkModuleEntitlement } from "@/services/platform-economics/entitlement-guard";
 
 export const metadata: Metadata = {
   title: "Health & Safety | UnionEyes",
@@ -20,10 +21,16 @@ export const metadata: Metadata = {
 };
 
 export default async function HealthSafetyPage() {
-  await requireUser();
+  const user = await requireUser();
 
   const hasAccess = await hasMinRole("health_safety_rep");
   if (!hasAccess) {
+    redirect("/dashboard");
+  }
+
+  // Premium feature — not available in pilot
+  const entitlement = await checkModuleEntitlement(user.organizationId, 'health_safety');
+  if (!entitlement.allowed) {
     redirect("/dashboard");
   }
 

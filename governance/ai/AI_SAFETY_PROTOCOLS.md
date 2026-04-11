@@ -93,7 +93,7 @@ def filter_content(text: str, context: str = "general") -> dict:
 | Domain | Hallucination Risk | Detection Method |
 |--------|-------------------|------------------|
 | **Justice-Equity** (ABR CanLII cases) | HIGH (AI invents case names/citations) | **Fact-check against CanLII API** (verify case exists before presenting to user) |
-| **Uniontech** (Union Eyes contracts) | HIGH (AI misinterprets contract clauses) | **Quote extraction validation** (only show direct quotes from uploaded contracts, never paraphrase legal language) |
+| **Uniontech** (UnionEyes contracts) | HIGH (AI misinterprets contract clauses) | **Quote extraction validation** (only show direct quotes from uploaded contracts, never paraphrase legal language) |
 | **Healthtech** (Memora medical info) | CRITICAL (medical misinformation) | **Hard-coded disclaimer** ("This is not medical advice. Consult your doctor."), **No medication/treatment recommendations** (prompt engineering rule) |
 | **AgTech** (CORA farm regulations) | MEDIUM (provincial regulations vary) | **Region-specific knowledge base** (Saskatchewan/Alberta/Ontario-specific prompts, validate against gov't websites) |
 
@@ -139,7 +139,7 @@ def validate_case_citation(case_citation: str) -> dict:
 |---------|-------------------|----------|
 | **Safety filter blocks output** | "I can't respond to that. Let's focus on [redirect to safe topic]." | User asks Memora Companion for medication advice → "I can't provide medical advice, but I can help you prepare questions for your doctor." |
 | **Hallucination detected** | "I'm not certain about this. Would you like me to search for verified information?" | ABR AI Coach cites fake CanLII case → Redirect to fact-checked case database |
-| **Context too complex** | "This is a complex question. Would you like me to connect you with a human expert?" | Union Eyes grievance prediction: novel contract clause → Escalate to union representative |
+| **Context too complex** | "This is a complex question. Would you like me to connect you with a human expert?" | UnionEyes grievance prediction: novel contract clause → Escalate to union representative |
 | **PII detected in user input** | "I noticed personal information in your message. For privacy, let's rephrase without names/addresses." | Memora user shares caregiver's email address → Auto-redact before sending to GPT-4 |
 | **API timeout** | "I'm taking longer than usual. Give me a moment, or try again shortly." | Azure OpenAI latency >10 seconds → Fallback to cached response or simpler prompt |
 
@@ -219,7 +219,7 @@ def companion_chat(request):
 
 #### **🟠 HIGH Incident** (24-Hour Action)
 
-**Examples**: Hallucination (fake CanLII case cited), tone error (insensitive response to grief), incorrect legal advice (Union Eyes misinterprets contract)
+**Examples**: Hallucination (fake CanLII case cited), tone error (insensitive response to grief), incorrect legal advice (UnionEyes misinterprets contract)
 
 **Response** (24 hours):
 1. **Flag prompt for review** (AI Lead investigates, notify CTO)
@@ -283,7 +283,7 @@ def companion_chat(request):
 | **Fake Legal Advice** (justice, union) | AI cites verified sources only, disclaims non-expert | User: "Can I sue?" → Companion: "I'm not a lawyer. Let me find similar cases from CanLII." |
 | **Cultural Insensitivity** | AI adapts tone for French Canadian, Indigenous users | French user gets culturally appropriate idioms, not direct English translations |
 | **Hallucination Detection** | Fact-checking catches fake citations, regulations | ABR cites fake case → System catches, redirects to real case database |
-| **Tone Mismatch** | Voice matches platform (warm for Memora, professional for ABR, motivational for Union Eyes) | Memora uses "Let's check in on your day" not "Complete your daily assessment" |
+| **Tone Mismatch** | Voice matches platform (warm for Memora, professional for ABR, motivational for UnionEyes) | Memora uses "Let's check in on your day" not "Complete your daily assessment" |
 | **Privacy Breach** | AI never shares user data across accounts or caregivers without consent | Caregiver asks "What did my parent say yesterday?" → Companion: "I need consent from both of you to share." |
 | **Emergency Escalation** | AI detects crisis language, escalates to human | User: "I don't want to live anymore" → Auto-notify caregiver + crisis hotline info |
 | **Edge Case Stress Test** | Rare scenarios don't crash AI (unusual names, non-binary pronouns, rare conditions) | User with rare disease name → AI handles gracefully, doesn't hallucinate |
@@ -299,9 +299,9 @@ def companion_chat(request):
 | Trigger | Platform | Human Contact | Response Time |
 |---------|----------|---------------|---------------|
 | **Crisis language detected** ("suicide", "self-harm") | Memora, CareAI | Notify caregiver (if consent) + show crisis hotline (988 Canada) | **Immediate** (in-app popup) |
-| **Legal advice requested** ("Can I sue?", "What are my rights?") | ABR, Union Eyes | Suggest consulting lawyer/union rep, provide legal clinic resources | 24 hours (asynchronous) |
+| **Legal advice requested** ("Can I sue?", "What are my rights?") | ABR, UnionEyes | Suggest consulting lawyer/union rep, provide legal clinic resources | 24 hours (asynchronous) |
 | **Medical diagnosis request** | Memora, CareAI, WellLoop | "I can't diagnose. Please consult your doctor." + book appointment feature | Immediate (in-app) |
-| **Complex grievance** (Union Eyes) | Union Eyes | "This is complex. Would you like me to connect you with a union representative?" | 48 hours (union rep callback) |
+| **Complex grievance** (UnionEyes) | UnionEyes | "This is complex. Would you like me to connect you with a union representative?" | 48 hours (union rep callback) |
 | **Farm regulation dispute** (CORA) | CORA | "Let me connect you with an agricultural advisor." → Partner with Farm Credit Canada | 72 hours (advisor callback) |
 
 ### **Human-in-the-Loop for High-Stakes Decisions**
@@ -309,7 +309,7 @@ def companion_chat(request):
 **Companion never auto-executes these actions without user confirmation:**
 
 - Notifying caregivers (Memora: requires explicit user consent)
-- Filing grievances (Union Eyes: AI suggests, user reviews and submits)
+- Filing grievances (UnionEyes: AI suggests, user reviews and submits)
 - Booking appointments (Memora: AI finds slots, user confirms)
 - Financial transactions (CORA: market pricing advisory only, no auto-trading)
 

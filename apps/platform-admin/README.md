@@ -1,6 +1,6 @@
 # Platform Admin
 
-> Internal admin console for managing platform intelligence services — AI, events, knowledge, ontology, and more.
+> Internal admin console for managing platform intelligence services — events, knowledge, ontology, and more.
 
 ## Stack
 
@@ -35,4 +35,4 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 
 ## Domain
 
-Internal operations dashboard exposing all platform intelligence subsystems. Used by platform engineers and admins to inspect AI runs, manage the knowledge graph, monitor event flows, and debug reasoning/decision pipelines.
+Internal operations dashboard exposing all platform intelligence subsystems. Used by platform engineers and admins to inspect execution runs, manage the knowledge graph, monitor event flows, and debug reasoning/decision pipelines.

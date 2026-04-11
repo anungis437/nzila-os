@@ -1,4 +1,4 @@
-# Union Eyes Service Migration Guide
+# UnionEyes Service Migration Guide
 
 ## Phase 1: Critical Services (50+ database operations)
 

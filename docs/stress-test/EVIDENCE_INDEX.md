@@ -51,7 +51,7 @@
 | E04-f | Contract test — DB queries scoped | `tooling/contract-tests/org-isolation.test.ts` L108 | `route files with DB queries include an entity scope` — PASS |
 | E04-g | Contract test — policy re-exports | `tooling/contract-tests/org-isolation.test.ts` L143 | `os-core policy re-exports authorize for uniform enforcement` — PASS |
 | E04-h | **GAP** — No runtime HTTP cross-org tests | — | Cross-org READ/WRITE supertest scenarios do not exist |
-| E04-i | Middleware — console | `apps/console/middleware.ts` | `clerkMiddleware(); !isPublicRoute → auth.protect()` |
+| E04-i | Middleware — console | `apps/console/middleware.ts` | `authMiddleware(); !isPublicRoute → auth.protect()` |
 | E04-j | Middleware — partners | `apps/partners/middleware.ts` | Same pattern; also covers `/invite(.*)` |
 
 ---
@@ -105,7 +105,7 @@
 | E08-b | Helmet — orchestrator | `apps/orchestrator-api/src/index.ts` L22 | `@fastify/helmet` with `hsts: { maxAge: 63072000 }`, `frameAncestors: 'none'` |
 | E08-c | **GAP** — No rate limiting in Next.js apps | `apps/console/`, `apps/partners/`, `apps/web/` | grep for `rateLimit\|upstash\|arcjet` returned 0 results in app source |
 | E08-d | Security headers — web | `apps/web/next.config.ts` | HSTS, X-Frame-Options: SAMEORIGIN, X-Content-Type-Options: nosniff, CSP, Referrer-Policy, Permissions-Policy |
-| E08-e | Security headers — console | `apps/console/next.config.ts` | HSTS, X-Frame-Options: DENY (stronger), CSP scoped to `https://clerk.nzila.app` |
+| E08-e | Security headers — console | `apps/console/next.config.ts` | HSTS, X-Frame-Options: DENY (stronger), CSP scoped to platform auth |
 
 ---
 

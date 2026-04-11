@@ -27,9 +27,9 @@ describe('PR8: AuthZ — middleware presence', () => {
       const middlewarePath = resolve(ROOT, `apps/${app}/middleware.ts`)
       expect(existsSync(middlewarePath), `apps/${app}/middleware.ts missing`).toBe(true)
       const content = readContent(middlewarePath)
-      // Must import from @nzila/platform-auth or clerkMiddleware compat wrapper
+      // Must import from @nzila/platform-auth or authMiddleware
       expect(
-        content.includes('clerkMiddleware') || content.includes('@nzila/platform-auth'),
+        content.includes('authMiddleware') || content.includes('@nzila/platform-auth'),
         `${app}/middleware.ts must use platform-auth middleware`
       ).toBe(true)
     })

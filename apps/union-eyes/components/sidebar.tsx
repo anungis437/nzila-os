@@ -54,6 +54,7 @@ import {
   Gift,
   TrendingUp,
   User,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -156,8 +157,24 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   const [isMounted, setIsMounted] = useState(false);
   const { organizationId, organization } = useOrganization();
   const { isPilotMode } = usePilotMode();
+  const [orgEntitlements, setOrgEntitlements] = useState<Set<string>>(new Set());
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  // Fetch the org's active entitlements for sidebar gating
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/entitlements');
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setOrgEntitlements(new Set(data.featureKeys ?? []));
+        }
+      } catch { /* default to empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, [organizationId]);
 
   const isActive = (path: string) => pathname === path;
   const isNzila = (NZILA_ROLES as readonly string[]).includes(userRole);
@@ -249,11 +266,13 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
     // ── 2. Work — "Active casework and operations" ────────────────────────
     {
       title: t('sidebar.work'),
-      roles: [...repsAndAbove, "bargaining_committee", "health_safety_rep", mgmt],
+      roles: [...unionAll, mgmt],
       defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/work`, icon: <FileBarChart size={16} />, label: t('sidebar.work'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
+        { href: `/${locale}/dashboard/committees`, icon: <Users size={16} />, label: "Committees", roles: [...unionAll, mgmt] },
+        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt], entitlementKey: 'health_safety' },
+        { href: `/${locale}/dashboard/correspondence`, icon: <Send size={16} />, label: "Correspondence", roles: ["clerk", ...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
       ],
     },
@@ -264,8 +283,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/priorities`, icon: <Clock size={16} />, label: t('sidebar.priorities'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: [...leadershipRoles, mgmt], entitlementKey: 'performance_targets' },
       ],
     },
     // ── 4. Intelligence — "Research, analysis, and insights" ──────────────
@@ -299,6 +317,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       roles: [...unionAll, mgmt],
       defaultOpen: false,
       items: [
+        { href: `/${locale}/dashboard/knowledge-base`, icon: <FileText size={16} />, label: t('sidebar.unionDocuments'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/agreements`, icon: <BookOpen size={16} />, label: t('sidebar.ourAgreements'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/education`, icon: <GraduationCap size={16} />, label: t('sidebar.educationTraining'), roles: unionAll },
         { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
@@ -316,7 +335,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/governance`, icon: <FileText size={16} />, label: t('sidebar.governance'), roles: [...execRoles, mgmt] },
         { href: `/${locale}/dashboard/audits`, icon: <FileBarChart size={16} />, label: t('sidebar.auditsCompliance'), roles: [...execRoles, "admin", mgmt] },
         { href: `/${locale}/dashboard/structure`, icon: <Network size={16} />, label: t('sidebar.orgStructure'), roles: ["admin", "system_admin", "app_owner", mgmt] },
-        { href: `/${locale}/dashboard/committees`, icon: <Users size={16} />, label: "Committees", roles: [...repsAndAbove, mgmt] },
       ],
     },
   ];
@@ -374,7 +392,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
     title: string;
     roles: string[];
     defaultOpen?: boolean;
-    items: { href: string; icon: React.ReactNode; label: string; roles: string[] }[];
+    items: { href: string; icon: React.ReactNode; label: string; roles: string[]; entitlementKey?: string }[];
   };
 
   // ── Sections filtered by org type ──────────────────────────────────────────
@@ -455,11 +473,14 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
     return sections
       .map(section => ({
         ...section,
-        items: section.items.filter(item => item.roles.includes(effectiveRole)),
+        items: section.items.filter(item =>
+          item.roles.includes(effectiveRole) &&
+          (!item.entitlementKey || orgEntitlements.has(item.entitlementKey))
+        ),
       }))
       .filter(section => section.items.length > 0 && section.roles.includes(effectiveRole));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userRole, isNzila, isViewingTenantOrg, hasSelectedOrg, locale, organization, isPilotMode]);
+  }, [userRole, isNzila, isViewingTenantOrg, hasSelectedOrg, locale, organization, isPilotMode, orgEntitlements]);
 
   const visibleSections = buildSections();
 
@@ -514,7 +535,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
           >
             <Image
               src="/images/brand/icon.png"
-              alt="Union Eyes"
+              alt="UnionEyes"
               width={32}
               height={32}
               className="w-7 h-7 md:w-8 md:h-8 rounded-lg object-contain"
@@ -522,7 +543,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
             <div className="hidden md:block">
               <Image
                 src="/images/brand/logo.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={96}
                 height={24}
                 className="h-6 object-contain"

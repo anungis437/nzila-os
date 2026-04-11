@@ -2,13 +2,13 @@
  * CFO — API Guards Unit Tests
  *
  * Tests the shared API route guard functions:
- *   - authenticateUser()       — Clerk auth + platform role
+ *   - authenticateUser()       — Platform auth + platform role
  *   - getOrgMembership()       — Entity membership lookup
  *   - requireOrgAccess()       — Full entity-scoped guard
  *   - requirePlatformRole()    — Platform-level role check
  *   - withRequestContext()     — os-core request context wrapper
  *
- * All external dependencies (Clerk, DB, os-core) are mocked.
+ * All external dependencies (platform auth, DB, os-core) are mocked.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 

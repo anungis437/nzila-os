@@ -1,11 +1,11 @@
-# Union Eyes Documentation Index
+# UnionEyes Documentation Index
 
-> Navigation hub for all Union Eyes documentation.
+> Navigation hub for all UnionEyes documentation.
 > Find what you need by audience or topic.
 
 ## Audience Guides
 
-> **Non-technical?** Start at the [Union Eyes Hub](../../docs/union-eyes/README.md) instead —
+> **Non-technical?** Start at the [UnionEyes Hub](../../docs/union-eyes/README.md) instead —
 > it has guides written for members, stewards, admins, and partners.
 
 ## Quick Start
@@ -97,7 +97,7 @@ Historical snapshots retained for traceability.
 
 ## Cross-References
 
-- Audience-friendly docs: [Union Eyes Hub](../../docs/union-eyes/README.md)
+- Audience-friendly docs: [UnionEyes Hub](../../docs/union-eyes/README.md)
 - Full glossary: [Glossary](../../docs/index/glossary.md)
 - Documentation map: [Doc Map](../../docs/index/doc-map.md)
 - Main repo README: [../../README.md](../../README.md)

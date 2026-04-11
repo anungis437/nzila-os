@@ -11,8 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
+  let user;
   try {
-    await requireUser();
+    user = await requireUser();
   } catch {
     redirect("/login");
   }
@@ -22,5 +23,5 @@ export default async function Page() {
     redirect("/dashboard");
   }
 
-  return <CommitteesPage />;
+  return <CommitteesPage userRole={user.role ?? "member"} />;
 }

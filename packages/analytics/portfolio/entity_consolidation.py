@@ -15,7 +15,7 @@ class EntityConsolidationAnalyzer:
         # Platform entity inventories (from PORTFOLIO_DEEP_DIVE v2)
         self.platform_entities = {
             "union_eyes": {
-                "name": "Union Eyes",
+                "name": "UnionEyes",
                 "total_entities": 4773,
                 "entity_types": {
                     "User": 1200,

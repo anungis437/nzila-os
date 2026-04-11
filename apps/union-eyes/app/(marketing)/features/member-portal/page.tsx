@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Member Portal | Union Eyes',
+  title: 'Member Portal | UnionEyes',
   description:
     'Member self-service portal with claims tracking, dues visibility, document management, and onboarding — giving members transparency without burdening stewards.',
 };

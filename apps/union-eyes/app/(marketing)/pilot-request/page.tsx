@@ -1,7 +1,7 @@
 /**
  * Pilot Program Application Page
  * 
- * Public-facing form for unions to request Union Eyes pilot program.
+ * Public-facing form for unions to request UnionEyes pilot program.
  * Collects readiness information and provides instant assessment.
  */
 
@@ -107,7 +107,7 @@ export default function PilotRequestPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Union Eyes Pilot Program
+            UnionEyes Pilot Program
           </h1>
           <p className="text-xl text-gray-600">
             Join us in building the future of member advocacy tools
@@ -702,7 +702,7 @@ export default function PilotRequestPage() {
                 Application Submitted
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Thank you for your interest in the Union Eyes pilot program.
+                Thank you for your interest in the UnionEyes pilot program.
               </p>
               <p className="text-gray-700 mb-6">
                 We&apos;ll review your application and contact you within 2-3 business days

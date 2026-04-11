@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Layout Wrapper component for Union Eyes
+ * Layout Wrapper component for UnionEyes
  * Controls when to show the header based on the current URL path.
  * Marketing pages use their own SiteNavigation via (marketing)/layout.tsx,
  * dashboard pages use Sidebar via dashboard/layout.tsx, and auth pages use

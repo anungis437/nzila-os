@@ -17,7 +17,7 @@ Total Platforms: 14
 - **Migration**: 4 weeks (MEDIUM)
 - **Entities**: 0
 
-### Union Eyes App V1 Main
+### UnionEyes App V1 Main
 - **ID**: `Union_Eyes_app_v1-main`
 - **Profile**: `nodeapi-aca-azurepg-clerk`
 - **Framework**: N/A

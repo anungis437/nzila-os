@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import PilotDashboard from './pilot-dashboard';
 
 export const metadata: Metadata = {
-  title: 'Pilot Program | Union Eyes',
+  title: 'Pilot Program | UnionEyes',
   description: 'Pilot health metrics, milestones, and progress tracking',
 };
 

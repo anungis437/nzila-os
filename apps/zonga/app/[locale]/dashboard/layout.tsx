@@ -2,13 +2,16 @@
  * Dashboard Layout — Authenticated shell for Zonga.
  * Role-aware sidebar + header + content with music-platform navigation.
  */
-import { auth, currentUser } from '@nzila/platform-auth/entra/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
-import { SidebarOrgSwitcher, SidebarAccountFooter, MobileAccountFooter } from '@/components/dashboard/clerk-widgets';
+import { SidebarAccountFooter } from '@/components/dashboard/account-widgets';
+import { ExternalBrandMark } from '@/components/branding';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { resolveNavContext } from '@/lib/resolve-nav';
 import { WorkspaceIdentity } from '@/components/branding';
+import { CLIENT_BRAND } from '@/lib/branding/brand-config';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 /**
  * Sidebar navigation configuration — canonical route registry.
@@ -51,9 +54,6 @@ export default async function DashboardLayout({
   const isPlatformOrg = navCtx?.isPlatformOrg ?? false;
   const hasCreatorProfile = navCtx?.hasCreatorProfile ?? false;
 
-  const user = await currentUser();
-  const isListener = (user?.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole === 'listener';
-
   return (
     <DashboardShell>
     <div className="flex min-h-screen bg-background">
@@ -64,16 +64,18 @@ export default async function DashboardLayout({
             <WorkspaceIdentity placement="app_sidebar" size="sm" />
           </div>
 
-          <div className="px-4 py-4 border-b border-white/10">
-            {hasCreatorProfile ? (
-              <SidebarOrgSwitcher />
-            ) : (
-              <p className="text-xs text-gray-500 text-center py-1">Personal account</p>
-            )}
-          </div>
+          {hasCreatorProfile && (
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+              <ExternalBrandMark asset={CLIENT_BRAND} placement="app_sidebar" maxHeight={24} />
+              <span className="text-xs font-medium text-white/60 truncate">Workspace</span>
+            </div>
+          )}
 
           <Sidebar role={role} locale={locale} isPlatformOrg={isPlatformOrg} hasCreatorProfile={hasCreatorProfile} />
 
+          <div className="px-4 py-3 border-t border-white/10">
+            <LanguageSwitcher currentLocale={locale} variant="dark" dropDirection="up" />
+          </div>
           <div className="px-4 py-4 border-t border-white/10">
             <SidebarAccountFooter locale={locale} />
           </div>
@@ -87,19 +89,6 @@ export default async function DashboardLayout({
 
       {/* ─── Main content ─── */}
       <div className="flex-1 flex flex-col">
-        <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {!isListener && (
-              <h2 className="text-lg font-semibold text-foreground pl-12 md:pl-0">Dashboard</h2>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="md:hidden">
-              <MobileAccountFooter locale={locale} />
-            </div>
-          </div>
-        </header>
-
         <main className="flex-1 p-6 pb-24">{children}</main>
       </div>
     </div>

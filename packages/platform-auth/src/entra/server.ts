@@ -1,10 +1,10 @@
 /**
  * @nzila/platform-auth — Entra Server-Side Auth Functions
  *
- * Drop-in replacements for Clerk's server-side auth functions:
- *   - auth()        → auth()        (Clerk-compatible shape)
- *   - currentUser() → currentUser() (Clerk-compatible shape)
- *   - getAuth()     → getAuth()     (older Clerk pattern)
+ * Platform auth functions for server-side usage:
+ *   - auth()        → returns session with userId/orgId/orgRole
+ *   - currentUser() → returns user-like object
+ *   - getAuth()     → deprecated alias for auth()
  *
  * These read the NextAuth session on the server side (RSC / API routes).
  *
@@ -21,15 +21,15 @@ import { resolveIdentityFromEntra } from './adapter'
 import type { AuthResult, AuthenticatedIdentity } from '../identity'
 import type { EntraSession } from './types'
 
-/** Session type alias for Clerk compatibility */
+/** Session type alias */
 export type Session = EntraSession
 
 /** Cookie name for PG-backed password auth sessions */
 const PG_SESSION_COOKIE = 'nzila_session'
 
-// ── Clerk-Compatible Server Auth ────────────────────────────────────────────
+// ── Server Auth ─────────────────────────────────────────────────────────────
 
-export interface ClerkCompatAuthResult {
+export interface AuthSessionResult {
   userId: string | null
   orgId: string | null
   orgRole: string | null
@@ -41,14 +41,13 @@ export interface ClerkCompatAuthResult {
 }
 
 /**
- * Clerk-compatible `auth()` — returns `{ userId, orgId, orgRole }`.
- * Direct drop-in for `import { auth } from '@clerk/nextjs/server'`.
+ * Platform `auth()` — returns `{ userId, orgId, orgRole }`.
  *
  * Resolution order:
  *   1. PG session cookie (`nzila_session`) — email/password auth
  *   2. Entra / NextAuth JWT — SSO
  */
-export async function auth(): Promise<ClerkCompatAuthResult> {
+export async function auth(): Promise<AuthSessionResult> {
   // ── 1. Try PG session-based auth ────────────────────────────────────────
   try {
     const { cookies } = await import('next/headers')
@@ -133,8 +132,7 @@ export async function auth(): Promise<ClerkCompatAuthResult> {
 }
 
 /**
- * Clerk-compatible `currentUser()` — returns a user-like object.
- * Direct drop-in for `import { currentUser } from '@clerk/nextjs/server'`.
+ * Platform `currentUser()` — returns a user-like object.
  *
  * Checks PG session first, then falls back to Entra/NextAuth.
  */
@@ -213,10 +211,10 @@ export async function currentUser() {
 }
 
 /**
- * Older Clerk pattern: `getAuth(req)` → extract auth state from a request.
- * @deprecated Use `auth()` instead — NextAuth v5 auto-resolves the request.
+ * Legacy `getAuth(req)` — extract auth state from a request.
+ * @deprecated Use `auth()` instead — auto-resolves the request.
  */
-export async function getAuth(_req?: unknown): Promise<ClerkCompatAuthResult> {
+export async function getAuth(_req?: unknown): Promise<AuthSessionResult> {
   return auth()
 }
 
@@ -280,7 +278,7 @@ export async function getSessionRoles(): Promise<string[]> {
 
 // ── Admin Client Re-export ──────────────────────────────────────────────────
 
-export { clerkClient } from './admin'
+export { adminClient, adminClient as clerkClient } from './admin'
 
 // ── Route Matching Utility ──────────────────────────────────────────────────
 
@@ -314,14 +312,14 @@ export function createRouteMatcher(patterns: string[]) {
   }
 }
 
-// ── clerkMiddleware Compat ──────────────────────────────────────────────────
+// ── Auth Middleware ──────────────────────────────────────────────────────────
 
 import { NextResponse } from 'next/server'
 
 /**
- * Drop-in replacement for Clerk's `clerkMiddleware()`.
+ * Platform auth middleware.
  *
- * Wraps NextAuth's `auth()` middleware. The callback receives a compat `auth`
+ * Wraps NextAuth's `auth()` middleware. The callback receives an `auth`
  * object with `.protect()` (redirects to /sign-in) and a callable form
  * that returns `{ userId, orgId, orgRole, sessionClaims }`.
  */
@@ -330,7 +328,7 @@ class AuthProtectRedirect {
   constructor(public url: string) {}
 }
 
-export function clerkMiddleware(
+export function authMiddleware(
   handler: (auth: any, request: any) => Promise<any> | any,
 ) {
   return nextAuth(async (req: any) => {
@@ -366,3 +364,6 @@ export function clerkMiddleware(
     }
   }) as any
 }
+
+/** @deprecated Use `authMiddleware` instead */
+export const clerkMiddleware = authMiddleware

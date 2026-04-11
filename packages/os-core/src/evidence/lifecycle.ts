@@ -101,7 +101,7 @@ export interface EvidencePackDraftOptions {
   summary?: string
   /** Control IDs covered */
   controlsCovered?: string[]
-  /** Clerk user ID or "system" */
+  /** Auth user ID or "system" */
   createdBy: string
 }
 

@@ -4,7 +4,7 @@
  * Pilot Onboarding Wizard
  *
  * A minimal 4-step first-login experience for pilot users:
- *   1. Welcome — what Union Eyes is
+ *   1. Welcome — what UnionEyes is
  *   2. Your Info — department, shift, location (optional, skippable)
  *   3. What You Can Do — three key features
  *   4. All Set — go to dashboard

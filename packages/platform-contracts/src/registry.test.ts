@@ -52,7 +52,7 @@ describe('getAppManifest', () => {
   it('finds an app by id', () => {
     const ue = getAppManifest('union-eyes')
     expect(ue).toBeDefined()
-    expect(ue!.name).toBe('Union Eyes')
+    expect(ue!.name).toBe('UnionEyes')
     expect(ue!.tier).toBe('PRODUCTION')
   })
 

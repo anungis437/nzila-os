@@ -25,7 +25,7 @@ Nzila Ventures is building the **infrastructure company for social impact techno
 
 | # | Platform | Vertical | Entities | Complexity | Status |
 |---|----------|----------|----------|-----------|--------|
-| 1 | **Union Eyes** | Uniontech | 4,773 | EXTREME | Flagship |
+| 1 | **UnionEyes** | Uniontech | 4,773 | EXTREME | Flagship |
 | 2 | **ABR Insights** | EdTech/Legaltech | 132 | EXTREME | Production Ready |
 | 3 | **C3UO/DiasporaCore** | Fintech | 485 | EXTREME | In Development |
 | 4 | **CongoWave** | Entertainment | 83 | HIGH-EXTREME | Production Ready |
@@ -45,7 +45,7 @@ Nzila Ventures is building the **infrastructure company for social impact techno
 
 | Vertical | TAM | Key Products |
 |----------|-----|--------------|
-| **Uniontech** | $50B | Union Eyes - Union management, pension forecasting |
+| **Uniontech** | $50B | UnionEyes - Union management, pension forecasting |
 | **Fintech** | $100B+ | DiasporaCore, Insight CFO, STSA/Lexora |
 | **Agrotech** | $8.6B | CORA, AgrimoOps - Farm management, supply chain |
 | **EdTech/Legaltech** | $13B+ | ABR Insights, CyberLearn, Court Lens |
@@ -163,7 +163,7 @@ python -m analytics.generators.export_manager --template board_report
 | Quarter | Milestone |
 |---------|-----------|
 | Q1 | Backbone Phase 1 Complete |
-| Q2 | Union Eyes MVP Launch |
+| Q2 | UnionEyes MVP Launch |
 | Q3 | ABR Insights Production |
 | Q4 | Series A Close ($3-5M) |
 

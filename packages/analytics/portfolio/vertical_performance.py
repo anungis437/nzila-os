@@ -23,7 +23,7 @@ class VerticalPerformanceAnalyzer:
                 "tam": 50_000_000_000,
                 "som_2026": 350_000,
                 "som_2030": 10_000_000,
-                "flagship": "Union Eyes",
+                "flagship": "UnionEyes",
                 "maturity": "growth",
                 "geographic_focus": ["Canada", "USA"],
             },

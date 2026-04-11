@@ -309,7 +309,7 @@ export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormPr
                   id="solution"
                   value={formData.solution}
                   onChange={(e) => handleInputChange('solution', e.target.value)}
-                  placeholder="Describe how Union Eyes helped solve the problem..."
+                  placeholder="Describe how UnionEyes helped solve the problem..."
                   rows={6}
                 />
               </div>

@@ -21,7 +21,7 @@
 export interface PlatformEventMetadata {
   /** Org that owns this event (never "tenant") */
   readonly orgId: string
-  /** Actor who triggered the event (Clerk user ID or "system") */
+  /** Actor who triggered the event (auth user ID or "system") */
   readonly actorId: string
   /** Correlation ID to group related events across services */
   readonly correlationId: string

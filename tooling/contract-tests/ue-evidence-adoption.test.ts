@@ -1,8 +1,8 @@
 // cSpell:ignore nzila
 /**
- * Contract Test — Union Eyes Evidence Adoption
+ * Contract Test — UnionEyes Evidence Adoption
  *
- * Proves that Union Eyes has adopted @nzila/os-core evidence tooling and
+ * Proves that UnionEyes has adopted @nzila/os-core evidence tooling and
  * is not running its own custom seal logic that bypasses governance.
  *
  * Checks:

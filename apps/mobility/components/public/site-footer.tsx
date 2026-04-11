@@ -53,7 +53,7 @@ const ecosystemLinks = [
   { name: "Nzila Ventures", href: NZILA_URL, desc: "Parent company" },
   { name: "Console", href: CONSOLE_URL, desc: "Admin portal" },
   { name: "Partner Hub", href: PARTNERS_URL, desc: "Integration portal" },
-  { name: "Union Eyes", href: UE_URL, desc: "Union management" },
+  { name: "UnionEyes", href: UE_URL, desc: "Union management" },
 ];
 
 const socials = [

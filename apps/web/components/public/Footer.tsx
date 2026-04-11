@@ -30,7 +30,7 @@ const footerLinks = {
 const appLinks = [
   { name: 'Console', href: CONSOLE_URL, external: true },
   { name: 'Partner Portal', href: PARTNERS_URL, external: true },
-  { name: 'Union Eyes', href: UNION_EYES_URL, external: true },
+  { name: 'UnionEyes', href: UNION_EYES_URL, external: true },
   { name: 'ABR Insights', href: ABR_URL, external: true },
 ];
 

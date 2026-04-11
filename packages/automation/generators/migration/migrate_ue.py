@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Union Eyes Data Migration Runner
+UnionEyes Data Migration Runner
 
 Pure PostgreSQL-to-PostgreSQL migration.
 Reads from UE's legacy PostgreSQL database and writes to the Django-managed
@@ -39,7 +39,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Union Eyes — PostgreSQL data migration"
+        description="UnionEyes — PostgreSQL data migration"
     )
     parser.add_argument("--source-url", "-s", help="Source PostgreSQL URL")
     parser.add_argument("--target-url", "-t", help="Target PostgreSQL URL (default: localhost/nzila_union_eyes)")

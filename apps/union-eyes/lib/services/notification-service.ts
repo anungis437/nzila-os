@@ -251,7 +251,7 @@ export class SendGridEmailProvider implements NotificationProvider {
         ],
         from: {
           email: fromEmail,
-          name: process.env.SENDGRID_FROM_NAME || 'Union Eyes',
+          name: process.env.SENDGRID_FROM_NAME || 'UnionEyes',
         },
         subject: payload.subject || 'Notification',
         content: [
@@ -1042,6 +1042,37 @@ export const NotificationTemplates = {
     subject: "Account Alert",
     title: "Account Activity",
     body: "{{alertMessage}}",
+  },
+
+  // Correspondence pipeline notifications
+  CORRESPONDENCE_REVIEW_REQUESTED: {
+    subject: "Correspondence Awaiting Your Review",
+    title: "Review Requested",
+    body: "{{drafterName}} has submitted {{referenceNumber}} — \"{{subject}}\" — for your review and signature.",
+  },
+
+  CORRESPONDENCE_APPROVED: {
+    subject: "Correspondence Approved",
+    title: "Ready for Signature",
+    body: "{{referenceNumber}} — \"{{subject}}\" — has been approved and is ready for your signature.",
+  },
+
+  CORRESPONDENCE_SIGNED: {
+    subject: "Correspondence Signed",
+    title: "Signed — Ready to Dispatch",
+    body: "{{signerName}} has signed {{referenceNumber}} — \"{{subject}}\". It is ready to be dispatched.",
+  },
+
+  CORRESPONDENCE_DISPATCHED: {
+    subject: "Correspondence Dispatched",
+    title: "Dispatched",
+    body: "{{referenceNumber}} — \"{{subject}}\" — has been dispatched via {{dispatchMethod}}.",
+  },
+
+  CORRESPONDENCE_REVISION_REQUESTED: {
+    subject: "Correspondence Revision Requested",
+    title: "Revision Needed",
+    body: "{{reviewerName}} has requested revisions to {{referenceNumber}} — \"{{subject}}\": {{reason}}",
   },
 };
 

@@ -38,7 +38,7 @@ export const BRAND_POLICY_MATRIX: readonly BrandPolicyRule[] = [
   // ── Client — deployment context, restricted visibility ────────────────
 
   { role: 'client', placement: 'app_header',             allowedModes: ['text_only'],                          defaultMode: 'text_only' },
-  { role: 'client', placement: 'app_sidebar',            allowedModes: ['hidden'],                             defaultMode: 'hidden' },
+  { role: 'client', placement: 'app_sidebar',            allowedModes: ['logo', 'text_only'],                  defaultMode: 'logo' },
   { role: 'client', placement: 'app_dashboard',          allowedModes: ['hidden'],                             defaultMode: 'hidden' },
   { role: 'client', placement: 'login',                  allowedModes: ['text_only', 'muted_logo'],            defaultMode: 'text_only' },
   { role: 'client', placement: 'onboarding',             allowedModes: ['text_only'],                          defaultMode: 'text_only' },

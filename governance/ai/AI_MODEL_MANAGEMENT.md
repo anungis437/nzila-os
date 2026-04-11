@@ -18,7 +18,7 @@ Nzila's AI infrastructure runs on Azure OpenAI (GPT-4, GPT-4 Turbo) with 200+ pr
 
 | Model | Version | Deployment | Use Case | Platforms |
 |-------|---------|------------|----------|-----------|
-| **GPT-4** | gpt-4-0613 | Azure OpenAI Canada East | Long-form coaching, case analysis, complex reasoning | ABR Insights, Union Eyes |
+| **GPT-4** | gpt-4-0613 | Azure OpenAI Canada East | Long-form coaching, case analysis, complex reasoning | ABR Insights, UnionEyes |
 | **GPT-4 Turbo** | gpt-4-1106-preview | Azure OpenAI Canada East | Fast interactive responses, daily check-ins, nudges | Memora, CareAI, FamilySync |
 | **GPT-3.5 Turbo** | gpt-3.5-turbo-0125 | Azure OpenAI Canada East | Fallback for high-volume, low-complexity prompts | CORA (farm advisory), Trade OS |
 | **text-embedding-ada-002** | text-embedding-ada-002-v2 | Azure OpenAI Canada East | Semantic search, context retrieval, prompt similarity | All platforms (pgVector integration) |
@@ -31,7 +31,7 @@ Nzila's AI infrastructure runs on Azure OpenAI (GPT-4, GPT-4 Turbo) with 200+ pr
 | **Context Window** | 8K tokens | 128K tokens | 16K tokens |
 | **Latency Tolerance** | 3-10 seconds | 1-3 seconds | <1 second |
 | **Cost Sensitivity** | $0.03/1K input, $0.06/1K output | $0.01/1K input, $0.03/1K output | $0.0005/1K input, $0.0015/1K output |
-| **Use Case Examples** | ABR CanLII case analysis, Union Eyes grievance prediction | Memora daily check-ins, CareAI respite planning | CORA crop recommendations, simple FAQs |
+| **Use Case Examples** | ABR CanLII case analysis, UnionEyes grievance prediction | Memora daily check-ins, CareAI respite planning | CORA crop recommendations, simple FAQs |
 
 ---
 
@@ -88,7 +88,7 @@ model:
 
 **200+ GPT-4 prompts organized by:**
 - **Domain**: healthtech, justice-equity, uniontech, agrotech, general
-- **Tone**: warm (Memora), professional (ABR), motivational (Union Eyes), advisory (CORA)
+- **Tone**: warm (Memora), professional (ABR), motivational (UnionEyes), advisory (CORA)
 - **User State**: new user (onboarding), active (engaged), lapsed (re-engagement), caregiver (family support)
 
 **Example Prompt Metadata** (Django 5 Prompt Library ORM):
@@ -182,7 +182,7 @@ graph LR
 |----------------|------------|------------------|
 | **Healthtech Prompts** (Memora, CareAI) | HIPAA, PIPEDA, Law 25 | PII detection (Azure AI Content Safety), audit logs, caregiver consent |
 | **Justice-Equity** (ABR Insights) | GDPR, PIPEDA | CanLII case anonymization, bias audits, fairness testing |
-| **Uniontech** (Union Eyes) | Labor law compliance (provincial) | Contract interpretation accuracy, grievance prediction explainability |
+| **Uniontech** (UnionEyes) | Labor law compliance (provincial) | Contract interpretation accuracy, grievance prediction explainability |
 | **AgTech** (CORA) | Environmental data privacy | Farm data anonymization, carbon credit verification |
 
 ### **Bias & Fairness Audits**

@@ -293,7 +293,7 @@
             "notes": "content_hash + previous_hash columns added to audit tables"
           }
         },
-        "D_ABRConfidentiality": "N/A (Union Eyes is not ABR vertical)"
+        "D_ABRConfidentiality": "N/A (UnionEyes is not ABR vertical)"
       }
     }
   },

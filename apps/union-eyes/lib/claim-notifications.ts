@@ -14,7 +14,7 @@ import { claims } from '../db/schema/claims-schema';
 import { eq, and } from 'drizzle-orm';
 import { ClaimStatus } from './workflow-engine';
 import * as React from 'react';
-import { clerkClient } from '@nzila/platform-auth/entra/server';
+import { adminClient } from '@nzila/platform-auth/entra/server';
 import { deadlines } from '../db/schema/deadlines-schema';
 
 interface ClaimNotificationData {
@@ -63,8 +63,8 @@ export async function sendClaimStatusNotification(
       return { success: false, error: 'Claim not found' };
     }
 
-    // Get member details from Clerk
-    const member = await clerkClient.users.getUser(claim.memberId!);
+    // Get member details from auth admin
+    const member = await adminClient.users.getUser(claim.memberId!);
 
     if (!member || !member.emailAddresses?.[0]?.emailAddress) {
       return { success: false, error: 'Member email not found' };
@@ -78,7 +78,7 @@ export async function sendClaimStatusNotification(
     let assignedStewardName: string | undefined;
     if (claim.assignedTo) {
       try {
-        const steward = await clerkClient.users.getUser(claim.assignedTo);
+        const steward = await adminClient.users.getUser(claim.assignedTo);
         if (steward?.emailAddresses?.[0]?.emailAddress) {
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';
@@ -271,7 +271,7 @@ export async function sendOverdueClaimNotification(
       return { success: false, error: 'No overdue deadlines found' };
     }
 
-    const member = await clerkClient.users.getUser(claim.memberId!);
+    const member = await adminClient.users.getUser(claim.memberId!);
     const memberEmail = member?.emailAddresses?.[0]?.emailAddress;
     if (!memberEmail) {
       return { success: false, error: 'Member email not found' };
@@ -282,7 +282,7 @@ export async function sendOverdueClaimNotification(
     let assignedStewardName: string | undefined;
     if (claim.assignedTo) {
       try {
-        const steward = await clerkClient.users.getUser(claim.assignedTo);
+        const steward = await adminClient.users.getUser(claim.assignedTo);
         if (steward?.emailAddresses?.[0]?.emailAddress) {
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';
@@ -349,8 +349,8 @@ return {
       return { success: false, error: 'Claim not found' };
     }
 
-    // Get member from Clerk
-    const member = await clerkClient.users.getUser(claim.memberId);
+    // Get member from auth admin
+    const member = await adminClient.users.getUser(claim.memberId);
     if (!member?.emailAddresses?.[0]?.emailAddress) {
       return { success: false, error: 'Member email not found' };
     }
@@ -363,7 +363,7 @@ return {
     let stewardName: string | undefined;
     if (claim.assignedTo) {
       try {
-        const steward = await clerkClient.users.getUser(claim.assignedTo);
+        const steward = await adminClient.users.getUser(claim.assignedTo);
         if (steward?.emailAddresses?.[0]?.emailAddress) {
           stewardEmail = steward.emailAddresses[0].emailAddress;
           stewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';

@@ -1,5 +1,5 @@
 -- =============================================================================
--- MASTER SEED — Union Eyes (Nzila OS)
+-- MASTER SEED — UnionEyes (Nzila OS)
 -- =============================================================================
 -- THE definitive, idempotent, Clerk-aligned seed for all 4 core tenants:
 --   1. NZILA Ventures  (platform)  → org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ

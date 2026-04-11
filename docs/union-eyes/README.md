@@ -1,6 +1,6 @@
-# Union Eyes — Documentation
+# UnionEyes — Documentation
 
-> **Union Eyes** is a digital case-tracking and grievance-management system
+> **UnionEyes** is a digital case-tracking and grievance-management system
 > built for union stewards, members, and administrators.
 
 ## Start Here
@@ -14,9 +14,9 @@
 | **Explain this to my partner or lawyer** | [Partner Overview](./partner-overview.md) |
 | **Find answers to common questions** | [FAQ](./faq.md) |
 
-## What Union Eyes Does
+## What UnionEyes Does
 
-Union Eyes lets you:
+UnionEyes lets you:
 
 - **Create cases** — Report workplace issues in plain language
 - **Track progress** — See where your case sits at every step
@@ -49,7 +49,7 @@ For the full glossary, see [Glossary](../index/glossary.md).
 - [CUPE Support SOP](../pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) — Issue triage and escalation
 
 ### Partners & Legal
-- [Partner Overview](./partner-overview.md) — Plain-language explanation of what Union Eyes is and does
+- [Partner Overview](./partner-overview.md) — Plain-language explanation of what UnionEyes is and does
 
 ### Developers & Platform Engineers
 - [Architecture](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) — System design

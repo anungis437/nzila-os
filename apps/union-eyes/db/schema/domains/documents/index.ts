@@ -21,6 +21,7 @@ export * from './documents';
 export * from './member-documents';
 export * from './signatures';
 export * from './workflows';
+export * from './correspondence';
 
 // Explicit re-exports to resolve ambiguities
 // signatureProviderEnum and signerStatusEnum exist in both signatures.ts and workflows.ts

@@ -252,7 +252,7 @@ async function fetchCollectionByHandle(
  * Create a discount code for redemption
  * 
  * Generates a unique discount code in Shopify Admin API.
- * Code format: UE{redemption_id} (Union Eyes + redemption ID).
+ * Code format: UE{redemption_id} (UnionEyes + redemption ID).
  * 
  * @param redemptionId - Redemption record ID
  * @param amount - Discount amount in CAD (e.g., 50.00)
@@ -309,7 +309,7 @@ async function createPriceRule(
     },
     body: JSON.stringify({
       price_rule: {
-        title: `Union Eyes Redemption - ${title}`,
+        title: `UnionEyes Redemption - ${title}`,
         target_type: 'line_item',
         target_selection: 'all',
         allocation_method: 'across',

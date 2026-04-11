@@ -40,6 +40,8 @@ export const PLATFORM_MODULES = {
   TRANSACTION_FEES: 'transaction_fees',
   COMMERCIAL_REPORTING: 'commercial_reporting',
   EXPORT_SUITE: 'export_suite',
+  HEALTH_SAFETY: 'health_safety',
+  PERFORMANCE_TARGETS: 'performance_targets',
 } as const;
 
 export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES];

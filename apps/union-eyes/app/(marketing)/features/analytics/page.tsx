@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Analytics & Reporting | Union Eyes',
+  title: 'Analytics & Reporting | UnionEyes',
   description:
     'Custom reports, leadership dashboards, financial summaries, and grievance analytics — built for union executives who need real data, not dashboards for show.',
 };

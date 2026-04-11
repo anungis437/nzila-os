@@ -1,10 +1,10 @@
-# Pilot Overview — Union Eyes (CUPE)
+# Pilot Overview — UnionEyes (CUPE)
 
 > What the pilot includes, how it works, and what happens next.
 
 ## What Is the Pilot?
 
-The pilot is a time-limited trial of Union Eyes with a small group of CUPE
+The pilot is a time-limited trial of UnionEyes with a small group of CUPE
 stewards and members. The goal is to validate that the system works for
 real cases before rolling out to the full membership.
 

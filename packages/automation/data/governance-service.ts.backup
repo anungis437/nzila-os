@@ -356,7 +356,7 @@ export class GovernanceService {
       eventDate: sunsetDate,
       goldenShareId,
       title: 'Golden Share Sunset Clause Triggered',
-      description: '5 consecutive years of mission compliance achieved. Class B Special Voting Share will convert to ordinary Class A share. Reserved Matter veto rights will cease. Union Eyes has proven long-term commitment to union-serving mission.',
+      description: '5 consecutive years of mission compliance achieved. Class B Special Voting Share will convert to ordinary Class A share. Reserved Matter veto rights will cease. UnionEyes has proven long-term commitment to union-serving mission.',
       impact: 'high',
       impactDescription: 'Golden share governance protections no longer needed. Company has demonstrated 5 years of mission fidelity. Will operate as standard corporation going forward.',
       stakeholders: ['board', 'council', 'investors', 'public'],

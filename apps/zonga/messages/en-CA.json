@@ -61,6 +61,7 @@
   },
   "payouts": {
     "title": "Payouts",
+    "description": "Creator earnings and payout history",
     "pending": "Pending",
     "processing": "Processing",
     "completed": "Completed",
@@ -121,26 +122,188 @@
   "marketing": {
     "hero": {
       "badge": "African Music, Global Stage",
-      "title": "Your Music,",
-      "titleAccent": "Your Revenue",
-      "description": "The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators."
+      "title": "Music Without",
+      "titleAccent": "Borders",
+      "description": "Stream the best of African music — Afrobeats, Amapiano, Highlife, and 40+ genres. Artists earn 85% of every stream. Labels scale across the continent.",
+      "ctaListen": "Start Listening",
+      "ctaDistribute": "Distribute Your Music"
+    },
+    "stats": {
+      "genres": "African Genres",
+      "streaming": "Streaming",
+      "streamingValue": "Free",
+      "revenueShare": "Artist Revenue Share",
+      "currencies": "African Currencies"
+    },
+    "stakeholders": {
+      "badge": "For Everyone in Music",
+      "title": "One Platform,",
+      "titleAccent": "Every Role",
+      "description": "Whether you create, curate, listen, or organize — Zonga is built for you.",
+      "listeners": {
+        "title": "For Listeners",
+        "description": "Discover the best of African music — Afrobeats, Amapiano, Highlife, Bongo, and more. Follow artists, build playlists, and stream for free.",
+        "cta": "Start Listening",
+        "highlights": ["Free streaming", "Curated playlists", "Live event access"]
+      },
+      "artists": {
+        "title": "For Artists",
+        "description": "Distribute your music, earn 85% of revenue, and own your masters — with instant payouts to mobile money, bank, or crypto.",
+        "cta": "Start Distributing",
+        "highlights": ["85% revenue share", "Instant mobile money payouts", "Own your masters"]
+      },
+      "labels": {
+        "title": "For Labels",
+        "description": "Manage rosters, automate royalty splits, and scale distribution across the continent — with full compliance and reporting.",
+        "cta": "Learn More",
+        "highlights": ["Multi-artist dashboard", "Automated royalty splits", "Compliance + reporting"]
+      },
+      "events": {
+        "title": "For Event Organizers",
+        "description": "Sell tickets, manage events, and connect with fans — powered by the same platform artists already trust.",
+        "cta": "Browse Events",
+        "highlights": ["Ticketing built-in", "Multi-tier pricing", "Fan engagement tools"]
+      }
     },
     "features": {
       "badge": "Platform Features",
-      "title": "Built for",
-      "titleAccent": "African Artists",
-      "description": "Everything you need to distribute, monetize, and grow your music — with transparency at every step."
+      "title": "Listen, Create,",
+      "titleAccent": "Thrive",
+      "description": "Features for listeners who want great music and creators who deserve fair pay — all on one platform.",
+      "items": [
+        { "title": "Stream & Discover", "description": "Explore millions of tracks across 40+ African genres — from Afrobeats and Amapiano to Highlife and Soukous. Free to stream, always." },
+        { "title": "Curated Playlists", "description": "Genre playlists, mood mixes, and regional collections hand-curated for every taste — updated weekly by our editorial team." },
+        { "title": "Live Events", "description": "Discover concerts, festivals, and live sessions near you. Buy tickets and follow artists for event alerts." },
+        { "title": "Fair Revenue Split", "description": "Transparent royalty calculations with real-time breakdown by stream, download, licensing, sync, and more." },
+        { "title": "Instant Payouts", "description": "Request payouts anytime via Orange Money, M-Pesa, MTN MoMo, Flutterwave, or bank transfer. No 90-day holds." },
+        { "title": "Full Creative Control", "description": "Artists own their masters. Upload, distribute, and manage your catalog with complete creative ownership." }
+      ]
+    },
+    "regions": {
+      "badge": "Continental Coverage",
+      "title": "Every Sound,",
+      "titleAccent": "Every Region",
+      "description": "From Lagos to Nairobi, Johannesburg to Dakar — Zonga amplifies the full spectrum of African music."
     },
     "mission": {
       "badge": "Our Mission",
       "title": "Music That",
       "titleAccent": "Empowers",
-      "description": "Zonga was born from a simple belief: African artists deserve the same tools, transparency, and revenue share as artists anywhere in the world. We built a platform that makes that possible."
+      "description": "Zonga was born from a simple belief: African music deserves a platform that puts listeners and creators first. Listeners get free access to the richest catalog of African music anywhere. Creators get 85% of every stream. Labels scale effortlessly. Everyone wins.",
+      "highlights": ["Free for Listeners", "85% Revenue Share", "Own Your Masters", "Pan-African Reach"]
+    },
+    "regions": {
+      "badge": "Continental Coverage",
+      "title": "Every Sound,",
+      "titleAccent": "Every Region",
+      "description": "From Lagos to Nairobi, Johannesburg to Dakar — Zonga amplifies the full spectrum of African music.",
+      "items": [
+        { "name": "West Africa", "genres": "Afrobeats · Highlife · Jùjú" },
+        { "name": "East Africa", "genres": "Bongo Flava · Benga · Taarab" },
+        { "name": "Southern Africa", "genres": "Amapiano · Kwaito · Maskandi" },
+        { "name": "Central Africa", "genres": "Soukous · Ndombolo · Rumba" },
+        { "name": "North Africa", "genres": "Raï · Gnawa · Chaabi" },
+        { "name": "Diaspora", "genres": "Afro-House · Afro-R&B · Afrofusion" }
+      ]
+    },
+    "partnership": {
+      "badge": "Partnership",
+      "title": "Built With",
+      "titleAccent": "Partners Who Care",
+      "description": "Zonga partners with organizations that share our commitment to fair music — from distribution to community impact."
+    },
+    "missionCard": {
+      "revenueShare": "Revenue Share",
+      "payouts": "Payouts",
+      "instant": "Instant",
+      "ownership": "Ownership"
     },
     "cta": {
-      "title": "Ready to Share Your",
-      "titleAccent": "Music?",
-      "description": "Join thousands of African artists who trust Zonga for transparent royalties, instant payouts, and full creative ownership."
+      "title": "Ready to Join the",
+      "titleAccent": "Movement?",
+      "description": "Whether you listen, create, manage, or organize — Zonga is where African music thrives. Stream for free. Distribute your music. Join the movement.",
+      "ctaListen": "Start Listening",
+      "ctaDistribute": "Distribute Your Music"
     }
+  },
+  "footer": {
+    "ctaTitle": "Ready to share your music?",
+    "ctaDescription": "Join thousands of African creators on Zonga.",
+    "ctaButton": "Start Free",
+    "tagline": "The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators.",
+    "platform": "Platform",
+    "platformCatalog": "Catalog",
+    "platformDistribution": "Distribution",
+    "platformAnalytics": "Analytics",
+    "platformPayouts": "Payouts",
+    "platformFingerprinting": "Audio Fingerprinting",
+    "resources": "Resources",
+    "resourcesDocs": "Documentation",
+    "resourcesApi": "API Reference",
+    "resourcesStatus": "Status",
+    "resourcesSupport": "Support",
+    "legal": "Legal",
+    "legalPrivacy": "Privacy Policy",
+    "legalTerms": "Terms of Service",
+    "legalCookies": "Cookie Policy",
+    "legalRoyalties": "Royalty Policy",
+    "ecosystem": "Ecosystem",
+    "badgeFairRevenue": "Fair Revenue",
+    "badgeAudioVerified": "Audio Verified",
+    "badgeGdpr": "GDPR Ready",
+    "copyright": "© {year} Zonga — A NzilaOS Application. All rights reserved."
+  },
+  "signIn": {
+    "pageTitle": "Sign In | Zonga",
+    "pageDescription": "Sign in to your Zonga account — the fair-share music platform for African creators.",
+    "tagline": "Your Music, Your Revenue",
+    "subtitle": "The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators.",
+    "poweredBy": "Powered by Nzila",
+    "partOf": "Part of",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "stats": [
+      { "value": "85%", "label": "Creator Revenue Share" },
+      { "value": "$1", "label": "Minimum Payout" },
+      { "value": "40+", "label": "African Genres" }
+    ],
+    "badges": [
+      { "label": "85% Revenue Share" },
+      { "label": "Daily Payouts from $1" },
+      { "label": "Own Your Masters" }
+    ],
+    "welcomeBack": "Welcome back",
+    "signInToContinue": "Sign in to your account to continue",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign in",
+    "signingIn": "Signing in…",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "artists": "Artists",
+    "events": "Events",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "signIn": "Sign In",
+    "browse": "Browse",
+    "search": "Search",
+    "catalog": "Catalog",
+    "releases": "Releases",
+    "playlists": "Playlists",
+    "events": "Events",
+    "revenue": "Revenue",
+    "payouts": "Payouts",
+    "creators": "Creators",
+    "analytics": "Analytics",
+    "notifications": "Notifications",
+    "integrity": "Integrity",
+    "myMusic": "My Music",
+    "moderation": "Moderation"
   }
 }

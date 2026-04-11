@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This document outlines a polyglot persistence architecture for Nzila OS. The current architecture uses primarily PostgreSQL via two ORM layers (Django ORM for Union Eyes/ABR, Drizzle for TS-authoritative apps). This design proposes expanding to specialized data stores to optimize for different data access patterns while maintaining data consistency and governance.
+This document outlines a polyglot persistence architecture for Nzila OS. The current architecture uses primarily PostgreSQL via two ORM layers (Django ORM for UnionEyes/ABR, Drizzle for TS-authoritative apps). This design proposes expanding to specialized data stores to optimize for different data access patterns while maintaining data consistency and governance.
 
 ---
 
@@ -62,7 +62,7 @@ flowchart TB
     end
     
     subgraph AppLayer["Application Layer"]
-        UE[Union Eyes]
+        UE[UnionEyes]
         ABR[ABR]
         CON[Console]
         CFO[CFO]

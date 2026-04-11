@@ -68,9 +68,9 @@ export async function register() {
 Create `middleware.ts`:
 
 ```typescript
-import { clerkMiddleware } from '@nzila/platform-auth/entra/server';
+import { authMiddleware } from '@nzila/platform-auth/entra/server';
 
-export default clerkMiddleware();
+export default authMiddleware();
 
 export const config = {
   matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
@@ -125,7 +125,7 @@ spec:
 ## Verification
 
 - [ ] App starts on assigned port
-- [ ] Clerk authentication redirects work
+- [ ] Platform authentication redirects work
 - [ ] OTel traces appear in Jaeger (<http://localhost:16686>)
 - [ ] App appears in Backstage catalog
 

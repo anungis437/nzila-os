@@ -8,6 +8,7 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
+import { getTranslations } from 'next-intl/server'
 import {
   getRevenueOverview,
   getRevenueByCreator,
@@ -62,6 +63,7 @@ export default async function RevenuePage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
+  const t = await getTranslations('revenue')
   const [overview, byCreator] = await Promise.all([
     getRevenueOverview(),
     getRevenueByCreator(),
@@ -108,7 +110,7 @@ export default async function RevenuePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Revenue</h1>
+        <h1 className="text-2xl font-bold text-navy">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
           {overview.eventCount.toLocaleString()} revenue events tracked
         </p>
@@ -118,22 +120,22 @@ export default async function RevenuePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           {
-            label: 'Total Revenue',
+            label: t('totalRevenue'),
             value: formatCompact(overview.totalRevenue),
             color: 'text-emerald-600',
           },
           {
-            label: 'Streaming Revenue',
+            label: t('streamingRevenue'),
             value: formatCompact(overview.streamRevenue),
             color: 'text-blue-600',
           },
           {
-            label: 'Download Revenue',
+            label: t('downloadRevenue'),
             value: formatCompact(overview.downloadRevenue),
             color: 'text-purple-600',
           },
           {
-            label: 'Licensing Revenue',
+            label: t('licensingRevenue'),
             value: formatCompact(overview.syncRevenue),
             color: 'text-amber-600',
           },
@@ -186,13 +188,13 @@ export default async function RevenuePage() {
         {/* Revenue by Creator */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            Revenue by Artist
+            {t('revenueByArtist')}
           </h2>
           {byCreator.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  No artist revenue data available. Revenue will appear here once listeners engage with your catalog.
+                  {t('noArtistRevenue')}
                 </p>
               </div>
             </Card>
@@ -242,13 +244,13 @@ export default async function RevenuePage() {
         {/* Recent Revenue Events */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            Recent Activity
+            {t('recentActivity')}
           </h2>
           {overview.recentEvents.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  No revenue events recorded. Events will appear here as your catalog generates income.
+                  {t('noRevenueEvents')}
                 </p>
               </div>
             </Card>
@@ -304,7 +306,7 @@ export default async function RevenuePage() {
       {/* Payout Rails */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">
-          Supported Payout Rails
+          {t('supportedPayoutRails')}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {PAYOUT_RAILS.map((rail) => (

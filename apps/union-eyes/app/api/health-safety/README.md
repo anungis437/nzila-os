@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete backend API implementation for the Health & Safety module with 8+ production-ready Next.js API routes. All endpoints follow existing Union Eyes patterns with authentication, RLS enforcement, rate limiting, validation, and comprehensive error handling.
+Complete backend API implementation for the Health & Safety module with 8+ production-ready Next.js API routes. All endpoints follow existing UnionEyes patterns with authentication, RLS enforcement, rate limiting, validation, and comprehensive error handling.
 
 ## API Endpoints Created
 
@@ -631,6 +631,6 @@ curl -X GET "https://your-app.com/api/health-safety/dashboard?period=30d" \
 ✅ **Comprehensive error handling**  
 ✅ **Audit logging throughout**  
 ✅ **Type-safe with TypeScript**  
-✅ **Following existing Union Eyes patterns**  
+✅ **Following existing UnionEyes patterns**  
 
 All routes are ready for integration with frontend components and can be tested immediately.

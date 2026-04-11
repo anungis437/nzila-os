@@ -57,7 +57,7 @@ import {
 } from '@/components/ui/table';
 
 export const metadata: Metadata = {
-  title: 'CLC Compliance Tracking | Union Eyes',
+  title: 'CLC Compliance Tracking | UnionEyes',
   description: 'National compliance monitoring and per-capita remittance tracking',
 };
 

@@ -37,7 +37,7 @@ const footerLinks = {
     title: 'Ecosystem',
     links: [
       { label: 'NzilaOS', href: 'https://nzila.app' },
-      { label: 'Union Eyes', href: 'https://union-eyes.nzila.app' },
+      { label: 'UnionEyes', href: 'https://union-eyes.nzila.app' },
       { label: 'Zonga', href: 'https://zonga.nzila.app' },
       { label: 'Console', href: 'https://console.nzila.app' },
     ],

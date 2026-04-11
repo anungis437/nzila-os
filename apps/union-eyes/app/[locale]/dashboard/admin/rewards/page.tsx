@@ -20,7 +20,7 @@ import { getRewardsSummary } from '@/actions/rewards-actions';
 import { logger } from '@/lib/logger';
 
 export const metadata: Metadata = {
-  title: 'Recognition & Rewards Admin | Union Eyes',
+  title: 'Recognition & Rewards Admin | UnionEyes',
   description: 'Manage recognition programs, awards, and budgets',
 };
 

@@ -31,7 +31,7 @@ import { eq, desc, count, and, sql, lte } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 export const metadata: Metadata = {
-  title: 'CLC Staff Dashboard | Union Eyes',
+  title: 'CLC Staff Dashboard | UnionEyes',
   description: 'CLC staff operations dashboard - sync, remittances, and operational support',
 };
 

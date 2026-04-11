@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Health & Safety module provides a comprehensive database schema for managing workplace health and safety operations within union organizations. This schema is designed to integrate seamlessly with the existing Union Eyes application structure and supports multi-org operations.
+The Health & Safety module provides a comprehensive database schema for managing workplace health and safety operations within union organizations. This schema is designed to integrate seamlessly with the existing UnionEyes application structure and supports multi-org operations.
 
 ## Schema Design
 
@@ -408,4 +408,4 @@ Potential additions to consider:
 
 **Schema Version:** 1.0.0  
 **Last Updated:** February 11, 2026  
-**Maintainer:** Union Eyes Development Team
+**Maintainer:** UnionEyes Development Team

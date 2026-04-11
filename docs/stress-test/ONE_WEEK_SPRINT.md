@@ -47,7 +47,7 @@ Promote the repo from **CONDITIONAL YES** to **UNCONDITIONAL YES** by closing:
 |---|------|-------|-----|
 | M1 | Add `@arcjet/next` to console + partners packages | `apps/console/package.json`, `apps/partners/package.json` | `pnpm install` succeeds |
 | M2 | Create `lib/arcjet.ts` in console and partners | `apps/console/lib/arcjet.ts`, `apps/partners/lib/arcjet.ts` | Arcjet client configured with token bucket (100 cap, 60 req/min refill) |
-| M3 | Wrap `clerkMiddleware` with Arcjet in both middlewares | `apps/console/middleware.ts`, `apps/partners/middleware.ts` | 429 returned when limit exceeded |
+| M3 | Wrap `authMiddleware` with Arcjet in both middlewares | `apps/console/middleware.ts`, `apps/partners/middleware.ts` | 429 returned when limit exceeded |
 | M4 | Add `ARCJET_KEY` env var to env contracts | `apps/console/lib/env.ts` (or equivalent), `.env.example` | `env-contract.test.ts` still passes |
 | M5 | Write `rate-limiting.test.ts` contract test | `tooling/contract-tests/rate-limiting.test.ts` | Static assertion that middleware imports rate limiter |
 | M6 | PR, CI green, merge | — | `contract-tests` job passes in CI |
@@ -97,7 +97,7 @@ Promote the repo from **CONDITIONAL YES** to **UNCONDITIONAL YES** by closing:
 
 | # | Task | Files | DoD |
 |---|------|-------|-----|
-| Th1 | Create `fixtures/orgs.ts` with OrgA + OrgB seeded fixtures and mock Clerk session headers | `tooling/contract-tests/fixtures/orgs.ts` | OrgA and OrgB fixtures with distinct `orgId` values |
+| Th1 | Create `fixtures/orgs.ts` with OrgA + OrgB seeded fixtures and mock auth session headers | `tooling/contract-tests/fixtures/orgs.ts` | OrgA and OrgB fixtures with distinct `orgId` values |
 | Th2 | Create `org-isolation-runtime.test.ts` | `tooling/contract-tests/org-isolation-runtime.test.ts` | Test A (cross-org READ), Test B (cross-org WRITE), Test C (missing context → 401) |
 | Th3 | Add Test D (forged orgId in body ignored) + Test E (no org ID in error message) | Same file | All 5 tests present |
 | Th4 | Configure test runner to handle Next.js route handlers (use `next/test-utils` or mock `auth()`) | `tooling/contract-tests/vitest.config.ts` | Tests run without requiring a live server |

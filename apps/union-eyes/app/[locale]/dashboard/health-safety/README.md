@@ -1,6 +1,6 @@
 # Health & Safety Dashboard Pages
 
-Production-ready Next.js pages for the Health & Safety module in the Union Eyes application.
+Production-ready Next.js pages for the Health & Safety module in the UnionEyes application.
 
 ## 📁 File Structure
 
@@ -142,7 +142,7 @@ app/[locale]/dashboard/health-safety/
 
 ## 🎨 Design Patterns
 
-All pages follow consistent Union Eyes patterns:
+All pages follow consistent UnionEyes patterns:
 
 ### Layout
 - **Client Components** (`"use client"`)

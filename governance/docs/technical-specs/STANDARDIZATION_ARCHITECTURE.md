@@ -77,7 +77,7 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 - **Email:** Resend + React Email templates
 
 **Target Platforms:**
-- Union Eyes (4,773 entities, largest platform)
+- UnionEyes (4,773 entities, largest platform)
 - ABR Insights (132 tables, LMS + Tribunal DB)
 - Shop Quoter (e-commerce, inventory management)
 - ClinicConnect (healthcare appointments, EMR)
@@ -226,7 +226,7 @@ Instead of duplicating functionality across 15 platforms, we build **8 core shar
 - `POST /ai/moderate` — Content moderation
 - `GET /ai/recommendations/:userId` — Personalized recommendations
 
-**Consumers:** Memora (health coaching), ABR (learning coach), Court Lens (legal analysis), Union Eyes (contract intelligence), all platforms needing AI
+**Consumers:** Memora (health coaching), ABR (learning coach), Court Lens (legal analysis), UnionEyes (contract intelligence), all platforms needing AI
 
 ---
 
@@ -312,7 +312,7 @@ Instead of duplicating functionality across 15 platforms, we build **8 core shar
 - **A/B Testing:** Experiment framework, statistical significance
 - **Dashboards:** Real-time Grafana/Metabase dashboards
 - **Alerting:** Anomaly detection (churn spike, downtime, error rate spike)
-- **Custom Events:** Platform-specific events (e.g., Court Lens case search, Union Eyes grievance filed)
+- **Custom Events:** Platform-specific events (e.g., Court Lens case search, UnionEyes grievance filed)
 
 **API Endpoints:**
 - `POST /analytics/events` — Track custom event
@@ -466,7 +466,7 @@ Instead of duplicating functionality across 15 platforms, we build **8 core shar
 4. CyberLearn (edtech, Next.js)
 5. C3UO (union organizing, Next.js)
 6. SentryIQ (insurance, Node API)
-7. Union Eyes (4,773 entities, Next.js)
+7. UnionEyes (4,773 entities, Next.js)
 
 **Time Savings:** 54 weeks sequential → 8 weeks parallel = **85% reduction**
 
@@ -555,7 +555,7 @@ tenant_key_mapping = {
 
 ### **Business Agility**
 - **Faster time-to-market:** New platforms launch in weeks (not months) by consuming backbone
-- **Easier cross-platform features:** User moves from Union Eyes → ABR → CORA seamlessly
+- **Easier cross-platform features:** User moves from UnionEyes → ABR → CORA seamlessly
 - **Portfolio-wide metrics:** Unified analytics across all 15 platforms
 
 ---

@@ -2,12 +2,12 @@
 
 > **Status:** Implemented  
 > **Domain:** Platform Economics  
-> **Apps:** Union Eyes  
+> **Apps:** UnionEyes  
 > **Currency:** CAD-only  
 
 ## Overview
 
-The DAPL is Union Eyes' canonical financial backbone — a 5-layer architecture
+The DAPL is UnionEyes' canonical financial backbone — a 5-layer architecture
 that unifies platform billing, cost allocation, dues alignment, and
 reproducible financial exports into a single, auditable system.
 

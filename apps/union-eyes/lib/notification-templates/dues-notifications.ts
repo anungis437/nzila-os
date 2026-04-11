@@ -187,7 +187,7 @@ export const DuesNotificationTemplates = {
         <p>Your union dues of <strong>$${data.amount}</strong> were due on <strong>${data.dueDate}</strong> and are now <strong style="color: #dc3545;">overdue</strong>.</p>
         
         <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0;">
-          <p style="margin: 0; color: #0c5460;"><strong>This may indicate a missed payroll deduction.</strong> Please check your recent pay stubs. If you believe the deduction was missed by your employer, report it through your Union Eyes dashboard.</p>
+          <p style="margin: 0; color: #0c5460;"><strong>This may indicate a missed payroll deduction.</strong> Please check your recent pay stubs. If you believe the deduction was missed by your employer, report it through your UnionEyes dashboard.</p>
         </div>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">

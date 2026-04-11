@@ -16,7 +16,7 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline'
 import { quoteRepo } from '@/lib/db'
-import { getReadContext } from '@/lib/clerk-org-resolver'
+import { getReadContext } from '@/lib/org-resolver'
 import { getOrdersAction } from '@/app/actions/orders'
 import { getInvoicesAction } from '@/app/actions/invoices'
 import { getCustomersAction } from '@/app/actions/customers'

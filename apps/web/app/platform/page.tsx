@@ -34,7 +34,7 @@ const capabilities = [
     photo: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600',
     name: 'Security & Compliance',
     alt: 'Digital security shield with encrypted data lock visualization',
-    description: 'SOC 2 aligned patterns, Clerk-based identity, and role-based access control across apps.',
+    description: 'SOC 2 aligned patterns, Entra ID-based identity, and role-based access control across apps.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600',

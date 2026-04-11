@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // cSpell:ignore nzila merkle
 /**
- * Union Eyes — Evidence Seal Verifier
+ * UnionEyes — Evidence Seal Verifier
  *
  * Loads pack.json + seal.json, runs verifySeal() from @nzila/os-core, and
  * exits 1 if the seal is invalid. This script is a REQUIRED CI gate.

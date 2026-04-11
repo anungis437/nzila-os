@@ -6,7 +6,7 @@ import SectionHeading from '@/components/public/SectionHeading';
 
 export const metadata: Metadata = {
   title: 'Portfolio',
-  description: '15 AI-powered platforms across 10+ verticals — from Union Eyes in labor rights to DiasporaCore in fintech. Explore the full Nzila Ventures portfolio.',
+  description: '15 AI-powered platforms across 10+ verticals — from UnionEyes in labor rights to DiasporaCore in fintech. Explore the full Nzila Ventures portfolio.',
   openGraph: {
     title: 'Nzila Ventures Portfolio',
     description: '15 platforms, 12,000+ data orgs, $100B+ TAM.',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 const platforms = [
-  { name: 'Union Eyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
+  { name: 'UnionEyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
   { name: 'ABR Insights', vertical: 'EdTech/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.1, status: 'Production Ready', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, AI coach' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', orgs: '485', complexity: 'EXTREME', readiness: 6.5, status: 'Flagship', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
   { name: 'CongoWave', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
@@ -191,7 +191,7 @@ export default function Portfolio() {
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             {[
               { phase: 'Phase 1', title: 'Foundation', weeks: '16 weeks', detail: 'Backbone core', color: 'from-electric to-blue-700' },
-              { phase: 'Phase 2–3', title: 'Django PoC', weeks: '20 weeks', detail: 'eExports, Union Eyes', color: 'from-violet to-purple-700' },
+              { phase: 'Phase 2–3', title: 'Django PoC', weeks: '20 weeks', detail: 'eExports, UnionEyes', color: 'from-violet to-purple-700' },
               { phase: 'Phase 4–7', title: 'Scale', weeks: '100 weeks', detail: 'Fintech, EdTech, Commerce', color: 'from-gold to-amber-700' },
               { phase: 'Phase 8', title: 'Complete', weeks: '16 weeks', detail: 'Agrotech, Consolidate', color: 'from-emerald to-green-700' },
             ].map((phase, i) => (

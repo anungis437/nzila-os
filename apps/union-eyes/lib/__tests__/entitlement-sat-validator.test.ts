@@ -112,7 +112,7 @@ describe('entitlement-sat-validator', () => {
     });
   });
 
-  describe('Union Eyes defaults', () => {
+  describe('UnionEyes defaults', () => {
     it('createUnionEyesEntitlements returns constraints and roleMappings', () => {
       const { constraints, roleMappings } = createUnionEyesEntitlements();
       expect(constraints.length).toBeGreaterThan(0);

@@ -106,7 +106,7 @@
         "rows": [
           {
             "patent_title": "AI-Powered Pension Forecasting System",
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "filing_date": "2026-04-15",
             "status": "Pending",
             "jurisdiction": "Canada (CIPO)",
@@ -122,7 +122,7 @@
           },
           {
             "patent_title": "Grievance Resolution Prediction Algorithm",
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "filing_date": "2026-05-20",
             "status": "Pending",
             "jurisdiction": "Canada (CIPO)",
@@ -162,8 +162,8 @@
       },
       "timeline": {
         "milestones": [
-          {"date": "2026-04-15", "event": "File Union Eyes Pension Patent (CIPO)", "status": "pending"},
-          {"date": "2026-05-20", "event": "File Union Eyes Grievance Patent (CIPO)", "status": "pending"},
+          {"date": "2026-04-15", "event": "File UnionEyes Pension Patent (CIPO)", "status": "pending"},
+          {"date": "2026-05-20", "event": "File UnionEyes Grievance Patent (CIPO)", "status": "pending"},
           {"date": "2026-08-30", "event": "File ABR Bias Detection Patent (CIPO)", "status": "pending"},
           {"date": "2027-04-15", "event": "Expected CIPO Examination Report (Pension Patent)", "status": "projected"},
           {"date": "2027-10-15", "event": "Expected Patent Grant (Pension Patent - optimistic)", "status": "projected"}
@@ -203,7 +203,7 @@
             "notes": "AI Companion for elderly care, strong brand recognition potential"
           },
           {
-            "trademark": "Union Eyes",
+            "trademark": "UnionEyes",
             "class": "Class 42 (Software/Technology Services)",
             "filing_date": "2026-02-20",
             "status": "Pending",
@@ -279,7 +279,7 @@
         "rows": [
           {
             "trade_secret": "Companion Engine Personality Graph Algorithm",
-            "platform": "Cross-Platform (Memora, ABR, Union Eyes, CourtLens, CORA)",
+            "platform": "Cross-Platform (Memora, ABR, UnionEyes, CourtLens, CORA)",
             "category": "Algorithm",
             "valuation": 150000,
             "protection_level": "HIGH",
@@ -313,7 +313,7 @@
           },
           {
             "trade_secret": "Pension Forecasting Training Dataset",
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "category": "Dataset",
             "valuation": 80000,
             "protection_level": "HIGH",
@@ -423,7 +423,7 @@
         "columns": ["platform", "engineering_hours", "hourly_rate", "valuation", "status", "ownership"],
         "rows": [
           {
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "engineering_hours": 4200,
             "hourly_rate": 150,
             "valuation": 630000,
@@ -645,7 +645,7 @@
             "notes": "High protection level, quarterly audits scheduled"
           },
           {
-            "risk": "Trademark Opposition (Memora, Union Eyes)",
+            "risk": "Trademark Opposition (Memora, UnionEyes)",
             "severity": "LOW",
             "probability": 0.15,
             "impact": "Rebranding cost $20K-$50K + delay to market",
@@ -684,7 +684,7 @@
     },
     "platform": {
       "type": "multi-select",
-      "options": ["Union Eyes", "ABR Insights", "Memora", "CORA", "Cross-Platform", "All"],
+      "options": ["UnionEyes", "ABR Insights", "Memora", "CORA", "Cross-Platform", "All"],
       "default": "All"
     },
     "status": {
