@@ -15,9 +15,11 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@nzila/crm-hubspot": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@types/dompurify": "^3.2.0",
     "dompurify": "^3.3.1",

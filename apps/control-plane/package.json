@@ -16,6 +16,7 @@
   "dependencies": {
     "@nzila/db": "workspace:*",
     "@nzila/deal-engine": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/observability": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-agent-workflows": "workspace:*",
@@ -36,6 +37,7 @@
     "@nzila/platform-observability": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/platform-procurement-proof": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

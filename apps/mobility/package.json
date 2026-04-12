@@ -14,6 +14,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@nzila/db": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-hubspot": "workspace:*",
     "@nzila/integrations-m365": "workspace:*",
     "@nzila/integrations-whatsapp": "workspace:*",
@@ -24,6 +25,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.400.0",
