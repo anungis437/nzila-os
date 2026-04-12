@@ -420,7 +420,7 @@ def _send_dues_reminder(txn: dict, reminder_type: str) -> bool:
                 "title":   titles.get(reminder_type, "Dues Reminder"),
                 "message": (
                     f"Your dues payment of ${txn.get('amount', '0.00')} "
-                    f"is {'overdue' if reminder_type == 'overdue' else f'due {txn.get(\"due_date\", \"soon\")}'}."
+                    f"is {'overdue' if reminder_type == 'overdue' else 'due ' + str(txn.get('due_date', 'soon'))}."
                 ),
                 "channels": ["email", "in-app"],
                 "data": {

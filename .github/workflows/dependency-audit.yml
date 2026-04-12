@@ -90,6 +90,6 @@ jobs:
           EXIT_CODE=0
           for req in $(find . -name 'requirements*.txt' -not -path '*/node_modules/*' -not -path '*/.venv/*' -not -path '*/tech-repo-scaffold/*'); do
             echo "── Auditing $req ──"
-            pip-audit -r "$req" --desc --severity high || EXIT_CODE=1
+            pip-audit -r "$req" --desc || EXIT_CODE=1
           done
           exit $EXIT_CODE

@@ -39,6 +39,11 @@ jobs:
         run: pnpm --filter web build
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+          AUTH_SECRET: "ci_placeholder_secret_at_least_32_characters_long"
+          AZURE_AD_CLIENT_ID: "00000000-0000-0000-0000-000000000000"
+          AZURE_AD_CLIENT_SECRET: "ci-dummy-secret"
+          AZURE_AD_TENANT_ID: "00000000-0000-0000-0000-000000000000"
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
@@ -47,6 +52,11 @@ jobs:
         run: lhci autorun
         env:
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+          AUTH_SECRET: "ci_placeholder_secret_at_least_32_characters_long"
+          AZURE_AD_CLIENT_ID: "00000000-0000-0000-0000-000000000000"
+          AZURE_AD_CLIENT_SECRET: "ci-dummy-secret"
+          AZURE_AD_TENANT_ID: "00000000-0000-0000-0000-000000000000"
 
       - name: Upload Lighthouse results
         if: always()
