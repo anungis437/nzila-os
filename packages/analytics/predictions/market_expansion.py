@@ -8,12 +8,12 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
-_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'market_data.json')
+_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "market_data.json")
 
 
 def _load_market_data() -> Dict:
     """Load market data from the shared JSON config."""
-    with open(_DATA_PATH, 'r') as f:
+    with open(_DATA_PATH, "r") as f:
         return json.load(f)
 
 
@@ -25,13 +25,16 @@ class MarketExpansionAnalyzer:
         self.vertical_markets = data["vertical_markets"]
         self.geographic_markets = data["geographic_markets"]
         self._synergies = data.get("synergies", [])
-        self._scoring_weights = data.get("scoring_weights", {
-            "tam_size": 0.25,
-            "competitive_intensity": 0.20,
-            "go_to_market_fit": 0.20,
-            "regulatory_barriers": 0.15,
-            "som_growth_rate": 0.20,
-        })
+        self._scoring_weights = data.get(
+            "scoring_weights",
+            {
+                "tam_size": 0.25,
+                "competitive_intensity": 0.20,
+                "go_to_market_fit": 0.20,
+                "regulatory_barriers": 0.15,
+                "som_growth_rate": 0.20,
+            },
+        )
 
     def calculate_tam_sam_som(self, vertical_id: str, year: int = 2026) -> Dict:
         """Calculate TAM/SAM/SOM for specific vertical and year"""

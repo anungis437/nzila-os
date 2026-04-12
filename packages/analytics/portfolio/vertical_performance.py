@@ -8,12 +8,12 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'market_data.json')
+_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "market_data.json")
 
 
 def _load_market_data() -> Dict:
     """Load market data from the shared JSON config."""
-    with open(_DATA_PATH, 'r') as f:
+    with open(_DATA_PATH, "r") as f:
         return json.load(f)
 
 
@@ -30,17 +30,61 @@ class VerticalPerformanceAnalyzer:
 
         # Platform-specific metadata that augments the shared market data
         platform_meta = {
-            "uniontech": {"platforms": ["union_eyes"], "flagship": "UnionEyes", "maturity": "growth"},
-            "dei_training": {"platforms": ["abr_insights"], "flagship": "ABR Insights", "maturity": "growth"},
-            "agrotech": {"platforms": ["cora", "agrimoops"], "flagship": "CORA", "maturity": "early"},
-            "fintech_remittance": {"platforms": ["c3uo", "stsa", "insight_cfo"], "flagship": "DiasporaCore V2", "maturity": "early"},
-            "insurtech": {"platforms": ["sentryiq"], "flagship": "SentryIQ360", "maturity": "early"},
-            "legaltech": {"platforms": ["court_lens"], "flagship": "Court Lens", "maturity": "early"},
-            "trade_commerce": {"platforms": ["trade_os", "eexports", "shop_quoter"], "flagship": "Trade OS", "maturity": "early"},
-            "entertainment_streaming": {"platforms": ["congowave"], "flagship": "CongoWave", "maturity": "beta"},
-            "edtech": {"platforms": ["cyberlearn"], "flagship": "CyberLearn", "maturity": "early"},
-            "healthtech": {"platforms": ["memora"], "flagship": "Memora", "maturity": "concept"},
-            "virtual_cfo": {"platforms": ["insight_cfo"], "flagship": "Insight CFO", "maturity": "early"},
+            "uniontech": {
+                "platforms": ["union_eyes"],
+                "flagship": "UnionEyes",
+                "maturity": "growth",
+            },
+            "dei_training": {
+                "platforms": ["abr_insights"],
+                "flagship": "ABR Insights",
+                "maturity": "growth",
+            },
+            "agrotech": {
+                "platforms": ["cora", "agrimoops"],
+                "flagship": "CORA",
+                "maturity": "early",
+            },
+            "fintech_remittance": {
+                "platforms": ["c3uo", "stsa", "insight_cfo"],
+                "flagship": "DiasporaCore V2",
+                "maturity": "early",
+            },
+            "insurtech": {
+                "platforms": ["sentryiq"],
+                "flagship": "SentryIQ360",
+                "maturity": "early",
+            },
+            "legaltech": {
+                "platforms": ["court_lens"],
+                "flagship": "Court Lens",
+                "maturity": "early",
+            },
+            "trade_commerce": {
+                "platforms": ["trade_os", "eexports", "shop_quoter"],
+                "flagship": "Trade OS",
+                "maturity": "early",
+            },
+            "entertainment_streaming": {
+                "platforms": ["congowave"],
+                "flagship": "CongoWave",
+                "maturity": "beta",
+            },
+            "edtech": {
+                "platforms": ["cyberlearn"],
+                "flagship": "CyberLearn",
+                "maturity": "early",
+            },
+            "healthtech": {
+                "platforms": ["memora"],
+                "flagship": "Memora",
+                "maturity": "concept",
+            },
+            "virtual_cfo": {
+                "platforms": ["insight_cfo"],
+                "flagship": "Insight CFO",
+                "maturity": "early",
+            },
         }
 
         result = {}
