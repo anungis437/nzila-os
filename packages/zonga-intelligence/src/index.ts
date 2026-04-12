@@ -104,3 +104,33 @@ export {
   type TrendingItem,
   type ContentSimilarity,
 } from './recommendation-engine'
+
+// ── Content Similarity ────────────────────────────────────────────────────
+export {
+  computeTrackSimilarity,
+  findSimilarTracks,
+  batchFindSimilar,
+  DEFAULT_SIMILARITY_WEIGHTS,
+  type TrackAttributes,
+  type SimilarityWeights,
+} from './content-similarity'
+
+// ── Trending Scorer ───────────────────────────────────────────────────────
+export {
+  scoreTrendingItems,
+  getTrendingByRegion,
+  detectBreakouts,
+  DEFAULT_TRENDING_CONFIG,
+  type TrendingInput,
+  type TrendingScorerConfig,
+} from './trending'
+
+// ── Recommendation Cache ──────────────────────────────────────────────────
+export {
+  createRecommendationCache,
+  DEFAULT_CACHE_CONFIG,
+  type RecommendationCacheConfig,
+  type CacheEntry,
+  type CacheStats,
+  type RecommendationCache,
+} from './recommendation-cache'
