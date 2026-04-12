@@ -2,11 +2,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 
 // ── Super-admin override ────────────────────────────────────────────────────
 
-/** Emails that always receive platform_admin, regardless of auth metadata. */
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-])
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 // ── Role definitions ────────────────────────────────────────────────────────
 
@@ -433,7 +429,7 @@ export async function getUserRole(): Promise<PlatformRole> {
   const user = await currentUser()
   const email = user?.primaryEmailAddress?.emailAddress
               ?? user?.emailAddresses?.[0]?.emailAddress
-  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+  if (isSuperAdmin(email)) {
     return 'platform_admin'
   }
 
@@ -467,7 +463,7 @@ export async function getUserRoles(): Promise<{
     const user = await currentUser()
     const email = user?.primaryEmailAddress?.emailAddress
                 ?? user?.emailAddresses?.[0]?.emailAddress
-    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    if (isSuperAdmin(email)) {
       platformRole = 'platform_admin'
     }
   }

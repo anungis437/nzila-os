@@ -18,11 +18,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
 
-/** Emails that always receive admin role, regardless of session metadata. */
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-])
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 /**
  * Resolve org context from auth session.
@@ -51,7 +47,7 @@ export async function resolveOrgContext(): Promise<AgriOrgContext> {
     const user = await currentUser()
     const email = user?.primaryEmailAddress?.emailAddress
                 ?? user?.emailAddresses?.[0]?.emailAddress
-    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    if (isSuperAdmin(email)) {
       role = 'admin' as AgriOrgRole
     }
   }

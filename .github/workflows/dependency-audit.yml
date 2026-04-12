@@ -68,3 +68,28 @@ jobs:
             audit-report.json
             audit-report-high.json
           retention-days: 90
+
+  python-audit:
+    name: Python dependency audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit Python requirements files
+        run: |
+          EXIT_CODE=0
+          for req in $(find . -name 'requirements*.txt' -not -path '*/node_modules/*' -not -path '*/.venv/*' -not -path '*/tech-repo-scaffold/*'); do
+            echo "── Auditing $req ──"
+            pip-audit -r "$req" --desc --severity high || EXIT_CODE=1
+          done
+          exit $EXIT_CODE

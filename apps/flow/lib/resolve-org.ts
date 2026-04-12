@@ -14,11 +14,7 @@ import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 import { getOrgCommerceConfig } from '@nzila/platform-commerce-org/service'
 import { resolveInternalOrgId } from './org-resolver'
 
-/** Emails that always receive admin role, regardless of Clerk metadata. */
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-])
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 /**
  * Resolve org context from Clerk auth.
@@ -45,7 +41,7 @@ export async function resolveOrgContext(): Promise<OrgContext> {
     const user = await currentUser()
     const email = user?.primaryEmailAddress?.emailAddress
                 ?? user?.emailAddresses?.[0]?.emailAddress
-    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    if (isSuperAdmin(email)) {
       role = OrgRole.ADMIN
     }
   }
