@@ -17,10 +17,15 @@ import {
   scoreTrendingItems,
   type RecommendationPorts,
   type TrendingInput,
+  type SignalType,
 } from '@nzila/zonga-intelligence'
 
 // ── Module-level singletons ─────────────────────────────────────────────────
-const cache = createRecommendationCache({ maxEntries: 5000 })
+const cache = createRecommendationCache({
+  maxEntries: 5000,
+  defaultTtlMs: 5 * 60 * 1000,
+  strategyTtlMs: {},
+})
 
 export async function GET(request: Request) {
   return withOrgScope(request, (ctx) =>
@@ -34,12 +39,12 @@ export async function GET(request: Request) {
       const cacheKey = `reco:${ctx.userId}:${strategy}:${region ?? 'global'}:${limit}`
       const cached = cache.get(cacheKey)
       if (cached) {
-        return NextResponse.json({ ok: true, data: { recommendations: cached.data, source: 'cache' } })
+        return NextResponse.json({ ok: true, data: { recommendations: cached.recommendations, source: 'cache' } })
       }
 
       // Build recommendation ports from DB
       const ports: RecommendationPorts = {
-        getUserSignals: async (userId: string) => {
+        fetchUserSignals: async (userId: string, _maxAgeDays: number) => {
           const rows = await platformDb.execute(sql`
             SELECT entity_id as "itemId", activity_type as "signalType",
                    CASE activity_type
@@ -58,64 +63,15 @@ export async function GET(request: Request) {
           `) as Array<{ itemId: string; signalType: string; weight: number; timestamp: string }>
           return rows.map((r) => ({
             userId,
-            itemId: r.itemId,
-            signalType: r.signalType as 'play' | 'skip' | 'like' | 'save' | 'share' | 'search',
+            signalType: r.signalType as SignalType,
+            targetId: r.itemId,
+            targetType: 'track' as const,
             weight: Number(r.weight),
             timestamp: new Date(r.timestamp),
           }))
         },
 
-        getSimilarUsers: async (userId: string, topK: number) => {
-          // Find users who liked similar content (collaborative filtering)
-          const rows = await platformDb.execute(sql`
-            SELECT other.user_id as "userId", COUNT(*) as overlap
-            FROM zonga_listener_activity my
-            JOIN zonga_listener_activity other
-              ON my.entity_id = other.entity_id
-              AND my.activity_type = other.activity_type
-            JOIN zonga_listeners other_l ON other_l.id = other.listener_id
-            JOIN zonga_listeners my_l ON my_l.id = my.listener_id
-            WHERE my_l.user_id = ${userId}
-              AND other_l.user_id != ${userId}
-              AND my.activity_type IN ('play', 'favorite')
-            GROUP BY other.user_id
-            ORDER BY overlap DESC
-            LIMIT ${topK}
-          `) as Array<{ userId: string; overlap: number }>
-          return rows.map((r) => r.userId)
-        },
-
-        getItemMetadata: async (itemIds: string[]) => {
-          if (itemIds.length === 0) return []
-          const rows = await platformDb.execute(sql`
-            SELECT id, title, creator_id as "artistId",
-                   metadata_json->>'genre' as genre,
-                   metadata_json->>'mood' as mood,
-                   metadata_json->>'bpm' as bpm,
-                   created_at as "releaseDate"
-            FROM zonga_content_assets
-            WHERE id = ANY(${itemIds}::uuid[]) AND status = 'published'
-          `) as Array<{
-            id: string
-            title: string
-            artistId: string
-            genre: string | null
-            mood: string | null
-            bpm: string | null
-            releaseDate: string
-          }>
-          return rows.map((r) => ({
-            itemId: r.id,
-            title: r.title,
-            artistId: r.artistId,
-            genres: r.genre ? [r.genre] : [],
-            moods: r.mood ? [r.mood] : [],
-            bpm: r.bpm ? Number(r.bpm) : undefined,
-            releaseDate: new Date(r.releaseDate),
-          }))
-        },
-
-        getTrendingItems: async (count: number) => {
+        fetchTrendingItems: async (region: string, _itemType, count: number) => {
           const rows = await platformDb.execute(sql`
             SELECT entity_id as "itemId",
                    COUNT(*) as volume,
@@ -131,17 +87,39 @@ export async function GET(request: Request) {
 
           const inputs: TrendingInput[] = rows.map((r) => ({
             itemId: r.itemId,
-            currentPeriodPlays: Number(r.recentPlays),
-            previousPeriodPlays: Math.max(1, Number(r.volume) - Number(r.recentPlays)),
-            totalPlays: Number(r.volume),
-            lastActivityAt: new Date(r.lastActivity),
+            itemType: 'track' as const,
+            region,
+            currentCount: Number(r.recentPlays),
+            previousCount: Math.max(1, Number(r.volume) - Number(r.recentPlays)),
+            lastInteractionAt: new Date(r.lastActivity).getTime(),
+            totalCount: Number(r.volume),
           }))
 
           const scored = scoreTrendingItems(inputs)
-          return scored.slice(0, count).map((s) => ({
-            itemId: s.itemId,
-            score: s.score,
+          return scored.slice(0, count)
+        },
+
+        fetchContentSimilar: async (itemIds: readonly string[], _itemType, count: number) => {
+          if (itemIds.length === 0) return []
+          const rows = await platformDb.execute(sql`
+            SELECT id, title, creator_id as "artistId",
+                   metadata_json->>'genre' as genre,
+                   metadata_json->>'mood' as mood
+            FROM zonga_content_assets
+            WHERE id = ANY(${[...itemIds]}::uuid[]) AND status = 'published'
+            LIMIT ${count}
+          `) as Array<{ id: string; title: string; artistId: string; genre: string | null; mood: string | null }>
+          return rows.map((r) => ({
+            sourceItemId: itemIds[0]!,
+            targetItemId: r.id,
+            targetItemType: 'track' as const,
+            similarityScore: 0.5,
+            sharedAttributes: [r.genre, r.mood].filter(Boolean) as string[],
           }))
+        },
+
+        fetchUserRegion: async (_userId: string) => {
+          return region ?? 'global'
         },
       }
 
@@ -150,14 +128,15 @@ export async function GET(request: Request) {
       try {
         const result = await engine.recommend({
           userId: ctx.userId,
-          count: limit,
-          strategy: strategy as 'collaborative' | 'content' | 'trending' | 'hybrid',
+          targetType: 'track',
+          limit,
+          strategy: (strategy === 'content' ? 'content_based' : strategy) as 'collaborative' | 'content_based' | 'trending' | 'hybrid',
         })
 
-        const recommendations = result.items ?? []
+        const recommendations = result.recommendations ?? []
 
         // Cache the result
-        cache.set(cacheKey, recommendations, strategy as 'collaborative' | 'content' | 'trending' | 'hybrid')
+        cache.set(cacheKey, result)
 
         return NextResponse.json({
           ok: true,

@@ -122,7 +122,6 @@ export function createPlayEvent(
     timestamp: Date.now(),
     properties: {
       ...props,
-      skipPercent: undefined as never, // Not applicable for play events
     },
   }
 }

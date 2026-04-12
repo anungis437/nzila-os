@@ -19,6 +19,8 @@ import {
   resolveStreamUrl,
   computeCdnSignedUrl,
   createPlaybackSession,
+  type TranscodeQuality,
+  type CdnConfig,
 } from '@nzila/zonga-streaming'
 import { createPlayEvent } from '@nzila/zonga-analytics'
 
@@ -50,44 +52,53 @@ export async function GET(request: Request, { params }: RouteParams) {
       const bestQuality = maxAudioQuality(planInfo.plan)
       const isPremium = planInfo.plan !== 'free'
 
-      const optimalQuality = selectOptimalQuality({
-        requestedBitrate: requestedQuality ? (AUDIO_QUALITY[requestedQuality]?.bitrate ?? 128) : undefined,
-        networkSpeedKbps: undefined,  // Client should pass via header in future
-        isPremium,
-        maxBitrateCap: AUDIO_QUALITY[bestQuality].bitrate,
-      })
+      const allQualities = [
+        { label: 'low', bitrate: 64, sampleRate: 22050, codec: 'aac' as const, container: 'mp4' as const, segmentDurationSec: 6 },
+        { label: 'standard', bitrate: 128, sampleRate: 44100, codec: 'aac' as const, container: 'mp4' as const, segmentDurationSec: 6 },
+        { label: 'high', bitrate: 256, sampleRate: 48000, codec: 'aac' as const, container: 'mp4' as const, segmentDurationSec: 4 },
+        { label: 'lossless', bitrate: 1411, sampleRate: 96000, codec: 'opus' as const, container: 'webm' as const, segmentDurationSec: 4 },
+      ] satisfies TranscodeQuality[]
+      const availableQualities = allQualities.filter((q) => q.bitrate <= (AUDIO_QUALITY[bestQuality]?.bitrate ?? 128))
+
+      const deliveryCtx = {
+        assetId,
+        listenerId: ctx.userId,
+        plan: isPremium ? 'premium' as const : 'free' as const,
+        networkType: 'wifi' as const,
+        deviceType: 'desktop' as const,
+        lowDataMode: false,
+      }
+
+      const optimalQuality = selectOptimalQuality(deliveryCtx, availableQualities)
 
       // 3. Generate CDN-signed stream URL
-      const blobPath = asset.storage_url.replace('blob://', '')
-      const streamUrl = resolveStreamUrl({
-        blobPath,
-        cdnBase: process.env.CDN_BASE_URL ?? '/api/blob',
-        quality: optimalQuality.selectedBitrate.toString(),
-      })
+      const cdn: CdnConfig = {
+        baseUrl: process.env.CDN_BASE_URL ?? '/api/blob',
+        signingSecret: process.env.CDN_SIGNING_SECRET ?? 'dev-secret',
+        tokenTtlSec: 3600,
+      }
 
-      const signedUrl = computeCdnSignedUrl({
-        rawUrl: streamUrl,
-        secret: process.env.CDN_SIGNING_SECRET ?? 'dev-secret',
-        expiresInSeconds: 3600,
-      })
+      const streamResult = resolveStreamUrl(assetId, deliveryCtx, availableQualities, cdn)
+      const signed = computeCdnSignedUrl(streamResult.url, cdn)
 
       // 4. Create a playback session for tracking
-      const session = createPlaybackSession({
-        trackId: assetId,
-        userId: ctx.userId,
-        quality: optimalQuality.selectedBitrate,
-        durationMs: asset.duration_ms ?? 0,
-      })
+      const session = createPlaybackSession(
+        assetId,
+        asset.duration_ms ?? 0,
+        ctx.userId,
+        optimalQuality.label,
+      )
 
       // 5. Emit analytics event
-      const playEvent = createPlayEvent({
-        userId: ctx.userId,
-        trackId: assetId,
-        artistId: asset.creator_id,
+      const playEvent = createPlayEvent(ctx.orgId, ctx.userId, {
+        assetId,
+        creatorId: asset.creator_id,
         durationMs: asset.duration_ms ?? 0,
-        listenedMs: 0, // Will be updated via progress tracking
+        positionMs: 0,
+        completionPercent: 0,
         quality: bestQuality,
-        source: 'api',
+        isComplete: false,
+        source: 'direct',
       })
 
       // Fire-and-forget persisting the play event
@@ -99,19 +110,19 @@ export async function GET(request: Request, { params }: RouteParams) {
       logger.info('Stream granted', {
         assetId,
         userId: ctx.userId,
-        quality: optimalQuality.selectedBitrate,
-        sessionId: session.sessionId,
+        quality: optimalQuality.bitrate,
+        sessionId: session.id,
       })
 
       return NextResponse.json({
         ok: true,
         data: {
-          streamUrl: signedUrl,
-          quality: optimalQuality.selectedBitrate,
-          codec: optimalQuality.codec ?? 'aac',
-          sessionId: session.sessionId,
+          streamUrl: signed.token ? `${streamResult.url}?token=${signed.token}` : streamResult.url,
+          quality: optimalQuality.bitrate,
+          codec: optimalQuality.codec,
+          sessionId: session.id,
           durationMs: asset.duration_ms,
-          expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+          expiresAt: new Date(signed.expiresAt).toISOString(),
         },
       })
     }),

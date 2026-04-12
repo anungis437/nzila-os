@@ -4,7 +4,7 @@
  * Converts workflow results into PlatformEvent objects.
  * No bus dependency — returns event objects for the caller to emit.
  */
-import type { createPlatformEvent as CreateFn } from '@nzila/platform-events'
+import type { createPlatformEvent as CreateFn, PlatformEvent } from '@nzila/platform-events'
 
 import type {
   GovernedWorkflowResult,
@@ -21,7 +21,7 @@ export function workflowStartedEvent(
   source: string,
   meta: { orgId: string; actorId: string },
   createEvent: typeof CreateFn,
-): ReturnType<typeof CreateFn> {
+): PlatformEvent<WorkflowStartedPayload> {
   return createEvent<WorkflowStartedPayload>(
     'governed-workflow.started',
     {
@@ -44,7 +44,7 @@ export function workflowStartedEvent(
 export function workflowCompletedEvent<TEntity, TState extends string>(
   result: GovernedWorkflowResult<TEntity, TState>,
   createEvent: typeof CreateFn,
-): ReturnType<typeof CreateFn> {
+): PlatformEvent<WorkflowCompletedPayload> {
   return createEvent<WorkflowCompletedPayload>(
     'governed-workflow.completed',
     {

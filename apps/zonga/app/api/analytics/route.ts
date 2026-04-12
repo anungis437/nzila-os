@@ -11,8 +11,6 @@ import { withSpan } from '@nzila/os-core/telemetry'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import {
-  aggregateCreatorDashboard,
-  aggregateAdminDashboard,
   createPlayEvent,
   createSkipEvent,
   createSearchEvent,
@@ -27,6 +25,11 @@ const IngestSchema = z.object({
   userId: z.string().uuid(),
   data: z.record(z.unknown()),
 })
+
+function parsePeriod(period: string): number {
+  const match = period.match(/^(\d+)d$/)
+  return match ? Number(match[1]) : 30
+}
 
 export async function GET(request: Request) {
   return withOrgScope(request, (ctx) =>
@@ -65,15 +68,14 @@ export async function GET(request: Request) {
           `) as Promise<Array<{ total: number }>>,
         ])
 
-        const dashboard = aggregateAdminDashboard({
+        const adminData = {
           dauTimeSeries: dauRows.map((r) => ({ date: String(r.date), count: Number(r.count) })),
           mauCount: Number(mauRows[0]?.count ?? 0),
           platformRevenue: Number(revenueRows[0]?.total ?? 0),
-          retentionCohorts: [],
           newListeners: Number(listenerRows[0]?.total ?? 0),
-        })
+        }
 
-        return NextResponse.json({ ok: true, data: { view: 'admin', period, periodDays, ...dashboard } })
+        return NextResponse.json({ ok: true, data: { view: 'admin', period, periodDays, ...adminData } })
       }
 
       // Creator dashboard — scoped to a specific creator or the current user
@@ -119,21 +121,21 @@ export async function GET(request: Request) {
         `) as Promise<Array<{ date: string; streams: number }>>,
       ])
 
-      const dashboard = aggregateCreatorDashboard({
+      const creatorData = {
         totalStreams: Number(streamRows[0]?.total ?? 0),
         totalRevenue: Number(revenueRow[0]?.total ?? 0),
         uniqueListeners: Number(listenerRow[0]?.total ?? 0),
         topCountries: geoRows.map((r) => ({ country: String(r.country ?? 'Unknown'), plays: Number(r.plays) })),
         dailyStreams: dailyRows.map((r) => ({ date: String(r.date), streams: Number(r.streams) })),
-      })
+      }
 
-      return NextResponse.json({ ok: true, data: { view: 'creator', period, periodDays, creatorId: targetCreator, ...dashboard } })
+      return NextResponse.json({ ok: true, data: { view: 'creator', period, periodDays, creatorId: targetCreator, ...creatorData } })
     }),
   )
 }
 
 export async function POST(request: Request) {
-  return withOrgScope(request, () =>
+  return withOrgScope(request, (ctx) =>
     withSpan('zonga.analytics.ingest', { 'http.method': 'POST' }, async () => {
       const body = await request.json()
       const parsed = IngestSchema.safeParse(body)
@@ -145,46 +147,52 @@ export async function POST(request: Request) {
       const { type, userId, data } = parsed.data
       let event: AnalyticsEvent
 
+      // orgId is from the current org scope
+      const orgId = ctx.orgId
+
       switch (type) {
         case 'play':
-          event = createPlayEvent({
-            userId,
-            trackId: String(data.trackId ?? ''),
-            artistId: String(data.artistId ?? ''),
+          event = createPlayEvent(orgId, userId, {
+            assetId: String(data.trackId ?? ''),
+            creatorId: String(data.artistId ?? ''),
             durationMs: Number(data.durationMs ?? 0),
-            listenedMs: Number(data.listenedMs ?? 0),
+            positionMs: Number(data.listenedMs ?? 0),
+            completionPercent: Number(data.durationMs) > 0
+              ? Math.round((Number(data.listenedMs ?? 0) / Number(data.durationMs)) * 100)
+              : 0,
             quality: String(data.quality ?? 'standard'),
-            source: String(data.source ?? 'unknown'),
+            isComplete: Number(data.listenedMs ?? 0) >= Number(data.durationMs ?? 1) * 0.9,
+            source: (data.source as 'search' | 'recommendation' | 'playlist' | 'direct' | 'share' | 'radio') ?? 'direct',
           })
           break
         case 'skip':
-          event = createSkipEvent({
-            userId,
-            trackId: String(data.trackId ?? ''),
-            skipAtMs: Number(data.skipAtMs ?? 0),
-            totalDurationMs: Number(data.totalDurationMs ?? 0),
-            reason: String(data.reason ?? 'manual'),
+          event = createSkipEvent(orgId, userId, {
+            assetId: String(data.trackId ?? ''),
+            creatorId: String(data.artistId ?? ''),
+            positionMs: Number(data.skipAtMs ?? 0),
+            durationMs: Number(data.totalDurationMs ?? 0),
+            reason: (data.reason as 'manual' | 'queue_next' | 'dislike') ?? 'manual',
           })
           break
         case 'search':
-          event = createSearchEvent({
-            userId,
+          event = createSearchEvent(orgId, userId, {
             query: String(data.query ?? ''),
             resultCount: Number(data.resultCount ?? 0),
-            selectedIndex: data.selectedIndex != null ? Number(data.selectedIndex) : undefined,
+            selectedIndex: data.selectedIndex != null ? Number(data.selectedIndex) : null,
+            selectedAssetId: data.selectedAssetId != null ? String(data.selectedAssetId) : null,
+            latencyMs: Number(data.latencyMs ?? 0),
           })
           break
         case 'share':
-          event = createShareEvent({
-            userId,
+          event = createShareEvent(orgId, userId, {
+            entityType: (data.contentType as 'track' | 'playlist' | 'artist' | 'event') ?? 'track',
             contentId: String(data.contentId ?? ''),
-            contentType: String(data.contentType ?? 'track'),
-            platform: String(data.platform ?? 'link'),
+            platform: (data.platform as 'whatsapp' | 'twitter' | 'facebook' | 'copy_link' | 'other') ?? 'other',
+            deepLink: String(data.deepLink ?? ''),
           })
           break
         case 'session':
-          event = createSessionEvent({
-            userId,
+          event = createSessionEvent(orgId, userId, 'session_start', {
             sessionId: String(data.sessionId ?? crypto.randomUUID()),
             durationMs: Number(data.durationMs ?? 0),
             tracksPlayed: Number(data.tracksPlayed ?? 0),
