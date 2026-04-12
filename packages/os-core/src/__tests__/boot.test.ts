@@ -24,17 +24,15 @@ vi.mock('../boot-assert', () => ({
 }))
 
 describe('createAppBoot', () => {
-  const origEnv = { ...process.env }
-
   beforeEach(() => {
     vi.clearAllMocks()
-    process.env.NEXT_RUNTIME = 'nodejs'
+    vi.stubEnv('NEXT_RUNTIME', 'nodejs')
+    vi.stubEnv('NODE_ENV', 'test')
     delete process.env.NEXT_PHASE
-    process.env.NODE_ENV = 'test'
   })
 
   afterEach(() => {
-    process.env = { ...origEnv }
+    vi.unstubAllEnvs()
   })
 
   it('returns a function', () => {
@@ -113,7 +111,7 @@ describe('createAppBoot', () => {
     mockAssertBootInvariants.mockImplementation(() => {
       throw new Error('Boot check failed')
     })
-    process.env.NODE_ENV = 'development'
+    vi.stubEnv('NODE_ENV', 'development')
 
     await expect(createAppBoot('console')()).resolves.toBeUndefined()
   })
@@ -122,7 +120,7 @@ describe('createAppBoot', () => {
     mockAssertBootInvariants.mockImplementation(() => {
       throw new Error('Boot check failed')
     })
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
 
     await expect(createAppBoot('console')()).rejects.toThrow('Boot invariants failed')
   })
