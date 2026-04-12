@@ -91,7 +91,7 @@ describe('events', () => {
   it('createShareEvent records share properties', () => {
     const event = createShareEvent(orgId, null, {
       entityType: 'track',
-      entityId: 'track-1',
+      contentId: 'track-1',
       platform: 'whatsapp',
       deepLink: 'https://zonga.app/t/track-1',
     })
@@ -364,13 +364,13 @@ describe('aggregateCreatorDashboard', () => {
       { trackId: 'a', trackTitle: 'Track A', artistName: 'Me', listenerId: 'l2', countryCode: 'KE', countryName: 'Kenya', playedAt: base + 5000, durationMs: 240_000, trackDurationMs: 240_000, revenueCents: 50, currency: 'USD', creatorId: 'creator-1' },
     ]
 
-    const dashboard = aggregateCreatorDashboard('creator-1', streams, '30d')
-    expect(dashboard.period).toBe('30d')
+    const dashboard = aggregateCreatorDashboard('creator-1', streams, { from: '2026-01-01', to: '2026-01-31' })
+    expect(dashboard.period).toEqual({ from: '2026-01-01', to: '2026-01-31' })
     expect(dashboard.totalStreams).toBe(2)
     expect(dashboard.totalRevenue).toBe(100) // 50+50 cents
     expect(dashboard.uniqueListeners).toBe(2)
     expect(dashboard.topTracks).toHaveLength(1) // one track
-    expect(dashboard.topCountries).toHaveLength(2) // NG + KE
+    expect(dashboard.listenerCountries).toHaveLength(2) // NG + KE
   })
 })
 
@@ -381,14 +381,14 @@ describe('aggregateAdminDashboard', () => {
       { trackId: 'a', trackTitle: 'Track A', artistName: 'Art1', listenerId: 'l1', countryCode: 'NG', countryName: 'Nigeria', playedAt: base, durationMs: 200_000, trackDurationMs: 240_000, revenueCents: 50, currency: 'USD', creatorId: 'c1' },
     ]
 
-    const dashboard = aggregateAdminDashboard(streams, '7d', {
+    const dashboard = aggregateAdminDashboard(streams, { from: '2026-04-01', to: '2026-04-07' }, {
       dauCount: 150,
       mauCount: 900,
       activeCreatorCount: 25,
       newSignupCount: 10,
     })
 
-    expect(dashboard.period).toBe('7d')
+    expect(dashboard.period).toEqual({ from: '2026-04-01', to: '2026-04-07' })
     expect(dashboard.dau).toBe(150)
     expect(dashboard.mau).toBe(900)
     expect(dashboard.dauMauRatio).toBeCloseTo(0.1667, 3)

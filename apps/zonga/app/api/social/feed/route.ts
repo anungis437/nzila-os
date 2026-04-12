@@ -10,7 +10,6 @@ import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
-import { logger } from '@/lib/logger'
 import {
   composeFeed,
   type RawFeedActivity,
@@ -32,7 +31,7 @@ export async function GET(request: Request) {
           a.id,
           a.activity_type as "activityType",
           a.entity_type as "entityType",
-          a.entity_id as "entityId",
+          a.entity_id as "contentId",
           a.metadata_json as "metadata",
           a.created_at as "createdAt",
           l.user_id as "actorId"
@@ -56,7 +55,7 @@ export async function GET(request: Request) {
         id: string
         activityType: string
         entityType: string
-        entityId: string
+        contentId: string
         metadata: Record<string, unknown> | null
         createdAt: string
         actorId: string
@@ -66,7 +65,7 @@ export async function GET(request: Request) {
         id: r.id,
         actorId: r.actorId,
         type: r.activityType as RawFeedActivity['type'],
-        contentId: r.entityId,
+        contentId: r.contentId,
         contentType: r.entityType,
         metadata: r.metadata ?? undefined,
         createdAt: new Date(r.createdAt),

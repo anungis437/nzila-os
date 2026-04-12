@@ -6,7 +6,7 @@
  * Org-scoped, auth-gated, evidence-backed.
  */
 import { NextResponse } from 'next/server'
-import { withOrgScope, authenticateUser } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'

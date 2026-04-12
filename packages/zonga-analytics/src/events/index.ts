@@ -59,7 +59,7 @@ export interface ShareEvent extends AnalyticsEvent {
   type: 'share'
   properties: {
     entityType: 'track' | 'playlist' | 'artist' | 'event'
-    entityId: string
+    contentId: string
     platform: 'whatsapp' | 'twitter' | 'facebook' | 'copy_link' | 'other'
     deepLink: string
   }

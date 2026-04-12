@@ -122,7 +122,6 @@ export async function GET(request: Request) {
   return withOrgScope(request, (ctx) =>
     withSpan('zonga.referral.stats', { 'http.method': 'GET' }, async () => {
       const port = buildReferralPort()
-      const service = createReferralService(port)
 
       const codes = await port.findCodesByOwner(ctx.userId)
       const stats = await Promise.all(

@@ -19,7 +19,6 @@ import {
   resolveStreamUrl,
   computeCdnSignedUrl,
   createPlaybackSession,
-  trackPlaybackProgress,
 } from '@nzila/zonga-streaming'
 import { createPlayEvent } from '@nzila/zonga-analytics'
 

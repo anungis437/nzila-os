@@ -16,7 +16,6 @@ import {
   createRecommendationCache,
   scoreTrendingItems,
   type RecommendationPorts,
-  type Recommendation,
   type TrendingInput,
 } from '@nzila/zonga-intelligence'
 
