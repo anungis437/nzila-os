@@ -187,7 +187,7 @@ export function ClauseLibrarySearch({ onSearch, isLoading, initialQuery = "" }: 
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          <SheetContent className="w-100 sm:w-135 overflow-y-auto">
             <SheetHeader>
               <SheetTitle>Search Filters</SheetTitle>
               <SheetDescription>

@@ -42,7 +42,7 @@ export function AuthPageLayout({
           aria-hidden
           fill
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/70 to-electric/40" />
+        <div className="absolute inset-0 bg-linear-to-br from-navy/90 via-navy/70 to-electric/40" />
 
         <div className="relative flex h-full flex-col justify-between p-12">
           {/* Logo */}

@@ -68,10 +68,10 @@ const KEY_ORDER = [
   'Ebmin', 'Bbmin', 'Fmin', 'Cmin', 'Gmin', 'Dmin',
 ] as const
 
-const KEY_INDEX = new Map(KEY_ORDER.map((k, i) => [k, i]))
+const KEY_INDEX = new Map<string, number>(KEY_ORDER.map((k, i) => [k, i]))
 
 // Relative major/minor pairs
-const RELATIVE_PAIRS = new Map([
+const RELATIVE_PAIRS = new Map<string, string>([
   ['Cmaj', 'Amin'], ['Gmaj', 'Emin'], ['Dmaj', 'Bmin'],
   ['Amaj', 'F#min'], ['Emaj', 'C#min'], ['Bmaj', 'G#min'],
   ['F#maj', 'Ebmin'], ['Dbmaj', 'Bbmin'], ['Abmaj', 'Fmin'],

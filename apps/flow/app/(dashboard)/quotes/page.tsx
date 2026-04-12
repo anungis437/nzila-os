@@ -226,7 +226,7 @@ export default async function QuotesListPage({ searchParams }: PageProps) {
                       >
                         {q.reference}
                       </Link>
-                      <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">
+                      <p className="text-xs text-gray-400 mt-0.5 truncate max-w-50">
                         {q.title}
                       </p>
                     </td>

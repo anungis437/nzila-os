@@ -1,8 +1,0 @@
-# CodeQL configuration — exclude generated/data files with known syntax issues
-# These are auto-generated Django views and model stubs used by the automation
-# package, not production code.
-
-paths-ignore:
-  - packages/automation/data
-  - '**/generated/**'
-  - tech-repo-scaffold

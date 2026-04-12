@@ -261,7 +261,7 @@ export default function CampaignsPage() {
             </div>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-45">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -277,7 +277,7 @@ export default function CampaignsPage() {
             </Select>
 
             <Select value={channelFilter} onValueChange={setChannelFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-45">
                 <SelectValue placeholder="Channel" />
               </SelectTrigger>
               <SelectContent>

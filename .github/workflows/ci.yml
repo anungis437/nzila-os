@@ -51,11 +51,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: Test (shard ${{ matrix.shard }})
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
+    name: Unit Tests
     services:
       postgres:
         image: postgres:16
@@ -91,7 +87,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: Run tests with coverage
-        run: pnpm test:coverage -- --shard=${{ matrix.shard }}/3
+        run: pnpm test:coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
@@ -100,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-reports-shard-${{ matrix.shard }}-${{ github.run_id }}
+          name: coverage-reports-${{ github.run_id }}
           path: |
             **/coverage/
           retention-days: 30
