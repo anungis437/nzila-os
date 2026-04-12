@@ -1,6 +1,6 @@
 'use client';
 
-import { useShell } from '../context/provider.js';
+import { useShell } from '../context/provider';
 
 export interface AppSwitcherProps {
   /** Maximum modules to show before collapsing into "more". */

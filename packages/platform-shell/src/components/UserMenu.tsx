@@ -1,6 +1,6 @@
 'use client';
 
-import { useShell } from '../context/provider.js';
+import { useShell } from '../context/provider';
 
 export function UserMenu() {
   const { user } = useShell();

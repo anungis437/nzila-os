@@ -13,8 +13,8 @@ import type {
   ShellContextValue,
   ShellUser,
   ShellOrg,
-} from './types.js';
-import { ModuleRegistry, type ModuleResolveContext } from '../registry/registry.js';
+} from './types';
+import { ModuleRegistry, type ModuleResolveContext } from '../registry/registry';
 
 // ---------------------------------------------------------------------------
 // Context

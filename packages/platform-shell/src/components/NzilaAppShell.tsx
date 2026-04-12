@@ -2,11 +2,11 @@
 
 import { type ReactNode, useMemo } from 'react'
 import { useAuth, useUser, useOrganization } from '@nzila/platform-auth/entra/client'
-import { ShellProvider } from '../context/provider.js'
-import { ShellLayout } from './ShellLayout.js'
-import { ModuleRegistry } from '../registry/registry.js'
-import { DEFAULT_MODULES } from '../registry/default-modules.js'
-import type { ShellUser, ShellOrg } from '../context/types.js'
+import { ShellProvider } from '../context/provider'
+import { ShellLayout } from './ShellLayout'
+import { ModuleRegistry } from '../registry/registry'
+import { DEFAULT_MODULES } from '../registry/default-modules'
+import type { ShellUser, ShellOrg } from '../context/types'
 import type { PlatformRole } from '@nzila/platform-contracts/role'
 
 export interface NzilaAppShellProps {
