@@ -165,7 +165,7 @@ describe('parseAudioMetadata', () => {
 describe('computeUploadKey', () => {
   it('generates a storage key with date prefix', () => {
     const key = computeUploadKey('My Song (feat. Artist).mp3', new Date('2025-03-15T10:00:00Z'))
-    expect(key).toMatch(/^uploads\/2025\/03\/15\/\d+-my_song_feat_artist_\.mp3$/)
+    expect(key).toMatch(/^uploads\/2025\/03\/15\/\d+-my_song_feat\._artist_\.mp3$/)
   })
 
   it('sanitizes special characters', () => {
