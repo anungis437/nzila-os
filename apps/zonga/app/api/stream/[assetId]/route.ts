@@ -34,7 +34,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   return withOrgScope(request, (ctx) =>
     withSpan('zonga.stream.get', { 'http.method': 'GET', 'asset.id': assetId }, async () => {
       const url = new URL(request.url)
-      const requestedQuality = url.searchParams.get('quality') as AudioQuality | null
+      const _requestedQuality = url.searchParams.get('quality') as AudioQuality | null
 
       // 1. Look up the asset to ensure it exists and is published
       const [asset] = (await platformDb.execute(

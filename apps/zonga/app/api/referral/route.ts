@@ -16,7 +16,6 @@ import { logger } from '@/lib/logger'
 import { z } from 'zod'
 import {
   createReferralService,
-  generateReferralCode,
   type ReferralRepository,
   type ReferralCode,
   type ReferralConversion,
@@ -24,7 +23,7 @@ import {
   type RewardStatus,
 } from '@nzila/zonga-growth'
 
-function buildReferralRepo(orgId: string): ReferralRepository {
+function buildReferralRepo(_orgId: string): ReferralRepository {
   return {
     findCode: async (orgId: string, code: string) => {
       const [row] = (await platformDb.execute(sql`
