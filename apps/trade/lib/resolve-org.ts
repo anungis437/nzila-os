@@ -15,6 +15,7 @@
  * @module resolve-org
  */
 import { auth, currentUser } from '@nzila/platform-auth/entra/server'
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 import type { TradeOrgContext } from '@nzila/trade-core/types'
 import type { TradeOrgRole } from '@nzila/trade-core/enums'
 
@@ -38,12 +39,6 @@ export async function resolveOrgContext(): Promise<TradeOrgContext> {
     throw new Error('No active organization — select an org before accessing Trade.')
   }
 
-  /** Emails that always receive admin role. */
-  const SUPER_ADMIN_EMAILS = new Set([
-    'info@nzilaventures.com',
-    ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-  ])
-
   let role = mapClerkRoleToTradeRole(orgRole, sessionClaims)
 
   // Super-admin email override
@@ -51,7 +46,7 @@ export async function resolveOrgContext(): Promise<TradeOrgContext> {
     const user = await currentUser()
     const email = user?.primaryEmailAddress?.emailAddress
                 ?? user?.emailAddresses?.[0]?.emailAddress
-    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    if (isSuperAdmin(email)) {
       role = 'admin' as TradeOrgRole
     }
   }

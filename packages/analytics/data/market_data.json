@@ -1,0 +1,233 @@
+{
+  "_meta": {
+    "description": "Market TAM/SAM/SOM data — single source of truth for market_expansion.py and vertical_performance.py",
+    "last_reviewed": "2026-04-12",
+    "currency": "USD"
+  },
+  "vertical_markets": {
+    "uniontech": {
+      "name": "Uniontech",
+      "tam": 50000000000,
+      "sam": 2500000000,
+      "som_2026": 350000,
+      "som_2030": 10000000,
+      "geographic_focus": ["Canada", "USA"],
+      "competitive_intensity": "MEDIUM",
+      "regulatory_barriers": "MEDIUM",
+      "go_to_market_fit": "HIGH"
+    },
+    "dei_training": {
+      "name": "DEI/Anti-Bias Training",
+      "tam": 1500000000,
+      "sam": 300000000,
+      "som_2026": 420000,
+      "som_2030": 8000000,
+      "geographic_focus": ["Canada", "USA", "UK"],
+      "competitive_intensity": "HIGH",
+      "regulatory_barriers": "LOW",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "agrotech": {
+      "name": "AgTech Supply Chain",
+      "tam": 8600000000,
+      "sam": 500000000,
+      "som_2026": 300000,
+      "som_2030": 6000000,
+      "geographic_focus": ["Canada", "USA", "Kenya", "Nigeria"],
+      "competitive_intensity": "MEDIUM-HIGH",
+      "regulatory_barriers": "LOW",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "fintech_remittance": {
+      "name": "Fintech Remittance",
+      "tam": 15000000000,
+      "sam": 1000000000,
+      "som_2026": 200000,
+      "som_2030": 5000000,
+      "geographic_focus": ["Canada", "USA", "UK", "DRC", "Kenya", "Nigeria"],
+      "competitive_intensity": "EXTREME",
+      "regulatory_barriers": "HIGH",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "insurtech": {
+      "name": "Insurtech Claims Automation",
+      "tam": 12000000000,
+      "sam": 800000000,
+      "som_2026": 150000,
+      "som_2030": 4000000,
+      "geographic_focus": ["Canada", "USA"],
+      "competitive_intensity": "HIGH",
+      "regulatory_barriers": "HIGH",
+      "go_to_market_fit": "LOW-MEDIUM"
+    },
+    "legaltech": {
+      "name": "Legaltech Research",
+      "tam": 7000000000,
+      "sam": 500000000,
+      "som_2026": 180000,
+      "som_2030": 3500000,
+      "geographic_focus": ["Canada"],
+      "competitive_intensity": "HIGH",
+      "regulatory_barriers": "MEDIUM",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "trade_commerce": {
+      "name": "Trade & Commerce",
+      "tam": 10000000000,
+      "sam": 600000000,
+      "som_2026": 250000,
+      "som_2030": 4500000,
+      "geographic_focus": ["Canada", "USA", "Africa"],
+      "competitive_intensity": "MEDIUM",
+      "regulatory_barriers": "MEDIUM",
+      "go_to_market_fit": "MEDIUM-HIGH"
+    },
+    "entertainment_streaming": {
+      "name": "Entertainment Streaming",
+      "tam": 25000000000,
+      "sam": 500000000,
+      "som_2026": 100000,
+      "som_2030": 2000000,
+      "geographic_focus": ["Canada", "USA", "DRC", "francophone Africa"],
+      "competitive_intensity": "EXTREME",
+      "regulatory_barriers": "MEDIUM",
+      "go_to_market_fit": "LOW"
+    },
+    "virtual_cfo": {
+      "name": "Virtual CFO Services",
+      "tam": 3500000000,
+      "sam": 200000000,
+      "som_2026": 80000,
+      "som_2030": 1500000,
+      "geographic_focus": ["Canada"],
+      "competitive_intensity": "MEDIUM",
+      "regulatory_barriers": "LOW",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "healthtech": {
+      "name": "HealthTech AI Companions",
+      "tam": 20000000000,
+      "sam": 1000000000,
+      "som_2026": 120000,
+      "som_2030": 3000000,
+      "geographic_focus": ["Canada", "USA"],
+      "competitive_intensity": "HIGH",
+      "regulatory_barriers": "HIGH",
+      "go_to_market_fit": "MEDIUM"
+    },
+    "edtech": {
+      "name": "EdTech Skills Training",
+      "tam": 6000000000,
+      "sam": 400000000,
+      "som_2026": 90000,
+      "som_2030": 1800000,
+      "geographic_focus": ["Canada", "USA"],
+      "competitive_intensity": "HIGH",
+      "regulatory_barriers": "LOW",
+      "go_to_market_fit": "MEDIUM"
+    }
+  },
+  "geographic_markets": {
+    "canada": {
+      "name": "Canada",
+      "market_size_modifier": 1.0,
+      "ease_of_entry": "HIGH",
+      "regulatory_environment": "Familiar",
+      "current_platforms": 15,
+      "expansion_priority": "PRIMARY"
+    },
+    "usa": {
+      "name": "United States",
+      "market_size_modifier": 10.0,
+      "ease_of_entry": "MEDIUM",
+      "regulatory_environment": "State-by-state complexity",
+      "current_platforms": 0,
+      "expansion_priority": "HIGH",
+      "recommended_entry_date": "2027-Q1"
+    },
+    "uk": {
+      "name": "United Kingdom",
+      "market_size_modifier": 2.5,
+      "ease_of_entry": "MEDIUM",
+      "regulatory_environment": "GDPR compliance required",
+      "current_platforms": 0,
+      "expansion_priority": "MEDIUM",
+      "recommended_entry_date": "2028-Q1"
+    },
+    "kenya": {
+      "name": "Kenya",
+      "market_size_modifier": 0.5,
+      "ease_of_entry": "MEDIUM-HIGH",
+      "regulatory_environment": "Mobile-first, M-Pesa integration critical",
+      "current_platforms": 0,
+      "expansion_priority": "MEDIUM",
+      "recommended_entry_date": "2027-Q3",
+      "strategic_verticals": ["agrotech", "fintech_remittance"]
+    },
+    "nigeria": {
+      "name": "Nigeria",
+      "market_size_modifier": 1.0,
+      "ease_of_entry": "MEDIUM",
+      "regulatory_environment": "Complex, partnership-driven",
+      "current_platforms": 0,
+      "expansion_priority": "MEDIUM",
+      "recommended_entry_date": "2028-Q2",
+      "strategic_verticals": ["agrotech", "fintech_remittance"]
+    },
+    "drc": {
+      "name": "Democratic Republic of Congo",
+      "market_size_modifier": 0.3,
+      "ease_of_entry": "LOW",
+      "regulatory_environment": "High complexity, local partners essential",
+      "current_platforms": 0,
+      "expansion_priority": "LOW",
+      "recommended_entry_date": "2029-Q1",
+      "strategic_verticals": ["fintech_remittance", "entertainment_streaming"]
+    }
+  },
+  "synergies": [
+    {
+      "synergy_id": "edtech_legaltech_ai",
+      "verticals": ["dei_training", "legaltech"],
+      "platforms": ["ABR Insights", "Court Lens"],
+      "opportunity": "Shared AI-powered legal research and training modules",
+      "estimated_arr_potential": 200000,
+      "implementation_effort": "MEDIUM",
+      "timeline": "2026-Q3"
+    },
+    {
+      "synergy_id": "agrotech_consolidation",
+      "verticals": ["agrotech"],
+      "platforms": ["CORA", "AgrimoOps"],
+      "opportunity": "Unified supply chain management (farm to distributor)",
+      "estimated_arr_potential": 150000,
+      "implementation_effort": "HIGH",
+      "timeline": "2027-Q1"
+    },
+    {
+      "synergy_id": "fintech_commerce_payments",
+      "verticals": ["fintech_remittance", "trade_commerce"],
+      "platforms": ["DiasporaCore", "Trade OS", "Shop Quoter"],
+      "opportunity": "Unified payment gateway (remittance + cross-border trade)",
+      "estimated_arr_potential": 100000,
+      "implementation_effort": "HIGH",
+      "timeline": "2027-Q2"
+    },
+    {
+      "synergy_id": "edtech_entertainment_gamification",
+      "verticals": ["dei_training", "edtech", "entertainment_streaming"],
+      "platforms": ["ABR Insights", "CyberLearn", "CongoWave"],
+      "opportunity": "Shared gamification engine (badges, leaderboards, social)",
+      "estimated_arr_potential": 80000,
+      "implementation_effort": "MEDIUM",
+      "timeline": "2026-Q4"
+    }
+  ],
+  "scoring_weights": {
+    "tam_size": 0.25,
+    "competitive_intensity": 0.20,
+    "go_to_market_fit": 0.20,
+    "regulatory_barriers": 0.15,
+    "som_growth_rate": 0.20
+  }
+}

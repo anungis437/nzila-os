@@ -29,6 +29,7 @@
     "./telemetry": "./src/telemetry/index.ts",
     "./retention": "./src/retention/index.ts",
     "./config": "./src/config/env.ts",
+    "./config/super-admins": "./src/config/super-admins.ts",
     "./secrets": "./src/secrets/keyvault.ts",
     "./rateLimit": "./src/rateLimit.ts",
     "./rateLimit/store": "./src/rateLimit/store.ts",

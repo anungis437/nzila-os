@@ -20,10 +20,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  * Returns a Set of lowercased, validated email addresses.
  */
 function buildSuperAdminSet(): Set<string> {
-  const builtin = 'info@nzilaventures.com'
+  const builtin = ['info@nzilaventures.com', 'support@onelabtech.com']
   const envRaw = process.env.SUPER_ADMIN_EMAILS ?? ''
   const candidates = [
-    builtin,
+    ...builtin,
     ...envRaw.split(',').map(s => s.trim()).filter(Boolean),
   ]
 

@@ -12,6 +12,7 @@
  *   - enterprise:admin, enterprise:user
  */
 import { auth, currentUser as _currentUser } from '@nzila/platform-auth/entra/server'
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 // Partner tables are non-Org-scoped (see NON_ORG_SCOPED_TABLES) — use platformDb
 import { platformDb } from '@nzila/db/platform'
 import { partners, partnerEntities, partnerUsers } from '@nzila/db/schema'
@@ -19,12 +20,6 @@ import { eq, and, sql, desc } from 'drizzle-orm'
 
 export type PlatformRole = 'platform:admin' | 'platform:ops' | 'platform:finance'
 export type PartnerType = 'channel' | 'isv' | 'enterprise'
-
-/** Emails that always receive platform:admin, regardless of session metadata. */
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-])
 
 export type PartnerRole =
   | 'channel:admin' | 'channel:sales' | 'channel:executive'
@@ -179,7 +174,7 @@ export async function isPlatformAdmin(): Promise<boolean> {
   const user = await _currentUser()
   const email = user?.primaryEmailAddress?.emailAddress
               ?? user?.emailAddresses?.[0]?.emailAddress
-  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) return true
+  if (isSuperAdmin(email)) return true
   
   // Check for platform roles
   const platformRoles: PlatformRole[] = ['platform:admin', 'platform:ops', 'platform:finance']
@@ -204,7 +199,7 @@ export async function requirePlatformAdmin(): Promise<{ userId: string; role: Pl
   const user = await _currentUser()
   const email = user?.primaryEmailAddress?.emailAddress
               ?? user?.emailAddresses?.[0]?.emailAddress
-  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+  if (isSuperAdmin(email)) {
     return { userId: session.userId, role: 'platform:admin' }
   }
 
