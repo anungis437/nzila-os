@@ -36,3 +36,11 @@ export {
   computeAppRevenueBreakdown,
   emitRevenueEvent,
 } from './service.js'
+
+// Evidence bridge
+export type { RevenueAuditEntry } from './evidence-bridge.js'
+export {
+  buildRevenueAuditEntry,
+  buildPayoutAuditEntry,
+  buildFeeAuditEntry,
+} from './evidence-bridge.js'

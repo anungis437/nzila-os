@@ -13,6 +13,9 @@ export type GovernanceEventType =
   | 'workflow_created'
   | 'workflow_step_executed'
   | 'recommendation_generated'
+  | 'revenue_event_recorded'
+  | 'revenue_payout_issued'
+  | 'revenue_fee_collected'
 
 export interface AuditTimelineEntry {
   id: string
@@ -155,6 +158,9 @@ export const governanceAuditTimelineEntrySchema = z.object({
     'approval_denied',
     'drift_detected',
     'remediation_applied',
+    'revenue_event_recorded',
+    'revenue_payout_issued',
+    'revenue_fee_collected',
   ]),
   actor: z.string(),
   policy_result: z.enum(['pass', 'fail', 'warn']),

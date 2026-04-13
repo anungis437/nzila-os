@@ -134,3 +134,43 @@ describe('CTRL-005: Production apps have health endpoints', () => {
     expect(violations, `Apps missing GET export: ${violations.join(', ')}`).toEqual([])
   })
 })
+
+// ── CTRL-006: Control plane has unified system state ────────────────────────
+
+describe('CTRL-006: Control plane has unified system state', () => {
+  it('system-state.ts exists with getSystemState export', () => {
+    const statePath = join(APPS_DIR, 'control-plane', 'services', 'system-state.ts')
+    expect(existsSync(statePath), 'services/system-state.ts must exist').toBe(true)
+    const content = readFileSync(statePath, 'utf-8')
+    expect(content).toContain('getSystemState')
+    expect(content).toContain('SystemState')
+    expect(content).toContain('DomainHealth')
+  })
+
+  it('revenue-aggregator.ts exists with getRevenueOverview export', () => {
+    const aggPath = join(APPS_DIR, 'control-plane', 'services', 'revenue-aggregator.ts')
+    expect(existsSync(aggPath), 'services/revenue-aggregator.ts must exist').toBe(true)
+    const content = readFileSync(aggPath, 'utf-8')
+    expect(content).toContain('getRevenueOverview')
+    expect(content).toContain('@nzila/platform-revenue')
+  })
+})
+
+// ── CTRL-007: Revenue apps report to control plane ──────────────────────────
+
+describe('CTRL-007: Revenue apps depend on control-plane-compatible packages', () => {
+  const REVENUE_APPS = ['zonga', 'cfo', 'flow', 'partners', 'trade']
+
+  for (const app of REVENUE_APPS) {
+    it(`${app} depends on @nzila/platform-revenue (control-plane aggregatable)`, () => {
+      const pkgPath = join(APPS_DIR, app, 'package.json')
+      if (!existsSync(pkgPath)) return
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'))
+      const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+      expect(
+        deps['@nzila/platform-revenue'],
+        `${app} must depend on @nzila/platform-revenue so revenue is aggregatable by control-plane`,
+      ).toBeDefined()
+    })
+  }
+})

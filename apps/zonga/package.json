@@ -24,6 +24,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-revenue": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",

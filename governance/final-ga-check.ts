@@ -21,6 +21,11 @@
  *   HARD-11  Auth adapter layer pure (no Clerk in non-compat active code)
  *   HARD-12  App floor CI enforced (app-floor-check workflow exists)
  *   HARD-13  No silent platform drift (drift workflows present)
+ *   HARD-14  Universal revenue enforcement (contract test exists)
+ *   HARD-15  Governed monetization documentation
+ *   HARD-16  Control plane unified system state
+ *   HARD-17  Auth purity contract test exists
+ *   HARD-18  Portfolio clarity (README has tier classification)
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
@@ -372,6 +377,113 @@ gate('HARD-13: Drift detection workflows present', () => {
   }
 })
 
+// ── HARD-14 Universal Revenue Enforcement ───────────────────────────────────
+
+gate('HARD-14: Revenue enforcement contract test exists', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/revenue-enforcement.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'revenue-enforcement.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasREV001 = content.includes('REV-001')
+  const hasREV002 = content.includes('REV-002')
+
+  return {
+    passed: hasREV001 && hasREV002,
+    details: hasREV001 && hasREV002
+      ? 'Revenue enforcement contract test with REV-001 + REV-002 present'
+      : 'Contract test exists but missing enforcement rules',
+  }
+})
+
+// ── HARD-15 Governed Monetization Documentation ─────────────────────────────
+
+gate('HARD-15: Governed monetization documentation exists', () => {
+  const docPath = join(ROOT, 'docs/platform/governed-monetization.md')
+  if (!existsSync(docPath)) {
+    return { passed: false, details: 'docs/platform/governed-monetization.md not found' }
+  }
+
+  const content = readFileSync(docPath, 'utf-8')
+  const hasAudit = content.includes('audit') || content.includes('Audit')
+  const hasEvidence = content.includes('evidence') || content.includes('Evidence')
+
+  return {
+    passed: hasAudit && hasEvidence,
+    details: hasAudit && hasEvidence
+      ? 'Governed monetization doc with audit + evidence coverage'
+      : 'Doc exists but missing audit/evidence references',
+  }
+})
+
+// ── HARD-16 Control Plane Unified System State ──────────────────────────────
+
+gate('HARD-16: Control plane has unified system state endpoint', () => {
+  const issues: string[] = []
+
+  const statePath = join(ROOT, 'apps/control-plane/services/system-state.ts')
+  if (!existsSync(statePath)) {
+    issues.push('system-state.ts missing')
+  } else {
+    const content = readFileSync(statePath, 'utf-8')
+    if (!content.includes('revenueApps')) issues.push('system-state missing revenueApps')
+    if (!content.includes('DomainHealth')) issues.push('system-state missing DomainHealth')
+  }
+
+  const aggPath = join(ROOT, 'apps/control-plane/services/revenue-aggregator.ts')
+  if (!existsSync(aggPath)) {
+    issues.push('revenue-aggregator.ts missing')
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'Unified system state with revenue aggregation present'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
+// ── HARD-17 Auth Purity Contract Test ───────────────────────────────────────
+
+gate('HARD-17: Auth purity contract test exists', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/auth-purity.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'auth-purity.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasAUTH001 = content.includes('AUTH-001')
+  const hasAUTH003 = content.includes('AUTH-003')
+
+  return {
+    passed: hasAUTH001 && hasAUTH003,
+    details: hasAUTH001 && hasAUTH003
+      ? 'Auth purity contract test with AUTH-001 + AUTH-003 present'
+      : 'Contract test exists but missing enforcement rules',
+  }
+})
+
+// ── HARD-18 Portfolio Clarity ───────────────────────────────────────────────
+
+gate('HARD-18: Portfolio clarity in README', () => {
+  const readmePath = join(ROOT, 'README.md')
+  if (!existsSync(readmePath)) {
+    return { passed: false, details: 'README.md not found' }
+  }
+
+  const content = readFileSync(readmePath, 'utf-8')
+  const hasTiers = content.includes('FLAGSHIP') && content.includes('INCUBATION') && content.includes('CORE')
+  const hasPortfolioRef = content.includes('portfolio-matrix.md')
+
+  return {
+    passed: hasTiers && hasPortfolioRef,
+    details: hasTiers && hasPortfolioRef
+      ? 'README has tier classifications + portfolio-matrix reference'
+      : 'README missing tier classifications or portfolio-matrix link',
+  }
+})
+
 // ── Runner ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -414,7 +526,7 @@ function main() {
     console.log('')
     process.exit(1)
   } else {
-    console.log('  ✅  HARDENING GATE PASSED — ALL 13 CONDITIONS MET  ✅')
+    console.log('  ✅  HARDENING GATE PASSED — ALL 18 CONDITIONS MET  ✅')
     console.log('')
     process.exit(0)
   }

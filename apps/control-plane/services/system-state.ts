@@ -20,6 +20,7 @@ export interface SystemState {
   packageCount: number
   activeGates: number
   passedGates: number
+  revenueApps: string[]
 }
 
 /**
@@ -49,7 +50,8 @@ export function getSystemState(): SystemState {
     domains,
     appCount: 17,
     packageCount: 159,
-    activeGates: 13,
-    passedGates: 13,
+    activeGates: 18,
+    passedGates: 18,
+    revenueApps: ['zonga', 'cfo', 'flow', 'partners', 'trade'],
   }
 }

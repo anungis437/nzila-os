@@ -31,6 +31,7 @@
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-revenue": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-commerce-org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",

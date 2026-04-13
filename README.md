@@ -16,20 +16,23 @@ Nzila OS is the digital backbone that powers every Nzila venture. It is not a st
 
 ### Business Domains
 
-| Domain | Apps | What It Does |
-|--------|------|-------------|
-| **Agriculture** | Agrimo, Cora | Smallholder supply chains — producer profiles, harvest tracking, warehouse ops, payment disbursement, yield intelligence, traceability |
-| **Commerce** | Flow | Multi-vertical commerce engine, order lifecycle, pricing rules |
-| **Trade** | Trade | Cross-border trade management, vehicle commerce |
-| **Finance** | CFO | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
-| **Union Management** | UnionEyes, ABR | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
-| **Compliance & Exams** | NACP Exams | Examination administration, integrity proofs |
-| **Mobility** | Mobility, Mobility Client Portal | Investment migration advisory (CBI/RBI), client-facing portal |
-| **Music & Media** | Zonga | Artist management, royalties, content distribution |
-| **Operations** | Console, Control Plane, Platform Admin | Governance, finance oversight, ML/AI management, platform administration |
-| **Public** | Web | Marketing site, resource library |
-| **Partners** | Partners | Entitlement-gated partner portal |
-| **APIs** | Orchestrator API | Cross-app orchestration and integration layer |
+| Domain | Apps | Tier | What It Does |
+|--------|------|------|-------------|
+| **Union Management** | UnionEyes, ABR | FLAGSHIP | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
+| **Music & Media** | Zonga | FLAGSHIP | Artist management, royalties, content distribution |
+| **Commerce** | Flow | FLAGSHIP | Multi-vertical commerce engine, order lifecycle, pricing rules |
+| **Finance** | CFO | FLAGSHIP | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
+| **Operations** | Console, Control Plane | CORE | Governance, finance oversight, platform administration |
+| **Agriculture** | ABR, Agrimo, Cora | CORE / SUPPORT | Smallholder supply chains, compliance audits, yield intelligence |
+| **Trade** | Trade | SUPPORT | Cross-border trade management, vehicle commerce |
+| **Partners** | Partners | SUPPORT | Entitlement-gated partner portal, commissions |
+| **Compliance & Exams** | NACP Exams | SUPPORT | Examination administration, integrity proofs |
+| **Mobility** | Mobility, Mobility Client Portal | INCUBATION | Investment migration advisory (CBI/RBI), client-facing portal |
+| **Public** | Web | CORE | Marketing site, resource library |
+| **APIs** | Orchestrator API | CORE | Cross-app orchestration and integration layer |
+| **Admin** | Platform Admin | CORE | Internal admin — intelligence services management |
+
+> **Tier legend**: FLAGSHIP = revenue-generating, production-deployed · CORE = platform infrastructure · SUPPORT = specific-audience enablement · INCUBATION = early-stage. See [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 For a full non-technical overview, see [README.business.md](README.business.md).
 
