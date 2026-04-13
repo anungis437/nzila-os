@@ -92,6 +92,8 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.4.1'
 
       - name: Download SBOM
         uses: actions/download-artifact@v8
