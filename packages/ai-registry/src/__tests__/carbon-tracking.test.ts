@@ -37,6 +37,17 @@ describe('estimateCarbon', () => {
     expect(result.energyKwh).toBeCloseTo(expectedEnergy);
   });
 
+  it('falls back to default energy factor for unrecognized model family string', () => {
+    const result = estimateCarbon({
+      modelId: 'custom',
+      modelFamily: 'nonexistent-model-xyz',
+      totalTokens: 1_000_000,
+      region: 'us-east',
+    });
+
+    expect(result.energyPerMillionTokens).toBe(MODEL_ENERGY_FACTORS['default']);
+  });
+
   it('respects energy override', () => {
     const result = estimateCarbon({
       modelId: 'test',
@@ -103,6 +114,19 @@ describe('aggregateCarbonEstimates', () => {
     expect(Object.keys(summary.byModel)).toEqual(['model-a', 'model-b']);
     expect(summary.byModel['model-a']!.count).toBe(2);
     expect(Object.keys(summary.byRegion)).toEqual(['us-east', 'eu-north']);
+  });
+
+  it('tracks period from/to with explicit timestamps', () => {
+    const oldTimestamp = new Date('2024-01-01');
+    const newTimestamp = new Date('2024-06-01');
+    const estimates = [
+      estimateCarbon({ modelId: 'a', totalTokens: 1000, region: 'us-east', timestamp: oldTimestamp }),
+      estimateCarbon({ modelId: 'b', totalTokens: 2000, region: 'us-east', timestamp: newTimestamp }),
+    ];
+
+    const summary = aggregateCarbonEstimates(estimates);
+    expect(summary.period.from).toEqual(oldTimestamp);
+    expect(summary.period.to).toEqual(newTimestamp);
   });
 
   it('handles empty array', () => {

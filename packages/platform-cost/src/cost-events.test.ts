@@ -165,4 +165,29 @@ describe('getTopCostDrivers', () => {
     expect(drivers[0].totalEstCostUsd).toBe(30.0)
     expect(drivers[1].totalEstCostUsd).toBe(5.0)
   })
+
+  it('uses the default top-10 limit when none is provided', async () => {
+    const rollups = Array.from({ length: 12 }, (_, index) => ({
+      orgId: ORG_ID,
+      appId: `app-${index}`,
+      category: 'compute_ms' as const,
+      day: '2026-03-01',
+      totalUnits: index + 1,
+      totalEstCostUsd: 100 - index,
+      eventCount: 1,
+    }))
+
+    const ports = makeMockPorts({
+      queryDailyRollups: vi.fn().mockResolvedValue(rollups),
+    })
+
+    const drivers = await getTopCostDrivers(
+      { orgId: ORG_ID, from: '2026-03-01', to: '2026-03-31' },
+      ports,
+    )
+
+    expect(drivers).toHaveLength(10)
+    expect(drivers[0].appId).toBe('app-0')
+    expect(drivers[9].appId).toBe('app-9')
+  })
 })

@@ -9,11 +9,13 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rm -rf .next .turbo node_modules"
+    "clean": "rm -rf .next .turbo node_modules",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@nzila/db": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-hubspot": "workspace:*",
     "@nzila/integrations-m365": "workspace:*",
     "@nzila/integrations-whatsapp": "workspace:*",
@@ -23,6 +25,8 @@
     "@nzila/mobility-programs": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.400.0",

@@ -11,7 +11,8 @@
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
     "seed:staging": "tsx lib/seed-flow-staging.ts",
-    "clean": "rm -rf .next .turbo node_modules"
+    "clean": "rm -rf .next .turbo node_modules",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -26,14 +27,17 @@
     "@nzila/commerce-services": "workspace:*",
     "@nzila/commerce-state": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-commerce-org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/pricing-engine": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "clsx": "^2.1.0",
     "framer-motion": "^11.3.30",

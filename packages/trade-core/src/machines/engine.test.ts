@@ -120,6 +120,26 @@ describe('attemptDealTransition — blocked transitions', () => {
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.reason).toBe('ROLE_DENIED')
   })
+
+  it('blocks transition when a guard fails', () => {
+    const guardedMachine = {
+      ...tradeDealMachine,
+      transitions: tradeDealMachine.transitions.map((t) =>
+        t.from === TradeDealStage.LEAD && t.to === TradeDealStage.QUALIFIED
+          ? { ...t, guards: [() => false] }
+          : t,
+      ),
+    }
+
+    const result = attemptDealTransition(
+      guardedMachine,
+      ctx(TradeOrgRole.ADMIN),
+      deal(TradeDealStage.LEAD),
+      TradeDealStage.QUALIFIED,
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.reason).toBe('GUARD_FAILED')
+  })
 })
 
 describe('attemptDealTransition — evidence requirements', () => {
@@ -196,5 +216,39 @@ describe('getAvailableDealTransitions', () => {
       deal(TradeDealStage.LEAD),
     )
     expect(transitions).toEqual([])
+  })
+})
+
+describe('validateDealMachine — invalid structures', () => {
+  it('reports invalid initial, terminal, and transition states', () => {
+    const invalidMachine = {
+      ...tradeDealMachine,
+      initialState: 'missing_initial' as TradeDealStage,
+      terminalStates: [...tradeDealMachine.terminalStates, 'missing_terminal' as TradeDealStage],
+      transitions: [
+        ...tradeDealMachine.transitions,
+        {
+          ...tradeDealMachine.transitions[0],
+          from: 'missing_from' as TradeDealStage,
+          to: 'missing_to' as TradeDealStage,
+        },
+      ],
+    }
+
+    const errors = validateDealMachine(invalidMachine)
+    expect(errors.some((e) => e.includes('Initial state'))).toBe(true)
+    expect(errors.some((e) => e.includes('Terminal state'))).toBe(true)
+    expect(errors.some((e) => e.includes("Transition from 'missing_from'"))).toBe(true)
+    expect(errors.some((e) => e.includes("Transition to 'missing_to'"))).toBe(true)
+  })
+
+  it('reports unreachable dead states', () => {
+    const unreachableMachine = {
+      ...tradeDealMachine,
+      transitions: tradeDealMachine.transitions.filter((t) => t.to !== TradeDealStage.DELIVERED),
+    }
+
+    const errors = validateDealMachine(unreachableMachine)
+    expect(errors.some((e) => e.includes("State 'delivered' is unreachable"))).toBe(true)
   })
 })

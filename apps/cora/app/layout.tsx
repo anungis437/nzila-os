@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { AuthProvider } from '@nzila/platform-auth/entra/client'
+import { NzilaAppShell } from '@nzila/platform-shell'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
@@ -21,9 +22,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <AuthProvider>
       <html lang={locale}>
         <body>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-          </NextIntlClientProvider>
+          <NzilaAppShell moduleId="cora">
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {children}
+            </NextIntlClientProvider>
+          </NzilaAppShell>
         </body>
       </html>
     </AuthProvider>

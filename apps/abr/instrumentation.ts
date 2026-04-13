@@ -1,32 +1,9 @@
 /**
  * Next.js Instrumentation Hook — ABR app.
  *
- * Initializes OpenTelemetry distributed tracing, SLO/RED metrics,
- * and boot invariants via @nzila/os-core before any request is handled.
+ * Runs the canonical Nzila boot sequence: OTel tracing, SLO/RED metrics,
+ * env validation, and boot invariant assertions.
  */
-export async function register() {
-  if (process.env.NEXT_RUNTIME !== 'nodejs') return
-  if (process.env.NEXT_PHASE === 'phase-production-build') return
+import { createAppBoot } from '@nzila/os-core/telemetry'
 
-  try {
-    const { initOtel, initMetrics } = await import('@nzila/os-core/telemetry')
-    await initOtel({ appName: 'abr' })
-    initMetrics('abr')
-  } catch {
-    // Non-critical — tracing degrades gracefully
-  }
-
-  try {
-    const { validateEnv } = await import('@nzila/os-core/config')
-    validateEnv('abr')
-  } catch {
-    // Non-critical in dev — env validation warns but doesn't crash
-  }
-
-  try {
-    const { assertBootInvariants } = await import('@nzila/os-core')
-    assertBootInvariants()
-  } catch {
-    if (process.env.NODE_ENV === 'production') throw new Error('Boot invariants failed')
-  }
-}
+export const register = createAppBoot('abr')

@@ -124,4 +124,66 @@ describe('exportPack', () => {
 
     await expect(exportPack(pack, 'json', exporterPorts)).rejects.toThrow('unsealed')
   })
+
+  it('should include artifact error when blob read throws non-Error value', async () => {
+    const { artifact: a1 } = makeArtifact('zip-fail')
+
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-Z2',
+      summary: 'Zip export failure path',
+      controlsCovered: [],
+      artifacts: [a1],
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const exporterPorts: ExporterPorts = {
+      readBlob: async () => {
+        throw 'blob missing'
+      },
+    }
+
+    const result = await exportPack(sealed, 'zip', exporterPorts)
+    const bundle = JSON.parse(result.data as string)
+
+    expect(bundle.artifacts[0].content).toBeNull()
+    expect(bundle.artifacts[0].error).toBe('blob missing')
+  })
+
+  it('should include artifact error when blob read throws Error instance', async () => {
+    const { artifact: a1 } = makeArtifact('zip-fail-error')
+
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-Z3',
+      summary: 'Zip export failure path error object',
+      controlsCovered: [],
+      artifacts: [a1],
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const exporterPorts: ExporterPorts = {
+      readBlob: async () => {
+        throw new Error('blob error object')
+      },
+    }
+
+    const result = await exportPack(sealed, 'zip', exporterPorts)
+    const bundle = JSON.parse(result.data as string)
+
+    expect(bundle.artifacts[0].content).toBeNull()
+    expect(bundle.artifacts[0].error).toBe('blob error object')
+  })
 })

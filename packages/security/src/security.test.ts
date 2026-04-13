@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { RateLimiter, InMemoryRateLimitStore } from "./rate-limit.js";
+import { describe, it, expect, vi } from "vitest";
+import { RateLimiter, InMemoryRateLimitStore, rateLimitKey } from "./rate-limit.js";
 import { ServiceAuthVerifier, ServiceAuthError } from "./auth.js";
 import { EnvSecretsProvider, CachedSecretsProvider, requireSecret } from "./secrets.js";
-import { assertOrgOwnership, OrgIsolationError, withOrgScope } from "./isolation.js";
-import { validateInput, UUIDSchema, PaginationSchema } from "./validation.js";
+import { assertOrgOwnership, assertAllSameOrg, OrgIsolationError, withOrgScope } from "./isolation.js";
+import { validateInput, strictValidate, UUIDSchema, OrgIdSchema, PaginationSchema, SortSchema } from "./validation.js";
 import { z } from "zod";
 
 // ── Rate Limiter ────────────────────────────────────────────
@@ -43,6 +43,23 @@ describe("RateLimiter", () => {
     expect(r1.allowed).toBe(false);
     expect(r2.allowed).toBe(true);
   });
+
+  it("resets a route bucket and rebuilds remaining capacity", async () => {
+    const store = new InMemoryRateLimitStore();
+    const limiter = new RateLimiter(store, { maxRequests: 2, windowMs: 60_000 });
+
+    await limiter.check("t1", "/api");
+    await limiter.check("t1", "/api");
+    await limiter.reset("t1", "/api");
+
+    const result = await limiter.check("t1", "/api");
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(1);
+  });
+
+  it("builds stable composite rate limit keys", () => {
+    expect(rateLimitKey("tenant-1", "/api/orders")).toBe("rl:tenant-1:/api/orders");
+  });
 });
 
 // ── Service Auth ────────────────────────────────────────────
@@ -79,6 +96,42 @@ describe("ServiceAuthVerifier", () => {
     const verifier = new ServiceAuthVerifier([{ serviceId, secret }]);
     expect(() => verifier.verify({}, "body")).toThrow(ServiceAuthError);
   });
+
+  it("rejects malformed signatures before timing-safe comparison", () => {
+    const verifier = new ServiceAuthVerifier([{ serviceId, secret }]);
+    const headers = ServiceAuthVerifier.sign(serviceId, secret, "body");
+
+    expect(() =>
+      verifier.verify({
+        ...headers,
+        "x-service-signature": "deadbeef",
+      }, "body"),
+    ).toThrow("Invalid signature");
+  });
+
+  it("rejects invalid timestamps", () => {
+    const verifier = new ServiceAuthVerifier([{ serviceId, secret }]);
+    const headers = ServiceAuthVerifier.sign(serviceId, secret, "body");
+
+    expect(() =>
+      verifier.verify({
+        ...headers,
+        "x-service-timestamp": "not-a-date",
+      }, "body"),
+    ).toThrow("Invalid timestamp");
+  });
+
+  it("rejects timestamps outside the allowed clock skew", () => {
+    const verifier = new ServiceAuthVerifier([{ serviceId, secret }], { maxClockSkewMs: 1000 });
+    const headers = ServiceAuthVerifier.sign(serviceId, secret, "body");
+
+    expect(() =>
+      verifier.verify({
+        ...headers,
+        "x-service-timestamp": "2000-01-01T00:00:00.000Z",
+      }, "body"),
+    ).toThrow("Timestamp outside allowed clock skew");
+  });
 });
 
 // ── Secrets ─────────────────────────────────────────────────
@@ -111,6 +164,42 @@ describe("Secrets", () => {
       'Required secret "MISSING_KEY" is not configured',
     );
   });
+
+  it("EnvSecretsProvider.has checks key presence", async () => {
+    process.env.TEST_SECRET_PRESENT = "yes";
+    const provider = new EnvSecretsProvider();
+
+    await expect(provider.has("TEST_SECRET_PRESENT")).resolves.toBe(true);
+    delete process.env.TEST_SECRET_PRESENT;
+    await expect(provider.has("TEST_SECRET_PRESENT")).resolves.toBe(false);
+  });
+
+  it("CachedSecretsProvider.has uses cache hits and invalidateAll clears them", async () => {
+    const inner = {
+      get: vi.fn(async (key: string) => (key === "KNOWN_SECRET" ? "value" : undefined)),
+      has: vi.fn(async (key: string) => key === "KNOWN_SECRET"),
+    };
+    const cached = new CachedSecretsProvider(inner);
+
+    await cached.get("KNOWN_SECRET");
+    await cached.get("UNKNOWN_SECRET");
+
+    await expect(cached.has("KNOWN_SECRET")).resolves.toBe(true);
+    await expect(cached.has("UNKNOWN_SECRET")).resolves.toBe(false);
+    expect(inner.has).not.toHaveBeenCalled();
+
+    cached.invalidateAll();
+    await expect(cached.has("KNOWN_SECRET")).resolves.toBe(true);
+    expect(inner.has).toHaveBeenCalledWith("KNOWN_SECRET");
+  });
+
+  it("requireSecret returns a configured value", async () => {
+    process.env.REQUIRED_SECRET_KEY = "configured";
+    const provider = new EnvSecretsProvider();
+
+    await expect(requireSecret(provider, "REQUIRED_SECRET_KEY")).resolves.toBe("configured");
+    delete process.env.REQUIRED_SECRET_KEY;
+  });
 });
 
 // ── Org Isolation ────────────────────────────────────────
@@ -125,6 +214,15 @@ describe("Org Isolation", () => {
   it("throws for mismatched org", () => {
     expect(() =>
       assertOrgOwnership({ orgId: "t2" }, { orgId: "t1" }),
+    ).toThrow(OrgIsolationError);
+  });
+
+  it("assertAllSameOrg throws when any record crosses org boundaries", () => {
+    expect(() =>
+      assertAllSameOrg(
+        [{ orgId: "t1" }, { orgId: "t2" }],
+        { orgId: "t1" },
+      ),
     ).toThrow(OrgIsolationError);
   });
 
@@ -161,5 +259,28 @@ describe("Validation", () => {
     const result = validateInput(schema, { name: "Alice", age: 30 });
     expect(result.success).toBe(true);
     expect(result.data!.name).toBe("Alice");
+  });
+
+  it("strictValidate parses valid input and throws on invalid input", () => {
+    expect(strictValidate(OrgIdSchema, "org-1")).toBe("org-1");
+    expect(() => strictValidate(OrgIdSchema, "")).toThrow();
+  });
+
+  it("applies sort defaults", () => {
+    const result = validateInput(SortSchema, { sortBy: "createdAt" });
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ sortBy: "createdAt", sortOrder: "asc" });
+  });
+});
+
+describe("package index", () => {
+  it("re-exports the public security API", async () => {
+    const api = await import("./index.js");
+
+    expect(api.RateLimiter).toBe(RateLimiter);
+    expect(api.ServiceAuthVerifier).toBe(ServiceAuthVerifier);
+    expect(api.EnvSecretsProvider).toBe(EnvSecretsProvider);
+    expect(api.assertOrgOwnership).toBe(assertOrgOwnership);
+    expect(api.strictValidate).toBe(strictValidate);
   });
 });

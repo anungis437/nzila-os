@@ -119,4 +119,34 @@ describe('createInstrumentedEventBus', () => {
 
     expect(received).toHaveLength(0)
   })
+
+  it('handles handler errors when no onError is provided', async () => {
+    // No onError callback — the instrumented wrapper should still not throw
+    const bus = createInstrumentedEventBus()
+
+    bus.subscribe('workflow.started', async () => {
+      throw new Error('no-callback-boom')
+    })
+
+    await expect(bus.publish(buildTestEvent())).resolves.toBeUndefined()
+  })
+
+  it('handles non-Error throws in handler', async () => {
+    const errors: unknown[] = []
+    const bus = createInstrumentedEventBus({
+      onError(error) {
+        errors.push(error)
+      },
+    })
+
+    bus.subscribe('workflow.started', async () => {
+      // eslint-disable-next-line no-throw-literal
+      throw 'string-error'
+    })
+
+    await bus.publish(buildTestEvent())
+
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toBe('string-error')
+  })
 })

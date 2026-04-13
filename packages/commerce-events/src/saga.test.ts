@@ -60,6 +60,15 @@ function throwStep(name: string): SagaStep {
   }
 }
 
+function throwNonErrorStep(name: string): SagaStep {
+  return {
+    name,
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    execute: vi.fn(async () => { throw 'string crash' }),
+    compensate: vi.fn(async () => ({ ok: true as const, data: {} })),
+  }
+}
+
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 describe('SagaOrchestrator', () => {
@@ -362,6 +371,74 @@ describe('SagaOrchestrator', () => {
       const result = await orchestrator.execute(saga, makeCtx({}))
       expect(result.status).toBe('completed')
       expect(result.stepsCompleted).toEqual([])
+    })
+  })
+
+  describe('execute — compensation throws', () => {
+    it('handles thrown error during compensation', async () => {
+      const step1: SagaStep = {
+        name: 'step-1',
+        execute: vi.fn(async () => ({ ok: true as const, data: {} })),
+        compensate: vi.fn(async () => { throw new Error('Compensate exploded') }),
+      }
+      const step2 = failStep('step-2')
+
+      const saga: SagaDefinition = {
+        name: 'throw-compensate',
+        triggerEvent: 'test',
+        steps: [step1, step2],
+      }
+
+      const result = await orchestrator.execute(saga, makeCtx({}))
+
+      expect(result.status).toBe('failed')
+      expect(result.stepsCompensated).toEqual([])
+      expect(step1.compensate).toHaveBeenCalledTimes(1)
+    })
+
+    it('continues compensating remaining steps when one throws', async () => {
+      const step1: SagaStep = {
+        name: 'step-1',
+        execute: vi.fn(async () => ({ ok: true as const, data: {} })),
+        compensate: vi.fn(async () => ({ ok: true as const, data: {} })),
+      }
+      const step2: SagaStep = {
+        name: 'step-2',
+        execute: vi.fn(async () => ({ ok: true as const, data: {} })),
+        compensate: vi.fn(async () => { throw new Error('Compensate exploded') }),
+      }
+      const step3 = failStep('step-3')
+
+      const saga: SagaDefinition = {
+        name: 'partial-compensate',
+        triggerEvent: 'test',
+        steps: [step1, step2, step3],
+      }
+
+      const result = await orchestrator.execute(saga, makeCtx({}))
+
+      // step-2 compensation threw (so not in stepsCompensated), but step-1 compensation succeeded
+      expect(result.status).toBe('failed')
+      expect(result.stepsCompensated).toEqual(['step-1'])
+      expect(step1.compensate).toHaveBeenCalledTimes(1)
+      expect(step2.compensate).toHaveBeenCalledTimes(1)
+    })
+
+    it('captures non-Error thrown values via String(err)', async () => {
+      const step1 = successStep('ok-step')
+      const step2 = throwNonErrorStep('string-throw')
+
+      const saga: SagaDefinition = {
+        name: 'non-error-throw',
+        triggerEvent: 'test',
+        steps: [step1, step2],
+      }
+
+      const result = await orchestrator.execute(saga, makeCtx({}))
+
+      expect(result.status).toBe('compensated')
+      expect(result.error).toBe('Step "string-throw" failed: string crash')
+      expect(step1.compensate).toHaveBeenCalledTimes(1)
     })
   })
 })

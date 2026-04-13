@@ -170,6 +170,30 @@ describe('SnapshotChain', () => {
     expect(result.totalEntries).toBe(0)
   })
 
+  it('should detect genesis entry with non-null previousHash', async () => {
+    const ports = makeInMemoryChainPorts()
+    const chain = new SnapshotChain(ports)
+
+    // Manually insert a genesis entry with non-null previousHash
+    const snapshot = makeSnapshot(1)
+    const hash = computeSnapshotHash(snapshot)
+    ports.chain.push({
+      snapshotId: snapshot.snapshotId,
+      orgId: ORG_ID,
+      version: 1,
+      snapshotHash: hash,
+      previousHash: 'f'.repeat(64), // should be null for genesis
+      createdAt: new Date().toISOString(),
+    })
+
+    const result = await chain.verify(ORG_ID)
+
+    expect(result.valid).toBe(false)
+    expect(result.brokenAt).toBe(0)
+    expect(result.errors[0]).toContain('Genesis entry')
+    expect(result.errors[0]).toContain('non-null previousHash')
+  })
+
   it('should load chain entries', async () => {
     const ports = makeInMemoryChainPorts()
     const chain = new SnapshotChain(ports)
@@ -179,5 +203,25 @@ describe('SnapshotChain', () => {
 
     const loaded = await chain.loadChain(ORG_ID)
     expect(loaded).toHaveLength(2)
+  })
+
+  it('should detect chain entry with null previousHash at non-genesis position', async () => {
+    const ports = makeInMemoryChainPorts()
+    const chain = new SnapshotChain(ports)
+
+    // Build a 3-entry chain normally
+    await chain.append(makeSnapshot(1))
+    await chain.append(makeSnapshot(2))
+    await chain.append(makeSnapshot(3))
+
+    // Corrupt entry 2 to have null previousHash
+    ports.chain[2] = { ...ports.chain[2]!, previousHash: null as any }
+
+    const result = await chain.verify(ORG_ID)
+
+    expect(result.valid).toBe(false)
+    expect(result.brokenAt).toBe(2)
+    expect(result.errors[0]).toContain('Chain broken')
+    expect(result.errors[0]).toContain("'null...'")
   })
 })

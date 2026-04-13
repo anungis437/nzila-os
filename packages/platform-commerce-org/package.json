@@ -21,7 +21,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/db": "workspace:*",

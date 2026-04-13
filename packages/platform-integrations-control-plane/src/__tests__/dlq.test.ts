@@ -88,6 +88,45 @@ describe('DlqManager', () => {
     expect(results[0].error).toBe('Provider down')
   })
 
+  it('uses fallback replay error when redispatch omits error details', async () => {
+    const entry = makeDlqEntry()
+    const ports = makePorts([entry], {
+      redispatch: vi.fn(async () => ({ success: false })),
+    })
+    const dlq = new DlqManager(ports)
+
+    const results = await dlq.replay([entry.id])
+
+    expect(results[0].status).toBe('failed')
+    expect(results[0].error).toBe('Re-dispatch failed')
+  })
+
+  it('reports failure when getEntry throws Error', async () => {
+    const entry = makeDlqEntry()
+    const ports = makePorts([entry], {
+      getEntry: vi.fn(async () => { throw new Error('Lookup failed') }),
+    })
+    const dlq = new DlqManager(ports)
+
+    const results = await dlq.replay([entry.id])
+
+    expect(results[0].status).toBe('failed')
+    expect(results[0].error).toBe('Lookup failed')
+  })
+
+  it('reports failure when getEntry throws non-Error value', async () => {
+    const entry = makeDlqEntry()
+    const ports = makePorts([entry], {
+      getEntry: vi.fn(async () => { throw 'lookup panic' }),
+    })
+    const dlq = new DlqManager(ports)
+
+    const results = await dlq.replay([entry.id])
+
+    expect(results[0].status).toBe('failed')
+    expect(results[0].error).toBe('lookup panic')
+  })
+
   it('purges all entries for an org', async () => {
     const entries = [makeDlqEntry(), makeDlqEntry()]
     const ports = makePorts(entries)
@@ -102,6 +141,17 @@ describe('DlqManager', () => {
     const entry = makeDlqEntry()
     const ports = makePorts([entry], {
       removeEntry: vi.fn(async () => { throw new Error('DB error') }),
+    })
+    const dlq = new DlqManager(ports)
+
+    const purged = await dlq.purge('org-123')
+    expect(purged).toBe(0)
+  })
+
+  it('handles non-Error throwables during purge gracefully', async () => {
+    const entry = makeDlqEntry()
+    const ports = makePorts([entry], {
+      removeEntry: vi.fn(async () => { throw 'remove panic' }),
     })
     const dlq = new DlqManager(ports)
 

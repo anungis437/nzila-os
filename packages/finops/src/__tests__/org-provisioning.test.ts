@@ -113,4 +113,72 @@ describe('Org Deprovisioning', () => {
   it('rejects empty orgId', async () => {
     await expect(deprovisionOrg('', 'test')).rejects.toThrow('orgId is required');
   });
+
+  it('handles step failure during deprovisioning', async () => {
+    const failingExecutor: ProvisioningExecutor = {
+      execute: async (step) => {
+        if (step === 'export-data') throw new Error('Storage unavailable');
+      },
+    };
+
+    const result = await deprovisionOrg('org_deprov_fail', 'Cancelled', failingExecutor);
+    expect(result.status).toBe('failed');
+    const failedStep = result.steps.find((s) => s.name === 'export-data');
+    expect(failedStep!.status).toBe('failed');
+    expect(failedStep!.error).toContain('Storage unavailable');
+  });
+
+  it('handles non-Error thrown during deprovisioning', async () => {
+    const failingExecutor: ProvisioningExecutor = {
+      execute: async (step) => {
+        if (step === 'disable-access') throw 'string error';
+      },
+    };
+
+    const result = await deprovisionOrg('org_deprov_str', 'Test', failingExecutor);
+    expect(result.status).toBe('failed');
+    const failedStep = result.steps.find((s) => s.name === 'disable-access');
+    expect(failedStep!.error).toBe('string error');
+  });
+
+  it('uses default executor when none is provided', async () => {
+    const result = await deprovisionOrg('org_default', 'Dry run');
+    expect(result.status).toBe('success');
+    expect(result.steps.every((s) => s.status === 'completed')).toBe(true);
+  });
+});
+
+describe('Org Provisioning — additional branches', () => {
+  it('returns failed when all provisioning steps fail', async () => {
+    const allFailExecutor: ProvisioningExecutor = {
+      execute: async () => {
+        throw new Error('everything broken');
+      },
+    };
+
+    const result = await provisionOrg(
+      { orgId: 'org_all_fail', orgName: 'Fail All', tier: 'free', adminEmail: 'a@b.com' },
+      allFailExecutor,
+    );
+
+    expect(result.status).toBe('failed');
+    expect(result.steps.every((s) => s.status === 'failed')).toBe(true);
+  });
+
+  it('handles non-Error thrown during provisioning', async () => {
+    const executor: ProvisioningExecutor = {
+      execute: async (step) => {
+        if (step === 'setup-quotas') throw 42;
+      },
+    };
+
+    const result = await provisionOrg(
+      { orgId: 'org_non_error', orgName: 'Non-Error', tier: 'free', adminEmail: 'a@b.com' },
+      executor,
+    );
+
+    expect(result.status).toBe('partial');
+    const quotaStep = result.steps.find((s) => s.name === 'setup-quotas');
+    expect(quotaStep!.error).toBe('42');
+  });
 });

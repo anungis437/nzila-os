@@ -1,26 +1,28 @@
 // @nzila/platform-shell — Barrel export
 
 // Registry
-export { ModuleRegistry } from './registry/registry.js';
+export { ModuleRegistry } from './registry/registry';
 export type {
   ModuleRegistryConfig,
   ModuleResolveContext,
-} from './registry/registry.js';
-export { DEFAULT_MODULES } from './registry/default-modules.js';
+} from './registry/registry';
+export { DEFAULT_MODULES } from './registry/default-modules';
 
 // Context
 export type {
   ShellContextValue,
   ShellUser,
   ShellOrg,
-} from './context/types.js';
-export { ShellProvider, useShell } from './context/provider.js';
-export type { ShellProviderProps } from './context/provider.js';
+} from './context/types';
+export { ShellProvider, useShell } from './context/provider';
+export type { ShellProviderProps } from './context/provider';
 
 // Components
-export { ShellLayout } from './components/ShellLayout.js';
-export { GlobalNav } from './components/GlobalNav.js';
-export { OrgSelector } from './components/OrgSelector.js';
-export { AppSwitcher } from './components/AppSwitcher.js';
-export { UserMenu } from './components/UserMenu.js';
-export { NotificationBell } from './components/NotificationBell.js';
+export { NzilaAppShell } from './components/NzilaAppShell';
+export type { NzilaAppShellProps } from './components/NzilaAppShell';
+export { ShellLayout } from './components/ShellLayout';
+export { GlobalNav } from './components/GlobalNav';
+export { OrgSelector } from './components/OrgSelector';
+export { AppSwitcher } from './components/AppSwitcher';
+export { UserMenu } from './components/UserMenu';
+export { NotificationBell } from './components/NotificationBell';

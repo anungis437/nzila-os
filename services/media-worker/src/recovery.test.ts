@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   classifyFailure,
   cleanupPartialArtifacts,
@@ -49,6 +49,14 @@ describe('classifyFailure', () => {
       expect(d2.delayMs).toBeGreaterThanOrEqual(1000)
     }
   })
+
+  it('dead-letters unknown non-retryable values with stringified reason', () => {
+    const decision = classifyFailure('fatal decode error', 0, 3)
+    expect(decision.action).toBe('dead-letter')
+    if (decision.action === 'dead-letter') {
+      expect(decision.reason).toContain('fatal decode error')
+    }
+  })
 })
 
 describe('cleanupPartialArtifacts', () => {
@@ -69,6 +77,36 @@ describe('cleanupPartialArtifacts', () => {
     const result = await cleanupPartialArtifacts(storage, 'nonexistent', logger)
     expect(result.cleaned).toBe(0)
     expect(result.errors).toBe(0)
+  })
+
+  it('counts list and delete failures without throwing', async () => {
+    const warnings: Array<{ message: string; meta?: Record<string, unknown> }> = []
+    const noisyLogger = {
+      ...logger,
+      warn: (message: string, meta?: Record<string, unknown>) => {
+        warnings.push({ message, meta })
+      },
+      info: vi.fn(),
+    }
+    const storage = {
+      ...createInMemoryStorageAdapter(),
+      async list(prefix: string) {
+        if (prefix.includes('preview')) {
+          throw new Error('list failed')
+        }
+        return [{ key: `${prefix}/broken.bin`, sizeBytes: 1, lastModified: new Date(), etag: 'x' }]
+      },
+      async delete() {
+        throw new Error('delete failed')
+      },
+    }
+
+    const result = await cleanupPartialArtifacts(storage, 'asset-2', noisyLogger as any)
+
+    expect(result.cleaned).toBe(0)
+    expect(result.errors).toBeGreaterThanOrEqual(4)
+    expect(warnings.some((entry) => entry.message.includes('Failed to delete artifact'))).toBe(true)
+    expect(warnings.some((entry) => entry.message.includes('Failed to list artifacts under'))).toBe(true)
   })
 })
 
@@ -93,6 +131,26 @@ describe('detectOrphans', () => {
     const orphans = await detectOrphans(storage, 'audio/processed/', knownIds, logger)
     expect(orphans).toHaveLength(0)
   })
+
+  it('logs and returns empty when the storage scan fails', async () => {
+    const errors: Array<{ message: string; meta?: Record<string, unknown> }> = []
+    const noisyLogger = {
+      ...logger,
+      error: (message: string, _err?: Error, meta?: Record<string, unknown>) => {
+        errors.push({ message, meta })
+      },
+    }
+    const storage = {
+      ...createInMemoryStorageAdapter(),
+      list: vi.fn().mockRejectedValue(new Error('scan failed')),
+    }
+
+    const orphans = await detectOrphans(storage, 'audio/processed/', new Set(['known-1']), noisyLogger as any)
+
+    expect(orphans).toEqual([])
+    expect(errors).toHaveLength(1)
+    expect(errors[0]?.message).toContain('Orphan detection scan failed')
+  })
 })
 
 describe('purgeOrphans', () => {
@@ -108,5 +166,31 @@ describe('purgeOrphans', () => {
 
     expect(deleted).toBe(1)
     expect(await storage.exists('a/b')).toBe(false)
+  })
+
+  it('continues when an orphan cannot be purged', async () => {
+    const warnings: string[] = []
+    const noisyLogger = {
+      ...logger,
+      warn: (message: string) => {
+        warnings.push(message)
+      },
+    }
+    const storage = {
+      ...createInMemoryStorageAdapter(),
+      delete: vi.fn().mockRejectedValue(new Error('forbidden')),
+    }
+
+    const deleted = await purgeOrphans(
+      storage,
+      [
+        { key: 'a/b', sizeBytes: 1, lastModified: new Date() },
+        { key: 'a/c', sizeBytes: 1, lastModified: new Date() },
+      ],
+      noisyLogger as any,
+    )
+
+    expect(deleted).toBe(0)
+    expect(warnings).toHaveLength(2)
   })
 })

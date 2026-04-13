@@ -126,6 +126,19 @@ describe('ComplianceVerifier — verifySnapshot', () => {
     expect(result.hashMatch).toBe(false)
     expect(result.errors.length).toBeGreaterThan(0)
   })
+
+  it('should detect snapshot with no chain entry', async () => {
+    const { snapshots, verifier } = makeTestSetup()
+    // Add snapshot but do NOT chain it
+    const snap = makeSnapshot(1)
+    snapshots.set(snap.snapshotId, snap)
+
+    const result = await verifier.verifySnapshot(snap.snapshotId)
+
+    expect(result.valid).toBe(false)
+    expect(result.chainEntryFound).toBe(false)
+    expect(result.errors[0]).toContain('No chain entry found')
+  })
 })
 
 // ── Chain Verification ──────────────────────────────────────────────────────
@@ -178,6 +191,22 @@ describe('ComplianceVerifier — verifyChain', () => {
     expect(result.verifiedEntries).toBe(0)
   })
 
+  it('should detect genesis with non-null previousHash', async () => {
+    const { chain, snapshots, snapshotChain, verifier } = makeTestSetup()
+    const snap = makeSnapshot(1)
+    snapshots.set(snap.snapshotId, snap)
+    await snapshotChain.append(snap)
+
+    // Corrupt genesis previousHash
+    chain[0] = { ...chain[0]!, previousHash: 'c'.repeat(64) }
+
+    const result = await verifier.verifyChain(ORG_ID)
+
+    expect(result.valid).toBe(false)
+    expect(result.brokenAt).toBe(0)
+    expect(result.errors[0]).toContain('Genesis entry')
+  })
+
   it('should detect tampered snapshot in chain', async () => {
     const { snapshots, snapshotChain, verifier } = makeTestSetup()
 
@@ -196,5 +225,39 @@ describe('ComplianceVerifier — verifyChain', () => {
     // Chain linkage is valid but snapshot hash mismatch
     expect(result.valid).toBe(false)
     expect(result.errors.length).toBeGreaterThan(0)
+  })
+
+  it('should detect chain entry with null previousHash at non-genesis position', async () => {
+    const { chain, snapshots, snapshotChain, verifier } = makeTestSetup()
+
+    for (let i = 1; i <= 3; i++) {
+      const snap = makeSnapshot(i)
+      snapshots.set(snap.snapshotId, snap)
+      await snapshotChain.append(snap)
+    }
+
+    // Corrupt entry 2 to have null previousHash
+    chain[2] = { ...chain[2]!, previousHash: null as any }
+
+    const result = await verifier.verifyChain(ORG_ID)
+
+    expect(result.valid).toBe(false)
+    expect(result.brokenAt).toBe(2)
+    expect(result.errors[0]).toContain("'null...'")
+  })
+
+  it('should handle snapshot not found during chain hash recomputation', async () => {
+    const { chain, snapshotChain, verifier } = makeTestSetup()
+    // Append a snapshot via chain ports but don't store it in snapshots map
+    const snap = makeSnapshot(1)
+    await snapshotChain.append(snap)
+    // snapshots map is empty — loadSnapshot returns null
+
+    const result = await verifier.verifyChain(ORG_ID)
+
+    // Chain linkage is valid (single genesis) but no hash recomputation possible
+    expect(result.valid).toBe(true)
+    expect(result.totalEntries).toBe(1)
+    expect(result.verifiedEntries).toBe(1)
   })
 })

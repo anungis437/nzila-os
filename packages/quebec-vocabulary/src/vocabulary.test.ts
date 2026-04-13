@@ -4,13 +4,19 @@ import {
   getAllCaseTypeIds,
   getAllStatusIds,
   getAllPriorityIds,
+  getAllSeverityIds,
   getAllRoleIds,
   getCaseTypeById,
+  getPriorityById,
   getStatusById,
+  getRoleById,
   getTribunal,
   getLegalReference,
+  getArticle,
+  getLocalizedLabel,
 } from './vocabulary'
-import { validateCaseType, validateStatus, validateGriefIntake } from './validator'
+import { validateCaseType, validatePriority, validateStatus, validateGriefIntake } from './validator'
+import * as vocabularyIndex from './index'
 
 describe('quebec-vocabulary', () => {
   it('exports case types', () => {
@@ -33,6 +39,11 @@ describe('quebec-vocabulary', () => {
     expect(ids).toContain('critical')
   })
 
+  it('exports severities', () => {
+    const ids = getAllSeverityIds()
+    expect(ids).toEqual(expect.arrayContaining(['minor', 'critical']))
+  })
+
   it('exports roles', () => {
     const ids = getAllRoleIds()
     expect(ids.length).toBeGreaterThan(0)
@@ -49,6 +60,24 @@ describe('quebec-vocabulary', () => {
     const s = getStatusById('brouillon')
     expect(s).toBeDefined()
     expect(s!.labelEn).toBe('Draft')
+  })
+
+  it('looks up priority and role by id', () => {
+    const priority = getPriorityById('high')
+    const role = getRoleById('delegue')
+
+    expect(priority?.escalationRequired).toBe(true)
+    expect(role?.labelEn).toBe('Shop Steward')
+  })
+
+  it('returns undefined for unknown lookups', () => {
+    expect(getCaseTypeById('missing')).toBeUndefined()
+    expect(getPriorityById('missing' as any)).toBeUndefined()
+    expect(getStatusById('missing')).toBeUndefined()
+    expect(getRoleById('missing')).toBeUndefined()
+    expect(getTribunal('missing')).toBeUndefined()
+    expect(getLegalReference('missing')).toBeUndefined()
+    expect(getArticle('missing-law', 'missing-article')).toBeUndefined()
   })
 
   it('getQuebecVocabulary returns full vocabulary', () => {
@@ -70,6 +99,16 @@ describe('quebec-vocabulary', () => {
     expect(lnt!.shortName).toBe('LNT')
   })
 
+  it('getArticle returns legal article values', () => {
+    expect(getArticle('codeDuTravail', 'certification')).toBe('art. 21–46')
+  })
+
+  it('getLocalizedLabel returns expected locale variant', () => {
+    const item = { label: 'Fr label', labelEn: 'En label' }
+    expect(getLocalizedLabel(item, 'fr')).toBe('Fr label')
+    expect(getLocalizedLabel(item, 'en')).toBe('En label')
+  })
+
   it('validates a known case type', () => {
     const result = validateCaseType('anciennete')
     expect(result.valid).toBe(true)
@@ -78,6 +117,14 @@ describe('quebec-vocabulary', () => {
   it('rejects unknown case type', () => {
     const result = validateCaseType('nonexistent')
     expect(result.valid).toBe(false)
+    expect(result.error?.field).toBe('caseType')
+  })
+
+  it('validates and rejects priorities', () => {
+    expect(validatePriority('high').valid).toBe(true)
+    const bad = validatePriority('invalid-priority')
+    expect(bad.valid).toBe(false)
+    expect(bad.error?.field).toBe('priority')
   })
 
   it('validates a known status', () => {
@@ -88,6 +135,7 @@ describe('quebec-vocabulary', () => {
   it('rejects unknown status', () => {
     const result = validateStatus('nonexistent')
     expect(result.valid).toBe(false)
+    expect(result.error?.field).toBe('status')
   })
 
   it('validates grief intake with valid data', () => {
@@ -107,5 +155,17 @@ describe('quebec-vocabulary', () => {
     })
     expect(result.valid).toBe(false)
     expect(result.errors.length).toBeGreaterThan(0)
+  })
+
+  it('treats missing intake fields as valid (optional validation)', () => {
+    const result = validateGriefIntake({})
+    expect(result.valid).toBe(true)
+    expect(result.errors).toEqual([])
+  })
+
+  it('exports vocabulary APIs from barrel index', () => {
+    expect(typeof vocabularyIndex.getQuebecVocabulary).toBe('function')
+    expect(typeof vocabularyIndex.validateGriefIntake).toBe('function')
+    expect(vocabularyIndex.getAllCaseTypeIds()).toContain('anciennete')
   })
 })

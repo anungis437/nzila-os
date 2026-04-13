@@ -1,6 +1,6 @@
-export { ModuleRegistry } from './registry.js';
+export { ModuleRegistry } from './registry';
 export type {
   ModuleRegistryConfig,
   ModuleResolveContext,
-} from './registry.js';
-export { DEFAULT_MODULES } from './default-modules.js';
+} from './registry';
+export { DEFAULT_MODULES } from './default-modules';

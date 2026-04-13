@@ -1,8 +1,8 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { useShell } from '../context/provider.js';
-import { GlobalNav } from './GlobalNav.js';
+import { useShell } from '../context/provider';
+import { GlobalNav } from './GlobalNav';
 
 export interface ShellLayoutProps {
   children: ReactNode;

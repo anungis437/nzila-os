@@ -60,11 +60,30 @@ describe('evaluateProgramEligibility', () => {
     expect(result.score).toBeLessThan(100)
   })
 
+  it('penalises high risk profile with enhanced screening', () => {
+    const high: ClientProfile = { ...baseProfile, riskProfile: 'high' }
+    const result = evaluateProgramEligibility(high, grenada)
+    expect(result.reasons).toContainEqual(expect.stringContaining('High risk profile'))
+    expect(result.score).toBeLessThan(100)
+  })
+
   it('adds region preference bonus', () => {
     const pref: ClientProfile = { ...baseProfile, preferredRegions: ['GD'] }
     const result = evaluateProgramEligibility(pref, grenada)
     expect(result.reasons).toContainEqual(expect.stringContaining('matches client preference'))
     expect(result.score).toBe(Math.min(100, 100 + 5))
+  })
+
+  it('does not add region bonus when preferred region differs', () => {
+    const pref: ClientProfile = { ...baseProfile, preferredRegions: ['PT'] }
+    const result = evaluateProgramEligibility(pref, grenada)
+    expect(result.reasons).not.toContainEqual(expect.stringContaining('matches client preference'))
+  })
+
+  it('no penalty when physicalPresenceRequired and physicalPresenceOk is true', () => {
+    const ok: ClientProfile = { ...baseProfile, physicalPresenceOk: true }
+    const result = evaluateProgramEligibility(ok, malta)
+    expect(result.blockers).not.toContainEqual(expect.stringContaining('physical presence'))
   })
 
   it('handles missing optional fields gracefully', () => {
@@ -115,5 +134,11 @@ describe('comparePrograms', () => {
     const comparison = comparePrograms(['GD', 'XX'], PROGRAM_CATALOG)
     expect(comparison.programIds).toEqual(['GD'])
     expect(comparison.programs).toHaveLength(1)
+  })
+
+  it('renders N/A for programs without a citizenship path timeline', () => {
+    const comparison = comparePrograms(['AE'], PROGRAM_CATALOG)
+    const row = comparison.rows.find((r) => r.field === 'Time to Citizenship')
+    expect(row?.values['AE']).toBe('N/A')
   })
 })

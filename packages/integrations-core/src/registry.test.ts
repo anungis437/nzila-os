@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { IntegrationRegistry } from './registry'
+import { IntegrationEventTypes } from './events'
+import {
+  CreateIntegrationConfigSchema,
+  UpdateIntegrationConfigSchema,
+  SendMessageSchema,
+  CreateWebhookSubscriptionSchema,
+} from './schemas'
+import * as barrel from './index'
 import type { IntegrationAdapter, SendRequest, HealthCheckResult } from './types'
 
 function makeAdapter(
@@ -72,5 +80,95 @@ describe('IntegrationRegistry', () => {
     registry.register(makeAdapter('resend', 'email'))
     registry.clear()
     expect(registry.listAdapters()).toHaveLength(0)
+  })
+})
+
+describe('IntegrationEventTypes', () => {
+  it('maps each key to the same literal value', () => {
+    for (const [key, value] of Object.entries(IntegrationEventTypes)) {
+      expect(value).toBe(key)
+    }
+  })
+
+  it('contains unique event names', () => {
+    const values = Object.values(IntegrationEventTypes)
+    expect(new Set(values).size).toBe(values.length)
+  })
+})
+
+describe('schemas', () => {
+  it('CreateIntegrationConfigSchema applies metadata default', () => {
+    const parsed = CreateIntegrationConfigSchema.parse({
+      orgId: '00000000-0000-0000-0000-000000000001',
+      type: 'email',
+      provider: 'resend',
+      credentialsRef: 'vault://creds/email',
+    })
+
+    expect(parsed.metadata).toEqual({})
+  })
+
+  it('CreateIntegrationConfigSchema rejects invalid uuid', () => {
+    expect(() =>
+      CreateIntegrationConfigSchema.parse({
+        orgId: 'not-a-uuid',
+        type: 'email',
+        provider: 'resend',
+        credentialsRef: 'vault://creds/email',
+      }),
+    ).toThrow()
+  })
+
+  it('UpdateIntegrationConfigSchema accepts partial updates and rejects empty credentialsRef', () => {
+    expect(UpdateIntegrationConfigSchema.parse({ status: 'active' })).toEqual({ status: 'active' })
+    expect(() => UpdateIntegrationConfigSchema.parse({ credentialsRef: '' })).toThrow()
+  })
+
+  it('SendMessageSchema validates required fields and optional payload', () => {
+    const ok = SendMessageSchema.parse({
+      orgId: '00000000-0000-0000-0000-000000000001',
+      channel: 'email',
+      to: 'user@example.com',
+      correlationId: '00000000-0000-0000-0000-000000000002',
+      variables: { total: 100 },
+    })
+
+    expect(ok.variables).toEqual({ total: 100 })
+    expect(() =>
+      SendMessageSchema.parse({
+        orgId: '00000000-0000-0000-0000-000000000001',
+        channel: 'email',
+        to: '',
+        correlationId: '00000000-0000-0000-0000-000000000002',
+      }),
+    ).toThrow()
+  })
+
+  it('CreateWebhookSubscriptionSchema validates url, events min, and secret length', () => {
+    const parsed = CreateWebhookSubscriptionSchema.parse({
+      orgId: '00000000-0000-0000-0000-000000000001',
+      url: 'https://example.com/webhook',
+      events: ['integration.delivery.sent'],
+      secret: '1234567890abcdef',
+    })
+
+    expect(parsed.events).toHaveLength(1)
+
+    expect(() =>
+      CreateWebhookSubscriptionSchema.parse({
+        orgId: '00000000-0000-0000-0000-000000000001',
+        url: 'notaurl',
+        events: [],
+        secret: 'short',
+      }),
+    ).toThrow()
+  })
+})
+
+describe('barrel exports', () => {
+  it('exposes runtime symbols from index', () => {
+    expect(barrel.IntegrationRegistry).toBeTypeOf('function')
+    expect(barrel.IntegrationEventTypes['integration.delivery.sent']).toBe('integration.delivery.sent')
+    expect(barrel.CreateIntegrationConfigSchema).toBeTruthy()
   })
 })

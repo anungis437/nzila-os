@@ -1,6 +1,6 @@
 'use client';
 
-import { useShell } from '../context/provider.js';
+import { useShell } from '../context/provider';
 
 export function OrgSelector() {
   const { org, availableOrgs, switchOrg } = useShell();

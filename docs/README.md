@@ -2,6 +2,9 @@
 
 ## What do you need?
 
+- **I'm evaluating Nzila OS for procurement** → [Buyer's Guide](personas/01-buyer.md)
+- **I'm running or deploying the platform** → [Operator's Guide](personas/02-operator.md)
+- **I'm performing a compliance or security audit** → [Auditor's Guide](personas/03-auditor.md)
 - **I want to use UnionEyes** → [Quick Start](union-eyes/quick-start.md) · [User Guide](union-eyes/user-guide.md)
 - **I am part of the CUPE pilot** → [Pilot Overview](union-eyes/pilot-overview.md) · [FAQ](union-eyes/faq.md)
 - **I am running the pilot** → [Admin Guide](union-eyes/admin-guide.md) · [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)

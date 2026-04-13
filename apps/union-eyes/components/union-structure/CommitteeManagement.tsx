@@ -442,7 +442,7 @@ export function CommitteeManagement({
                   <TableHead>Meeting</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Status</TableHead>
-                  {!readOnly && <TableHead className="w-[70px]">Actions</TableHead>}
+                  {!readOnly && <TableHead className="w-17.5">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>

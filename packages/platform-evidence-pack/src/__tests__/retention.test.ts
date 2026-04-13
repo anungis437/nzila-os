@@ -91,4 +91,79 @@ describe('RetentionManager', () => {
     const results = await manager.processExpired('permanent')
     expect(results.length).toBe(0)
   })
+
+  it('should return skipped when retention expires without auto actions', () => {
+    const ports = createTestPorts()
+    const manager = new RetentionManager(ports, {
+      standard: {
+        retentionClass: 'standard',
+        retentionDays: 1,
+        autoArchive: false,
+        autoDelete: false,
+      },
+    })
+
+    const oldDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+    const result = manager.evaluatePack('PACK-SKIP', oldDate, 'standard')
+
+    expect(result.action).toBe('skipped')
+  })
+
+  it('should archive expired packs for extended retention', async () => {
+    const oldPack = {
+      packId: 'OLD-EXTENDED',
+      orgId: 'org-1',
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-OLD-EXT',
+      runId: 'run-1',
+      createdBy: 'test',
+      createdAt: new Date(Date.now() - 365 * 5 * 24 * 60 * 60 * 1000).toISOString(),
+      summary: 'Old extended pack',
+      controlsCovered: [],
+      artifacts: [],
+    } as EvidencePackIndex
+
+    const ports = createTestPorts([oldPack])
+    const manager = new RetentionManager(ports)
+
+    const results = await manager.processExpired('extended')
+
+    expect(results).toHaveLength(1)
+    expect(results[0]!.action).toBe('archived')
+    expect(ports.archived).toContain('OLD-EXTENDED')
+  })
+
+  it('should keep expired packs unchanged when policy has no auto actions', async () => {
+    const oldPack = {
+      packId: 'OLD-NO-ACTION',
+      orgId: 'org-1',
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-OLD-NO-ACTION',
+      runId: 'run-1',
+      createdBy: 'test',
+      createdAt: new Date(Date.now() - 365 * 2 * 24 * 60 * 60 * 1000).toISOString(),
+      summary: 'Old no action pack',
+      controlsCovered: [],
+      artifacts: [],
+    } as EvidencePackIndex
+
+    const ports = createTestPorts([oldPack])
+    const manager = new RetentionManager(ports, {
+      standard: {
+        retentionClass: 'standard',
+        retentionDays: 1,
+        autoArchive: false,
+        autoDelete: false,
+      },
+    })
+
+    const results = await manager.processExpired('standard')
+
+    expect(results).toHaveLength(1)
+    expect(results[0]!.action).toBe('skipped')
+    expect(ports.archived).toHaveLength(0)
+    expect(ports.deleted).toHaveLength(0)
+  })
 })

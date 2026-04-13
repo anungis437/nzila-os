@@ -1,4 +1,5 @@
 import { AuthProvider } from "@nzila/platform-auth/entra/client";
+import { NzilaAppShell } from "@nzila/platform-shell";
 import type { Metadata } from "next";
 import { Poppins } from 'next/font/google';
 import { initializeBrands } from '@/lib/branding/brand-config';
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <AuthProvider>
-          {children}
+          <NzilaAppShell moduleId="zonga">
+            {children}
+          </NzilaAppShell>
         </AuthProvider>
       </body>
     </html>

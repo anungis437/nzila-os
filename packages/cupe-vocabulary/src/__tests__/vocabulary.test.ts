@@ -6,6 +6,7 @@ import {
   getStatusById,
   getAllCaseTypeIds,
   getAllPriorityIds,
+  getAllRoleIds,
   getAllStatusIds,
   getStatusesByCategory,
 } from '../vocabulary';
@@ -81,6 +82,16 @@ describe('CUPE Vocabulary', () => {
       expect(ids.length).toBeGreaterThan(0);
       expect(ids).toContain('discipline');
       expect(ids).toContain('safety');
+    });
+  });
+
+  describe('getAllRoleIds', () => {
+    it('returns all role IDs', () => {
+      const ids = getAllRoleIds();
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids).toContain('member');
+      expect(ids).toContain('steward');
+      expect(ids).toContain('admin');
     });
   });
 
@@ -169,6 +180,19 @@ describe('Vocabulary Validation', () => {
       });
       expect(result.valid).toBe(false);
       expect(result.errors.some((e) => e.field === 'priority')).toBe(true);
+    });
+
+    it('returns valid when all fields are omitted', () => {
+      const result = validateCaseIntake({});
+      expect(result.valid).toBe(true);
+      expect(result.errors.length).toBe(0);
+    });
+
+    it('validates only status when caseType and priority are omitted', () => {
+      const result = validateCaseIntake({ status: 'invalid' });
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].field).toBe('status');
     });
   });
 });

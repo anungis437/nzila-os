@@ -129,6 +129,46 @@ describe('@nzila/zonga-control-plane — Governance Enforcer', () => {
       const violations = eventPolicy.evaluate(ctx, 'event', entity)
       expect(violations.some((v) => v.rule === 'ticket_types_required')).toBe(true)
     })
+
+    it('uses "unknown" entityId when event has no id', () => {
+      const ctx = makeContext()
+      const entity = { capacity: 0, hasTicketTypes: false }
+      const violations = eventPolicy.evaluate(ctx, 'event', entity)
+      expect(violations.length).toBeGreaterThan(0)
+      expect(violations.every((v) => v.entityId === 'unknown')).toBe(true)
+    })
+  })
+
+  // ── Policies with missing entity id ───────────────────────────────
+
+  describe('entityId fallback to "unknown"', () => {
+    it('payout violations use "unknown" when entity has no id', () => {
+      const ctx = makeContext()
+      const entity = { amount: 0.5, hasActiveDispute: true }
+      const violations = payoutPolicy.evaluate(ctx, 'payout', entity)
+      expect(violations.length).toBe(2)
+      expect(violations.every((v) => v.entityId === 'unknown')).toBe(true)
+    })
+
+    it('release violations use "unknown" when entity has no id', () => {
+      const ctx = makeContext()
+      const entity = { hasValidRights: false, splitTotal: 50 }
+      const violations = releasePolicy.evaluate(ctx, 'release', entity)
+      expect(violations.length).toBe(2)
+      expect(violations.every((v) => v.entityId === 'unknown')).toBe(true)
+    })
+
+    it('validateGovernancePolicy emits event with "unknown" entityId', () => {
+      const ctx = makeContext()
+      const entity = { amount: 0.01, hasActiveDispute: true }
+      const result = validateGovernancePolicy(ctx, 'payout', entity)
+      expect(result.passed).toBe(false)
+
+      const events = getEventLog()
+      const violation = events.find((e) => e.type === SystemEventType.POLICY_VIOLATION_DETECTED)
+      expect(violation).toBeDefined()
+      expect(violation!.entityId).toBe('unknown')
+    })
   })
 
   // ── validateGovernancePolicy ──────────────────────────────────────

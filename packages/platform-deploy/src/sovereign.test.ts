@@ -37,6 +37,11 @@ describe('checkEgress', () => {
     expect(result.allowed).toBe(true)
   })
 
+  it('allows wildcard root-domain match', () => {
+    const result = checkEgress('slack.com', 443, ENFORCED_ALLOWLIST)
+    expect(result.allowed).toBe(true)
+  })
+
   it('blocks unlisted host', () => {
     const result = checkEgress('evil.example.com', 443, ENFORCED_ALLOWLIST)
     expect(result.allowed).toBe(false)
@@ -87,6 +92,17 @@ describe('egress audit log', () => {
     const stats = getEgressStats()
     expect(stats.allowed).toBeGreaterThanOrEqual(1)
     expect(stats.blocked).toBeGreaterThanOrEqual(1)
+  })
+
+  it('trims the log when max size is exceeded', () => {
+    const allowed = checkEgress('api.stripe.com', 443, ENFORCED_ALLOWLIST)
+
+    for (let i = 0; i < 2100; i++) {
+      recordEgressCheck(allowed, `corr-${i}`)
+    }
+
+    const log = getEgressAuditLog()
+    expect(log.length).toBeLessThanOrEqual(2000)
   })
 })
 

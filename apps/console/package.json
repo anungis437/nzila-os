@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rm -rf .next .turbo node_modules"
+    "clean": "rm -rf .next .turbo node_modules",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -17,10 +18,12 @@
     "@nzila/blob": "workspace:*",
     "@nzila/commerce-observability": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-assurance": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-evidence-pack": "workspace:*",
@@ -35,6 +38,7 @@
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-proof": "workspace:*",
     "@nzila/qbo": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/tax": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@types/dompurify": "^3.2.0",

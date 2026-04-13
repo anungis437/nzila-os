@@ -1,7 +1,8 @@
 {
   "name": "@nzila/trade-db",
   "version": "0.1.0",
-  "private": true, "type": "module",
+  "private": true,
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -20,7 +21,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/trade-core": "workspace:*",

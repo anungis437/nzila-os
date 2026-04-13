@@ -259,7 +259,7 @@ export default async function DashboardPage({
                           {q.reference}
                         </Link>
                       </td>
-                      <td className="px-5 py-3 text-gray-700 truncate max-w-[200px]">{q.title || '—'}</td>
+                      <td className="px-5 py-3 text-gray-700 truncate max-w-50">{q.title || '—'}</td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full ${s.bg} ${s.text}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
@@ -385,13 +385,13 @@ export default async function DashboardPage({
           <div className="space-y-2.5">
             {overdueInvoices > 0 && (
               <Link href={`${base}/invoices`} className="flex items-center gap-2 p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-colors">
-                <ClockIcon className="h-4 w-4 text-red-500 flex-shrink-0" />
+                <ClockIcon className="h-4 w-4 text-red-500 shrink-0" />
                 <span className="text-xs text-red-700 font-medium">{overdueInvoices} overdue invoice{overdueInvoices > 1 ? 's' : ''}</span>
               </Link>
             )}
             {lowStock.length > 0 && (
               <Link href={`${base}/inventory`} className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors">
-                <CubeIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                <CubeIcon className="h-4 w-4 text-amber-500 shrink-0" />
                 <span className="text-xs text-amber-700 font-medium">{lowStock.length} low stock item{lowStock.length > 1 ? 's' : ''}</span>
               </Link>
             )}

@@ -1,14 +1,15 @@
 {
-  "name": "@nzila/platform-ai-contract",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./schemas": "./src/schemas.ts",
-    "./types": "./src/types.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  }
+   "name": "@nzila/platform-ai-contract",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "exports": {
+      ".": "./src/index.ts",
+      "./schemas": "./src/schemas.ts",
+      "./types": "./src/types.ts"
+   },
+   "scripts": {
+      "typecheck": "tsc --noEmit",
+      "test:coverage": "vitest run --coverage"
+   }
 }

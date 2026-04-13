@@ -61,6 +61,26 @@ describe('checkOrgBudget', () => {
     expect(result.state).toBe('warning')
   })
 
+  it('keeps utilization at zero when budgets are zero', async () => {
+    const ports = makeBudgetPorts({
+      getOrgBudgetPolicy: vi.fn().mockResolvedValue({
+        orgId: ORG_ID,
+        dailyBudgetUsd: 0,
+        monthlyBudgetUsd: 0,
+        enforce: true,
+        exemptRoutes: [],
+      }),
+      getOrgDailySpend: vi.fn().mockResolvedValue(0),
+      getOrgMonthlySpend: vi.fn().mockResolvedValue(0),
+    })
+
+    const result = await checkOrgBudget(ORG_ID, ports)
+
+    expect(result.state).toBe('ok')
+    expect(result.dailyUtilization).toBe(0)
+    expect(result.monthlyUtilization).toBe(0)
+  })
+
   it('returns exceeded when daily budget breached', async () => {
     const ports = makeBudgetPorts({
       getOrgBudgetPolicy: vi.fn().mockResolvedValue({

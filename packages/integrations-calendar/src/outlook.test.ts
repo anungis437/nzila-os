@@ -121,6 +121,27 @@ describe('mapGraphEvent', () => {
     const recurring = { ...graphEvent, recurrence: { pattern: {} } }
     expect(mapGraphEvent(recurring, 'cal-1').isRecurring).toBe(true)
   })
+
+  it('maps nullable optional fields to undefined and attendeeCount to 0', () => {
+    const event: GraphEvent = {
+      ...graphEvent,
+      bodyPreview: null,
+      location: null,
+      onlineMeeting: null,
+      organizer: undefined,
+      attendees: undefined,
+      isAllDay: undefined,
+    }
+
+    const mapped = mapGraphEvent(event, 'cal-1')
+    expect(mapped.description).toBeUndefined()
+    expect(mapped.location).toBeUndefined()
+    expect(mapped.meetingUrl).toBeUndefined()
+    expect(mapped.organizerEmail).toBeUndefined()
+    expect(mapped.organizerName).toBeUndefined()
+    expect(mapped.attendeeCount).toBe(0)
+    expect(mapped.allDay).toBe(false)
+  })
 })
 
 describe('mapGraphAttendees', () => {
@@ -144,6 +165,35 @@ describe('mapGraphAttendees', () => {
   it('returns empty array when no attendees', () => {
     const noAtt = { ...graphEvent, attendees: undefined }
     expect(mapGraphAttendees(noAtt)).toEqual([])
+  })
+
+  it('falls back to needs_action for unknown attendee response', () => {
+    const event: GraphEvent = {
+      ...graphEvent,
+      attendees: [
+        {
+          emailAddress: { name: 'Zed', address: 'zed@cape.ca' },
+          status: { response: 'mystery' },
+        },
+      ],
+    }
+
+    const result = mapGraphAttendees(event)
+    expect(result[0]!.responseStatus).toBe('needs_action')
+  })
+
+  it('maps null attendee displayName to undefined', () => {
+    const event: GraphEvent = {
+      ...graphEvent,
+      attendees: [
+        {
+          emailAddress: { name: null, address: 'nullname@cape.ca' },
+          status: { response: 'accepted' },
+        },
+      ],
+    }
+    const result = mapGraphAttendees(event)
+    expect(result[0]!.displayName).toBeUndefined()
   })
 })
 
@@ -199,5 +249,14 @@ describe('createOutlookCalendarClient', () => {
     const client = createOutlookCalendarClient(transport, 'u1')
     const health = await client.healthCheck()
     expect(health.ok).toBe(false)
+  })
+
+  it('fetchAttendees returns empty array because attendees are embedded in events', async () => {
+    const transport: GraphCalendarTransport = {
+      listCalendars: async () => [],
+      listEvents: async () => [],
+    }
+    const client = createOutlookCalendarClient(transport, 'u1')
+    await expect(client.fetchAttendees('org1', 'evt-1')).resolves.toEqual([])
   })
 })

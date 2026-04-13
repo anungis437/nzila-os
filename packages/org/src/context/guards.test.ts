@@ -6,6 +6,7 @@ import {
   assertSameOrg,
   withOrgScope,
   OrgScopeRequiredError,
+  OrgScopeInvalidError,
   OrgAccessDeniedError,
 } from './guards.js'
 import type { OrgContext } from './types.js'
@@ -32,6 +33,12 @@ describe('requireOrgScope', () => {
 
   it('throws OrgScopeRequiredError when undefined', () => {
     expect(() => requireOrgScope(undefined)).toThrow(OrgScopeRequiredError)
+  })
+
+  it('throws OrgScopeInvalidError when context shape is malformed', () => {
+    expect(() => requireOrgScope({ orgId: 'org-1' } as unknown as OrgContext)).toThrow(
+      OrgScopeInvalidError,
+    )
   })
 })
 

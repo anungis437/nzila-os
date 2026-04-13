@@ -174,6 +174,31 @@ describe('@nzila/zonga-control-plane — Offline Sync', () => {
       expect(events.length).toBeGreaterThanOrEqual(1)
       expect(events[0]!.payload['deviceId']).toBe('device-x')
     })
+
+    it('tracks failed items when conflict resolution returns empty', () => {
+      const ctx = makeContext()
+      const localItem = makeSyncItem({
+        id: 'upd-1',
+        type: 'playlist_change',
+        timestamp: new Date('2025-01-01T00:00:00Z'),
+      })
+      const remoteItem = makeSyncItem({
+        id: 'upd-1',
+        type: 'playlist_change',
+        timestamp: new Date('2025-01-02T00:00:00Z'),
+      })
+      const queue: SyncQueue = {
+        items: [localItem],
+        lastSyncAt: null,
+        deviceId: 'device-upd',
+      }
+
+      const result = processSyncQueue(ctx, queue, [remoteItem])
+
+      // Non-ticket_scan items use update_conflict resolution
+      expect(result.conflicts).toBe(1)
+      expect(result.resolved).toBe(1)
+    })
   })
 
   // ── buildSyncState / needsSync ────────────────────────────────────
@@ -192,6 +217,22 @@ describe('@nzila/zonga-control-plane — Offline Sync', () => {
       expect(state.pendingCount).toBe(2)
       expect(state.isOnline).toBe(true)
       expect(state.lastSyncAt).toEqual(new Date('2025-01-01'))
+    })
+
+    it('counts items with conflictWith as conflicts', () => {
+      const queue: SyncQueue = {
+        items: [
+          makeSyncItem({ id: 'c-1', conflictWith: 'remote-1' }),
+          makeSyncItem({ id: 'c-2' }),
+        ],
+        lastSyncAt: null,
+        deviceId: 'dev-2',
+      }
+
+      const state = buildSyncState('dev-2', queue, false)
+
+      expect(state.conflictCount).toBe(1)
+      expect(state.isOnline).toBe(false)
     })
   })
 

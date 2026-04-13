@@ -9,7 +9,8 @@
     "start": "node --env-file=.env --import tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "build": "echo 'orchestrator-api: no build step (tsx runtime)'"
+    "build": "echo 'orchestrator-api: no build step (tsx runtime)'",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@fastify/helmet": "^13.0.2",

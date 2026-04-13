@@ -66,6 +66,23 @@ describe('ProviderRegistry', () => {
     expect(health[0].successRate).toBe(80)
   })
 
+  it('treats zero total deliveries as 100% success', async () => {
+    const ports = makePorts({
+      getDeliveryStats: vi.fn(async () => ({
+        total: 0,
+        succeeded: 0,
+        failed: 0,
+        avgLatencyMs: 0,
+      })),
+    })
+    const registry = new ProviderRegistry(ports)
+    const health = await registry.getProviderHealth('org-123')
+
+    expect(health[0].status).toBe('healthy')
+    expect(health[0].successRate).toBe(100)
+    expect(health[0].totalDeliveries).toBe(0)
+  })
+
   it('returns unknown status on error', async () => {
     const ports = makePorts({
       getCircuitState: vi.fn(async () => { throw new Error('connection failed') }),
@@ -74,6 +91,17 @@ describe('ProviderRegistry', () => {
     const health = await registry.getProviderHealth('org-123')
 
     expect(health[0].status).toBe('unknown')
+  })
+
+  it('returns unknown status on non-Error throw', async () => {
+    const ports = makePorts({
+      getCircuitState: vi.fn(async () => { throw 'registry panic' }),
+    })
+    const registry = new ProviderRegistry(ports)
+    const health = await registry.getProviderHealth('org-123')
+
+    expect(health[0].status).toBe('unknown')
+    expect(health[0].totalDeliveries).toBe(0)
   })
 
   it('getProviderHealthSingle returns specific provider', async () => {

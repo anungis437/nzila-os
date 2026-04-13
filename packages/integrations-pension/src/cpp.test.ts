@@ -142,6 +142,12 @@ describe('createCppClient', () => {
     expect(contribs[0]!.provider).toBe('CPP_QPP')
   })
 
+  it('fetchMembers returns empty list', async () => {
+    const client = createCppClient(transport)
+    const members = await client.fetchMembers('org1', 'plan-1')
+    expect(members).toEqual([])
+  })
+
   it('fetchEstimates maps via transport', async () => {
     const client = createCppClient(transport)
     const estimates = await client.fetchEstimates('org1', '123-456-789')

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import {
   STORAGE_PATHS,
   rawPath,
@@ -10,8 +10,16 @@ import {
   artworkPath,
   waveformPath,
   previewPath,
+  createS3StorageAdapter,
   createInMemoryStorageAdapter,
 } from './storage'
+
+afterEach(() => {
+  vi.resetAllMocks()
+  vi.resetModules()
+  vi.doUnmock('@aws-sdk/client-s3')
+  vi.doUnmock('@aws-sdk/s3-request-presigner')
+})
 
 describe('Storage Paths', () => {
   it('rawPath builds correct key', () => {
@@ -156,5 +164,138 @@ describe('InMemoryStorageAdapter', () => {
   it('download throws for missing key', async () => {
     const storage = createInMemoryStorageAdapter()
     await expect(storage.download('nope')).rejects.toThrow('Not found')
+  })
+})
+
+describe('S3StorageAdapter', () => {
+  it('covers upload, list, metadata, copy, signed URLs, and prefix deletion via the mocked SDK', async () => {
+    const sentInputs: Array<{ type: string; input: Record<string, unknown> }> = []
+    const send = vi.fn(async (command: { input: Record<string, unknown>; constructor: { name: string } }) => {
+      sentInputs.push({ type: command.constructor.name, input: command.input })
+
+      switch (command.constructor.name) {
+        case 'PutObjectCommand':
+          return { ETag: 'etag-1' }
+        case 'GetObjectCommand':
+          return { Body: { transformToByteArray: async () => new Uint8Array([1, 2, 3]) } }
+        case 'HeadObjectCommand':
+          return {
+            ContentLength: 3,
+            LastModified: new Date('2026-04-12T00:00:00.000Z'),
+            ETag: 'etag-head',
+            ContentType: 'audio/mp4',
+            Metadata: { artist: 'Nzila' },
+          }
+        case 'ListObjectsV2Command':
+          if (!command.input.ContinuationToken) {
+            return {
+              Contents: [{ Key: 'tracks/a.m3u8', Size: 4, LastModified: new Date('2026-04-12T00:00:00.000Z'), ETag: '1' }],
+              NextContinuationToken: 'page-2',
+            }
+          }
+          return {
+            Contents: [{ Key: 'tracks/b.ts', Size: 5, LastModified: new Date('2026-04-12T00:00:01.000Z'), ETag: '2' }],
+          }
+        case 'DeleteObjectCommand':
+        case 'CopyObjectCommand':
+          return {}
+        default:
+          throw new Error(`Unexpected command: ${command.constructor.name}`)
+      }
+    })
+
+    vi.doMock('@aws-sdk/client-s3', () => {
+      class S3Client {
+        send = send
+      }
+      class PutObjectCommand { constructor(public input: Record<string, unknown>) {} }
+      class GetObjectCommand { constructor(public input: Record<string, unknown>) {} }
+      class DeleteObjectCommand { constructor(public input: Record<string, unknown>) {} }
+      class HeadObjectCommand { constructor(public input: Record<string, unknown>) {} }
+      class ListObjectsV2Command { constructor(public input: Record<string, unknown>) {} }
+      class CopyObjectCommand { constructor(public input: Record<string, unknown>) {} }
+
+      return {
+        S3Client,
+        PutObjectCommand,
+        GetObjectCommand,
+        DeleteObjectCommand,
+        HeadObjectCommand,
+        ListObjectsV2Command,
+        CopyObjectCommand,
+      }
+    })
+    vi.doMock('@aws-sdk/s3-request-presigner', () => ({
+      getSignedUrl: vi.fn(async (_client, command) => `signed://${command.input.Key}`),
+    }))
+
+    const storage = createS3StorageAdapter({
+      provider: 'r2',
+      bucket: 'nzila-media',
+      region: 'us-east-1',
+      endpoint: 'https://r2.example.com',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+      cdnBaseUrl: 'https://cdn.example.com',
+    })
+
+    const upload = await storage.upload({
+      key: 'tracks/source.m4a',
+      body: new Uint8Array([1, 2, 3]),
+      contentType: 'audio/mp4',
+    })
+    const download = await storage.download('tracks/source.m4a')
+    const exists = await storage.exists('tracks/source.m4a')
+    const signedDownloadUrl = await storage.getSignedUrl('tracks/source.m4a', 300)
+    const signedUploadUrl = await storage.getSignedUploadUrl('tracks/upload.m4a', 'audio/mp4', 300)
+    const listed = await storage.list('tracks/')
+    const metadata = await storage.getObjectMetadata('tracks/source.m4a')
+    await storage.copyObject('tracks/source.m4a', 'tracks/copy.m4a')
+    const deleted = await storage.deletePrefix('tracks/')
+
+    expect(upload.url).toBe('https://cdn.example.com/tracks/source.m4a')
+    expect(Array.from(download)).toEqual([1, 2, 3])
+    expect(exists).toBe(true)
+    expect(signedDownloadUrl).toBe('signed://tracks/source.m4a')
+    expect(signedUploadUrl).toBe('signed://tracks/upload.m4a')
+    expect(listed).toHaveLength(2)
+    expect(metadata?.metadata.artist).toBe('Nzila')
+    expect(deleted).toBe(2)
+    expect(sentInputs.some((entry) => entry.type === 'CopyObjectCommand')).toBe(true)
+  })
+
+  it('returns false/null for head failures and throws for empty downloads', async () => {
+    const send = vi.fn(async (command: { constructor: { name: string } }) => {
+      if (command.constructor.name === 'GetObjectCommand') {
+        return { Body: null }
+      }
+      throw new Error('not found')
+    })
+
+    vi.doMock('@aws-sdk/client-s3', () => {
+      class S3Client {
+        send = send
+      }
+      class GetObjectCommand { constructor(public input: Record<string, unknown>) {} }
+      class HeadObjectCommand { constructor(public input: Record<string, unknown>) {} }
+
+      return {
+        S3Client,
+        GetObjectCommand,
+        HeadObjectCommand,
+      }
+    })
+
+    const storage = createS3StorageAdapter({
+      provider: 's3',
+      bucket: 'nzila-media',
+      region: 'ca-central-1',
+      accessKeyId: 'key',
+      secretAccessKey: 'secret',
+    })
+
+    await expect(storage.download('missing')).rejects.toThrow('Empty body for key: missing')
+    await expect(storage.exists('missing')).resolves.toBe(false)
+    await expect(storage.getObjectMetadata('missing')).resolves.toBeNull()
   })
 })

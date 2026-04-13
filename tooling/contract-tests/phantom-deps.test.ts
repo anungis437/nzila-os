@@ -100,6 +100,15 @@ function isImported(files: string[], pkg: string): boolean {
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Platform mandate packages — declared by CI adoption gate before apps
+ * have started consuming them in source code.
+ */
+const MANDATE_DEPS = new Set([
+  '@nzila/schema-core',
+  '@nzila/governed-workflow',
+])
+
 describe('Phantom Dependencies — STUDIO-01 contract', () => {
   for (const app of APPS) {
     const appDir = resolve(ROOT, `apps/${app}`)
@@ -116,6 +125,8 @@ describe('Phantom Dependencies — STUDIO-01 contract', () => {
       }
 
       for (const dep of deps) {
+        if (MANDATE_DEPS.has(dep)) continue
+
         it(`${dep} is actually imported (not a phantom dependency)`, () => {
           const appFiles = getFiles()
           expect(

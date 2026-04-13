@@ -13,7 +13,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/agri-core": "workspace:*",

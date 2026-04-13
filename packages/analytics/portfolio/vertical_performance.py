@@ -4,8 +4,17 @@ Benchmark and compare performance across business verticals
 """
 
 import json
+import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+
+_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "market_data.json")
+
+
+def _load_market_data() -> Dict:
+    """Load market data from the shared JSON config."""
+    with open(_DATA_PATH, "r") as f:
+        return json.load(f)
 
 
 class VerticalPerformanceAnalyzer:
@@ -15,109 +24,83 @@ class VerticalPerformanceAnalyzer:
         self.verticals = self._load_verticals()
 
     def _load_verticals(self) -> Dict[str, Dict[str, Any]]:
-        """Load vertical definitions and platform assignments."""
-        return {
+        """Load vertical definitions — TAM/SOM from shared market_data.json, platform metadata local."""
+        market_data = _load_market_data()
+        shared = market_data["vertical_markets"]
+
+        # Platform-specific metadata that augments the shared market data
+        platform_meta = {
             "uniontech": {
-                "name": "Uniontech",
                 "platforms": ["union_eyes"],
-                "tam": 50_000_000_000,
-                "som_2026": 350_000,
-                "som_2030": 10_000_000,
                 "flagship": "UnionEyes",
                 "maturity": "growth",
-                "geographic_focus": ["Canada", "USA"],
             },
             "dei_training": {
-                "name": "DEI / Anti-Bias Training",
                 "platforms": ["abr_insights"],
-                "tam": 1_500_000_000,
-                "som_2026": 420_000,
-                "som_2030": 8_000_000,
                 "flagship": "ABR Insights",
                 "maturity": "growth",
-                "geographic_focus": ["Canada", "USA", "UK"],
             },
             "agrotech": {
-                "name": "Agrotech",
                 "platforms": ["cora", "agrimoops"],
-                "tam": 8_600_000_000,
-                "som_2026": 300_000,
-                "som_2030": 6_000_000,
                 "flagship": "CORA",
                 "maturity": "early",
-                "geographic_focus": ["Canada", "USA", "Kenya", "Nigeria"],
             },
-            "fintech": {
-                "name": "Fintech",
+            "fintech_remittance": {
                 "platforms": ["c3uo", "stsa", "insight_cfo"],
-                "tam": 15_000_000_000,
-                "som_2026": 200_000,
-                "som_2030": 5_000_000,
                 "flagship": "DiasporaCore V2",
                 "maturity": "early",
-                "geographic_focus": ["Canada", "USA", "UK", "DRC"],
             },
             "insurtech": {
-                "name": "Insurtech",
                 "platforms": ["sentryiq"],
-                "tam": 12_000_000_000,
-                "som_2026": 150_000,
-                "som_2030": 4_000_000,
                 "flagship": "SentryIQ360",
                 "maturity": "early",
-                "geographic_focus": ["Canada", "USA"],
             },
             "legaltech": {
-                "name": "Legaltech",
                 "platforms": ["court_lens"],
-                "tam": 7_000_000_000,
-                "som_2026": 180_000,
-                "som_2030": 3_500_000,
                 "flagship": "Court Lens",
                 "maturity": "early",
-                "geographic_focus": ["Canada"],
             },
             "trade_commerce": {
-                "name": "Trade & Commerce",
                 "platforms": ["trade_os", "eexports", "shop_quoter"],
-                "tam": 10_000_000_000,
-                "som_2026": 250_000,
-                "som_2030": 4_500_000,
                 "flagship": "Trade OS",
                 "maturity": "early",
-                "geographic_focus": ["Canada", "USA", "Africa"],
             },
-            "entertainment": {
-                "name": "Entertainment",
+            "entertainment_streaming": {
                 "platforms": ["congowave"],
-                "tam": 25_000_000_000,
-                "som_2026": 100_000,
-                "som_2030": 2_000_000,
                 "flagship": "CongoWave",
                 "maturity": "beta",
-                "geographic_focus": ["Canada", "USA", "DRC"],
             },
             "edtech": {
-                "name": "EdTech",
                 "platforms": ["cyberlearn"],
-                "tam": 5_000_000_000,
-                "som_2026": 50_000,
-                "som_2030": 1_500_000,
                 "flagship": "CyberLearn",
                 "maturity": "early",
-                "geographic_focus": ["Canada", "USA"],
             },
             "healthtech": {
-                "name": "Healthtech",
                 "platforms": ["memora"],
-                "tam": 8_000_000_000,
-                "som_2026": 0,
-                "som_2030": 1_000_000,
                 "flagship": "Memora",
                 "maturity": "concept",
-                "geographic_focus": ["Canada"],
+            },
+            "virtual_cfo": {
+                "platforms": ["insight_cfo"],
+                "flagship": "Insight CFO",
+                "maturity": "early",
             },
         }
+
+        result = {}
+        for vid, meta in platform_meta.items():
+            market = shared.get(vid, {})
+            result[vid] = {
+                "name": market.get("name", vid),
+                "platforms": meta["platforms"],
+                "tam": market.get("tam", 0),
+                "som_2026": market.get("som_2026", 0),
+                "som_2030": market.get("som_2030", 0),
+                "flagship": meta["flagship"],
+                "maturity": meta["maturity"],
+                "geographic_focus": market.get("geographic_focus", []),
+            }
+        return result
 
     def benchmark_verticals(self) -> Dict[str, Any]:
         """Benchmark all verticals against each other."""
@@ -164,7 +147,8 @@ class VerticalPerformanceAnalyzer:
         }
 
         # Weighted components
-        tam_score = min(vertical["tam"] / 50_000_000_000, 1.0) * 25
+        max_tam = max(v["tam"] for v in self.verticals.values()) or 1
+        tam_score = min(vertical["tam"] / max_tam, 1.0) * 25
         som_score = min(vertical["som_2030"] / 10_000_000, 1.0) * 25
         maturity_score = maturity_weights.get(vertical["maturity"], 20) * 0.25
         platform_score = min(len(vertical["platforms"]) / 3, 1.0) * 15

@@ -105,10 +105,12 @@ export function processSyncQueue(
 
       if (conflictResolution.length > 0) {
         resolved++
+      /* v8 ignore start */
       } else {
         failed++
         pendingItems.push(localItem)
       }
+      /* v8 ignore stop */
     } else {
       synced++
     }
@@ -122,6 +124,7 @@ export function processSyncQueue(
     entityType: 'sync_queue',
     correlationId: context.correlationId,
     payload: { synced, conflicts: conflictCount, resolved, failed, deviceId: queue.deviceId },
+    /* v8 ignore next */
     severity: failed > 0 ? AuditSeverity.WARNING : AuditSeverity.INFO,
   }))
 

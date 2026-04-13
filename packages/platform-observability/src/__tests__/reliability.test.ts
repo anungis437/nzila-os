@@ -58,6 +58,16 @@ describe('reliability', () => {
       expect(meetsSlo(slo, 0.5)).toBe(true)
       expect(meetsSlo(slo, 1)).toBe(false)
     })
+
+    it('checks gt comparison', () => {
+      const slo: SloTarget = {
+        service: 'api', category: 'api', sli: 'success_rate',
+        comparison: 'gt', target: 95, windowHours: 24,
+        alertThresholdPct: 5, description: 'test',
+      }
+      expect(meetsSlo(slo, 96)).toBe(true)
+      expect(meetsSlo(slo, 95)).toBe(false)
+    })
   })
 
   describe('computeErrorBudget', () => {
@@ -105,6 +115,22 @@ describe('reliability', () => {
       const overBudget = computeErrorBudget(slo, 500)
       expect(overBudget.budgetConsumedPct).toBe(125)
       expect(overBudget.exhausted).toBe(true)
+    })
+
+    it('handles zero total budget safely', () => {
+      const zeroUpperBound: SloTarget = {
+        service: 'api', category: 'api', sli: 'error_rate',
+        comparison: 'lte', target: 0, windowHours: 24,
+        alertThresholdPct: 1, description: 'zero budget upper bound',
+      }
+      const zeroLowerBound: SloTarget = {
+        service: 'api', category: 'api', sli: 'availability',
+        comparison: 'gte', target: 100, windowHours: 24,
+        alertThresholdPct: 1, description: 'zero budget lower bound',
+      }
+
+      expect(computeErrorBudget(zeroUpperBound, 10).budgetConsumedPct).toBe(0)
+      expect(computeErrorBudget(zeroLowerBound, 99).budgetConsumedPct).toBe(0)
     })
   })
 })

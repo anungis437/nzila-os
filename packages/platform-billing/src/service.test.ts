@@ -66,4 +66,9 @@ describe('InMemoryBillingService', () => {
     expect(await svc.canAccessModule('org-1', 'dashboard')).toBe(true)
     expect(await svc.canAccessModule('org-1', 'sso')).toBe(false)
   })
+
+  it('returns empty entitlements for unsubscribed org', async () => {
+    const ents = await svc.listEntitlements('org-1')
+    expect(ents).toEqual([])
+  })
 })

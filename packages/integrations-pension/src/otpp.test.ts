@@ -9,6 +9,7 @@ import {
   type OtppContributionRecord,
   type OtppTransport,
 } from './otpp'
+import * as pensionIndex from './index'
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -107,6 +108,18 @@ describe('mapOtppMember', () => {
     const rec = { ...memberRecord, firstName: null, lastName: 'Smith' }
     expect(mapOtppMember(rec, 'p').employeeName).toBe('Smith')
   })
+
+  it('maps null numeric fields to undefined', () => {
+    const rec = { ...memberRecord, creditedService: null, pensionableSalary: null }
+    const mapped = mapOtppMember(rec, 'p')
+    expect(mapped.creditedService).toBeUndefined()
+    expect(mapped.pensionableSalary).toBeUndefined()
+  })
+
+  it('falls back to active for unknown status values', () => {
+    const rec = { ...memberRecord, status: 'X' as unknown as OtppMemberRecord['status'] }
+    expect(mapOtppMember(rec, 'p').memberStatus).toBe('active')
+  })
 })
 
 describe('mapOtppContribution', () => {
@@ -174,5 +187,28 @@ describe('createOtppClient', () => {
     const client = createOtppClient(transport)
     const health = await client.healthCheck()
     expect(health.ok).toBe(true)
+  })
+
+  it('fetchEstimates returns empty list', async () => {
+    const client = createOtppClient(transport)
+    const estimates = await client.fetchEstimates('org1', 'M-1001')
+    expect(estimates).toEqual([])
+  })
+})
+
+describe('barrel and schema exports', () => {
+  it('exposes runtime exports via package index', () => {
+    expect(pensionIndex.createOtppClient).toBe(createOtppClient)
+    expect(pensionIndex.mapOtppMember).toBe(mapOtppMember)
+    expect(pensionIndex.mapOtppContribution).toBe(mapOtppContribution)
+    expect(pensionIndex.createCppClient).toBeTypeOf('function')
+    expect(pensionIndex.mapCppContribution).toBeTypeOf('function')
+    expect(pensionIndex.mapCppEstimate).toBeTypeOf('function')
+
+    expect(pensionIndex.PensionProviderSchema.safeParse('OTPP').success).toBe(true)
+    expect(pensionIndex.PlanTypeSchema.safeParse('defined_benefit').success).toBe(true)
+    expect(pensionIndex.MemberStatusSchema.safeParse('active').success).toBe(true)
+    expect(pensionIndex.ContributionTypeSchema.safeParse('employee_regular').success).toBe(true)
+    expect(pensionIndex.MemberStatusSchema.safeParse('invalid_status').success).toBe(false)
   })
 })

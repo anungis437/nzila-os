@@ -99,3 +99,39 @@ export {
   InvalidationPatterns,
   type CachePort,
 } from './cache'
+
+// ── Feed Composer ───────────────────────────────────────────────────────────
+export {
+  composeFeed,
+  formatRelativeTime,
+  type RawFeedActivity,
+  type ActorProfile,
+  type ContentPreview,
+  type EnrichedFeedItem,
+  type FeedSection,
+  type FeedType,
+  type ComposeFeedParams,
+  type FeedEnrichmentPort,
+} from './feed-composer'
+
+// ── Referral System ─────────────────────────────────────────────────────────
+export {
+  generateReferralCode,
+  validateReferralCode,
+  calculateReward,
+  computeReferralStats,
+  createReferralService,
+  CreateReferralCodeSchema,
+  RedeemReferralSchema,
+  DEFAULT_REFERRAL_CONFIG,
+  type ReferralCode,
+  type ReferralConversion,
+  type ConversionType,
+  type RewardStatus,
+  type ReferralRewardConfig,
+  type ReferralRewardTier,
+  type ReferralStats,
+  type ReferralChain,
+  type ReferralRepository,
+  type CodeValidation,
+} from './referral'
