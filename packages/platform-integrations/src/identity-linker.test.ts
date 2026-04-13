@@ -14,6 +14,7 @@ const MOCK_LINK: ExternalIdentityLink = {
   externalSystem: 'workday',
   metadataJson: {},
   staleAt: null,
+  verifiedAt: null,
   createdAt: '2026-07-15T00:00:00Z',
   updatedAt: '2026-07-15T00:00:00Z',
 }
