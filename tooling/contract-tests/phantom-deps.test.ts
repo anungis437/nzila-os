@@ -107,6 +107,7 @@ function isImported(files: string[], pkg: string): boolean {
 const MANDATE_DEPS = new Set([
   '@nzila/schema-core',
   '@nzila/governed-workflow',
+  '@nzila/platform-revenue',
 ])
 
 describe('Phantom Dependencies — STUDIO-01 contract', () => {

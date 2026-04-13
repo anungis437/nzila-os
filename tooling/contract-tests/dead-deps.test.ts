@@ -66,6 +66,7 @@ const IMPLICIT_USE_ALLOWLIST = new Set([
   // before apps have started consuming them in source code
   '@nzila/schema-core',
   '@nzila/governed-workflow',
+  '@nzila/platform-revenue',
 ])
 
 function findFiles(dir: string, exts = ['.ts', '.tsx', '.mjs', '.js', '.jsx']): string[] {

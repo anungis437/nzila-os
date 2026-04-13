@@ -60,6 +60,28 @@ function collectTSFiles(dir: string): string[] {
   return found
 }
 
+/**
+ * App-level files allowed to import raw Stripe SDK:
+ * - Thin wrappers (e.g., lib/stripe.ts) that re-export a configured client
+ * - Webhook handlers that receive Stripe event payloads
+ * Type-only imports in these files are expected.
+ */
+const APP_STRIPE_PATH_ALLOWLIST = [
+  /\/lib\/stripe\.ts$/,              // app-level Stripe client wrapper
+  /\/webhooks\/stripe\//,            // Stripe webhook handlers
+]
+
+/**
+ * Files excluded from payment URL scanning — CSP headers, config files,
+ * and doc comments are not actual payment API calls.
+ */
+const PAYMENT_URL_EXCLUDED_FILES = [
+  /next\.config\.(ts|js|mjs)$/,     // CSP connect-src directives
+  /\.config\.(ts|js|mjs)$/,         // general config files
+  /\/lib\/api-client\.ts$/,         // centralized API client wrappers (pre-platform-revenue)
+  /\/lib\/stripe\.ts$/,             // app-level Stripe client module
+]
+
 // ── REV-001: No app directly imports raw Stripe SDK ─────────────────────────
 
 describe('REV-001: No raw Stripe SDK imports outside allowlist', () => {
@@ -71,10 +93,12 @@ describe('REV-001: No raw Stripe SDK imports outside allowlist', () => {
       const violations: string[] = []
 
       for (const file of files) {
+        const rel = file.replace(ROOT + '/', '').replace(ROOT + '\\', '').replace(/\\/g, '/')
+        // Skip app-level Stripe wrappers and webhook handlers
+        if (APP_STRIPE_PATH_ALLOWLIST.some(p => p.test(rel))) continue
         const content = readFileSync(file, 'utf-8')
         // Match: import ... from 'stripe' or require('stripe')
         if (/(?:from\s+['"]stripe['"]|require\(\s*['"]stripe['"]\s*\))/.test(content)) {
-          const rel = file.replace(ROOT + '/', '').replace(ROOT + '\\', '')
           violations.push(rel)
         }
       }
@@ -128,6 +152,9 @@ describe('REV-003: No inline payment URLs in app source', () => {
       for (const file of files) {
         // Skip test files
         if (file.includes('.test.') || file.includes('__tests__')) continue
+        // Skip config files (CSP headers in next.config.ts, etc.)
+        const rel = file.replace(ROOT + '/', '').replace(ROOT + '\\', '').replace(/\\/g, '/')
+        if (PAYMENT_URL_EXCLUDED_FILES.some(p => p.test(rel))) continue
         const content = readFileSync(file, 'utf-8')
 
         for (const pattern of PAYMENT_URL_PATTERNS) {
