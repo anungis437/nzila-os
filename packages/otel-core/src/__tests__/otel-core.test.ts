@@ -428,7 +428,7 @@ describe('fastify-plugin', () => {
   it('registers plugin and annotates request/response spans when dependencies are available', async () => {
     const otelPlugin = vi.fn();
     const activeSpan = { setAttribute: vi.fn() };
-    const hooks: Record<string, (...args: any[]) => Promise<void>> = {};
+    const hooks: Record<string, (...args: unknown[]) => Promise<void>> = {};
 
     vi.doMock('@fastify/otel', () => ({ default: otelPlugin }));
     vi.doMock('@opentelemetry/api', () => ({
@@ -440,7 +440,7 @@ describe('fastify-plugin', () => {
     const { default: plugin } = await import('../fastify-plugin.js');
     const fastify = {
       register: vi.fn(async () => {}),
-      addHook: vi.fn((name: string, fn: (...args: any[]) => Promise<void>) => {
+      addHook: vi.fn((name: string, fn: (...args: unknown[]) => Promise<void>) => {
         hooks[name] = fn;
       }),
       log: {
@@ -483,10 +483,10 @@ describe('fastify-plugin', () => {
     }));
 
     const { default: plugin } = await import('../fastify-plugin.js');
-    const hooks: Record<string, (...args: any[]) => Promise<void>> = {};
+    const hooks: Record<string, (...args: unknown[]) => Promise<void>> = {};
     const fastify = {
       register: vi.fn(async () => {}),
-      addHook: vi.fn((name: string, fn: (...args: any[]) => Promise<void>) => {
+      addHook: vi.fn((name: string, fn: (...args: unknown[]) => Promise<void>) => {
         hooks[name] = fn;
       }),
       log: {
