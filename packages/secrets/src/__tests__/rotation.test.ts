@@ -1,10 +1,9 @@
 /**
  * @nzila/secrets — SecretRotationManager comprehensive tests
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import {
   SecretRotationManager,
-  type RotationPolicy,
   type RotationEvent,
 } from '../rotation'
 

@@ -11,7 +11,7 @@ const { mockGetSecret, mockSetSecret, MockSecretClient, MockDefaultAzureCredenti
     mockGetSecret,
     mockSetSecret,
     // Must use regular function (not arrow) so `new` works
-    MockSecretClient: vi.fn().mockImplementation(function (this: any) {
+    MockSecretClient: vi.fn().mockImplementation(function (this: Record<string, unknown>) {
       this.getSecret = mockGetSecret
       this.setSecret = mockSetSecret
     }),
