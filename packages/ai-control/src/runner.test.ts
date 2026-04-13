@@ -62,6 +62,7 @@ describe("runAI", () => {
   it("uses a custom classifier when provided", async () => {
     const config = makeConfig({
       classifier: {
+        rules: [],
         classify() {
           return {
             classification: "warning",
