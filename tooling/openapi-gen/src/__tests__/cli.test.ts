@@ -23,7 +23,7 @@ const fakeResult: GenerationResult = {
   combinedSpecPath: '/out/combined.json',
 }
 
-const fakeNoCombined: GenerationResult = {
+const _fakeNoCombined: GenerationResult = {
   ...fakeResult,
   combinedSpecPath: undefined,
 }

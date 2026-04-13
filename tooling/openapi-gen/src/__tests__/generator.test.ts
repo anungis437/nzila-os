@@ -1,7 +1,7 @@
 /**
  * @nzila/openapi-gen — Generator comprehensive tests
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { join } from 'node:path'
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
 
