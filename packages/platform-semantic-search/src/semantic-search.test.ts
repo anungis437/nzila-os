@@ -313,7 +313,7 @@ describe('platform-semantic-search', () => {
 
   describe('schema and barrel exports', () => {
     it('exposes the drizzle table definition', () => {
-      expect(searchDocuments[Symbol.for('drizzle:Name')]).toBe('search_documents')
+      expect((searchDocuments as unknown as Record<symbol, unknown>)[Symbol.for('drizzle:Name')]).toBe('search_documents')
       expect(searchDocuments.title.name).toBe('title')
       expect(searchDocuments.updatedAt.name).toBe('updated_at')
     })
