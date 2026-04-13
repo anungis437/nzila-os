@@ -270,7 +270,7 @@ describe('platform-event-fabric', () => {
       const original = globalThis.crypto?.randomUUID
       // Temporarily remove randomUUID
       if (globalThis.crypto) {
-        ;(globalThis.crypto as Record<string, unknown>).randomUUID = undefined
+        ;(globalThis.crypto as unknown as Record<string, unknown>).randomUUID = undefined
       }
       try {
         const event = buildPlatformEvent({
