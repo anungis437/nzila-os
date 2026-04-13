@@ -4,6 +4,7 @@ import {
   InMemoryBudgetStore,
   InMemoryAILogStore,
   AIPolicyRegistry,
+  OutputClassifier,
   runAI,
   type AIRunnerConfig,
   type AIProvider,
@@ -62,7 +63,6 @@ describe("runAI", () => {
   it("uses a custom classifier when provided", async () => {
     const config = makeConfig({
       classifier: {
-        rules: [],
         classify() {
           return {
             classification: "warning",
@@ -70,7 +70,7 @@ describe("runAI", () => {
             reasons: ["custom rule"],
           };
         },
-      },
+      } as unknown as OutputClassifier,
     });
 
     const result = await runAI(config, request);
