@@ -26,7 +26,7 @@ on:
           - cross-org-isolation
           - blob-storage-unavailable
           - bulkhead-saturation
-          - clerk-auth-latency
+          - auth-provider-latency
         default: all-weekly
       environment:
         description: 'Target environment'
@@ -145,7 +145,7 @@ jobs:
           | cross-org-isolation | Weekly | ⏳ |
           | blob-storage-unavailable | Monthly | ⏳ |
           | bulkhead-saturation | Monthly | ⏳ |
-          | clerk-auth-latency | Monthly | ⏳ |
+          | auth-provider-latency | Monthly | ⏳ |
 
           ## Notes
 

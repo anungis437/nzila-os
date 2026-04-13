@@ -5357,6 +5357,22 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/platform-revenue:
+    dependencies:
+      '@nzila/platform-billing':
+        specifier: workspace:*
+        version: link:../platform-billing
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
   packages/platform-rfp-generator:
     dependencies:
       '@nzila/os-core':
@@ -6070,6 +6086,28 @@ importers:
     devDependencies:
       typescript:
         specifier: ^6.0.2
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/zonga-monetization:
+    dependencies:
+      '@nzila/zonga-analytics':
+        specifier: workspace:*
+        version: link:../zonga-analytics
+      '@nzila/zonga-economics':
+        specifier: workspace:*
+        version: link:../zonga-economics
+      '@nzila/zonga-payments':
+        specifier: workspace:*
+        version: link:../zonga-payments
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^6
         version: 6.0.2
       vitest:
         specifier: ^4.1.2

@@ -281,7 +281,7 @@ describe('ADVERSARIAL-6 — Failure Simulation & Graceful Degradation', () => {
       expect(true).toBe(true)
     })
 
-    it('Clerk auth failures produce 401 not 500', () => {
+    it('auth failures produce 401 not 500', () => {
       const authFiles = walkFiles(UE_LIB, /auth|guard/i)
       // Auth guards should catch and return 401, not let errors bubble
       const catches401 = authFiles.some(f => {

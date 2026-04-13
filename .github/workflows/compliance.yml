@@ -289,7 +289,7 @@ jobs:
           | CC-3 | Risk Assessment | ✅ Dep Audit + Supply Chain | risk-assessment.md |
           | CC-4 | Monitoring | ✅ OTel + SLO | monitoring.md |
           | CC-5 | Data Classification | ✅ OPA Policies | data-classification.md |
-          | CC-6 | Logical Access | ✅ Clerk + orgId Scoping | via CT-02, CT-09 |
+          | CC-6 | Logical Access | ✅ Platform Auth + orgId Scoping | via CT-02, CT-09 |
           | CC-7 | System Operations | ✅ Control Tests | via control-tests.yml |
           | CC-8 | Change Detection | ✅ TruffleHog + Gitleaks | via secret-scan.yml |
 

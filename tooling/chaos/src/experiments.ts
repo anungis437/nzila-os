@@ -67,8 +67,8 @@ export const NZILA_EXPERIMENTS: NzilaExperiment[] = [
   // ── Latency ───────────────────────────────────────────────────────────
   {
     config: {
-      name: 'clerk-auth-latency',
-      description: 'Injects 3s latency into Clerk auth to verify request timeout handling',
+      name: 'auth-provider-latency',
+      description: 'Injects 3s latency into auth provider to verify request timeout handling',
       category: 'latency',
       targetService: 'web',
       faultType: 'latency',

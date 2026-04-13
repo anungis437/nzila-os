@@ -18,7 +18,7 @@ Security is not a feature — it is a foundational property of every system we b
 
 ### Authentication
 
-All user sessions are managed through **Clerk**, a SOC 2 Type II certified identity provider. Key guarantees:
+All user sessions are managed through **Nzila Platform Auth** (Entra ID + local sessions). Key guarantees:
 
 - Multi-factor authentication (TOTP, passkeys) enforced for privileged roles
 - Short-lived JWTs — no long-lived tokens in cookies or local storage

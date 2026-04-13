@@ -26,6 +26,7 @@ export interface AppMeta {
   dependsOnPlatformAuth: boolean;
   nzilaDeps: string[];
   purpose: string;
+  codeFileCount: number;
 }
 
 export interface RepoInventory {
@@ -139,6 +140,7 @@ function scanApps(): AppMeta[] {
       dependsOnPlatformAuth: '@nzila/platform-auth' in deps,
       nzilaDeps,
       purpose,
+      codeFileCount: countFiles(appDir, /\.(ts|tsx|js|jsx|py)$/),
     };
   });
 }
@@ -226,12 +228,12 @@ function toMarkdown(inv: RepoInventory): string {
   lines.push('');
   lines.push('## Apps');
   lines.push('');
-  lines.push('| App | Framework | Port | README | .env.example | platform-shell | platform-auth | Purpose |');
-  lines.push('|-----|-----------|------|--------|--------------|----------------|---------------|---------|');
+  lines.push('| App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |');
+  lines.push('|-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|');
   for (const app of inv.apps) {
     const yn = (v: boolean) => v ? '✅' : '❌';
     lines.push(
-      `| ${app.name} | ${app.framework} | ${app.port ?? '—'} | ${yn(app.hasReadme)} | ${yn(app.hasEnvExample)} | ${yn(app.dependsOnPlatformShell)} | ${yn(app.dependsOnPlatformAuth)} | ${app.purpose.slice(0, 80)} |`
+      `| ${app.name} | ${app.framework} | ${app.port ?? '—'} | ${yn(app.hasReadme)} | ${yn(app.hasEnvExample)} | ${yn(app.dependsOnPlatformShell)} | ${yn(app.dependsOnPlatformAuth)} | ${app.codeFileCount} | ${app.purpose.slice(0, 80)} |`
     );
   }
   lines.push('');

@@ -41,7 +41,7 @@ function walkTs(dir: string, acc: string[] = [], depth = 0): string[] {
 
 describe('CERT-PHASE-2 — Startup and Runtime Certification', () => {
   // ── 1. Auth middleware on all deployed auth apps ───────────────────────
-  it('all deployed auth apps have Clerk middleware', () => {
+  it('all deployed auth apps have auth middleware', () => {
     const missing: string[] = []
     for (const app of AUTH_APPS) {
       const mwPath = join(APPS_DIR, app, 'middleware.ts')
@@ -57,8 +57,8 @@ describe('CERT-PHASE-2 — Startup and Runtime Certification', () => {
     expect(missing).toEqual([])
   })
 
-  // ── 2. No hardcoded Clerk keys in source ──────────────────────────────
-  it('no hardcoded Clerk secret keys in app source code', () => {
+  // ── 2. No hardcoded auth secret keys in source ────────────────────────
+  it('no hardcoded auth secret keys in app source code', () => {
     const violations: string[] = []
     for (const app of DEPLOYED_APPS) {
       const appDir = join(APPS_DIR, app)

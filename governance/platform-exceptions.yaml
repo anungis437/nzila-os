@@ -1,0 +1,38 @@
+# Nzila OS — Platform Adoption Exceptions
+# Every app MUST adopt platform-shell and platform-auth unless listed here.
+# Each exception MUST include: app, missing component, reason, owner, reviewDate.
+# Reviewed quarterly. No silent divergence allowed.
+
+exceptions:
+  - app: orchestrator-api
+    missing: platform-shell
+    reason: >-
+      Fastify API server — no browser UI. Shell components are not applicable
+      to headless API services.
+    owner: platform-team
+    reviewDate: "2027-01-01"
+
+  - app: orchestrator-api
+    missing: platform-auth
+    reason: >-
+      Server-to-server API using ORCHESTRATOR_API_KEY. Session-based auth is
+      not appropriate for headless API orchestration.
+    owner: platform-team
+    reviewDate: "2027-01-01"
+
+  - app: web
+    missing: platform-shell
+    reason: >-
+      Public marketing site — uses a custom public layout, not the authenticated
+      platform shell. No org-scoped context.
+    owner: platform-team
+    reviewDate: "2027-01-01"
+
+  - app: mobility-client-portal
+    missing: platform-shell
+    reason: >-
+      Client-facing portal with custom branding and layout distinct from
+      internal platform shell. Uses platform-auth for identity but not the
+      internal shell chrome.
+    owner: mobility-team
+    reviewDate: "2027-01-01"

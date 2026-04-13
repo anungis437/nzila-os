@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-13T08:37:23.727Z",
+  "generatedAt": "2026-04-13T13:09:55.321Z",
   "appCount": 17,
   "packageCount": 159,
   "workflowCount": 34,
@@ -32,7 +32,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural Business Review — compliance audits, analytics, and Django-backed AI services for agri-business operations."
+      "purpose": "Agricultural Business Review — compliance audits, analytics, and Django-backed AI services for agri-business operations.",
+      "codeFileCount": 202
     },
     {
       "name": "agrimo",
@@ -68,7 +69,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend."
+      "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
+      "codeFileCount": 97
     },
     {
       "name": "cfo",
@@ -102,7 +104,8 @@
         "tax",
         "ui"
       ],
-      "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks."
+      "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks.",
+      "codeFileCount": 233
     },
     {
       "name": "console",
@@ -145,7 +148,8 @@
         "tax",
         "ui"
       ],
-      "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight."
+      "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
+      "codeFileCount": 205
     },
     {
       "name": "control-plane",
@@ -184,7 +188,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight."
+      "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
+      "codeFileCount": 154
     },
     {
       "name": "cora",
@@ -215,7 +220,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability."
+      "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability.",
+      "codeFileCount": 37
     },
     {
       "name": "flow",
@@ -252,7 +258,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations."
+      "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
+      "codeFileCount": 316
     },
     {
       "name": "mobility",
@@ -280,7 +287,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Investment migration advisory platform — case management, program intelligence, KYC/AML compliance, and document workflows for citizenship-by-investment (CBI) and residency-by-investment (RBI) firms."
+      "purpose": "Investment migration advisory platform — case management, program intelligence, KYC/AML compliance, and document workflows for citizenship-by-investment (CBI) and residency-by-investment (RBI) firms.",
+      "codeFileCount": 36
     },
     {
       "name": "mobility-client-portal",
@@ -301,7 +309,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Client-facing portal for investment migration applicants to track cases, upload documents, manage family members, and communicate with their advisory team."
+      "purpose": "Client-facing portal for investment migration applicants to track cases, upload documents, manage family members, and communicate with their advisory team.",
+      "codeFileCount": 32
     },
     {
       "name": "nacp-exams",
@@ -329,7 +338,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "National Anti-Corruption Programme examination and assessment platform."
+      "purpose": "National Anti-Corruption Programme examination and assessment platform.",
+      "codeFileCount": 59
     },
     {
       "name": "orchestrator-api",
@@ -349,7 +359,8 @@
         "platform-procurement-proof",
         "platform-utils"
       ],
-      "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations."
+      "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
+      "codeFileCount": 26
     },
     {
       "name": "partners",
@@ -376,7 +387,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations."
+      "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations.",
+      "codeFileCount": 100
     },
     {
       "name": "platform-admin",
@@ -410,7 +422,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Internal admin console for managing platform intelligence services — events, knowledge, ontology, and more."
+      "purpose": "Internal admin console for managing platform intelligence services — events, knowledge, ontology, and more.",
+      "codeFileCount": 27
     },
     {
       "name": "trade",
@@ -437,7 +450,8 @@
         "trade-db",
         "ui"
       ],
-      "purpose": "Cross-border trade management — deals, listings, shipments, and commission tracking."
+      "purpose": "Cross-border trade management — deals, listings, shipments, and commission tracking.",
+      "codeFileCount": 51
     },
     {
       "name": "union-eyes",
@@ -465,7 +479,8 @@
         "ui",
         "workload-intelligence"
       ],
-      "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law."
+      "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
+      "codeFileCount": 3028
     },
     {
       "name": "web",
@@ -488,7 +503,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content."
+      "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
+      "codeFileCount": 60
     },
     {
       "name": "zonga",
@@ -523,7 +539,8 @@
         "zonga-payments",
         "zonga-streaming"
       ],
-      "purpose": "Africa-first music distribution, streaming, and royalty management platform."
+      "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
+      "codeFileCount": 393
     }
   ],
   "workflows": [
