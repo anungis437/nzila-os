@@ -8,17 +8,6 @@ export default defineProject({
     name: 'ai-core',
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/**/__tests__/**'],
-      thresholds: {
-        lines: 0,
-        functions: 0,
-        branches: 0,
-        statements: 0,
-      },
-    },
   },
   resolve: {
     alias: {
