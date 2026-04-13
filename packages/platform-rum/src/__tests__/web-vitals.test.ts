@@ -198,7 +198,7 @@ describe('web-vitals', () => {
     });
 
     it('rates LCP correctly', async () => {
-      const lcpHandler = await setupAndGetHandler({ batchSize: 1 });
+      const _lcpHandler = await setupAndGetHandler({ batchSize: 1 });
       // Use LCP handler via the setup
       const handler = wvMocks.onLCP.mock.calls[0]?.[0] as (m: unknown) => void;
 
