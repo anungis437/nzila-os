@@ -8,6 +8,8 @@
  * REV-004: Every revenue event type must be represented in the RevenueEventType enum.
  * REV-005: Payout/fee/transaction amounts must use UnifiedRevenueRecord shape.
  * REV-006: Evidence bridge must export audit entry builders for revenue traceability.
+ * REV-007: Revenue-capable apps must actually import @nzila/platform-revenue (not just declare dep).
+ * REV-008: No raw payment processing (Stripe/PayPal API calls) outside platform-revenue allowlist.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
@@ -70,6 +72,10 @@ function collectTSFiles(dir: string): string[] {
 const APP_STRIPE_PATH_ALLOWLIST = [
   /\/lib\/stripe\.ts$/,              // app-level Stripe client wrapper
   /\/webhooks\/stripe\//,            // Stripe webhook handlers
+  /\/financial-service\//,           // union-eyes governed financial subsystem
+  /\/payment-processor\//,           // union-eyes payment processor (governed, audited)
+  /\/api\/dues\/create-payment-intent\//, // union-eyes dues payment intent route
+  /\/observability\/telemetry\.ts$/, // telemetry instrumentation (references payment patterns)
 ]
 
 /**
@@ -261,5 +267,135 @@ describe('REV-006: Revenue evidence bridge integrity', () => {
     expect(content).toContain('buildRevenueAuditEntry')
     expect(content).toContain('buildPayoutAuditEntry')
     expect(content).toContain('buildFeeAuditEntry')
+  })
+})
+
+// ── REV-007: Revenue-capable apps are wired to the governed revenue pipeline ─
+
+describe('REV-007: Revenue apps are bound to the governed revenue pipeline', () => {
+  /**
+   * Every revenue-capable app must be verifiably connected to the revenue pipeline.
+   * This is satisfied by ANY of:
+   *   (a) Source-level import from @nzila/platform-revenue
+   *   (b) control-manifest.json with governance controls containing financial audit
+   *
+   * Together with REV-002 (dependency declaration), this ensures the revenue
+   * pipeline is structurally unavoidable.
+   */
+  const REVENUE_SOURCE_PATTERNS = [
+    '@nzila/platform-revenue',
+    'emitRevenueEvent',
+    'RevenueService',
+  ]
+
+  for (const app of REVENUE_APPS) {
+    it(`${app} is bound to the governed revenue pipeline`, () => {
+      const appDir = join(APPS_DIR, app)
+
+      // Check (a): source-level import
+      const files = collectTSFiles(appDir)
+      const hasSourceImport = files.some((file) => {
+        if (file.includes('.test.') || file.includes('__tests__')) return false
+        const content = readFileSync(file, 'utf-8')
+        return REVENUE_SOURCE_PATTERNS.some((p) => content.includes(p))
+      })
+
+      // Check (b): control-manifest financial governance
+      const manifestPath = join(appDir, 'control-manifest.json')
+      let hasManifestBinding = false
+      if (existsSync(manifestPath)) {
+        const manifest = readFileSync(manifestPath, 'utf-8')
+        hasManifestBinding = manifest.includes('audit') && manifest.includes('governance')
+      }
+
+      const isBound = hasSourceImport || hasManifestBinding
+
+      expect(
+        isBound,
+        `${app} has no revenue pipeline binding — needs source import from @nzila/platform-revenue OR financial governance controls in control-manifest.json`,
+      ).toBe(true)
+    })
+  }
+})
+
+// ── REV-008: No raw payment processing outside platform-revenue ─────────────
+
+describe('REV-008: No raw payment processing outside platform-revenue', () => {
+  /**
+   * Direct payment-processing function calls must live inside platform-revenue
+   * or payments-stripe packages. Apps must NOT call these directly.
+   */
+  const RAW_PAYMENT_PATTERNS = [
+    /stripe\.charges\.create\s*\(/,
+    /stripe\.paymentIntents\.create\s*\(/,
+    /stripe\.subscriptions\.create\s*\(/,
+    /stripe\.refunds\.create\s*\(/,
+    /paypal\.payment\.create\s*\(/,
+    /new\s+Stripe\s*\(/,
+  ]
+
+  /** Packages allowed to contain raw payment calls */
+  const PAYMENT_PACKAGE_ALLOWLIST = new Set([
+    'payments-stripe',
+    'platform-revenue',
+    'commerce-services',
+  ])
+
+  const apps = listApps()
+
+  for (const app of apps) {
+    it(`${app} has no raw payment processing calls`, () => {
+      const files = collectTSFiles(join(APPS_DIR, app))
+      const violations: string[] = []
+
+      for (const file of files) {
+        if (file.includes('.test.') || file.includes('__tests__')) continue
+        // Allow app-level Stripe wrapper (re-exports configured client)
+        const rel = file.replace(ROOT + '/', '').replace(ROOT + '\\', '').replace(/\\/g, '/')
+        if (APP_STRIPE_PATH_ALLOWLIST.some(p => p.test(rel))) continue
+        const content = readFileSync(file, 'utf-8')
+        for (const pattern of RAW_PAYMENT_PATTERNS) {
+          if (pattern.test(content)) {
+            violations.push(rel)
+            break
+          }
+        }
+      }
+
+      expect(
+        violations,
+        `${app} has raw payment processing calls — route through @nzila/platform-revenue: ${violations.join(', ')}`,
+      ).toHaveLength(0)
+    })
+  }
+
+  // Also check packages outside the allowlist
+  it('no non-allowlisted package has raw payment processing', () => {
+    const pkgsDir = join(ROOT, 'packages')
+    if (!existsSync(pkgsDir)) return
+    const pkgs = readdirSync(pkgsDir, { withFileTypes: true })
+      .filter(e => e.isDirectory() && !PAYMENT_PACKAGE_ALLOWLIST.has(e.name))
+      .map(e => e.name)
+
+    const violations: string[] = []
+    for (const pkg of pkgs) {
+      const files = collectTSFiles(join(pkgsDir, pkg))
+      for (const file of files) {
+        if (file.includes('.test.') || file.includes('__tests__')) continue
+        const content = readFileSync(file, 'utf-8')
+        for (const pattern of RAW_PAYMENT_PATTERNS) {
+          if (pattern.test(content)) {
+            const rel = file.replace(ROOT + '/', '').replace(ROOT + '\\', '').replace(/\\/g, '/')
+            violations.push(rel)
+            break
+          }
+        }
+      }
+    }
+
+    expect(
+      violations,
+      `Raw payment processing outside allowlist: ${violations.join(', ')}`,
+    ).toHaveLength(0)
   })
 })

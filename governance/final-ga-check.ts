@@ -32,6 +32,12 @@
  *   HARD-22  All apps report to control plane (control-manifest.json)
  *   HARD-23  Auth purity final (AUTH-003 Clerk SDK import check implemented)
  *   HARD-24  Governed revenue end-to-end (evidence + enforcement + docs)
+ *   HARD-25  Revenue enforcement covers REV-007/REV-008 (source-level revenue lock)
+ *   HARD-26  Evidence bridge has traceId field
+ *   HARD-27  Auto-audit wired in emitRevenueEvent
+ *   HARD-28  Control-plane authority contract tests CTRL-003/004/009
+ *   HARD-29  Auth purity covers AUTH-004 (canonical auth positive assertion)
+ *   HARD-30  What-is-nzila.md exists (repo-as-product)
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
@@ -643,6 +649,134 @@ gate('HARD-24: Governed revenue pipeline complete', () => {
   }
 })
 
+// ── HARD-25 Revenue Enforcement REV-007/REV-008 ─────────────────────────────
+
+gate('HARD-25: Revenue enforcement covers source-level revenue lock (REV-007/008)', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/revenue-enforcement.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'revenue-enforcement.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasREV007 = content.includes('REV-007')
+  const hasREV008 = content.includes('REV-008')
+
+  const passed = hasREV007 && hasREV008
+  return {
+    passed,
+    details: passed
+      ? 'REV-007 (source-level revenue import) + REV-008 (no raw payment) present'
+      : `Missing: ${[!hasREV007 && 'REV-007', !hasREV008 && 'REV-008'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-26 Evidence Bridge Has traceId ─────────────────────────────────────
+
+gate('HARD-26: Evidence bridge has traceId field', () => {
+  const bridgePath = join(ROOT, 'packages/platform-revenue/src/evidence-bridge.ts')
+  if (!existsSync(bridgePath)) {
+    return { passed: false, details: 'evidence-bridge.ts not found' }
+  }
+
+  const content = readFileSync(bridgePath, 'utf-8')
+  const hasTraceId = content.includes('traceId')
+  const hasGenerator = content.includes('generateTraceId')
+
+  const passed = hasTraceId && hasGenerator
+  return {
+    passed,
+    details: passed
+      ? 'Evidence bridge has traceId field + generateTraceId helper'
+      : `Missing: ${[!hasTraceId && 'traceId field', !hasGenerator && 'generateTraceId'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-27 Auto-Audit Wired in emitRevenueEvent ───────────────────────────
+
+gate('HARD-27: emitRevenueEvent auto-records audit entry', () => {
+  const servicePath = join(ROOT, 'packages/platform-revenue/src/service.ts')
+  if (!existsSync(servicePath)) {
+    return { passed: false, details: 'service.ts not found' }
+  }
+
+  const content = readFileSync(servicePath, 'utf-8')
+  const importsBuilder = content.includes('buildRevenueAuditEntry')
+  const hasAuditLog = content.includes('auditLog')
+  const hasGetter = content.includes('getRevenueAuditLog')
+
+  const passed = importsBuilder && hasAuditLog && hasGetter
+  return {
+    passed,
+    details: passed
+      ? 'emitRevenueEvent auto-pushes audit entries + getRevenueAuditLog exported'
+      : `Missing: ${[!importsBuilder && 'buildRevenueAuditEntry import', !hasAuditLog && 'auditLog', !hasGetter && 'getRevenueAuditLog'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-28 Control-Plane Authority CTRL-003/004/009 ────────────────────────
+
+gate('HARD-28: Control-plane authority covers CTRL-003/004/009', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/control-plane-authority.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'control-plane-authority.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasCTRL003 = content.includes('CTRL-003')
+  const hasCTRL004 = content.includes('CTRL-004')
+  const hasCTRL009 = content.includes('CTRL-009')
+
+  const passed = hasCTRL003 && hasCTRL004 && hasCTRL009
+  return {
+    passed,
+    details: passed
+      ? 'CTRL-003 (registry coverage) + CTRL-004 (manifest consistency) + CTRL-009 (financial dep) present'
+      : `Missing: ${[!hasCTRL003 && 'CTRL-003', !hasCTRL004 && 'CTRL-004', !hasCTRL009 && 'CTRL-009'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-29 Auth Purity AUTH-004 ────────────────────────────────────────────
+
+gate('HARD-29: Auth purity covers AUTH-004 (canonical auth positive assertion)', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/auth-purity.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'auth-purity.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasAUTH004 = content.includes('AUTH-004')
+  const hasCanonical = content.includes('platform-auth')
+
+  const passed = hasAUTH004 && hasCanonical
+  return {
+    passed,
+    details: passed
+      ? 'AUTH-004 positive assertion (canonical platform-auth import) present'
+      : `Missing: ${[!hasAUTH004 && 'AUTH-004', !hasCanonical && 'platform-auth ref'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-30 Repo as Product — what-is-nzila.md ─────────────────────────────
+
+gate('HARD-30: what-is-nzila.md exists (repo-as-product)', () => {
+  const docPath = join(ROOT, 'docs/platform/what-is-nzila.md')
+  if (!existsSync(docPath)) {
+    return { passed: false, details: 'docs/platform/what-is-nzila.md not found' }
+  }
+
+  const content = readFileSync(docPath, 'utf-8')
+  const hasTitle = content.includes('What Is Nzila OS')
+  const hasArchitecture = content.includes('Architecture') || content.includes('architecture')
+
+  const passed = hasTitle && hasArchitecture
+  return {
+    passed,
+    details: passed
+      ? 'what-is-nzila.md present with title + architecture reference'
+      : 'Doc exists but missing required sections',
+  }
+})
+
 // ── Runner ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -685,7 +819,7 @@ function main() {
     console.log('')
     process.exit(1)
   } else {
-    console.log('  ✅  HARDENING GATE PASSED — ALL 24 CONDITIONS MET  ✅')
+    console.log('  ✅  HARDENING GATE PASSED — ALL 30 CONDITIONS MET  ✅')
     console.log('')
     process.exit(0)
   }

@@ -35,6 +35,7 @@ export {
   createInMemoryRevenueService,
   computeAppRevenueBreakdown,
   emitRevenueEvent,
+  getRevenueAuditLog,
 } from './service.js'
 
 // Evidence bridge

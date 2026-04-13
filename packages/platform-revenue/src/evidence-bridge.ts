@@ -8,6 +8,7 @@ import type { RevenueEvent, UnifiedRevenueRecord } from './types.js'
 
 /** Governance audit entry shape for revenue events */
 export interface RevenueAuditEntry {
+  traceId: string
   timestamp: string
   eventType: 'revenue_event_recorded' | 'revenue_payout_issued' | 'revenue_fee_collected'
   actor: string
@@ -24,6 +25,11 @@ export interface RevenueAuditEntry {
   }
 }
 
+/** Generate a deterministic trace ID from event data */
+function generateTraceId(eventId: string, timestamp: string): string {
+  return `rev-${eventId}-${timestamp.replace(/[^0-9]/g, '').slice(0, 14)}`
+}
+
 /**
  * Build a governance audit entry from a revenue event.
  * This is the bridge between platform-revenue and platform-governance.
@@ -33,6 +39,7 @@ export function buildRevenueAuditEntry(
   actor: string = 'system',
 ): RevenueAuditEntry {
   return {
+    traceId: generateTraceId(event.id, event.occurredAt),
     timestamp: event.occurredAt,
     eventType: 'revenue_event_recorded',
     actor,
@@ -55,6 +62,7 @@ export function buildPayoutAuditEntry(
   actor: string = 'system',
 ): RevenueAuditEntry {
   return {
+    traceId: generateTraceId(record.id, record.timestamp),
     timestamp: record.timestamp,
     eventType: 'revenue_payout_issued',
     actor,
@@ -80,6 +88,7 @@ export function buildFeeAuditEntry(
   actor: string = 'system',
 ): RevenueAuditEntry {
   return {
+    traceId: generateTraceId(record.id, record.timestamp),
     timestamp: record.timestamp,
     eventType: 'revenue_fee_collected',
     actor,

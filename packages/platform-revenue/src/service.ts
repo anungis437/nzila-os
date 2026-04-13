@@ -16,6 +16,15 @@ import {
   RevenueEventSchema,
   UnifiedRevenueRecordSchema,
 } from './types.js'
+import { buildRevenueAuditEntry, type RevenueAuditEntry } from './evidence-bridge.js'
+
+/** Audit log emitted by emitRevenueEvent for governance traceability */
+const auditLog: RevenueAuditEntry[] = []
+
+/** Get the current audit log (for testing and governance export) */
+export function getRevenueAuditLog(): readonly RevenueAuditEntry[] {
+  return auditLog
+}
 
 export interface RevenueService {
   recordEvent(event: RevenueEvent): void
@@ -49,6 +58,10 @@ export function emitRevenueEvent(
     occurredAt: validated.timestamp,
   }
   service.recordEvent(event)
+
+  // Auto-generate governance audit entry for every revenue event
+  auditLog.push(buildRevenueAuditEntry(event))
+
   return event
 }
 

@@ -4,6 +4,7 @@
  * AUTH-001: No Clerk-style naming outside adapter/compat layers
  * AUTH-002: All internal logic uses orgId/userId (no clerkId/clerkUserId)
  * AUTH-003: No Clerk SDK imports outside platform-auth package
+ * AUTH-004: Apps use canonical auth — import from @nzila/platform-auth
  *
  * Allowed exceptions:
  *   - packages/platform-auth/** (the adapter layer itself)
@@ -244,4 +245,45 @@ describe('AUTH-003: No @clerk/* imports outside platform-auth', () => {
       `Clerk SDK imports found outside platform-auth — use @nzila/platform-auth instead: ${violations.join(', ')}`,
     ).toHaveLength(0)
   })
+})
+
+// ── AUTH-004: Apps use canonical auth from @nzila/platform-auth ──────────────
+
+describe('AUTH-004: Apps use canonical auth (platform-auth import)', () => {
+  /**
+   * Positive assertion: every app that has server-side auth logic MUST import
+   * from @nzila/platform-auth (not roll their own or use a third-party auth SDK).
+   * We check that at least one .ts file in the app imports from @nzila/platform-auth.
+   * Apps that are purely static / marketing (no auth) are allowed to skip.
+   */
+  const CANONICAL_IMPORT = /@nzila\/platform-auth/
+
+  /** Apps that use non-session auth (API-key auth, machine-to-machine) */
+  const AUTH_EXEMPT_APPS = new Set<string>([
+    'orchestrator-api', // Fastify API service — uses API key auth, not session-based platform-auth
+  ])
+
+  const apps = readdirSync(APPS_DIR, { withFileTypes: true })
+    .filter(e => e.isDirectory() && !e.name.startsWith('.'))
+    .filter(e => !AUTH_EXEMPT_APPS.has(e.name))
+    .map(e => e.name)
+
+  for (const app of apps) {
+    it(`${app} imports from @nzila/platform-auth`, () => {
+      const files = collectTSFiles(join(APPS_DIR, app))
+      const hasCanonicalImport = files.some(file => {
+        try {
+          const content = readFileSync(file, 'utf-8')
+          return CANONICAL_IMPORT.test(content)
+        } catch {
+          return false
+        }
+      })
+
+      expect(
+        hasCanonicalImport,
+        `${app} has no import from @nzila/platform-auth — all authenticated apps must use the canonical auth package`,
+      ).toBe(true)
+    })
+  }
 })
