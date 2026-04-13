@@ -34,7 +34,7 @@ Section 2 ❌ items → **Controlled rollout only**.
 | Cross-Org READ attempt returns 403/404 | ✅ | Static: `org-isolation.test.ts` L51 (9/9); `org-isolation-runtime.test.ts` (9/9) — all routes have auth guards; body injection blocked |
 | Cross-Org WRITE attempt returns 403 | ✅ | `authorizeOrgAccess()` in `@nzila/os-core/policy/authorize.ts`; enforced on all mutation routes |
 | Forged `org_id` in payload is ignored | ✅ | `org-isolation.test.ts` L88 — 0 routes read orgId from body without auth |
-| Missing Org context rejected (401) | ✅ | `clerkMiddleware` + `auth.protect()` in both console and partners middleware |
+| Missing Org context rejected (401) | ✅ | `authMiddleware` (from `@nzila/platform-auth`) + `auth.protect()` in both console and partners middleware |
 | Enumeration protection (no object existence leakage) | ✅ | `org-isolation-runtime.test.ts` — error response leak test |
 | Automated cross-Org regression tests run in CI | ✅ | `contract-tests` job runs 9 org-isolation tests + 9 runtime tests |
 | CI fails if any Org isolation test fails | ✅ | `ci.yml` `contract-tests` job — exit 1 on test failure; required check |
@@ -98,7 +98,7 @@ Section 2 ❌ items → **Controlled rollout only**.
 | Item | Status | Evidence / Blocker |
 |------|--------|--------------------|
 | API rate limiting enabled | ✅ | `@nzila/os-core/rateLimit` — sliding window, configurable `RATE_LIMIT_MAX` + `RATE_LIMIT_WINDOW_MS`; `rate-limiting.test.ts` (11/11) |
-| Next.js surface protected | ✅ | `apps/console/middleware.ts` + `apps/partners/middleware.ts` — `checkRateLimit()` wraps every request before `clerkMiddleware` |
+| Next.js surface protected | ✅ | `apps/console/middleware.ts` + `apps/partners/middleware.ts` — `checkRateLimit()` wraps every request before `authMiddleware` (from `@nzila/platform-auth`) |
 | Request size limits enforced | 🟡 | Relies on Azure Front Door / platform defaults; no explicit `next.config.ts` `maxBodySize` set |
 | Load test confirms throttle behavior | ❌ | No load test suite documented |
 | Abuse events logged | 🟡 | Rate limiter returns 429 with structured headers; no explicit abuse-log emit |

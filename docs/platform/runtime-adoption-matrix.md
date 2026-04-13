@@ -5,8 +5,43 @@
 > understanding which parts of the platform are governed and which
 > are not.
 >
-> **Last updated:** Auto-generated from codebase analysis.
-> **Status:** Baseline — zero adoption detected.
+> **Last updated:** 2026-04-13
+> **Status:** Platform package adoption at high level; enforcement pipeline rollout pending.
+
+---
+
+## Platform Package Adoption
+
+| App | Framework | platform-shell | platform-auth | os-core | middleware.ts | .env.example | README.md | Evidence |
+|-----|-----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| abr | Next.js + Django | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| agrimo | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| cfo | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| console | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| control-plane | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| cora | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| flow | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| mobility | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| mobility-client-portal | Next.js | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| nacp-exams | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| orchestrator-api | Fastify | ⚠️ | ⚠️ | ✅ | N/A | ✅ | ✅ | — |
+| partners | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| platform-admin | Next.js | ✅ | ✅ | — | ✅ | ✅ | ✅ | — |
+| trade | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| union-eyes | Next.js + Django | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| web | Next.js | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| zonga | Next.js | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+
+**Legend:** ✅ Adopted · ⚠️ Exception registered (see `governance/exceptions/`) · — Not applicable · N/A Not applicable for runtime
+
+| Metric | Count |
+|--------|-------|
+| platform-shell adopted | 14/17 (82%) |
+| platform-auth adopted | 16/17 (94%) |
+| .env.example present | 17/17 (100%) |
+| README.md present | 17/17 (100%) |
+
+All exceptions are registered in `governance/exceptions/platform-adoption-exceptions.json`.
 
 ---
 

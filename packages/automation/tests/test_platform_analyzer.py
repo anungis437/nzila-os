@@ -110,7 +110,7 @@ class TestPlatformAnalyzer:
         assert profile.tech_stack.language == "TypeScript"
         assert profile.database.orm == "Drizzle"
         assert profile.database.tables_count >= 2
-        assert profile.auth.current == "clerk"
+        assert profile.auth.current == "oidc"
         assert profile.entity_count >= 2
         assert profile.components_count >= 1
 

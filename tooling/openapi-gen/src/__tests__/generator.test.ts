@@ -322,7 +322,7 @@ describe('generator — spec content', () => {
     const content = readFileSync(webApp!.specPath!, 'utf-8')
     const spec = JSON.parse(content)
 
-    expect(spec.components.securitySchemes.clerk).toBeDefined()
-    expect(spec.security).toEqual([{ clerk: [] }])
+    expect(spec.components.securitySchemes.platformAuth).toBeDefined()
+    expect(spec.security).toEqual([{ platformAuth: [] }])
   })
 })

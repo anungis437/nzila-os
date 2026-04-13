@@ -49,7 +49,7 @@
 | `.github/workflows/sbom.yml` | ✅ PASS | CycloneDX SBOM, license validation job |
 | `.github/workflows/trivy.yml` | ✅ PASS | Container scan (exit 1 on CRITICAL) + filesystem SARIF |
 | `.github/workflows/secret-scan.yml` | ✅ PASS | TruffleHog OSS (full history) + Gitleaks |
-| `.gitleaks.toml` | ✅ PASS | Clerk/Stripe/QBO custom rules, comprehensive allowlist |
+| `.gitleaks.toml` | ✅ PASS | Auth/Stripe/QBO custom rules, comprehensive allowlist |
 | `lefthook.yml` | ✅ PASS | Pre-commit: gitleaks + lint + typecheck; Pre-push: contract-tests |
 | `SECURITY.md` | ✅ PASS | Present |
 | `docs/hardening/` | ✅ PASS | BASELINE.md, logging.md, observability.md, secrets.md, build-reproducibility.md |
@@ -64,7 +64,7 @@
 
 | Claim | Evidence | Verdict |
 |-------|---------|---------|
-| `orgId` source: Clerk session claims `nzila_role` / session context, NOT from request body | `packages/os-core/src/policy/authorize.ts` — `resolveRole(session)` reads `session.sessionClaims` | ✅ PASS |
+| `orgId` source: platform-auth session claims `nzila_role` / session context, NOT from request body | `packages/os-core/src/policy/authorize.ts` — `resolveRole(session)` reads `session.sessionClaims` | ✅ PASS |
 | `orgId` validated via `org_members` DB table (console) or `partner_entities` DB table (partners) | `authorize.ts` → `authorizeOrgAccess()` queries `partnerEntities` with `eq(partnerId, ctx.partnerId)` and `eq(orgId, orgId)` | ✅ PASS |
 | Propagation: `AuthContext` carries `orgId` / `partnerId` from session to handler | `AuthContext` interface in `authorize.ts` L28-36 | ✅ PASS |
 | Centralized in `@nzila/os-core/policy` | `packages/os-core/src/policy/authorize.ts`, `roles.ts`, `scopes.ts`, `index.ts` | ✅ PASS |
@@ -95,8 +95,8 @@
 
 | Claim | Evidence | Verdict |
 |-------|---------|---------|
-| `apps/console/middleware.ts` uses `clerkMiddleware` | File present; `clerkMiddleware` imported from `@nzila/platform-auth/entra/server`, `!isPublicRoute → auth.protect()` | ✅ PASS |
-| `apps/partners/middleware.ts` uses `clerkMiddleware` | Same pattern; also covers `/invite(.*)` for onboarding | ✅ PASS |
+| `apps/console/middleware.ts` uses `authMiddleware` | File present; `authMiddleware` imported from `@nzila/platform-auth/entra/server` (backward-compat alias: `clerkMiddleware`), `!isPublicRoute → auth.protect()` | ✅ PASS |
+| `apps/partners/middleware.ts` uses `authMiddleware` | Same pattern; also covers `/invite(.*)` for onboarding | ✅ PASS |
 | `authz-regression.test.ts` asserts middleware presence for all protected apps | `tooling/contract-tests/authz-regression.test.ts` — 7/7 tests pass | ✅ PASS |
 | Every POST/PUT/PATCH/DELETE route has an auth check | `api-authz-coverage.test.ts` — 4/4 tests pass | ✅ PASS |
 | No undocumented auth bypass markers (`@noauth`, `skipAuth=true`, etc.) | `authz-regression.test.ts` L63 — 0 violations | ✅ PASS |
@@ -163,7 +163,7 @@
 
 | Control | Evidence | Verdict |
 |---------|---------|---------|
-| `.gitleaks.toml` present with custom rules | `.gitleaks.toml` — Clerk, Stripe, QBO, DB URL rules + safe path allowlist | ✅ PASS |
+| `.gitleaks.toml` present with custom rules | `.gitleaks.toml` — Auth, Stripe, QBO, DB URL rules + safe path allowlist | ✅ PASS |
 | Gitleaks in CI (`.github/workflows/secret-scan.yml`) | `gitleaks-action@v2` + `GITLEAKS_CONFIG: .gitleaks.toml` | ✅ PASS |
 | TruffleHog OSS in CI (full history scan) | `secret-scan.yml` job `trufflehog` — `fetch-depth: 0`, `--only-verified` | ✅ PASS |
 | Pre-commit Gitleaks on staged files | `lefthook.yml` — `gitleaks: npx gitleaks@latest --staged` | ✅ PASS |
@@ -216,7 +216,7 @@
 | App | HSTS | X-Frame | CSP | X-Content-Type | Verdict |
 |-----|------|---------|-----|-----------------|---------|
 | `apps/web` | ✅ max-age=63072000 | ✅ SAMEORIGIN | 🟡 `unsafe-inline`+`unsafe-eval` (Next.js RSC requirement) | ✅ nosniff | 🟡 SOFT PASS |
-| `apps/console` | ✅ max-age=63072000 | ✅ DENY | 🟡 `unsafe-inline`+`unsafe-eval` (Clerk + RSC) | ✅ nosniff | 🟡 SOFT PASS |
+| `apps/console` | ✅ max-age=63072000 | ✅ DENY | 🟡 `unsafe-inline`+`unsafe-eval` (platform-auth + RSC) | ✅ nosniff | 🟡 SOFT PASS |
 | `apps/orchestrator-api` | ✅ via `@fastify/helmet` | ✅ `frame-ancestors: none` | ✅ tight CSP | ✅ | ✅ PASS |
 
 CSP `unsafe-inline` / `unsafe-eval` are noted in code comments as required by Next.js RSC hydration. Acceptable with nonce-based approach as post-launch hardening.
@@ -324,7 +324,7 @@ Rules applied:
 - Auth config change audit action (`AUTH_CONFIG_CHANGE`)
 - Call-site tests proving `MEMBER_ROLE_CHANGE` fires on role-update routes
 - `pnpm run secret-scan` convenience script for local developer use
-- Health route dependency checks (DB ping, Clerk reachability)
+- Health route dependency checks (DB ping, auth service reachability)
 
 ---
 

@@ -21,7 +21,7 @@
 
 - Access to Union-Eyes production environment
 - Access to Django admin panel (admin role)
-- Access to Clerk dashboard (org management)
+- Access to platform-auth admin panel (org management)
 - Access to Azure Blob Storage (evidence / exports)
 - Access to Redis and PostgreSQL dashboards
 - `admin` or `owner` OrgRole for the affected org
@@ -116,7 +116,7 @@ customMetrics
 
 ### Pilot Onboarding (New Org)
 
-1. **Create Clerk organization** for the pilot entity
+1. **Create organization** via platform-auth admin for the pilot entity
 2. **Configure RLS context**: Verify `withRLSContext` is applied to all queries for this org
 3. **Seed required data**: Run any org-specific migration scripts
 4. **Verify isolation**: Run the org isolation verification query (Step 2 above)
@@ -130,7 +130,7 @@ customMetrics
 2. If cross-org queries found → **escalate to P1**, follow [org-isolation-breach runbook](../commerce/org-isolation-breach.md)
 3. If no cross-org queries → check Django-side RLS via admin panel
 4. Verify `withRLSContext` is wrapping all DB calls in affected route
-5. Check that `djangoProxy()` passes through the Clerk session correctly
+5. Check that `djangoProxy()` passes through the platform-auth session correctly
 
 ### If Feature Broken
 
@@ -138,7 +138,7 @@ customMetrics
 2. Verify Django backend is responding (health check)
 3. Check Redis connectivity (session / rate-limit stores)
 4. If Django timeout → check DB connection pool saturation
-5. If auth error → verify Clerk webhook is syncing org membership
+5. If auth error → verify platform-auth org membership is synced
 
 ---
 
@@ -148,11 +148,11 @@ customMetrics
 
 ```bash
 # Export all data for a pilot org via authenticated API
-curl -H "Authorization: Bearer $CLERK_SESSION_TOKEN" \
+curl -H "Authorization: Bearer $SESSION_TOKEN" \
   "https://<UE_HOST>/api/v2/rewards/export?orgId=<ORG_ID>&format=csv" \
   -o rewards-export.csv
 
-curl -H "Authorization: Bearer $CLERK_SESSION_TOKEN" \
+curl -H "Authorization: Bearer $SESSION_TOKEN" \
   "https://<UE_HOST>/api/v2/tax/cra/export?orgId=<ORG_ID>&format=csv" \
   -o tax-cra-export.csv
 ```
@@ -161,7 +161,7 @@ curl -H "Authorization: Bearer $CLERK_SESSION_TOKEN" \
 
 1. **Notify** the pilot org contact that rollback is proceeding
 2. **Export** all org data (see above)
-3. **Disable** the org in Clerk (do NOT delete — preserve audit trail)
+3. **Disable** the org in platform-auth admin (do NOT delete — preserve audit trail)
 4. **Verify** no active sessions remain:
    ```kql
    customEvents

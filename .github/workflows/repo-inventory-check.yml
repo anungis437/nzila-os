@@ -1,0 +1,45 @@
+name: Repo Inventory Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/**'
+      - 'governance/exceptions/**'
+      - 'README.md'
+      - 'README.business.md'
+      - 'ARCHITECTURE.md'
+      - 'docs/plans/REPO_ASSESSMENT.md'
+      - 'docs/platform/GA_READINESS.md'
+      - 'docs/ga/GA_READINESS_GATE.md'
+      - 'docs/platform/platform-boundaries.md'
+
+permissions:
+  contents: read
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    name: Inventory Drift Check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate inventory
+        run: npx tsx tooling/repo-inventory/src/generate.ts
+
+      - name: Run drift check
+        run: npx tsx tooling/repo-inventory/src/check-drift.ts

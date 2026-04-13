@@ -153,10 +153,10 @@ All AI and machine learning capabilities are centrally managed with:
 
 | Metric | Value |
 |--------|-------|
-| Applications | 13 |
-| Shared packages | 58+ |
+| Applications | 17 |
+| Shared packages | 159 |
 | Contract test invariants | 5,000+ |
-| CI/CD pipelines | 15 |
+| CI/CD pipelines | 34 |
 | Automated security gates | 5 (dependency audit, secret scan, CodeQL, Trivy, red-team) |
 
 ---

@@ -36,3 +36,7 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 ## Domain
 
 Internal operations dashboard exposing all platform intelligence subsystems. Used by platform engineers and admins to inspect execution runs, manage the knowledge graph, monitor event flows, and debug reasoning/decision pipelines.
+
+## Environment Variables
+
+See `.env.example` in this directory for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).

@@ -50,9 +50,9 @@ class TestPatternExtractor:
         extractor = PatternExtractor(platforms_dir=temp_dir)
         library = extractor.extract_all([platform_dir])
 
-        clerk_patterns = [p for p in library.patterns if "Clerk" in p.name]
-        assert len(clerk_patterns) >= 1
-        assert clerk_patterns[0].category == "auth"
+        auth_patterns = [p for p in library.patterns if "Auth" in p.name]
+        assert len(auth_patterns) >= 1
+        assert auth_patterns[0].category == "auth"
 
     def test_extract_drizzle_client(self, temp_dir):
         """Test Drizzle client pattern extraction."""
@@ -122,10 +122,10 @@ class TestPatternExtractor:
             [temp_dir / "platform1", temp_dir / "platform2"]
         )
 
-        clerk_patterns = [p for p in library.patterns if "Clerk" in p.name]
-        assert len(clerk_patterns) == 1
-        assert clerk_patterns[0].occurrences == 2
-        assert len(clerk_patterns[0].platforms) == 2
+        auth_patterns = [p for p in library.patterns if "Auth" in p.name]
+        assert len(auth_patterns) == 1
+        assert auth_patterns[0].occurrences == 2
+        assert len(auth_patterns[0].platforms) == 2
 
     def test_assess_complexity_simple(self):
         """Test simple complexity classification."""

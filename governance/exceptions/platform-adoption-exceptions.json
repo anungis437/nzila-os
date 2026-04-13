@@ -1,0 +1,34 @@
+{
+  "ruleId": "platform-adoption",
+  "description": "Apps that intentionally do not adopt @nzila/platform-shell or @nzila/platform-auth. Each entry must have a justification, owner, and review date.",
+  "entries": [
+    {
+      "path": "apps/orchestrator-api",
+      "package": "platform-shell",
+      "owner": "platform-team",
+      "justification": "Fastify API server — no browser UI, no need for platform shell components. Uses API key auth instead.",
+      "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/orchestrator-api",
+      "package": "platform-auth",
+      "owner": "platform-team",
+      "justification": "Server-to-server API using ORCHESTRATOR_API_KEY. Session-based auth is not appropriate for headless API orchestration.",
+      "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/web",
+      "package": "platform-shell",
+      "owner": "platform-team",
+      "justification": "Public marketing site — uses a custom public layout, not the authenticated platform shell. No org-scoped context.",
+      "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/mobility-client-portal",
+      "package": "platform-shell",
+      "owner": "mobility-team",
+      "justification": "Client-facing portal with custom branding and layout distinct from internal platform shell. Uses platform-auth for identity but not the internal shell chrome.",
+      "expiresOn": "2027-01-01"
+    }
+  ]
+}

@@ -22,16 +22,16 @@ and security monitoring within Nzila OS.
 
 See `Control-Test-Plan.md` → CT-02 for full procedure.
 
-1. Export Clerk users for the organization
+1. Export platform-auth users for the organization
 2. Export `org_members` table per entity
-3. Cross-reference: every member maps to an active Clerk user
+3. Cross-reference: every member maps to an active platform-auth user
 4. Audit role assignments (flag excessive admin access)
 5. Review off-boardings for the quarter
 6. Generate and store evidence
 
 ## Key Rotation Procedure
 
-1. Generate new credential (Azure portal / CLI / Clerk dashboard)
+1. Generate new credential (Azure portal / CLI / platform-auth admin)
 2. Deploy new credential to environment variables
 3. Verify service functions with new credential
 4. Revoke old credential

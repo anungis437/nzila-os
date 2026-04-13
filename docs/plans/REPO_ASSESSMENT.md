@@ -8,14 +8,14 @@
 
 ## 1. Executive Summary
 
-**Nzila OS** is a sophisticated internal platform backbone for Nzila Digital Ventures. It is a **polyglot monorepo** (TypeScript + Python/Django) comprising **16 applications** and **120+ shared packages**. The platform emphasizes **evidence-first governance**, **contract-enforced invariants**, and **org-scoped multi-tenancy**.
+**Nzila OS** is a sophisticated internal platform backbone for Nzila Digital Ventures. It is a **polyglot monorepo** (TypeScript + Python/Django) comprising **17 applications** and **159 shared packages**. The platform emphasizes **evidence-first governance**, **contract-enforced invariants**, and **org-scoped multi-tenancy**.
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| Apps | 16 |
-| Packages | 120+ |
+| Apps | 17 |
+| Packages | 159 |
 | Tests | 7,669+ passing |
 | CI/CD Workflows | 20+ |
 | Stack | Next.js + Django, TypeScript (strict), PostgreSQL 15, Redis 7 |
@@ -28,7 +28,7 @@
 
 ```mermaid
 graph TB
-    subgraph "16 Apps"
+    subgraph "17 Apps"
         A1[web]
         A2[console]
         A3[partners]
@@ -257,7 +257,7 @@ The following platform packages were observed in the environment and represent t
 
 ### Areas of Attention
 
-1. **Complexity** — 120+ packages can create maintenance overhead
+1. **Complexity** — 159 packages can create maintenance overhead
 2. **Stack authority** — Django + TS dual-authority requires careful coordination
 3. **New platform packages** — Platform packages are still evolving (observed `platform-*` in development)
 4. **Documentation drift** — Large codebase requires up-to-date architecture docs
