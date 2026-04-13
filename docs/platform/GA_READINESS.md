@@ -47,7 +47,7 @@ All 20 checks run via `pnpm ga-check` against commit `5979ae7` on 2026-02-22.
 | ORG-REGISTRY | Org boundary: Org-scoped registry exists and consistent | ✅ | ORG_SCOPED_TABLES + NON_ORG_SCOPED_TABLES present |
 | HASH-CHAIN | Hash chain: Module + append-only tables tracked | ✅ | 3 append-only tables tracked |
 | GOVERNANCE-PROFILES | Governance profiles: Registry exists + validation | ✅ | Profile registry with immutable controls |
-| AUTH-MIDDLEWARE | Auth middleware: All apps have Clerk middleware | ✅ | All 4 apps have `clerkMiddleware` |
+| AUTH-MIDDLEWARE | Auth middleware: All apps use platform-auth middleware | ✅ | All 4 apps have `authMiddleware` (from `@nzila/platform-auth`) |
 | AUDITED-WRITES | Audited writes: withAudit used in API guards | ✅ | `withAudit`/`createAuditedScopedDb` in api-guards |
 | AUDIT-MANDATORY | Audited writes: Audit module blocks on failure | ✅ | Audit emission mandatory (blocks on failure) |
 | EVIDENCE-SEALING | Evidence: verifySeal exported from seal module | ✅ | `generateSeal` + `verifySeal` both exported |
@@ -231,7 +231,7 @@ Both UnionEyes and ABR Insights are held to the **same NzilaOS GA Gate v2 bar**.
 | NzilaOS Gate | UE Equivalent | ABR Equivalent |
 |-------------|--------------|----------------|
 | ORG-ISOLATION | Shared monorepo check — `apps/union-eyes` included in `APP_DIRS` scan | Shared — `org_id` on all 7 ABR tables (ABR-MIG-02) |
-| AUTH-MIDDLEWARE | `apps/union-eyes/middleware.ts` with `clerkMiddleware` | Django auth middleware (platform-level) |
+| AUTH-MIDDLEWARE | `apps/union-eyes/middleware.ts` with `authMiddleware` (from `@nzila/platform-auth`) | Django auth middleware (platform-level) |
 | AUDITED-WRITES | `@nzila/os-core` audit infrastructure used directly | `pip-audit` + audit taxonomy via `@nzila/os-core` |
 | EVIDENCE-SEALING | `generateSeal`/`verifySeal` via `@nzila/os-core/evidence/seal` (UE-EVD-02) | `seal.py` + `verify.py` via NzilaOS evidence primitives (ABR-SEC-03) |
 | VERTICAL-EVIDENCE-WIRED | `ue-evidence` job in `governance-gate` needs | `abr-evidence` job in `governance-gate` needs |

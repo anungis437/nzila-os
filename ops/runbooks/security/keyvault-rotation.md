@@ -17,7 +17,7 @@ keys, and certificates managed via Azure Key Vault.
 | API keys (internal)    | 180 days           | Automated      | 30 days before |
 | API keys (third-party) | Per vendor policy  | Manual         | 30 days before |
 | TLS certificates       | 365 days           | Auto-renewal   | 60 days before |
-| Clerk signing keys     | Per Clerk rotation | Manual trigger | 14 days before |
+| Auth signing keys (AUTH_SECRET) | Per rotation policy | Manual trigger | 14 days before |
 | PagerDuty integration  | 180 days           | Manual         | 30 days before |
 | Azure Storage keys     | 90 days            | Automated      | 30 days before |
 

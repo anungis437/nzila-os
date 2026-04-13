@@ -73,10 +73,10 @@ class TestManifestGenerator:
         manifest = gen.generate_manifest(profile)
 
         assert manifest["product_name"] == "Test Platform"
-        assert manifest["profile"] == "nextjs-aca-azurepg-clerk"
-        assert manifest["auth_provider"] == "clerk"
+        assert manifest["profile"] == "nextjs-aca-azurepg-oidc"
+        assert manifest["auth_provider"] == "oidc"
         assert manifest["db_provider"] == "azure_postgresql"
-        assert "auth-clerk" in manifest["modules"]
+        assert "auth-oidc" in manifest["modules"]
         assert "core-governance" in manifest["modules"]
 
     def test_generate_manifest_django(self):
@@ -101,7 +101,7 @@ class TestManifestGenerator:
         gen = ManifestGenerator()
         profile = _make_profile()
         result = gen._select_profile(profile)
-        assert result == "nextjs-aca-azurepg-clerk"
+        assert result == "nextjs-aca-azurepg-oidc"
 
     def test_select_profile_django(self):
         """Test profile selection for Django."""
@@ -123,16 +123,16 @@ class TestManifestGenerator:
             }
         )
         result = gen._select_profile(profile)
-        assert result == "nodeapi-aca-azurepg-clerk"
+        assert result == "nodeapi-aca-azurepg-oidc"
 
     def test_select_modules_clerk_enabled(self):
-        """Test module selection includes Clerk when enabled."""
+        """Test module selection includes OIDC auth when enabled."""
         gen = ManifestGenerator(ManifestConfig(clerk_enabled=True))
         profile = _make_profile()
-        stack_profile = "nextjs-aca-azurepg-clerk"
+        stack_profile = "nextjs-aca-azurepg-oidc"
         modules = gen._select_modules(profile, stack_profile)
 
-        assert "auth-clerk" in modules
+        assert "auth-oidc" in modules
         assert "core-governance" in modules
 
     def test_select_modules_ai_dependency(self):
@@ -227,7 +227,7 @@ class TestManifestGeneratorIntegration:
         assert (temp_dir / "manifests" / "plat2.manifest.json").exists()
 
         # Verify profile mapping
-        assert manifests["plat1"]["profile"] == "nextjs-aca-azurepg-clerk"
+        assert manifests["plat1"]["profile"] == "nextjs-aca-azurepg-oidc"
         assert manifests["plat2"]["profile"] == "django-aca-azurepg"
 
 
@@ -247,7 +247,7 @@ class TestManifestGeneratorExtended:
                 "monorepo": False,
             }
         )
-        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-clerk"
+        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-oidc"
 
     def test_select_profile_react_vite(self):
         gen = ManifestGenerator()
@@ -258,7 +258,7 @@ class TestManifestGeneratorExtended:
                 "monorepo": False,
             }
         )
-        assert gen._select_profile(profile) == "nextjs-aca-azurepg-clerk"
+        assert gen._select_profile(profile) == "nextjs-aca-azurepg-oidc"
 
     def test_select_profile_unknown(self):
         gen = ManifestGenerator()
@@ -269,14 +269,14 @@ class TestManifestGeneratorExtended:
                 "monorepo": False,
             }
         )
-        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-clerk"
+        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-oidc"
 
     def test_select_profile_null_framework_ts(self):
         gen = ManifestGenerator()
         profile = _make_profile(
             tech_stack={"framework": None, "language": "TypeScript", "monorepo": False}
         )
-        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-clerk"
+        assert gen._select_profile(profile) == "nodeapi-aca-azurepg-oidc"
 
     # ── _get_app_path ────────────────────────────────────────────────────
 

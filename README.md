@@ -100,7 +100,7 @@ apps/                      17 deployable applications
 ├── platform-admin/        Platform administration (Next.js, port 3015)
 └── orchestrator-api/      Fastify API orchestrator (rate-limited, helmet-secured)
 
-packages/                  58+ shared packages (see Packages section below)
+packages/                  159 shared packages (see Packages section below)
 
 tooling/
 ├── contract-tests/        Invariant enforcement tests (stack authority, governance, etc.)
@@ -121,7 +121,7 @@ ops/                       Runbooks, incident response, change management, compl
 docs/                      Architecture decisions, domain docs, migration guides
 platform/                  Platform architecture documentation
 security/                  Red-team profiles, security tooling
-.github/workflows/         15 CI/CD pipelines (see CI section)
+.github/workflows/         33 CI/CD pipelines (see CI section)
 ```
 
 ### Toolchain
@@ -133,7 +133,7 @@ security/                  Red-team profiles, security tooling
 | **Styling** | Tailwind CSS v4 |
 | **Auth** | Email/password (Argon2id + PG sessions) · Entra SSO (optional) via `@nzila/platform-auth` |
 | **Database** | PostgreSQL 15 + Drizzle ORM |
-| **CI** | GitHub Actions (15 workflows) |
+| **CI** | GitHub Actions (34 workflows) |
 
 ---
 

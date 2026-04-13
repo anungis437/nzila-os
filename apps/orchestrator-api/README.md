@@ -40,3 +40,20 @@ Copy `.env` and fill required values (`ORCHESTRATOR_API_KEY`, `DATABASE_URL`).
 ## Domain
 
 Central orchestration service for the Nzila platform. Handles workflow dispatch, job scheduling, automation run tracking, and procurement proof-center operations. Protected by API key auth and Helmet security headers with rate limiting.
+
+## Environment Variables
+
+See `.env.example` in this directory. Key variables:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ORCHESTRATOR_API_KEY` | Yes | API key for authenticating requests |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | No | OpenTelemetry collector endpoint |
+
+## Known Exceptions
+
+- **No `@nzila/platform-shell`** — Fastify API server, no UI layer to wrap
+- **No `@nzila/platform-auth`** — Uses API key authentication instead of session auth
+
+See `governance/exceptions/platform-adoption-exceptions.json` for formal registration.

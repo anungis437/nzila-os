@@ -26,3 +26,13 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 ## Domain
 
 Self-service portal for HNWI/UHNWI clients going through citizenship-by-investment or residency-by-investment programs. Covers document uploads, family member management, case status tracking ("my cases"), and secure messaging — the applicant-facing complement to the internal mobility advisory app.
+
+## Environment Variables
+
+See `.env.example` in this directory for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).
+
+## Known Exceptions
+
+- **No `@nzila/platform-shell`** — Custom client-facing portal UI with distinct branding
+
+See `governance/exceptions/platform-adoption-exceptions.json` for formal registration.

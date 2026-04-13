@@ -110,16 +110,16 @@ function generateAppSpec(
     paths,
     components: {
       securitySchemes: {
-        clerk: {
+        platformAuth: {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Clerk session token',
+          description: 'Nzila platform-auth session token (email/password or Entra SSO)',
         },
       },
     },
     tags: [{ name: appName, description: `@nzila/${appName} routes` }],
-    security: [{ clerk: [] }],
+    security: [{ platformAuth: [] }],
   };
 }
 
@@ -161,16 +161,16 @@ function generateCombinedSpec(
     paths,
     components: {
       securitySchemes: {
-        clerk: {
+        platformAuth: {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Clerk session token',
+          description: 'Nzila platform-auth session token (email/password or Entra SSO)',
         },
       },
     },
     tags,
-    security: [{ clerk: [] }],
+    security: [{ platformAuth: [] }],
   };
 }
 

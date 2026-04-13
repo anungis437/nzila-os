@@ -19,7 +19,7 @@ All production secrets are stored in **Azure Key Vault** (`nzila-kv`). Applicati
 
 | Secret | Rotation Period | Urgency Window |
 |--------|----------------|----------------|
-| `CLERK_SECRET_KEY` | 90 days | < 7 days after suspected compromise |
+| `AUTH_SECRET` | 90 days | < 7 days after suspected compromise |
 | `DATABASE_URL` | 180 days | Immediate on any suspected exposure |
 | `STRIPE_SECRET_KEY` | 90 days | Immediate on any suspected exposure |
 | `STRIPE_WEBHOOK_SECRET` | Per Stripe endpoint lifecycle | On webhook endpoint modification |
@@ -31,15 +31,15 @@ All production secrets are stored in **Azure Key Vault** (`nzila-kv`). Applicati
 
 ## Rotation Procedures
 
-### Clerk Secret Key
+### Auth Secret (AUTH_SECRET)
 
 ```bash
-# 1. Generate new key in Clerk dashboard → API Keys
+# 1. Generate new secret: openssl rand -base64 32
 # 2. Store in Azure Key Vault
 az keyvault secret set \
   --vault-name nzila-kv \
-  --name CLERK-SECRET-KEY \
-  --value "sk_live_xxxxxxxxxxx"
+  --name AUTH-SECRET \
+  --value "<generated-secret>"
 
 # 3. Trigger rolling restart of console + partners
 # (Container Apps pull secrets from Key Vault at startup)
@@ -54,7 +54,7 @@ az containerapp revision restart \
 curl https://console.nzila.app/api/health
 curl https://partners.nzila.app/api/health
 
-# 5. Revoke old key in Clerk dashboard (after 5 min grace period)
+# 5. Discard old AUTH_SECRET (after 5 min grace period — sessions will re-authenticate)
 ```
 
 ### Database URL / Password
@@ -110,7 +110,7 @@ curl https://console.nzila.app/api/health
 If a secret is suspected to be compromised:
 
 ```bash
-# Revoke immediately in the upstream provider (Clerk, Stripe, etc.)
+# Revoke immediately in the upstream provider (Entra ID, Stripe, etc.)
 # THEN update Key Vault
 # THEN trigger rolling restart
 
@@ -124,10 +124,10 @@ If a secret is suspected to be compromised:
 After every rotation, create a record:
 ```bash
 # Log to audit system
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | KEY_ROTATION | CLERK_SECRET_KEY | rotated by @engineer" \
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | KEY_ROTATION | AUTH_SECRET | rotated by @engineer" \
   >> ops/change-management/key-rotation-log.txt
 git add ops/change-management/key-rotation-log.txt
-git commit -m "sec: rotate CLERK_SECRET_KEY [$(date -u +%Y-%m-%d)]"
+git commit -m "sec: rotate AUTH_SECRET [$(date -u +%Y-%m-%d)]"
 ```
 
 ---
@@ -148,5 +148,5 @@ pnpm contract-tests
 |------|---------|
 | Key Vault owner | `@nzila/platform` |
 | Stripe account owner | finance@nzila.app |
-| Clerk account owner | ops@nzila.app |
+| Entra ID / platform-auth owner | ops@nzila.app |
 | QBO integration owner | finance@nzila.app |

@@ -27,3 +27,7 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 ## Domain
 
 Anti-corruption examination management — exam creation, candidate dashboards, assessment scoring, and compliance reporting. Integrates AI/ML for question generation and analytics.
+
+## Environment Variables
+
+See `.env.example` in this directory for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).

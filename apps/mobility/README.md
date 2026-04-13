@@ -26,3 +26,7 @@ No `.env.example` — configure `.env.local` with standard auth vars (`AUTH_SECR
 ## Domain
 
 Mobility is the **investment migration vertical** — purpose-built for firms (like [TIMC](https://www.timc.ca)) that help high-net-worth individuals and families diversify citizenships and residencies across 25+ countries. The platform manages the full advisory lifecycle: client intake with wealth-tier classification (HNWI/UHNWI), eligibility assessment against 40+ CBI/RBI/Golden Visa programs, KYC/AML screening, document collection, government submission tracking, and post-approval compliance. Integrates with HubSpot (CRM), Microsoft 365, and WhatsApp for client communications.
+
+## Environment Variables
+
+See `.env.example` in this directory for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).
