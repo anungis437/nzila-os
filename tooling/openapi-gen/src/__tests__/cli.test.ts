@@ -17,8 +17,8 @@ const fakeResult: GenerationResult = {
   totalRoutes: 5,
   routesWithSchemas: 2,
   apps: [
-    { name: 'web', routeCount: 3, specPath: '/out/web.json' },
-    { name: 'console', routeCount: 2, specPath: '/out/console.json' },
+    { name: 'web', routeCount: 3, specPath: '/out/web.json', errors: [] },
+    { name: 'console', routeCount: 2, specPath: '/out/console.json', errors: [] },
   ],
   combinedSpecPath: '/out/combined.json',
 }

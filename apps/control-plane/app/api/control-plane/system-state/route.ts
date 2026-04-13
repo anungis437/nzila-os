@@ -10,8 +10,15 @@
 import { NextResponse } from 'next/server'
 import { getSystemState } from '../../../../services/system-state'
 import { getRevenueOverview } from '../../../../services/revenue-aggregator'
+import { requireApiAuth, handleAuthError } from '../../../../lib/api-auth'
 
-export async function GET() {
+export async function GET(request: Request) {
+  try {
+    await requireApiAuth(request)
+  } catch (error) {
+    return handleAuthError(error)
+  }
+
   const systemState = getSystemState()
   const revenueOverview = getRevenueOverview()
 
