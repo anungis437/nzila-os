@@ -244,7 +244,7 @@ describe('platform-data-fabric', () => {
         resolveConflict(
           store,
           '00000000-0000-0000-0000-000000000333',
-          'prefer_source_a',
+          'source_wins',
           'reviewer-1',
         ),
       ).resolves.toBeUndefined()
