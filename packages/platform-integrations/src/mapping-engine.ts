@@ -225,11 +225,26 @@ export class MappingEngine {
         if (!expr) {
           return { value: undefined, sourceValue, error: { field: field.targetField, message: 'Computed field requires an expression', code: 'MISSING_EXPRESSION' } }
         }
-        // Only support simple template-style expressions: ${fieldName}
-        const computed = expr.replace(/\$\{([^}]+)\}/g, (_, key) => {
-          const val = this.getNestedValue(input, key.trim())
-          return val != null ? String(val) : ''
-        })
+        // Parse template-style expressions: ${fieldName} — manual parsing avoids ReDoS
+        let computed = ''
+        let pos = 0
+        while (pos < expr.length) {
+          const start = expr.indexOf('${', pos)
+          if (start === -1) {
+            computed += expr.slice(pos)
+            break
+          }
+          computed += expr.slice(pos, start)
+          const end = expr.indexOf('}', start + 2)
+          if (end === -1) {
+            computed += expr.slice(start)
+            break
+          }
+          const key = expr.slice(start + 2, end).trim()
+          const val = this.getNestedValue(input, key)
+          computed += val != null ? String(val) : ''
+          pos = end + 1
+        }
         return { value: computed, sourceValue }
       }
 

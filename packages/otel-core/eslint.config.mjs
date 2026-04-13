@@ -3,7 +3,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 
 const eslintConfig = defineConfig([
-  globalIgnores(['dist/**', 'node_modules/**']),
+  globalIgnores(['dist/**', 'node_modules/**', 'coverage/**']),
   {
     files: ['src/**/*.{ts,tsx}'],
     languageOptions: {
