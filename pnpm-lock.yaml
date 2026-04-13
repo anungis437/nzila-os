@@ -702,6 +702,9 @@ importers:
       '@nzila/platform-procurement-proof':
         specifier: workspace:*
         version: link:../../packages/platform-procurement-proof
+      '@nzila/platform-revenue':
+        specifier: workspace:*
+        version: link:../../packages/platform-revenue
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
