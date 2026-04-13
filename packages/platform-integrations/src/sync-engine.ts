@@ -186,7 +186,7 @@ export class SyncEngine {
           // External system cannot write when internal is source of truth
           for (const [field, value] of Object.entries(delta.fields)) {
             conflicts.push({
-              entityId: delta.externalId,
+              recordId: delta.externalId,
               field,
               internalValue: null,
               externalValue: value,
@@ -202,7 +202,7 @@ export class SyncEngine {
         if (direction === 'outbound') {
           for (const [field, value] of Object.entries(delta.fields)) {
             conflicts.push({
-              entityId: delta.externalId ?? (delta.internalId || 'unknown'),
+              recordId: delta.externalId ?? (delta.internalId || 'unknown'),
               field,
               internalValue: value,
               externalValue: null,
@@ -221,7 +221,7 @@ export class SyncEngine {
 
           if (rule.owner !== sourceOwner && rule.writePolicy === 'error') {
             conflicts.push({
-              entityId: delta.externalId,
+              recordId: delta.externalId,
               field,
               internalValue: direction === 'inbound' ? null : value,
               externalValue: direction === 'inbound' ? value : null,
@@ -231,7 +231,7 @@ export class SyncEngine {
             })
           } else if (rule.owner !== sourceOwner && rule.writePolicy === 'ignore') {
             conflicts.push({
-              entityId: delta.externalId,
+              recordId: delta.externalId,
               field,
               internalValue: direction === 'inbound' ? null : value,
               externalValue: direction === 'inbound' ? value : null,

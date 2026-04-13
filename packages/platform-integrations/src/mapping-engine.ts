@@ -12,7 +12,6 @@ import type {
   MappingError,
   MappingWarning,
   TransformationStep,
-  MappingOperationType,
   EnumTranslationMap,
   DateNormalizationConfig,
   ValidationRule,

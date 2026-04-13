@@ -66,7 +66,7 @@ export interface SyncSession {
 }
 
 export interface SyncConflict {
-  readonly entityId: string
+  readonly recordId: string
   readonly field: string
   readonly internalValue: unknown
   readonly externalValue: unknown

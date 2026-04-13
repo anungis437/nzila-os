@@ -16,7 +16,7 @@ import type {
   DeliveryAttemptStatus,
 } from '@nzila/platform-integrations-types'
 import type { IntegrationAuditHooks } from './audit-hooks'
-import { computeHmacSignature, verifyHmacSignature } from './signature'
+import { computeHmacSignature } from './signature'
 
 // ─── Store Interfaces ────────────────────────────────────────────────────────
 

@@ -8,12 +8,10 @@ import type {
   IntegrationRun,
   CreateRunInput,
   RunStatus,
-  SyncDirection,
   IntegrationConnection,
   IntegrationEventMetadata,
 } from '@nzila/platform-integrations-types'
-import { inboundPayloadSchema } from '@nzila/platform-integrations-types/schemas'
-import type { ConnectorAdapter, ConnectorExecutionResult } from './connector-registry'
+import type { ConnectorAdapter } from './connector-registry'
 import type { IntegrationAuditHooks } from './audit-hooks'
 import type { IdempotencyStore } from './idempotency'
 

@@ -83,6 +83,17 @@ export class RestApiConnector implements ConnectorAdapter {
     const queryParams = payload.queryParams as Record<string, string> | undefined
 
     const url = new URL(endpoint ?? '', config.baseUrl)
+    const baseOrigin = new URL(config.baseUrl).origin
+    if (url.origin !== baseOrigin) {
+      return {
+        success: false,
+        data: null,
+        statusCode: null,
+        error: 'Endpoint must be on the same origin as baseUrl.',
+        durationMs: Date.now() - start,
+        retryable: false,
+      }
+    }
     if (queryParams) {
       for (const [k, v] of Object.entries(queryParams)) {
         url.searchParams.set(k, v)
@@ -136,6 +147,17 @@ export class RestApiConnector implements ConnectorAdapter {
     const body = payload.body as Record<string, unknown> | undefined
 
     const url = new URL(endpoint ?? '', config.baseUrl)
+    const baseOrigin = new URL(config.baseUrl).origin
+    if (url.origin !== baseOrigin) {
+      return {
+        success: false,
+        data: null,
+        statusCode: null,
+        error: 'Endpoint must be on the same origin as baseUrl.',
+        durationMs: Date.now() - start,
+        retryable: false,
+      }
+    }
 
     try {
       const headers = this.buildHeaders(config)
