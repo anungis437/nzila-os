@@ -100,7 +100,7 @@ export type RevenueStatus = (typeof RevenueStatus)[keyof typeof RevenueStatus]
 
 export const UnifiedRevenueRecordSchema = z.object({
   id: z.string().uuid(),
-  entityId: z.string().uuid(),
+  orgId: z.string().uuid(),
   appSource: z.string(),
   revenueType: z.nativeEnum(RevenueType),
   grossAmount: z.number(),

@@ -35,7 +35,7 @@ export function emitRevenueEvent(
   const validated = UnifiedRevenueRecordSchema.parse(record)
   const event: RevenueEvent = {
     id: validated.id,
-    orgId: validated.entityId,
+    orgId: validated.orgId,
     eventType: mapRevenueTypeToEventType(validated.revenueType, validated.appSource),
     amount: validated.grossAmount,
     currency: validated.currency,

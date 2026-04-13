@@ -13,7 +13,7 @@ Every revenue-generating event across the platform is normalised into a `Unified
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | UUID | Unique record identifier |
-| `entityId` | UUID | User, org, or creator that generated the revenue |
+| `orgId` | UUID | Organization that generated the revenue |
 | `appSource` | string | Originating app (e.g. `zonga`, `cfo`, `flow`) |
 | `revenueType` | enum | `subscription` · `transaction` · `event` · `payout` |
 | `grossAmount` | number | Total amount before platform fees |
@@ -37,7 +37,7 @@ const service = createInMemoryRevenueService()
 
 emitRevenueEvent(service, {
   id: crypto.randomUUID(),
-  entityId: orgId,
+  orgId: orgId,
   appSource: 'zonga',
   revenueType: 'transaction',
   grossAmount: 150.00,
