@@ -157,17 +157,13 @@ export function withAuth<T>(
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-/** Emails that always receive super_admin, regardless of session claims. */
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-])
+import { isSuperAdmin } from '../config/super-admins'
 
 function resolveRole(session: { userId: string; orgId?: string | null; sessionClaims?: unknown }): NzilaRole | null {
   const claims = session.sessionClaims as Record<string, unknown> | undefined
   // Super-admin email override (email may be present in custom JWT claims)
   const email = claims?.['email'] as string | undefined
-  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+  if (isSuperAdmin(email)) {
     return 'super_admin' as NzilaRole
   }
   return (claims?.['nzila_role'] as NzilaRole) ?? null

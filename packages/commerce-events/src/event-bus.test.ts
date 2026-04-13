@@ -157,6 +157,37 @@ describe('InMemoryEventBus', () => {
 
       expect(handler).toHaveBeenCalledTimes(1)
     })
+
+    it('returned unsubscribe prevents handler from firing', () => {
+      const handler = vi.fn()
+      const unsub = bus.once('x', handler)
+      unsub()
+      bus.emit(makeEvent('x'))
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('handler fires only once via emitAndWait', async () => {
+      const handler = vi.fn()
+      bus.once('x', handler)
+      await bus.emitAndWait(makeEvent('x'))
+      await bus.emitAndWait(makeEvent('x'))
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('reuses existing subscriber set when type already has handlers', () => {
+      const first = vi.fn()
+      const second = vi.fn()
+      bus.on('x', first)
+      bus.once('x', second)
+
+      bus.emit(makeEvent('x'))
+      bus.emit(makeEvent('x'))
+
+      expect(first).toHaveBeenCalledTimes(2)
+      expect(second).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('unsubscribe', () => {
@@ -196,6 +227,25 @@ describe('InMemoryEventBus', () => {
     it('isolates async handler errors', async () => {
       const safe = vi.fn()
       bus.on('x', async () => { throw new Error('boom') })
+      bus.on('x', safe)
+
+      await bus.emitAndWait(makeEvent('x'))
+      expect(safe).toHaveBeenCalledTimes(1)
+    })
+
+    it('handles sync handlers that do not return a promise', async () => {
+      const handler = vi.fn()
+      bus.on('x', handler)
+
+      await bus.emitAndWait(makeEvent('x'))
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('isolates sync handler errors in async dispatch', async () => {
+      const thrower = vi.fn(() => { throw new Error('sync boom') })
+      const safe = vi.fn()
+      bus.on('x', thrower as unknown as EventHandler)
       bus.on('x', safe)
 
       await bus.emitAndWait(makeEvent('x'))

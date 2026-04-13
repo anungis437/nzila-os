@@ -1,6 +1,7 @@
-export { ShellLayout, type ShellLayoutProps } from './ShellLayout.js';
-export { GlobalNav } from './GlobalNav.js';
-export { OrgSelector } from './OrgSelector.js';
-export { AppSwitcher, type AppSwitcherProps } from './AppSwitcher.js';
-export { UserMenu } from './UserMenu.js';
-export { NotificationBell, type NotificationBellProps } from './NotificationBell.js';
+export { NzilaAppShell, type NzilaAppShellProps } from './NzilaAppShell';
+export { ShellLayout, type ShellLayoutProps } from './ShellLayout';
+export { GlobalNav } from './GlobalNav';
+export { OrgSelector } from './OrgSelector';
+export { AppSwitcher, type AppSwitcherProps } from './AppSwitcher';
+export { UserMenu } from './UserMenu';
+export { NotificationBell, type NotificationBellProps } from './NotificationBell';

@@ -10,10 +10,13 @@ import {
   hubspotContactSchema,
 } from './contacts'
 import type { HubspotClient } from './contacts'
+import { syncHubspotDeal } from './deals'
+import type { HubspotDealsClient } from './deals'
 import {
   ingestHubspotWebhook,
   SUPPORTED_WEBHOOK_TYPES,
 } from './webhooks'
+import * as hubspotIndex from './index'
 
 describe('stage mapping', () => {
   it('maps HubSpot stages to case status', () => {
@@ -102,6 +105,98 @@ describe('syncHubspotContact', () => {
     expect(result.clientId).toBe('client-1')
     expect(result.action).toBe('created')
   })
+
+  it('formats details when names are missing', async () => {
+    const mockClient: HubspotClient = {
+      async getContact(id) {
+        return {
+          id,
+          properties: {
+            firstname: null,
+            lastname: null,
+            email: null,
+            phone: null,
+            country: null,
+            lifecyclestage: null,
+          },
+        }
+      },
+      async listContacts() {
+        return { results: [] }
+      },
+    }
+
+    const result = await syncHubspotContact(mockClient, '99', async () => ({
+      clientId: 'client-2',
+      action: 'updated' as const,
+    }))
+
+    expect(result.details).toContain('updated')
+  })
+})
+
+describe('syncHubspotDeal', () => {
+  it('syncs a deal via the client', async () => {
+    const mockClient: HubspotDealsClient = {
+      async getDeal(id) {
+        return {
+          id,
+          properties: {
+            dealname: 'New Deal',
+            amount: '1200',
+            dealstage: 'qualifiedtobuy',
+            pipeline: 'default',
+            closedate: null,
+          },
+          associations: {
+            contacts: {
+              results: [{ id: 'c-1' }],
+            },
+          },
+        }
+      },
+      async listDeals() {
+        return { results: [] }
+      },
+    }
+
+    const result = await syncHubspotDeal(mockClient, 'd-1', async () => ({
+      caseId: 'case-1',
+      action: 'created' as const,
+    }))
+
+    expect(result.hubspotDealId).toBe('d-1')
+    expect(result.caseId).toBe('case-1')
+    expect(result.action).toBe('created')
+  })
+
+  it('falls back to deal id when deal name is missing', async () => {
+    const mockClient: HubspotDealsClient = {
+      async getDeal(id) {
+        return {
+          id,
+          properties: {
+            dealname: null,
+            amount: null,
+            dealstage: null,
+            pipeline: null,
+            closedate: null,
+          },
+        }
+      },
+      async listDeals() {
+        return { results: [] }
+      },
+    }
+
+    const result = await syncHubspotDeal(mockClient, 'd-2', async () => ({
+      caseId: 'case-2',
+      action: 'updated' as const,
+    }))
+
+    expect(result.details).toContain('d-2')
+    expect(result.action).toBe('updated')
+  })
 })
 
 describe('ingestHubspotWebhook', () => {
@@ -145,6 +240,108 @@ describe('ingestHubspotWebhook', () => {
     )
 
     expect(results[0].processed).toBe(false)
+  })
+
+  it('processes contact and deal webhook variants', async () => {
+    const seen: string[] = []
+
+    const results = await ingestHubspotWebhook(
+      [
+        {
+          subscriptionType: 'contact.propertyChange',
+          objectId: 11,
+          propertyName: 'email',
+          propertyValue: 'new@example.com',
+          occurredAt: Date.now(),
+          eventId: 10,
+          subscriptionId: 1,
+          portalId: 1,
+          appId: 1,
+          attemptNumber: 0,
+        },
+        {
+          subscriptionType: 'contact.deletion',
+          objectId: 12,
+          occurredAt: Date.now(),
+          eventId: 11,
+          subscriptionId: 1,
+          portalId: 1,
+          appId: 1,
+          attemptNumber: 0,
+        },
+        {
+          subscriptionType: 'deal.creation',
+          objectId: 21,
+          occurredAt: Date.now(),
+          eventId: 12,
+          subscriptionId: 1,
+          portalId: 1,
+          appId: 1,
+          attemptNumber: 0,
+        },
+        {
+          subscriptionType: 'deal.propertyChange',
+          objectId: 22,
+          propertyName: 'dealstage',
+          propertyValue: 'closedwon',
+          occurredAt: Date.now(),
+          eventId: 13,
+          subscriptionId: 1,
+          portalId: 1,
+          appId: 1,
+          attemptNumber: 0,
+        },
+        {
+          subscriptionType: 'deal.deletion',
+          objectId: 23,
+          occurredAt: Date.now(),
+          eventId: 14,
+          subscriptionId: 1,
+          portalId: 1,
+          appId: 1,
+          attemptNumber: 0,
+        },
+      ],
+      {
+        onContactUpdated: async (id, name, value) => { seen.push(`cu:${id}:${name}:${value}`) },
+        onContactDeleted: async (id) => { seen.push(`cd:${id}`) },
+        onDealCreated: async (id) => { seen.push(`dc:${id}`) },
+        onDealUpdated: async (id, name, value) => { seen.push(`du:${id}:${name}:${value}`) },
+        onDealDeleted: async (id) => { seen.push(`dd:${id}`) },
+      },
+    )
+
+    expect(results.every((r) => r.processed)).toBe(true)
+    expect(seen).toContain('cu:11:email:new@example.com')
+    expect(seen).toContain('du:22:dealstage:closedwon')
+  })
+
+  it('leaves property change unprocessed when propertyName is missing', async () => {
+    const results = await ingestHubspotWebhook(
+      [{
+        subscriptionType: 'deal.propertyChange',
+        objectId: 1,
+        propertyValue: 'x',
+        occurredAt: Date.now(),
+        eventId: 100,
+        subscriptionId: 1,
+        portalId: 1,
+        appId: 1,
+        attemptNumber: 0,
+      }],
+      {
+        onDealUpdated: async () => {},
+      },
+    )
+
+    expect(results[0].processed).toBe(false)
+  })
+
+  it('exposes expected barrel exports', () => {
+    expect(hubspotIndex.syncHubspotContact).toBeTypeOf('function')
+    expect(hubspotIndex.syncHubspotDeal).toBeTypeOf('function')
+    expect(hubspotIndex.ingestHubspotWebhook).toBeTypeOf('function')
+    expect(hubspotIndex.mapHubspotStageToCaseStatus).toBeTypeOf('function')
   })
 
   it('supports all documented webhook types', () => {

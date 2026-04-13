@@ -51,6 +51,16 @@ describe('verifyWebhookSignature', () => {
     )
   })
 
+  it('uses fallback message when thrown value is not an Error', () => {
+    mockConstructEvent.mockImplementation(() => {
+      throw 'string_error' // eslint-disable-line no-throw-literal
+    })
+
+    expect(() => verifyWebhookSignature(Buffer.from('body'), 'bad_sig')).toThrow(
+      'Invalid webhook signature',
+    )
+  })
+
   it('WebhookSignatureError has correct name', () => {
     const err = new WebhookSignatureError('bad')
     expect(err.name).toBe('WebhookSignatureError')
@@ -122,5 +132,59 @@ describe('extractEntityIdFromEvent', () => {
     } as unknown as Stripe.Event
 
     expect(extractEntityIdFromEvent(event)).toBe('top_level')
+  })
+
+  it('returns null when payment_intent is a string (not expanded)', () => {
+    const event = {
+      data: {
+        object: {
+          metadata: {},
+          payment_intent: 'pi_1234',
+        },
+      },
+    } as unknown as Stripe.Event
+
+    expect(extractEntityIdFromEvent(event)).toBeNull()
+  })
+
+  it('returns null when payment_intent is null', () => {
+    const event = {
+      data: {
+        object: {
+          metadata: {},
+          payment_intent: null,
+        },
+      },
+    } as unknown as Stripe.Event
+
+    expect(extractEntityIdFromEvent(event)).toBeNull()
+  })
+
+  it('returns null when payment_intent object has no metadata', () => {
+    const event = {
+      data: {
+        object: {
+          metadata: {},
+          payment_intent: {},
+        },
+      },
+    } as unknown as Stripe.Event
+
+    expect(extractEntityIdFromEvent(event)).toBeNull()
+  })
+
+  it('returns null when payment_intent metadata has no org_id', () => {
+    const event = {
+      data: {
+        object: {
+          metadata: {},
+          payment_intent: {
+            metadata: { other: 'value' },
+          },
+        },
+      },
+    } as unknown as Stripe.Event
+
+    expect(extractEntityIdFromEvent(event)).toBeNull()
   })
 })

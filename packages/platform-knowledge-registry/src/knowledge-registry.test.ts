@@ -1,15 +1,31 @@
 /**
  * @nzila/platform-knowledge-registry — Unit Tests
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   KnowledgeTypes,
+  KnowledgeStatuses,
   createInMemoryKnowledgeStore,
   registerKnowledgeAsset,
   searchKnowledgeAssets,
   getKnowledgeAssetVersion,
   resolveApplicableKnowledge,
+  knowledgeAssets,
+  knowledgeVersions,
 } from './index'
+
+function runDrizzleExtraConfig(table: Record<PropertyKey, unknown>): unknown[] {
+  const symbols = Object.getOwnPropertySymbols(table)
+  const builder = symbols.find((s) => s.toString() === 'Symbol(drizzle:ExtraConfigBuilder)')
+  const cols = symbols.find((s) => s.toString() === 'Symbol(drizzle:ExtraConfigColumns)')
+
+  expect(builder).toBeDefined()
+  expect(cols).toBeDefined()
+
+  return (table as Record<PropertyKey, (arg: unknown) => unknown[]>)[builder!](
+    (table as Record<PropertyKey, unknown>)[cols!],
+  )
+}
 
 const TENANT = 'tenant-1'
 const NOW = new Date().toISOString()
@@ -117,5 +133,74 @@ describe('platform-knowledge-registry', () => {
       store, TENANT, 'mobility', ['eligibility'],
     )
     expect(applicable).toHaveLength(1)
+  })
+
+  it('filters by status, tenant, query text, and missing tags', async () => {
+    const store = createInMemoryKnowledgeStore()
+
+    const asset = await registerKnowledgeAsset(store, {
+      tenantScope: TENANT,
+      domainScope: 'mobility',
+      title: 'Mobility Handbook',
+      knowledgeType: KnowledgeTypes.POLICY,
+      source: 'ops',
+      effectiveDate: NOW,
+      textPayload: 'Work permit obligations and deadlines.',
+      tags: ['permit'],
+    })
+
+    await store.update(asset.id, {
+      status: KnowledgeStatuses.DRAFT,
+      changedBy: 'editor',
+      changeReason: 'review',
+    })
+
+    expect(await searchKnowledgeAssets(store, { tenantScope: 'other-tenant' })).toHaveLength(0)
+    expect(await searchKnowledgeAssets(store, { status: KnowledgeStatuses.ACTIVE })).toHaveLength(0)
+    expect(await searchKnowledgeAssets(store, { query: 'deadlines' })).toHaveLength(1)
+    expect(await searchKnowledgeAssets(store, { tags: ['not-present'] })).toHaveLength(0)
+  })
+
+  it('returns undefined when update/getVersion target does not exist', async () => {
+    const store = createInMemoryKnowledgeStore()
+
+    const updated = await store.update('missing-id', {
+      title: 'No-op',
+      changedBy: 'system',
+      changeReason: 'test',
+    })
+    expect(updated).toBeUndefined()
+
+    const missingVersion = await getKnowledgeAssetVersion(store, 'missing-id', 99)
+    expect(missingVersion).toBeUndefined()
+  })
+
+  it('uses deterministic fallback id when crypto.randomUUID is unavailable', async () => {
+    const originalCrypto = globalThis.crypto
+    vi.stubGlobal('crypto', {})
+
+    try {
+      const store = createInMemoryKnowledgeStore()
+      const asset = await registerKnowledgeAsset(store, {
+        tenantScope: TENANT,
+        domainScope: 'mobility',
+        title: 'Fallback ID test',
+        knowledgeType: KnowledgeTypes.RULE,
+        source: 'test',
+        effectiveDate: NOW,
+      })
+
+      expect(asset.id).toMatch(/^00000000-0000-0000-0000-\d{12}$/)
+    } finally {
+      vi.stubGlobal('crypto', originalCrypto)
+    }
+  })
+
+  it('exercises drizzle schema extra config builders', () => {
+    const assetsConfig = runDrizzleExtraConfig(knowledgeAssets as unknown as Record<PropertyKey, unknown>)
+    expect(assetsConfig).toHaveLength(5)
+
+    const versionsConfig = runDrizzleExtraConfig(knowledgeVersions as unknown as Record<PropertyKey, unknown>)
+    expect(versionsConfig).toHaveLength(2)
   })
 })

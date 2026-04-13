@@ -107,6 +107,7 @@ import {
   getAuditLogByOrg,
   getAuditLogByUser,
   verifyAuditChain,
+  getChainHash,
   clearAuditLog,
   getAuditLogSize,
 } from '../src/audit'
@@ -1306,5 +1307,698 @@ describe('Phase 15 — Self-Validation Checks', () => {
     const ctx = memberContext()
     expect(enforceIsolation(ctx, 'org-2', 'local-1')).toBe(false)
     expect(enforceIsolation(ctx, 'org-1', 'local-1')).toBe(true)
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COVERAGE GAP TESTS
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('Coverage gaps — assistant.ts', () => {
+  beforeEach(() => {
+    clearAuditLog()
+    clearToolLog()
+    clearEscalationLog()
+  })
+
+  it('uses "unknown" actorId when none provided', () => {
+    const store = populatedStore()
+    const ctx = memberContext()
+    const response = processRequest(
+      { query: 'Where is the training page?', context: ctx },
+      { knowledgeStore: store },
+    )
+    expect(response.content).toBeTruthy()
+    const log = getAuditLog()
+    expect(log.length).toBeGreaterThan(0)
+    expect(log[0].userId).toBe('unknown')
+  })
+
+  it('builds DIRECT_ANSWER content (member + benefits)', () => {
+    const store = populatedStore()
+    const ctx = memberContext()
+    const response = processRequest(
+      { query: 'Tell me about dental benefits coverage', context: ctx },
+      { knowledgeStore: store, actorId: 'user-1' },
+    )
+    expect(response.responseType).toBe(ResponseTypes.DIRECT_ANSWER)
+    expect(response.content).toContain('benefits')
+  })
+
+  it('skips disclaimers for navigation intent', () => {
+    const store = populatedStore()
+    store.add({
+      id: 'route-1',
+      sourceType: KnowledgeSourceTypes.UE_ROUTE,
+      orgId: 'org-1',
+      localId: null,
+      title: 'Settings Page',
+      content: 'Navigate to the settings page for account configuration.',
+      language: 'en',
+      tags: ['settings', 'page', 'navigate'],
+    })
+    const ctx = memberContext()
+    const response = processRequest(
+      { query: 'Where do I find the settings page?', context: ctx },
+      { knowledgeStore: store, actorId: 'user-1' },
+    )
+    expect(response.content).toBeTruthy()
+    // Navigation has no required disclaimers
+    expect(getRequiredDisclaimers(IntentTypes.NAVIGATION)).toHaveLength(0)
+  })
+
+  it('prepends safety emergency prefix for urgent query', () => {
+    const store = populatedStore()
+    const ctx = memberContext()
+    const response = processRequest(
+      { query: 'There is a fire in the building, someone is trapped', context: ctx },
+      { knowledgeStore: store, actorId: 'user-1' },
+    )
+    expect(response.content).toContain('emergency services')
+  })
+})
+
+describe('Coverage gaps — context.ts', () => {
+  it('filterCaseAccess returns false for unknown role', () => {
+    const ctx = buildContext({
+      orgId: 'org-1',
+      localId: 'local-1',
+      userRole: 'unknown_role' as never,
+    })
+    expect(filterCaseAccess(ctx, 'user-1', undefined, 'user-1')).toBe(false)
+  })
+
+  it('filterCaseAccess: member without actorId returns false', () => {
+    const ctx = memberContext()
+    expect(filterCaseAccess(ctx, 'user-1')).toBe(false)
+  })
+
+  it('filterCaseAccess: steward without actorId returns false', () => {
+    const ctx = stewardContext()
+    expect(filterCaseAccess(ctx, 'user-1', 'steward-1')).toBe(false)
+  })
+
+  it('filterCaseAccess: steward without assignedStewardId returns false', () => {
+    const ctx = stewardContext()
+    expect(filterCaseAccess(ctx, 'user-1', undefined, 'steward-1')).toBe(false)
+  })
+
+  it('filterCaseAccess: parent_admin can access all', () => {
+    const ctx = parentAdminContext()
+    expect(filterCaseAccess(ctx, 'anyone', undefined, undefined)).toBe(true)
+  })
+})
+
+describe('Coverage gaps — domain-rules.ts', () => {
+  it('getActionsForRole returns empty for unknown role', () => {
+    const ctx = buildContext({
+      orgId: 'org-1',
+      localId: 'local-1',
+      userRole: 'unknown_role' as never,
+    })
+    expect(getActionsForRole(IntentTypes.GRIEVANCE, ctx)).toEqual([])
+  })
+
+  it('requiresLegalEscalation: "legal" with no citations → true', () => {
+    expect(requiresLegalEscalation('Is this a legal issue?', [])).toBe(true)
+  })
+
+  it('requiresLegalEscalation: non-legal with citations → false', () => {
+    const cit = [{ sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT, sourceId: 'd1', title: 't', excerpt: 'e', relevanceScore: 0.8 }]
+    expect(requiresLegalEscalation('What are my benefits?', cit)).toBe(false)
+  })
+
+  it('requiresLegalEscalation: legal keyword match → true', () => {
+    const cit = [{ sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT, sourceId: 'd1', title: 't', excerpt: 'e', relevanceScore: 0.8 }]
+    expect(requiresLegalEscalation('What is the arbitration ruling precedent?', cit)).toBe(true)
+  })
+})
+
+describe('Coverage gaps — escalation.ts', () => {
+  beforeEach(() => {
+    clearEscalationLog()
+  })
+
+  it('safety_emergency ignores non-safety intent even with emergency terms', () => {
+    const ctx = memberContext()
+    const result = evaluateEscalation({
+      query: 'There was an emergency meeting about benefits',
+      intent: IntentTypes.BENEFITS,
+      confidence: 0.8,
+      citations: [{ sourceType: KnowledgeSourceTypes.BENEFITS_DOCUMENTATION, sourceId: 'doc-4', title: 'Benefits', excerpt: 'test', relevanceScore: 0.8 }],
+      ctx,
+    })
+    if (result) {
+      expect(result.target).not.toBe('safety_officer')
+    }
+  })
+
+  it('missing_data triggers for non-navigation intent with no citations', () => {
+    const ctx = memberContext()
+    const result = evaluateEscalation({
+      query: 'Tell me about benefits',
+      intent: IntentTypes.BENEFITS,
+      confidence: 0.8,
+      citations: [],
+      ctx,
+    })
+    expect(result).not.toBeNull()
+    expect(result!.reason).toBe('missing_data')
+    expect(result!.target).toBe('admin')
+  })
+
+  it('safety intent without emergency terms does not trigger safety_emergency', () => {
+    const ctx = memberContext()
+    const result = evaluateEscalation({
+      query: 'I want to report a safety concern about poor ventilation',
+      intent: IntentTypes.SAFETY,
+      confidence: 0.8,
+      citations: [{ sourceType: KnowledgeSourceTypes.SAFETY_POLICY, sourceId: 'doc-3', title: 'Safety', excerpt: 'test', relevanceScore: 0.8 }],
+      ctx,
+    })
+    // Should NOT be critical/safety_officer since no emergency terms
+    if (result) {
+      expect(result.severity).not.toBe('critical')
+    }
+  })
+
+  it('legal_ambiguity returns false when legal terms present but citations >= 2', () => {
+    const ctx = memberContext()
+    const result = evaluateEscalation({
+      query: 'What does the court ruling say about this?',
+      intent: IntentTypes.RIGHTS,
+      confidence: 0.8,
+      citations: [
+        { sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT, sourceId: 'doc-1', title: 'Art 12', excerpt: 'test', relevanceScore: 0.8 },
+        { sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT, sourceId: 'doc-2', title: 'Art 15', excerpt: 'test', relevanceScore: 0.8 },
+      ],
+      ctx,
+    })
+    // legal_ambiguity should NOT trigger (has 2 citations)
+    if (result) {
+      expect(result.reason).not.toBe('legal_ambiguity')
+    }
+  })
+})
+
+describe('Coverage gaps — guardrails.ts', () => {
+  it('detects cross-org leakage in citations', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.BENEFITS,
+      ctx,
+      citations: [{
+        sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+        sourceId: 'org:org-2:doc-5',
+        title: 'Other Org Doc',
+        excerpt: 'test',
+        relevanceScore: 0.8,
+      }],
+      content: 'Some benefits info',
+      confidence: 0.8,
+      responseType: ResponseTypes.DIRECT_ANSWER,
+    })
+    expect(result.passed).toBe(false)
+    expect(result.violations.some((v) => v.includes('Cross-org'))).toBe(true)
+  })
+
+  it('passes when citation matches org', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.BENEFITS,
+      ctx,
+      citations: [{
+        sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+        sourceId: 'org:org-1:doc-1',
+        title: 'Own Org Doc',
+        excerpt: 'test',
+        relevanceScore: 0.8,
+      }],
+      content: 'Some benefits info',
+      confidence: 0.8,
+      responseType: ResponseTypes.DIRECT_ANSWER,
+    })
+    expect(result.passed).toBe(true)
+  })
+
+  it('flags safety urgency without emergency protocol reference', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.SAFETY,
+      ctx,
+      citations: [{ sourceType: KnowledgeSourceTypes.SAFETY_POLICY, sourceId: 'doc-3', title: 'Safety', excerpt: 'test', relevanceScore: 0.8 }],
+      content: 'There is an emergency situation. Please be careful.',
+      confidence: 0.8,
+      responseType: ResponseTypes.GUIDED_STEPS,
+    })
+    expect(result.passed).toBe(false)
+    expect(result.violations.some((v) => v.includes('emergency protocol'))).toBe(true)
+  })
+
+  it('passes safety response with emergency reference', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.SAFETY,
+      ctx,
+      citations: [{ sourceType: KnowledgeSourceTypes.SAFETY_POLICY, sourceId: 'doc-3', title: 'Safety', excerpt: 'test', relevanceScore: 0.8 }],
+      content: 'There is an emergency situation. Call emergency services immediately.',
+      confidence: 0.8,
+      responseType: ResponseTypes.GUIDED_STEPS,
+    })
+    expect(result.violations.filter((v) => v.includes('emergency protocol'))).toHaveLength(0)
+  })
+
+  it('passes for non-legal non-safety intent with adequate confidence', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.NAVIGATION,
+      ctx,
+      citations: [],
+      content: 'Navigate to the dashboard.',
+      confidence: 0.8,
+      responseType: ResponseTypes.DIRECT_ANSWER,
+    })
+    expect(result.passed).toBe(true)
+  })
+
+  it('no confidence violation when just above threshold', () => {
+    const ctx = memberContext()
+    const result = runGuardrails({
+      intent: IntentTypes.GRIEVANCE,
+      ctx,
+      citations: [{ sourceType: KnowledgeSourceTypes.GRIEVANCE_PROCEDURE, sourceId: 'doc-5', title: 'Grievance', excerpt: 'test', relevanceScore: 0.8 }],
+      content: 'Here are the steps to follow.',
+      confidence: 0.35,
+      responseType: ResponseTypes.GUIDED_STEPS,
+    })
+    expect(result.violations.filter((v) => v.includes('Confidence'))).toHaveLength(0)
+  })
+})
+
+describe('Coverage gaps — knowledge.ts', () => {
+  it('matches entries by tag when content/title do not match', () => {
+    const store = new InMemoryKnowledgeStore()
+    store.add({
+      id: 'tag-doc',
+      sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+      orgId: 'org-1',
+      localId: null,
+      title: 'Article 99',
+      content: 'Special provisions document.',
+      language: 'en',
+      tags: ['overtime'],
+    })
+    const results = store.search({
+      query: 'overtime',
+      orgId: 'org-1',
+      localId: 'local-1',
+      sourceTypes: [KnowledgeSourceTypes.COLLECTIVE_AGREEMENT],
+      language: 'en',
+      limit: 10,
+    })
+    expect(results).toHaveLength(1)
+    expect(results[0].id).toBe('tag-doc')
+  })
+
+  it('sorts same-language entries before different-language', () => {
+    const store = new InMemoryKnowledgeStore()
+    store.add({
+      id: 'fr-doc',
+      sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+      orgId: 'org-1',
+      localId: null,
+      title: 'Overtime FR',
+      content: 'Overtime rules in French.',
+      language: 'fr',
+      tags: ['overtime'],
+    })
+    store.add({
+      id: 'en-doc',
+      sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+      orgId: 'org-1',
+      localId: null,
+      title: 'Overtime EN',
+      content: 'Overtime rules in English.',
+      language: 'en',
+      tags: ['overtime'],
+    })
+    const results = store.search({
+      query: 'overtime',
+      orgId: 'org-1',
+      localId: 'local-1',
+      sourceTypes: [KnowledgeSourceTypes.COLLECTIVE_AGREEMENT],
+      language: 'en',
+      limit: 10,
+    })
+    expect(results[0].language).toBe('en')
+  })
+
+  it('filters out entries from a different local', () => {
+    const store = new InMemoryKnowledgeStore()
+    store.add({
+      id: 'other-local-doc',
+      sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT,
+      orgId: 'org-1',
+      localId: 'local-2',
+      title: 'Local 2 Policy',
+      content: 'Overtime policy for local 2.',
+      language: 'en',
+      tags: ['overtime'],
+    })
+    const results = store.search({
+      query: 'overtime',
+      orgId: 'org-1',
+      localId: 'local-1',
+      sourceTypes: [KnowledgeSourceTypes.COLLECTIVE_AGREEMENT],
+      language: 'en',
+      limit: 10,
+    })
+    expect(results).toHaveLength(0)
+  })
+})
+
+describe('Coverage gaps — localization.ts', () => {
+  it('returns key for unknown message key', () => {
+    expect(getLocalizedMessage('nonexistent_key', 'en')).toBe('nonexistent_key')
+  })
+})
+
+describe('Coverage gaps — response-policy.ts', () => {
+  it('returns CLARIFICATION_REQUIRED for member + case_analysis', () => {
+    expect(determineResponseType(UEAssistantRoles.MEMBER, IntentTypes.CASE_ANALYSIS)).toBe(ResponseTypes.CLARIFICATION_REQUIRED)
+  })
+
+  it('returns CLARIFICATION_REQUIRED for member + oversight', () => {
+    expect(determineResponseType(UEAssistantRoles.MEMBER, IntentTypes.OVERSIGHT)).toBe(ResponseTypes.CLARIFICATION_REQUIRED)
+  })
+
+  it('returns CLARIFICATION_REQUIRED for member + drafting', () => {
+    expect(determineResponseType(UEAssistantRoles.MEMBER, IntentTypes.DRAFTING)).toBe(ResponseTypes.CLARIFICATION_REQUIRED)
+  })
+})
+
+describe('Coverage gaps — steward-intelligence.ts', () => {
+  it('recommendEscalation: legally complex only → high urgency', () => {
+    const ctx = stewardContext()
+    const rec = recommendEscalation(ctx, {
+      caseId: 'case-1',
+      confidence: 0.9,
+      missingInfo: [],
+      isLegallyComplex: true,
+      isHighRisk: false,
+    })
+    expect(rec.recommended).toBe(true)
+    expect(rec.urgency).toBe('high')
+    expect(rec.target).toBe('legal_representative')
+  })
+
+  it('recommendEscalation: low confidence only → medium', () => {
+    const ctx = stewardContext()
+    const rec = recommendEscalation(ctx, {
+      caseId: 'case-1',
+      confidence: 0.3,
+      missingInfo: [],
+      isLegallyComplex: false,
+      isHighRisk: false,
+    })
+    expect(rec.recommended).toBe(true)
+    expect(rec.urgency).toBe('medium')
+  })
+
+  it('recommendEscalation: many missing info only → medium', () => {
+    const ctx = stewardContext()
+    const rec = recommendEscalation(ctx, {
+      caseId: 'case-1',
+      confidence: 0.9,
+      missingInfo: ['a', 'b', 'c', 'd'],
+      isLegallyComplex: false,
+      isHighRisk: false,
+    })
+    expect(rec.recommended).toBe(true)
+    expect(rec.urgency).toBe('medium')
+  })
+
+  it('recommendEscalation: high-risk + low confidence → stays high', () => {
+    const ctx = stewardContext()
+    const rec = recommendEscalation(ctx, {
+      caseId: 'case-1',
+      confidence: 0.3,
+      missingInfo: [],
+      isLegallyComplex: false,
+      isHighRisk: true,
+    })
+    expect(rec.recommended).toBe(true)
+    expect(rec.urgency).toBe('high')
+  })
+
+  it('recommendEscalation: high-risk + many missing info → stays high', () => {
+    const ctx = stewardContext()
+    const rec = recommendEscalation(ctx, {
+      caseId: 'case-1',
+      confidence: 0.9,
+      missingInfo: ['a', 'b', 'c', 'd'],
+      isLegallyComplex: false,
+      isHighRisk: true,
+    })
+    expect(rec.recommended).toBe(true)
+    expect(rec.urgency).toBe('high')
+  })
+
+  it('summarizeCase accessible by local_admin', () => {
+    const ctx = localAdminContext()
+    const summary = summarizeCase(ctx, 'case-1', {
+      description: 'Issue reported at workplace.',
+      filedDate: '2024-03-01',
+    })
+    expect(summary.caseId).toBe('case-1')
+    expect(summary.missingInfo.length).toBeGreaterThan(0)
+  })
+
+  it('summarizeCase accessible by parent_admin', () => {
+    const ctx = parentAdminContext()
+    const summary = summarizeCase(ctx, 'case-1', {
+      description: 'Cross-local workplace issue.',
+    })
+    expect(summary.caseId).toBe('case-1')
+  })
+
+  it('summarizeCase truncates long descriptions with ellipsis', () => {
+    const ctx = stewardContext()
+    const longDesc = 'A'.repeat(150)
+    const summary = summarizeCase(ctx, 'case-1', {
+      description: longDesc,
+      filedDate: '2024-01-15',
+      status: 'investigating',
+      grievanceType: 'contract',
+      evidence: ['e1'],
+    })
+    expect(summary.summary).toContain('...')
+    expect(summary.confidence).toBe(0.9)
+  })
+
+  it('mapToClauses returns empty for no matching clauses', () => {
+    const ctx = stewardContext()
+    const mapping = mapToClauses(ctx, 'xyz completely unrelated', [
+      { id: 'clause-1', title: 'Overtime', content: 'Overtime shall be distributed by seniority.' },
+    ])
+    expect(mapping.matchedClauses).toHaveLength(0)
+    expect(mapping.confidence).toBe(0.3)
+  })
+
+  it('detectMissingInfo returns all gaps for empty data', () => {
+    const ctx = stewardContext()
+    const missing = detectMissingInfo(ctx, {})
+    expect(missing).toContain('Detailed description of the issue')
+    expect(missing).toContain('Date the issue occurred')
+    expect(missing).toContain('Type of grievance')
+    expect(missing).toContain('Supporting evidence or documentation')
+    expect(missing).toContain('Relevant contract clause references')
+    expect(missing).toContain('Witness information (if applicable)')
+    expect(missing).toContain('Timeline of events')
+  })
+
+  it('detectMissingInfo returns no gaps for complete data', () => {
+    const ctx = stewardContext()
+    const missing = detectMissingInfo(ctx, {
+      description: 'A detailed description of the issue that exceeds twenty characters.',
+      filedDate: '2024-01-15',
+      grievanceType: 'contract',
+      evidence: ['doc-1'],
+      contractClauses: ['Article 15'],
+      witnesses: ['John Doe'],
+      timeline: ['2024-01-10: incident occurred'],
+    })
+    expect(missing).toHaveLength(0)
+  })
+})
+
+describe('Coverage gaps — tools.ts', () => {
+  beforeEach(() => {
+    clearToolLog()
+  })
+
+  it('OPEN_GRIEVANCE_FORM denied without grievance entitlement', () => {
+    const ctx = buildContext({
+      orgId: 'org-1',
+      localId: 'local-1',
+      userRole: UEAssistantRoles.MEMBER,
+      entitlements: ['voting'],
+      activeModules: ['voting'],
+    })
+    const result = executeTool(ToolNames.OPEN_GRIEVANCE_FORM, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('not entitled')
+  })
+
+  it('OPEN_GRIEVANCE_FORM succeeds with empty entitlements', () => {
+    const ctx = buildContext({
+      orgId: 'org-1',
+      localId: 'local-1',
+      userRole: UEAssistantRoles.MEMBER,
+      entitlements: [],
+      activeModules: ['grievances'],
+    })
+    const result = executeTool(ToolNames.OPEN_GRIEVANCE_FORM, ctx, {})
+    expect(result.result.success).toBe(true)
+  })
+
+  it('GET_CASE_STATUS requires caseId', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.GET_CASE_STATUS, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('caseId is required')
+  })
+
+  it('GET_CASE_STATUS succeeds for non-member role', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.GET_CASE_STATUS, ctx, { caseId: 'case-1' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('ANALYZE_CASE requires caseId', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.ANALYZE_CASE, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('caseId is required')
+  })
+
+  it('SUMMARIZE_CASE requires caseId', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.SUMMARIZE_CASE, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('caseId is required')
+  })
+
+  it('SUMMARIZE_CASE succeeds with caseId', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.SUMMARIZE_CASE, ctx, { caseId: 'case-1' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('MAP_TO_CONTRACT_CLAUSES requires description', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.MAP_TO_CONTRACT_CLAUSES, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('description is required')
+  })
+
+  it('MAP_TO_CONTRACT_CLAUSES succeeds with description', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.MAP_TO_CONTRACT_CLAUSES, ctx, { description: 'Overtime issue' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('EXPLAIN_AGREEMENT_SECTION requires section', () => {
+    const ctx = memberContext()
+    const result = executeTool(ToolNames.EXPLAIN_AGREEMENT_SECTION, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('section is required')
+  })
+
+  it('EXPLAIN_AGREEMENT_SECTION succeeds with section', () => {
+    const ctx = memberContext()
+    const result = executeTool(ToolNames.EXPLAIN_AGREEMENT_SECTION, ctx, { section: 'Article 15' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('DRAFT_GRIEVANCE succeeds', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.DRAFT_GRIEVANCE, ctx, { caseId: 'case-1' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('SUGGEST_NEXT_STEPS succeeds', () => {
+    const ctx = stewardContext()
+    const result = executeTool(ToolNames.SUGGEST_NEXT_STEPS, ctx, { caseId: 'case-1' })
+    expect(result.result.success).toBe(true)
+  })
+
+  it('REPORT_SAFETY_ISSUE non-urgent', () => {
+    const ctx = memberContext()
+    const result = executeTool(ToolNames.REPORT_SAFETY_ISSUE, ctx, { urgent: false })
+    const data = result.result.data as { action: string; urgent: boolean }
+    expect(data.action).toBe('reporting_workflow')
+    expect(data.urgent).toBe(false)
+  })
+
+  it('CASE_DASHBOARD_INSIGHTS succeeds', () => {
+    const ctx = localAdminContext()
+    const result = executeTool(ToolNames.CASE_DASHBOARD_INSIGHTS, ctx, {})
+    expect(result.result.success).toBe(true)
+  })
+
+  it('WORKLOAD_ANALYSIS succeeds', () => {
+    const ctx = localAdminContext()
+    const result = executeTool(ToolNames.WORKLOAD_ANALYSIS, ctx, {})
+    expect(result.result.success).toBe(true)
+  })
+
+  it('AGGREGATE_INSIGHTS succeeds', () => {
+    const ctx = parentAdminContext()
+    const result = executeTool(ToolNames.AGGREGATE_INSIGHTS, ctx, {})
+    expect(result.result.success).toBe(true)
+  })
+
+  it('TREND_ANALYSIS succeeds with custom period', () => {
+    const ctx = parentAdminContext()
+    const result = executeTool(ToolNames.TREND_ANALYSIS, ctx, { period: 'last_7_days' })
+    expect(result.result.success).toBe(true)
+    expect((result.result.data as Record<string, unknown>).period).toBe('last_7_days')
+  })
+
+  it('TREND_ANALYSIS uses default period', () => {
+    const ctx = parentAdminContext()
+    const result = executeTool(ToolNames.TREND_ANALYSIS, ctx, {})
+    expect(result.result.success).toBe(true)
+    expect((result.result.data as Record<string, unknown>).period).toBe('last_30_days')
+  })
+
+  it('unknown tool returns error', () => {
+    const ctx = memberContext()
+    const result = executeTool('nonexistent_tool' as never, ctx, {})
+    expect(result.result.success).toBe(false)
+    expect(result.result.error).toContain('not allowed')
+  })
+})
+
+describe('Coverage gaps — audit.ts', () => {
+  beforeEach(() => {
+    clearAuditLog()
+  })
+
+  it('getChainHash returns initial hash when empty', () => {
+    expect(getChainHash()).toBe('0'.repeat(64))
+  })
+
+  it('getChainHash changes after recording entry', () => {
+    recordAuditEntry({
+      userId: 'user-1', orgId: 'org-1', role: UEAssistantRoles.MEMBER,
+      intent: IntentTypes.GRIEVANCE, query: 'test', responseType: ResponseTypes.GUIDED_STEPS,
+      mode: 'guided', sourcesUsed: [], toolsInvoked: [], dataAccessed: [],
+      escalationTriggered: false, confidence: 0.8,
+    })
+    const hash = getChainHash()
+    expect(hash).not.toBe('0'.repeat(64))
+    expect(hash).toHaveLength(64)
   })
 })

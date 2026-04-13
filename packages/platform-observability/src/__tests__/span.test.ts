@@ -31,6 +31,13 @@ describe('Span', () => {
     expect(data.attributes['http.method']).toBe('GET')
   })
 
+  it('should keep error status when end is called after fail', () => {
+    const span = new Span({ operationName: 'op', serviceName: 'svc' })
+    span.fail('first error')
+    const ended = span.end()
+    expect(ended.status).toBe('error')
+  })
+
   it('should fail and produce SpanData with error status', () => {
     const span = new Span({ operationName: 'op', serviceName: 'svc' })
     const data = span.fail('something broke')
@@ -71,6 +78,13 @@ describe('Span', () => {
     expect(ctx.spanId).toBe(span.spanId)
     expect(ctx.traceFlags).toBe(1)
   })
+
+  it('should expose unset status before explicit end/fail', () => {
+    const span = new Span({ operationName: 'op', serviceName: 'svc' })
+    const data = (span as unknown as { toData: () => { status: string; endTime: number | null } }).toData()
+    expect(data.status).toBe('unset')
+    expect(data.endTime).not.toBeNull()
+  })
 })
 
 describe('trace()', () => {
@@ -90,6 +104,14 @@ describe('trace()', () => {
         throw new Error('boom')
       }),
     ).rejects.toThrow('boom')
+  })
+
+  it('should trace non-Error failures', async () => {
+    await expect(
+      trace('fail-op-string', 'test-svc', async () => {
+        throw 'string-boom'
+      }),
+    ).rejects.toBe('string-boom')
   })
 
   it('should accept parent span and trace ids', async () => {

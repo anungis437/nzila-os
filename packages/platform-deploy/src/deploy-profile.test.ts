@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   validateDeploymentProfile,
+  validateAndPersistProfile,
   detectDeploymentProfile,
   buildDeploymentProofSection,
   DeploymentProfileConfigSchema,
@@ -103,12 +104,58 @@ describe('detectDeploymentProfile', () => {
     expect(detectDeploymentProfile({ SOVEREIGN_MODE: 'true' })).toBe('sovereign')
   })
 
+  it('detects sovereign from SELF_HOSTED_DB=true', () => {
+    expect(detectDeploymentProfile({ SELF_HOSTED_DB: 'true' })).toBe('sovereign')
+  })
+
   it('detects hybrid from HYBRID_MODE=true', () => {
     expect(detectDeploymentProfile({ HYBRID_MODE: 'true' })).toBe('hybrid')
   })
 
   it('defaults to managed', () => {
     expect(detectDeploymentProfile({})).toBe('managed')
+  })
+
+  it('falls back to managed for invalid explicit profile', () => {
+    expect(detectDeploymentProfile({ NZILA_DEPLOYMENT_PROFILE: 'invalid-profile' })).toBe(
+      'managed',
+    )
+  })
+})
+
+describe('validateAndPersistProfile', () => {
+  it('persists result and emits audit metadata including critical failures', async () => {
+    const config = DeploymentProfileConfigSchema.parse({
+      profile: 'sovereign',
+      environment: 'production',
+      selfHostedDb: false,
+      egressAllowlistEnforced: false,
+      egressAllowlist: [],
+      integrationApprovalRequired: false,
+    })
+
+    const calls: { persisted: unknown[]; audits: unknown[] } = {
+      persisted: [],
+      audits: [],
+    }
+
+    const result = await validateAndPersistProfile(config, {
+      persistValidation: async (persisted) => {
+        calls.persisted.push(persisted)
+      },
+      emitAudit: async (event) => {
+        calls.audits.push(event)
+      },
+    })
+
+    expect(calls.persisted).toHaveLength(1)
+    expect(calls.audits).toHaveLength(1)
+    expect(result.overallPassed).toBe(false)
+
+    const audit = calls.audits[0] as { action: string; metadata: Record<string, unknown> }
+    expect(audit.action).toBe('deploy.profile.validated')
+    expect(Array.isArray(audit.metadata.criticalFailures)).toBe(true)
+    expect((audit.metadata.criticalFailures as string[]).length).toBeGreaterThan(0)
   })
 })
 

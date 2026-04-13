@@ -13,10 +13,12 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/mobility-core": "workspace:*",
     "@nzila/mobility-programs": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.400.0",

@@ -116,7 +116,7 @@ export function LanguageSwitcher({
 
       {open && (
         <div
-          className={`absolute z-50 min-w-[180px] rounded-xl border shadow-lg py-1 ${
+          className={`absolute z-50 min-w-45 rounded-xl border shadow-lg py-1 ${
             dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
           } right-0 ${
             isLight

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import {
   registerModel,
   approveModel,
+  getModel,
   listModels,
   clearRegistry,
 } from '../src/modelRegistry'
@@ -15,6 +16,7 @@ import {
   logAIDecision,
   getDecisionsPendingReview,
   reviewDecision,
+  getDecisionLog,
   clearDecisionLog,
 } from '../src/decisionLog'
 import {
@@ -23,6 +25,13 @@ import {
   getPendingReviewFlags,
   clearReviewFlags,
 } from '../src/humanReview'
+import {
+  modelRegistryEntrySchema,
+  promptVersionSchema,
+  aiDecisionLogEntrySchema,
+  humanReviewFlagSchema,
+} from '../src/types'
+import * as governanceIndex from '../src'
 
 describe('platform-ai-governance', () => {
   beforeEach(() => {
@@ -66,6 +75,18 @@ describe('platform-ai-governance', () => {
       const approved = listModels({ approvedOnly: true })
       expect(approved).toHaveLength(1)
     })
+
+    it('returns undefined for unknown model approval and supports provider/getModel filters', () => {
+      expect(approveModel('missing-model')).toBeUndefined()
+
+      const model = registerModel({ name: 'c', version: '2', provider: 'azure', capabilities: ['chat'], riskLevel: 'medium' })
+      registerModel({ name: 'd', version: '1', provider: 'openai', capabilities: ['chat'], riskLevel: 'low' })
+
+      expect(getModel(model.id)?.name).toBe('c')
+      expect(getModel('missing-model')).toBeUndefined()
+      expect(listModels({ provider: 'azure' })).toHaveLength(1)
+      expect(listModels({ approvedOnly: false })).toHaveLength(2)
+    })
   })
 
   describe('promptVersioning', () => {
@@ -105,6 +126,13 @@ describe('platform-ai-governance', () => {
       const history = getPromptHistory('x')
       expect(history).toHaveLength(2)
       expect(history[0].version).toBe(2) // newest first
+    })
+
+    it('does not deactivate unrelated prompt names', () => {
+      const x = createPromptVersion({ promptName: 'x', template: 'x1', author: 'a', changeReason: 'x1' })
+      const y = createPromptVersion({ promptName: 'y', template: 'y1', author: 'a', changeReason: 'y1' })
+      expect(getActivePrompt('x')?.id).toBe(x.id)
+      expect(getActivePrompt('y')?.id).toBe(y.id)
     })
   })
 
@@ -155,6 +183,14 @@ describe('platform-ai-governance', () => {
       expect(reviewed?.reviewedBy).toBe('analyst')
     })
 
+    it('returns undefined when reviewing unknown decision', () => {
+      const reviewed = reviewDecision('missing', {
+        status: 'rejected',
+        reviewedBy: 'auditor',
+      })
+      expect(reviewed).toBeUndefined()
+    })
+
     it('stores modelVersion, engineVersion, and evidenceRefs', () => {
       const decision = logAIDecision({
         modelId: 'm1',
@@ -171,6 +207,32 @@ describe('platform-ai-governance', () => {
       expect(decision.modelVersion).toBe('gpt-4o-2025-01')
       expect(decision.engineVersion).toBe('1.2.0')
       expect(decision.evidenceRefs).toHaveLength(2)
+    })
+
+    it('filters decision log and pending reviews', () => {
+      logAIDecision({
+        modelId: 'm1',
+        promptId: 'p1',
+        app: 'cfo',
+        orgId: 'org-1',
+        inputSummary: 'Low confidence',
+        outputSummary: 'Needs check',
+        confidence: 0.2,
+      })
+      logAIDecision({
+        modelId: 'm2',
+        promptId: 'p2',
+        app: 'web',
+        orgId: 'org-1',
+        inputSummary: 'High confidence',
+        outputSummary: 'Looks good',
+        confidence: 0.95,
+      })
+
+      expect(getDecisionsPendingReview()).toHaveLength(1)
+      expect(getDecisionLog({ app: 'cfo' })).toHaveLength(1)
+      expect(getDecisionLog({ modelId: 'm2' })).toHaveLength(1)
+      expect(getDecisionLog({ app: 'none' })).toHaveLength(0)
     })
   })
 
@@ -196,6 +258,74 @@ describe('platform-ai-governance', () => {
       const resolved = resolveReviewFlag(flag.id, 'Output verified as correct')
       expect(resolved?.resolved).toBe(true)
       expect(getPendingReviewFlags()).toHaveLength(0)
+    })
+
+    it('returns undefined when resolving an unknown review flag', () => {
+      expect(resolveReviewFlag('missing-flag', 'n/a')).toBeUndefined()
+    })
+  })
+
+  describe('types and barrel exports', () => {
+    it('validates runtime schemas', () => {
+      const modelId = crypto.randomUUID()
+      const promptId = crypto.randomUUID()
+      const decisionId = crypto.randomUUID()
+
+      const model = modelRegistryEntrySchema.parse({
+        id: modelId,
+        name: 'gpt-4o',
+        version: '2025-01',
+        provider: 'azure-openai',
+        capabilities: ['chat'],
+        riskLevel: 'low',
+        approvedForProduction: true,
+        registeredAt: new Date().toISOString(),
+      })
+
+      const prompt = promptVersionSchema.parse({
+        id: promptId,
+        promptName: 'quote-summary',
+        version: 1,
+        template: 'Summarize {{input}}',
+        author: 'admin',
+        createdAt: new Date().toISOString(),
+        active: true,
+        changeReason: 'init',
+      })
+
+      const decision = aiDecisionLogEntrySchema.parse({
+        id: decisionId,
+        timestamp: new Date().toISOString(),
+        modelId,
+        promptId,
+        app: 'web',
+        orgId: 'org-1',
+        inputSummary: 'input',
+        outputSummary: 'output',
+        confidence: 0.9,
+        requiresHumanReview: true,
+      })
+
+      const flag = humanReviewFlagSchema.parse({
+        id: crypto.randomUUID(),
+        decisionId,
+        reason: 'check output',
+        flaggedAt: new Date().toISOString(),
+        flaggedBy: 'admin',
+        priority: 'high',
+        resolved: false,
+      })
+
+      expect(model.name).toBe('gpt-4o')
+      expect(prompt.version).toBe(1)
+      expect(decision.modelId).toBe(modelId)
+      expect(flag.priority).toBe('high')
+    })
+
+    it('exposes governance functions from barrel index', () => {
+      expect(typeof governanceIndex.registerModel).toBe('function')
+      expect(typeof governanceIndex.logAIDecision).toBe('function')
+      expect(typeof governanceIndex.flagForReview).toBe('function')
     })
   })
 })

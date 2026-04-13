@@ -193,6 +193,10 @@ export default defineConfig({
       // Onboarding & Pilot mode
       'packages/onboarding-core',
       'packages/pilot-mode',
+      // Schema core
+      'packages/schema-core',
+      // Governed workflow
+      'packages/governed-workflow',
     ],
   },
 })

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { OutboundWebhookDispatcher, type OutboundWebhookPorts } from './outbound'
 import type { WebhookSubscription } from './types'
+import * as packageExports from './index'
 
 const mockSub: WebhookSubscription = {
   id: 'sub-1',
@@ -83,5 +84,46 @@ describe('OutboundWebhookDispatcher', () => {
 
     expect(result.delivered).toBe(0)
     expect(result.failed).toBe(0)
+  })
+
+  it('handles thrown network errors and emits failure after retries', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockRejectedValueOnce(new Error('network timeout'))
+      .mockRejectedValueOnce(new Error('dns failure')),
+    )
+
+    const dispatcher = new OutboundWebhookDispatcher(ports, { maxAttempts: 2, baseDelayMs: 0 })
+    const result = await dispatcher.deliver('org-1', 'order.created', { id: 'oops' }, 'idem-5')
+
+    expect(result.delivered).toBe(0)
+    expect(result.failed).toBe(1)
+    expect(ports.recordAttempt).toHaveBeenCalledTimes(2)
+    const firstAttempt = vi.mocked(ports.recordAttempt).mock.calls[0]?.[0]
+    expect(firstAttempt?.responseStatus).toBeNull()
+    expect(firstAttempt?.success).toBe(false)
+    expect(firstAttempt?.responseBody).toContain('network timeout')
+  })
+
+  it('caps stored response body to 1024 chars', async () => {
+    const veryLongText = 'x'.repeat(1500)
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: vi.fn().mockResolvedValue(veryLongText),
+    }))
+
+    const dispatcher = new OutboundWebhookDispatcher(ports, { maxAttempts: 1, baseDelayMs: 0 })
+    await dispatcher.deliver('org-1', 'order.created', {}, 'idem-6')
+
+    const attempt = vi.mocked(ports.recordAttempt).mock.calls[0]?.[0]
+    expect(attempt?.responseBody).toHaveLength(1024)
+  })
+
+  it('exports inbound and outbound APIs from index', () => {
+    expect(packageExports.OutboundWebhookDispatcher).toBeDefined()
+    expect(packageExports.verifyInboundWebhook).toBeTypeOf('function')
+    expect(packageExports.InMemoryIdempotencyStore).toBeTypeOf('function')
+    expect(packageExports.CreateWebhookSubscriptionSchema).toBeDefined()
+    expect(packageExports.WebhookEventPayloadSchema).toBeDefined()
   })
 })

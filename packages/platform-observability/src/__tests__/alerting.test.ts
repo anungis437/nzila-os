@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   PLATFORM_ALERT_RULES,
   fireAlert,
@@ -61,6 +61,25 @@ describe('alerting', () => {
 
       const event = fireAlert(rule, 'partners', 500, { endpoint: '/api/users' }, sink)
       expect(event.metadata).toEqual({ endpoint: '/api/users' })
+    })
+
+    it('uses default sink for critical, warning, and info severities', () => {
+      const writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+
+      fireAlert(PLATFORM_ALERT_RULES.find((r) => r.severity === 'critical')!, 'console', 1)
+      fireAlert(PLATFORM_ALERT_RULES.find((r) => r.severity === 'warning')!, 'console', 1)
+      fireAlert(
+        {
+          ...PLATFORM_ALERT_RULES[0]!,
+          id: 'alert-info-test',
+          severity: 'info',
+        },
+        'console',
+        1,
+      )
+
+      expect(writeSpy).toHaveBeenCalled()
+      writeSpy.mockRestore()
     })
   })
 })

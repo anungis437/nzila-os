@@ -5,6 +5,7 @@
  * and test the propose → policy-check → execute → attest flow end-to-end.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import * as runtime from './index'
 
 // ── Mock @nzila/db ──────────────────────────────────────────────────────────
 
@@ -210,5 +211,14 @@ describe('Sanitize pipeline idempotency', () => {
     const p1 = { period: { periodLabel: '2026-01' } }
     const p2 = { period: { periodLabel: '2026-02' } }
     expect(hashSanitized(p1)).not.toBe(hashSanitized(p2))
+  })
+})
+
+describe('tools-runtime barrel', () => {
+  it('exports expected runtime functions', () => {
+    expect(runtime.buildExportPath).toBeTypeOf('function')
+    expect(runtime.chunkText).toBeTypeOf('function')
+    expect(runtime.sanitize).toBeTypeOf('function')
+    expect(runtime.uploadWithLogging).toBeTypeOf('function')
   })
 })

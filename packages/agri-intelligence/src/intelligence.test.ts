@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   computeHistoricalMeanYieldPerHa,
   computeExpectedYield,
@@ -7,7 +7,11 @@ import {
 } from './yield'
 import { computeLossRate, computeLossRateByCrop } from './loss'
 import { simulatePayout, computeFairShare } from './payout'
-import { createStubYieldProvider } from './providers'
+import {
+  createStubClimateProvider,
+  createStubPricingProvider,
+  createStubYieldProvider,
+} from './providers'
 
 // ---------------------------------------------------------------------------
 // Yield
@@ -50,6 +54,51 @@ describe('yield intelligence', () => {
     const provider = createStubYieldProvider(data)
     const result = await getExpectedYield(provider, 'maize', 'r1', 10, 5)
     expect(result.expectedKg).toBeCloseTo(2166.67 * 10, 0)
+  })
+
+  it('stub yield provider filters by crop and region and limits by seasons', async () => {
+    const provider = createStubYieldProvider([
+      ...data,
+      { cropId: 'beans', regionId: 'r1', season: '2024A', yieldKg: 1000, areaHa: 1 },
+      { cropId: 'maize', regionId: 'r2', season: '2024A', yieldKg: 2000, areaHa: 1 },
+    ])
+
+    const result = await provider.getHistoricalYields('maize', 'r1', 2)
+
+    expect(result).toHaveLength(2)
+    expect(result.every((entry) => entry.cropId === 'maize' && entry.regionId === 'r1')).toBe(true)
+  })
+})
+
+describe('providers', () => {
+  it('pricing provider filters by crop, market, and lookback window', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(new Date('2026-01-15T00:00:00.000Z').getTime())
+    const provider = createStubPricingProvider([
+      { cropId: 'maize', marketId: 'm1', date: '2026-01-14T00:00:00.000Z', pricePerKg: 5, currency: 'USD' },
+      { cropId: 'maize', marketId: 'm1', date: '2026-01-01T00:00:00.000Z', pricePerKg: 9, currency: 'USD' },
+      { cropId: 'beans', marketId: 'm1', date: '2026-01-14T00:00:00.000Z', pricePerKg: 7, currency: 'USD' },
+      { cropId: 'maize', marketId: 'm2', date: '2026-01-14T00:00:00.000Z', pricePerKg: 8, currency: 'USD' },
+    ])
+
+    const prices = await provider.getRecentPrices('maize', 'm1', 7)
+
+    expect(prices).toEqual([
+      { cropId: 'maize', marketId: 'm1', date: '2026-01-14T00:00:00.000Z', pricePerKg: 5, currency: 'USD' },
+    ])
+    vi.restoreAllMocks()
+  })
+
+  it('climate provider filters by region', async () => {
+    const provider = createStubClimateProvider([
+      { regionId: 'north', factor: 'drought', probability: 0.8, impactPercent: 20 },
+      { regionId: 'south', factor: 'flood', probability: 0.4, impactPercent: 10 },
+    ])
+
+    const risks = await provider.getRiskFactors('north', { lat: 0, lng: 0 })
+
+    expect(risks).toEqual([
+      { regionId: 'north', factor: 'drought', probability: 0.8, impactPercent: 20 },
+    ])
   })
 })
 
@@ -117,6 +166,16 @@ describe('payout simulation', () => {
     )
     // gross=300, bonus=300*(-0.05)=-15, net=285
     expect(result.entries[0]!.netPayout).toBe(285)
+  })
+
+  it('falls back to zero bonus for unknown quality grade', () => {
+    const result = simulatePayout(
+      [{ producerId: 'p1', contributionKg: 50, qualityGrade: 'Z', pricePerKg: 4 }],
+      'USD',
+    )
+
+    expect(result.entries[0]!.qualityBonus).toBe(0)
+    expect(result.entries[0]!.netPayout).toBe(200)
   })
 })
 

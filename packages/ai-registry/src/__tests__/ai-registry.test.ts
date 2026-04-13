@@ -60,6 +60,17 @@ describe('createModelCard', () => {
     expect(card.riskTier).toBe('medium');
   });
 
+  it('creates a valid high-risk model card with proper governance', () => {
+    const card = createModelCard({
+      ...baseCard,
+      riskTier: 'high',
+      dataClassification: 'sensitive',
+    });
+    expect(card.riskTier).toBe('high');
+    expect(card.governance.humanOversight).toBe(true);
+    expect(card.governance.auditLogging).toBe(true);
+  });
+
   it('rejects high-risk model without human oversight', () => {
     expect(() =>
       createModelCard({
@@ -78,6 +89,49 @@ describe('createModelCard', () => {
         safetyMeasures: [],
       }),
     ).toThrow('PII redaction');
+  });
+
+  it('rejects high-risk model without audit logging', () => {
+    expect(() =>
+      createModelCard({
+        ...baseCard,
+        riskTier: 'high',
+        governance: { ...baseCard.governance, humanOversight: true, auditLogging: false },
+      }),
+    ).toThrow('auditLogging=true');
+  });
+
+  it('rejects critical-risk model without audit logging', () => {
+    expect(() =>
+      createModelCard({
+        ...baseCard,
+        riskTier: 'critical',
+        governance: { ...baseCard.governance, humanOversight: true, auditLogging: false },
+      }),
+    ).toThrow('auditLogging=true');
+  });
+
+  it('rejects regulated data with non-PII safety measures only', () => {
+    expect(() =>
+      createModelCard({
+        ...baseCard,
+        dataClassification: 'regulated',
+        safetyMeasures: [
+          { measure: 'Rate limit', type: 'rate-limiting', enforced: true, enforcementLayer: 'gateway' },
+        ],
+      }),
+    ).toThrow('PII redaction');
+  });
+
+  it('allows sensitive data model with enforced PII redaction', () => {
+    const card = createModelCard({
+      ...baseCard,
+      dataClassification: 'sensitive',
+      safetyMeasures: [
+        { measure: 'PII redaction', type: 'pii-redaction', enforced: true, enforcementLayer: 'gateway' },
+      ],
+    });
+    expect(card.dataClassification).toBe('sensitive');
   });
 });
 
@@ -136,6 +190,43 @@ describe('classifyRisk', () => {
     expect(result.factors).toHaveLength(7);
     const totalWeight = result.factors.reduce((sum, f) => sum + f.weight, 0);
     expect(totalWeight).toBeCloseTo(1.0);
+  });
+
+  it('classifies critical-risk model correctly', () => {
+    const result = classifyRisk({
+      modelId: 'autonomous-v1',
+      classifiedBy: 'test',
+      autonomyLevel: 100,
+      dataClassification: 100,
+      impactScope: 100,
+      reversibility: 100,
+      transparency: 100,
+      biasRisk: 100,
+      safetyImpact: 100,
+    });
+
+    expect(result.riskLevel).toBe('critical');
+    expect(result.overallScore).toBeGreaterThanOrEqual(75);
+    expect(result.requiredControls).toContain('red-team-testing');
+  });
+
+  it('classifies medium-risk model correctly', () => {
+    const result = classifyRisk({
+      modelId: 'assist-v1',
+      classifiedBy: 'test',
+      autonomyLevel: 30,
+      dataClassification: 33,
+      impactScope: 25,
+      reversibility: 30,
+      transparency: 30,
+      biasRisk: 25,
+      safetyImpact: 25,
+    });
+
+    expect(result.riskLevel).toBe('medium');
+    expect(result.overallScore).toBeGreaterThanOrEqual(25);
+    expect(result.overallScore).toBeLessThan(50);
+    expect(result.requiredControls).toContain('pii-redaction');
   });
 });
 
@@ -236,6 +327,19 @@ describe('GovernanceLifecycle', () => {
     expect(history[0]!.toState).toBe('review');
     expect(history[1]!.toState).toBe('approved');
   });
+
+  it('returns undefined for model with no events', () => {
+    const lifecycle = new GovernanceLifecycle();
+    expect(lifecycle.getCurrentState('nonexistent')).toBeUndefined();
+  });
+
+  it('returns available transitions from a given state', () => {
+    const lifecycle = new GovernanceLifecycle();
+    const transitions = lifecycle.getAvailableTransitions('deployed');
+    expect(transitions.length).toBeGreaterThan(0);
+    expect(transitions.map(t => t.to)).toContain('deprecated');
+    expect(transitions.map(t => t.to)).toContain('approved');
+  });
 });
 
 // ── NIST AI RMF Tests ────────────────────────────────────────────────────────
@@ -314,5 +418,88 @@ describe('evaluateNistRmf', () => {
     const assessment = evaluateNistRmf(card, 'test@nzila.io');
     expect(assessment.gaps.length).toBeGreaterThan(0);
     expect(assessment.recommendations.length).toBeGreaterThan(0);
+  });
+
+  it('flags humanOversight gap for non-low-risk model', () => {
+    const card = createModelCard({
+      modelId: 'nist-medium',
+      displayName: 'NIST Medium Test',
+      version: '1.0.0',
+      provider: 'internal',
+      modality: 'text',
+      purpose: 'Test',
+      intendedUse: 'Test',
+      outOfScopeUse: [],
+      riskTier: 'medium',
+      dataClassification: 'internal',
+      inputFormat: 'text',
+      outputFormat: 'text',
+      limitations: [
+        { category: 'accuracy', description: 'Test', severity: 'low' },
+      ],
+      safetyMeasures: [
+        { measure: 'Filter', type: 'input-filtering', enforced: true, enforcementLayer: 'gateway' },
+      ],
+      governance: {
+        humanOversight: false,
+        auditLogging: true,
+        appealAvailable: false,
+        dataRetentionDays: 30,
+        complianceFrameworks: ['NIST AI RMF'],
+      },
+      owner: 'test',
+      team: 'test',
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const assessment = evaluateNistRmf(card, 'test@nzila.io');
+    expect(assessment.gaps).toContain('GOVERN-2: No human oversight for non-low-risk model');
+    expect(assessment.recommendations).toContain('Enable humanOversight in model governance settings');
+  });
+
+  it('produces clean assessment when model has metrics and full governance', () => {
+    const card = createModelCard({
+      modelId: 'nist-full',
+      displayName: 'Full Model',
+      version: '1.0.0',
+      provider: 'azure-openai',
+      modality: 'text',
+      purpose: 'Test',
+      intendedUse: 'Test',
+      outOfScopeUse: [],
+      riskTier: 'low',
+      dataClassification: 'public',
+      inputFormat: 'text',
+      outputFormat: 'text',
+      metrics: {
+        accuracy: 0.95,
+        latencyP50Ms: 200,
+        lastEvaluated: new Date().toISOString(),
+      },
+      limitations: [
+        { category: 'accuracy', description: 'Test', severity: 'low' },
+      ],
+      safetyMeasures: [
+        { measure: 'Filter', type: 'input-filtering', enforced: true, enforcementLayer: 'gateway' },
+      ],
+      governance: {
+        humanOversight: true,
+        auditLogging: true,
+        appealAvailable: false,
+        dataRetentionDays: 30,
+        complianceFrameworks: ['NIST AI RMF'],
+      },
+      owner: 'test',
+      team: 'test',
+      status: 'deployed',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const assessment = evaluateNistRmf(card, 'test@nzila.io');
+    expect(assessment.gaps).toHaveLength(0);
+    expect(assessment.recommendations).toHaveLength(0);
   });
 });

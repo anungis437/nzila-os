@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
@@ -18,6 +18,11 @@ import {
   CANONICAL_SECTIONS,
 } from '../src/coragov-ingestion-contract'
 import { simulateCoraGovIngestion } from '../src/coragov-ingestion-harness'
+import * as ingestionContract from '../src/coragov-ingestion-contract'
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 // ── Fixture helpers ─────────────────────────────────────────────────────────
 
@@ -196,6 +201,46 @@ describe('buildCoraGovPayload', () => {
     expect(result.accepted).toBe(false)
   })
 
+  it('rejects a report that fails canonical validation and returns mapped errors', () => {
+    const invalidReport = {
+      report_id: 'bad_1',
+      org_id: 'org_bad',
+      // intentionally missing required fields
+    } as any
+
+    const result = buildCoraGovPayload(SourceApp.CORA, [invalidReport])
+    expect(result.accepted).toBe(false)
+    if (!result.accepted) {
+      expect(result.reason).toContain('failed canonical validation')
+      expect(result.errors?.length).toBeGreaterThan(0)
+      expect(result.errors?.[0]?.path).toBeTruthy()
+      expect(result.errors?.[0]?.message).toBeTruthy()
+    }
+  })
+
+  it('rejects when assembled payload fails schema validation', () => {
+    const report = buildCanonicalReport({
+      org_id: 'org_bad_payload',
+      source_app: SourceApp.CORA,
+      report_type: 'cooperative_summary',
+      title: 'Bad payload trigger',
+      entity_scope: EntityScope.COOPERATIVE,
+      reporting_period: {
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-01-31T23:59:59.000Z',
+      },
+      metrics: [{ key: 'k', label: 'K', value: 1, unit: 'u', period: 'P1' }],
+    })
+
+    const result = buildCoraGovPayload('', [report])
+    expect(result.accepted).toBe(false)
+    if (!result.accepted) {
+      expect(result.reason).toBe('Assembled payload failed schema validation')
+      expect(result.batch_id).toMatch(/^cgov_/)
+      expect(result.errors?.some((e) => e.path === 'source_app')).toBe(true)
+    }
+  })
+
   it('accepts reports with no metrics but valid schema (empty dataset)', () => {
     const report = buildCanonicalReport({
       org_id: 'org_none',
@@ -261,6 +306,41 @@ describe('simulateCoraGovIngestion', () => {
   it('rejects null', () => {
     const result = simulateCoraGovIngestion(null)
     expect(result.accepted).toBe(false)
+  })
+
+  it('returns empty batch id when payload is non-object', () => {
+    const result = simulateCoraGovIngestion('bad_payload')
+    expect(result.accepted).toBe(false)
+    if (!result.accepted) {
+      expect(result.batch_id).toBe('')
+    }
+  })
+
+  it('defaults section to metrics when issue path has no canonical section', () => {
+    vi.spyOn(ingestionContract.coraGovPayloadSchema, 'safeParse').mockReturnValueOnce({
+      success: true,
+      data: {
+        batch_id: 'cgov_forced_ds_error',
+        submitted_at: '2025-04-01T12:00:00.000Z',
+        source_app: 'cora',
+        datasets: [{}],
+      } as any,
+    })
+
+    vi.spyOn(ingestionContract.coraGovDatasetSchema, 'safeParse').mockReturnValueOnce({
+      success: false,
+      error: {
+        issues: [{ path: ['unknown_field'], message: 'invalid unknown field' }],
+      } as any,
+    })
+
+    const result = simulateCoraGovIngestion({})
+    expect(result.accepted).toBe(false)
+    if (!result.accepted) {
+      expect(result.reason).toBe('Dataset section validation failed')
+      expect(result.errors?.[0]?.section).toBe('metrics')
+      expect(result.errors?.[0]?.path).toContain('datasets[0]')
+    }
   })
 })
 

@@ -9,6 +9,7 @@
  */
 
 import { auth, currentUser } from '@/lib/api-auth-guard';
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 import { db } from "@/db/db";
 import { organizationMembers, organizations } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
@@ -95,16 +96,11 @@ export async function getUserRole(
     }
 
     // 0b. SUPER_ADMIN_EMAILS — email-based override.
-    const superAdminEmails = new Set([
-      'info@nzilaventures.com',
-      'support@onelabtech.com',
-      ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
-    ]);
     try {
       const user = await currentUser();
       const email = (user as { primaryEmailAddress?: { emailAddress?: string }; emailAddresses?: { emailAddress?: string }[] })?.primaryEmailAddress?.emailAddress
                   ?? (user as { emailAddresses?: { emailAddress?: string }[] })?.emailAddresses?.[0]?.emailAddress;
-      if (email && superAdminEmails.has(email.toLowerCase())) {
+      if (isSuperAdmin(email)) {
         logger.info('[getUserRole] Granting app_owner via SUPER_ADMIN_EMAILS', { detail: email });
         return UserRole.APP_OWNER;
       }

@@ -8,14 +8,17 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-core": "workspace:*",
     "@nzila/integrations-runtime": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-context-orchestrator": "workspace:*",
     "@nzila/platform-data-fabric": "workspace:*",
     "@nzila/platform-decision-graph": "workspace:*",
@@ -28,6 +31,7 @@
     "@nzila/platform-ops": "workspace:*",
     "@nzila/platform-reasoning-engine": "workspace:*",
     "@nzila/platform-semantic-search": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "next": "16.2.3",
     "next-intl": "^4.8.3",

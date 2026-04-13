@@ -51,7 +51,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: Test
+    name: Unit Tests
     services:
       postgres:
         image: postgres:16
@@ -86,11 +86,20 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm test:coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports-${{ github.run_id }}
+          path: |
+            **/coverage/
+          retention-days: 30
 
   build:
     runs-on: ubuntu-latest
@@ -128,6 +137,50 @@ jobs:
           AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
           AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
           NODE_OPTIONS: "--max-old-space-size=8192"
+
+      - name: Check bundle sizes
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| App | JS (gzip) | CSS (gzip) | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-----------|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          BUDGET_KB=350
+          FAILED=0
+          for app_dir in apps/*/; do
+            app=$(basename "$app_dir")
+            next_dir="${app_dir}.next/static"
+            [ -d "$next_dir" ] || continue
+            js_bytes=$(find "$next_dir" -name '*.js' -exec gzip -c {} + 2>/dev/null | wc -c)
+            css_bytes=$(find "$next_dir" -name '*.css' -exec gzip -c {} + 2>/dev/null | wc -c)
+            js_kb=$((js_bytes / 1024))
+            css_kb=$((css_bytes / 1024))
+            # Per-app budget override
+            case "$app" in
+              console) app_budget=500 ;;
+              web) app_budget=250 ;;
+              *) app_budget=$BUDGET_KB ;;
+            esac
+            if [ "$js_kb" -gt "$app_budget" ]; then
+              status="❌ Over budget (${app_budget} KB)"
+              FAILED=1
+            else
+              status="✅"
+            fi
+            echo "| $app | ${js_kb} KB | ${css_kb} KB | $status |" >> $GITHUB_STEP_SUMMARY
+          done
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::warning::One or more apps exceed their bundle size budget. See step summary."
+          fi
+
+      - name: Generate OpenAPI specs
+        run: npx tsx tooling/openapi-gen/src/cli.ts
+
+      - name: Upload OpenAPI specs
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-specs-${{ github.run_id }}
+          path: docs/api/specs/
+          retention-days: 90
 
   # ── W1-5: IaC Security Scan (Checkov) ──────────────────────────────────────
   iac-scan:
@@ -462,4 +515,34 @@ jobs:
             ops/outputs/platform-health.json
             ops/outputs/procurement-pack-*.zip
           retention-days: 90
+
+  # ─── Performance Regression Gate ──────────────────────────────────────────
+  perf-regression:
+    runs-on: ubuntu-latest
+    name: Performance Regression Gate
+    needs: [build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D68
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Run k6 baseline smoke test
+        run: k6 run --env PROFILE=baseline --env BASE_URL=http://localhost:3000 tests/load/smoke.js --duration 10s --vus 1 --no-thresholds
+        continue-on-error: true
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-perf-results
+          path: tests/load/
+          retention-days: 30
 

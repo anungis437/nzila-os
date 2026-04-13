@@ -15,7 +15,11 @@ import {
   circuitStateEnum,
   integrationProviderHealth,
   integrationProviderMetrics,
+  integrationSloTargets,
 } from './health-schema'
+import * as integrationDbIndex from './index'
+import * as integrationRepos from './repos'
+import * as integrationHealthRepos from './health-repos'
 
 describe('integrations-db schema', () => {
   describe('enums', () => {
@@ -62,7 +66,7 @@ describe('integrations-db schema', () => {
     it('integrationDeliveries has required columns', () => {
       const cols = Object.keys(integrationDeliveries)
       expect(cols).toEqual(expect.arrayContaining([
-        'id', 'orgId', 'configId', 'channel', 'provider', 'recipientRef', 'status', 'attempts', 'correlationId',
+        'id', 'orgId', 'configId', 'channel', 'provider', 'recipientRef', 'templateId', 'status', 'attempts', 'lastError', 'correlationId',
       ]))
     })
 
@@ -83,7 +87,7 @@ describe('integrations-db schema', () => {
     it('webhookDeliveryAttempts has required columns', () => {
       const cols = Object.keys(webhookDeliveryAttempts)
       expect(cols).toEqual(expect.arrayContaining([
-        'id', 'subscriptionId', 'event', 'payload', 'success', 'attemptNumber',
+        'id', 'subscriptionId', 'event', 'payload', 'responseStatus', 'success', 'attemptNumber',
       ]))
     })
 
@@ -97,8 +101,22 @@ describe('integrations-db schema', () => {
     it('integrationProviderMetrics has required columns', () => {
       const cols = Object.keys(integrationProviderMetrics)
       expect(cols).toEqual(expect.arrayContaining([
-        'id', 'orgId',
+        'id', 'orgId', 'provider', 'windowStart', 'windowEnd',
       ]))
+    })
+
+    it('integrationSloTargets has required columns', () => {
+      const cols = Object.keys(integrationSloTargets)
+      expect(cols).toEqual(expect.arrayContaining([
+        'id', 'orgId', 'provider', 'channel', 'successRateTarget', 'p95LatencyTarget', 'windowDays', 'isDefault', 'metadata',
+      ]))
+    })
+
+    it('exports schema and ports from barrel modules', () => {
+      expect(integrationDbIndex.integrationConfigs).toBeDefined()
+      expect(integrationDbIndex.integrationProviderHealth).toBeDefined()
+      expect(Object.keys(integrationRepos).length).toBeGreaterThanOrEqual(0)
+      expect(Object.keys(integrationHealthRepos).length).toBeGreaterThanOrEqual(0)
     })
   })
 })

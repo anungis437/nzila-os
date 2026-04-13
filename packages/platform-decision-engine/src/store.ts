@@ -6,6 +6,7 @@
  *
  * @module @nzila/platform-decision-engine/store
  */
+import * as crypto from 'node:crypto'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { decisionRecordSchema } from './schemas'
@@ -140,7 +141,7 @@ export function appendDecisionReview(
 export function saveDecisionFeedback(feedback: DecisionFeedback): void {
   const dir = feedbackDir()
   fs.mkdirSync(dir, { recursive: true })
-  const filename = `${feedback.decision_id}-${Date.now()}.json`
+  const filename = `${feedback.decision_id}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.json`
   fs.writeFileSync(path.join(dir, filename), JSON.stringify(feedback, null, 2), 'utf-8')
 }
 

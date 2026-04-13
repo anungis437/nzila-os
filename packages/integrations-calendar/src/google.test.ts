@@ -10,6 +10,13 @@ import {
   type GoogleEventResource,
   type GoogleCalendarTransport,
 } from './google'
+import {
+  CalendarProviderSchema,
+  EventStatusSchema,
+  AttendeeResponseSchema,
+  createGoogleCalendarClient as createGoogleCalendarClientFromBarrel,
+  createOutlookCalendarClient,
+} from './index'
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -89,6 +96,17 @@ describe('mapGoogleCalendar', () => {
     const shared = { ...gCal, accessRole: 'reader' }
     expect(mapGoogleCalendar(shared).isShared).toBe(true)
   })
+
+  it('omits optional description/timezone when nullish', () => {
+    const cal = {
+      ...gCal,
+      description: null,
+      timeZone: undefined,
+    }
+    const mapped = mapGoogleCalendar(cal)
+    expect(mapped.description).toBeUndefined()
+    expect(mapped.timezone).toBeUndefined()
+  })
 })
 
 describe('mapGoogleEvent', () => {
@@ -129,6 +147,39 @@ describe('mapGoogleEvent', () => {
     })
     expect(mapGoogleEvent(parsed, 'cal-1').title).toBe('(No Title)')
   })
+
+  it('falls back for missing dateTime/date and unknown status', () => {
+    const parsed = googleEventSchema.parse({
+      ...gEvent,
+      status: undefined,
+      start: {},
+      end: {},
+    })
+
+    const mapped = mapGoogleEvent(parsed, 'cal-1')
+    expect(mapped.status).toBe('confirmed')
+    expect(mapped.startTime).toBe('')
+    expect(mapped.endTime).toBe('')
+  })
+
+  it('maps nullable optional fields to undefined', () => {
+    const parsed = googleEventSchema.parse({
+      ...gEvent,
+      description: null,
+      location: null,
+      hangoutLink: null,
+      organizer: undefined,
+      attendees: undefined,
+    })
+
+    const mapped = mapGoogleEvent(parsed, 'cal-1')
+    expect(mapped.description).toBeUndefined()
+    expect(mapped.location).toBeUndefined()
+    expect(mapped.meetingUrl).toBeUndefined()
+    expect(mapped.organizerEmail).toBeUndefined()
+    expect(mapped.organizerName).toBeUndefined()
+    expect(mapped.attendeeCount).toBe(0)
+  })
 })
 
 describe('mapGoogleAttendees', () => {
@@ -153,6 +204,19 @@ describe('mapGoogleAttendees', () => {
   it('returns empty array when no attendees', () => {
     const noAtt = { ...gEvent, attendees: undefined }
     expect(mapGoogleAttendees(noAtt)).toEqual([])
+  })
+
+  it('maps unknown responseStatus to needs_action and defaults flags', () => {
+    const event: GoogleEventResource = {
+      ...gEvent,
+      attendees: [
+        { email: 'x@local42.ca', displayName: null, responseStatus: 'unknown_state' },
+      ],
+    }
+    const attendees = mapGoogleAttendees(event)
+    expect(attendees[0]!.responseStatus).toBe('needs_action')
+    expect(attendees[0]!.isOrganizer).toBe(false)
+    expect(attendees[0]!.isOptional).toBe(false)
   })
 })
 
@@ -197,5 +261,51 @@ describe('createGoogleCalendarClient', () => {
     const client = createGoogleCalendarClient(transport)
     const health = await client.healthCheck()
     expect(health.ok).toBe(false)
+  })
+
+  it('fetchEvents forwards since value and maps results', async () => {
+    let capturedSince: string | undefined
+    const transport: GoogleCalendarTransport = {
+      listCalendars: async () => [],
+      listEvents: async (_calendarId, since) => {
+        capturedSince = since
+        return [gEvent]
+      },
+    }
+    const client = createGoogleCalendarClient(transport)
+    const events = await client.fetchEvents('org1', 'cal-1', '2025-01-01T00:00:00Z')
+
+    expect(capturedSince).toBe('2025-01-01T00:00:00Z')
+    expect(events).toHaveLength(1)
+    expect(events[0]!.title).toBe('Membership Meeting')
+  })
+
+  it('fetchAttendees returns empty array (adapter contract)', async () => {
+    const client = createGoogleCalendarClient({
+      listCalendars: async () => [],
+      listEvents: async () => [],
+    })
+    await expect(client.fetchAttendees('org1', 'evt-1')).resolves.toEqual([])
+  })
+
+  it('barrel exports expose client factories and schemas', () => {
+    expect(CalendarProviderSchema.parse('GOOGLE')).toBe('GOOGLE')
+    expect(EventStatusSchema.parse('confirmed')).toBe('confirmed')
+    expect(AttendeeResponseSchema.parse('needs_action')).toBe('needs_action')
+
+    const gClient = createGoogleCalendarClientFromBarrel({
+      listCalendars: async () => [],
+      listEvents: async () => [],
+    })
+    const oClient = createOutlookCalendarClient(
+      {
+        listCalendars: async () => [],
+        listEvents: async () => [],
+      },
+      'user-1',
+    )
+
+    expect(gClient.provider).toBe('GOOGLE')
+    expect(oClient.provider).toBe('OUTLOOK')
   })
 })

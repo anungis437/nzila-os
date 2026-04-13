@@ -247,6 +247,30 @@ describe('calculateTierPricing — Input Validation', () => {
     if (result.success) return
     expect(result.error).toContain('negative costs')
   })
+
+  it('should reject negative labor cost in template', () => {
+    const badTemplate = { ...TEMPLATE, laborCostPerBox: -1 }
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, PricingTier.STANDARD, badTemplate)
+    expect(result.success).toBe(false)
+  })
+
+  it('should reject negative shipping cost in template', () => {
+    const badTemplate = { ...TEMPLATE, shippingCostPerBox: -1 }
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, PricingTier.STANDARD, badTemplate)
+    expect(result.success).toBe(false)
+  })
+
+  it('should reject negative GST rate in template', () => {
+    const badTemplate = { ...TEMPLATE, gstRate: -0.01 }
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, PricingTier.STANDARD, badTemplate)
+    expect(result.success).toBe(false)
+  })
+
+  it('should reject negative QST rate in template', () => {
+    const badTemplate = { ...TEMPLATE, qstRate: -0.01 }
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, PricingTier.STANDARD, badTemplate)
+    expect(result.success).toBe(false)
+  })
 })
 
 // ── Quebec Tax Standalone ───────────────────────────────────────────────────
@@ -307,6 +331,35 @@ describe('calculateAllTiers', () => {
   })
 })
 
+// ── Unknown Tier Fallback ───────────────────────────────────────────────────
+
+describe('calculateTierPricing — Unknown Tier Fallback', () => {
+  it('should fall back to standard margins for unknown tier', () => {
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, 'custom' as PricingTier, TEMPLATE)
+    expect(result.success).toBe(true)
+    if (!result.success) return
+
+    // default cases in getTargetMargin / getFloorMargin return standard values
+    expect(result.data.targetMargin).toBe(TEMPLATE.standardMarginTarget)
+    expect(result.data.isAboveFloor).toBe(true)
+  })
+
+  it('should warn when actual margin falls below floor', () => {
+    // Template where target is below floor → isAboveFloor = false
+    const lowTargetTemplate: PricingTemplate = {
+      ...TEMPLATE,
+      budgetMarginTarget: 10,
+      budgetMarginFloor: 20,
+    }
+    const result = calculateTierPricing(ITEMS, BOX_COUNT, PricingTier.BUDGET, lowTargetTemplate)
+    expect(result.success).toBe(true)
+    if (!result.success) return
+
+    expect(result.data.isAboveFloor).toBe(false)
+    expect(result.message).toBe('Warning: Below floor margin')
+  })
+})
+
 // ── Target Optimization ─────────────────────────────────────────────────────
 
 describe('optimizeForTargetTotal', () => {
@@ -325,6 +378,20 @@ describe('optimizeForTargetTotal', () => {
     if (!result.success) return
 
     expect(result.data.adjustmentNeeded).toBe(false)
+    expect(result.data.margin).toBeGreaterThan(50)
+    expect(result.data.suggestion).toBe('Price may be too high for market acceptance')
+  })
+
+  it('should report achievable margin for moderate target', () => {
+    // targetTotal that yields ~30% margin (between floor 15% and 50%)
+    const result = optimizeForTargetTotal(170000, BOX_COUNT, ITEMS, TEMPLATE)
+    expect(result.success).toBe(true)
+    if (!result.success) return
+
+    expect(result.data.adjustmentNeeded).toBe(false)
+    expect(result.data.margin).toBeGreaterThan(15)
+    expect(result.data.margin).toBeLessThanOrEqual(50)
+    expect(result.data.suggestion).toBe('Target price achievable with good margin')
   })
 })
 

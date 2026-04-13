@@ -32,12 +32,13 @@ BillingFrequency = Literal["monthly", "bi-weekly", "weekly"]
 # Options: max_retries=2, time_limit=1800 (30 min)
 # ---------------------------------------------------------------------------
 
+
 @shared_task(
     bind=True,
     name="billing.tasks.run_billing_scheduler_task",
     queue="billing",
     max_retries=2,
-    default_retry_delay=300,    # 5 minutes between retries
+    default_retry_delay=300,  # 5 minutes between retries
     acks_late=True,
     time_limit=1800,
     soft_time_limit=1680,
@@ -89,9 +90,12 @@ def run_billing_scheduler_task(self, frequency: BillingFrequency):
 
         logger.info(
             "Billing scheduler complete: freq=%s total=%d ok=%d fail=%d skip=%d elapsed=%dms",
-            frequency, result["total_organizations"],
-            result["successful"], result["failed"],
-            result["skipped"], elapsed_ms,
+            frequency,
+            result["total_organizations"],
+            result["successful"],
+            result["failed"],
+            result["skipped"],
+            elapsed_ms,
         )
         return result
 
@@ -105,6 +109,7 @@ def run_billing_scheduler_task(self, frequency: BillingFrequency):
 # BullMQ equivalent: DuesReminderScheduler.runReminderJob() called from cron
 # Options: runs daily at 09:00 UTC
 # ---------------------------------------------------------------------------
+
 
 @shared_task(
     bind=True,
@@ -175,7 +180,9 @@ def send_dues_reminders_task(self):
 
         logger.info(
             "Dues reminders complete: processed=%d sent=%d failed=%d",
-            result["total_processed"], result["reminders_sent"], result["reminders_failed"],
+            result["total_processed"],
+            result["reminders_sent"],
+            result["reminders_failed"],
         )
         return result
 
@@ -189,6 +196,7 @@ def send_dues_reminders_task(self):
 # BullMQ equivalent: FailedPaymentRetryService.runRetryJob() called from cron
 # Retry strategy (mirrors TS): Day 0, Day 1, Day 3, Day 7 → admin intervention
 # ---------------------------------------------------------------------------
+
 
 @shared_task(
     bind=True,
@@ -213,7 +221,7 @@ def retry_failed_payments_task(self):
       Attempt 4 → Day 7
       After 4   → mark for admin intervention
     """
-    RETRY_DAYS = {1: 1, 2: 3, 3: 7}   # attempt_number → days_after_failure
+    RETRY_DAYS = {1: 1, 2: 3, 3: 7}  # attempt_number → days_after_failure
     MAX_ATTEMPTS = 4
 
     logger.info("Starting failed payment retry job")
@@ -237,18 +245,22 @@ def retry_failed_payments_task(self):
             failure_count = int(metadata.get("failure_count", 0))
             last_failure = metadata.get("last_failure_date")
 
-            should_retry = _should_retry_payment(failure_count, last_failure, RETRY_DAYS, MAX_ATTEMPTS)
+            should_retry = _should_retry_payment(
+                failure_count, last_failure, RETRY_DAYS, MAX_ATTEMPTS
+            )
 
             if not should_retry["retry"]:
                 if should_retry.get("max_attempts_reached"):
                     _mark_for_admin_intervention(txn["id"], failure_count)
                     result["marked_for_admin"] += 1
-                    result["results"].append({
-                        "transaction_id": txn["id"],
-                        "member_id": txn.get("member_id"),
-                        "attempt_number": failure_count,
-                        "result": "max_attempts",
-                    })
+                    result["results"].append(
+                        {
+                            "transaction_id": txn["id"],
+                            "member_id": txn.get("member_id"),
+                            "attempt_number": failure_count,
+                            "result": "max_attempts",
+                        }
+                    )
                 continue
 
             result["retries_attempted"] += 1
@@ -259,27 +271,33 @@ def retry_failed_payments_task(self):
                 else:
                     result["retries_failed"] += 1
 
-                result["results"].append({
-                    "transaction_id": txn["id"],
-                    "member_id": txn.get("member_id"),
-                    "attempt_number": failure_count + 1,
-                    "result": "retried",
-                    **retry_result,
-                })
+                result["results"].append(
+                    {
+                        "transaction_id": txn["id"],
+                        "member_id": txn.get("member_id"),
+                        "attempt_number": failure_count + 1,
+                        "result": "retried",
+                        **retry_result,
+                    }
+                )
             except Exception as exc:  # noqa: BLE001
                 result["retries_failed"] += 1
-                result["results"].append({
-                    "transaction_id": txn["id"],
-                    "member_id": txn.get("member_id"),
-                    "attempt_number": failure_count + 1,
-                    "result": "error",
-                    "error": str(exc),
-                })
+                result["results"].append(
+                    {
+                        "transaction_id": txn["id"],
+                        "member_id": txn.get("member_id"),
+                        "attempt_number": failure_count + 1,
+                        "result": "error",
+                        "error": str(exc),
+                    }
+                )
 
         logger.info(
             "Failed payment retry complete: processed=%d attempted=%d succeeded=%d admin=%d",
-            result["total_processed"], result["retries_attempted"],
-            result["retries_succeeded"], result["marked_for_admin"],
+            result["total_processed"],
+            result["retries_attempted"],
+            result["retries_succeeded"],
+            result["marked_for_admin"],
         )
         return result
 
@@ -291,6 +309,7 @@ def retry_failed_payments_task(self):
 # ---------------------------------------------------------------------------
 # Internal helpers  (stubs — wire to real DB models as they become available)
 # ---------------------------------------------------------------------------
+
 
 def _get_organizations_for_billing(frequency: BillingFrequency) -> list[dict]:
     """Return a list of org dicts configured for this billing frequency."""
@@ -314,14 +333,19 @@ def _get_organizations_for_billing(frequency: BillingFrequency) -> list[dict]:
 def _process_org_billing(org: dict, frequency: BillingFrequency) -> dict:
     """Process a billing cycle for one organization. Returns a result dict."""
     if not org.get("enabled"):
-        return {**org, "success": True, "skipped": True,
-                "error": "Billing disabled for this organization"}
+        return {
+            **org,
+            "success": True,
+            "skipped": True,
+            "error": "Billing disabled for this organization",
+        }
 
     try:
         # Wire in BillingCycleService when available in billing/services.py
         logger.info(
             "Processing billing: org=%s frequency=%s",
-            org["organization_id"], frequency,
+            org["organization_id"],
+            frequency,
         )
         return {
             "organization_id": org["organization_id"],
@@ -409,31 +433,33 @@ def _send_dues_reminder(txn: dict, reminder_type: str) -> bool:
         from notifications.tasks import send_notification_task
 
         titles = {
-            "7day":   "Dues Payment Due in 7 Days",
-            "1day":   "Dues Payment Due Tomorrow",
+            "7day": "Dues Payment Due in 7 Days",
+            "1day": "Dues Payment Due Tomorrow",
             "overdue": "Dues Payment Overdue",
         }
 
         send_notification_task.apply_async(
             kwargs={
                 "user_id": str(txn.get("member_id", "")),
-                "title":   titles.get(reminder_type, "Dues Reminder"),
+                "title": titles.get(reminder_type, "Dues Reminder"),
                 "message": (
                     f"Your dues payment of ${txn.get('amount', '0.00')} "
-                    f"is {'overdue' if reminder_type == 'overdue' else f'due {txn.get(\"due_date\", \"soon\")}'}."
+                    f"is {'overdue' if reminder_type == 'overdue' else 'due ' + str(txn.get('due_date', 'soon'))}."
                 ),
                 "channels": ["email", "in-app"],
                 "data": {
                     "transaction_id": str(txn.get("id", "")),
-                    "reminder_type":  reminder_type,
-                    "due_date":       str(txn.get("due_date", "")),
+                    "reminder_type": reminder_type,
+                    "due_date": str(txn.get("due_date", "")),
                 },
             },
             queue="notifications",
         )
         return True
     except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to send dues reminder: txn=%s error=%s", txn.get("id"), exc)
+        logger.error(
+            "Failed to send dues reminder: txn=%s error=%s", txn.get("id"), exc
+        )
         return False
 
 
@@ -498,7 +524,10 @@ def _attempt_payment_retry(txn: dict) -> dict:
 
     stripe_key = os.environ.get("STRIPE_SECRET_KEY")
     if not stripe_key:
-        logger.warning("STRIPE_SECRET_KEY not configured — payment retry skipped for %s", txn.get("id"))
+        logger.warning(
+            "STRIPE_SECRET_KEY not configured — payment retry skipped for %s",
+            txn.get("id"),
+        )
         return {"success": False, "reason": "payment_processor_not_configured"}
 
     try:
@@ -507,11 +536,16 @@ def _attempt_payment_retry(txn: dict) -> dict:
         stripe.api_key = stripe_key
         amount_cents = int(float(txn.get("amount", 0)) * 100)
         currency = txn.get("currency", "cad").lower()
-        payment_method = txn.get("payment_method_id") or txn.get("stripe_payment_method_id")
+        payment_method = txn.get("payment_method_id") or txn.get(
+            "stripe_payment_method_id"
+        )
         customer_id = txn.get("stripe_customer_id")
 
         if not payment_method or not customer_id:
-            logger.warning("Transaction %s missing payment_method or customer — cannot retry", txn.get("id"))
+            logger.warning(
+                "Transaction %s missing payment_method or customer — cannot retry",
+                txn.get("id"),
+            )
             return {"success": False, "reason": "missing_payment_method"}
 
         intent = stripe.PaymentIntent.create(
@@ -528,11 +562,23 @@ def _attempt_payment_retry(txn: dict) -> dict:
         )
 
         if intent.status in ("succeeded", "requires_capture"):
-            logger.info("Payment retry succeeded for transaction %s (intent %s)", txn.get("id"), intent.id)
+            logger.info(
+                "Payment retry succeeded for transaction %s (intent %s)",
+                txn.get("id"),
+                intent.id,
+            )
             return {"success": True, "payment_intent_id": intent.id}
 
-        logger.warning("Payment retry intent status=%s for transaction %s", intent.status, txn.get("id"))
-        return {"success": False, "reason": f"intent_status_{intent.status}", "payment_intent_id": intent.id}
+        logger.warning(
+            "Payment retry intent status=%s for transaction %s",
+            intent.status,
+            txn.get("id"),
+        )
+        return {
+            "success": False,
+            "reason": f"intent_status_{intent.status}",
+            "payment_intent_id": intent.id,
+        }
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Payment retry failed for transaction %s: %s", txn.get("id"), exc)
@@ -556,9 +602,8 @@ def _mark_for_admin_intervention(transaction_id: str, failure_count: int) -> Non
             )
         logger.warning(
             "Transaction %s marked for admin intervention after %d failures",
-            transaction_id, failure_count,
+            transaction_id,
+            failure_count,
         )
     except Exception as exc:  # noqa: BLE001
-        logger.error(
-            "Could not mark transaction %s for admin: %s", transaction_id, exc
-        )
+        logger.error("Could not mark transaction %s for admin: %s", transaction_id, exc)

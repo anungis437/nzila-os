@@ -8,6 +8,17 @@ export default defineProject({
     name: 'cfo',
     environment: 'node',
     include: ['lib/**/*.test.ts', 'tests/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['lib/**/*.ts', 'lib/**/*.tsx'],
+      exclude: ['lib/**/*.test.ts', 'lib/**/*.test.tsx', 'lib/**/__tests__/**', 'lib/**/__mocks__/**'],
+      thresholds: {
+        lines: 0,
+        functions: 0,
+        branches: 0,
+        statements: 0,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -19,6 +30,7 @@ export default defineProject({
       '@nzila/os-core/rateLimit': resolve(ROOT, 'packages/os-core/src/rateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),
+      '@nzila/os-core/config/super-admins': resolve(ROOT, 'packages/os-core/src/config/super-admins.ts'),
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),
       '@nzila/os-core/retention': resolve(ROOT, 'packages/os-core/src/retention/index.ts'),
       '@nzila/os-core': resolve(ROOT, 'packages/os-core/src/index.ts'),

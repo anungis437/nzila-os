@@ -9,18 +9,22 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rm -rf .next .turbo node_modules"
+    "clean": "rm -rf .next .turbo node_modules",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-core": "workspace:*",
     "@nzila/integrations-runtime": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-performance": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "axios": "^1.15.0",
     "clsx": "^2.1.0",

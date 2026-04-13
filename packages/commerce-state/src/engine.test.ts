@@ -4,8 +4,11 @@ import {
   attemptTransition,
   getAvailableTransitions,
   validateMachine,
+  type MachineDefinition,
   type TransitionContext,
 } from './engine'
+import * as commerceIndex from './index'
+import * as machineIndex from './machines'
 import { quoteMachine } from './machines/quote'
 import { orderMachine } from './machines/order'
 import { invoiceMachine } from './machines/invoice'
@@ -50,6 +53,65 @@ describe('validateMachine', () => {
     const errors = validateMachine(bad)
     expect(errors.length).toBeGreaterThan(0)
     expect(errors[0]).toContain('initialState')
+  })
+
+  it('should detect invalid terminal state entries', () => {
+    const bad = { ...quoteMachine, terminalStates: [...quoteMachine.terminalStates, 'ghost'] as QuoteStatus[] }
+    const errors = validateMachine(bad)
+    expect(errors.some((e) => e.includes('terminalState "ghost"'))).toBe(true)
+  })
+
+  it('should detect transitions with unknown from/to states', () => {
+    const bad = {
+      ...quoteMachine,
+      transitions: [
+        ...quoteMachine.transitions,
+        {
+          from: 'ghost-from' as QuoteStatus,
+          to: 'ghost-to' as QuoteStatus,
+          allowedRoles: [],
+          guards: [],
+          events: [],
+          actions: [],
+          label: 'invalid transition',
+        },
+      ],
+    }
+
+    const errors = validateMachine(bad)
+    expect(errors.some((e) => e.includes('from state "ghost-from"'))).toBe(true)
+    expect(errors.some((e) => e.includes('to state "ghost-to"'))).toBe(true)
+  })
+
+  it('should detect transitions originating from terminal states', () => {
+    const bad = {
+      ...quoteMachine,
+      transitions: [
+        ...quoteMachine.transitions,
+        {
+          from: QuoteStatus.ACCEPTED,
+          to: QuoteStatus.DRAFT,
+          allowedRoles: [],
+          guards: [],
+          events: [],
+          actions: [],
+          label: 'invalid from terminal',
+        },
+      ],
+    }
+
+    const errors = validateMachine(bad)
+    expect(errors.some((e) => e.includes('originates from terminal state'))).toBe(true)
+  })
+
+  it('should detect dead non-terminal states with no outgoing transitions', () => {
+    const bad = {
+      ...quoteMachine,
+      states: [...quoteMachine.states, 'stuck'] as QuoteStatus[],
+    }
+
+    const errors = validateMachine(bad)
+    expect(errors.some((e) => e.includes('dead state'))).toBe(true)
   })
 })
 
@@ -260,5 +322,50 @@ describe('guard evaluation', () => {
 
     const result = attemptTransition(guardedMachine, QuoteStatus.DRAFT, QuoteStatus.PRICING, ctx(), ORG_ID, {})
     expect(result.ok).toBe(true)
+  })
+})
+
+describe('barrel and compat exports', () => {
+  it('exports engine functions and machine definitions from barrel files', () => {
+    expect(commerceIndex.attemptTransition).toBe(attemptTransition)
+    expect(commerceIndex.getAvailableTransitions).toBe(getAvailableTransitions)
+    expect(commerceIndex.validateMachine).toBe(validateMachine)
+    expect(commerceIndex.quoteMachine).toBe(quoteMachine)
+    expect(commerceIndex.orderMachine).toBe(orderMachine)
+    expect(commerceIndex.invoiceMachine).toBe(invoiceMachine)
+    expect(commerceIndex.fulfillmentMachine).toBe(fulfillmentMachine)
+
+    expect(machineIndex.quoteMachine).toBe(quoteMachine)
+    expect(machineIndex.orderMachine).toBe(orderMachine)
+    expect(machineIndex.invoiceMachine).toBe(invoiceMachine)
+    expect(machineIndex.fulfillmentMachine).toBe(fulfillmentMachine)
+  })
+
+  it('converts commerce machine guards to fsm-core predicate guards', () => {
+    const sourceMachine: MachineDefinition<'open' | 'closed'> = {
+      name: 'guarded',
+      states: ['open', 'closed'],
+      initialState: 'open',
+      terminalStates: ['closed'],
+      transitions: [
+        {
+          from: 'open',
+          to: 'closed',
+          label: 'close',
+          allowedRoles: [],
+          guards: [() => true, () => false],
+          events: [],
+          actions: [],
+        },
+      ],
+    }
+
+    const converted = commerceIndex.toFsmCoreMachine(sourceMachine)
+    expect(converted.name).toBe('guarded')
+    expect(converted.version).toBe('1.0.0')
+    expect(converted.transitions).toHaveLength(1)
+    expect(converted.transitions[0]!.guards).toHaveLength(2)
+    expect(converted.transitions[0]!.guards.every((g) => g.kind === 'predicate')).toBe(true)
+    expect(converted.transitions[0]!.guards.every((g) => g.name.startsWith('guard_0_'))).toBe(true)
   })
 })

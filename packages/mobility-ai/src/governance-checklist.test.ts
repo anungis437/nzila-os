@@ -196,6 +196,19 @@ describe('Document Checklist', () => {
       const cl = generateDocumentChecklist('case-005', 'PT', ['passport', 'bank_statement'])
       expect(cl.items.every((i) => i.status === 'pending')).toBe(true)
     })
+
+    it('supports additional dependent relation document rules', () => {
+      const cl = generateDocumentChecklist('case-006', 'PT', ['passport'], [
+        { memberId: 'dep-parent', relation: 'parent' },
+        { memberId: 'dep-sibling', relation: 'sibling' },
+      ])
+
+      const parentDocs = cl.items.filter((i) => i.memberId === 'dep-parent')
+      const siblingDocs = cl.items.filter((i) => i.memberId === 'dep-sibling')
+
+      expect(parentDocs.some((i) => i.documentType === 'medical_report')).toBe(true)
+      expect(siblingDocs.some((i) => i.documentType === 'police_clearance')).toBe(true)
+    })
   })
 
   describe('updateChecklistStats', () => {
@@ -234,6 +247,30 @@ describe('Document Checklist', () => {
       expect(updated.uploaded).toBe(2)
       expect(updated.verified).toBe(2)
       expect(updated.completionPercent).toBe(100)
+    })
+
+    it('returns 0 completion when no required documents exist', () => {
+      const cl: DocumentChecklist = {
+        caseId: 'case-empty',
+        programCountryCode: 'PT',
+        items: [
+          {
+            documentType: 'passport',
+            target: 'primary_applicant',
+            required: false,
+            description: '',
+            status: 'pending',
+          },
+        ],
+        totalRequired: 0,
+        uploaded: 0,
+        verified: 0,
+        completionPercent: 99,
+      }
+
+      const updated = updateChecklistStats(cl)
+      expect(updated.totalRequired).toBe(0)
+      expect(updated.completionPercent).toBe(0)
     })
   })
 })

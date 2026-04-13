@@ -11,6 +11,7 @@ import {
   getWorkflowDefinition,
   listRegisteredWorkflows,
   WorkflowNotFoundError,
+  WorkflowBypassError,
 } from './orchestrator'
 import type {
   ControlPlaneContext,
@@ -220,6 +221,254 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
       expect(types).toContain('workflow.started')
       expect(types).toContain('workflow.step_completed')
       expect(types).toContain('workflow.completed')
+    })
+
+    it('handles step that throws an exception', async () => {
+      const id = uniqueId()
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Throwing Step',
+        description: 'Step throws instead of returning failure',
+        steps: [
+          {
+            id: 's-throw',
+            name: 'Throwing step',
+            maxRetries: 0,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => { throw new Error('Unexpected crash') }),
+          },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.error).toContain('Unexpected crash')
+    })
+
+    it('handles step that throws a non-Error value', async () => {
+      const id = uniqueId()
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Throwing String',
+        description: 'Step throws a string',
+        steps: [
+          {
+            id: 's-throw-str',
+            name: 'String throw step',
+            maxRetries: 0,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => { throw 'string error' }),
+          },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.error).toContain('string error')
+    })
+
+    it('skips compensation for steps without compensate function', async () => {
+      const id = uniqueId()
+      const compensated: string[] = []
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Skip Compensate',
+        description: 'First step has no compensate, second does, third fails',
+        steps: [
+          {
+            id: 's1-no-comp',
+            name: 'No compensate',
+            maxRetries: 0,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => ({ success: true, output: { a: 1 } })),
+            // no compensate function
+          },
+          makeStepDef('s2-comp', { output: { b: 2 }, onCompensate: () => compensated.push('s2') }),
+          makeStepDef('s3-fail', { shouldFail: true }),
+        ],
+        maxRetries: 0,
+        timeoutMs: 10000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      // Only s2 should be compensated; s1 should be skipped
+      expect(compensated).toEqual(['s2'])
+      expect(execution.steps[0]!.status).toBe('skipped')
+    })
+
+    it('handles compensation failure gracefully', async () => {
+      const id = uniqueId()
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Compensation Failure',
+        description: 'Compensation itself throws',
+        steps: [
+          {
+            id: 's1-comp-fail',
+            name: 'Bad compensate',
+            maxRetries: 0,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => ({ success: true, output: { a: 1 } })),
+            compensate: vi.fn(async () => { throw new Error('Rollback failed') }),
+          },
+          makeStepDef('s2-fail', { shouldFail: true }),
+        ],
+        maxRetries: 0,
+        timeoutMs: 10000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.steps[0]!.status).toBe('failed')
+      expect(execution.steps[0]!.error).toContain('Compensation failed')
+    })
+
+    it('retries step that throws then succeeds', async () => {
+      const id = uniqueId()
+      let callCount = 0
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Retry After Throw',
+        description: 'Step throws on first attempt, succeeds on retry',
+        steps: [
+          {
+            id: 's-retry-throw',
+            name: 'Retry throw step',
+            maxRetries: 1,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => {
+              callCount++
+              if (callCount === 1) throw new Error('Transient')
+              return { success: true, output: { recovered: true } }
+            }),
+          },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPLETED)
+      expect(callCount).toBe(2)
+    })
+
+    it('step returns failure without shouldRetry stops immediately', async () => {
+      const id = uniqueId()
+      const executeFn = vi.fn(async () => ({
+        success: false as const,
+        error: 'Permanent failure',
+        shouldRetry: false,
+      }))
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'No Retry',
+        description: 'Step fails without shouldRetry',
+        steps: [
+          { id: 's-no-retry', name: 'No retry', maxRetries: 3, timeoutMs: 5000, execute: executeFn },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(executeFn).toHaveBeenCalledTimes(1)
+    })
+
+    it('exhausts all retries and returns last error', async () => {
+      const id = uniqueId()
+      const executeFn = vi.fn(async () => ({
+        success: false as const,
+        error: 'Still failing',
+        shouldRetry: true,
+      }))
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'All Retries Fail',
+        description: 'Step fails on every retry attempt',
+        steps: [
+          { id: 's-exhaust', name: 'Exhaust retries', maxRetries: 2, timeoutMs: 5000, execute: executeFn },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.error).toContain('Still failing')
+      // 1 initial + 2 retries = 3 calls
+      expect(executeFn).toHaveBeenCalledTimes(3)
+    })
+
+    it('returns default error when all retries fail without error field', async () => {
+      const id = uniqueId()
+      const executeFn = vi.fn(async () => ({
+        success: false as const,
+        shouldRetry: true,
+      }))
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'No Error Field',
+        description: 'Step fails without providing error field',
+        steps: [
+          { id: 's-no-err', name: 'No error', maxRetries: 1, timeoutMs: 5000, execute: executeFn },
+        ],
+        maxRetries: 0,
+        timeoutMs: 5000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.error).toBe('Step failed after all retries')
+    })
+
+    it('handles compensation that throws a non-Error value', async () => {
+      const id = uniqueId()
+
+      registerWorkflow({
+        id: id as WorkflowId,
+        name: 'Non-Error Compensation',
+        description: 'Compensation throws a string',
+        steps: [
+          {
+            id: 's1-str-comp',
+            name: 'String compensate',
+            maxRetries: 0,
+            timeoutMs: 5000,
+            execute: vi.fn(async () => ({ success: true, output: { a: 1 } })),
+            compensate: vi.fn(async () => { throw 'non-error rollback' }),
+          },
+          makeStepDef('s2-fail', { shouldFail: true }),
+        ],
+        maxRetries: 0,
+        timeoutMs: 10000,
+      })
+
+      const execution = await executeWorkflow(id, makeContext(), {})
+      expect(execution.status).toBe(WorkflowExecutionStatus.COMPENSATED)
+      expect(execution.steps[0]!.error).toContain('non-error rollback')
+    })
+  })
+
+  describe('WorkflowBypassError', () => {
+    it('includes operation and required workflow in message', () => {
+      const err = new WorkflowBypassError('direct_payout', 'payout_settlement_flow')
+      expect(err.name).toBe('WorkflowBypassError')
+      expect(err.operation).toBe('direct_payout')
+      expect(err.requiredWorkflow).toBe('payout_settlement_flow')
+      expect(err.message).toContain('direct_payout')
+      expect(err.message).toContain('payout_settlement_flow')
     })
   })
 

@@ -15,10 +15,7 @@ const PLATFORM_ADMIN_USER_IDS = new Set(
   (process.env.PLATFORM_ADMIN_USER_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
 )
 
-const SUPER_ADMIN_EMAILS = new Set([
-  'info@nzilaventures.com',
-  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
-])
+import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 /** The Nzila platform org ID — resolved once at startup. */
 const PLATFORM_ORG_NAME = process.env.PLATFORM_ORG_NAME ?? 'Nzila'
@@ -89,7 +86,7 @@ export async function resolveNavContext(locale: string): Promise<NavContext | nu
   const user = await currentUser()
   const email =
     user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress
-  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+  if (isSuperAdmin(email)) {
     return { role: 'admin', isPlatformOrg, locale, hasCreatorProfile: true }
   }
 

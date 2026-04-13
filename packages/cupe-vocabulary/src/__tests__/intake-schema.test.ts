@@ -124,6 +124,12 @@ describe('CaseIntakeRequestSchema', () => {
     expect(result.data!.isAnonymous).toBe(false);
   });
 
+  it('maps field to "unknown" when error path is empty', () => {
+    const result = validateIntakeRequest(null);
+    expect(result.success).toBe(false);
+    expect(result.errors!.some((e) => e.field === 'unknown')).toBe(true);
+  });
+
   it('accepts isAnonymous = true', () => {
     const result = validateIntakeRequest({ ...validIntake, isAnonymous: true });
     expect(result.success).toBe(true);

@@ -2,12 +2,21 @@ import { describe, it, expect } from 'vitest'
 import { checkCapacity } from './capacity'
 import { validatePromoCode, computeOrderTotal, checkRefundEligibility } from './ticketing'
 import { validateScan, resolveOfflineConflicts, computeCheckInStats } from './checkin'
+import {
+  DEFAULT_EVENT_FEE_MODEL,
+  PREMIUM_EVENT_FEE_MODEL,
+  feeModelToRules,
+  computeTicketClassRevenue,
+  calculateRefund,
+  computeEventRevenueSummary,
+} from './event-economics'
+import * as zongaEvents from './index'
 import type { OfflineScanRecord } from './checkin'
 import {
   TicketTier, TicketStatus, ScanResult, PromoCodeType,
 } from './types'
 import type {
-  TicketInventory, PromoCode, TicketHolder, TicketScan,
+  TicketInventory, PromoCode, TicketHolder, TicketScan, TierCapacity,
 } from './types'
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -255,5 +264,149 @@ describe('@nzila/zonga-events — checkin', () => {
     expect(stats.totalTickets).toBe(3)
     expect(stats.checkedIn).toBe(2) // t1 and t2 have VALID scans
     expect(stats.checkInRate).toBeCloseTo(66.67) // 2/3 * 100, rounded to 2 decimals
+  })
+})
+
+describe('@nzila/zonga-events — event economics', () => {
+  it('exposes the public API through the barrel file', () => {
+    expect(zongaEvents.computeEventRevenueSummary).toBeTypeOf('function')
+    expect(zongaEvents.calculateRefund).toBeTypeOf('function')
+    expect(zongaEvents.DEFAULT_EVENT_FEE_MODEL).toEqual(DEFAULT_EVENT_FEE_MODEL)
+  })
+
+  it('converts fee models into platform and processing rules', () => {
+    const rules = feeModelToRules(DEFAULT_EVENT_FEE_MODEL)
+
+    expect(rules).toHaveLength(2)
+    expect(rules[0]).toMatchObject({
+      id: 'evtfee_default_platform',
+      orgId: '*',
+      ratePercent: 7.5,
+      flatAmount: 0,
+    })
+    expect(rules[1]).toMatchObject({
+      id: 'evtfee_default_processing',
+      ratePercent: 1.5,
+      flatAmount: 0.1,
+    })
+  })
+
+  it('computes class revenue for sold and unsold tiers', () => {
+    const revenue = computeTicketClassRevenue([
+      {
+        tier: TicketTier.GENERAL,
+        totalQuantity: 100,
+        soldQuantity: 25,
+        reservedQuantity: 0,
+        availableQuantity: 75,
+        price: 10,
+        currency: 'USD',
+      },
+      {
+        tier: TicketTier.VIP,
+        totalQuantity: 20,
+        soldQuantity: 0,
+        reservedQuantity: 0,
+        availableQuantity: 20,
+        price: 50,
+        currency: 'USD',
+      },
+    ] satisfies readonly TierCapacity[])
+
+    expect(revenue).toEqual([
+      {
+        tier: TicketTier.GENERAL,
+        unitsSold: 25,
+        grossRevenueMinor: 25_000,
+        averagePriceMinor: 1_000,
+        discountsAppliedMinor: 0,
+      },
+      {
+        tier: TicketTier.VIP,
+        unitsSold: 0,
+        grossRevenueMinor: 0,
+        averagePriceMinor: 0,
+        discountsAppliedMinor: 0,
+      },
+    ])
+  })
+
+  it('calculates cancellation, full-window, partial-window, and denied refunds', () => {
+    const eventStartsAt = new Date('2025-06-20T20:00:00Z')
+    const policy = {
+      eventId: 'event-1',
+      fullRefundBeforeHours: 48,
+      partialRefundPercent: 50,
+      partialRefundBeforeHours: 24,
+      noRefundAfterHours: 0,
+      cancellationFullRefund: true,
+    }
+
+    expect(calculateRefund({
+      originalAmountMinor: 10_000,
+      eventStartsAt,
+      requestedAt: new Date('2025-06-20T10:00:00Z'),
+      eventCancelled: true,
+      policy,
+    })).toMatchObject({ eligible: true, refundAmountMinor: 10_000, refundPercent: 100 })
+
+    expect(calculateRefund({
+      originalAmountMinor: 10_000,
+      eventStartsAt,
+      requestedAt: new Date('2025-06-18T18:00:00Z'),
+      eventCancelled: false,
+      policy,
+    })).toMatchObject({ eligible: true, refundAmountMinor: 10_000, refundPercent: 100 })
+
+    expect(calculateRefund({
+      originalAmountMinor: 10_000,
+      eventStartsAt,
+      requestedAt: new Date('2025-06-19T12:00:00Z'),
+      eventCancelled: false,
+      policy,
+    })).toMatchObject({ eligible: true, refundAmountMinor: 5_000, refundPercent: 50 })
+
+    expect(calculateRefund({
+      originalAmountMinor: 10_000,
+      eventStartsAt,
+      requestedAt: new Date('2025-06-20T18:00:00Z'),
+      eventCancelled: false,
+      policy,
+    })).toMatchObject({ eligible: false, refundAmountMinor: 0, refundPercent: 0 })
+  })
+
+  it('computes event revenue summaries with the selected fee model', () => {
+    const summary = computeEventRevenueSummary({
+      eventId: 'event-1',
+      totalRefundsMinor: 2_000,
+      feeModel: PREMIUM_EVENT_FEE_MODEL,
+      tiers: [
+        {
+          tier: TicketTier.GENERAL,
+          totalQuantity: 100,
+          soldQuantity: 25,
+          reservedQuantity: 0,
+          availableQuantity: 75,
+          price: 10,
+          currency: 'USD',
+        },
+        {
+          tier: TicketTier.VIP,
+          totalQuantity: 20,
+          soldQuantity: 4,
+          reservedQuantity: 0,
+          availableQuantity: 16,
+          price: 50,
+          currency: 'USD',
+        },
+      ],
+    })
+
+    expect(summary.ticketClassRevenue).toHaveLength(2)
+    expect(summary.grossRevenueMinor).toBe(45_000)
+    expect(summary.netRevenueMinor).toBe(43_000)
+    expect(summary.platformFeesMinor).toBe(2_150)
+    expect(summary.processingFeesMinor).toBe(655)
+    expect(summary.distributableMinor).toBe(40_195)
   })
 })

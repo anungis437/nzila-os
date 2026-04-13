@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
-    "clean": "rm -rf .next .turbo node_modules"
+    "clean": "rm -rf .next .turbo node_modules",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/ai-sdk": "workspace:*",
@@ -21,13 +22,16 @@
     "@nzila/commerce-observability": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/fx": "workspace:*",
+    "@nzila/governed-workflow": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/qbo": "workspace:*",
+    "@nzila/schema-core": "workspace:*",
     "@nzila/tax": "workspace:*",
     "@nzila/ui": "workspace:*",
     "clsx": "^2.1.0",

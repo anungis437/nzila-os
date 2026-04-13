@@ -19,3 +19,9 @@ export {
   type EventStore,
   InMemoryEventStore,
 } from './store.js'
+
+export {
+  type DurableEventBus,
+  type DurableEventBusOptions,
+  type DurableSubscription,
+} from './durable-bus.js'

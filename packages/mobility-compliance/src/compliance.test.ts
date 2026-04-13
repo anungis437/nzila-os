@@ -15,6 +15,7 @@ import {
 import type { ComplianceWorkflowState } from './workflows'
 import { computeRiskScore, requiresTwoStepApproval } from './risk'
 import type { RiskSignal } from './risk'
+import { buildEvidenceEntry, buildEvidencePack } from './evidence'
 
 // ── Workflow Tests ──────────────────────────────────────────────────────────
 
@@ -97,6 +98,15 @@ describe('Compliance Workflows', () => {
       expect(deriveCaseStatus(state)).toBe('compliance_review')
     })
 
+    it('returns document_verification for document verification step', () => {
+      const state: ComplianceWorkflowState = {
+        ...initWorkflow('case-001'),
+        currentStep: 'document_verification',
+        completedSteps: ['kyc_intake', 'aml_screening', 'pep_check', 'source_of_funds_review'],
+      }
+      expect(deriveCaseStatus(state)).toBe('document_verification')
+    })
+
     it('returns approved after all steps completed and currentStep advances past last', () => {
       // When completedSteps has all 6 steps and currentStep is not a named check
       const state: ComplianceWorkflowState = {
@@ -171,6 +181,159 @@ describe('Compliance Workflows', () => {
       expect(state.completedSteps).toEqual([])
       expect(result.completedSteps).toContain('kyc_intake')
     })
+
+    it('keeps current step unchanged when passing final step (no next step)', () => {
+      const state: ComplianceWorkflowState = {
+        ...initWorkflow('case-001'),
+        currentStep: 'compliance_approval',
+        completedSteps: [
+          'kyc_intake',
+          'aml_screening',
+          'pep_check',
+          'source_of_funds_review',
+          'document_verification',
+        ],
+      }
+
+      const result = advanceWorkflow(state, {
+        passed: true,
+        eventType: 'compliance_approved',
+        severity: 'info',
+        details: {},
+      })
+
+      expect(result.currentStep).toBe('compliance_approval')
+      expect(result.completedSteps).toHaveLength(6)
+    })
+
+    it('adds info-level penalty for info severity failures', () => {
+      const state = initWorkflow('case-001')
+      const result = advanceWorkflow(state, {
+        passed: false,
+        eventType: 'kyc_initiated',
+        severity: 'info',
+        details: {},
+      })
+
+      expect(result.riskScore).toBe(5)
+    })
+
+    it('returns intake when step is not explicitly mapped and not all steps are complete', () => {
+      const state: ComplianceWorkflowState = {
+        ...initWorkflow('case-001'),
+        currentStep: 'pep_check',
+        completedSteps: ['kyc_intake'],
+      }
+
+      expect(deriveCaseStatus(state)).toBe('intake')
+    })
+  })
+})
+
+describe('Evidence Pack Builder', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-03-10T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('builds an evidence entry with optional attachments', () => {
+    const entry = buildEvidenceEntry(
+      'aml_screening',
+      {
+        passed: false,
+        eventType: 'aml_flag',
+        severity: 'warning',
+        details: { reason: 'high-risk jurisdiction' },
+      },
+      'case-123',
+      'user-123',
+      [{ name: 'report.pdf', mimeType: 'application/pdf', url: 'https://example.com/report.pdf' }],
+    )
+
+    expect(entry.stepId).toBe('aml_screening')
+    expect(entry.eventType).toBe('aml_flag')
+    expect(entry.caseId).toBe('case-123')
+    expect(entry.actorId).toBe('user-123')
+    expect(entry.attachments).toHaveLength(1)
+  })
+
+  it('builds an evidence entry with empty attachments by default', () => {
+    const entry = buildEvidenceEntry(
+      'kyc_intake',
+      {
+        passed: true,
+        eventType: 'kyc_completed',
+        severity: 'info',
+        details: {},
+      },
+      'case-124',
+      'user-124',
+    )
+
+    expect(entry.attachments).toEqual([])
+  })
+
+  it('builds pack summary with pass/fail checks and highest severity', () => {
+    const entries = [
+      buildEvidenceEntry(
+        'kyc_intake',
+        { passed: true, eventType: 'kyc_completed', severity: 'info', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+      buildEvidenceEntry(
+        'aml_screening',
+        { passed: false, eventType: 'aml_flag', severity: 'warning', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+      buildEvidenceEntry(
+        'pep_check',
+        { passed: false, eventType: 'risk_escalation', severity: 'critical', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+      buildEvidenceEntry(
+        'document_verification',
+        { passed: true, eventType: 'document_verified', severity: 'info', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+      buildEvidenceEntry(
+        'compliance_approval',
+        { passed: true, eventType: 'compliance_approved', severity: 'info', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+      buildEvidenceEntry(
+        'source_of_funds_review',
+        { passed: false, eventType: 'compliance_rejected', severity: 'critical', details: {} },
+        'case-200',
+        'auditor-1',
+      ),
+    ]
+
+    const pack = buildEvidencePack('case-200', 'org-200', entries)
+
+    expect(pack.caseId).toBe('case-200')
+    expect(pack.orgId).toBe('org-200')
+    expect(pack.summary.totalSteps).toBe(6)
+    expect(pack.summary.completedSteps).toBe(6)
+    expect(pack.summary.passedChecks).toBe(3)
+    expect(pack.summary.failedChecks).toBe(3)
+    expect(pack.summary.highestSeverity).toBe('critical')
+  })
+
+  it('defaults highest severity to info for empty entries', () => {
+    const pack = buildEvidencePack('case-empty', 'org-empty', [])
+    expect(pack.summary.highestSeverity).toBe('info')
+    expect(pack.summary.completedSteps).toBe(0)
+    expect(pack.summary.passedChecks).toBe(0)
+    expect(pack.summary.failedChecks).toBe(0)
   })
 })
 

@@ -22,6 +22,7 @@ import {
   evaluateBudgetAlerts,
   DEFAULT_ALERT_THRESHOLDS,
   type OrgBudget,
+  type BudgetThreshold,
 } from '../alerts.js';
 
 // ── Quotas ────────────────────────────────────────────────────────────────────
@@ -79,6 +80,28 @@ describe('Quota Enforcement', () => {
     expect(usage[1]!.status).toBe('ok');
   });
 
+  it('returns exceeded status when usage meets or exceeds limit', () => {
+    const policies: QuotaPolicy[] = [
+      { ...policy, orgId: 'org_1' },
+    ];
+    const usageData = new Map([['ai_requests', 1000]]);
+
+    const usage = getQuotaUsage('org_1', policies, usageData);
+    expect(usage[0]!.status).toBe('exceeded');
+    expect(usage[0]!.utilizationPercent).toBe(100);
+  });
+
+  it('defaults to zero when resource has no usage data', () => {
+    const policies: QuotaPolicy[] = [
+      { ...policy, orgId: 'org_1', resource: 'egress_gb', limit: 100, enforcement: 'soft' },
+    ];
+    const usageData = new Map<string, number>();
+
+    const usage = getQuotaUsage('org_1', policies, usageData);
+    expect(usage[0]!.current).toBe(0);
+    expect(usage[0]!.status).toBe('ok');
+  });
+
   it('has sensible default policies', () => {
     expect(DEFAULT_QUOTA_POLICIES.length).toBeGreaterThan(5);
     for (const p of DEFAULT_QUOTA_POLICIES) {
@@ -92,6 +115,27 @@ describe('Quota Enforcement', () => {
 // ── Recommendations ───────────────────────────────────────────────────────────
 
 describe('FinOps Recommendations', () => {
+  it('skips AI recommendation when tokens per request are within threshold', () => {
+    const snapshots: UsageSnapshot[] = [
+      {
+        orgId: 'org_1',
+        period: '2025-01',
+        aiRequests: 1000,
+        aiTokensUsed: 500_000,
+        storageGb: 1,
+        computeHours: 50,
+        egressGb: 1,
+        dbConnectionPeak: 5,
+        integrationCalls: 10,
+        avgResponseTimeMs: 200,
+      },
+    ];
+
+    const recs = generateRecommendations(snapshots);
+    const aiRec = recs.find((r) => r.category === 'ai-optimization');
+    expect(aiRec).toBeUndefined();
+  });
+
   it('generates AI optimization recommendation for verbose prompts', () => {
     const snapshots: UsageSnapshot[] = [
       {
@@ -301,6 +345,32 @@ describe('Budget Alerts', () => {
     expect(alerts[0]!.severity).toBe('critical');
     expect(alerts[1]!.severity).toBe('warning');
     expect(alerts[2]!.severity).toBe('info');
+  });
+
+  it('sorts by utilization when severity is the same', () => {
+    const budgets: OrgBudget[] = [
+      { orgId: 'org_a', resource: 'storage', limit: 100, period: 'daily', currentSpend: 60 },
+      { orgId: 'org_b', resource: 'compute', limit: 100, period: 'daily', currentSpend: 70 },
+    ];
+
+    const alerts = evaluateBudgetAlerts(budgets);
+    expect(alerts).toHaveLength(2);
+    // Both are 'info' severity — higher utilization first
+    expect(alerts[0]!.orgId).toBe('org_b');
+    expect(alerts[1]!.orgId).toBe('org_a');
+  });
+
+  it('generates block action message with custom threshold', () => {
+    const budgets: OrgBudget[] = [
+      { orgId: 'org_1', resource: 'ai_requests', limit: 100, period: 'daily', currentSpend: 120 },
+    ];
+    const thresholds: BudgetThreshold[] = [
+      { percent: 100, severity: 'critical', action: 'block' },
+    ];
+
+    const alerts = evaluateBudgetAlerts(budgets, thresholds);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]!.message).toContain('blocked until the next billing period');
   });
 
   it('has sensible default thresholds', () => {

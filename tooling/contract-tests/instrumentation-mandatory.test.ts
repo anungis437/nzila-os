@@ -44,18 +44,28 @@ describe('Instrumentation mandatory', () => {
       ).toBe(true)
     })
 
-    it(`${app} — instrumentation.ts calls initOtel`, () => {
+    it(`${app} — instrumentation.ts calls initOtel or createAppBoot`, () => {
       if (!existsSync(instrPath)) return
       const content = readFileSync(instrPath, 'utf-8')
-      expect(content).toContain('initOtel')
+      const usesCanonicalBoot = content.includes('createAppBoot')
+      const usesDirectInit = content.includes('initOtel')
+      expect(
+        usesCanonicalBoot || usesDirectInit,
+        `${app}/instrumentation.ts must call createAppBoot() or initOtel()`,
+      ).toBe(true)
       expect(content).toContain('@nzila/os-core/telemetry')
     })
 
     if (!LIGHT_INSTRUMENTATION.includes(app)) {
-      it(`${app} — instrumentation.ts calls initMetrics`, () => {
+      it(`${app} — instrumentation.ts calls initMetrics or createAppBoot`, () => {
         if (!existsSync(instrPath)) return
         const content = readFileSync(instrPath, 'utf-8')
-        expect(content).toContain('initMetrics')
+        const usesCanonicalBoot = content.includes('createAppBoot')
+        const usesDirectMetrics = content.includes('initMetrics')
+        expect(
+          usesCanonicalBoot || usesDirectMetrics,
+          `${app}/instrumentation.ts must call createAppBoot() or initMetrics()`,
+        ).toBe(true)
       })
     }
   }

@@ -46,6 +46,23 @@ describe('env detection', () => {
     process.env.GITHUB_REF = 'refs/heads/main'
     expect(getEnvironment()).toBe('STAGING')
   })
+
+  it('defaults to STAGING in CI without specific ref or event', () => {
+    process.env.CI = 'true'
+    // no GITHUB_REF, no GITHUB_EVENT_NAME
+    expect(getEnvironment()).toBe('STAGING')
+  })
+
+  it('handles case-insensitive ENVIRONMENT env var', () => {
+    process.env.ENVIRONMENT = 'staging'
+    expect(getEnvironment()).toBe('STAGING')
+  })
+
+  it('ignores invalid ENVIRONMENT value and falls through', () => {
+    process.env.ENVIRONMENT = 'BANANA'
+    // Falls through to CI check → no CI → LOCAL
+    expect(getEnvironment()).toBe('LOCAL')
+  })
 })
 
 describe('isProtectedEnvironment', () => {
@@ -71,12 +88,28 @@ describe('allowsDebugLogging', () => {
     expect(allowsDebugLogging('LOCAL')).toBe(true)
   })
 
+  it('allows debug for PREVIEW', () => {
+    expect(allowsDebugLogging('PREVIEW')).toBe(true)
+  })
+
+  it('allows debug for STAGING', () => {
+    expect(allowsDebugLogging('STAGING')).toBe(true)
+  })
+
   it('blocks debug for PRODUCTION', () => {
     expect(allowsDebugLogging('PRODUCTION')).toBe(false)
   })
 })
 
 describe('allowsAIExperimental', () => {
+  it('allows AI for LOCAL', () => {
+    expect(allowsAIExperimental('LOCAL')).toBe(true)
+  })
+
+  it('allows AI for PREVIEW', () => {
+    expect(allowsAIExperimental('PREVIEW')).toBe(true)
+  })
+
   it('allows AI for STAGING', () => {
     expect(allowsAIExperimental('STAGING')).toBe(true)
   })

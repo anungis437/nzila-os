@@ -1,4 +1,5 @@
 import { AuthProvider } from "@nzila/platform-auth/entra/client";
+import { NzilaAppShell } from "@nzila/platform-shell";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -31,7 +32,9 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="en" className={poppins.variable}>
-        <body className="font-poppins antialiased">{children}</body>
+        <body className="font-poppins antialiased">
+          <NzilaAppShell moduleId="abr">{children}</NzilaAppShell>
+        </body>
       </html>
     </AuthProvider>
   );

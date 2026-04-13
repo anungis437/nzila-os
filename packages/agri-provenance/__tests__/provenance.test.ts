@@ -29,6 +29,17 @@ describe('computeHash', () => {
     const h2 = computeHash({ a: 1, b: 2 })
     expect(h1).toBe(h2)
   })
+
+  it('hashes non-object values (array, string, null)', () => {
+    const hArr = computeHash([1, 2, 3])
+    const hStr = computeHash('hello')
+    const hNull = computeHash(null)
+    expect(hArr).toHaveLength(64)
+    expect(hStr).toHaveLength(64)
+    expect(hNull).toHaveLength(64)
+    // All different
+    expect(new Set([hArr, hStr, hNull]).size).toBe(3)
+  })
 })
 
 describe('createProvenanceRecord', () => {
@@ -193,6 +204,21 @@ describe('verifyProvenanceChain', () => {
       ...chain,
       entries: chain.entries.map((e, i) =>
         i === 0 ? { ...e, hash: 'tampered' } : e,
+      ),
+    }
+    expect(verifyProvenanceChain(tampered)).toBe(false)
+  })
+
+  it('rejects a chain with tampered previousHash', () => {
+    const entries = [
+      { entityType: 'crop', subjectId: 'a', action: 'create', timestamp: '2025-01-01T00:00:00Z' },
+      { entityType: 'crop', subjectId: 'b', action: 'create', timestamp: '2025-01-02T00:00:00Z' },
+    ]
+    const chain = buildProvenanceChain('org_1', entries)
+    const tampered = {
+      ...chain,
+      entries: chain.entries.map((e, i) =>
+        i === 1 ? { ...e, previousHash: 'tampered' } : e,
       ),
     }
     expect(verifyProvenanceChain(tampered)).toBe(false)

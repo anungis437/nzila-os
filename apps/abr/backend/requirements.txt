@@ -17,7 +17,7 @@ azure-keyvault-secrets>=4.7.0
 
 # Clerk authentication
 pyjwt>=2.8.0
-cryptography>=43.0.1
+cryptography>=46.0.5
 
 # Utilities
 python-dotenv>=1.0.0

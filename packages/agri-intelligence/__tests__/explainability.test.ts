@@ -5,6 +5,7 @@ import {
   createInsight,
   assertExplainable,
 } from '../src/explainability'
+import * as agriIntelligence from '../src/index'
 
 describe('createRecommendation', () => {
   it('builds a valid recommendation with explainability', () => {
@@ -24,6 +25,22 @@ describe('createRecommendation', () => {
     expect(rec.explanation).toBe('Soil moisture below threshold')
     expect(rec.confidenceLevel).toBe('HIGH')
     expect(rec.generatedAt).toBeTruthy()
+  })
+
+  it('defaults actionable fields when no action metadata is provided', () => {
+    const rec = createRecommendation({
+      type: 'monitor',
+      title: 'Watch field',
+      priority: 'low',
+      explanation: 'Observation only',
+      sourceDataRefs: [{ type: 'sensor', id: 's2' }],
+      confidenceLevel: 'LOW',
+      modelVersion: 'v1.1',
+    })
+
+    expect(rec.actionable).toBe(false)
+    expect(rec.suggestedAction).toBeNull()
+    expect(rec.expiresAt).toBeNull()
   })
 })
 
@@ -61,6 +78,21 @@ describe('createInsight', () => {
     expect(insight.id).toMatch(/^insight_/)
     expect(insight.metricValue).toBe(12)
     expect(insight.comparisonPeriod).toBe('2024 vs 2023')
+  })
+
+  it('defaults optional insight fields to null', () => {
+    const insight = createInsight({
+      type: 'trend',
+      title: 'Steady output',
+      explanation: 'No sharp change detected',
+      sourceDataRefs: [{ type: 'report', id: 'r1' }],
+      confidenceLevel: 'MEDIUM',
+      modelVersion: 'v3.0',
+    })
+
+    expect(insight.metricValue).toBeNull()
+    expect(insight.metricUnit).toBeNull()
+    expect(insight.comparisonPeriod).toBeNull()
   })
 })
 
@@ -113,5 +145,26 @@ describe('assertExplainable', () => {
         generatedAt: new Date().toISOString(),
       }),
     ).toThrow('INTELLIGENCE_CONTRACT_VIOLATION')
+  })
+
+  it('throws for missing confidenceLevel', () => {
+    expect(() =>
+      assertExplainable({
+        explanation: 'ok',
+        sourceDataRefs: [{ type: 'a', id: 'b' }],
+        confidenceLevel: '' as 'LOW',
+        modelVersion: 'v1',
+        generatedAt: new Date().toISOString(),
+      }),
+    ).toThrow('INTELLIGENCE_CONTRACT_VIOLATION')
+  })
+})
+
+describe('barrel exports', () => {
+  it('exports explainability and analytics helpers from the package entrypoint', () => {
+    expect(agriIntelligence.createRecommendation).toBe(createRecommendation)
+    expect(agriIntelligence.createAlert).toBe(createAlert)
+    expect(agriIntelligence.createInsight).toBe(createInsight)
+    expect(typeof agriIntelligence.computeLossRate).toBe('function')
   })
 })

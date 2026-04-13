@@ -81,7 +81,7 @@ For a full non-technical overview, see [README.business.md](README.business.md).
 ## Repository Map
 
 ```
-apps/                      13 deployable applications
+apps/                      17 deployable applications
 ├── web/                   Public marketing site (Next.js, port 3000)
 ├── console/               Internal ops console — governance, finance, ML, AI (Next.js, port 3001)
 ├── partners/              Partner portal — entitlement-gated (Next.js, port 3002)
@@ -92,8 +92,12 @@ apps/                      13 deployable applications
 ├── flow/                  Full commerce vertical (Next.js, port 3007)
 ├── cfo/                   CFO / finance (Next.js, port 3008)
 ├── trade/                 Trade management (Next.js, port 3009)
-├── agrimo/                 Agri field operations (Next.js, port 3010)
+├── agrimo/                Agri field operations (Next.js, port 3010)
 ├── zonga/                 Zonga (Next.js, port 3011)
+├── control-plane/         Platform control plane (Next.js, port 3012)
+├── mobility/              Investment migration advisory (Next.js, port 3013)
+├── mobility-client-portal/ Client-facing mobility portal (Next.js, port 3014)
+├── platform-admin/        Platform administration (Next.js, port 3015)
 └── orchestrator-api/      Fastify API orchestrator (rate-limited, helmet-secured)
 
 packages/                  58+ shared packages (see Packages section below)
@@ -341,7 +345,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architectural overview.
 ## Testing
 
 ```bash
-pnpm test              # 7,669 unit tests (Vitest) across 304 files
+pnpm test              # 7,669 unit tests (Vitest) across 1,000+ files
 pnpm contract-tests    # 5,000+ architectural invariant checks
 pnpm lint              # ESLint across all workspaces
 pnpm typecheck         # tsc --noEmit across all workspaces
@@ -354,8 +358,8 @@ pnpm typecheck         # tsc --noEmit across all workspaces
 | **Unit** | Vitest | 7,669 | Component logic, services, utilities, schemas |
 | **Contract** | Custom | 5,000+ | Org scoping, stack authority, SDK boundaries, governance rules |
 | **E2E** | Playwright | Per-app | User workflows (auth-gated) |
-| **Security** | Gitleaks, CodeQL, Trivy | CI | Secrets, static analysis, container vulnerabilities |
-| **Load** | Planned | — | Rate limiting validation |
+| **Security** | Gitleaks, CodeQL, Trivy, DAST | CI | Secrets, SAST, container vulnerabilities, dynamic analysis |
+| **Load** | k6 | 3 profiles | Baseline (10K), scale (100K), scale (1M) concurrency |
 
 All tests run on every PR via `ci.yml`. Contract tests also run on a nightly schedule.
 

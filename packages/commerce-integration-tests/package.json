@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@nzila/commerce-core": "workspace:*",

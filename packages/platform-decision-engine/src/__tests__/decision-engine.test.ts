@@ -50,6 +50,8 @@ import {
   listDecisionsByOrg,
   updateDecisionStatus,
   appendDecisionReview,
+  saveDecisionFeedback,
+  loadDecisionFeedback,
 } from '../store'
 import { recordDecisionFeedback } from '../feedback'
 import { createAuditEntry, emitAuditEvent, loadAuditTrail } from '../audit'
@@ -59,6 +61,7 @@ import type { DecisionRecord, DecisionEngineInput } from '../types'
 import { ENGINE_VERSION } from '../types'
 import type { Anomaly } from '@nzila/platform-anomaly-engine'
 import type { CrossAppInsight, OperationalSignal } from '@nzila/platform-intelligence'
+import * as decisionEngineBarrel from '../index'
 
 // ── Test fixtures ───────────────────────────────────────────────────────────
 
@@ -419,6 +422,14 @@ describe('@nzila/platform-decision-engine', () => {
       expect(summary.by_severity.CRITICAL).toBe(1)
       expect(summary.by_category.STAFFING).toBe(2)
     })
+
+    it('does not count expired critical decisions as critical open', () => {
+      const summary = summariseDecisions([
+        makeTestRecord({ severity: 'CRITICAL', status: 'EXPIRED' }),
+      ])
+
+      expect(summary.critical_open).toBe(0)
+    })
   })
 
   // ── Evidence ──────────────────────────────────────────────────────────
@@ -449,6 +460,42 @@ describe('@nzila/platform-decision-engine', () => {
         signals: [makeTestSignal()],
       })
       expect(refs).toHaveLength(3)
+    })
+
+    it('builds evidence refs from change records', () => {
+      const refs = _evidenceFromChanges([
+        {
+          change_id: 'CHG-2026-0002',
+          title: 'Deploy worker',
+          description: 'Routine release',
+          service: 'worker',
+          environment: 'STAGING',
+          change_type: 'STANDARD',
+          risk_level: 'LOW',
+          impact_summary: 'Background job improvements',
+          requested_by: 'ops',
+          approvers_required: [],
+          approved_by: [],
+          approval_status: 'APPROVED',
+          implementation_window_start: new Date().toISOString(),
+          implementation_window_end: new Date().toISOString(),
+          rollback_plan: 'Rollback image',
+          test_evidence_refs: [],
+          linked_prs: [],
+          linked_commits: [],
+          status: 'APPROVED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ])
+
+      expect(refs).toEqual([
+        {
+          type: 'change',
+          ref_id: 'CHG-2026-0002',
+          summary: 'STANDARD: Deploy worker',
+        },
+      ])
     })
   })
 
@@ -493,6 +540,25 @@ describe('@nzila/platform-decision-engine', () => {
       expect(executable).toHaveLength(1)
       expect(blocked).toHaveLength(1)
     })
+
+    it('blocks execution when approvals are pending or the decision has expired', () => {
+      const pending = makeTestRecord({
+        severity: 'LOW',
+        required_approvals: ['director'],
+        reviewed_by: [],
+        environment_context: { environment: 'LOCAL', protected_environment: false },
+      })
+      const expired = makeTestRecord({
+        severity: 'LOW',
+        required_approvals: [],
+        environment_context: { environment: 'LOCAL', protected_environment: false },
+        expires_at: '2020-01-01T00:00:00.000Z',
+      })
+
+      expect(evaluateDecisionPolicyContext(pending).reasons).toContain('Pending approvals: director')
+      expect(evaluateDecisionPolicyContext(expired).reasons).toContain('Decision has expired')
+      expect(_filterExecutableDecisions([pending, expired])).toEqual([])
+    })
   })
 
   // ── Ranking ───────────────────────────────────────────────────────────
@@ -516,6 +582,15 @@ describe('@nzila/platform-decision-engine', () => {
       const record = makeTestRecord({ severity: 'HIGH', confidence_score: 0.9 })
       const score = computePriorityScore(record)
       expect(score).toBeGreaterThan(0)
+    })
+
+    it('prefers recent decisions over stale ones when other factors match', () => {
+      const recent = makeTestRecord({ generated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() })
+      const midAged = makeTestRecord({ generated_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString() })
+      const stale = makeTestRecord({ generated_at: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString() })
+
+      expect(computePriorityScore(recent)).toBeGreaterThan(computePriorityScore(midAged))
+      expect(computePriorityScore(midAged)).toBeGreaterThan(computePriorityScore(stale))
     })
   })
 
@@ -576,6 +651,36 @@ describe('@nzila/platform-decision-engine', () => {
       expect(updated).not.toBeNull()
       expect(updated!.reviewed_by).toContain('reviewer-1')
       expect(updated!.review_notes).toContain('Looks good')
+    })
+
+    it('returns null or empty results when records do not exist', () => {
+      expect(loadDecisionRecord('DEC-2099-9999')).toBeNull()
+      expect(updateDecisionStatus('DEC-2099-9999', 'APPROVED')).toBeNull()
+      expect(appendDecisionReview('DEC-2099-9999', 'reviewer', 'missing')).toBeNull()
+      expect(loadAllDecisions()).toEqual([])
+    })
+
+    it('saves and loads decision feedback in chronological order', () => {
+      saveDecisionFeedback({
+        decision_id: 'DEC-2025-0001',
+        actor: 'admin',
+        action: 'COMMENT',
+        note: 'First',
+        created_at: '2026-01-01T00:00:00.000Z',
+      })
+      saveDecisionFeedback({
+        decision_id: 'DEC-2025-0001',
+        actor: 'admin',
+        action: 'APPROVE',
+        note: 'Second',
+        created_at: '2026-01-02T00:00:00.000Z',
+      })
+
+      const feedback = loadDecisionFeedback('DEC-2025-0001')
+
+      expect(feedback).toHaveLength(2)
+      expect(feedback[0].note).toBe('First')
+      expect(feedback[1].note).toBe('Second')
     })
   })
 
@@ -663,6 +768,42 @@ describe('@nzila/platform-decision-engine', () => {
       const result = executeDecisionQuery('list_open', 'open decisions')
       expect(result.answer).toContain('1 open')
     })
+
+    it('classifies unknown queries', () => {
+      expect(classifyDecisionIntent('hello there')).toBe('unknown')
+    })
+
+    it('executes critical, count, detail, and fallback query branches', () => {
+      const critical = makeTestRecord({
+        decision_id: 'DEC-2026-0001',
+        severity: 'CRITICAL',
+        status: 'GENERATED',
+        title: 'Critical decision',
+      })
+      const closed = makeTestRecord({
+        decision_id: 'DEC-2026-0002',
+        severity: 'CRITICAL',
+        status: 'CLOSED',
+        title: 'Closed decision',
+      })
+
+      saveDecisionRecord(critical)
+      saveDecisionRecord(closed)
+
+      const criticalResult = executeDecisionQuery('list_critical', 'critical decisions')
+      const countResult = executeDecisionQuery('count', 'count decisions')
+      const detailHit = executeDecisionQuery('detail', 'show DEC-2026-0001')
+      const detailMiss = executeDecisionQuery('detail', 'show DEC-2026-9999')
+      const detailPrompt = executeDecisionQuery('detail', 'show me the latest decision')
+      const fallback = executeDecisionQuery('unknown', 'help')
+
+      expect(criticalResult.records).toHaveLength(1)
+      expect(countResult.answer).toContain('2 decision(s) in total')
+      expect(detailHit.answer).toContain('Found decision DEC-2026-0001')
+      expect(detailMiss.answer).toContain('No decision found with ID DEC-2026-9999')
+      expect(detailPrompt.answer).toContain('Please specify a decision ID')
+      expect(fallback.answer).toContain('I can help with decision queries')
+    })
   })
 
   // ── Export ────────────────────────────────────────────────────────────
@@ -675,6 +816,14 @@ describe('@nzila/platform-decision-engine', () => {
       expect(pack.decision_record.decision_id).toBe(record.decision_id)
       expect(pack.output_hash).toBeTruthy()
       expect(pack.exported_at).toBeTruthy()
+    })
+  })
+
+  describe('barrel exports', () => {
+    it('exposes public runtime exports from the package entrypoint', () => {
+      expect(decisionEngineBarrel.ENGINE_VERSION).toBe(ENGINE_VERSION)
+      expect(decisionEngineBarrel.generateDecisions).toBe(generateDecisions)
+      expect(decisionEngineBarrel.classifyDecisionIntent).toBe(classifyDecisionIntent)
     })
   })
 })

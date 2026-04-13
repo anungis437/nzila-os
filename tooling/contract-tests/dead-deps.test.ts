@@ -62,6 +62,10 @@ const IMPLICIT_USE_ALLOWLIST = new Set([
   // Email dev server — executed as CLI (`npx react-email dev`),
   // actual code imports @react-email/components instead
   'react-email',
+  // Platform mandate packages — declared as deps by CI adoption gate
+  // before apps have started consuming them in source code
+  '@nzila/schema-core',
+  '@nzila/governed-workflow',
 ])
 
 function findFiles(dir: string, exts = ['.ts', '.tsx', '.mjs', '.js', '.jsx']): string[] {

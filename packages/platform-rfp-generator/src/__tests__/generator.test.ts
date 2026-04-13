@@ -183,6 +183,154 @@ describe('generateRfpResponse', () => {
   })
 })
 
+describe('generateRfpResponse — alternate branches', () => {
+  it('renders non-empty blockedLicenses, unverified lockfile, invalid attestation', () => {
+    const altPack: ProcurementPack = {
+      ...mockPack,
+      sections: {
+        ...mockPack.sections,
+        security: {
+          ...mockPack.sections.security,
+          dependencyAudit: {
+            ...mockPack.sections.security.dependencyAudit,
+            blockedLicenses: ['MIT', 'Apache-2.0'],
+            lockfileIntegrity: false,
+          },
+          signedAttestation: mockPack.sections.security.signedAttestation,
+          vulnerabilitySummary: mockPack.sections.security.vulnerabilitySummary,
+        },
+      },
+    }
+    const altDashboard: AssuranceDashboard = {
+      ...mockDashboard,
+      security: { ...mockDashboard.security, attestationValid: false },
+    }
+    const input: RfpGeneratorInput = {
+      orgId: 'org-1',
+      generatedBy: 'user-1',
+      procurementPack: altPack,
+      assuranceDashboard: altDashboard,
+    }
+
+    const response = generateRfpResponse(input)
+    const securityAnswers = response.sections.find((s) => s.section === 'security')!.answers
+
+    // blockedLicenses non-empty → joined list
+    expect(securityAnswers[0]!.answer).toContain('MIT, Apache-2.0')
+    // lockfileIntegrity false → 'unverified'
+    expect(securityAnswers[2]!.answer).toContain('unverified')
+    // attestationValid false → 'invalid'
+    expect(securityAnswers[2]!.answer).toContain('invalid')
+  })
+
+  it('renders crossBorderTransfer enabled and sovereignty pending validation', () => {
+    const altPack: ProcurementPack = {
+      ...mockPack,
+      sections: {
+        ...mockPack.sections,
+        sovereignty: {
+          ...mockPack.sections.sovereignty,
+          crossBorderTransfer: true,
+          validated: false,
+        },
+      },
+    }
+    const input: RfpGeneratorInput = {
+      orgId: 'org-1',
+      generatedBy: 'user-1',
+      procurementPack: altPack,
+      assuranceDashboard: mockDashboard,
+    }
+
+    const response = generateRfpResponse(input)
+    const privacyAnswers = response.sections.find((s) => s.section === 'privacy')!.answers
+    const hostingAnswers = response.sections.find((s) => s.section === 'hosting_sovereignty')!.answers
+
+    // crossBorderTransfer true → 'enabled with safeguards'
+    expect(privacyAnswers[1]!.answer).toContain('enabled with safeguards')
+    // validated false → 'pending validation'
+    expect(privacyAnswers[1]!.answer).toContain('pending validation')
+    // hosting section → 'enabled with documented safeguards and consent'
+    expect(hostingAnswers[0]!.answer).toContain('enabled with documented safeguards and consent')
+  })
+
+  it('renders autoDelete disabled and lastPurgeAt null', () => {
+    const altPack: ProcurementPack = {
+      ...mockPack,
+      sections: {
+        ...mockPack.sections,
+        dataLifecycle: {
+          ...mockPack.sections.dataLifecycle,
+          retentionControls: {
+            ...mockPack.sections.dataLifecycle.retentionControls,
+            autoDeleteEnabled: false,
+            lastPurgeAt: null,
+          },
+        },
+      },
+    }
+    const input: RfpGeneratorInput = {
+      orgId: 'org-1',
+      generatedBy: 'user-1',
+      procurementPack: altPack,
+      assuranceDashboard: mockDashboard,
+    }
+
+    const response = generateRfpResponse(input)
+    const privacyAnswers = response.sections.find((s) => s.section === 'privacy')!.answers
+    const evidenceAnswers = response.sections.find((s) => s.section === 'evidence_auditability')!.answers
+
+    // autoDeleteEnabled false → 'disabled'
+    expect(privacyAnswers[2]!.answer).toContain('auto-delete disabled')
+    // lastPurgeAt null → 'N/A'
+    expect(evidenceAnswers[1]!.answer).toContain('N/A')
+  })
+
+  it('renders snapshotChainValid false as unverified', () => {
+    const altPack: ProcurementPack = {
+      ...mockPack,
+      sections: {
+        ...mockPack.sections,
+        governance: {
+          ...mockPack.sections.governance,
+          snapshotChainValid: false,
+        },
+      },
+    }
+    const input: RfpGeneratorInput = {
+      orgId: 'org-1',
+      generatedBy: 'user-1',
+      procurementPack: altPack,
+      assuranceDashboard: mockDashboard,
+    }
+
+    const response = generateRfpResponse(input)
+    const evidenceAnswers = response.sections.find((s) => s.section === 'evidence_auditability')!.answers
+
+    expect(evidenceAnswers[0]!.answer).toContain('unverified')
+  })
+
+  it('renders verification appendix with missing signature', () => {
+    const altPack: ProcurementPack = {
+      ...mockPack,
+      signature: undefined as any,
+    }
+    const input: RfpGeneratorInput = {
+      orgId: 'org-1',
+      generatedBy: 'user-1',
+      procurementPack: altPack,
+      assuranceDashboard: mockDashboard,
+    }
+
+    const response = generateRfpResponse(input)
+    const verificationAnswers = response.sections.find((s) => s.section === 'verification')!.answers
+
+    // sig?.keyId ?? 'N/A' and sig?.algorithm ?? 'Ed25519'
+    expect(verificationAnswers[0]!.answer).toContain('N/A')
+    expect(verificationAnswers[0]!.answer).toContain('Ed25519')
+  })
+})
+
 describe('renderRfpMarkdown', () => {
   it('renders a complete markdown document', () => {
     const input: RfpGeneratorInput = {

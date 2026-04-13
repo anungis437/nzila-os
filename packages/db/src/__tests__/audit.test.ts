@@ -11,7 +11,12 @@
  *   7. Audit immutability contract preserved
  */
 import { describe, it, expect, vi } from 'vitest'
-import { withAudit, type AuditEvent, type AuditEmitter } from '../audit'
+import {
+  withAudit,
+  createAuditedScopedDb,
+  type AuditEvent,
+  type AuditEmitter,
+} from '../audit'
 import { createScopedDb, type ScopedDb } from '../scoped'
 
 // ── Test Constants ──────────────────────────────────────────────────────────
@@ -228,5 +233,78 @@ describe('withAudit — AuditedScopedDb interface', () => {
     const auditedDb = withAudit(scopedDb, context)
 
     expect(auditedDb.auditContext).toEqual(context)
+  })
+})
+
+describe('withAudit — mandatory audit failures for thenable writes', () => {
+  function createThenableResult() {
+    return {
+      then: (onFulfilled?: (v: string) => unknown, _onRejected?: (e: unknown) => unknown) =>
+        Promise.resolve('ok').then((v) => (onFulfilled ? onFulfilled(v) : v)),
+    }
+  }
+
+  function createThenableScopedDb(orgId: string): ScopedDb {
+    return {
+      orgId,
+      select: vi.fn().mockReturnValue(Promise.resolve([])),
+      insert: vi.fn().mockReturnValue(createThenableResult()),
+      update: vi.fn().mockReturnValue(createThenableResult()),
+      delete: vi.fn().mockReturnValue(createThenableResult()),
+      transaction: vi.fn().mockImplementation(async (fn) => fn(createThenableScopedDb(orgId))),
+    }
+  }
+
+  it('rejects insert chain when emitter fails', async () => {
+    const scopedDb = createThenableScopedDb(ENTITY_ID)
+    const emitter: AuditEmitter = async () => {
+      throw new Error('audit sink unavailable')
+    }
+    const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
+
+    await expect((auditedDb.insert(mockTable as any, { kind: 'board' }) as any).then(() => 'ok')).rejects
+      .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.insert')
+  })
+
+  it('rejects update chain when emitter fails', async () => {
+    const scopedDb = createThenableScopedDb(ENTITY_ID)
+    const emitter: AuditEmitter = async () => {
+      throw new Error('audit sink unavailable')
+    }
+    const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
+
+    await expect((auditedDb.update(mockTable as any, { status: 'held' }) as any).then(() => 'ok')).rejects
+      .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.update')
+  })
+
+  it('rejects delete chain when emitter fails', async () => {
+    const scopedDb = createThenableScopedDb(ENTITY_ID)
+    const emitter: AuditEmitter = async () => {
+      throw new Error('audit sink unavailable')
+    }
+    const auditedDb = withAudit(scopedDb, { actorId: ACTOR_ID, orgId: ENTITY_ID }, emitter)
+
+    await expect((auditedDb.delete(mockTable as any) as any).then(() => 'ok')).rejects
+      .toThrow('[AUDIT:MANDATORY] Audit emission failed for meetings.delete')
+  })
+})
+
+describe('createAuditedScopedDb — input validation', () => {
+  it('throws when orgId is missing', () => {
+    expect(() => createAuditedScopedDb({ orgId: '' as any, actorId: ACTOR_ID })).toThrow(
+      'requires a non-empty orgId',
+    )
+  })
+
+  it('throws when actorId is missing', () => {
+    expect(() => createAuditedScopedDb({ orgId: ENTITY_ID, actorId: '' as any })).toThrow(
+      'requires a non-empty actorId',
+    )
+  })
+
+  it('creates audited db with valid options', () => {
+    const db = createAuditedScopedDb({ orgId: ENTITY_ID, actorId: ACTOR_ID })
+    expect(db.orgId).toBe(ENTITY_ID)
+    expect(db.auditContext.actorId).toBe(ACTOR_ID)
   })
 })

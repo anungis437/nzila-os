@@ -9,6 +9,7 @@
  * RGT-6: Dispute FSM transitions
  */
 import { describe, it, expect } from 'vitest'
+import { FeeType } from '@nzila/zonga-economics'
 import {
   validateSplits,
   isFullySigned,
@@ -23,6 +24,12 @@ import {
   checkPayoutReadiness,
   summarizeRoyalties,
 } from './royalties'
+import { computeRoyalty } from './royalty-engine'
+import {
+  generatePayoutProof,
+  markProofDisbursed,
+  verifyProofIntegrity,
+} from './payout-proof'
 import {
   canFileDispute,
   canTransitionDispute,
@@ -46,6 +53,7 @@ import type {
   RoyaltyAccrual,
   RightsDispute,
 } from './types'
+import * as zongaRights from './index'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -455,6 +463,200 @@ describe('RGT-4: Royalty computation determinism', () => {
     expect(summary.byTrigger[RoyaltyTrigger.STREAM]!.units).toBe(3000)
     expect(summary.byTrigger[RoyaltyTrigger.DOWNLOAD]!.units).toBe(50)
   })
+
+  it('computeRoyalty returns zeroed result when units are non-positive', () => {
+    const result = computeRoyalty({
+      assetId: 'asset-1',
+      orgId: 'org-1',
+      trigger: RoyaltyTrigger.STREAM,
+      units: 0,
+      ratePerUnitMinor: 23,
+      splits: [makeSplitEntry({ holderId: 'a', percentage: 100 })],
+      now: new Date('2025-01-01T00:00:00.000Z'),
+    })
+
+    expect(result.grossAmountMinor).toBe(0)
+    expect(result.netDistributableMinor).toBe(0)
+    expect(result.splits).toEqual([])
+    expect(result.calculationHash).toBeTruthy()
+  })
+
+  it('computeRoyalty rejects split totals that do not sum to 100%', () => {
+    expect(() =>
+      computeRoyalty({
+        assetId: 'asset-1',
+        orgId: 'org-1',
+        trigger: RoyaltyTrigger.STREAM,
+        units: 100,
+        ratePerUnitMinor: 10,
+        splits: [
+          makeSplitEntry({ holderId: 'a', percentage: 60 }),
+          makeSplitEntry({ holderId: 'b', percentage: 30 }),
+        ],
+        now: new Date('2025-01-01T00:00:00.000Z'),
+      }),
+    ).toThrow('Splits must sum to 100%')
+  })
+
+  it('computeRoyalty assigns rounding remainder to the first holder and falls back unknown trigger to stream', () => {
+    const result = computeRoyalty({
+      assetId: 'asset-2',
+      orgId: 'org-1',
+      trigger: 'unknown_trigger' as RoyaltyTrigger,
+      units: 1,
+      ratePerUnitMinor: 101,
+      splits: [
+        makeSplitEntry({ holderId: 'a', holderName: 'Artist A', percentage: 50 }),
+        makeSplitEntry({ holderId: 'b', holderName: 'Artist B', percentage: 50 }),
+      ],
+      feeRules: [],
+      now: new Date('2025-01-01T00:00:00.000Z'),
+    })
+
+    expect(result.revenueSource).toBe('stream')
+    expect(result.netDistributableMinor).toBe(101)
+    expect(result.splits[0]!.netShareMinor).toBe(51)
+    expect(result.splits[1]!.netShareMinor).toBe(50)
+  })
+
+  it('computeRoyalty categorizes platform, processing, and tax fees', () => {
+    const customRules = [
+      {
+        id: 'platform',
+        orgId: 'org-1',
+        feeType: FeeType.PLATFORM_COMMISSION,
+        revenueSource: 'stream',
+        ratePercent: 10,
+        flatAmount: 0,
+        currency: 'USD',
+        minAmount: 0,
+        maxAmount: null,
+        isActive: true,
+        effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+        effectiveUntil: null,
+      },
+      {
+        id: 'processing',
+        orgId: 'org-1',
+        feeType: FeeType.PAYOUT_FEE,
+        revenueSource: 'stream',
+        ratePercent: 0,
+        flatAmount: 0.5,
+        currency: 'USD',
+        minAmount: 0,
+        maxAmount: null,
+        isActive: true,
+        effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+        effectiveUntil: null,
+      },
+      {
+        id: 'tax',
+        orgId: 'org-1',
+        feeType: FeeType.TAX_WITHHOLDING,
+        revenueSource: 'stream',
+        ratePercent: 5,
+        flatAmount: 0,
+        currency: 'USD',
+        minAmount: 0,
+        maxAmount: null,
+        isActive: true,
+        effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+        effectiveUntil: null,
+      },
+    ]
+
+    const result = computeRoyalty({
+      assetId: 'asset-3',
+      orgId: 'org-1',
+      trigger: RoyaltyTrigger.STREAM,
+      units: 10,
+      ratePerUnitMinor: 100,
+      splits: [makeSplitEntry({ holderId: 'a', percentage: 100 })],
+      feeRules: customRules,
+      now: new Date('2025-01-01T00:00:00.000Z'),
+    })
+
+    expect(result.grossAmountMinor).toBe(1000)
+    expect(result.platformFeesMinor).toBe(100)
+    expect(result.processingFeesMinor).toBe(50)
+    expect(result.taxesWithheldMinor).toBe(50)
+    expect(result.netDistributableMinor).toBe(800)
+  })
+})
+
+describe('payout proof integrity', () => {
+  it('generatePayoutProof defaults providerRef to null and verifies integrity', () => {
+    const proof = generatePayoutProof({
+      payoutId: 'pay-1',
+      orgId: 'org-1',
+      recipientId: 'holder-1',
+      recipientName: 'Artist A',
+      amountMinor: 150,
+      currency: 'USD',
+      revenueSourceBreakdown: [
+        { source: 'stream', amountMinor: 100, units: 10 },
+        { source: 'download', amountMinor: 50, units: 2 },
+      ],
+      royaltyComputationHashes: ['abc123'],
+      provider: 'mobile_money',
+    })
+
+    expect(proof.providerRef).toBeNull()
+    expect(proof.status).toBe('generated')
+    expect(verifyProofIntegrity(proof)).toBe(true)
+  })
+
+  it('generatePayoutProof rejects non-positive amounts and mismatched breakdown totals', () => {
+    expect(() =>
+      generatePayoutProof({
+        payoutId: 'pay-2',
+        orgId: 'org-1',
+        recipientId: 'holder-1',
+        recipientName: 'Artist A',
+        amountMinor: 0,
+        currency: 'USD',
+        revenueSourceBreakdown: [{ source: 'stream', amountMinor: 0, units: 0 }],
+        royaltyComputationHashes: ['abc123'],
+        provider: 'bank',
+      }),
+    ).toThrow('Payout amount must be positive')
+
+    expect(() =>
+      generatePayoutProof({
+        payoutId: 'pay-3',
+        orgId: 'org-1',
+        recipientId: 'holder-1',
+        recipientName: 'Artist A',
+        amountMinor: 200,
+        currency: 'USD',
+        revenueSourceBreakdown: [{ source: 'stream', amountMinor: 150, units: 10 }],
+        royaltyComputationHashes: ['abc123'],
+        provider: 'bank',
+      }),
+    ).toThrow('Revenue breakdown total')
+  })
+
+  it('markProofDisbursed updates status and tampering fails integrity verification', () => {
+    const proof = generatePayoutProof({
+      payoutId: 'pay-4',
+      orgId: 'org-1',
+      recipientId: 'holder-1',
+      recipientName: 'Artist A',
+      amountMinor: 100,
+      currency: 'USD',
+      revenueSourceBreakdown: [{ source: 'stream', amountMinor: 100, units: 10 }],
+      royaltyComputationHashes: ['hash-1'],
+      provider: 'bank',
+    })
+
+    const disbursed = markProofDisbursed(proof, 'provider-ref-1')
+    expect(disbursed.status).toBe('disbursed')
+    expect(disbursed.providerRef).toBe('provider-ref-1')
+    expect(disbursed.disbursedAt).toBeTruthy()
+
+    const tampered = { ...proof, amountMinor: proof.amountMinor + 1 }
+    expect(verifyProofIntegrity(tampered)).toBe(false)
+  })
 })
 
 // ── RGT-5: Dispute Payout Freeze ──────────────────────────────────────
@@ -570,5 +772,14 @@ describe('RGT-6: Dispute FSM transitions', () => {
     }
     expect(status).toBe(DisputeStatus.RESOLVED)
     expect(getAvailableDisputeTransitions(status)).toHaveLength(0)
+  })
+})
+
+describe('barrel exports', () => {
+  it('exports deterministic rights APIs from the package entrypoint', () => {
+    expect(zongaRights.computeRoyalty).toBe(computeRoyalty)
+    expect(zongaRights.generatePayoutProof).toBe(generatePayoutProof)
+    expect(zongaRights.verifyProofIntegrity).toBe(verifyProofIntegrity)
+    expect(typeof zongaRights.validateSplits).toBe('function')
   })
 })
