@@ -10,6 +10,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { FeeType } from '@nzila/zonga-economics'
+import type { FeeRule } from '@nzila/zonga-economics'
 import {
   validateSplits,
   isFullySigned,
@@ -520,7 +521,7 @@ describe('RGT-4: Royalty computation determinism', () => {
   })
 
   it('computeRoyalty categorizes platform, processing, and tax fees', () => {
-    const customRules = [
+    const customRules: FeeRule[] = [
       {
         id: 'platform',
         orgId: 'org-1',
