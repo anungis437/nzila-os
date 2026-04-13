@@ -61,9 +61,24 @@ function loadYamlExceptions(): PlatformException[] {
   for (const block of blocks) {
     const lines = `app: ${block}`.split('\n')
     const get = (key: string): string => {
-      for (const line of lines) {
-        const match = line.match(new RegExp(`^\\s*${key}:\\s*[>|]?-?\\s*(.+)`, 'm'))
-        if (match) return match[1].trim().replace(/^["']|["']$/g, '')
+      for (let i = 0; i < lines.length; i++) {
+        const match = lines[i].match(new RegExp(`^\\s*${key}:\\s*(.*)$`))
+        if (!match) continue
+        const value = match[1].trim()
+        // Handle YAML folded/literal block scalars (>-, >|, >, |)
+        if (/^[>|]-?$/.test(value) || value === '') {
+          // Collect continuation lines (indented more than current key)
+          const parts: string[] = []
+          for (let j = i + 1; j < lines.length; j++) {
+            if (/^\s{6,}\S/.test(lines[j])) {
+              parts.push(lines[j].trim())
+            } else {
+              break
+            }
+          }
+          return parts.join(' ')
+        }
+        return value.replace(/^["']|["']$/g, '')
       }
       return ''
     }

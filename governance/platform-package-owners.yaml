@@ -212,6 +212,12 @@ packages:
     tier: service
     description: "Billing plan enforcement and usage metering"
 
+  platform-revenue:
+    owner: "@nzila/commerce"
+    steward: null
+    tier: service
+    description: "Cross-app revenue awareness — subscriptions, usage metrics, billing hooks"
+
   platform-notifications:
     owner: "@nzila/platform"
     steward: null
