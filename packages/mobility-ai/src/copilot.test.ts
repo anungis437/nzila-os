@@ -35,8 +35,8 @@ describe('mobility-ai copilot', () => {
           clientId: 'client-100',
           programIds: ['PT-GV', 'GR-GV'],
           eligibilityResults: [
-            { programId: 'PT-GV', eligible: true, score: 92 },
-            { programId: 'GR-GV', eligible: false, score: 41 },
+            { programId: 'PT-GV', eligible: true, score: 92, reasons: ['meets criteria'], blockers: [] },
+            { programId: 'GR-GV', eligible: false, score: 41, reasons: [], blockers: ['missing docs'] },
           ],
           additionalNotes: 'Prioritize timeline clarity.',
         },
@@ -61,7 +61,7 @@ describe('mobility-ai copilot', () => {
   })
 
   it('uses minimal prompt when optional context is absent', async () => {
-    const generateFn = vi.fn(async () => ({ text: 'ok', confidence: 0.6 }))
+    const generateFn = vi.fn(async (_prompt: string) => ({ text: 'ok', confidence: 0.6 }))
 
     const response = await generateCaseMemo(
       {
