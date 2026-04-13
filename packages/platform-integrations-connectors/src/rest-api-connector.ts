@@ -39,7 +39,7 @@ export class RestApiConnector implements ConnectorAdapter {
   }
 
   async testConnection(connection: IntegrationConnection): Promise<ConnectionTestResult> {
-    const config = connection.config as RestApiConfig
+    const config = connection.configJson as unknown as RestApiConfig
     const start = Date.now()
 
     if (!config.baseUrl) {
@@ -75,7 +75,7 @@ export class RestApiConnector implements ConnectorAdapter {
     connection: IntegrationConnection,
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
-    const config = connection.config as RestApiConfig
+    const config = connection.configJson as unknown as RestApiConfig
     const start = Date.now()
 
     const endpoint = payload.endpoint as string | undefined
@@ -139,7 +139,7 @@ export class RestApiConnector implements ConnectorAdapter {
     connection: IntegrationConnection,
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
-    const config = connection.config as RestApiConfig
+    const config = connection.configJson as unknown as RestApiConfig
     const start = Date.now()
 
     const endpoint = payload.endpoint as string | undefined

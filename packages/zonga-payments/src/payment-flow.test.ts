@@ -14,6 +14,7 @@ import {
   type PaymentIntent,
   type PaymentCapture,
 } from './types'
+import { PayoutStatus } from './types'
 import type { WalletOperationResult, CreditParams, DebitParams } from './wallet'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -96,8 +97,8 @@ function makeMockDeps(): PaymentFlowDeps {
     audit: {
       log: vi.fn().mockResolvedValue(undefined),
     } satisfies AuditLogger,
-    walletCredit: vi.fn<[CreditParams], Promise<WalletOperationResult>>().mockResolvedValue(makeWalletResult()),
-    walletDebit: vi.fn<[DebitParams], Promise<WalletOperationResult>>().mockResolvedValue(makeWalletResult()),
+    walletCredit: vi.fn().mockResolvedValue(makeWalletResult()) as unknown as (params: CreditParams) => Promise<WalletOperationResult>,
+    walletDebit: vi.fn().mockResolvedValue(makeWalletResult()) as unknown as (params: DebitParams) => Promise<WalletOperationResult>,
   }
 }
 
@@ -290,11 +291,14 @@ describe('createPaymentFlowService', () => {
         recipientId: 'recip-1',
         amount: 5000,
         currency: 'USD',
+        method: 'card' as const,
         provider: PaymentProvider.STRIPE,
-        status: 'pending' as any,
-        destination: { type: 'bank' as any, details: {} },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        destination: { type: 'bank_account' as const, accountIdentifier: 'ba_123', accountName: 'Recip' },
+        status: PayoutStatus.PENDING,
+        providerPayoutId: null,
+        batchId: null,
+        scheduledAt: new Date(),
+        completedAt: null,
       }
 
       const result = await service.initiatePayout({
@@ -320,11 +324,14 @@ describe('createPaymentFlowService', () => {
         recipientId: 'recip-1',
         amount: 5000,
         currency: 'USD',
+        method: 'card' as const,
         provider: PaymentProvider.STRIPE,
-        status: 'pending' as any,
-        destination: { type: 'bank' as any, details: {} },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        destination: { type: 'bank_account' as const, accountIdentifier: 'ba_456', accountName: 'Recip' },
+        status: PayoutStatus.PENDING,
+        providerPayoutId: null,
+        batchId: null,
+        scheduledAt: new Date(),
+        completedAt: null,
       }
 
       await expect(

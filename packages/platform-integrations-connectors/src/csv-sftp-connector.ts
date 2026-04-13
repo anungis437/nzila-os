@@ -44,7 +44,7 @@ export class CsvSftpConnector implements ConnectorAdapter {
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
     const start = Date.now()
-    const config = connection.config as CsvSftpConfig
+    const config = connection.configJson as unknown as CsvSftpConfig
     const csvContent = payload.csvContent as string | undefined
 
     if (!csvContent) {
@@ -85,7 +85,7 @@ export class CsvSftpConnector implements ConnectorAdapter {
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
     const start = Date.now()
-    const config = connection.config as CsvSftpConfig
+    const config = connection.configJson as unknown as CsvSftpConfig
     const records = payload.records as Record<string, unknown>[] | undefined
 
     if (!records || !Array.isArray(records) || records.length === 0) {

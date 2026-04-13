@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createMoMoAdapter, type MoMoConfig } from './momo.adapter'
 import { createAirtelAdapter, type AirtelConfig } from './airtel.adapter'
 import { createOrangeMoneyAdapter, type OrangeMoneyConfig } from './orange.adapter'
-import { PaymentProvider, PaymentIntentStatus, PayoutStatus, RefundStatus } from '../types'
+import { PaymentProvider, PaymentIntentStatus, PayoutStatus, RefundStatus, type PaymentMethod } from '../types'
 
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
@@ -30,8 +30,8 @@ const payoutInstruction = (provider: string) => ({
   recipientId: 'artist-1',
   amount: 5000,
   currency: 'KES',
-  method: 'mobile_money',
-  provider,
+  method: 'mobile_money' as const,
+  provider: provider as PaymentProvider,
   destination: {
     type: 'mobile_wallet' as const,
     accountIdentifier: '+254700123456',
@@ -50,7 +50,7 @@ const intentParams = (provider: string) => ({
   userId: 'user-1',
   amount: 1000,
   currency: 'KES',
-  method: 'mobile_money',
+  method: 'mobile_money' as PaymentMethod,
   provider,
   idempotencyKey: 'idem-1',
   metadata: { phoneNumber: '+254700123456' },

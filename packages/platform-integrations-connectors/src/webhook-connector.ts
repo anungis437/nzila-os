@@ -27,7 +27,7 @@ export class WebhookConnector implements ConnectorAdapter {
   }
 
   async testConnection(connection: IntegrationConnection): Promise<ConnectionTestResult> {
-    const config = connection.config as { targetUrl?: string }
+    const config = connection.configJson as unknown as { targetUrl?: string }
     const start = Date.now()
 
     if (!config.targetUrl) {
@@ -63,13 +63,13 @@ export class WebhookConnector implements ConnectorAdapter {
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
     const start = Date.now()
-    const config = connection.config as { secret?: string; signatureHeader?: string }
+    const config = connection.configJson as unknown as { secret?: string; signatureHeader?: string }
 
     // Verify inbound signature if secret is configured
     if (config.secret && payload.__signature) {
       const body = JSON.stringify(payload.__body ?? payload)
       const signature = payload.__signature as string
-      const valid = verifyHmacSignature(body, config.secret, signature, 'sha256')
+      const valid = verifyHmacSignature(body, config.secret, signature, 'hmac-sha256')
       if (!valid) {
         return {
           success: false,
@@ -99,7 +99,7 @@ export class WebhookConnector implements ConnectorAdapter {
     payload: Record<string, unknown>,
   ): Promise<ConnectorExecutionResult> {
     const start = Date.now()
-    const config = connection.config as { targetUrl?: string; secret?: string; signatureHeader?: string }
+    const config = connection.configJson as unknown as { targetUrl?: string; secret?: string; signatureHeader?: string }
 
     if (!config.targetUrl) {
       return {
@@ -116,7 +116,7 @@ export class WebhookConnector implements ConnectorAdapter {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
 
     if (config.secret) {
-      const sig = computeHmacSignature(body, config.secret, 'sha256')
+      const sig = computeHmacSignature(body, config.secret, 'hmac-sha256')
       headers[config.signatureHeader ?? 'x-signature-256'] = `sha256=${sig}`
     }
 
