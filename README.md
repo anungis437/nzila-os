@@ -1,466 +1,123 @@
 # Nzila OS
 
-> The operating system for Nzila Digital Ventures — 17 apps, 150+ packages, polyglot (TypeScript + Python/Django), with evidence-first governance, contract-enforced invariants, and org-scoped multi-tenancy.
+> A governed system platform — not a repository. Every product, every payment, every audit trail runs through one control plane with enforced invariants.
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-7%2C669%20passing-brightgreen)](#testing)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](#)
-[![pnpm](https://img.shields.io/badge/pnpm-10-F69220)](#quick-start)
+[![Contract Tests](https://img.shields.io/badge/contract%20tests-380%2B%20passing-blue)](#system-guarantees)
+[![GA Gates](https://img.shields.io/badge/GA%20gates-30%2F30-brightgreen)](#system-guarantees)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](#license)
 
 ---
 
-## What Is Nzila OS?
+## The System in 30 Seconds
 
-Nzila OS is the digital backbone that powers every Nzila venture. It is not a standalone product — it is the internal platform that all Nzila applications run on. Every business action that matters — a payment, a trade, a harvest record, a grievance filing, a compliance attestation — flows through Nzila OS with a tamper-evident audit trail, role-based access control, and automated compliance.
+Nzila OS is the operating system for Nzila Digital Ventures. It is a **governed platform** — not a collection of apps. Every business action flows through a single control plane with:
 
-### Business Domains
+- **Enforced revenue pipeline** — all financial events pass through `@nzila/platform-revenue`. No app can process payments outside it.
+- **Contract-enforced invariants** — 380+ contract tests enforce auth purity, revenue enforcement, control-plane authority, and platform drift prevention at CI time.
+- **Evidence-first audit** — every material action produces a tamper-evident audit entry with a deterministic trace ID and hash-chain verification.
+- **Org-scoped multi-tenancy** — every data query, API call, and evidence record is scoped to the authenticated organization.
 
-| Domain | Apps | Tier | What It Does |
-|--------|------|------|-------------|
-| **Union Management** | UnionEyes, ABR | FLAGSHIP | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
-| **Music & Media** | Zonga | FLAGSHIP | Artist management, royalties, content distribution |
-| **Commerce** | Flow | FLAGSHIP | Multi-vertical commerce engine, order lifecycle, pricing rules |
-| **Finance** | CFO | FLAGSHIP | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
-| **Operations** | Console, Control Plane | CORE | Governance, finance oversight, platform administration |
-| **Agriculture** | ABR, Agrimo, Cora | CORE / SUPPORT | Smallholder supply chains, compliance audits, yield intelligence |
-| **Trade** | Trade | SUPPORT | Cross-border trade management, vehicle commerce |
-| **Partners** | Partners | SUPPORT | Entitlement-gated partner portal, commissions |
-| **Compliance & Exams** | NACP Exams | SUPPORT | Examination administration, integrity proofs |
-| **Mobility** | Mobility, Mobility Client Portal | INCUBATION | Investment migration advisory (CBI/RBI), client-facing portal |
-| **Public** | Web | CORE | Marketing site, resource library |
-| **APIs** | Orchestrator API | CORE | Cross-app orchestration and integration layer |
-| **Admin** | Platform Admin | CORE | Internal admin — intelligence services management |
-
-> **Tier legend**: FLAGSHIP = revenue-generating, production-deployed · CORE = platform infrastructure · SUPPORT = specific-audience enablement · INCUBATION = early-stage. See [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
-
-For a full non-technical overview, see [README.business.md](README.business.md).
+For a deeper overview, see [docs/platform/what-is-nzila.md](docs/platform/what-is-nzila.md).
 
 ---
 
-## Platform Architecture
+## Flagship Products
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          17 APPS (Next.js + Django)                      │
-│  web │ console │ partners │ union-eyes │ abr │ cora │ agrimo │ trade │…  │
-└───────┬──────────────────────┬───────────────────────┬───────────────────┘
-        │                      │                       │
-        ▼                      ▼                       ▼
-┌───────────────┐  ┌───────────────────────┐  ┌───────────────────────────┐
-│  @nzila/ui    │  │  @nzila/os-core       │  │  @nzila/ai-sdk + ml-sdk  │
-│  Components   │  │  Policy · Evidence ·  │  │  Governed AI/ML access   │
-│  Tailwind 4   │  │  Telemetry · Config   │  │  Budget caps · Registry  │
-└───────────────┘  └───────────┬───────────┘  └───────────────────────────┘
-                               │
-        ┌──────────────────────┼──────────────────────┐
-        ▼                      ▼                      ▼
-┌───────────────┐  ┌───────────────────────┐  ┌───────────────────────────┐
-│  @nzila/db    │  │  @nzila/evidence      │  │  @nzila/blob              │
-│  Drizzle ORM  │  │  Seal · Verify ·      │  │  Azure Blob Storage      │
-│  90+ tables   │  │  Hash-chain audit     │  │  Immutable evidence      │
-└───────┬───────┘  └───────────────────────┘  └───────────────────────────┘
-        │
-        ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                     PostgreSQL 15 + Redis 7                              │
-│              Org-scoped RLS · Append-only audit · BullMQ                │
-└──────────────────────────────────────────────────────────────────────────┘
-```
+### UnionEyes
 
-### Invariants (enforced by 5,000+ contract tests)
+Union case management — grievance lifecycle, collective bargaining, elections, strike funds, evidence-sealed audit trails, federation management. Full-stack Next.js + Django. 3,000+ source files. Production-deployed.
+
+### Zonga
+
+Music distribution and streaming — artist management, royalties, content distribution, creator payouts, platform fees. Dedicated monetization layer (`zonga-monetization`, `zonga-economics`, `zonga-payments`). Production-deployed.
+
+> **Flow** (commerce engine) and **CFO** (finance dashboard) are also production-deployed revenue verticals. Full classification: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+
+---
+
+## Control Plane
+
+The **Control Plane** (`apps/control-plane/`) is the system's governance hub — the default entry point for understanding and operating the platform.
+
+| Capability | Description |
+|------------|-------------|
+| **System health** | Anomaly detection across all apps |
+| **Revenue oversight** | Financial event aggregation via `@nzila/platform-revenue` |
+| **Account governance** | Multi-tenant account management |
+| **Agent orchestration** | Workflow coordination and dispatch |
+| **Architecture compliance** | Drift monitoring and enforcement |
+
+Every app is registered in the [platform-contracts registry](packages/platform-contracts/src/registry.ts). The control plane is the lens through which the entire system is observed and governed.
+
+---
+
+## Revenue Layer
+
+`@nzila/platform-revenue` is the **mandatory** revenue pipeline. It is not optional.
+
+- **REV-001–008**: Contract tests enforce that all revenue apps bind to the pipeline and no raw payment processing occurs outside allowlisted paths.
+- **CTRL-009**: Financial-record emitters must depend on `@nzila/platform-revenue`.
+- Every `emitRevenueEvent()` call auto-generates an auditable `RevenueAuditEntry` with a deterministic `traceId`.
+
+Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
+
+---
+
+## System Guarantees
 
 | Invariant | Enforcement |
 |-----------|-------------|
-| **Org-scoped everything** | All data queries, mutations, and API routes are scoped to `orgId` |
+| **Unified auth** | All apps use `@nzila/platform-auth` — Argon2id + PG sessions, optional Entra SSO (AUTH-001–004) |
+| **Revenue pipeline** | All financial events route through `@nzila/platform-revenue` (REV-001–008) |
+| **Control-plane authority** | Every app registered, manifest-validated (CTRL-001–009) |
+| **Org-scoped everything** | All queries, mutations, API routes scoped to `orgId` |
 | **Evidence-first** | Material actions produce tamper-evident audit trails with hash chaining |
-| **Content boundary** | Apps read from `content/` — NEVER from `governance/` |
-| **SDK-only AI/ML** | Apps consume `@nzila/ai-sdk` and `@nzila/ml-sdk` — never provider SDKs directly |
-| **Auth on all routes** | Every API route calls `authorize()` from `@nzila/os-core/policy` |
-| **Stack authority** | Django-authoritative apps (ABR, UE) must not mutate domain data via Drizzle |
+| **SDK-only AI/ML** | Apps use `@nzila/ai-sdk` / `@nzila/ml-sdk` — never provider SDKs directly |
+| **Stack authority** | Django-authoritative apps (ABR, UnionEyes) must not mutate domain data via Drizzle |
+
+**30 GA gates — all passing. 380+ contract tests enforced on every PR.**
 
 ---
 
-## Repository Map
+## Products at a Glance
 
-```
-apps/                      17 deployable applications
-├── web/                   Public marketing site (Next.js, port 3000)
-├── console/               Internal ops console — governance, finance, ML, AI (Next.js, port 3001)
-├── partners/              Partner portal — entitlement-gated (Next.js, port 3002)
-├── union-eyes/            UE case management (Next.js + Django backend, port 3003)
-├── abr/                   ABR app (Next.js + Django backend, port 3004)
-├── nacp-exams/            NACP exams (Next.js, port 3005)
-├── cora/                  Agri intelligence dashboard (Next.js, port 3006)
-├── flow/                  Full commerce vertical (Next.js, port 3007)
-├── cfo/                   CFO / finance (Next.js, port 3008)
-├── trade/                 Trade management (Next.js, port 3009)
-├── agrimo/                Agri field operations (Next.js, port 3010)
-├── zonga/                 Zonga (Next.js, port 3011)
-├── control-plane/         Platform control plane (Next.js, port 3012)
-├── mobility/              Investment migration advisory (Next.js, port 3013)
-├── mobility-client-portal/ Client-facing mobility portal (Next.js, port 3014)
-├── platform-admin/        Platform administration (Next.js, port 3015)
-└── orchestrator-api/      Fastify API orchestrator (rate-limited, helmet-secured)
+| Tier | Apps | Status |
+|------|------|--------|
+| **FLAGSHIP** | UnionEyes, Zonga, Flow, CFO | Production-deployed, revenue-generating |
+| **CORE** | Console, Control Plane, Web, Orchestrator API | Deployed infrastructure |
+| **Growth** | Partners, ABR, Agrimo, NACP Exams, Trade | Pilot or support stage |
+| **INCUBATION** | Cora, Mobility, Mobility Client Portal, Platform Admin | Early-stage — not yet revenue-ready |
 
-packages/                  159 shared packages (see Packages section below)
-
-tooling/
-├── contract-tests/        Invariant enforcement tests (stack authority, governance, etc.)
-├── ai-evals/              AI evaluation harness
-├── ml/                    ML training / inference scripts
-├── ga-check/              GA readiness checker
-├── scripts/               CLI tools (thin wrappers)
-├── security/              Security artifact publishing
-├── db/                    Schema snapshot tooling
-└── ops/                   Ops pack validation
-
-content/
-├── public/                Curated markdown → nzila.app/resources/{slug}
-└── internal/              Curated markdown → console.nzila.app/docs/{slug} (auth required)
-
-governance/                Raw source-of-truth strategy & corporate docs (NEVER rendered by apps)
-ops/                       Runbooks, incident response, change management, compliance
-docs/                      Architecture decisions, domain docs, migration guides
-platform/                  Platform architecture documentation
-security/                  Red-team profiles, security tooling
-.github/workflows/         33 CI/CD pipelines (see CI section)
-```
-
-### Toolchain
-
-| Tool | Version |
-|------|---------|
-| **Package manager** | pnpm 10 with workspaces |
-| **Build orchestration** | Turborepo |
-| **Styling** | Tailwind CSS v4 |
-| **Auth** | Email/password (Argon2id + PG sessions) · Entra SSO (optional) via `@nzila/platform-auth` |
-| **Database** | PostgreSQL 15 + Drizzle ORM |
-| **CI** | GitHub Actions (34 workflows) |
+> All 17 apps are governed by the same invariants. Incubation apps are structurally identical — same auth, same evidence, same contract enforcement. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- **Node.js** ≥ 20
-- **pnpm** ≥ 10 — `npm i -g pnpm`
-- **Python** ≥ 3.11 (for ABR/UE Django backends and `packages/automation`)
-- **Auth credentials** — see `.env.example` in each app (`AUTH_SECRET` required; `AZURE_AD_*` vars for optional Entra SSO)
-
-### 1. Install & run
-
 ```bash
-pnpm install           # all TS/JS dependencies
-pnpm dev               # all apps in parallel
-pnpm dev:web           # → http://localhost:3000
-pnpm dev:console       # → http://localhost:3001
+pnpm install           # install all dependencies
+pnpm dev               # run all apps in parallel
+pnpm build             # build via Turborepo
+pnpm test              # 7,669 unit tests (Vitest)
+pnpm contract-tests    # 380+ invariant enforcement tests
 ```
 
-### 2. Configure environment
-
-Each app and Django backend has a `.env.example`. Copy and fill:
-
-```bash
-cp apps/web/.env.example apps/web/.env.local
-cp apps/console/.env.example apps/console/.env.local
-# … repeat for each app you need locally
-```
-
-### 3. Build & validate
-
-```bash
-pnpm build             # all apps + packages via Turborepo
-pnpm lint              # ESLint across all workspaces
-pnpm typecheck         # tsc --noEmit across all workspaces
-pnpm test              # Vitest unit tests
-pnpm contract-tests    # invariant enforcement tests
-```
+**Prerequisites:** Node.js ≥ 20 · pnpm ≥ 10 · Python ≥ 3.11 (for Django backends). See `.env.example` in each app for auth config.
 
 ---
 
-## Apps
-
-### Next.js Apps (11)
-
-All Next.js apps use `@nzila/platform-auth` (email/password by default, Entra SSO optional), Tailwind CSS v4, and the `@nzila/ui` component library.
-
-| App | Port | Purpose |
-|-----|------|---------|
-| `web` | 3000 | Public marketing / landing |
-| `console` | 3001 | Internal ops console (governance, finance, ML, AI, NACP integrity) |
-| `partners` | 3002 | Partner portal with row-level entitlement gating |
-| `union-eyes` | 3003 | UE case management (**Django-authoritative backend**) |
-| `abr` | 3004 | ABR app (**Django-authoritative backend**) |
-| `nacp-exams` | 3005 | NACP examinations |
-| `cora` | 3006 | Agri intelligence — yield, pricing, risk, traceability |
-| `flow` | 3007 | Full commerce vertical — quoting, orders, invoices, procurement |
-| `cfo` | 3008 | CFO finance dashboard |
-| `trade` | 3009 | Trade management |
-| `agrimo` | 3010 | Agri field ops — producers, harvests, lots, QA, warehouse, shipments |
-| `zonga` | 3011 | Zonga |
-
-### API
-
-| App | Runtime | Purpose |
-|-----|---------|---------|
-| `orchestrator-api` | Fastify | Central API orchestrator — rate-limited (200 req/min), helmet-secured |
-
-### Django Backends
-
-`apps/abr/backend/` and `apps/union-eyes/backend/` are full Django REST Framework applications. They are the **authoritative data layer** for their domains. See [docs/architecture/STACK_AUTHORITY.md](docs/architecture/STACK_AUTHORITY.md).
-
----
-
-## Packages by Domain
-
-### Platform Core
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/os-core` | Control backbone — evidence, policy, telemetry, retention, config, secrets |
-| `@nzila/db` | Drizzle ORM schema + migrations |
-| `@nzila/blob` | Azure Blob Storage abstraction |
-| `@nzila/evidence` | Evidence pack sealing and verification |
-| `@nzila/org` | Organization management |
-| `@nzila/config` | Shared TS, ESLint, Prettier configs |
-| `@nzila/ui` | Shared React component library |
-| `@nzila/cli` | CLI tooling |
-| `@nzila/webhooks` | Webhook handling |
-| `@nzila/data-lifecycle` | Data retention / lifecycle management |
-
-### Platform Infrastructure
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/platform-export` | Platform data export |
-| `@nzila/platform-isolation` | Org-level isolation |
-| `@nzila/platform-metrics` | Platform metrics collection |
-| `@nzila/platform-ops` | Operational snapshots |
-| `@nzila/platform-performance` | Performance envelopes |
-| `@nzila/platform-proof` | NACP integrity proofs, real DB-backed verification |
-| `@nzila/tools-runtime` | Tools execution runtime |
-
-### AI / ML
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/ai-core` | AI infrastructure — profiles, budget enforcement, RAG, actions |
-| `@nzila/ai-sdk` | App-facing AI client + `no-shadow-ai` ESLint rule |
-| `@nzila/ml-core` | ML infrastructure — registry, scoring, drift monitoring |
-| `@nzila/ml-sdk` | App-facing ML client + `no-shadow-ml` ESLint rule |
-
-### Agriculture
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/agri-core` | Domain primitives — enums, types, schemas, FSMs |
-| `@nzila/agri-db` | Database repositories (org-scoped) |
-| `@nzila/agri-events` | Domain event bus + integration dispatch |
-| `@nzila/agri-intelligence` | Computation library — yield, loss, payout |
-| `@nzila/agri-traceability` | Evidence packs + hash chain verification |
-| `@nzila/agri-adapters` | External adapters — weather, market, mobile-money, SMS |
-
-### Commerce
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/commerce-core` | Commerce engine core |
-| `@nzila/commerce-db` | Database layer |
-| `@nzila/commerce-events` | Event bus |
-| `@nzila/commerce-state` | State machines |
-| `@nzila/commerce-services` | Business services |
-| `@nzila/commerce-audit` | Audit layer |
-| `@nzila/commerce-evidence` | Evidence packs |
-| `@nzila/commerce-governance` | Governance rules |
-| `@nzila/commerce-observability` | Observability |
-| `@nzila/commerce-integration-tests` | Cross-package integration tests |
-| `@nzila/pricing-engine` | Pricing engine |
-
-### Trade
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/trade-core` | Trade domain core |
-| `@nzila/trade-db` | Database layer |
-| `@nzila/trade-adapters` | External adapters |
-| `@nzila/trade-cars` | Cars domain |
-
-### Finance
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/payments-stripe` | Stripe integration + webhooks |
-| `@nzila/qbo` | QuickBooks Online OAuth + sync |
-| `@nzila/tax` | Tax calendar + obligation engine |
-| `@nzila/fx` | Foreign exchange |
-
-### Communications & Integrations
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/comms-email` | Email |
-| `@nzila/comms-sms` | SMS |
-| `@nzila/comms-push` | Push notifications |
-| `@nzila/chatops-slack` | Slack ChatOps |
-| `@nzila/chatops-teams` | Teams ChatOps |
-| `@nzila/crm-hubspot` | HubSpot CRM |
-| `@nzila/integrations-core` | Integrations framework |
-| `@nzila/integrations-db` | Integrations database layer |
-| `@nzila/integrations-runtime` | Integrations execution runtime |
-
-### Domain
-
-| Package | Purpose |
-|---------|---------|
-| `@nzila/nacp-core` | NACP domain core |
-| `@nzila/zonga-core` | Zonga domain core |
-
-### Python (outside pnpm workspace)
-
-| Directory | Purpose |
-|-----------|---------|
-| `packages/automation/` | Python automation pipelines |
-| `packages/analytics/` | Python analytics & reporting |
-
----
-
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architectural overview.
-
-### Key Decisions
-
-| Decision | Detail |
-|----------|--------|
-| **Evidence-first** | Material actions → `buildEvidencePackFromAction()` → Azure Blob + hash-chained `audit_events` |
-| **Ports-and-adapters** | Domain logic depends on port interfaces, not concrete implementations |
-| **Polyglot persistence** | TypeScript/Drizzle for platform core, Python/Django for domain verticals (ABR, UE) |
-| **Stack authority** | Each app has a formally designated authoritative data layer — enforced by contract tests |
-| **RBAC** | `@nzila/platform-auth` session claims — roles: `platform_admin`, `studio_admin`, `ops`, `analyst`, `viewer` |
-| **Governance separation** | Raw strategy docs in `governance/` are never imported by app code; curated → `content/` |
-| **Contract-enforced invariants** | `tooling/contract-tests/` runs 5,000+ tests verifying architectural rules at CI time |
-| **SLO gating** | Deploy to pilot/prod blocked if real SLO metrics fail thresholds |
-
----
-
-## Testing
-
-```bash
-pnpm test              # 7,669 unit tests (Vitest) across 1,000+ files
-pnpm contract-tests    # 5,000+ architectural invariant checks
-pnpm lint              # ESLint across all workspaces
-pnpm typecheck         # tsc --noEmit across all workspaces
-```
-
-### Test Pyramid
-
-| Layer | Framework | Count | What It Checks |
-|-------|-----------|-------|----------------|
-| **Unit** | Vitest | 7,669 | Component logic, services, utilities, schemas |
-| **Contract** | Custom | 5,000+ | Org scoping, stack authority, SDK boundaries, governance rules |
-| **E2E** | Playwright | Per-app | User workflows (auth-gated) |
-| **Security** | Gitleaks, CodeQL, Trivy, DAST | CI | Secrets, SAST, container vulnerabilities, dynamic analysis |
-| **Load** | k6 | 3 profiles | Baseline (10K), scale (100K), scale (1M) concurrency |
-
-All tests run on every PR via `ci.yml`. Contract tests also run on a nightly schedule.
-
----
-
-## CI / CD
-
-15 GitHub Actions workflows:
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci.yml` | PR, push | Primary gate — lint, typecheck, test, contract tests, build |
-| `control-tests.yml` | Schedule | Scheduled control/invariant validation |
-| `deploy-web.yml` | Push to main | Deploy public site to Azure SWA |
-| `deploy-console.yml` | Push to main | Deploy console to Azure SWA |
-| `deploy-partners.yml` | Push to main | Deploy partner portal |
-| `deploy-union-eyes.yml` | Push to main | Deploy UE |
-| `release-train.yml` | Tag | Release evidence + SBOM generation |
-| `ops-pack.yml` | PR | Ops pack completeness gate |
-| `dependency-audit.yml` | PR, weekly | CVE scanning via `pnpm audit` |
-| `sbom.yml` | Release | CycloneDX Software Bill of Materials |
-| `secret-scan.yml` | PR | TruffleHog + Gitleaks |
-| `codeql.yml` | PR, weekly | CodeQL static analysis (TS + Python) |
-| `trivy.yml` | Dockerfile changes, weekly | Container image vulnerability scanning |
-| `red-team.yml` | Manual | Red-team security testing |
-| `nzila-governance.yml` | PR | Governance automation checks |
-
-### Required GitHub Secrets
-
-| Secret | Purpose |
-|--------|---------|
-| `AZURE_SWA_TOKEN_WEB` | SWA deploy token — public website |
-| `AZURE_SWA_TOKEN_CONSOLE` | SWA deploy token — console |
-| `AUTH_SECRET` | Session encryption secret (required) |
-| `AZURE_AD_CLIENT_ID` | Entra app registration client ID (optional — for SSO) |
-| `AZURE_AD_CLIENT_SECRET` | Entra app registration client secret (optional — for SSO) |
-| `AZURE_AD_TENANT_ID` | Entra tenant ID (optional — for SSO) |
-
----
-
-## Content Authoring
-
-### Public (`content/public/`)
-
-Rendered at `nzila.app/resources/{slug}`:
-
-```md
----
-title: Getting Started
-description: How to onboard onto the Nzila platform
-category: Guides
-order: 1
----
-
-Your content here…
-```
-
-### Internal (`content/internal/`)
-
-Rendered at `console.nzila.app/docs/{slug}` (requires sign-in). Same frontmatter format.
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Key points:
-
-- Read the [repo contract](docs/repo-contract/README.md) first
-- PRs must pass: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm contract-tests`, `turbo run build`
-- Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`)
-- New apps must pass the App Alignment Checklist
-
----
-
-## Security
-
-See [SECURITY.md](SECURITY.md). Report vulnerabilities to security@nzila.app (not public issues).
-
-### Security Posture
-
-| Layer | Tooling | Trigger |
-|-------|---------|---------|
-| **Secret scanning** | Gitleaks + TruffleHog | Every PR + pre-commit |
-| **Static analysis** | CodeQL (TS + Python) | Every PR + weekly |
-| **Container scanning** | Trivy | Dockerfile changes + weekly |
-| **Dependency audit** | `pnpm audit` | Every PR + weekly (blocks on CRITICAL) |
-| **SBOM** | CycloneDX | Release tags |
-| **Red-team** | Manual workflow | On demand |
-
----
-
-## App READMEs
-
-Each app has its own detailed README:
-
-| App | README |
-|-----|--------|
-| **UnionEyes** | [apps/union-eyes/README.md](apps/union-eyes/README.md) |
+## Documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/platform/what-is-nzila.md](docs/platform/what-is-nzila.md) | 30-second platform overview |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Full architectural overview |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | All 17 apps — tier, revenue readiness, strategic role |
+| [docs/platform/revenue-architecture.md](docs/platform/revenue-architecture.md) | Revenue system design |
+| [README.business.md](README.business.md) | Non-technical business overview |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide + repo contract |
+| [SECURITY.md](SECURITY.md) | Security posture and vulnerability reporting |
 
 ---
 
