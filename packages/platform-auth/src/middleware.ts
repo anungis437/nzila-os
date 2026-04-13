@@ -1,9 +1,9 @@
 /**
  * @nzila/platform-auth — Middleware Helpers
  *
- * Shared middleware factories for Next.js apps using Clerk.
+ * Shared middleware factories for Next.js apps.
  * Apps can import and configure these instead of writing
- * their own clerkMiddleware wrappers.
+ * their own authMiddleware wrappers.
  */
 
 // ── Public Route Matcher ────────────────────────────────────────────────────

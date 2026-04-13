@@ -7,7 +7,5 @@
  *
  * See @nzila/platform-contracts for contract definitions.
  */
-export {}
-
-// TODO: export { healthAggregator } from './health-aggregator'
-// TODO: export { metricsAggregator } from './metrics-aggregator'
+export { getSystemState, type SystemState, type DomainHealth } from '../../services/system-state'
+export { getRevenueOverview, type RevenueOverview } from '../../services/revenue-aggregator'

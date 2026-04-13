@@ -14,6 +14,7 @@ export type {
   RevenueEvent,
   RevenueSummary,
   BillingHook,
+  UnifiedRevenueRecord,
 } from './types.js'
 export {
   SubscriptionTier,
@@ -23,6 +24,9 @@ export {
   UsageMetricSchema,
   RevenueEventType,
   RevenueEventSchema,
+  RevenueType,
+  RevenueStatus,
+  UnifiedRevenueRecordSchema,
 } from './types.js'
 
 // Service
@@ -30,4 +34,5 @@ export type { RevenueService } from './service.js'
 export {
   createInMemoryRevenueService,
   computeAppRevenueBreakdown,
+  emitRevenueEvent,
 } from './service.js'

@@ -11,7 +11,10 @@ import {
   type UsageMetric,
   type BillingHook,
   type RevenueEventType,
+  type UnifiedRevenueRecord,
+  RevenueEventType as ET,
   RevenueEventSchema,
+  UnifiedRevenueRecordSchema,
 } from './types.js'
 
 export interface RevenueService {
@@ -19,6 +22,44 @@ export interface RevenueService {
   registerHook(hook: BillingHook): void
   getEvents(orgId: string, from?: string, to?: string): RevenueEvent[]
   summarize(orgId: string, period: string): RevenueSummary
+}
+
+/**
+ * Emit and validate a unified revenue record.
+ * Apps (Zonga, CFO, Flow) call this to feed the platform revenue ledger.
+ */
+export function emitRevenueEvent(
+  service: RevenueService,
+  record: UnifiedRevenueRecord,
+): RevenueEvent {
+  const validated = UnifiedRevenueRecordSchema.parse(record)
+  const event: RevenueEvent = {
+    id: validated.id,
+    orgId: validated.entityId,
+    eventType: mapRevenueTypeToEventType(validated.revenueType, validated.appSource),
+    amount: validated.grossAmount,
+    currency: validated.currency,
+    appId: validated.appSource,
+    metadata: {
+      ...validated.metadata,
+      platformFee: validated.platformFee,
+      netAmount: validated.netAmount,
+      status: validated.status,
+    },
+    occurredAt: validated.timestamp,
+  }
+  service.recordEvent(event)
+  return event
+}
+
+function mapRevenueTypeToEventType(
+  revenueType: string,
+  appSource: string,
+): RevenueEventType {
+  if (appSource === 'zonga') return ET.ZONGA_REVENUE
+  if (revenueType === 'subscription') return ET.SUBSCRIPTION_STARTED
+  if (revenueType === 'transaction') return ET.COMMERCE_REVENUE
+  return ET.ONE_TIME_PAYMENT
 }
 
 /**

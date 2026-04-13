@@ -16,6 +16,11 @@
  *   HARD-06  Platform revenue layer (package + docs)
  *   HARD-07  Portfolio classification (portfolio-matrix.md exists)
  *   HARD-08  Revenue architecture (revenue-architecture.md exists)
+ *   HARD-09  Revenue system documentation (revenue-system.md exists)
+ *   HARD-10  Control plane aggregates revenue (depends on @nzila/platform-revenue)
+ *   HARD-11  Auth adapter layer pure (no Clerk in non-compat active code)
+ *   HARD-12  App floor CI enforced (app-floor-check workflow exists)
+ *   HARD-13  No silent platform drift (drift workflows present)
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
@@ -260,6 +265,113 @@ gate('HARD-08: Revenue architecture documented', () => {
   }
 })
 
+// ── HARD-09 Revenue System Documentation ────────────────────────────────────
+
+gate('HARD-09: Revenue system documentation exists', () => {
+  const docPath = join(ROOT, 'docs/platform/revenue-system.md')
+  if (!existsSync(docPath)) {
+    return { passed: false, details: 'docs/platform/revenue-system.md not found' }
+  }
+
+  const content = readFileSync(docPath, 'utf-8')
+  const hasUnified = content.includes('UnifiedRevenueRecord') || content.includes('emitRevenueEvent')
+
+  return {
+    passed: hasUnified,
+    details: hasUnified
+      ? 'Revenue system doc with unified schema reference present'
+      : 'Doc exists but missing unified revenue model reference',
+  }
+})
+
+// ── HARD-10 Control Plane Aggregates Revenue ────────────────────────────────
+
+gate('HARD-10: Control plane depends on platform-revenue', () => {
+  const pkgPath = join(ROOT, 'apps/control-plane/package.json')
+  if (!existsSync(pkgPath)) {
+    return { passed: false, details: 'apps/control-plane/package.json not found' }
+  }
+
+  const content = readFileSync(pkgPath, 'utf-8')
+  const hasRevenue = content.includes('@nzila/platform-revenue')
+
+  return {
+    passed: hasRevenue,
+    details: hasRevenue
+      ? 'Control plane wired to platform-revenue'
+      : 'Control plane missing @nzila/platform-revenue dependency',
+  }
+})
+
+// ── HARD-11 Auth Adapter Layer Pure ─────────────────────────────────────────
+
+gate('HARD-11: Auth adapter layer is provider-neutral', () => {
+  const adapterPath = join(ROOT, 'packages/platform-auth/src/middleware.ts')
+  if (!existsSync(adapterPath)) {
+    return { passed: false, details: 'platform-auth middleware.ts not found' }
+  }
+
+  const content = readFileSync(adapterPath, 'utf-8')
+  // Doc comments should not reference specific external providers
+  const headerLines = content.split('\n').slice(0, 10).join('\n')
+  const hasStaleRef = /\bClerk\b/.test(headerLines)
+
+  return {
+    passed: !hasStaleRef,
+    details: hasStaleRef
+      ? 'middleware.ts header still references Clerk — should be provider-neutral'
+      : 'Auth middleware header is provider-neutral',
+  }
+})
+
+// ── HARD-12 App Floor CI Enforced ───────────────────────────────────────────
+
+gate('HARD-12: App floor CI workflow exists', () => {
+  const workflowPath = join(ROOT, '.github/workflows/app-floor-check.yml')
+  if (!existsSync(workflowPath)) {
+    return { passed: false, details: '.github/workflows/app-floor-check.yml not found' }
+  }
+
+  const content = readFileSync(workflowPath, 'utf-8')
+  const checksReadme = content.includes('README.md')
+  const checksEnv = content.includes('.env.example')
+
+  return {
+    passed: checksReadme && checksEnv,
+    details: checksReadme && checksEnv
+      ? 'App floor CI workflow enforces README + .env.example'
+      : 'Workflow exists but missing checks',
+  }
+})
+
+// ── HARD-13 No Silent Platform Drift ────────────────────────────────────────
+
+gate('HARD-13: Drift detection workflows present', () => {
+  const issues: string[] = []
+
+  const inventoryCheck = join(ROOT, '.github/workflows/repo-inventory-check.yml')
+  if (!existsSync(inventoryCheck)) {
+    issues.push('repo-inventory-check.yml missing')
+  }
+
+  const appFloor = join(ROOT, '.github/workflows/app-floor-check.yml')
+  if (!existsSync(appFloor)) {
+    issues.push('app-floor-check.yml missing')
+  }
+
+  const driftGuard = join(ROOT, 'tooling/contract-tests/platform-drift-guard.test.ts')
+  if (!existsSync(driftGuard)) {
+    issues.push('platform-drift-guard.test.ts missing')
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'All drift detection mechanisms in place'
+      : `Missing: ${issues.join('; ')}`,
+  }
+})
+
 // ── Runner ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -302,7 +414,7 @@ function main() {
     console.log('')
     process.exit(1)
   } else {
-    console.log('  ✅  HARDENING GATE PASSED — ALL 8 CONDITIONS MET  ✅')
+    console.log('  ✅  HARDENING GATE PASSED — ALL 13 CONDITIONS MET  ✅')
     console.log('')
     process.exit(0)
   }

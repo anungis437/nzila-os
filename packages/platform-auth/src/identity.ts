@@ -15,7 +15,7 @@ export type AuthStatus = 'authenticated' | 'unauthenticated' | 'service'
 // ── Authenticated Identity ──────────────────────────────────────────────────
 
 export const authenticatedIdentitySchema = z.object({
-  /** User ID from auth provider (Clerk user_xxx). */
+  /** User ID from auth provider. */
   userId: z.string().min(1),
   /** Primary email. */
   email: z.string().email().optional(),
@@ -23,7 +23,7 @@ export const authenticatedIdentitySchema = z.object({
   displayName: z.string().optional(),
   /** Avatar URL. */
   avatarUrl: z.string().url().optional(),
-  /** Active org ID (from Clerk org selection). */
+  /** Active org ID from auth provider. */
   activeOrgId: z.string().optional(),
   /** Org role from auth provider. */
   orgRole: z.string().optional(),

@@ -1,0 +1,41 @@
+name: App Floor Check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/**'
+
+concurrency:
+  group: app-floor-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  app-floor:
+    name: App floor uniformity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check every app has README.md + .env.example
+        run: |
+          failed=0
+          for app in apps/*/; do
+            name=$(basename "$app")
+            if [ ! -f "$app/README.md" ]; then
+              echo "::error::$name is missing README.md"
+              failed=1
+            fi
+            if [ ! -f "$app/.env.example" ]; then
+              echo "::error::$name is missing .env.example"
+              failed=1
+            fi
+            if [ ! -f "$app/package.json" ]; then
+              echo "::error::$name is missing package.json"
+              failed=1
+            fi
+          done
+          if [ "$failed" -eq 1 ]; then
+            echo "❌ App floor check failed — every app must have README.md, .env.example, and package.json"
+            exit 1
+          fi
+          echo "✅ All apps meet the operational floor"

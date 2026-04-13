@@ -80,6 +80,39 @@ export const RevenueEventSchema = z.object({
 })
 export type RevenueEvent = z.infer<typeof RevenueEventSchema>
 
+// ── Unified Revenue Record ───────────────────────────────
+
+export const RevenueType = {
+  SUBSCRIPTION: 'subscription',
+  TRANSACTION: 'transaction',
+  EVENT: 'event',
+  PAYOUT: 'payout',
+} as const
+export type RevenueType = (typeof RevenueType)[keyof typeof RevenueType]
+
+export const RevenueStatus = {
+  PENDING: 'pending',
+  SETTLED: 'settled',
+  FAILED: 'failed',
+  REFUNDED: 'refunded',
+} as const
+export type RevenueStatus = (typeof RevenueStatus)[keyof typeof RevenueStatus]
+
+export const UnifiedRevenueRecordSchema = z.object({
+  id: z.string().uuid(),
+  entityId: z.string().uuid(),
+  appSource: z.string(),
+  revenueType: z.nativeEnum(RevenueType),
+  grossAmount: z.number(),
+  platformFee: z.number().nonnegative(),
+  netAmount: z.number(),
+  currency: z.string().length(3),
+  timestamp: z.string().datetime(),
+  status: z.nativeEnum(RevenueStatus),
+  metadata: z.record(z.unknown()).optional(),
+})
+export type UnifiedRevenueRecord = z.infer<typeof UnifiedRevenueRecordSchema>
+
 // ── Revenue Summary ──────────────────────────────────────
 
 export interface RevenueSummary {
