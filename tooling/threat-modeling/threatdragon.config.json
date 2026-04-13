@@ -34,7 +34,7 @@
         "id": 3,
         "title": "Authentication — Data Flow",
         "diagramType": "STRIDE",
-        "placeholder": "Clerk OIDC flow: Browser → Clerk → App → API",
+        "placeholder": "OIDC flow: Browser → Entra ID → App → API",
         "cells": []
       }
     ],

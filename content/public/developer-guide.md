@@ -55,7 +55,7 @@ All apps use **`@nzila/platform-auth`** with Microsoft Entra External ID. The mi
 
 ```typescript
 // middleware.ts
-import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server';
+import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server';
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -63,7 +63,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+export default authMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect();
   }

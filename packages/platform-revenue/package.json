@@ -1,0 +1,28 @@
+{
+  "name": "@nzila/platform-revenue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cross-app revenue awareness — subscription models, usage metrics, billing hooks, revenue events for the entire Nzila OS platform",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./service": "./src/service.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/platform-billing": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}
