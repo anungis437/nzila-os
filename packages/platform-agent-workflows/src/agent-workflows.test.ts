@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createWorkflow, executeStep } from '../src/workflowRunner'
 import { generateRecommendations } from '../src/recommendations'
+import * as packageExports from '../src/index'
 import { getAuditTimeline, clearAuditTimeline } from '@nzila/platform-governance'
 
 describe('platform-agent-workflows', () => {
@@ -114,6 +115,61 @@ describe('platform-agent-workflows', () => {
       expect(recs[0].actionable).toBe(false)
       expect(recs[0].humanReviewRequired).toBe(true)
     })
+
+    it('returns no recommendations when workflow has no blocked or failed steps', () => {
+      const wf = createWorkflow({
+        name: 'test',
+        triggerEvent: 'test',
+        app: 'web',
+        orgId: 'org-1',
+        steps: [{ name: 'step-1' }],
+      })
+
+      const recs = generateRecommendations(wf)
+
+      expect(recs).toEqual([])
+      const events = getAuditTimeline({ eventType: 'recommendation_generated' })
+      expect(events).toHaveLength(0)
+    })
+
+    it('generates failed-step recommendation with explicit error details', () => {
+      const wf = createWorkflow({
+        name: 'test',
+        triggerEvent: 'test',
+        app: 'partners',
+        orgId: 'org-1',
+        steps: [{ name: 'step-1' }],
+      })
+
+      const failedWorkflow = {
+        ...wf,
+        steps: [{ ...wf.steps[0], status: 'failed' as const, error: 'timeout on external dependency' }],
+      }
+
+      const recs = generateRecommendations(failedWorkflow)
+      expect(recs).toHaveLength(1)
+      expect(recs[0].priority).toBe('medium')
+      expect(recs[0].description).toBe('timeout on external dependency')
+    })
+
+    it('generates failed-step fallback description when no error details exist', () => {
+      const wf = createWorkflow({
+        name: 'test',
+        triggerEvent: 'test',
+        app: 'partners',
+        orgId: 'org-1',
+        steps: [{ name: 'step-without-error' }],
+      })
+
+      const failedWorkflow = {
+        ...wf,
+        steps: [{ ...wf.steps[0], status: 'failed' as const }],
+      }
+
+      const recs = generateRecommendations(failedWorkflow)
+      expect(recs).toHaveLength(1)
+      expect(recs[0].description).toContain('failed without error details')
+    })
   })
 
   describe('audit event emission', () => {
@@ -167,6 +223,17 @@ describe('platform-agent-workflows', () => {
       const events = getAuditTimeline({ eventType: 'recommendation_generated' })
       expect(events).toHaveLength(1)
       expect(events[0].policyResult).toBe('warn')
+    })
+  })
+
+  describe('barrel exports', () => {
+    it('exports runtime APIs and schemas from index', () => {
+      expect(packageExports.createWorkflow).toBeTypeOf('function')
+      expect(packageExports.executeStep).toBeTypeOf('function')
+      expect(packageExports.generateRecommendations).toBeTypeOf('function')
+      expect(packageExports.workflowStepSchema).toBeDefined()
+      expect(packageExports.agentWorkflowSchema).toBeDefined()
+      expect(packageExports.recommendationSchema).toBeDefined()
     })
   })
 })

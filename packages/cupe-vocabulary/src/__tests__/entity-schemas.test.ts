@@ -129,6 +129,58 @@ describe('Union Entity Schemas', () => {
     });
   });
 
+  describe('WorksiteSchema', () => {
+    it('validates correct worksite and applies created_at default', () => {
+      const worksite = {
+        id: 'worksite-001',
+        org_id: 'cupe-local-123',
+        name: 'Main Campus',
+      };
+
+      const result = WorksiteSchema.safeParse(worksite);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.created_at).toBeDefined();
+      }
+    });
+  });
+
+  describe('CaseAssignmentSchema', () => {
+    it('validates correct assignment and applies created_at default', () => {
+      const assignment = {
+        id: 'assign-001',
+        case_id: 'case-001',
+        assigned_to: 'member-002',
+        assigned_by: 'member-003',
+        assigned_at: new Date().toISOString(),
+      };
+
+      const result = CaseAssignmentSchema.safeParse(assignment);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.created_at).toBeDefined();
+      }
+    });
+  });
+
+  describe('CaseNoteSchema', () => {
+    it('validates correct note and applies created_at default', () => {
+      const note = {
+        id: 'note-001',
+        case_id: 'case-001',
+        author_id: 'member-001',
+        content: 'Initial investigation notes.',
+      };
+
+      const result = CaseNoteSchema.safeParse(note);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.created_at).toBeDefined();
+        expect(result.data.is_internal).toBe(false);
+      }
+    });
+  });
+
   describe('createCaseNumber', () => {
     it('generates correct case number format', () => {
       const number = generateCaseNumber(2025, 42);
@@ -176,6 +228,15 @@ describe('Union Entity Schemas', () => {
     it('allows chief_steward and business_agent at same level', () => {
       expect(hasRoleOrHigher('chief_steward', 'business_agent')).toBe(true);
       expect(hasRoleOrHigher('business_agent', 'chief_steward')).toBe(true);
+    });
+
+    it('returns false for unknown role', () => {
+      expect(hasRoleOrHigher('unknown_role', 'member')).toBe(false);
+    });
+
+    it('handles unknown minRole gracefully', () => {
+      // Cast to bypass type check — tests runtime fallback
+      expect(hasRoleOrHigher('admin', 'nonexistent' as any)).toBe(true);
     });
   });
 });

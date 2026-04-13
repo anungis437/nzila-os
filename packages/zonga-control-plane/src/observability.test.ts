@@ -63,6 +63,12 @@ describe('@nzila/zonga-control-plane — Observability', () => {
       recordMetric(MetricName.PAYOUT_LATENCY_MS, 200)
       expect(count).toBe(1) // unchanged
     })
+
+    it('handles double unsubscribe gracefully', () => {
+      const unsub = onMetric(() => {})
+      unsub()
+      expect(() => unsub()).not.toThrow()
+    })
   })
 
   describe('getMetrics', () => {
@@ -152,6 +158,12 @@ describe('@nzila/zonga-control-plane — Observability', () => {
       unsub()
       emitLog({ level: 'info', message: 'b', correlationId: 'c' })
       expect(count).toBe(1)
+    })
+
+    it('handles double unsubscribe gracefully', () => {
+      const unsub = onLog(() => {})
+      unsub()
+      expect(() => unsub()).not.toThrow()
     })
   })
 })

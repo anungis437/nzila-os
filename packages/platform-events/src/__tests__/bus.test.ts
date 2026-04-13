@@ -96,6 +96,23 @@ describe('PlatformEventBus', () => {
     expect(successHandler).toHaveBeenCalledOnce()
   })
 
+  it('isolates async errors between handlers in emit', async () => {
+    const successHandler = vi.fn()
+    const asyncFailHandler = vi.fn(async () => {
+      throw new Error('async boom')
+    })
+
+    bus.on('test.event', asyncFailHandler)
+    bus.on('test.event', successHandler)
+
+    bus.emit(makeEvent())
+
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(asyncFailHandler).toHaveBeenCalledOnce()
+    expect(successHandler).toHaveBeenCalledOnce()
+  })
+
   it('supports unsubscribe', async () => {
     const received: PlatformEvent[] = []
     const unsub = bus.on('test.event', (e) => { received.push(e) })
@@ -145,6 +162,58 @@ describe('PlatformEventBus', () => {
     expect(results).toHaveLength(2)
     expect(results.filter((r) => r.status === 'rejected')).toHaveLength(1)
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+  })
+
+  it('emitAndWait includes wildcard handlers', async () => {
+    const wildcard = vi.fn(async () => { /* noop */ })
+    bus.onAny(wildcard)
+
+    const results = await bus.emitAndWait(makeEvent())
+
+    expect(results).toHaveLength(1)
+    expect(results[0]?.status).toBe('fulfilled')
+    expect(wildcard).toHaveBeenCalledOnce()
+  })
+
+  it('emit persists through store when configured', async () => {
+    const persist = vi.fn(async () => {})
+    bus = new PlatformEventBus({ store: { persist } })
+
+    bus.emit(makeEvent())
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(persist).toHaveBeenCalledOnce()
+  })
+
+  it('emitAndWait awaits store persistence before handlers', async () => {
+    const callOrder: string[] = []
+    const persist = vi.fn(async () => {
+      callOrder.push('persist')
+    })
+
+    bus = new PlatformEventBus({ store: { persist } })
+    bus.on('test.event', async () => {
+      callOrder.push('handler')
+    })
+
+    await bus.emitAndWait(makeEvent())
+    expect(callOrder).toEqual(['persist', 'handler'])
+  })
+
+  it('isolates wildcard sync and async handler errors', async () => {
+    const ok = vi.fn()
+    bus.onAny(() => {
+      throw new Error('wildcard sync fail')
+    })
+    bus.onAny(async () => {
+      throw new Error('wildcard async fail')
+    })
+    bus.onAny(ok)
+
+    bus.emit(makeEvent())
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(ok).toHaveBeenCalledOnce()
   })
 
   it('clear() removes all subscriptions', async () => {
@@ -219,5 +288,30 @@ describe('createPlatformEvent', () => {
     expect(event.metadata.causationId).toBeDefined()
     expect(event.metadata.traceId).toBe('trace-abc')
     expect(event.metadata.spanId).toBe('span-def')
+  })
+
+  it('accepts custom schema version', () => {
+    const event = createPlatformEvent(
+      'test.created',
+      {},
+      {
+        orgId: crypto.randomUUID(),
+        actorId: 'user_123',
+        correlationId: crypto.randomUUID(),
+      },
+      '2.0',
+    )
+
+    expect(event.schemaVersion).toBe('2.0')
+  })
+})
+
+describe('package index', () => {
+  it('exports core symbols', async () => {
+    const api = await import('../index')
+    expect(typeof api.PlatformEventBus).toBe('function')
+    expect(typeof api.createPlatformEvent).toBe('function')
+    expect(typeof api.PlatformEventDispatcher).toBe('function')
+    expect(typeof api.validateEvent).toBe('function')
   })
 })

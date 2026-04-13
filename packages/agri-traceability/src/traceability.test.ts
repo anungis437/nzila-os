@@ -154,6 +154,15 @@ describe('traceability chain builder', () => {
     expect(verifyTraceabilityChain(chain)).toBe(false)
   })
 
+  it('detects tampered previousHash', () => {
+    const chain = buildTraceabilityChain('org_1', [
+      { entityType: 'harvest', subjectId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
+      { entityType: 'lot', subjectId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
+    ])
+    chain.entries[1]!.previousHash = 'tampered'
+    expect(verifyTraceabilityChain(chain)).toBe(false)
+  })
+
   it('handles empty chain', () => {
     const chain = buildTraceabilityChain('org_1', [])
     expect(chain.entryCount).toBe(0)

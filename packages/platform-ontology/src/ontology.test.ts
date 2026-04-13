@@ -6,17 +6,37 @@ import type { OntologyEntityType } from './index'
 import {
   OntologyEntityTypes,
   RelationshipTypes,
+  validateEntity,
   validateCreateEntity,
+  validateRelationship,
   validateCreateRelationship,
   getOntologyDefinition,
   registerOntologyType,
   resolveOntologyRelationships,
+  validateRelationshipAllowed,
   buildOntologyEntity,
   buildOntologyRelationship,
   isRelationshipAllowed,
   listOntologyDefinitions,
+  getTypeDefinition,
+  getRelationshipsFor,
+  ontologyEntities,
+  ontologyRelationships,
   resetRegistry,
 } from './index'
+
+function runDrizzleExtraConfig(table: Record<PropertyKey, unknown>): unknown[] {
+  const symbols = Object.getOwnPropertySymbols(table)
+  const builder = symbols.find((s) => s.toString() === 'Symbol(drizzle:ExtraConfigBuilder)')
+  const cols = symbols.find((s) => s.toString() === 'Symbol(drizzle:ExtraConfigColumns)')
+
+  expect(builder).toBeDefined()
+  expect(cols).toBeDefined()
+
+  return (table as Record<PropertyKey, (arg: unknown) => unknown[]>)[builder!](
+    (table as Record<PropertyKey, unknown>)[cols!],
+  )
+}
 
 describe('platform-ontology', () => {
   beforeEach(() => {
@@ -61,6 +81,43 @@ describe('platform-ontology', () => {
       })
       expect(result.success).toBe(true)
     })
+
+    it('validates full entity and relationship payloads', () => {
+      const now = new Date().toISOString()
+
+      const entityResult = validateEntity({
+        id: '550e8400-e29b-41d4-a716-446655440120',
+        tenantId: '550e8400-e29b-41d4-a716-446655440000',
+        entityType: OntologyEntityTypes.CLIENT,
+        canonicalName: 'Jane Doe',
+        aliases: [],
+        status: 'active',
+        tags: [],
+        sourceSystems: [],
+        metadata: {},
+        createdAt: now,
+        updatedAt: now,
+      })
+      expect(entityResult.success).toBe(true)
+
+      const relationshipResult = validateRelationship({
+        id: '550e8400-e29b-41d4-a716-446655440121',
+        tenantId: '550e8400-e29b-41d4-a716-446655440000',
+        sourceEntityType: OntologyEntityTypes.CLIENT,
+        sourceEntityId: '550e8400-e29b-41d4-a716-446655440001',
+        targetEntityType: OntologyEntityTypes.FAMILY,
+        targetEntityId: '550e8400-e29b-41d4-a716-446655440002',
+        relationshipType: RelationshipTypes.HAS,
+        metadata: {},
+        createdAt: now,
+      })
+      expect(relationshipResult.success).toBe(true)
+    })
+
+    it('rejects invalid full entity and relationship payloads', () => {
+      expect(validateEntity({}).success).toBe(false)
+      expect(validateRelationship({}).success).toBe(false)
+    })
   })
 
   describe('relationships', () => {
@@ -103,6 +160,16 @@ describe('platform-ontology', () => {
         ),
       ).toBe(false)
     })
+
+    it('returns default definitions for unknown types and no relationships', () => {
+      const unknown = 'UnknownType' as unknown as OntologyEntityType
+      const def = getTypeDefinition(unknown)
+      expect(def.entityType).toBe(unknown)
+      expect(def.allowedRelationships).toEqual([])
+
+      const rels = getRelationshipsFor(unknown)
+      expect(rels).toEqual([])
+    })
   })
 
   describe('registry', () => {
@@ -142,6 +209,49 @@ describe('platform-ontology', () => {
       expect(rels.length).toBeGreaterThan(0)
       expect(rels.some((r) => r.targetEntityType === OntologyEntityTypes.DOCUMENT)).toBe(true)
     })
+
+    it('uses custom relationship validation when custom source type exists', () => {
+      registerOntologyType({
+        entityType: 'CustomWidget' as unknown as OntologyEntityType,
+        description: 'Custom widget',
+        requiredFields: ['canonicalName'],
+        optionalFields: [],
+        allowedRelationships: [
+          {
+            relationshipType: RelationshipTypes.LINKS_TO,
+            targetEntityType: OntologyEntityTypes.CLIENT,
+            cardinality: 'many',
+            description: 'Widget links to clients',
+          },
+        ],
+      })
+
+      expect(
+        validateRelationshipAllowed(
+          'CustomWidget' as unknown as OntologyEntityType,
+          OntologyEntityTypes.CLIENT,
+          RelationshipTypes.LINKS_TO,
+        ),
+      ).toBe(true)
+
+      expect(
+        validateRelationshipAllowed(
+          'CustomWidget' as unknown as OntologyEntityType,
+          OntologyEntityTypes.CLIENT,
+          RelationshipTypes.HAS,
+        ),
+      ).toBe(false)
+    })
+
+    it('falls back to canonical relationship validation for built-in source types', () => {
+      expect(
+        validateRelationshipAllowed(
+          OntologyEntityTypes.CLIENT,
+          OntologyEntityTypes.FAMILY,
+          RelationshipTypes.HAS,
+        ),
+      ).toBe(true)
+    })
   })
 
   describe('builders', () => {
@@ -179,6 +289,14 @@ describe('platform-ontology', () => {
       )
       expect(rel.relationshipType).toBe('HAS')
       expect(rel.sourceEntityType).toBe('Client')
+    })
+
+    it('exercises drizzle schema extra config builders', () => {
+      const entityConfig = runDrizzleExtraConfig(ontologyEntities as unknown as Record<PropertyKey, unknown>)
+      expect(entityConfig).toHaveLength(4)
+
+      const relationshipConfig = runDrizzleExtraConfig(ontologyRelationships as unknown as Record<PropertyKey, unknown>)
+      expect(relationshipConfig).toHaveLength(4)
     })
   })
 })

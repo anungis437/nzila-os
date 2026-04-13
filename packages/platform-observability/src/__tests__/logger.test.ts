@@ -83,6 +83,25 @@ describe('StructuredLogger', () => {
     expect(entries[0]!.org_id).toBe('http-org')
   })
 
+  it('fromHeaders supports array values and unknown org fallback', () => {
+    const writeSpy = _vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    const logger = StructuredLogger.fromHeaders(
+      {
+        'x-request-id': ['arr-req-1', 'arr-req-2'],
+        'x-correlation-id': ['arr-cor-1', 'arr-cor-2'],
+      },
+    )
+    logger.info('array.headers')
+
+    const payload = String(writeSpy.mock.calls[0]?.[0] ?? '').trim()
+    const entry = JSON.parse(payload) as StructuredLogEntry
+
+    expect(entry.request_id).toBe('arr-req-1')
+    expect(entry.correlation_id).toBe('arr-cor-1')
+    expect(entry.org_id).toBe('unknown')
+    writeSpy.mockRestore()
+  })
+
   it('generates UUIDs for missing context', () => {
     const { entries, sink } = collectSink()
     const logger = new StructuredLogger(undefined, sink)

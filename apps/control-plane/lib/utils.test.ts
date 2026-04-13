@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { cn, formatRelativeTime } from './utils'
+import { cn, formatRelativeTime, formatDateTime } from './utils'
 
 describe('cn', () => {
   it('merges class names', () => {
@@ -30,5 +30,14 @@ describe('formatRelativeTime', () => {
   it('returns days ago for >= 24 hours', () => {
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60_000).toISOString()
     expect(formatRelativeTime(threeDaysAgo)).toBe('3d ago')
+  })
+})
+
+describe('formatDateTime', () => {
+  it('formats an ISO date string in human-readable form', () => {
+    const iso = '2024-01-15T14:30:00.000Z'
+    const result = formatDateTime(iso)
+    expect(typeof result).toBe('string')
+    expect(result.length).toBeGreaterThan(0)
   })
 })

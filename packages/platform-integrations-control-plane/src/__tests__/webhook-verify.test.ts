@@ -50,6 +50,18 @@ describe('verifyWebhookSignature', () => {
     expect(result.valid).toBe(true)
   })
 
+  it('accepts valid sha1= prefixed signature', () => {
+    const sig = `sha1=${computeSignature(BODY, SECRET)}`
+    const result = verifyWebhookSignature({
+      body: BODY,
+      signature: sig,
+      secret: SECRET,
+      provider: 'legacy',
+    })
+
+    expect(result.valid).toBe(true)
+  })
+
   it('rejects invalid signature', () => {
     const result = verifyWebhookSignature({
       body: BODY,
@@ -116,6 +128,46 @@ describe('verifyWebhookSignature', () => {
     })
 
     expect(result.valid).toBe(true)
+  })
+
+  it('returns verification error when signature payload is malformed', () => {
+    const result = verifyWebhookSignature({
+      body: BODY,
+      signature: null as unknown as string,
+      secret: SECRET,
+      provider: 'test',
+    })
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toContain('Verification error')
+  })
+
+  it('rejects signature length mismatch', () => {
+    const result = verifyWebhookSignature({
+      body: BODY,
+      signature: 'abcd',
+      secret: SECRET,
+      provider: 'test',
+    })
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('Signature length mismatch')
+  })
+
+  it('handles non-Error throwables during verification', () => {
+    const result = verifyWebhookSignature({
+      body: {
+        toString: () => {
+          throw 'body stringify failed'
+        },
+      } as unknown as Buffer,
+      signature: computeSignature(BODY, SECRET),
+      secret: SECRET,
+      provider: 'test',
+    })
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toContain('body stringify failed')
   })
 })
 

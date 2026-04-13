@@ -1,30 +1,31 @@
 {
-  "name": "@nzila/zonga-analytics",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./events": "./src/events/index.ts",
-    "./metrics": "./src/metrics/index.ts",
-    "./dashboards": "./src/dashboards/index.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "lint": "eslint src/"
-  },
-  "dependencies": {
-    "@nzila/zonga-core": "workspace:*",
-    "zod": "^3.24.0"
-  },
-  "devDependencies": {
-    "typescript": "^6",
-    "vitest": "^4.1.2",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^10"
-  }
+   "name": "@nzila/zonga-analytics",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "main": "./src/index.ts",
+   "types": "./src/index.ts",
+   "exports": {
+      ".": "./src/index.ts",
+      "./events": "./src/events/index.ts",
+      "./metrics": "./src/metrics/index.ts",
+      "./dashboards": "./src/dashboards/index.ts"
+   },
+   "scripts": {
+      "typecheck": "tsc --noEmit",
+      "test": "vitest run",
+      "lint": "eslint src/",
+      "test:coverage": "vitest run --coverage"
+   },
+   "dependencies": {
+      "@nzila/zonga-core": "workspace:*",
+      "zod": "^3.24.0"
+   },
+   "devDependencies": {
+      "typescript": "^6",
+      "vitest": "^4.1.2",
+      "@typescript-eslint/eslint-plugin": "^8.0.0",
+      "@typescript-eslint/parser": "^8.0.0",
+      "eslint": "^10"
+   }
 }

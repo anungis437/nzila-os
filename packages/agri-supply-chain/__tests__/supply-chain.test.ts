@@ -47,9 +47,31 @@ describe('canFollowStep', () => {
     const result = canFollowStep(null, SupplyChainStepType.DELIVERY)
     expect(result.ok).toBe(false)
   })
+
+  it('rejects unknown step type', () => {
+    const result = canFollowStep(SupplyChainStepType.HARVEST, 'INVALID' as SupplyChainStepType)
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toContain('Unknown step type')
+    }
+  })
+
+  it('rejects skipping non-optional steps', () => {
+    // HARVEST → STORAGE skips COLLECTION which is not optional
+    const result = canFollowStep(SupplyChainStepType.HARVEST, SupplyChainStepType.STORAGE)
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toContain('Cannot skip non-optional steps')
+    }
+  })
 })
 
 describe('getNextStepTypes', () => {
+  it('returns HARVEST when current is null (start of chain)', () => {
+    const next = getNextStepTypes(null)
+    expect(next).toEqual([SupplyChainStepType.HARVEST])
+  })
+
   it('returns COLLECTION after HARVEST', () => {
     const next = getNextStepTypes(SupplyChainStepType.HARVEST)
     expect(next).toContain(SupplyChainStepType.COLLECTION)
@@ -171,6 +193,25 @@ describe('recordEvent', () => {
       responsibleParty: { id: 'rp1', name: 'X', role: 'y' },
     })
     expect(result.ok).toBe(false)
+  })
+
+  it('rejects recording on a cancelled chain', () => {
+    const chain = cancelSupplyChain(createSupplyChain({
+      orgId: 'org_1',
+      batchId: 'batch_1',
+      cropType: 'MAIZE',
+      originCooperativeId: 'coop_1',
+      originProducerId: 'prod_1',
+    }))
+    const result = recordEvent(chain, {
+      stepType: SupplyChainStepType.HARVEST,
+      status: SupplyChainStepStatus.COMPLETED,
+      responsibleParty: { id: 'rp1', name: 'X', role: 'y' },
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toContain('cannot record new events')
+    }
   })
 })
 

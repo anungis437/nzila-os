@@ -6,6 +6,12 @@ import {
   getGovernanceStatus,
 } from '../src/governanceStatus'
 import { recordAuditEvent, clearAuditTimeline } from '../src/auditTimeline'
+import {
+  governanceStatusSchema,
+  governanceStatusReportSchema,
+  governanceAuditTimelineEntrySchema,
+} from '../src/types'
+import * as governance from '../src'
 
 describe('governanceStatus', () => {
   beforeEach(() => {
@@ -100,6 +106,35 @@ describe('governanceStatus', () => {
     expect(report.commitHash).toBe('abc123')
   })
 
+  it('builds non_compliant report when any app is non-compliant', () => {
+    const report = buildGovernanceReport(
+      [
+        assessAppCompliance({
+          name: 'healthy-app',
+          hasSbom: true,
+          hasPolicyEngine: true,
+          hasEvidencePack: true,
+          hasHealthEndpoint: true,
+          hasMetricsEndpoint: true,
+          hasTests: true,
+        }),
+        assessAppCompliance({
+          name: 'broken-app',
+          hasSbom: false,
+          hasPolicyEngine: false,
+          hasEvidencePack: false,
+          hasHealthEndpoint: false,
+          hasMetricsEndpoint: false,
+          hasTests: false,
+        }),
+      ],
+      'deadbeef',
+    )
+
+    expect(report.overallCompliance).toBe('non_compliant')
+    expect(report.driftDetected).toBe(true)
+  })
+
   it('getGovernanceStatus returns healthy when all systems are up', () => {
     recordAuditEvent({
       eventType: 'compliance_check',
@@ -137,5 +172,59 @@ describe('governanceStatus', () => {
     expect(status.sbom_current).toBe(false)
     expect(status.compliance_snapshot).toBe('missing')
     expect(status.audit_timeline).toBe('degraded')
+  })
+
+  it('getGovernanceStatus preserves stale compliance snapshot when provided', () => {
+    const status = getGovernanceStatus({
+      policyEngineAvailable: true,
+      evidencePackValid: true,
+      sbomExists: true,
+      complianceSnapshotAge: 'stale',
+    })
+
+    expect(status.compliance_snapshot).toBe('stale')
+  })
+
+  it('validates governance schemas and barrel exports', () => {
+    const status = getGovernanceStatus({
+      policyEngineAvailable: true,
+      evidencePackValid: true,
+      sbomExists: true,
+      complianceSnapshotAge: 'current',
+    })
+
+    const parsedStatus = governanceStatusSchema.safeParse(status)
+    expect(parsedStatus.success).toBe(true)
+
+    const report = buildGovernanceReport(
+      [
+        assessAppCompliance({
+          name: 'shop-quoter',
+          hasSbom: true,
+          hasPolicyEngine: true,
+          hasEvidencePack: true,
+          hasHealthEndpoint: true,
+          hasMetricsEndpoint: true,
+          hasTests: true,
+        }),
+      ],
+      'cafebabe',
+    )
+
+    const parsedReport = governanceStatusReportSchema.safeParse(report)
+    expect(parsedReport.success).toBe(true)
+
+    const parsedTimeline = governanceAuditTimelineEntrySchema.safeParse({
+      timestamp: new Date().toISOString(),
+      event_type: 'policy_evaluated',
+      actor: 'tester',
+      policy_result: 'pass',
+      commit_hash: 'cafebabe',
+      source: 'web',
+    })
+    expect(parsedTimeline.success).toBe(true)
+
+    expect(typeof governance.validateAppCompliance).toBe('function')
+    expect(typeof governance.buildGovernanceReport).toBe('function')
   })
 })

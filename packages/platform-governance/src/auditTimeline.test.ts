@@ -138,4 +138,34 @@ describe('auditTimeline', () => {
     const t2 = buildGovernanceAuditTimeline()
     expect(t1.map((e) => e.timestamp)).toEqual(t2.map((e) => e.timestamp))
   })
+
+  it('filters timeline by eventType and since date', () => {
+    recordAuditEvent({
+      eventType: 'policy_evaluated',
+      actor: 'seed',
+      orgId: 'org-2',
+      app: 'web',
+      policyResult: 'pass',
+      commitHash: 'seed-1',
+    })
+
+    const afterFirst = new Date().toISOString()
+
+    recordAuditEvent({
+      eventType: 'drift_detected',
+      actor: 'seed',
+      orgId: 'org-2',
+      app: 'web',
+      policyResult: 'fail',
+      commitHash: 'seed-2',
+    })
+
+    const eventFiltered = getAuditTimeline({ eventType: 'drift_detected' })
+    expect(eventFiltered).toHaveLength(1)
+    expect(eventFiltered[0].eventType).toBe('drift_detected')
+
+    const sinceFiltered = getAuditTimeline({ since: afterFirst })
+    expect(sinceFiltered.length).toBeGreaterThanOrEqual(1)
+    expect(sinceFiltered.some((entry) => entry.commitHash === 'seed-2')).toBe(true)
+  })
 })

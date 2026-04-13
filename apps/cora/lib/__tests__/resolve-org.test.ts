@@ -11,17 +11,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Mock platform auth
 const mockAuth = vi.fn()
 const mockCurrentUser = vi.fn()
+const mockIsSuperAdmin = vi.fn()
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: () => mockAuth(),
   currentUser: () => mockCurrentUser(),
 }))
+vi.mock('@nzila/os-core/config/super-admins', () => ({
+  isSuperAdmin: (email: string | undefined) => mockIsSuperAdmin(email),
+}))
 
 import { resolveOrgContext } from '../resolve-org'
+import { locales, defaultLocale } from '../locales'
 
 describe('resolveOrgContext', () => {
   beforeEach(() => {
     vi.stubGlobal('crypto', { randomUUID: () => 'test-uuid-1234' })
     mockCurrentUser.mockResolvedValue({ primaryEmailAddress: { emailAddress: 'regular@example.com' }, emailAddresses: [] })
+    mockIsSuperAdmin.mockReturnValue(false)
   })
 
   it('throws Unauthorized when userId is missing', async () => {
@@ -112,5 +118,40 @@ describe('resolveOrgContext', () => {
 
     const ctx = await resolveOrgContext()
     expect(ctx.role).toBe('viewer')
+  })
+
+  it('elevates member role to admin for super-admin email', async () => {
+    mockIsSuperAdmin.mockReturnValue(true)
+    mockAuth.mockResolvedValue({
+      userId: 'user-7',
+      orgId: 'org-001',
+      orgRole: 'org:member',
+      sessionClaims: null,
+    })
+
+    const ctx = await resolveOrgContext()
+    expect(ctx.role).toBe('admin')
+  })
+
+  it('uses fallback emailAddresses value for super-admin check', async () => {
+    mockIsSuperAdmin.mockImplementation((email) => email === 'fallback@example.com')
+    mockCurrentUser.mockResolvedValue({
+      primaryEmailAddress: null,
+      emailAddresses: [{ emailAddress: 'fallback@example.com' }],
+    })
+    mockAuth.mockResolvedValue({
+      userId: 'user-8',
+      orgId: 'org-001',
+      orgRole: 'org:member',
+      sessionClaims: null,
+    })
+
+    const ctx = await resolveOrgContext()
+    expect(ctx.role).toBe('admin')
+  })
+
+  it('exports locale constants', () => {
+    expect(locales).toEqual(['en-CA', 'fr-CA'])
+    expect(defaultLocale).toBe('en-CA')
   })
 })

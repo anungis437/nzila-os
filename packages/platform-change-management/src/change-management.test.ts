@@ -2,18 +2,51 @@
  * Tests for schema validation, approval requirements, window validation,
  * calendar conflict detection, and emergency rules.
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mkdirSync, rmSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
 import { changeRecordSchema, calendarPolicySchema } from './schemas'
 import { evaluateChangeRequirements, canClosePIR, recordPostImplementationReview } from './approvals'
-import { validateChangeWindow } from './checks'
-import { detectWindowConflicts, isWithinApprovedWindow, isInFreezePeriod } from './calendar'
-import { loadChangeRecord, loadAllChanges, saveChangeRecord, listChangesByEnvironment, findApprovedChange } from './service'
+import { validateChangeWindow, listChangesPendingPIR } from './checks'
+import {
+  detectWindowConflicts,
+  isWithinApprovedWindow,
+  isInFreezePeriod,
+  listUpcomingChanges,
+  listChangesForEnvironment,
+  loadCalendarPolicy,
+} from './calendar'
+import {
+  loadChangeRecord,
+  loadAllChanges,
+  saveChangeRecord,
+  listChangesByEnvironment,
+  listChangesByService,
+  findApprovedChange,
+  getChangeRecordsDir,
+} from './service'
+import {
+  emitChangeEvent,
+  emitChangeApproved,
+  emitChangeRejected,
+  emitChangeCompleted,
+  emitChangeFailed,
+  emitChangeRolledBack,
+  emitPIRRecorded,
+} from './audit'
 import { generateChangeId, parseChangeId, windowsOverlap, isWithinWindow } from './utils'
 import type { ChangeRecord, PostImplementationReview } from './types'
+import * as platformChangeManagement from './index'
+
+const { mockRecordAuditEvent } = vi.hoisted(() => ({
+  mockRecordAuditEvent: vi.fn(),
+}))
+
+vi.mock('@nzila/platform-governance', () => ({
+  recordAuditEvent: mockRecordAuditEvent,
+}))
 
 // ── Test data ───────────────────────────────────────────────────────────────
 
@@ -56,6 +89,7 @@ let testDir: string
 beforeEach(() => {
   testDir = join(tmpdir(), `change-mgmt-test-${Date.now()}-${Math.random().toString(36).slice(2)}`)
   mkdirSync(testDir, { recursive: true })
+  writeFileSync(join(testDir, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\n')
 })
 
 afterEach(() => {
@@ -349,6 +383,25 @@ describe('file storage', () => {
     const record = loadChangeRecord('BAD-0001', { baseDir: testDir })
     expect(record).toBeNull()
   })
+
+  it('returns null for schema-invalid JSON record', () => {
+    mkdirSync(testDir, { recursive: true })
+    writeFileSync(join(testDir, 'BAD-SCHEMA.json'), JSON.stringify({ change_id: 'BAD-SCHEMA' }))
+    const record = loadChangeRecord('BAD-SCHEMA', { baseDir: testDir })
+    expect(record).toBeNull()
+  })
+
+  it('listChangesByService filters correctly', () => {
+    saveChangeRecord(baseChange({ change_id: 'CHG-2026-0001', service: 'web' }), { baseDir: testDir })
+    saveChangeRecord(baseChange({ change_id: 'CHG-2026-0002', service: 'console' }), { baseDir: testDir })
+    const webChanges = listChangesByService('web', { baseDir: testDir })
+    expect(webChanges).toHaveLength(1)
+    expect(webChanges[0].service).toBe('web')
+  })
+
+  it('getChangeRecordsDir resolves explicit base dir', () => {
+    expect(getChangeRecordsDir(testDir)).toBe(testDir)
+  })
 })
 
 // ── Deployment Validation ───────────────────────────────────────────────────
@@ -425,6 +478,155 @@ describe('validateChangeWindow', () => {
     })
     expect(result.valid).toBe(false)
     expect(result.errors.some((e) => e.includes('missing required approvals'))).toBe(true)
+  })
+
+  it('warns when commit and PR references do not match linked metadata', () => {
+    saveChangeRecord(baseChange(), { baseDir: testDir })
+    const result = validateChangeWindow({
+      env: 'STAGING',
+      service: 'web',
+      now,
+      baseDir: testDir,
+      commitSha: 'different-sha',
+      prRef: '#999',
+    })
+
+    expect(result.valid).toBe(true)
+    expect(result.warnings.some((w) => w.includes('Deployment commit different-sha'))).toBe(true)
+    expect(result.warnings.some((w) => w.includes('PR #999'))).toBe(true)
+  })
+
+  it('fails NORMAL changes that overlap freeze periods', () => {
+    saveChangeRecord(baseChange({
+      implementation_window_start: '2026-12-25T00:00:00.000Z',
+      implementation_window_end: '2026-12-26T00:00:00.000Z',
+      environment: 'PROD',
+    }), { baseDir: testDir })
+
+    const calendarDir = join(testDir, 'ops', 'change-management')
+    mkdirSync(calendarDir, { recursive: true })
+    writeFileSync(
+      join(calendarDir, 'calendar-policy.yml'),
+      [
+        'freeze_periods:',
+        '  - name: Holiday Freeze',
+        '    start: 2026-12-20T00:00:00.000Z',
+        '    end: 2027-01-03T00:00:00.000Z',
+        '    environments: [PROD]',
+      ].join('\n'),
+    )
+
+    const result = validateChangeWindow({
+      env: 'PROD',
+      service: 'web',
+      now: new Date('2026-12-25T12:00:00.000Z'),
+      baseDir: testDir,
+    })
+
+    expect(result.valid).toBe(false)
+    expect(result.errors.some((e) => e.includes('overlaps with freeze period'))).toBe(true)
+  })
+
+  it('warns when EMERGENCY changes override freeze periods', () => {
+    saveChangeRecord(baseChange({
+      environment: 'PROD',
+      change_type: 'EMERGENCY',
+      risk_level: 'CRITICAL',
+      approved_by: ['service_owner'],
+      implementation_window_start: '2026-12-25T00:00:00.000Z',
+      implementation_window_end: '2026-12-26T00:00:00.000Z',
+    }), { baseDir: testDir })
+
+    const calendarDir = join(testDir, 'ops', 'change-management')
+    mkdirSync(calendarDir, { recursive: true })
+    writeFileSync(
+      join(calendarDir, 'calendar-policy.yml'),
+      [
+        'freeze_periods:',
+        '  - name: Holiday Freeze',
+        '    start: 2026-12-20T00:00:00.000Z',
+        '    end: 2027-01-03T00:00:00.000Z',
+        '    environments: [PROD]',
+      ].join('\n'),
+    )
+
+    const result = validateChangeWindow({
+      env: 'PROD',
+      service: 'web',
+      now: new Date('2026-12-25T12:00:00.000Z'),
+      baseDir: testDir,
+    })
+
+    expect(result.valid).toBe(true)
+    expect(result.warnings.some((w) => w.includes('overrides freeze period'))).toBe(true)
+  })
+})
+
+describe('calendar loading and upcoming lists', () => {
+  it('returns empty policy when calendar file is missing', () => {
+    expect(loadCalendarPolicy(testDir)).toEqual({ freeze_periods: [] })
+  })
+
+  it('returns empty policy for malformed calendar YAML', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendarDir = join(testDir, 'ops', 'change-management')
+    mkdirSync(calendarDir, { recursive: true })
+    writeFileSync(join(calendarDir, 'calendar-policy.yml'), 'freeze_periods: [')
+
+    expect(loadCalendarPolicy(testDir)).toEqual({ freeze_periods: [] })
+    expect(warnSpy).toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+
+  it('loads and parses valid calendar YAML', () => {
+    const calendarDir = join(testDir, 'ops', 'change-management')
+    mkdirSync(calendarDir, { recursive: true })
+    writeFileSync(
+      join(calendarDir, 'calendar-policy.yml'),
+      [
+        'freeze_periods:',
+        '  - name: Fiscal Close',
+        '    start: 2026-06-28T00:00:00.000Z',
+        '    end: 2026-07-02T00:00:00.000Z',
+        '    environments: [PROD, STAGING]',
+      ].join('\n'),
+    )
+
+    const policy = loadCalendarPolicy(testDir)
+    expect(policy.freeze_periods).toHaveLength(1)
+    expect(policy.freeze_periods[0].name).toBe('Fiscal Close')
+  })
+
+  it('lists upcoming changes sorted by window start and filtered by environment', () => {
+    saveChangeRecord(baseChange({
+      change_id: 'CHG-2026-1001',
+      status: 'APPROVED',
+      implementation_window_start: new Date(Date.now() + 4 * 3600_000).toISOString(),
+      implementation_window_end: new Date(Date.now() + 5 * 3600_000).toISOString(),
+      environment: 'STAGING',
+    }), { baseDir: testDir })
+    saveChangeRecord(baseChange({
+      change_id: 'CHG-2026-1002',
+      status: 'SCHEDULED',
+      implementation_window_start: new Date(Date.now() + 2 * 3600_000).toISOString(),
+      implementation_window_end: new Date(Date.now() + 3 * 3600_000).toISOString(),
+      environment: 'PROD',
+    }), { baseDir: testDir })
+    saveChangeRecord(baseChange({
+      change_id: 'CHG-2026-1003',
+      status: 'COMPLETED',
+      implementation_window_start: new Date(Date.now() + 1 * 3600_000).toISOString(),
+      implementation_window_end: new Date(Date.now() + 2 * 3600_000).toISOString(),
+      environment: 'STAGING',
+    }), { baseDir: testDir })
+
+    const upcoming = listUpcomingChanges({ baseDir: testDir })
+    expect(upcoming).toHaveLength(2)
+    expect(upcoming.map((c) => c.change_id)).toEqual(['CHG-2026-1002', 'CHG-2026-1001'])
+
+    const stagingOnly = listChangesForEnvironment('STAGING', { baseDir: testDir })
+    expect(stagingOnly).toHaveLength(1)
+    expect(stagingOnly[0].change_id).toBe('CHG-2026-1001')
   })
 })
 
@@ -519,5 +721,115 @@ describe('recordPostImplementationReview', () => {
         observations: '',
       }, { baseDir: testDir }),
     ).toThrow('Cannot record PIR')
+  })
+})
+
+describe('listChangesPendingPIR', () => {
+  it('returns only NORMAL or EMERGENCY changes in terminal states without PIR', () => {
+    saveChangeRecord(baseChange({ change_id: 'CHG-2026-2001', change_type: 'NORMAL', status: 'COMPLETED' }), { baseDir: testDir })
+    saveChangeRecord(baseChange({ change_id: 'CHG-2026-2002', change_type: 'EMERGENCY', status: 'FAILED' }), { baseDir: testDir })
+    saveChangeRecord(baseChange({
+      change_id: 'CHG-2026-2003',
+      change_type: 'NORMAL',
+      status: 'COMPLETED',
+      post_implementation_review: {
+        outcome: 'SUCCESS',
+        incidents_triggered: false,
+        incident_refs: [],
+        observations: 'Done',
+      },
+    }), { baseDir: testDir })
+    saveChangeRecord(baseChange({ change_id: 'CHG-2026-2004', change_type: 'STANDARD', status: 'COMPLETED' }), { baseDir: testDir })
+
+    const pending = listChangesPendingPIR({ baseDir: testDir })
+    expect(pending.map((c) => c.change_id).sort()).toEqual(['CHG-2026-2001', 'CHG-2026-2002'])
+  })
+})
+
+describe('audit emitters', () => {
+  it('emits approval and rejection governance event mappings', () => {
+    mockRecordAuditEvent.mockClear()
+    const change = baseChange({ linked_commits: ['abc123'] })
+
+    emitChangeApproved(change, 'approver1')
+    emitChangeRejected(change, 'approver2')
+
+    expect(mockRecordAuditEvent).toHaveBeenCalledTimes(2)
+    expect(mockRecordAuditEvent.mock.calls[0][0]).toMatchObject({
+      eventType: 'approval_granted',
+      actor: 'approver1',
+      policyResult: 'pass',
+    })
+    expect(mockRecordAuditEvent.mock.calls[1][0]).toMatchObject({
+      eventType: 'approval_denied',
+      actor: 'approver2',
+      policyResult: 'fail',
+    })
+  })
+
+  it('emits default compliance checks for lifecycle transitions', () => {
+    mockRecordAuditEvent.mockClear()
+    const change = baseChange({ linked_commits: [] })
+
+    emitChangeCompleted(change)
+    emitChangeFailed(change)
+    emitChangeRolledBack(change)
+
+    expect(mockRecordAuditEvent.mock.calls[0][0]).toMatchObject({
+      eventType: 'compliance_check',
+      commitHash: 'none',
+      policyResult: 'pass',
+    })
+    expect(mockRecordAuditEvent.mock.calls[1][0]).toMatchObject({
+      policyResult: 'fail',
+    })
+    expect(mockRecordAuditEvent.mock.calls[2][0]).toMatchObject({
+      policyResult: 'warn',
+    })
+  })
+
+  it('includes PIR details when emitting PIR events', () => {
+    mockRecordAuditEvent.mockClear()
+    const change = baseChange({
+      post_implementation_review: {
+        outcome: 'SUCCESS',
+        incidents_triggered: true,
+        incident_refs: ['INC-1'],
+        observations: 'Handled',
+      },
+    })
+
+    emitPIRRecorded(change)
+
+    expect(mockRecordAuditEvent).toHaveBeenCalledTimes(1)
+    expect(mockRecordAuditEvent.mock.calls[0][0]).toMatchObject({
+      details: expect.objectContaining({
+        pir_outcome: 'SUCCESS',
+        incidents_triggered: true,
+      }),
+    })
+  })
+
+  it('emits generic change events with default actor', () => {
+    mockRecordAuditEvent.mockClear()
+    const change = baseChange({ requested_by: 'default-requester' })
+
+    emitChangeEvent('change_started', change)
+
+    expect(mockRecordAuditEvent).toHaveBeenCalledTimes(1)
+    expect(mockRecordAuditEvent.mock.calls[0][0]).toMatchObject({
+      actor: 'default-requester',
+      eventType: 'compliance_check',
+      policyResult: 'pass',
+    })
+  })
+})
+
+describe('barrel exports', () => {
+  it('exports the public API surface', () => {
+    expect(typeof platformChangeManagement.validateChangeWindow).toBe('function')
+    expect(typeof platformChangeManagement.loadChangeRecord).toBe('function')
+    expect(typeof platformChangeManagement.emitChangeEvent).toBe('function')
+    expect(typeof platformChangeManagement.generateChangeId).toBe('function')
   })
 })

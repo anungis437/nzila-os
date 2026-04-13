@@ -1,42 +1,43 @@
 {
-  "name": "@nzila/schema-core",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "description": "Canonical schema authority for Nzila OS — single source of truth for cross-app entity definitions",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./entity": "./src/entity.ts",
-    "./actor": "./src/actor.ts",
-    "./org": "./src/org.ts",
-    "./event": "./src/event.ts",
-    "./audit": "./src/audit.ts",
-    "./evidence": "./src/evidence.ts",
-    "./workflow": "./src/workflow.ts",
-    "./document": "./src/document.ts",
-    "./correlation": "./src/correlation.ts",
-    "./module": "./src/module.ts",
-    "./financial": "./src/financial.ts",
-    "./integration": "./src/integration.ts",
-    "./error": "./src/error.ts",
-    "./result": "./src/result.ts",
-    "./guards": "./src/guards.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "lint": "eslint src/"
-  },
-  "dependencies": {
-    "zod": "^3.24.0"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8",
-    "@typescript-eslint/parser": "^8",
-    "typescript": "^6",
-    "vitest": "^4.1.2",
-    "eslint": "^10"
-  }
+   "name": "@nzila/schema-core",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "description": "Canonical schema authority for Nzila OS — single source of truth for cross-app entity definitions",
+   "main": "./src/index.ts",
+   "types": "./src/index.ts",
+   "exports": {
+      ".": "./src/index.ts",
+      "./entity": "./src/entity.ts",
+      "./actor": "./src/actor.ts",
+      "./org": "./src/org.ts",
+      "./event": "./src/event.ts",
+      "./audit": "./src/audit.ts",
+      "./evidence": "./src/evidence.ts",
+      "./workflow": "./src/workflow.ts",
+      "./document": "./src/document.ts",
+      "./correlation": "./src/correlation.ts",
+      "./module": "./src/module.ts",
+      "./financial": "./src/financial.ts",
+      "./integration": "./src/integration.ts",
+      "./error": "./src/error.ts",
+      "./result": "./src/result.ts",
+      "./guards": "./src/guards.ts"
+   },
+   "scripts": {
+      "typecheck": "tsc --noEmit",
+      "test": "vitest run",
+      "lint": "eslint src/",
+      "test:coverage": "vitest run --coverage"
+   },
+   "dependencies": {
+      "zod": "^3.24.0"
+   },
+   "devDependencies": {
+      "@typescript-eslint/eslint-plugin": "^8",
+      "@typescript-eslint/parser": "^8",
+      "typescript": "^6",
+      "vitest": "^4.1.2",
+      "eslint": "^10"
+   }
 }

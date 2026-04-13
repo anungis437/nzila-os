@@ -7,6 +7,8 @@ import {
   getAIRun,
   createInMemoryAIRunStore,
   createNullPolicyEvaluator,
+  aiRunRecords,
+  executeInstrumentedAIRun,
 } from './index'
 import type { AIRunStore, AIModelProvider, PolicyEvaluator } from './index'
 import { OntologyEntityTypes } from '@nzila/platform-ontology'
@@ -181,6 +183,85 @@ describe('platform-governed-ai', () => {
         ENTITY_ID,
       )
       expect(history).toHaveLength(1)
+    })
+  })
+
+  describe('in-memory store branches', () => {
+    it('returns undefined for missing run and ignores updates for unknown ids', async () => {
+      const missingBefore = await store.getRun('missing-run')
+      expect(missingBefore).toBeUndefined()
+
+      await store.updateRun('missing-run', { status: AIRunStatuses.FAILED })
+
+      const missingAfter = await store.getRun('missing-run')
+      expect(missingAfter).toBeUndefined()
+    })
+
+    it('filters by tenant and enforces limit', async () => {
+      const provider = makeProvider()
+      const policyEvaluator = createNullPolicyEvaluator()
+
+      await executeGovernedAIRun({
+        store,
+        provider,
+        policyEvaluator,
+        request: {
+          tenantId: TENANT,
+          operationType: AIOperationTypes.CLASSIFICATION,
+          modelId: 'classifier-v1',
+          entityType: OntologyEntityTypes.CASE,
+          entityId: ENTITY_ID,
+          input: {},
+          requestedBy: 'user-1',
+        },
+      })
+
+      await executeGovernedAIRun({
+        store,
+        provider,
+        policyEvaluator,
+        request: {
+          tenantId: TENANT,
+          operationType: AIOperationTypes.RECOMMENDATION,
+          modelId: 'gpt-4o',
+          entityType: OntologyEntityTypes.CASE,
+          entityId: ENTITY_ID,
+          input: {},
+          requestedBy: 'user-2',
+        },
+      })
+
+      await executeGovernedAIRun({
+        store,
+        provider,
+        policyEvaluator,
+        request: {
+          tenantId: '00000000-0000-0000-0000-000000000777',
+          operationType: AIOperationTypes.SUMMARIZATION,
+          modelId: 'gpt-4o',
+          entityType: OntologyEntityTypes.CASE,
+          entityId: ENTITY_ID,
+          input: {},
+          requestedBy: 'user-3',
+        },
+      })
+
+      const tenantRuns = await store.getRunsByTenant(TENANT, 1)
+      expect(tenantRuns).toHaveLength(1)
+      expect(tenantRuns[0]?.tenantId).toBe(TENANT)
+    })
+  })
+
+  describe('index exports', () => {
+    it('exports schema and instrumented operation entrypoints', () => {
+      expect(aiRunRecords).toBeDefined()
+      expect(typeof executeInstrumentedAIRun).toBe('function')
+    })
+
+    it('null policy evaluator returns no violations', async () => {
+      const evaluator = createNullPolicyEvaluator()
+      const result = await evaluator.evaluate()
+      expect(result).toEqual([])
     })
   })
 })

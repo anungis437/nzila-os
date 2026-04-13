@@ -59,6 +59,16 @@ describe('resolveLastWriteWins', () => {
     const result = resolveLastWriteWins(conflict)
     expect(result.winner).toBe('remote')
   })
+
+  it('picks local when local version is higher', () => {
+    const conflict = makeConflict({ name: 'local' }, { name: 'remote' }, {
+      localVersion: 7,
+      remoteVersion: 3,
+    })
+    const result = resolveLastWriteWins(conflict)
+    expect(result.winner).toBe('local')
+    expect(result.resolvedData).toEqual({ name: 'local' })
+  })
 })
 
 describe('resolveDevicePriority', () => {
@@ -79,6 +89,16 @@ describe('resolveDevicePriority', () => {
     })
     const result = resolveDevicePriority(conflict, ['server'])
     expect(result.winner).toBe('remote')
+  })
+
+  it('picks local when local is in priority list but remote is not', () => {
+    const conflict = makeConflict({ name: 'local' }, { name: 'remote' }, {
+      localDeviceId: 'tablet_1',
+      remoteDeviceId: 'unknown_device',
+    })
+    const result = resolveDevicePriority(conflict, ['tablet_1'])
+    expect(result.winner).toBe('local')
+    expect(result.resolvedData).toEqual({ name: 'local' })
   })
 })
 
@@ -104,6 +124,14 @@ describe('resolveConflict', () => {
     const result = resolveConflict(conflict, ConflictResolutionStrategy.DEVICE_PRIORITY, ['d1', 'd2'])
     expect(result).not.toBeNull()
     expect(result!.winner).toBe('local')
+  })
+
+  it('dispatches DEVICE_PRIORITY with default empty priority list', () => {
+    const conflict = makeConflict({ v: 1 }, { v: 2 }, { localDeviceId: 'd1', remoteDeviceId: 'd2' })
+    const result = resolveConflict(conflict, ConflictResolutionStrategy.DEVICE_PRIORITY)
+    expect(result).not.toBeNull()
+    // Both devices unknown in empty list → falls back to last-write-wins (remote v2 > local v1)
+    expect(result!.winner).toBe('remote')
   })
 
   it('dispatches MANUAL', () => {

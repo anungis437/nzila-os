@@ -1,30 +1,31 @@
 {
-  "name": "@nzila/governed-workflow",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./registry": "./src/registry.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "lint": "eslint src/"
-  },
-  "dependencies": {
-    "@nzila/contracts": "workspace:*",
-    "@nzila/fsm-core": "workspace:*",
-    "@nzila/ingestion-core": "workspace:*",
-    "@nzila/os-core": "workspace:*",
-    "@nzila/platform-events": "workspace:*"
-  },
-  "devDependencies": {
-    "@nzila/config": "workspace:*",
-    "@types/node": "^25",
-    "typescript": "^6",
-    "vitest": "^4.1.2"
-  }
+   "name": "@nzila/governed-workflow",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "main": "./src/index.ts",
+   "types": "./src/index.ts",
+   "exports": {
+      ".": "./src/index.ts",
+      "./registry": "./src/registry.ts"
+   },
+   "scripts": {
+      "typecheck": "tsc --noEmit",
+      "test": "vitest run",
+      "lint": "eslint src/",
+      "test:coverage": "vitest run --coverage"
+   },
+   "dependencies": {
+      "@nzila/contracts": "workspace:*",
+      "@nzila/fsm-core": "workspace:*",
+      "@nzila/ingestion-core": "workspace:*",
+      "@nzila/os-core": "workspace:*",
+      "@nzila/platform-events": "workspace:*"
+   },
+   "devDependencies": {
+      "@nzila/config": "workspace:*",
+      "@types/node": "^25",
+      "typescript": "^6",
+      "vitest": "^4.1.2"
+   }
 }

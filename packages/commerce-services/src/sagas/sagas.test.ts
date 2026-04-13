@@ -337,6 +337,40 @@ describe('quote-to-order saga', () => {
     expect(orgCtx.requestId).toBe('corr-1')
   })
 
+  it('create-order compensate flags order when one was created', async () => {
+    const saga = createQuoteToOrderSaga(ports)
+    const createOrderStep = saga.steps[1]!
+
+    const ctx: SagaContext<QuoteToOrderData> = {
+      sagaId: 'saga-q-comp',
+      correlationId: 'corr-q-comp',
+      orgId: 'org-1',
+      actorId: 'actor-1',
+      data: { quoteId: 'q-1', order: mockOrder({ id: 'ord-comp-1' }) },
+    }
+
+    const result = await createOrderStep.compensate(ctx)
+    expect(result.ok).toBe(true)
+    expect(result.data).toEqual({ orderId: 'ord-comp-1', action: 'flagged_for_review' })
+  })
+
+  it('create-order compensate is no-op when order was not created', async () => {
+    const saga = createQuoteToOrderSaga(ports)
+    const createOrderStep = saga.steps[1]!
+
+    const ctx: SagaContext<QuoteToOrderData> = {
+      sagaId: 'saga-q-comp-2',
+      correlationId: 'corr-q-comp-2',
+      orgId: 'org-1',
+      actorId: 'actor-1',
+      data: { quoteId: 'q-1' },
+    }
+
+    const result = await createOrderStep.compensate(ctx)
+    expect(result.ok).toBe(true)
+    expect(result.data).toBeNull()
+  })
+
   // ── Event-Driven Trigger ──────────────────────────────────────────────
 
   it('auto-triggers via quote.accepted event on the bus', async () => {

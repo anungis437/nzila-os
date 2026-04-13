@@ -73,6 +73,17 @@ describe('createMlClient', () => {
     expect(url).toContain('limit=5')
   })
 
+  it('getInferenceRuns uses default limit when not provided', async () => {
+    const { createMlClient } = await load()
+    mockFetch.mockResolvedValueOnce(jsonRes([]))
+    const client = createMlClient(cfg())
+    await client.getInferenceRuns('org-1')
+
+    const [url] = mockFetch.mock.calls[0]!
+    expect(url).toContain('/api/ml/runs/inference')
+    expect(url).toContain('limit=20')
+  })
+
   it('getStripeDailyScores sends all params', async () => {
     const { createMlClient } = await load()
     mockFetch.mockResolvedValueOnce(jsonRes([]))
@@ -88,6 +99,37 @@ describe('createMlClient', () => {
     expect(url).toContain('startDate=2026-01-01')
     expect(url).toContain('endDate=2026-01-31')
     expect(url).toContain('includeFeatures=true')
+  })
+
+  it('omits undefined query params', async () => {
+    const { createMlClient } = await load()
+    mockFetch.mockResolvedValueOnce(jsonRes([]))
+    const client = createMlClient(cfg())
+    await client.getAllModels('org-1')
+
+    const [url] = mockFetch.mock.calls[0]!
+    expect(url).toContain('orgId=org-1')
+    expect(url).not.toContain('status=')
+  })
+
+  it('getStripeTxnScores returns paginated payload and endpoint', async () => {
+    const { createMlClient } = await load()
+    mockFetch.mockResolvedValueOnce(
+      jsonRes({ items: [], nextCursor: 'c-1', totalInPeriod: 12, anomalyInPeriod: 3 }),
+    )
+    const client = createMlClient(cfg())
+    const result = await client.getStripeTxnScores({
+      orgId: 'org-1',
+      startDate: '2026-01-01',
+      endDate: '2026-01-31',
+      limit: 25,
+    })
+
+    const [url] = mockFetch.mock.calls[0]!
+    expect(url).toContain('/api/ml/scores/stripe/transactions')
+    expect(result.totalInPeriod).toBe(12)
+    expect(result.anomalyInPeriod).toBe(3)
+    expect(result.nextCursor).toBe('c-1')
   })
 
   it('throws MlSdkError on non-ok response', async () => {
@@ -159,5 +201,10 @@ describe('createMlClient', () => {
     const [url] = mockFetch.mock.calls[0]!
     expect(url).toContain('/api/ml/scores/ue/cases/sla-risk')
     expect(res.total).toBe(0)
+  })
+
+  it('exports createMlClient from index barrel', async () => {
+    const pkg = await import('./index')
+    expect(pkg.createMlClient).toBeTypeOf('function')
   })
 })

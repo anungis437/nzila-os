@@ -22,6 +22,8 @@ import {
   aggregateAdminDashboard,
   computeTopTracks,
   computeTopCountries,
+  computeRevenueTimeline,
+  computeListenerGrowth,
 } from './dashboards/index'
 
 // ── Events ──────────────────────────────────────────────────────────────────
@@ -200,6 +202,42 @@ describe('computeMAU', () => {
     const feb25 = result.find((r) => r.month === '2025-02')
     expect(feb25?.uniqueUsers).toBe(3)
   })
+
+  it('handles multiple days in the same month', () => {
+    const jan15 = new Date('2025-01-15T10:00:00Z').getTime()
+    const jan16 = new Date('2025-01-16T10:00:00Z').getTime()
+
+    const sessions = [
+      { userId: 'u1', startedAt: jan15, durationMs: 1000 },
+      { userId: 'u2', startedAt: jan16, durationMs: 1000 },
+    ]
+    const dailyData = computeDAU(sessions)
+    const result = computeMAU(dailyData, sessions)
+
+    expect(result).toHaveLength(1)
+    expect(result[0]!.uniqueUsers).toBe(2)
+  })
+
+  it('handles month with sessions but no matching daily data', () => {
+    const jan = new Date('2025-01-15T10:00:00Z').getTime()
+    const feb = new Date('2025-02-15T10:00:00Z').getTime()
+
+    const sessions = [
+      { userId: 'u1', startedAt: jan },
+      { userId: 'u2', startedAt: feb },
+    ]
+    // Only provide dailyData for Jan — Feb has no DAU entries
+    const dailyData = computeDAU([
+      { userId: 'u1', startedAt: jan, durationMs: 1000 },
+    ])
+    const result = computeMAU(dailyData, sessions)
+
+    expect(result).toHaveLength(2)
+    const feb25 = result.find((r) => r.month === '2025-02')
+    expect(feb25?.uniqueUsers).toBe(1)
+    // Feb has no DAU data → dauToMauRatio should be 0
+    expect(feb25?.dauToMauRatio).toBe(0)
+  })
 })
 
 describe('computeRetention', () => {
@@ -227,6 +265,29 @@ describe('computeRetention', () => {
     expect(result[0]!.retentionRates[0]).toBe(100)
     // Day 7: 1/2 = 50%
     expect(result[0]!.retentionRates[1]).toBe(50)
+  })
+
+  it('handles signed-up user with no sessions', () => {
+    const MS_DAY = 86_400_000
+    const day1 = new Date('2025-03-01T00:00:00Z').getTime()
+    const day2 = new Date('2025-03-02T00:00:00Z').getTime()
+
+    const signups = [
+      { userId: 'u1', signedUpAt: day1 },
+      { userId: 'u2', signedUpAt: day1 }, // u2 never comes back
+      { userId: 'u3', signedUpAt: day2 }, // separate cohort, also no sessions
+    ]
+
+    const sessions = [
+      { userId: 'u1', startedAt: day1 + MS_DAY },
+    ]
+
+    const result = computeRetention(signups, sessions)
+    expect(result).toHaveLength(2) // two cohort dates
+    // Mar 1 cohort: u1 retained on day 1, u2 not → 1/2 = 50%
+    expect(result[0]!.retentionRates[0]).toBe(50)
+    // Mar 2 cohort: u3 has no sessions → 0/1 = 0%
+    expect(result[1]!.retentionRates[0]).toBe(0)
   })
 })
 
@@ -289,6 +350,10 @@ describe('computeCompletionRate', () => {
     ]
     expect(computeCompletionRate(plays, 50)).toBeCloseTo(66.67, 1) // 2/3
   })
+
+  it('returns 0 for empty plays', () => {
+    expect(computeCompletionRate([])).toBe(0)
+  })
 })
 
 describe('computeListenerSegments', () => {
@@ -310,6 +375,16 @@ describe('computeListenerSegments', () => {
     expect(bySegment['returning']).toBe(1)
     expect(bySegment['dormant']).toBe(1)
     expect(bySegment['churned']).toBe(1)
+  })
+
+  it('returns zero counts for empty listeners', () => {
+    const segments = computeListenerSegments([], Date.now())
+    const total = segments.reduce((sum, s) => sum + s.count, 0)
+    expect(total).toBe(0)
+    // percentages should be 0 (guarded by || 1)
+    for (const s of segments) {
+      expect(s.percentage).toBe(0)
+    }
   })
 })
 
@@ -395,5 +470,68 @@ describe('aggregateAdminDashboard', () => {
     expect(dashboard.totalStreams).toBe(1)
     expect(dashboard.totalRevenue).toBe(50)
     expect(dashboard.activeCreators).toBe(25)
+  })
+
+  it('handles zero MAU without NaN', () => {
+    const dashboard = aggregateAdminDashboard([], { from: '2026-04-01', to: '2026-04-07' }, {
+      dauCount: 0,
+      mauCount: 0,
+      activeCreatorCount: 0,
+      newSignupCount: 0,
+    })
+
+    expect(dashboard.dauMauRatio).toBe(0)
+  })
+})
+
+// ── Revenue Timeline ────────────────────────────────────────────────────────
+
+describe('computeRevenueTimeline', () => {
+  it('aggregates revenue by day and sorts chronologically', () => {
+    const day1 = new Date('2026-04-01T10:00:00Z').getTime()
+    const day2 = new Date('2026-04-02T14:00:00Z').getTime()
+    const makeStream = (playedAt: number, revenueCents: number) => ({
+      trackId: 't1', trackTitle: 'T', artistName: 'A', listenerId: 'l1',
+      countryCode: 'NG', countryName: 'Nigeria', playedAt, durationMs: 1000,
+      trackDurationMs: 2000, revenueCents, currency: 'USD', creatorId: 'c1',
+    })
+
+    const result = computeRevenueTimeline([
+      makeStream(day2, 30),
+      makeStream(day1, 10),
+      makeStream(day1, 20),
+    ])
+
+    expect(result).toHaveLength(2)
+    expect(result[0]!.date).toBe('2026-04-01')
+    expect(result[0]!.value).toBe(30) // 10+20
+    expect(result[1]!.date).toBe('2026-04-02')
+    expect(result[1]!.value).toBe(30)
+  })
+})
+
+// ── Listener Growth ─────────────────────────────────────────────────────────
+
+describe('computeListenerGrowth', () => {
+  it('counts unique listeners per day and sorts chronologically', () => {
+    const day1 = new Date('2026-04-01T10:00:00Z').getTime()
+    const day2 = new Date('2026-04-02T14:00:00Z').getTime()
+    const makeStream = (listenerId: string, playedAt: number) => ({
+      trackId: 't1', trackTitle: 'T', artistName: 'A', listenerId,
+      countryCode: 'NG', countryName: 'Nigeria', playedAt, durationMs: 1000,
+      trackDurationMs: 2000, revenueCents: 1, currency: 'USD', creatorId: 'c1',
+    })
+
+    const result = computeListenerGrowth([
+      makeStream('l1', day2),
+      makeStream('l1', day1),
+      makeStream('l2', day1),
+    ])
+
+    expect(result).toHaveLength(2)
+    expect(result[0]!.date).toBe('2026-04-01')
+    expect(result[0]!.value).toBe(2) // l1 + l2
+    expect(result[1]!.date).toBe('2026-04-02')
+    expect(result[1]!.value).toBe(1) // l1
   })
 })

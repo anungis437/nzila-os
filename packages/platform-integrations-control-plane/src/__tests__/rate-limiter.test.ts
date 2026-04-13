@@ -16,6 +16,14 @@ describe('IntegrationRateLimiter', () => {
     expect(result.isThrottled).toBe(false)
   })
 
+  it('status() returns zero counts when no window state exists', () => {
+    const status = limiter.status('org-1', 'slack')
+
+    expect(status.currentMinuteCount).toBe(0)
+    expect(status.currentHourCount).toBe(0)
+    expect(status.isThrottled).toBe(false)
+  })
+
   it('allows requests within rate limits', () => {
     limiter.configure({
       orgId: 'org-1',
@@ -85,6 +93,24 @@ describe('IntegrationRateLimiter', () => {
     const status = limiter.status('org-1', 'slack')
 
     expect(status.currentMinuteCount).toBe(1)
+    expect(status.isThrottled).toBe(false)
+  })
+
+  it('status() does not throttle when config is missing but window state exists', () => {
+    limiter.configure({
+      orgId: 'org-1',
+      provider: 'slack',
+      maxRequestsPerMinute: 1,
+      maxRequestsPerHour: 1,
+      burstLimit: 1,
+    })
+
+    limiter.checkAndRecord('org-1', 'slack')
+    ;(limiter as unknown as { configs: Map<string, unknown> }).configs.clear()
+
+    const status = limiter.status('org-1', 'slack')
+    expect(status.currentMinuteCount).toBe(1)
+    expect(status.currentHourCount).toBe(1)
     expect(status.isThrottled).toBe(false)
   })
 

@@ -19,7 +19,8 @@
     "audit:claims": "tsx src/claim-verification.ts",
     "audit:docs": "tsx src/doc-consistency.ts",
     "audit:ops-readiness": "tsx src/ops-readiness-audit.ts",
-    "audit:all": "tsx src/run-all.ts"
+    "audit:all": "tsx src/run-all.ts",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "zod": "^3.25.0"

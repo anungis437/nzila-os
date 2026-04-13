@@ -74,6 +74,13 @@ describe('@nzila/zonga-control-plane — system events', () => {
       emitSystemEvent(makeEvent())
       expect(handler).not.toHaveBeenCalled()
     })
+
+    it('handles double unsubscribe gracefully', () => {
+      const handler = vi.fn()
+      const unsub = onSystemEvent(handler)
+      unsub()
+      expect(() => unsub()).not.toThrow()
+    })
   })
 
   // ── Build Event ───────────────────────────────────────────────────────
@@ -114,6 +121,87 @@ describe('@nzila/zonga-control-plane — system events', () => {
       const result = queryAuditEvents({ entityType: 'payout' })
       expect(result.totalCount).toBe(1)
       expect(result.events[0]!.entityType).toBe('payout')
+    })
+
+    it('filters by entityId', () => {
+      const result = queryAuditEvents({ entityId: 'e-2' })
+      expect(result.totalCount).toBe(1)
+      expect(result.events[0]!.entityId).toBe('e-2')
+    })
+
+    it('filters by actorId', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent({ actorId: 'admin-1' }))
+      emitSystemEvent(makeEvent({ actorId: 'admin-2' }))
+
+      const result = queryAuditEvents({ actorId: 'admin-1' })
+      expect(result.totalCount).toBe(1)
+      expect(result.events[0]!.actorId).toBe('admin-1')
+    })
+
+    it('filters by workflowId', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent({ workflowId: 'wf-1' }))
+      emitSystemEvent(makeEvent({ workflowId: 'wf-2' }))
+      emitSystemEvent(makeEvent())
+
+      const result = queryAuditEvents({ workflowId: 'wf-1' })
+      expect(result.totalCount).toBe(1)
+    })
+
+    it('filters by correlationId', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent({ correlationId: 'corr-abc' }))
+      emitSystemEvent(makeEvent({ correlationId: 'corr-xyz' }))
+
+      const result = queryAuditEvents({ correlationId: 'corr-abc' })
+      expect(result.totalCount).toBe(1)
+    })
+
+    it('filters by eventType', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent({ type: SystemEventType.PAYOUT_COMPLETED }))
+      emitSystemEvent(makeEvent({ type: SystemEventType.REVENUE_RECORDED }))
+      emitSystemEvent(makeEvent({ type: SystemEventType.PAYOUT_COMPLETED }))
+
+      const result = queryAuditEvents({ eventType: SystemEventType.PAYOUT_COMPLETED })
+      expect(result.totalCount).toBe(2)
+    })
+
+    it('filters by severity', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent({ severity: AuditSeverity.WARNING }))
+      emitSystemEvent(makeEvent({ severity: AuditSeverity.INFO }))
+      emitSystemEvent(makeEvent({ severity: AuditSeverity.WARNING }))
+
+      const result = queryAuditEvents({ severity: AuditSeverity.WARNING })
+      expect(result.totalCount).toBe(2)
+    })
+
+    it('filters by fromDate', () => {
+      clearEventLog()
+      const old = buildSystemEvent({
+        type: SystemEventType.REVENUE_RECORDED,
+        orgId: 'o', actorId: 'a', entityId: 'e', entityType: 't',
+        correlationId: 'c', payload: {}, severity: AuditSeverity.INFO,
+      })
+      // Manually set timestamp to the past
+      const pastEvent = { ...old, timestamp: new Date('2020-01-01') }
+      emitSystemEvent(pastEvent)
+      emitSystemEvent(makeEvent()) // now
+
+      const result = queryAuditEvents({ fromDate: new Date('2025-01-01') })
+      expect(result.totalCount).toBe(1)
+    })
+
+    it('filters by toDate', () => {
+      clearEventLog()
+      emitSystemEvent(makeEvent()) // now (2026)
+      const futureEvent = { ...makeEvent(), timestamp: new Date('2030-01-01') }
+      emitSystemEvent(futureEvent)
+
+      const result = queryAuditEvents({ toDate: new Date('2027-01-01') })
+      expect(result.totalCount).toBe(1)
     })
 
     it('supports pagination with limit and offset', () => {

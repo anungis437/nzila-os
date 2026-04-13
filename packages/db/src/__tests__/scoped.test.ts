@@ -12,7 +12,7 @@
  * so they can run without a live database connection.
  */
 import { describe, it, expect } from 'vitest'
-import { createScopedDb, ScopedDbError } from '../scoped'
+import { createScopedDb, ScopedDbError, ReadOnlyViolationError } from '../scoped'
 
 // ── Test Constants ──────────────────────────────────────────────────────────
 
@@ -141,5 +141,126 @@ describe('ScopedDbError', () => {
   it('preserves message', () => {
     const err = new ScopedDbError('Entity isolation violation')
     expect(err.message).toBe('Entity isolation violation')
+  })
+})
+
+describe('createScopedDb — object form and CRUD behavior', () => {
+  const tableWithEntityId = {
+    [Symbol.for('drizzle:Name')]: 'meetings',
+    id: { name: 'id' },
+    orgId: { name: 'org_id' },
+  }
+
+  it('supports object-form read-only createScopedDb with correlationId', () => {
+    const whereArg: unknown[] = []
+    const fakeClient = {
+      select: () => ({
+        from: () => ({
+          where: (w: unknown) => {
+            whereArg.push(w)
+            return Promise.resolve([])
+          },
+        }),
+      }),
+      transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+        const tx = {
+          select: () => ({
+            from: () => ({ where: () => Promise.resolve([]) }),
+          }),
+          transaction: async (nestedFn: (nested: unknown) => Promise<unknown>) =>
+            nestedFn({
+              select: () => ({
+                from: () => ({ where: () => Promise.resolve([]) }),
+              }),
+              transaction: async () => Promise.resolve(null),
+            }),
+        }
+        return fn(tx)
+      },
+    }
+
+    const scopedDb = (createScopedDb as any)(
+      { orgId: VALID_ENTITY_ID, correlationId: 'corr-1' },
+      fakeClient,
+    )
+
+    expect(scopedDb.orgId).toBe(VALID_ENTITY_ID)
+    expect(scopedDb.correlationId).toBe('corr-1')
+    expect(() => scopedDb.select(tableWithEntityId as any)).not.toThrow()
+    expect(whereArg.length).toBe(1)
+  })
+
+  it('throws on nested transaction beyond supported depth', async () => {
+    const txClient = {
+      select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+      transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+        const tx = {
+          select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+          transaction: async (nestedFn: (nested: unknown) => Promise<unknown>) =>
+            nestedFn({
+              select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+              transaction: async () => Promise.resolve(null),
+            }),
+        }
+        return fn(tx)
+      },
+    }
+
+    const scopedDb = (createScopedDb as any)({ orgId: VALID_ENTITY_ID }, txClient)
+
+    await expect(
+      scopedDb.transaction(async (tx: any) =>
+        tx.transaction(async (nested: any) => nested.transaction(async () => null)),
+      ),
+    ).rejects.toThrow('Nested transactions beyond 2 levels not supported')
+  })
+
+  it('injects orgId on insert and scopes update/delete', () => {
+    const insertValues: unknown[] = []
+    const whereArgs: unknown[] = []
+    const fakeClient = {
+      select: () => ({ from: () => ({ where: (w: unknown) => Promise.resolve([w]) }) }),
+      insert: () => ({
+        values: (v: unknown) => {
+          insertValues.push(v)
+          return { ok: true }
+        },
+      }),
+      update: () => ({
+        set: () => ({
+          where: (w: unknown) => {
+            whereArgs.push(w)
+            return { ok: true }
+          },
+        }),
+      }),
+      delete: () => ({
+        where: (w: unknown) => {
+          whereArgs.push(w)
+          return { ok: true }
+        },
+      }),
+      transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(fakeClient),
+    }
+
+    const scopedDb = (createScopedDb as any)(VALID_ENTITY_ID, fakeClient)
+    scopedDb.insert(tableWithEntityId as any, { id: '1', orgId: 'wrong' })
+    scopedDb.insert(tableWithEntityId as any, [{ id: '2' }, { id: '3' }])
+    scopedDb.update(tableWithEntityId as any, { status: 'updated' })
+    scopedDb.delete(tableWithEntityId as any)
+
+    expect(insertValues).toHaveLength(2)
+    expect((insertValues[0] as Record<string, unknown>).orgId).toBe(VALID_ENTITY_ID)
+    expect((insertValues[1] as Array<Record<string, unknown>>)[0].orgId).toBe(VALID_ENTITY_ID)
+    expect(whereArgs.length).toBe(2)
+  })
+})
+
+describe('ReadOnlyViolationError', () => {
+  it('extends ScopedDbError and keeps operation in message', () => {
+    const err = new ReadOnlyViolationError('insert')
+    expect(err).toBeInstanceOf(ScopedDbError)
+    expect(err.name).toBe('ReadOnlyViolationError')
+    expect(err.message).toContain('insert')
   })
 })

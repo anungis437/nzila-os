@@ -99,6 +99,11 @@ describe('@nzila/zonga-economics — pricing-tiers', () => {
     expect(getEffectiveTierCommission('enterprise', 'stream')).toBe(15)
   })
 
+  it('returns 0 for a revenue source with no default commission rule', () => {
+    // Cast an unknown source to hit the ?? 0 fallback
+    expect(getEffectiveTierCommission('starter', 'nonexistent_source' as any)).toBe(0)
+  })
+
   // ── computeSubscriptionRevenue ──────────────────────────────────────────
 
   it('computes monthly revenue from pro_creator subscribers', () => {

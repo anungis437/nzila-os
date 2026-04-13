@@ -12,6 +12,7 @@ import {
   type BuildCommercePackContext,
   type CommerceArtifact,
 } from './evidence'
+import * as commerceEvidenceBarrel from './index'
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -78,6 +79,11 @@ describe('generateCommercePackId', () => {
   it('should uppercase entity type', () => {
     const id = generateCommercePackId('invoice', 'inv-001', TIMESTAMP)
     expect(id).toContain('INVOICE')
+  })
+
+  it('should generate an ID when timestamp is omitted', () => {
+    const id = generateCommercePackId('quote', 'q-001')
+    expect(id).toMatch(/^COM-QUOTE-\d{8}-\d{4}$/)
   })
 })
 
@@ -217,6 +223,21 @@ describe('validateCommerceEvidencePack', () => {
     const errors = validateCommerceEvidencePack(pack)
     expect(errors.some(e => e.includes('size'))).toBe(true)
   })
+
+  it('should detect missing required top-level fields', () => {
+    const pack = buildCommerceEvidencePack(
+      makePackCtx({ packId: '', orgId: '', commerceEntityType: '', commerceEntityId: '', createdBy: '' }),
+      [makeArtifact()],
+      [],
+    )
+    const errors = validateCommerceEvidencePack(pack)
+
+    expect(errors).toContain('packId is required')
+    expect(errors).toContain('orgId is required (org scope)')
+    expect(errors).toContain('commerceEntityType is required')
+    expect(errors).toContain('commerceEntityId is required')
+    expect(errors).toContain('createdBy is required')
+  })
 })
 
 // ── toSealableIndex ─────────────────────────────────────────────────────────
@@ -264,5 +285,11 @@ describe('COMMERCE_CONTROL_MAPPINGS', () => {
     for (const mapping of Object.values(COMMERCE_CONTROL_MAPPINGS)) {
       expect(['PERMANENT', '7_YEARS', '3_YEARS', '1_YEAR']).toContain(mapping.retentionClass)
     }
+  })
+
+  it('should export pack builders from barrel index', () => {
+    expect(typeof commerceEvidenceBarrel.buildCommerceEvidencePack).toBe('function')
+    expect(typeof commerceEvidenceBarrel.validateCommerceEvidencePack).toBe('function')
+    expect(typeof commerceEvidenceBarrel.toSealableIndex).toBe('function')
   })
 })

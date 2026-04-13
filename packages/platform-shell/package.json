@@ -14,7 +14,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/org": "workspace:*",
@@ -28,8 +29,11 @@
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19",
+    "jsdom": "^26.1.0",
     "react": "^19",
+    "react-dom": "^19",
     "typescript": "^6",
     "vitest": "^4.1.2"
   }

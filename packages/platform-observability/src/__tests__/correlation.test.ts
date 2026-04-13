@@ -6,6 +6,8 @@ import {
   extractCorrelationContext,
   buildCorrelationHeaders,
   createChildContext,
+  withCorrelation,
+  withFreshCorrelation,
 } from '../correlation'
 
 describe('correlation', () => {
@@ -75,6 +77,34 @@ describe('correlation', () => {
       })
       expect(ctx.traceId).toBe('explicit-trace')
     })
+
+    it('should use first value when headers are arrays', () => {
+      const ctx = extractCorrelationContext({
+        'x-request-id': ['req-first', 'req-second'],
+        'x-trace-id': ['trace-first', 'trace-second'],
+        'x-span-id': ['span-first', 'span-second'],
+      })
+
+      expect(ctx.requestId).toBe('req-first')
+      expect(ctx.traceId).toBe('trace-first')
+      expect(ctx.spanId).toBe('span-first')
+    })
+
+    it('should generate span id when explicit trace id is present without span id', () => {
+      const ctx = extractCorrelationContext({
+        'x-trace-id': 'explicit-trace-only',
+      })
+      expect(ctx.traceId).toBe('explicit-trace-only')
+      expect(ctx.spanId).toMatch(/^[0-9a-f]{16}$/)
+    })
+
+    it('should ignore malformed traceparent and generate trace/span ids', () => {
+      const ctx = extractCorrelationContext({
+        traceparent: '00-too-short-bad-01',
+      })
+      expect(ctx.traceId).toMatch(/^[0-9a-f]{32}$/)
+      expect(ctx.spanId).toMatch(/^[0-9a-f]{16}$/)
+    })
   })
 
   describe('buildCorrelationHeaders', () => {
@@ -105,6 +135,15 @@ describe('correlation', () => {
       })
       expect(headers['x-org-id']).toBe('my-org')
     })
+
+    it('should omit traceparent for non-W3C id lengths', () => {
+      const headers = buildCorrelationHeaders({
+        traceId: 'short',
+        spanId: 'tiny',
+        requestId: 'req',
+      })
+      expect(headers.traceparent).toBeUndefined()
+    })
   })
 
   describe('createChildContext', () => {
@@ -123,6 +162,32 @@ describe('correlation', () => {
       expect(child.spanId).not.toBe('parent-span')
       expect(child.spanId).toMatch(/^[0-9a-f]{16}$/)
       expect(child.parentSpanId).toBe('parent-span')
+    })
+  })
+
+  describe('wrappers', () => {
+    it('withCorrelation injects extracted context into handler', async () => {
+      const wrapped = withCorrelation(async (ctx, req: { headers: Record<string, string> }, value: number) => {
+        expect(ctx.requestId).toBe('req-1')
+        expect(ctx.traceId).toBe('trace-1')
+        expect(ctx.spanId).toBe('span-1')
+        return value + Object.keys(req.headers).length
+      })
+
+      const result = await wrapped({ headers: { 'x-request-id': 'req-1', 'x-trace-id': 'trace-1', 'x-span-id': 'span-1' } }, 2)
+      expect(result).toBe(5)
+    })
+
+    it('withFreshCorrelation creates root context for non-request handlers', async () => {
+      const wrapped = withFreshCorrelation(async (ctx, suffix: string) => {
+        expect(ctx.requestId).toBeTruthy()
+        expect(ctx.traceId).toMatch(/^[0-9a-f]{32}$/)
+        expect(ctx.spanId).toMatch(/^[0-9a-f]{16}$/)
+        return `${ctx.requestId}-${suffix}`
+      })
+
+      const result = await wrapped('done')
+      expect(result.endsWith('-done')).toBe(true)
     })
   })
 })

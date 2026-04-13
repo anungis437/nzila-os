@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {
   executeGovernedWorkflow,
@@ -7,6 +7,7 @@ import {
   registerWorkflow,
   getWorkflow,
   listWorkflows,
+  unregisterWorkflow,
   clearWorkflowRegistry,
   workflowStartedEvent,
   workflowCompletedEvent,
@@ -16,11 +17,17 @@ import type {
   GovernedWorkflowContext,
 } from '../index'
 
-import { pipeline, stage } from '@nzila/ingestion-core'
+import { pipeline, stage, executePipeline } from '@nzila/ingestion-core'
 import type { PipelineDefinition } from '@nzila/ingestion-core'
 import { machine, transition } from '@nzila/fsm-core'
 import type { MachineDefinition } from '@nzila/fsm-core'
 import { createPlatformEvent } from '@nzila/platform-events'
+
+// Wrap executePipeline so we can override its return value for one test.
+vi.mock('@nzila/ingestion-core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@nzila/ingestion-core')>()
+  return { ...actual, executePipeline: vi.fn(actual.executePipeline) }
+})
 
 /* ─── Test fixtures ───────────────────────────────────── */
 
@@ -295,6 +302,48 @@ describe('executeGovernedWorkflow', () => {
     expect(eventTypes).toContain('fsm.transition.completed')
   })
 
+  it('uses fallback error message when ingestion result.error is undefined', async () => {
+    vi.mocked(executePipeline).mockResolvedValueOnce({
+      result: {
+        correlationId: 'corr-001',
+        pipelineName: 'claim-ingestion',
+        pipelineVersion: '1.0.0',
+        outcome: 'failed',
+        entity: null as any,
+        stages: [{ stage: 'normalize', outcome: 'failed', durationMs: 0 }],
+        startedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        durationMs: 0,
+        error: undefined,
+      },
+      record: {
+        correlationId: 'corr-001',
+        pipelineName: 'claim-ingestion',
+        pipelineVersion: '1.0.0',
+        orgId: 'org-001',
+        actorId: 'actor-001',
+        source: 'test',
+        outcome: 'failed',
+        stageCount: 1,
+        failedStage: 'normalize',
+        startedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        durationMs: 0,
+      },
+    } as any)
+
+    const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
+      name: 'claim-silent-fail',
+      version: '1.0',
+      ingestion: { pipeline: claimPipeline },
+    }
+
+    const result = await executeGovernedWorkflow(def, makeCtx())
+
+    expect(result.outcome).toBe('ingestion_failed')
+    expect(result.error).toBe('Ingestion pipeline "claim-ingestion" failed')
+  })
+
   it('produces no events when createEvent is not provided', async () => {
     const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
       name: 'claim-no-events',
@@ -353,6 +402,43 @@ describe('buildWorkflowRecord', () => {
     expect(record.ingestionOutcome).toBe('failed')
     expect(record.fsmOutcome).toBeNull()
     expect(record.error).toBeTruthy()
+  })
+  it('records null ingestionOutcome when ingestion did not run', async () => {
+    const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
+      name: 'claim-fsm-only',
+      version: '1.0',
+      fsm: { machine: claimMachine, targetState: 'submitted' },
+    }
+
+    const entity: Claim = { claimantName: 'Dan', amount: 50, normalizedAmount: 50 }
+    const result = await executeGovernedWorkflow(def, makeCtx(), {
+      currentState: 'draft',
+      entity,
+    })
+    const record = buildWorkflowRecord(result)
+
+    expect(record.ingestionOutcome).toBeNull()
+    expect(record.fsmOutcome).toBe('success')
+  })
+
+  it('records fsm error code when transition fails', async () => {
+    const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
+      name: 'claim-fsm-fail',
+      version: '1.0',
+      fsm: { machine: claimMachine, targetState: 'approved' },
+    }
+
+    const entity: Claim = { claimantName: 'Eve', amount: 10, normalizedAmount: 10 }
+    // draft→approved has no direct transition
+    const result = await executeGovernedWorkflow(def, makeCtx(), {
+      currentState: 'draft',
+      entity,
+    })
+    const record = buildWorkflowRecord(result)
+
+    expect(record.outcome).toBe('transition_failed')
+    expect(record.fsmOutcome).not.toBe('success')
+    expect(record.fsmOutcome).toBeTruthy()
   })
 })
 
@@ -435,6 +521,15 @@ describe('Workflow registry', () => {
 
     expect(listWorkflows()).toHaveLength(0)
   })
+  it('unregisters a workflow and returns true', () => {
+    registerWorkflow({ name: 'to-remove', version: '1.0' })
+    expect(unregisterWorkflow('to-remove', '1.0')).toBe(true)
+    expect(getWorkflow('to-remove', '1.0')).toBeUndefined()
+  })
+
+  it('returns false when unregistering a non-existent workflow', () => {
+    expect(unregisterWorkflow('nonexistent', '99.0')).toBe(false)
+  })
 })
 
 /* ─── Event bridge tests ──────────────────────────────── */
@@ -473,5 +568,38 @@ describe('Event bridge', () => {
     expect(event.payload.workflowName).toBe('claim-event-test')
     expect(event.payload.durationMs).toBeGreaterThanOrEqual(0)
     expect(event.metadata.orgId).toBe('org-001')
+  })
+
+  it('creates a completed event with fsmOutcome success when FSM succeeds', async () => {
+    const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
+      name: 'claim-event-fsm-ok',
+      version: '1.0',
+      ingestion: { pipeline: claimPipeline },
+      fsm: { machine: claimMachine, targetState: 'submitted' },
+    }
+
+    const result = await executeGovernedWorkflow(def, makeCtx(), { currentState: 'draft' })
+    const event = workflowCompletedEvent(result, createPlatformEvent)
+
+    expect(event.payload.fsmOutcome).toBe('success')
+  })
+
+  it('creates a completed event with fsm error code when FSM fails', async () => {
+    const def: GovernedWorkflowDef<RawClaim, Claim, ClaimState, OrgRole> = {
+      name: 'claim-event-fsm-fail',
+      version: '1.0',
+      fsm: { machine: claimMachine, targetState: 'approved' },
+    }
+
+    const entity: Claim = { claimantName: 'Fay', amount: 5, normalizedAmount: 5 }
+    const result = await executeGovernedWorkflow(def, makeCtx(), {
+      currentState: 'draft',
+      entity,
+    })
+    const event = workflowCompletedEvent(result, createPlatformEvent)
+
+    expect(event.payload.fsmOutcome).not.toBe('success')
+    expect(event.payload.fsmOutcome).not.toBeNull()
+    expect(event.payload.fsmOutcome).toBeTruthy()
   })
 })

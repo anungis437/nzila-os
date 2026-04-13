@@ -165,4 +165,149 @@ describe('verifyPack', () => {
     expect(result.artifactIntegrity[0]!.match).toBe(false)
     expect(result.artifactIntegrity[0]!.error).toContain('Blob not found')
   })
+
+  it('should report digest and merkle mismatches', async () => {
+    const { artifact, content } = makeArtifactWithContent('mismatch')
+
+    const blobStore = new Map<string, Buffer>()
+    blobStore.set(artifact.blobPath, content)
+
+    const verifierPorts: VerifierPorts = {
+      readBlob: async (path) => {
+        const buf = blobStore.get(path)
+        if (!buf) throw new Error(`Blob not found: ${path}`)
+        return buf
+      },
+    }
+
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-MIS',
+      summary: 'Mismatch test',
+      controlsCovered: [],
+      artifacts: [artifact],
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const tampered: EvidencePackIndex = {
+      ...sealed,
+      seal: {
+        ...sealed.seal!,
+        packDigest: 'f'.repeat(64),
+        artifactsMerkleRoot: 'e'.repeat(64),
+      },
+    }
+
+    const result = await verifyPack(tampered, verifierPorts)
+
+    expect(result.digestMatch).toBe(false)
+    expect(result.merkleMatch).toBe(false)
+    expect(result.errors.some((e) => e.includes('Pack digest mismatch'))).toBe(true)
+    expect(result.errors.some((e) => e.includes('Merkle root mismatch'))).toBe(true)
+  })
+
+  it('should verify sealed pack with zero artifacts', async () => {
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-EMPTY-VERIFY',
+      summary: 'No artifacts verify path',
+      controlsCovered: [],
+      artifacts: [],
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const verifierPorts: VerifierPorts = {
+      readBlob: async () => Buffer.from('unused'),
+    }
+
+    const result = await verifyPack(sealed, verifierPorts)
+
+    expect(result.valid).toBe(true)
+    expect(result.artifactIntegrity).toHaveLength(0)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('should verify pack with odd artifact count', async () => {
+    const items = [
+      makeArtifactWithContent('odd-1'),
+      makeArtifactWithContent('odd-2'),
+      makeArtifactWithContent('odd-3'),
+    ]
+
+    const blobStore = new Map<string, Buffer>()
+    for (const item of items) {
+      blobStore.set(item.artifact.blobPath, item.content)
+    }
+
+    const verifierPorts: VerifierPorts = {
+      readBlob: async (path) => {
+        const buf = blobStore.get(path)
+        if (!buf) throw new Error(`Blob not found: ${path}`)
+        return buf
+      },
+    }
+
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-ODD-VERIFY',
+      summary: 'Odd Merkle verify path',
+      controlsCovered: [],
+      artifacts: items.map((i) => i.artifact),
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const result = await verifyPack(sealed, verifierPorts)
+
+    expect(result.valid).toBe(true)
+    expect(result.artifactIntegrity).toHaveLength(3)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('should stringify non-Error read failures', async () => {
+    const { artifact } = makeArtifactWithContent('string-failure')
+
+    const verifierPorts: VerifierPorts = {
+      readBlob: async () => {
+        throw 'blob string failure'
+      },
+    }
+
+    const orchPorts = createTestPorts()
+    const orchestrator = new EvidencePackOrchestrator(orchPorts)
+
+    const pack = await orchestrator.createPack({
+      orgId: randomUUID(),
+      controlFamily: 'IR',
+      eventType: 'test',
+      eventId: 'S1',
+      summary: 'String failure',
+      controlsCovered: [],
+      artifacts: [artifact],
+      createdBy: 'test',
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+    const result = await verifyPack(sealed, verifierPorts)
+
+    expect(result.valid).toBe(false)
+    expect(result.artifactIntegrity[0]!.error).toBe('blob string failure')
+  })
 })

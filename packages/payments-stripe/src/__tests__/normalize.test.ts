@@ -320,4 +320,141 @@ describe('normalizeAndPersist', () => {
       expect(result.data.paymentStripeObjectId).toBe('ch_fallback')
     }
   })
+
+  // ── Nullish-coalescing fallback branches ────────────────────────────────
+
+  it('checkout.session.completed uses fallback for missing amount_total', async () => {
+    const event = fakeEvent('checkout.session.completed', {
+      id: 'cs_null',
+      status: 'complete',
+      currency: 'cad',
+      metadata: {},
+    })
+    const result = await normalizeAndPersist(event, 'wh_f1', 'org_1')
+    if (result.kind === 'payment') {
+      expect(result.data.amountCents).toBe(BigInt(0))
+    }
+  })
+
+  it('payment_intent with null metadata, amount, and currency uses fallbacks', async () => {
+    const event = fakeEvent('payment_intent.succeeded', {
+      id: 'pi_null',
+      status: 'succeeded',
+    })
+    const result = await normalizeAndPersist(event, 'wh_f2', 'org_1')
+    if (result.kind === 'payment') {
+      expect(result.data.amountCents).toBe(BigInt(0))
+      expect(result.data.currency).toBe('CAD')
+      expect(result.data.ventureId).toBeNull()
+    }
+  })
+
+  it('charge.refunded with null refund amount uses fallback', async () => {
+    const event = fakeEvent('charge.refunded', {
+      id: 'ch_null',
+      payment_intent: 'pi_1',
+      refunds: {
+        data: [{ id: 're_null', status: 'succeeded', created: 1710000000 }],
+      },
+    })
+    const result = await normalizeAndPersist(event, 'wh_f3', 'org_1')
+    if (result.kind === 'refund') {
+      expect(result.data.amountCents).toBe(BigInt(0))
+    }
+  })
+
+  it('charge.dispute.created with null payment_intent, amount, and status uses fallbacks', async () => {
+    const event = fakeEvent('charge.dispute.created', {
+      id: 'dp_null',
+      created: 1710000000,
+    })
+    const result = await normalizeAndPersist(event, 'wh_f4', 'org_1')
+    if (result.kind === 'dispute') {
+      expect(result.data.paymentStripeObjectId).toBe('')
+      expect(result.data.amountCents).toBe(BigInt(0))
+      expect(result.data.status).toBe('needs_response')
+    }
+  })
+
+  it('payout.paid with null amount and currency uses fallbacks', async () => {
+    const event = fakeEvent('payout.paid', {
+      id: 'po_null',
+      created: 1710000000,
+    })
+    const result = await normalizeAndPersist(event, 'wh_f5', 'org_1')
+    if (result.kind === 'payout') {
+      expect(result.data.amountCents).toBe(BigInt(0))
+      expect(result.data.currency).toBe('CAD')
+    }
+  })
+
+  it('invoice.paid with null metadata, amount, and currency uses fallbacks', async () => {
+    const event = fakeEvent('invoice.paid', {
+      id: 'inv_null',
+    })
+    const result = await normalizeAndPersist(event, 'wh_f6', 'org_1')
+    if (result.kind === 'payment') {
+      expect(result.data.amountCents).toBe(BigInt(0))
+      expect(result.data.currency).toBe('CAD')
+      expect(result.data.ventureId).toBeNull()
+    }
+  })
+
+  it('persists refund with null paymentId when payment not found', async () => {
+    // Mock payment lookup returning empty
+    mocks.mockFrom.mockReturnValueOnce({
+      where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+    })
+
+    const event = fakeEvent('charge.refunded', {
+      id: 'ch_nopay',
+      payment_intent: 'pi_missing',
+      refunds: {
+        data: [{ id: 're_nopay', amount: 1000, status: 'succeeded', created: 1710000000 }],
+      },
+    })
+    const result = await normalizeAndPersist(event, 'wh_f7', 'org_1')
+    expect(result.kind).toBe('refund')
+    expect(mocks.mockValues).toHaveBeenCalled()
+  })
+
+  it('persists dispute with null paymentId when payment not found', async () => {
+    mocks.mockFrom.mockReturnValueOnce({
+      where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+    })
+
+    const event = fakeEvent('charge.dispute.created', {
+      id: 'dp_nopay',
+      payment_intent: 'pi_missing',
+      amount: 2000,
+      status: 'needs_response',
+      reason: 'other',
+      created: 1710000000,
+    })
+    const result = await normalizeAndPersist(event, 'wh_f8', 'org_1')
+    expect(result.kind).toBe('dispute')
+    expect(mocks.mockValues).toHaveBeenCalled()
+  })
+})
+
+// ── markEventFailed ─────────────────────────────────────────────────────────
+
+describe('markEventFailed', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet })
+    mocks.mockSet.mockReturnValue({ where: mocks.mockWhere })
+  })
+
+  it('updates webhook event with failed status and error message', async () => {
+    const { markEventFailed } = await import('../normalize')
+    await markEventFailed('wh_evt_1', 'Processing failed: timeout')
+
+    expect(mocks.mockUpdate).toHaveBeenCalled()
+    expect(mocks.mockSet).toHaveBeenCalledWith({
+      processingStatus: 'failed',
+      error: 'Processing failed: timeout',
+    })
+    expect(mocks.mockWhere).toHaveBeenCalled()
+  })
 })

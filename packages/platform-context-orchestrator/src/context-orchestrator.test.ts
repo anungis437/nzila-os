@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   buildContextEnvelope,
   getWorkflowContext,
@@ -107,6 +107,38 @@ describe('platform-context-orchestrator', () => {
       })
 
       expect(envelope.tenantPolicies).toEqual(policies)
+    })
+
+    it('uses deterministic fallback id when randomUUID is unavailable', async () => {
+      const originalCrypto = globalThis.crypto
+
+      vi.stubGlobal('crypto', {
+        ...(originalCrypto ?? {}),
+        randomUUID: undefined,
+      })
+
+      try {
+        const envelopeA = await buildContextEnvelope(makeSources(), {
+          tenantId: TENANT,
+          purpose: ContextPurposes.WORKFLOW,
+          entityType: OntologyEntityTypes.CASE,
+          entityId: ENTITY_ID,
+          caller: CALLER,
+        })
+
+        const envelopeB = await buildContextEnvelope(makeSources(), {
+          tenantId: TENANT,
+          purpose: ContextPurposes.WORKFLOW,
+          entityType: OntologyEntityTypes.CASE,
+          entityId: ENTITY_ID,
+          caller: CALLER,
+        })
+
+        expect(envelopeA.id).toBe('00000000-0000-0000-0000-000000000001')
+        expect(envelopeB.id).toBe('00000000-0000-0000-0000-000000000002')
+      } finally {
+        vi.unstubAllGlobals()
+      }
     })
   })
 

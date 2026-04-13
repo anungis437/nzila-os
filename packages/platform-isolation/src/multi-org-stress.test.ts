@@ -228,4 +228,5 @@ describe('runMultiOrgStress — edge cases', () => {
     expect(() => new Date(result.completedAt)).not.toThrow()
     expect(new Date(result.completedAt).toISOString()).toBe(result.completedAt)
   })
+
 })

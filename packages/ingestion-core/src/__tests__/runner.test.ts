@@ -18,9 +18,21 @@ import {
   registerPipeline,
   getPipeline,
   listPipelines,
+  unregisterPipeline,
   clearPipelineRegistry,
 } from '../registry';
 import { stage, pipeline } from '../builders';
+import {
+  pipelineStartedEvent,
+  pipelineCompletedEvent,
+  pipelineEventsFromResult,
+} from '../events';
+import {
+  runPipeline as runPipelineFromBarrel,
+  validatePipeline as validatePipelineFromBarrel,
+  stage as stageFromBarrel,
+  pipeline as pipelineFromBarrel,
+} from '../index';
 
 // ── Test fixtures ───────────────────────────────────────────────────────
 
@@ -191,6 +203,26 @@ describe('runPipeline', () => {
       expect(s.durationMs).toBeGreaterThanOrEqual(0);
     }
   });
+
+  it('handles non-Error throws', async () => {
+    const failingPipeline: PipelineDefinition<RawDoc, NormDoc> = {
+      name: 'non-error-throw',
+      version: '1.0',
+      stages: [
+        {
+          name: 'explode',
+          async execute() {
+            throw 'raw failure';
+          },
+        },
+      ],
+    };
+
+    const result = await runPipeline(failingPipeline, makeCtx());
+    expect(result.outcome).toBe('failed');
+    expect(result.stages[0]!.error).toBe('raw failure');
+    expect(result.error).toContain('raw failure');
+  });
 });
 
 // ── createPipelineContext ───────────────────────────────────────────────
@@ -243,6 +275,19 @@ describe('validatePipeline', () => {
     });
     expect(
       errors.some((e) => e.message.includes('Duplicate stage name')),
+    ).toBe(true);
+  });
+
+  it('errors on missing version and empty stage names', () => {
+    const errors = validatePipeline({
+      name: 'x',
+      version: '',
+      stages: [{ name: '   ', execute: async () => {} }],
+    });
+
+    expect(errors.some((e) => e.field === 'version')).toBe(true);
+    expect(
+      errors.some((e) => e.message.includes('non-empty name')),
     ).toBe(true);
   });
 });
@@ -305,6 +350,14 @@ describe('pipeline registry', () => {
       registerPipeline({ name: '', version: '1.0', stages: [] }),
     ).toThrow(/Invalid pipeline/);
   });
+
+  it('unregisters existing pipelines and returns false when missing', () => {
+    const def = makePipeline();
+    registerPipeline(def);
+
+    expect(unregisterPipeline('doc-ingest', '1.0')).toBe(true);
+    expect(unregisterPipeline('doc-ingest', '1.0')).toBe(false);
+  });
 });
 
 // ── Builders ────────────────────────────────────────────────────────────
@@ -353,5 +406,86 @@ describe('pipeline builder', () => {
     const result = await runPipeline(def, makeCtx());
     expect(result.outcome).toBe('completed');
     expect(result.entity?.wordCount).toBe(5);
+  });
+
+  it('supports addStageDef for raw stage definitions', async () => {
+    const def = pipeline<RawDoc, NormDoc>('raw', '1.0')
+      .addStageDef({
+        name: 'raw-stage',
+        async execute(ctx) {
+          ctx.bag.set('raw', true);
+        },
+      })
+      .build();
+
+    const ctx = makeCtx();
+    const result = await runPipeline(def, ctx);
+    expect(result.outcome).toBe('completed');
+    expect(ctx.bag.get('raw')).toBe(true);
+  });
+});
+
+describe('events bridge', () => {
+  const createEvent = <T,>(
+    type: string,
+    payload: T,
+    metadata: Record<string, unknown>,
+  ) => ({
+    id: `evt-${type}`,
+    type,
+    payload,
+    metadata,
+  });
+
+  it('creates started and completed events', async () => {
+    const def = makePipeline();
+    const ctx = makeCtx();
+    const result = await runPipeline(def, ctx);
+
+    const started = pipelineStartedEvent(def, ctx, createEvent);
+    const completed = pipelineCompletedEvent(result, ctx.source, createEvent);
+
+    expect(started.type).toBe('ingestion.pipeline.started');
+    expect((started.payload as { pipelineName: string }).pipelineName).toBe('doc-ingest');
+    expect(completed.type).toBe('ingestion.pipeline.completed');
+    expect((completed.payload as { failedStage: string | null }).failedStage).toBeNull();
+  });
+
+  it('captures failed stage and causation metadata when building both events', async () => {
+    const def: PipelineDefinition<RawDoc, NormDoc> = {
+      name: 'event-fail',
+      version: '1.0',
+      stages: [
+        {
+          name: 'kaboom',
+          async execute() {
+            throw new Error('boom');
+          },
+        },
+      ],
+    };
+    const ctx = makeCtx();
+    const result = await runPipeline(def, ctx);
+
+    const both = pipelineEventsFromResult(def, ctx, result, createEvent);
+    expect((both.completed.payload as { failedStage: string | null }).failedStage).toBe('kaboom');
+    expect((both.completed.metadata as { causationId: string }).causationId).toBe(
+      both.started.id,
+    );
+  });
+});
+
+describe('barrel exports', () => {
+  it('re-exports core API symbols', async () => {
+    const stageBuilder = stageFromBarrel<RawDoc, NormDoc>('noop', async () => {});
+    const def = pipelineFromBarrel<RawDoc, NormDoc>('barrel', '1.0')
+      .addStage(stageBuilder)
+      .build();
+
+    const validation = validatePipelineFromBarrel(def);
+    const result = await runPipelineFromBarrel(def, makeCtx());
+
+    expect(validation).toHaveLength(0);
+    expect(result.outcome).toBe('completed');
   });
 });

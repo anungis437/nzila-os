@@ -85,4 +85,18 @@ describe('stripeEnvSchema / getStripeEnv', () => {
     const { getStripeEnv } = await import('../env')
     expect(() => getStripeEnv()).toThrow('Stripe env validation failed')
   })
+
+  it('validateStripeEnv calls getStripeEnv eagerly', async () => {
+    Object.assign(process.env, VALID_ENV)
+    const { validateStripeEnv } = await import('../env')
+    expect(() => validateStripeEnv()).not.toThrow()
+  })
+
+  it('returns cached env on second call', async () => {
+    Object.assign(process.env, VALID_ENV)
+    const { getStripeEnv } = await import('../env')
+    const first = getStripeEnv()
+    const second = getStripeEnv()
+    expect(first).toBe(second)
+  })
 })

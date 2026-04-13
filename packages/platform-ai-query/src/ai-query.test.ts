@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { classifyIntent, parseQuery, buildQueryResult, executeQuery, getQueryLog, clearQueryLog } from '../src/queryEngine'
 import { createEvidenceRef, validateEvidenceBacking } from '../src/evidenceBacked'
+import { naturalLanguageQuerySchema, evidenceReferenceSchema, queryResultSchema } from '../src/types'
+import * as queryIndex from '../src'
 
 describe('platform-ai-query', () => {
   beforeEach(() => {
@@ -86,6 +88,65 @@ describe('platform-ai-query', () => {
         executeQuery({ query: 'test', orgId: '', actor: 'x' }),
       ).toThrow('orgId is required')
     })
+
+    it('covers remaining answer branches deterministically', () => {
+      const governanceStatus = executeQuery({
+        query: 'What is the governance status right now?',
+        orgId: 'org-1',
+        actor: 'auditor',
+      })
+      expect(governanceStatus.answer).toContain('Governance status')
+
+      const genericStatus = executeQuery({
+        query: 'What is the status of console?',
+        orgId: 'org-1',
+        actor: 'operator',
+      })
+      expect(genericStatus.answer).toContain('System status')
+
+      const comparison = executeQuery({
+        query: 'Compare churn versus retention',
+        orgId: 'org-1',
+        actor: 'analyst',
+      })
+      expect(comparison.answer).toContain('Comparison analysis completed')
+
+      const trendGeneric = executeQuery({
+        query: 'Show trend over time for quote volume',
+        orgId: 'org-1',
+        actor: 'analyst',
+      })
+      expect(trendGeneric.answer).toContain('Trend analysis completed')
+
+      const compliance = executeQuery({
+        query: 'Show compliance policy posture',
+        orgId: 'org-1',
+        actor: 'auditor',
+      })
+      expect(compliance.answer).toContain('Compliance status')
+
+      const anomalyRisk = executeQuery({
+        query: 'Which employer has the highest risk score?',
+        orgId: 'org-1',
+        actor: 'analyst',
+      })
+      expect(anomalyRisk.answer).toContain('Employer risk assessment')
+
+      const anomalyGeneric = executeQuery({
+        query: 'Find unusual spikes in traffic',
+        orgId: 'org-1',
+        actor: 'analyst',
+      })
+      expect(anomalyGeneric.answer).toContain('Anomaly analysis completed')
+
+      const unknown = executeQuery({
+        query: 'Bonjour planet',
+        orgId: 'org-1',
+        actor: 'analyst',
+      })
+      expect(unknown.answer).toContain('Query could not be fully resolved')
+      expect(unknown.confidence).toBe(0.3)
+    })
   })
 
   describe('evidenceBacked', () => {
@@ -112,6 +173,44 @@ describe('platform-ai-query', () => {
       const result = validateEvidenceBacking([])
       expect(result.valid).toBe(false)
       expect(result.coverage).toBe(0)
+    })
+  })
+
+  describe('types and barrel exports', () => {
+    it('validates schema contracts', () => {
+      const evidence = evidenceReferenceSchema.parse({
+        source: 'platform-events',
+        type: 'event',
+        id: 'evt-1',
+        summary: 'Evidence summary',
+      })
+
+      const parsedQuery = naturalLanguageQuerySchema.parse({
+        id: crypto.randomUUID(),
+        query: 'How is system health?',
+        orgId: 'org-1',
+        actor: 'admin',
+        timestamp: new Date().toISOString(),
+        context: { region: 'ca' },
+      })
+
+      const parsedResult = queryResultSchema.parse({
+        id: crypto.randomUUID(),
+        queryId: crypto.randomUUID(),
+        answer: 'Healthy',
+        confidence: 0.88,
+        evidenceRefs: [evidence],
+        timestamp: new Date().toISOString(),
+      })
+
+      expect(parsedQuery.orgId).toBe('org-1')
+      expect(parsedResult.evidenceRefs).toHaveLength(1)
+    })
+
+    it('exposes query helpers from index barrel', () => {
+      expect(queryIndex.classifyIntent('status please')).toBe('status')
+      expect(typeof queryIndex.validateEvidenceBacking).toBe('function')
+      expect(typeof queryIndex.executeQuery).toBe('function')
     })
   })
 })

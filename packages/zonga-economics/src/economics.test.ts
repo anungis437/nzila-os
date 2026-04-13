@@ -3,24 +3,36 @@ import {
   validateLedgerEntries,
   buildTransferEntries,
   computeBalanceFromEntries,
+  snapshotBalance,
 } from './ledger'
 import {
   applyFees,
   DEFAULT_FEE_RULES,
+  resolveFeeRules,
 } from './fees'
 import {
   validateSplitRules,
   calculateSplits,
 } from './splits'
 import {
+  validateSettlement,
+  computeSettlementSummary,
+  generatePayoutBatches,
+} from './settlement'
+import {
   EntryDirection,
   RevenueSource,
   Currency,
   FeeType,
+  AccountType,
+  PayoutInstructionStatus,
 } from './types'
 import type {
   EconomicEntry,
+  EconomicAccount,
   FeeRule,
+  PayoutInstruction,
+  SettlementBatch,
   SplitRule,
 } from './types'
 
@@ -256,5 +268,372 @@ describe('@nzila/zonga-economics — splits', () => {
     // Label gets 30% of $85 = $25.50
     const label = result.distributions.find(d => d.recipientName === 'Label')
     expect(label?.amount).toBeCloseTo(25.50)
+  })
+
+  it('rejects negative share percent', () => {
+    const rules = [
+      makeSplitRule({ recipientAccountId: 'a1', recipientName: 'Artist', sharePercent: -10 }),
+      makeSplitRule({ recipientAccountId: 'a2', recipientName: 'Label', sharePercent: 110, id: 's2' }),
+    ]
+    const result = validateSplitRules(rules)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('Negative share'))).toBe(true)
+  })
+
+  it('rejects zero share percent', () => {
+    const rules = [
+      makeSplitRule({ recipientAccountId: 'a1', recipientName: 'Artist', sharePercent: 0 }),
+      makeSplitRule({ recipientAccountId: 'a2', recipientName: 'Label', sharePercent: 100, id: 's2' }),
+    ]
+    const result = validateSplitRules(rules)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('Zero share'))).toBe(true)
+  })
+})
+
+// ── Fee Edge-Case Tests ─────────────────────────────────────────────────
+
+describe('@nzila/zonga-economics — fees (edge cases)', () => {
+  it('enforces minAmount floor on computed fee', () => {
+    const rule: FeeRule = {
+      id: 'fee_min_test',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 1,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 5,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: null,
+    }
+    // 1% of $10 = $0.10, which is below minAmount of $5
+    const result = applyFees({
+      grossAmount: 10,
+      currency: Currency.USD,
+      revenueSource: RevenueSource.STREAM,
+      rules: [rule],
+    })
+    expect(result.fees[0]!.amount).toBe(5)
+    expect(result.netAmount).toBe(5)
+  })
+
+  it('enforces maxAmount cap on computed fee', () => {
+    const rule: FeeRule = {
+      id: 'fee_max_test',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 50,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: 2,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: null,
+    }
+    // 50% of $100 = $50, which exceeds maxAmount of $2
+    const result = applyFees({
+      grossAmount: 100,
+      currency: Currency.USD,
+      revenueSource: RevenueSource.STREAM,
+      rules: [rule],
+    })
+    expect(result.fees[0]!.amount).toBe(2)
+    expect(result.netAmount).toBe(98)
+  })
+})
+
+describe('@nzila/zonga-economics — fee rule resolution', () => {
+  it('returns org-specific rules when they exist', () => {
+    const orgRule: FeeRule = {
+      id: 'org_fee',
+      orgId: 'org-42',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 5,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: null,
+    }
+    const wildcardRule: FeeRule = {
+      id: 'wildcard_fee',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 15,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: null,
+    }
+    const rules = resolveFeeRules([orgRule, wildcardRule], 'org-42', RevenueSource.STREAM)
+    expect(rules).toHaveLength(1)
+    expect(rules[0]!.orgId).toBe('org-42')
+    expect(rules[0]!.ratePercent).toBe(5)
+  })
+
+  it('falls back to wildcard rules when no org-specific rules', () => {
+    const wildcardRule: FeeRule = {
+      id: 'wildcard_fee',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 15,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: null,
+    }
+    const rules = resolveFeeRules([wildcardRule], 'org-99', RevenueSource.STREAM)
+    expect(rules).toHaveLength(1)
+    expect(rules[0]!.orgId).toBe('*')
+  })
+
+  it('includes rules with a future effectiveUntil date', () => {
+    const rule: FeeRule = {
+      id: 'expiring_fee',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 10,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: new Date('2030-01-01'),
+    }
+    const now = new Date('2025-06-01')
+    const rules = resolveFeeRules([rule], 'org-1', RevenueSource.STREAM, now)
+    expect(rules).toHaveLength(1)
+  })
+
+  it('excludes rules whose effectiveUntil has passed', () => {
+    const rule: FeeRule = {
+      id: 'expired_fee',
+      orgId: '*',
+      feeType: FeeType.PLATFORM_COMMISSION,
+      revenueSource: RevenueSource.STREAM,
+      ratePercent: 10,
+      flatAmount: 0,
+      currency: Currency.USD,
+      minAmount: 0,
+      maxAmount: null,
+      isActive: true,
+      effectiveFrom: new Date('2024-01-01'),
+      effectiveUntil: new Date('2024-06-01'),
+    }
+    const now = new Date('2025-01-01')
+    const rules = resolveFeeRules([rule], 'org-1', RevenueSource.STREAM, now)
+    expect(rules).toHaveLength(0)
+  })
+})
+
+// ── Ledger Snapshot Tests ───────────────────────────────────────────────
+
+describe('@nzila/zonga-economics — ledger snapshot', () => {
+  it('takes a balance snapshot for an account', () => {
+    const account: EconomicAccount = {
+      id: 'acct-1',
+      orgId: 'org-1',
+      type: AccountType.CREATOR,
+      ownerId: 'user-1',
+      ownerName: 'Artist',
+      currency: Currency.USD,
+      balance: 500,
+      holdBalance: 50,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    const snap = snapshotBalance(account)
+    expect(snap.accountId).toBe('acct-1')
+    expect(snap.balance).toBe(500)
+    expect(snap.holdBalance).toBe(50)
+    expect(snap.availableBalance).toBe(450)
+    expect(snap.currency).toBe(Currency.USD)
+    expect(snap.asOf).toBeInstanceOf(Date)
+  })
+})
+
+// ── Settlement Tests ────────────────────────────────────────────────────
+
+function makeAccount(overrides: Partial<EconomicAccount> = {}): EconomicAccount {
+  return {
+    id: 'acct-1',
+    orgId: 'org-1',
+    type: AccountType.CREATOR,
+    ownerId: 'user-1',
+    ownerName: 'Artist',
+    currency: Currency.USD,
+    balance: 1000,
+    holdBalance: 0,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+function makeInstruction(overrides: Partial<PayoutInstruction> = {}): PayoutInstruction {
+  return {
+    id: 'instr-1',
+    orgId: 'org-1',
+    accountId: 'acct-1',
+    recipientId: 'recip-1',
+    recipientName: 'Artist',
+    amount: 100,
+    currency: Currency.USD,
+    status: PayoutInstructionStatus.APPROVED,
+    payoutRail: 'bank_transfer',
+    externalRef: null,
+    settlementBatchId: null,
+    metadata: {},
+    createdAt: new Date(),
+    approvedAt: new Date(),
+    completedAt: null,
+    failedReason: null,
+    ...overrides,
+  }
+}
+
+describe('@nzila/zonga-economics — settlement', () => {
+  it('rejects empty payout instructions', () => {
+    const result = validateSettlement([], [])
+    expect(result.valid).toBe(false)
+    expect(result.errors[0]).toContain('No payout instructions')
+    expect(result.totalAmount).toBe(0)
+  })
+
+  it('rejects multi-currency batch', () => {
+    const instructions = [
+      makeInstruction({ id: 'i1', currency: Currency.USD }),
+      makeInstruction({ id: 'i2', currency: Currency.KES }),
+    ]
+    const accounts = [makeAccount()]
+    const result = validateSettlement(instructions, accounts)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('single-currency'))).toBe(true)
+  })
+
+  it('rejects non-APPROVED instructions', () => {
+    const instructions = [
+      makeInstruction({ status: PayoutInstructionStatus.PENDING }),
+    ]
+    const accounts = [makeAccount()]
+    const result = validateSettlement(instructions, accounts)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('APPROVED'))).toBe(true)
+  })
+
+  it('rejects zero or negative amount', () => {
+    const instructions = [
+      makeInstruction({ amount: 0 }),
+    ]
+    const accounts = [makeAccount()]
+    const result = validateSettlement(instructions, accounts)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('positive'))).toBe(true)
+  })
+
+  it('rejects instruction with missing account', () => {
+    const instructions = [
+      makeInstruction({ accountId: 'nonexistent' }),
+    ]
+    const result = validateSettlement(instructions, [])
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('not found'))).toBe(true)
+  })
+
+  it('rejects instruction exceeding available balance', () => {
+    const instructions = [
+      makeInstruction({ amount: 800 }),
+    ]
+    const accounts = [makeAccount({ balance: 500, holdBalance: 100 })]
+    const result = validateSettlement(instructions, accounts)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('insufficient'))).toBe(true)
+  })
+
+  it('validates a correct single instruction', () => {
+    const instructions = [makeInstruction({ amount: 100 })]
+    const accounts = [makeAccount({ balance: 1000, holdBalance: 0 })]
+    const result = validateSettlement(instructions, accounts)
+    expect(result.valid).toBe(true)
+    expect(result.totalAmount).toBe(100)
+    expect(result.instructionCount).toBe(1)
+  })
+})
+
+describe('@nzila/zonga-economics — payout batches', () => {
+  it('generates batches grouped by currency, skipping non-APPROVED', () => {
+    const instructions = [
+      makeInstruction({ id: 'i1', amount: 100, currency: Currency.USD }),
+      makeInstruction({ id: 'i2', amount: 200, currency: Currency.USD }),
+      makeInstruction({ id: 'i3', amount: 50, currency: Currency.USD, status: PayoutInstructionStatus.PENDING }),
+    ]
+    const batches = generatePayoutBatches(instructions)
+    expect(batches).toHaveLength(1)
+    expect(batches[0]!.totalAmount).toBe(300)
+    expect(batches[0]!.instructions).toHaveLength(2)
+  })
+})
+
+describe('@nzila/zonga-economics — settlement summary', () => {
+  it('returns zero rates and complete for zero-instruction batch', () => {
+    const batch: SettlementBatch = {
+      id: 'batch-1',
+      orgId: 'org-1',
+      status: 'open',
+      instructionCount: 0,
+      totalAmount: 0,
+      currency: Currency.USD,
+      processedCount: 0,
+      failedCount: 0,
+      metadata: {},
+      createdAt: new Date(),
+      settledAt: null,
+    }
+    const summary = computeSettlementSummary(batch)
+    expect(summary.successRate).toBe(0)
+    expect(summary.failureRate).toBe(0)
+    expect(summary.isComplete).toBe(true)
+    expect(summary.pendingCount).toBe(0)
+  })
+
+  it('computes rates for a partially processed batch', () => {
+    const batch: SettlementBatch = {
+      id: 'batch-2',
+      orgId: 'org-1',
+      status: 'open',
+      instructionCount: 10,
+      totalAmount: 5000,
+      currency: Currency.USD,
+      processedCount: 7,
+      failedCount: 1,
+      metadata: {},
+      createdAt: new Date(),
+      settledAt: null,
+    }
+    const summary = computeSettlementSummary(batch)
+    expect(summary.successRate).toBe(70)
+    expect(summary.failureRate).toBe(10)
+    expect(summary.isComplete).toBe(false)
+    expect(summary.pendingCount).toBe(2)
   })
 })

@@ -84,4 +84,19 @@ describe('verifyInboundWebhook', () => {
     expect(r2.verified).toBe(true)
     expect(r2.error).toContain('Duplicate delivery')
   })
+
+  it('accepts payloads without a string idempotency key', async () => {
+    const body = JSON.stringify({ event: 'test', idempotencyKey: 123 })
+    const signature = await signPayload(secret, body)
+    const store = new InMemoryIdempotencyStore()
+
+    const result = await verifyInboundWebhook(
+      { headers: {}, body, signature },
+      { secret, idempotencyStore: store },
+    )
+
+    expect(result.verified).toBe(true)
+    expect(result.error).toBeUndefined()
+    expect(store.size).toBe(0)
+  })
 })

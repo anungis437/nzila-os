@@ -24,7 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nzila/os-core": "workspace:*",

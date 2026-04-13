@@ -5,9 +5,12 @@ import {
   getAvailableTransitions,
   validateMachine,
   executeTransition,
+  platformEventsFromTransition,
+  platformEventFromRecord,
   registerMachine,
   getMachine,
   listMachines,
+  unregisterMachine,
   clearRegistry,
   machine,
   transition,
@@ -448,6 +451,21 @@ describe('executeTransition', () => {
     expect(result.ok).toBe(false)
     expect(record).toBeNull()
   })
+
+  it('uses default entityId and empty reason when opts are omitted', () => {
+    const { result, record } = executeTransition(
+      ticketMachine,
+      'open',
+      'in_progress',
+      ctx,
+      org,
+      ticket,
+    )
+    expect(result.ok).toBe(true)
+    expect(record).not.toBeNull()
+    expect(record!.entityId).toBe(org)
+    expect(record!.reason).toBe('')
+  })
 })
 
 /* ─── Registry ────────────────────────────────────────── */
@@ -461,6 +479,8 @@ describe('registry', () => {
     registerMachine(ticketMachine)
     expect(getMachine('support-ticket')).toBe(ticketMachine)
     expect(listMachines()).toContain('support-ticket')
+    expect(unregisterMachine('support-ticket')).toBe(true)
+    expect(getMachine('support-ticket')).toBeUndefined()
   })
 
   it('throws on invalid machine registration', () => {
@@ -548,5 +568,115 @@ describe('builders', () => {
 
     expect(validateMachine(m)).toHaveLength(0)
     expect(m.transitions[0]!.timeout!.delayMs).toBe(86_400_000)
+  })
+
+  it('supports scheduled actions and addTransitionDef', () => {
+    type S = 'queued' | 'done'
+
+    const m = machine<S>('scheduler', '1.0.0')
+      .states(['queued', 'done'])
+      .initial('queued')
+      .terminal('done')
+      .addTransition(
+        transition<S>('queued', 'done', 'Complete')
+          .schedules('notify', { level: 'info' }, 1_000)
+          .emits('task.done'),
+      )
+      .addTransitionDef({
+        from: 'done',
+        to: 'done',
+        label: 'No-op',
+        allowedRoles: [],
+        guards: [],
+        events: [],
+        actions: [],
+      })
+      .build()
+
+    expect(m.transitions[0]!.actions[0]!.delayMs).toBe(1_000)
+    expect(m.transitions[1]!.label).toBe('No-op')
+  })
+
+  it('treats predicate guard without fn as a named guard at runtime', () => {
+    type S = 'a' | 'b'
+    const builder = transition<S>('a', 'b', 'Go')
+    ;(builder as any).guard('predicate', 'missing_fn')
+    const def = builder.build()
+    expect(def.guards[0]).toEqual({ kind: 'named', name: 'missing_fn' })
+  })
+})
+
+describe('event bridge', () => {
+  let eventSeq = 0
+  const createEvent = (
+    type: string,
+    payload: Record<string, unknown>,
+    meta: Record<string, unknown>,
+  ) => ({
+    id: `evt_${++eventSeq}`,
+    type,
+    payload,
+    meta,
+  })
+
+  it('creates envelope and emitted events with chained causation', () => {
+    const transitionResult = attemptTransition(
+      ticketMachine,
+      'in_progress',
+      'review',
+      ctx,
+      org,
+      ticket,
+    )
+    expect(transitionResult.ok).toBe(true)
+    if (!transitionResult.ok) return
+
+    const events = platformEventsFromTransition(
+      transitionResult,
+      ticketMachine.name,
+      ticketMachine.version,
+      'ticket-1',
+      {
+        orgId: org,
+        actorId: ctx.actorId,
+        correlationId: 'corr-1',
+      },
+      createEvent as any,
+    )
+
+    expect(events).toHaveLength(2)
+    expect(events[0]!.type).toBe('fsm.transition.completed')
+    expect(events[1]!.type).toBe('ticket.submitted_for_review')
+    expect(events[1]!.meta.causationId).toBe(events[0]!.id)
+    expect(events[0]!.meta.source).toBe('fsm-core')
+  })
+
+  it('maps audit record to fsm.transition.recorded event with explicit source', () => {
+    const { record } = executeTransition(
+      ticketMachine,
+      'open',
+      'in_progress',
+      ctx,
+      org,
+      ticket,
+      { entityId: 'ticket-2' },
+    )
+    expect(record).not.toBeNull()
+
+    const event = platformEventFromRecord(
+      record!,
+      {
+        orgId: org,
+        actorId: ctx.actorId,
+        correlationId: 'corr-2',
+        causationId: null,
+        source: 'custom-source',
+      },
+      createEvent as any,
+    )
+
+    expect(event.type).toBe('fsm.transition.recorded')
+    expect(event.payload.transitionId).toBe(record!.transitionId)
+    expect(event.meta.source).toBe('custom-source')
   })
 })

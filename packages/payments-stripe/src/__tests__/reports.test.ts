@@ -225,4 +225,137 @@ describe('generateStripeReports', () => {
     )
     expect(hasperiodId).toBe(true)
   })
+
+  it('generates payout_recon report with detail mapping', async () => {
+    mocks.mockSelectWhere
+      .mockResolvedValueOnce([]) // payments (revenue)
+      .mockResolvedValueOnce([  // payouts
+        {
+          id: 'po_db_1',
+          payoutId: 'po_1',
+          amountCents: BigInt(15000),
+          currency: 'CAD',
+          status: 'paid',
+          arrivalDate: '2025-03-16',
+          occurredAt: new Date('2025-03-15'),
+        },
+      ])
+      .mockResolvedValueOnce([]) // refunds
+      .mockResolvedValueOnce([]) // disputes
+
+    const artifacts = await generateStripeReports({
+      orgId: 'org_1',
+      startDate: '2025-03-01',
+      endDate: '2025-03-31',
+      actorClerkUserId: 'user_1',
+    })
+
+    expect(artifacts).toHaveLength(4)
+    // Verify payout_recon report has details
+    const payoutUpload = mocks.mockUploadBuffer.mock.calls[1][0]
+    const report = JSON.parse(payoutUpload.buffer.toString())
+    expect(report.reportType).toBe('payout_recon')
+    expect(report.summary.totalPayouts).toBe(1)
+    expect(report.summary.totalAmountCents).toBe(15000)
+    expect(report.details).toHaveLength(1)
+    expect(report.details[0].payoutId).toBe('po_1')
+  })
+
+  it('generates refunds_summary report with detail mapping', async () => {
+    mocks.mockSelectWhere
+      .mockResolvedValueOnce([]) // payments
+      .mockResolvedValueOnce([]) // payouts
+      .mockResolvedValueOnce([  // refunds
+        {
+          id: 'ref_db_1',
+          refundId: 're_1',
+          amountCents: 2000,
+          status: 'succeeded',
+          requestedBy: 'user_a',
+          approvedBy: 'user_b',
+          occurredAt: new Date('2025-03-10'),
+        },
+      ])
+      .mockResolvedValueOnce([]) // disputes
+
+    const artifacts = await generateStripeReports({
+      orgId: 'org_1',
+      startDate: '2025-03-01',
+      endDate: '2025-03-31',
+      actorClerkUserId: 'user_1',
+    })
+
+    expect(artifacts).toHaveLength(4)
+    const refundUpload = mocks.mockUploadBuffer.mock.calls[2][0]
+    const report = JSON.parse(refundUpload.buffer.toString())
+    expect(report.reportType).toBe('refunds_summary')
+    expect(report.summary.totalRefunds).toBe(1)
+    expect(report.details).toHaveLength(1)
+    expect(report.details[0].refundId).toBe('re_1')
+  })
+
+  it('generates disputes_summary report with detail mapping', async () => {
+    mocks.mockSelectWhere
+      .mockResolvedValueOnce([]) // payments
+      .mockResolvedValueOnce([]) // payouts
+      .mockResolvedValueOnce([]) // refunds
+      .mockResolvedValueOnce([  // disputes
+        {
+          id: 'disp_db_1',
+          disputeId: 'dp_1',
+          amountCents: 4000,
+          status: 'needs_response',
+          reason: 'fraudulent',
+          dueBy: new Date('2025-04-01'),
+          occurredAt: new Date('2025-03-20'),
+        },
+      ])
+
+    const artifacts = await generateStripeReports({
+      orgId: 'org_1',
+      startDate: '2025-03-01',
+      endDate: '2025-03-31',
+      actorClerkUserId: 'user_1',
+    })
+
+    expect(artifacts).toHaveLength(4)
+    const disputeUpload = mocks.mockUploadBuffer.mock.calls[3][0]
+    const report = JSON.parse(disputeUpload.buffer.toString())
+    expect(report.reportType).toBe('disputes_summary')
+    expect(report.summary.totalDisputes).toBe(1)
+    expect(report.details).toHaveLength(1)
+    expect(report.details[0].disputeId).toBe('dp_1')
+    expect(report.details[0].reason).toBe('fraudulent')
+    expect(report.details[0].dueBy).toBe('2025-04-01T00:00:00.000Z')
+  })
+
+  it('handles dispute with null dueBy in detail mapping', async () => {
+    mocks.mockSelectWhere
+      .mockResolvedValueOnce([]) // payments
+      .mockResolvedValueOnce([]) // payouts
+      .mockResolvedValueOnce([]) // refunds
+      .mockResolvedValueOnce([  // disputes
+        {
+          id: 'disp_db_2',
+          disputeId: 'dp_2',
+          amountCents: 1000,
+          status: 'won',
+          reason: null,
+          dueBy: null,
+          occurredAt: new Date('2025-03-25'),
+        },
+      ])
+
+    const artifacts = await generateStripeReports({
+      orgId: 'org_1',
+      startDate: '2025-03-01',
+      endDate: '2025-03-31',
+      actorClerkUserId: 'user_1',
+    })
+
+    const disputeUpload = mocks.mockUploadBuffer.mock.calls[3][0]
+    const report = JSON.parse(disputeUpload.buffer.toString())
+    expect(report.details[0].dueBy).toBeNull()
+    expect(report.details[0].reason).toBeNull()
+  })
 })

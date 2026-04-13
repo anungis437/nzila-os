@@ -417,6 +417,89 @@ describe('computeCloseReadiness', () => {
     expect(tolFactor.status).toBe('fail')
   })
 
+  it('tolerance-compliance shows warn when score is between 14 and 17', () => {
+    // 3 out of 4 within tolerance = 75% of 20 = 15 pts → 'warn'
+    const match: MatchResult = {
+      matched: [
+        { stripePayout: payout({ id: 'po_1' }), qboDeposit: deposit({ id: 'dep_1' }), deltaCents: 0, withinTolerance: true },
+        { stripePayout: payout({ id: 'po_2' }), qboDeposit: deposit({ id: 'dep_2' }), deltaCents: 0, withinTolerance: true },
+        { stripePayout: payout({ id: 'po_3' }), qboDeposit: deposit({ id: 'dep_3' }), deltaCents: 0, withinTolerance: true },
+        { stripePayout: payout({ id: 'po_4' }), qboDeposit: deposit({ id: 'dep_4' }), deltaCents: 500, withinTolerance: false },
+      ],
+      unmatchedStripe: [],
+      unmatchedQbo: [],
+    }
+
+    const report = computeCloseReadiness(orgId, period, match, [], DEFAULT_RECON_CONFIG, {
+      stripeReportsGenerated: true,
+    })
+
+    const tolFactor = report.factors.find((f) => f.name === 'tolerance-compliance')!
+    expect(tolFactor.score).toBe(15) // 3/4 * 20 = 15
+    expect(tolFactor.status).toBe('warn')
+  })
+
+  it('no-critical-exceptions shows warn when critScore is between 10 and 19', () => {
+    // 2 critical open: 20 - 2*5 = 10 → 'warn'
+    const exceptions: ReconciliationException[] = [
+      {
+        id: 'RECON-001',
+        orgId,
+        type: 'missing-qbo-deposit',
+        severity: 'critical',
+        status: 'open',
+        stripeAmountCents: 5000,
+        qboAmountCents: 0,
+        deltaCents: 5000,
+        description: 'test1',
+        periodLabel: period,
+        detectedAt: new Date().toISOString(),
+      },
+      {
+        id: 'RECON-002',
+        orgId,
+        type: 'missing-qbo-deposit',
+        severity: 'critical',
+        status: 'open',
+        stripeAmountCents: 3000,
+        qboAmountCents: 0,
+        deltaCents: 3000,
+        description: 'test2',
+        periodLabel: period,
+        detectedAt: new Date().toISOString(),
+      },
+    ]
+
+    const report = computeCloseReadiness(orgId, period, perfectMatch, exceptions, DEFAULT_RECON_CONFIG, {
+      stripeReportsGenerated: true,
+    })
+
+    const critFactor = report.factors.find((f) => f.name === 'no-critical-exceptions')!
+    expect(critFactor.score).toBe(10) // 20 - 2*5 = 10
+    expect(critFactor.status).toBe('warn')
+  })
+
+  it('payout-matching shows warn when matchScore is between 20 and 26', () => {
+    // 3 out of 4 payouts matched = 75% of 30 = 22.5 → round to 23 → 'warn'
+    const match: MatchResult = {
+      matched: [
+        { stripePayout: payout({ id: 'po_m1' }), qboDeposit: deposit({ id: 'dep_m1' }), deltaCents: 0, withinTolerance: true },
+        { stripePayout: payout({ id: 'po_m2' }), qboDeposit: deposit({ id: 'dep_m2' }), deltaCents: 0, withinTolerance: true },
+        { stripePayout: payout({ id: 'po_m3' }), qboDeposit: deposit({ id: 'dep_m3' }), deltaCents: 0, withinTolerance: true },
+      ],
+      unmatchedStripe: [payout({ id: 'po_unmatched' })],
+      unmatchedQbo: [],
+    }
+
+    const report = computeCloseReadiness(orgId, period, match, [], DEFAULT_RECON_CONFIG, {
+      stripeReportsGenerated: true,
+    })
+
+    const matchFactor = report.factors.find((f) => f.name === 'payout-matching')!
+    expect(matchFactor.score).toBe(23) // 3/4 * 30 = 22.5 → round to 23
+    expect(matchFactor.status).toBe('warn')
+  })
+
   it('deducts for open critical exceptions', () => {
     const exceptions: ReconciliationException[] = [
       {

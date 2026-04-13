@@ -169,4 +169,58 @@ describe('EvidencePackOrchestrator', () => {
     const loaded = await orchestrator.getPack('does-not-exist')
     expect(loaded).toBeNull()
   })
+
+  it('should allow explicit status updates', async () => {
+    await orchestrator.updateStatus('PACK-STATUS-1', 'archived')
+    expect(ports.statuses.get('PACK-STATUS-1')).toBe('archived')
+  })
+
+  it('should seal pack with zero artifacts', async () => {
+    const pack = await orchestrator.createPack({
+      orgId,
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-EMPTY',
+      summary: 'No artifacts',
+      controlsCovered: [],
+      artifacts: [],
+      createdBy,
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+
+    expect(sealed.seal).toBeDefined()
+    expect(sealed.seal!.artifactCount).toBe(0)
+    expect(sealed.seal!.artifactsMerkleRoot).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('should seal pack with odd artifact count', async () => {
+    const pack = await orchestrator.createPack({
+      orgId,
+      controlFamily: 'IR',
+      eventType: 'incident.resolved',
+      eventId: 'INC-ODD',
+      summary: 'Odd Merkle path',
+      controlsCovered: [],
+      artifacts: [makeArtifact('odd-a'), makeArtifact('odd-b'), makeArtifact('odd-c')],
+      createdBy,
+    })
+
+    const sealed = await orchestrator.sealPack(pack.packId)
+
+    expect(sealed.seal).toBeDefined()
+    expect(sealed.seal!.artifactCount).toBe(3)
+    expect(sealed.seal!.artifactsMerkleRoot).toMatch(/^[a-f0-9]{64}$/)
+  })
+})
+
+describe('barrel exports', () => {
+  it('re-exports core APIs from index', async () => {
+    const mod = await import('../index')
+
+    expect(typeof mod.EvidencePackOrchestrator).toBe('function')
+    expect(typeof mod.exportPack).toBe('function')
+    expect(typeof mod.verifyPack).toBe('function')
+    expect(typeof mod.RetentionManager).toBe('function')
+  })
 })

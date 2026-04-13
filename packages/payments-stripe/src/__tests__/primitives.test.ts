@@ -146,6 +146,38 @@ describe('createCheckoutSession', () => {
     const call = mockSessionsCreate.mock.calls[0][0]
     expect(call.line_items[0]).toEqual({ price: 'price_abc', quantity: 1 })
   })
+
+  it('falls back to Payment when name is not provided on ad-hoc item', async () => {
+    mockSessionsCreate.mockResolvedValue({ id: 'cs_fallback' })
+
+    await createCheckoutSession({
+      orgId: 'ent1',
+      lineItems: [{ amountCents: 500, quantity: 1 }],
+      successUrl: 'https://x.com/ok',
+      cancelUrl: 'https://x.com/no',
+    })
+
+    const call = mockSessionsCreate.mock.calls[0][0]
+    expect(call.line_items[0].price_data.product_data.name).toBe('Payment')
+  })
+
+  it('includes venture_id in metadata when ventureId provided', async () => {
+    mockSessionsCreate.mockResolvedValue({ id: 'cs_venture' })
+
+    await createCheckoutSession({
+      orgId: 'ent1',
+      ventureId: 'v_123',
+      lineItems: [{ name: 'Item', amountCents: 500, quantity: 1 }],
+      successUrl: 'https://x.com/ok',
+      cancelUrl: 'https://x.com/no',
+    })
+
+    expect(mockSessionsCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: { org_id: 'ent1', venture_id: 'v_123' },
+      }),
+    )
+  })
 })
 
 describe('executeRefund', () => {
@@ -356,6 +388,36 @@ describe('createSubscriptionCheckoutSession', () => {
         subscription_data: expect.objectContaining({ trial_period_days: 7 }),
       }),
     )
+  })
+
+  it('omits venture_id from metadata when ventureId is not provided', async () => {
+    mockSessionsCreate.mockResolvedValue({ id: 'cs_sub_4', url: 'https://x.com' })
+
+    await createSubscriptionCheckoutSession({
+      priceId: 'price_1',
+      orgId: 'org_1',
+      successUrl: 'https://x.com/ok',
+      cancelUrl: 'https://x.com/no',
+    })
+
+    const call = mockSessionsCreate.mock.calls[0][0]
+    expect(call.subscription_data.metadata).toEqual({ org_id: 'org_1' })
+    expect(call.subscription_data.metadata).not.toHaveProperty('venture_id')
+  })
+
+  it('includes venture_id in metadata when ventureId is provided', async () => {
+    mockSessionsCreate.mockResolvedValue({ id: 'cs_sub_5', url: 'https://x.com' })
+
+    await createSubscriptionCheckoutSession({
+      priceId: 'price_1',
+      orgId: 'org_1',
+      ventureId: 'v_1',
+      successUrl: 'https://x.com/ok',
+      cancelUrl: 'https://x.com/no',
+    })
+
+    const call = mockSessionsCreate.mock.calls[0][0]
+    expect(call.subscription_data.metadata).toEqual({ org_id: 'org_1', venture_id: 'v_1' })
   })
 })
 

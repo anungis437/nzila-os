@@ -9,6 +9,7 @@ import {
   sendNotification,
   sendCaseStatusUpdate,
   sendDocumentRequest,
+  sendRenewalReminder,
 } from './messaging'
 
 describe('providers', () => {
@@ -59,6 +60,30 @@ describe('providers', () => {
     const result = await provider.sendTemplate('+1234', 'welcome', { name: 'John' })
     expect(result.status).toBe('queued')
   })
+
+  it('sendMessage works for WhatsApp Business provider', async () => {
+    const provider = createWhatsAppBusinessProvider({
+      phoneNumberId: 'phone-1',
+      accessToken: 'token',
+    })
+
+    const result = await provider.sendMessage('+1234', 'Hello from WABA')
+    expect(result.externalId).toContain('waba_')
+    expect(result.status).toBe('queued')
+  })
+
+  it('OpenClaw provider handles both message and template sends', async () => {
+    const provider = createOpenClawProvider({
+      apiUrl: 'https://api.openclaw.com',
+      apiKey: 'key',
+    })
+
+    const msgResult = await provider.sendMessage('+1234', 'Hello from OpenClaw')
+    expect(msgResult.externalId).toContain('oc_')
+
+    const tplResult = await provider.sendTemplate('+1234', 'reminder', { dueDate: 'tomorrow' })
+    expect(tplResult.externalId).toContain('oc_tpl_')
+  })
 })
 
 describe('messaging', () => {
@@ -108,5 +133,50 @@ describe('messaging', () => {
     )
 
     expect(result.messageType).toBe('document_request')
+  })
+
+  it('sendNotification uses template branch when template data is provided', async () => {
+    let loggedEntry: unknown = null
+    const logger: CommunicationLogger = {
+      log: async (entry) => {
+        loggedEntry = entry
+      },
+    }
+
+    const result = await sendNotification(
+      provider,
+      {
+        clientId: 'client-2',
+        caseId: 'case-2',
+        recipientPhone: '+1234567890',
+        messageType: 'case_status',
+        body: 'Template fallback body',
+        templateName: 'case_status_update',
+        templateParams: { status: 'approved' },
+      },
+      'org-1',
+      logger,
+    )
+
+    expect(result.sendResult.externalId).toContain('twilio_tpl_')
+    expect(loggedEntry).toMatchObject({
+      caseId: 'case-2',
+      channel: 'whatsapp',
+      direction: 'outbound',
+    })
+  })
+
+  it('sendRenewalReminder sends renewal_reminder message type', async () => {
+    const result = await sendRenewalReminder(
+      provider,
+      'client-3',
+      '+1234567890',
+      'Your permit renewal is due in 14 days',
+      'org-1',
+      mockLogger,
+    )
+
+    expect(result.messageType).toBe('renewal_reminder')
+    expect(result.caseId).toBeUndefined()
   })
 })
