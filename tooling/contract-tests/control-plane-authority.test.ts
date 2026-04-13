@@ -6,6 +6,9 @@
  * CTRL-003: App registry in platform-contracts must list all apps with manifests
  * CTRL-004: control-manifest riskLevel must match registry riskLevel
  * CTRL-005: All production apps must have a health endpoint
+ * CTRL-006: Control plane has unified system state
+ * CTRL-007: Revenue apps depend on control-plane-compatible packages
+ * CTRL-008: Control plane exposes system-state API route
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
@@ -173,4 +176,69 @@ describe('CTRL-007: Revenue apps depend on control-plane-compatible packages', (
       ).toBeDefined()
     })
   }
+})
+
+// ── CTRL-008: Control plane exposes system-state API route ──────────────────
+
+describe('CTRL-008: Control plane has system-state API route', () => {
+  it('system-state route.ts exists', () => {
+    const routePath = join(
+      APPS_DIR,
+      'control-plane',
+      'app',
+      'api',
+      'control-plane',
+      'system-state',
+      'route.ts',
+    )
+    expect(
+      existsSync(routePath),
+      'control-plane must expose /api/control-plane/system-state endpoint',
+    ).toBe(true)
+  })
+
+  it('system-state route imports getSystemState', () => {
+    const routePath = join(
+      APPS_DIR,
+      'control-plane',
+      'app',
+      'api',
+      'control-plane',
+      'system-state',
+      'route.ts',
+    )
+    if (!existsSync(routePath)) return
+    const content = readFileSync(routePath, 'utf-8')
+    expect(content).toContain('getSystemState')
+  })
+
+  it('system-state route imports getRevenueOverview', () => {
+    const routePath = join(
+      APPS_DIR,
+      'control-plane',
+      'app',
+      'api',
+      'control-plane',
+      'system-state',
+      'route.ts',
+    )
+    if (!existsSync(routePath)) return
+    const content = readFileSync(routePath, 'utf-8')
+    expect(content).toContain('getRevenueOverview')
+  })
+
+  it('system-state route exports GET handler', () => {
+    const routePath = join(
+      APPS_DIR,
+      'control-plane',
+      'app',
+      'api',
+      'control-plane',
+      'system-state',
+      'route.ts',
+    )
+    if (!existsSync(routePath)) return
+    const content = readFileSync(routePath, 'utf-8')
+    expect(content).toMatch(/export\s+(async\s+)?function\s+GET/)
+  })
 })

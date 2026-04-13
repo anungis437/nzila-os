@@ -7,6 +7,7 @@
  * REV-003: No inline payment processing (raw fetch to Stripe / PayPal URLs).
  * REV-004: Every revenue event type must be represented in the RevenueEventType enum.
  * REV-005: Payout/fee/transaction amounts must use UnifiedRevenueRecord shape.
+ * REV-006: Evidence bridge must export audit entry builders for revenue traceability.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
@@ -219,5 +220,46 @@ describe('REV-005: UnifiedRevenueRecord has mandatory fields', () => {
     for (const field of requiredFields) {
       expect(content, `UnifiedRevenueRecord missing field: ${field}`).toContain(field)
     }
+  })
+})
+
+// ── REV-006: Evidence bridge exports audit entry builders ───────────────────
+
+describe('REV-006: Revenue evidence bridge integrity', () => {
+  const bridgePath = join(ROOT, 'packages/platform-revenue/src/evidence-bridge.ts')
+
+  it('evidence-bridge.ts exists', () => {
+    expect(existsSync(bridgePath), 'evidence-bridge.ts must exist').toBe(true)
+  })
+
+  it('exports buildRevenueAuditEntry', () => {
+    const content = readFileSync(bridgePath, 'utf-8')
+    expect(content).toContain('export function buildRevenueAuditEntry')
+  })
+
+  it('exports buildPayoutAuditEntry', () => {
+    const content = readFileSync(bridgePath, 'utf-8')
+    expect(content).toContain('export function buildPayoutAuditEntry')
+  })
+
+  it('exports buildFeeAuditEntry', () => {
+    const content = readFileSync(bridgePath, 'utf-8')
+    expect(content).toContain('export function buildFeeAuditEntry')
+  })
+
+  it('RevenueAuditEntry type has required fields', () => {
+    const content = readFileSync(bridgePath, 'utf-8')
+    const requiredFields = ['timestamp', 'eventType', 'actor', 'orgId', 'app', 'policyResult', 'details']
+    for (const field of requiredFields) {
+      expect(content, `RevenueAuditEntry missing field: ${field}`).toContain(field)
+    }
+  })
+
+  it('barrel export includes evidence bridge', () => {
+    const indexPath = join(ROOT, 'packages/platform-revenue/src/index.ts')
+    const content = readFileSync(indexPath, 'utf-8')
+    expect(content).toContain('buildRevenueAuditEntry')
+    expect(content).toContain('buildPayoutAuditEntry')
+    expect(content).toContain('buildFeeAuditEntry')
   })
 })

@@ -26,6 +26,12 @@
  *   HARD-16  Control plane unified system state
  *   HARD-17  Auth purity contract test exists
  *   HARD-18  Portfolio clarity (README has tier classification)
+ *   HARD-19  Revenue evidence bridge integrity (audit entry builders)
+ *   HARD-20  Control plane system-state API route
+ *   HARD-21  Revenue enforcement covers evidence bridge (REV-006)
+ *   HARD-22  All apps report to control plane (control-manifest.json)
+ *   HARD-23  Auth purity final (AUTH-003 Clerk SDK import check implemented)
+ *   HARD-24  Governed revenue end-to-end (evidence + enforcement + docs)
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
@@ -484,6 +490,159 @@ gate('HARD-18: Portfolio clarity in README', () => {
   }
 })
 
+// ── HARD-19 Revenue Evidence Bridge ─────────────────────────────────────────
+
+gate('HARD-19: Revenue evidence bridge exports audit builders', () => {
+  const bridgePath = join(ROOT, 'packages/platform-revenue/src/evidence-bridge.ts')
+  if (!existsSync(bridgePath)) {
+    return { passed: false, details: 'evidence-bridge.ts not found' }
+  }
+
+  const content = readFileSync(bridgePath, 'utf-8')
+  const hasRevenue = content.includes('buildRevenueAuditEntry')
+  const hasPayout = content.includes('buildPayoutAuditEntry')
+  const hasFee = content.includes('buildFeeAuditEntry')
+
+  const passed = hasRevenue && hasPayout && hasFee
+  return {
+    passed,
+    details: passed
+      ? 'All three audit entry builders present (revenue, payout, fee)'
+      : `Missing builders: ${[!hasRevenue && 'revenue', !hasPayout && 'payout', !hasFee && 'fee'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-20 Control Plane System-State API ──────────────────────────────────
+
+gate('HARD-20: Control plane has system-state API route', () => {
+  const routePath = join(ROOT, 'apps/control-plane/app/api/control-plane/system-state/route.ts')
+  if (!existsSync(routePath)) {
+    return { passed: false, details: 'system-state route.ts not found' }
+  }
+
+  const content = readFileSync(routePath, 'utf-8')
+  const hasGet = /export\s+(async\s+)?function\s+GET/.test(content)
+  const hasSystemState = content.includes('getSystemState')
+  const hasRevenue = content.includes('getRevenueOverview')
+
+  const passed = hasGet && hasSystemState && hasRevenue
+  return {
+    passed,
+    details: passed
+      ? 'System-state API route with GET + system state + revenue aggregation'
+      : 'Route exists but missing required exports/imports',
+  }
+})
+
+// ── HARD-21 Revenue Enforcement Covers Evidence Bridge ──────────────────────
+
+gate('HARD-21: Revenue enforcement contract test covers evidence bridge', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/revenue-enforcement.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'revenue-enforcement.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasREV006 = content.includes('REV-006')
+  const hasBridge = content.includes('evidence-bridge') || content.includes('evidence bridge')
+
+  return {
+    passed: hasREV006 && hasBridge,
+    details: hasREV006 && hasBridge
+      ? 'REV-006 evidence bridge enforcement present'
+      : 'Revenue enforcement missing evidence bridge coverage (REV-006)',
+  }
+})
+
+// ── HARD-22 All Apps Report to Control Plane ────────────────────────────────
+
+gate('HARD-22: All apps have control-manifest.json', () => {
+  const appsDir = join(ROOT, 'apps')
+  const apps = readdirSync(appsDir).filter(d => {
+    try { return statSync(join(appsDir, d)).isDirectory() } catch { return false }
+  })
+
+  const missing: string[] = []
+  for (const app of apps) {
+    if (!existsSync(join(appsDir, app, 'control-manifest.json'))) {
+      missing.push(app)
+    }
+  }
+
+  return {
+    passed: missing.length === 0,
+    details: missing.length === 0
+      ? `All ${apps.length} apps registered with control plane (control-manifest.json)`
+      : `Apps missing control-manifest.json: ${missing.join(', ')}`,
+  }
+})
+
+// ── HARD-23 Auth Purity Final ───────────────────────────────────────────────
+
+gate('HARD-23: Auth purity covers Clerk SDK import check', () => {
+  const testPath = join(ROOT, 'tooling/contract-tests/auth-purity.test.ts')
+  if (!existsSync(testPath)) {
+    return { passed: false, details: 'auth-purity.test.ts not found' }
+  }
+
+  const content = readFileSync(testPath, 'utf-8')
+  const hasAuth001 = content.includes('AUTH-001')
+  const hasAuth002 = content.includes('AUTH-002')
+  const hasAuth003 = content.includes('AUTH-003')
+  const hasClerkImportCheck = content.includes('@clerk/')
+
+  const passed = hasAuth001 && hasAuth002 && hasAuth003 && hasClerkImportCheck
+  return {
+    passed,
+    details: passed
+      ? 'All three auth purity checks implemented (naming + identifiers + SDK imports)'
+      : `Missing: ${[!hasAuth001 && 'AUTH-001', !hasAuth002 && 'AUTH-002', !hasAuth003 && 'AUTH-003', !hasClerkImportCheck && 'Clerk SDK check'].filter(Boolean).join(', ')}`,
+  }
+})
+
+// ── HARD-24 Governed Revenue End-to-End ─────────────────────────────────────
+
+gate('HARD-24: Governed revenue pipeline complete', () => {
+  const issues: string[] = []
+
+  // Evidence bridge exists
+  const bridgePath = join(ROOT, 'packages/platform-revenue/src/evidence-bridge.ts')
+  if (!existsSync(bridgePath)) issues.push('evidence-bridge.ts missing')
+
+  // Governed monetization docs exist
+  const govDoc = join(ROOT, 'docs/platform/governed-monetization.md')
+  if (!existsSync(govDoc)) {
+    issues.push('governed-monetization.md missing')
+  } else {
+    const content = readFileSync(govDoc, 'utf-8')
+    if (!content.includes('Revenue → Governance Pipeline')) {
+      issues.push('governed-monetization.md missing pipeline documentation')
+    }
+  }
+
+  // Revenue enforcement test exists with full coverage
+  const testPath = join(ROOT, 'tooling/contract-tests/revenue-enforcement.test.ts')
+  if (!existsSync(testPath)) {
+    issues.push('revenue-enforcement.test.ts missing')
+  } else {
+    const content = readFileSync(testPath, 'utf-8')
+    for (const rule of ['REV-001', 'REV-002', 'REV-003', 'REV-004', 'REV-005', 'REV-006']) {
+      if (!content.includes(rule)) issues.push(`${rule} missing from revenue enforcement`)
+    }
+  }
+
+  // Control plane aggregates revenue
+  const aggPath = join(ROOT, 'apps/control-plane/services/revenue-aggregator.ts')
+  if (!existsSync(aggPath)) issues.push('revenue-aggregator.ts missing')
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'Governed revenue: evidence bridge + docs + enforcement + control-plane aggregation'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
 // ── Runner ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -526,7 +685,7 @@ function main() {
     console.log('')
     process.exit(1)
   } else {
-    console.log('  ✅  HARDENING GATE PASSED — ALL 18 CONDITIONS MET  ✅')
+    console.log('  ✅  HARDENING GATE PASSED — ALL 24 CONDITIONS MET  ✅')
     console.log('')
     process.exit(0)
   }
