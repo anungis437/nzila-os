@@ -351,6 +351,7 @@ describe('quote-to-order saga', () => {
 
     const result = await createOrderStep.compensate(ctx)
     expect(result.ok).toBe(true)
+    if (!result.ok) throw new Error('expected ok')
     expect(result.data).toEqual({ orderId: 'ord-comp-1', action: 'flagged_for_review' })
   })
 
@@ -368,6 +369,7 @@ describe('quote-to-order saga', () => {
 
     const result = await createOrderStep.compensate(ctx)
     expect(result.ok).toBe(true)
+    if (!result.ok) throw new Error('expected ok')
     expect(result.data).toBeNull()
   })
 

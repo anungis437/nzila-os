@@ -55,7 +55,7 @@ describe('verify-pack', () => {
       artifacts: [{ sha256: 'abc', type: 'audit' }],
     }
     const sealed = { ...packIndex, seal: generateSeal(packIndex) }
-    sealed.orgId = 'tampered-org'
+    ;(sealed as any).orgId = 'tampered-org'
 
     mockExistsSync.mockImplementation((p: string) => p === '/tmp/pack.json')
     mockReadFileSync.mockReturnValue(JSON.stringify(sealed))

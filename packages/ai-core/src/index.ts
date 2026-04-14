@@ -38,6 +38,18 @@ export { AiControlPlaneError } from './types'
 // Provider resilience
 export { AiProviderOutageError, withRetry } from './providers/retry'
 
+// Circuit breaker & fallback strategy
+export {
+  CircuitBreaker,
+  executeWithFallback,
+  withTimeout,
+  DEFAULT_FALLBACK_STRATEGY,
+  type CircuitBreakerConfig,
+  type CircuitBreakerMetrics,
+  type CircuitState,
+  type FallbackStrategy,
+} from './fallback'
+
 // Errors (standard taxonomy)
 export {
   profileNotFound,
@@ -144,3 +156,21 @@ export {
   type AiActionEvidence,
   type AiActionsEvidenceAppendix,
 } from './actions/evidencePack'
+
+// LLM evaluation
+export {
+  evaluateLlmCase,
+  runLlmEvaluation,
+  type LlmEvalCase,
+  type LlmEvalOutput,
+  type LlmEvalCaseResult,
+  type LlmEvalRun,
+} from './evaluation'
+
+// AI control integration
+export { governedGenerate } from './control-adapter'
+export type {
+  GovernedGenerateInput,
+  GovernedGenerateOutput,
+  GovernedGenerateConfig,
+} from './control-adapter'

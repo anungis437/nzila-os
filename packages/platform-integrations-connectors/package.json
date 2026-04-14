@@ -1,0 +1,25 @@
+{
+  "name": "@nzila/platform-integrations-connectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./webhook": "./src/webhook-connector.ts",
+    "./rest-api": "./src/rest-api-connector.ts",
+    "./csv-sftp": "./src/csv-sftp-connector.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/platform-integrations": "workspace:*",
+    "@nzila/platform-integrations-types": "workspace:*",
+    "zod": "^3.24.0"
+  }
+}

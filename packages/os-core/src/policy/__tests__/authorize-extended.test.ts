@@ -115,7 +115,7 @@ describe('authorize extended', () => {
 
       const mockReq = { url: 'http://localhost/api/test', method: 'GET', headers: new Map() }
 
-      await expect(authorize(mockReq as any, { requireAuth: true })).rejects.toThrow()
+      await expect(authorize(mockReq as any, {} as any)).rejects.toThrow()
     })
   })
 })

@@ -35,12 +35,26 @@ async function checkBlob(): Promise<boolean> {
   }
 }
 
+async function checkRedis(): Promise<boolean> {
+  try {
+    // No Redis configured — skip check
+    if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.REDIS_URL) return true
+    const { getRateLimitStore } = await import('@nzila/os-core/rateLimit/store')
+    const store = await getRateLimitStore()
+    await store.hit('_health_probe', 60_000, 9999)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function GET() {
-  const [db, blob] = await Promise.allSettled([checkDb(), checkBlob()])
+  const [db, blob, redis] = await Promise.allSettled([checkDb(), checkBlob(), checkRedis()])
 
   const checks = {
     db: db.status === 'fulfilled' ? db.value : false,
     blob: blob.status === 'fulfilled' ? blob.value : false,
+    redis: redis.status === 'fulfilled' ? redis.value : false,
   }
 
   const allHealthy = Object.values(checks).every(Boolean)

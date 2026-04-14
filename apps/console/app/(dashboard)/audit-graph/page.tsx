@@ -7,8 +7,8 @@
  */
 import { requireRole, getUserRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
-import { auditEvents, orgs as _orgs } from '@nzila/db/schema'
-import { eq, count, sql, desc, gte as _gte } from 'drizzle-orm'
+import { auditEvents } from '@nzila/db/schema'
+import { eq, count, sql, desc } from 'drizzle-orm'
 import { createHash } from 'crypto'
 import {
   LinkIcon,

@@ -25,3 +25,24 @@ export {
   type ConsentBasis,
   type DataSensitivity,
 } from './evidence/training-consent'
+
+// Training orchestration
+export {
+  runTrainingPipeline,
+  type TrainingStage,
+  type TrainingStageResult,
+  type TrainingPipelineRun,
+  type TrainingStageStatus,
+} from './training-pipeline'
+
+// Experiment framework
+export {
+  createExperiment,
+  assignExperimentVariant,
+  evaluateExperiment,
+  type ExperimentDefinition,
+  type ExperimentVariant,
+  type VariantObservation,
+  type VariantSummary,
+  type ExperimentEvaluation,
+} from './experiments'

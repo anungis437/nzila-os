@@ -25,7 +25,7 @@ describe('platform-ops index runtime paths', () => {
 
   it('builds outbox backlog statuses and handles missing tables', async () => {
     vi.mocked(platformDb.execute)
-      .mockResolvedValueOnce([{ domain: 'zonga', pendingCount: 130, oldestAgeSec: 90 }])
+      .mockResolvedValueOnce([{ domain: 'zonga', pendingCount: 130, oldestAgeSec: 90 }] as any)
       .mockRejectedValueOnce(new Error('relation does not exist'))
 
     const backlogs = await getOutboxBacklogs()
@@ -52,7 +52,7 @@ describe('platform-ops index runtime paths', () => {
       { queueName: 'active-q', pendingCount: 2, runningCount: 1 },
       { queueName: 'busy-q', pendingCount: 2, runningCount: 3 },
       { queueName: 'sat-q', pendingCount: 1, runningCount: 20 },
-    ])
+    ] as any)
 
     const metrics = await getWorkerMetrics()
 
@@ -104,7 +104,7 @@ describe('platform-ops index runtime paths', () => {
         domain: 'x',
         oldestAgeSec: 10,
       },
-    ])
+    ] as any)
 
     const snapshot = await getOpsSnapshot()
 

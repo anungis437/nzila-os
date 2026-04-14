@@ -1,0 +1,57 @@
+{
+  "app": {
+    "tagline": "Kiɗa Ba Tare da Iyaka Ba"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Barka da zuwa Zonga",
+    "description": "Gudanar da kundin kiɗanka, bibiyar kuɗin shiga, duba biyan kuɗi, kuma ka ƙara masu sauraro."
+  },
+  "catalog": {
+    "title": "Katalog",
+    "tracks": "Waƙoƙi",
+    "albums": "Albums",
+    "podcasts": "Podcasts",
+    "videos": "Bidiyon Kiɗa",
+    "upload": "Loda Abun Ciki",
+    "publish": "Buga",
+    "noAssets": "Babu abu tukuna",
+    "noAssetsDescription": "Loda waƙarka ta farko don farawa."
+  },
+  "revenue": {
+    "title": "Kuɗaɗen Shiga",
+    "totalRevenue": "Jimillar Kuɗaɗen Shiga",
+    "streamingRevenue": "Kuɗin Streaming",
+    "downloadRevenue": "Kuɗin Download",
+    "netPayout": "Biyan Kuɗi na Gaskiya"
+  },
+  "payouts": {
+    "title": "Biyan Kuɗi",
+    "description": "Kuɗin masu fasaha da tarihin biyan kuɗi",
+    "pending": "Ana jira",
+    "processing": "Ana aiwatarwa",
+    "completed": "An kammala",
+    "failed": "Ya gaza",
+    "requestPayout": "Nemi Biyan Kuɗi",
+    "newPayout": "Sabon Biyan Kuɗi"
+  },
+  "marketing": {
+    "hero": {
+      "badge": "Kiɗan Afirka, Dandalin Duniya",
+      "title": "Kiɗa Ba tare",
+      "titleAccent": "da Iyaka ba",
+      "description": "Saurari mafi kyawun kiɗan Afirka. Masu fasaha suna samun 85% na kowane sauraro.",
+      "ctaListen": "Fara Sauraro",
+      "ctaDistribute": "Rarraba Kiɗanka"
+    }
+  },
+  "footer": {
+    "ctaTitle": "Kana shirye ka raba kiɗanka?",
+    "ctaDescription": "Shiga tare da dubban masu ƙirƙira na Afirka a Zonga.",
+    "ctaButton": "Fara Kyauta"
+  },
+  "signIn": {
+    "pageTitle": "Shiga | Zonga",
+    "tagline": "Kiɗanka, Kuɗinka"
+  }
+}

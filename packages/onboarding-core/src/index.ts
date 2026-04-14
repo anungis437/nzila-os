@@ -60,3 +60,28 @@ export type {
   StepCompletedPayload,
   FlowCompletedPayload,
 } from './events'
+
+// Self-Service
+export {
+  resolveOnboardingFlow,
+  validateOrgCreation,
+  buildOrgCreation,
+  buildInviteLink,
+  validateInviteConsumption,
+  getFieldsForPhase,
+  computeProfileCompleteness,
+  buildReferralAttribution,
+  buildSelfServiceFlow,
+  DEFAULT_PROFILE_FIELDS,
+} from './self-service'
+export type {
+  OrgCreationRequest,
+  OrgType,
+  OrgCreationResult,
+  InviteRole,
+  InviteLink,
+  CreateInviteInput,
+  ProfilePhase,
+  ProfileField,
+  ReferralAttribution,
+} from './self-service'

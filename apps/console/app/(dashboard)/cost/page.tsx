@@ -4,19 +4,10 @@
  * Org-scoped cost observability: spend over time, top cost drivers,
  * cost per request estimate, and projected monthly burn.
  */
-import { requireRole, getUserRole as _getUserRole } from '@/lib/rbac'
+import { requireRole } from '@/lib/rbac'
+import { getCostDashboardData } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
-
-interface _CostRollup {
-  orgId: string
-  appId: string
-  category: string
-  day: string
-  totalUnits: number
-  totalEstCostUsd: number
-  eventCount: number
-}
 
 function MetricCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -51,35 +42,7 @@ export default async function CostDashboardPage({
   const isPlatformAdmin = role === 'platform_admin' || role === 'studio_admin'
   const isGlobalView = isPlatformAdmin && params.mode === 'global'
 
-  // ── Mock data for server component (replaced by real DB queries in production) ──
-  const now = new Date()
-  const today = now.toISOString().slice(0, 10)
-  const last30 = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(now)
-    d.setDate(d.getDate() - (29 - i))
-    return d.toISOString().slice(0, 10)
-  })
-
-  // Deterministic placeholder data (seeded from day index)
-  const dailyTrend = last30.map((day, i) => ({
-    day,
-    totalEstCostUsd: Math.round((8 + ((i * 7 + 3) % 13)) * 100) / 100,
-  }))
-
-  const totalSpend = dailyTrend.reduce((s, d) => s + d.totalEstCostUsd, 0)
-  const last7Avg = dailyTrend.slice(-7).reduce((s, d) => s + d.totalEstCostUsd, 0) / 7
-  const projected30 = Math.round(last7Avg * 30 * 100) / 100
-  const costPerRequest = Math.round((totalSpend / 45000) * 10000) / 10000
-
-  const topDrivers = [
-    { appId: 'web', category: 'compute_ms', totalEstCostUsd: totalSpend * 0.35 },
-    { appId: 'console', category: 'db_query_ms', totalEstCostUsd: totalSpend * 0.25 },
-    { appId: 'orchestrator-api', category: 'integration_call', totalEstCostUsd: totalSpend * 0.2 },
-    { appId: 'web', category: 'egress_kb', totalEstCostUsd: totalSpend * 0.12 },
-    { appId: 'cora', category: 'ai_token', totalEstCostUsd: totalSpend * 0.08 },
-  ]
-
-  const budgetState = totalSpend > 400 ? 'exceeded' : totalSpend > 320 ? 'warning' : 'ok'
+  const { dailyTrend, totalSpend, last7Avg, projected30, costPerRequest, topDrivers, budgetState, today } = await getCostDashboardData()
 
   return (
     <div className="space-y-8 p-6">
@@ -149,7 +112,7 @@ export default async function CostDashboardPage({
           })}
         </div>
         <div className="mt-2 flex justify-between text-xs text-zinc-400">
-          <span>{last30[0]}</span>
+          <span>{dailyTrend[0]?.day}</span>
           <span>{today}</span>
         </div>
       </div>

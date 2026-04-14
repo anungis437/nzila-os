@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { PromptVersion } from './types'
-
-const versions: PromptVersion[] = []
+import { getGovernanceStore, persistGovernanceCollection } from './store'
 
 export function createPromptVersion(params: {
   promptName: string
@@ -9,6 +8,7 @@ export function createPromptVersion(params: {
   author: string
   changeReason: string
 }): PromptVersion {
+  const versions = getGovernanceStore().getPromptVersions()
   // Deactivate previous versions
   for (const v of versions) {
     if (v.promptName === params.promptName) {
@@ -31,21 +31,26 @@ export function createPromptVersion(params: {
     changeReason: params.changeReason,
   }
   versions.push(entry)
+  persistGovernanceCollection('promptVersions')
   return entry
 }
 
 export function getActivePrompt(
   promptName: string,
 ): PromptVersion | undefined {
+  const versions = getGovernanceStore().getPromptVersions()
   return versions.find((v) => v.promptName === promptName && v.active)
 }
 
 export function getPromptHistory(promptName: string): PromptVersion[] {
+  const versions = getGovernanceStore().getPromptVersions()
   return versions
     .filter((v) => v.promptName === promptName)
     .sort((a, b) => b.version - a.version)
 }
 
 export function clearPromptVersions(): void {
+  const versions = getGovernanceStore().getPromptVersions()
   versions.length = 0
+  persistGovernanceCollection('promptVersions')
 }

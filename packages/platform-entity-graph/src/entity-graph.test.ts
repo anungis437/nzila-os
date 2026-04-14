@@ -173,10 +173,10 @@ describe('platform-entity-graph', () => {
 
   it('buildEntitySubgraph handles incoming edges not previously collected', async () => {
     const employerId = 'emp-0000-0000-0000-000000000001'
-    await store.addNode(node(OntologyEntityTypes.EMPLOYER, employerId, 'Acme Corp'))
-    // Employer -> Case: when BFS processes Case, this is a NEW edge where Case is target
+    await store.addNode(node(OntologyEntityTypes.ORGANIZATION, employerId, 'Acme Corp'))
+    // Organization -> Case: when BFS processes Case, this is a NEW edge where Case is target
     await store.addEdge(
-      edge('e-emp', OntologyEntityTypes.EMPLOYER, employerId, OntologyEntityTypes.CASE, caseId, RelationshipTypes.HAS),
+      edge('e-emp', OntologyEntityTypes.ORGANIZATION, employerId, OntologyEntityTypes.CASE, caseId, RelationshipTypes.HAS),
     )
     const subgraph = await buildEntitySubgraph(
       store, TENANT, OntologyEntityTypes.CLIENT, clientId, 2,

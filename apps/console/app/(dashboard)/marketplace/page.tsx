@@ -5,95 +5,18 @@
  * @see @nzila/platform-marketplace
  */
 import { requireRole } from '@/lib/rbac'
-import type { ProviderManifest as _ProviderManifest } from '@nzila/platform-marketplace'
+import { getMarketplaceProviders, type MarketplaceProvider } from '@/lib/server-data'
 import {
   PuzzlePieceIcon,
   CheckCircleIcon,
   XCircleIcon,
   ArrowPathIcon,
   KeyIcon,
-  GlobeAltIcon,
-  ChatBubbleLeftRightIcon,
-  UserGroupIcon,
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
 
-// ── Mock providers (wired to real ProviderRegistry in production) ───────
-
-interface Provider {
-  id: string
-  name: string
-  category: string
-  version: string
-  description: string
-  installed: boolean
-  status: 'active' | 'inactive' | 'error'
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-  scopes: string[]
-  requiredSecrets: string[]
-  retryAttempts: number
-  lastHealthCheck: string
-}
-
-const providers: Provider[] = [
-  {
-    id: 'slack',
-    name: 'Slack',
-    category: 'chatops',
-    version: '1.0.0',
-    description: 'Push audit, compliance, and alert notifications to Slack channels.',
-    installed: true,
-    status: 'active',
-    icon: ChatBubbleLeftRightIcon,
-    scopes: ['chat:write', 'channels:read', 'users:read'],
-    requiredSecrets: ['SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET'],
-    retryAttempts: 3,
-    lastHealthCheck: '2 minutes ago',
-  },
-  {
-    id: 'hubspot',
-    name: 'HubSpot',
-    category: 'crm',
-    version: '1.0.0',
-    description: 'Sync contacts, deals, and pipeline data with HubSpot CRM.',
-    installed: true,
-    status: 'active',
-    icon: UserGroupIcon,
-    scopes: ['crm.objects.contacts.read', 'crm.objects.contacts.write', 'crm.objects.deals.read', 'crm.objects.deals.write'],
-    requiredSecrets: ['HUBSPOT_ACCESS_TOKEN', 'HUBSPOT_PORTAL_ID'],
-    retryAttempts: 5,
-    lastHealthCheck: '5 minutes ago',
-  },
-  {
-    id: 'azure-blob',
-    name: 'Azure Blob Storage',
-    category: 'storage',
-    version: '1.0.0',
-    description: 'Sovereign data storage with PIPEDA-compliant residency.',
-    installed: false,
-    status: 'inactive',
-    icon: GlobeAltIcon,
-    scopes: ['blob.read', 'blob.write', 'container.list'],
-    requiredSecrets: ['AZURE_STORAGE_CONNECTION_STRING'],
-    retryAttempts: 3,
-    lastHealthCheck: 'N/A',
-  },
-  {
-    id: 'stripe',
-    name: 'Stripe Payments',
-    category: 'payments',
-    version: '1.0.0',
-    description: 'Process payments with full audit trail and evidence capture.',
-    installed: false,
-    status: 'inactive',
-    icon: KeyIcon,
-    scopes: ['charges.read', 'charges.write', 'refunds.write'],
-    requiredSecrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],
-    retryAttempts: 3,
-    lastHealthCheck: 'N/A',
-  },
-]
+type Provider = MarketplaceProvider
 
 function StatusBadge({ status }: { status: Provider['status'] }) {
   if (status === 'active') {
@@ -118,13 +41,12 @@ function StatusBadge({ status }: { status: Provider['status'] }) {
 }
 
 function ProviderCard({ provider }: { provider: Provider }) {
-  const Icon = provider.icon
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${provider.installed ? 'bg-blue-50' : 'bg-gray-50'}`}>
-            <Icon className={`h-6 w-6 ${provider.installed ? 'text-blue-600' : 'text-gray-400'}`} />
+            <PuzzlePieceIcon className={`h-6 w-6 ${provider.installed ? 'text-blue-600' : 'text-gray-400'}`} />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900">{provider.name}</h3>
@@ -186,6 +108,7 @@ export default async function MarketplacePage({
   await requireRole('platform_admin', 'studio_admin')
   const params = await searchParams
   const categoryFilter = params.category
+  const providers = await getMarketplaceProviders()
 
   const filtered = categoryFilter
     ? providers.filter((p) => p.category === categoryFilter)

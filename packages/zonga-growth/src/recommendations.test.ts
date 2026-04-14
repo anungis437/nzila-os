@@ -24,9 +24,9 @@ describe('computeTrendingScores', () => {
   it('computes scores and velocity for a single asset', () => {
     const result = computeTrendingScores([makeSignal()])
     expect(result).toHaveLength(1)
-    expect(result[0].assetId).toBe('a1')
-    expect(result[0].score).toBeGreaterThan(0)
-    expect(result[0].velocity).toBeGreaterThan(0)
+    expect(result[0]!.assetId).toBe('a1')
+    expect(result[0]!.score).toBeGreaterThan(0)
+    expect(result[0]!.velocity).toBeGreaterThan(0)
   })
 
   it('returns scores sorted descending', () => {
@@ -35,8 +35,8 @@ describe('computeTrendingScores', () => {
       makeSignal({ assetId: 'high', streams24h: 1000, streams7d: 500, uniqueListeners: 800, shareCount: 200, saveCount: 100 }),
     ]
     const result = computeTrendingScores(signals)
-    expect(result[0].assetId).toBe('high')
-    expect(result[0].score).toBeGreaterThan(result[1].score)
+    expect(result[0]!.assetId).toBe('high')
+    expect(result[0]!.score).toBeGreaterThan(result[1]!.score)
   })
 
   it('computes velocity as (24h * 7) / 7d ratio', () => {
@@ -44,21 +44,21 @@ describe('computeTrendingScores', () => {
       makeSignal({ streams24h: 100, streams7d: 200 }),
     ])
     // velocity = (100 * 7) / 200 = 3.5
-    expect(result[0].velocity).toBeCloseTo(3.5, 1)
+    expect(result[0]!.velocity).toBeCloseTo(3.5, 1)
   })
 
   it('assigns max velocity 10 for new content with zero 7d streams', () => {
     const result = computeTrendingScores([
       makeSignal({ streams24h: 100, streams7d: 0 }),
     ])
-    expect(result[0].velocity).toBe(10)
+    expect(result[0]!.velocity).toBe(10)
   })
 
   it('assigns velocity 0 when both 24h and 7d are zero', () => {
     const result = computeTrendingScores([
       makeSignal({ streams24h: 0, streams7d: 0 }),
     ])
-    expect(result[0].velocity).toBe(0)
+    expect(result[0]!.velocity).toBe(0)
   })
 
   it('normalizes across multiple signals', () => {

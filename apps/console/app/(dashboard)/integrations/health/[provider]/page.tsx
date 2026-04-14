@@ -19,6 +19,7 @@ import {
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Card } from '@nzila/ui'
+import { getProviderHealthDetail } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,8 +36,6 @@ const providerMeta: Record<string, { displayName: string; channel: string }> = {
   hubspot: { displayName: 'HubSpot', channel: 'crm' },
 }
 
-type CircuitState = 'closed' | 'open' | 'half_open'
-
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProviderHealthPage({
@@ -48,28 +47,7 @@ export default async function ProviderHealthPage({
   const meta = providerMeta[provider]
   if (!meta) return notFound()
 
-  // Static demo data (replaced by DB queries at runtime)
-  const health = {
-    status: 'ok' as const,
-    consecutiveFailures: 0,
-    circuitState: 'closed' as CircuitState,
-    circuitOpenedAt: null as string | null,
-    circuitNextRetryAt: null as string | null,
-    lastCheckedAt: new Date().toISOString(),
-    lastErrorCode: null as string | null,
-    lastErrorMessage: null as string | null,
-  }
-
-  const metrics = {
-    successRate: 99.5,
-    p50LatencyMs: 80,
-    p95LatencyMs: 180,
-    p99LatencyMs: 350,
-    sentCount: 1240,
-    failureCount: 6,
-    rateLimitedCount: 2,
-    timeoutCount: 0,
-  }
+  const { health, metrics } = await getProviderHealthDetail(provider)
 
   const isCircuitOpen = health.circuitState === 'open'
   const isCircuitHalfOpen = health.circuitState === 'half_open'

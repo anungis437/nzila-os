@@ -18,38 +18,14 @@ import {
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
+import { getProviderHealthList, type ProviderHealthRow } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
 
 // ── Types for the dashboard ─────────────────────────────────────────────────
 
-type HealthStatus = 'ok' | 'degraded' | 'down'
-type CircuitState = 'closed' | 'open' | 'half_open'
-
-interface ProviderHealth {
-  provider: string
-  displayName: string
-  status: HealthStatus
-  successRate: number
-  p95LatencyMs: number
-  rateLimitedCount: number
-  circuitState: CircuitState
-  consecutiveFailures: number
-  lastCheckedAt: string | null
-}
-
-// ── Static seed data (replaced by API calls at runtime) ─────────────────────
-
-const providers: ProviderHealth[] = [
-  { provider: 'resend', displayName: 'Resend', status: 'ok', successRate: 99.8, p95LatencyMs: 120, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'sendgrid', displayName: 'SendGrid', status: 'ok', successRate: 99.5, p95LatencyMs: 180, rateLimitedCount: 2, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'mailgun', displayName: 'Mailgun', status: 'ok', successRate: 99.7, p95LatencyMs: 150, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'twilio', displayName: 'Twilio', status: 'ok', successRate: 99.9, p95LatencyMs: 80, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'firebase', displayName: 'Firebase', status: 'ok', successRate: 99.6, p95LatencyMs: 200, rateLimitedCount: 1, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'slack', displayName: 'Slack', status: 'ok', successRate: 99.3, p95LatencyMs: 250, rateLimitedCount: 5, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'teams', displayName: 'Microsoft Teams', status: 'ok', successRate: 99.1, p95LatencyMs: 300, rateLimitedCount: 1, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-  { provider: 'hubspot', displayName: 'HubSpot', status: 'ok', successRate: 98.8, p95LatencyMs: 400, rateLimitedCount: 8, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: new Date().toISOString() },
-]
+type HealthStatus = ProviderHealthRow['status']
+type CircuitState = ProviderHealthRow['circuitState']
 
 // ── Components ──────────────────────────────────────────────────────────────
 
@@ -106,7 +82,8 @@ function SummaryCard({ icon, title, value, subtext }: {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function IntegrationsHealthPage() {
+export default async function IntegrationsHealthPage() {
+  const providers = await getProviderHealthList()
   const healthy = providers.filter((p) => p.status === 'ok').length
   const degraded = providers.filter((p) => p.status === 'degraded').length
   const down = providers.filter((p) => p.status === 'down').length

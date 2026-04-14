@@ -1,0 +1,71 @@
+{
+  "app": {
+    "title": "NACP Jarrabawa",
+    "description": "Gawon Gudanar da Jarrabawa na Kasuwa"
+  },
+  "nav": {
+    "home": "Gida",
+    "about": "Gameya",
+    "pricing": "Farashin",
+    "contact": "Tuntubo Mu",
+    "signIn": "Shigar",
+    "requestDemo": "Bugi Alwala"
+  },
+  "dashboard": {
+    "title": "Dabarun Ni",
+    "examSessions": "Jerin Jarrabawa",
+    "candidates": "Mai Jira",
+    "centers": "Cibiyoyin Jarrabawa",
+    "submissions": "Abubuwan da Aka Shigar",
+    "integrity": "Duba Gaskiya",
+    "reports": "Rahotani"
+  },
+  "exams": {
+    "title": "Jarrabawa",
+    "examType": "Nau'in Jarrabawa",
+    "apprenticeship": "Koyo Aiki",
+    "competency": "Ikon Aiki",
+    "advancedDiploma": "Digiri Babbar",
+    "examDate": "Kwanakinta Jarrabawa",
+    "examCenter": "Cibiyar Jarrabawa",
+    "duration": "Lokacin Jarrabawa",
+    "totalMarks": "Dukkan Alamu",
+    "passingMarks": "Alamun Wucewa",
+    "results": "Sakonnin",
+    "certificateValidity": "Lokacin Takardar Shaidar"
+  },
+  "compliance": {
+    "title": "Kauracewa",
+    "jurisdictionRules": "Dokoki na Gida",
+    "minimumWage": "Mafi Karun Albashi",
+    "workingHours": "Awannin Aiki",
+    "leaveEntitlement": "Hutun da Aka Ba",
+    "pensionContribution": "Cakar Tanadi",
+    "examBoardRules": "Dokoki na Bwadin Jarrabawa",
+    "certificateExpiry": "Matakin Takardar Shaidar",
+    "appealDeadline": "Kwanakinta Tillaba"
+  },
+  "forms": {
+    "submit": "Tima",
+    "cancel": "Soke",
+    "save": "Ajiye",
+    "edit": "Gyara",
+    "delete": "Shafu",
+    "required": "Dole ne",
+    "optional": "Ba dole ba",
+    "error": "Kuskure",
+    "success": "An yi nasara"
+  },
+  "messages": {
+    "loading": "Ana jira...",
+    "noResults": "Babu iska",
+    "confirmDelete": "Kina tabbata kana so ka shafu?",
+    "sessionExpired": "Jeri ya ƙare. Tafiya shigar saboda sabon lokaci."
+  },
+  "errors": {
+    "invalidGrade": "Alamu ba ta dace ba. Mafi karun alamu shine {minimumGrade}",
+    "certificateExpired": "Takardar shaidar ta ƙare a {expiryDate}",
+    "maxAttemptsExceeded": "Kun yi roƙon {attemptCount} na {maxAttempts}",
+    "appealDeadlinePassed": "Kwanakinta tillaba ta wuce {deadlineDate}"
+  }
+}

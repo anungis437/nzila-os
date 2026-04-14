@@ -19,6 +19,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-event-fabric": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
+    "@nzila/platform-ops": "workspace:*",
     "@nzila/platform-governed-ai": "workspace:*",
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-utils": "workspace:*",

@@ -21,7 +21,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -103,6 +103,10 @@ DATABASES = {
         "PASSWORD": os.environ.get("PGPASSWORD", "postgres"),
         "HOST": os.environ.get("PGHOST", "localhost"),
         "PORT": os.environ.get("PGPORT", "5432"),
+        # Persistent connections — reuse for 10 min instead of per-request open/close.
+        # PgBouncer on Azure Flexible Server handles the real pool (5000 client conns).
+        "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", "600")),
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
@@ -132,7 +136,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Authentication — OIDC (Entra External ID / Clerk)
 AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL")
 AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY")
-AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get("CLERK_WEBHOOK_SECRET")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get(
+    "CLERK_WEBHOOK_SECRET"
+)
 
 # Legacy env var names (backward compat)
 CLERK_JWKS_URL = AUTH_JWKS_URL
@@ -206,6 +212,7 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 min hard limit
 CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 min soft limit
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # Fair scheduling
 CELERY_TASK_ACKS_LATE = True  # Re-queue on worker crash
+CELERY_TASK_REJECT_ON_WORKER_LOST = True  # Prevent duplicate execution on crash
 CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}
 
 # ---------------------------------------------------------------------------
@@ -246,6 +253,8 @@ CELERY_TASK_ROUTES = {
     "services.integration_control_plane.tasks.send_to_dead_letter": {
         "queue": "integration_dead_letter_queue"
     },
+    # Audit logging
+    "auth_core.tasks.log_audit_event": {"queue": "notifications"},
     # Event bus
     "services.events.tasks.process_event_task": {"queue": "notifications"},
     # Compliance snapshots

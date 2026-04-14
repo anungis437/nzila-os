@@ -148,22 +148,31 @@ export async function executeMobileMoneyPayout(opts: {
   const divisor = zeroDecimal.has(opts.currency.toUpperCase()) ? 1 : 100
   const amount = opts.amountMinorUnits / divisor
 
-  const response = await fetch('https://api.flutterwave.com/v3/transfers', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      account_bank: bankMap[opts.rail] ?? 'MPS',
-      account_number: opts.phoneNumber,
-      amount,
-      currency: opts.currency.toUpperCase(),
-      narration: opts.description ?? `Zonga payout to ${opts.creatorId}`,
-      reference,
-      beneficiary_name: opts.creatorId,
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30_000)
+
+  let response: Response
+  try {
+    response = await fetch('https://api.flutterwave.com/v3/transfers', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        account_bank: bankMap[opts.rail] ?? 'MPS',
+        account_number: opts.phoneNumber,
+        amount,
+        currency: opts.currency.toUpperCase(),
+        narration: opts.description ?? `Zonga payout to ${opts.creatorId}`,
+        reference,
+        beneficiary_name: opts.creatorId,
+      }),
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
 
   if (!response.ok) {
     const body = await response.text()

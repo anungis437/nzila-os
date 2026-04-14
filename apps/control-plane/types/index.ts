@@ -82,6 +82,9 @@ export interface ProcurementSummary {
   sbomRef: string;
   attestationStatus: "valid" | "expired" | "missing";
   createdAt: string;
+  evidence_verified?: number;
+  evidence_total?: number;
+  last_verified_at?: string;
 }
 
 export const procurementSummarySchema = z.object({
@@ -91,4 +94,7 @@ export const procurementSummarySchema = z.object({
   sbomRef: z.string(),
   attestationStatus: z.enum(["valid", "expired", "missing"]),
   createdAt: z.string().datetime(),
+  evidence_verified: z.number().optional(),
+  evidence_total: z.number().optional(),
+  last_verified_at: z.string().datetime().optional(),
 });

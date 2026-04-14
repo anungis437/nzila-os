@@ -7,7 +7,7 @@
  * @see @nzila/platform-integrations-control-plane/dlq
  */
 import { requireRole } from '@/lib/rbac'
-import type { DlqEntry as _DlqEntry } from '@nzila/platform-integrations-control-plane'
+import { getDlqEntries, type DlqRow } from '@/lib/server-data'
 import Link from 'next/link'
 import {
   BoltIcon,
@@ -17,35 +17,6 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
-
-// ── Placeholder data ───────────────────────────────────────────────────────
-
-interface DlqRow {
-  entryId: string
-  providerId: string
-  orgId: string
-  eventType: string
-  failedAt: string
-  retryCount: number
-  lastError: string
-}
-
-function loadDlqEntries(): DlqRow[] {
-  return [
-    { entryId: 'dlq_001', providerId: 'hubspot', orgId: 'org_acme', eventType: 'CONTACT_SYNC', failedAt: '2026-03-04T11:52:00Z', retryCount: 3, lastError: 'HTTP 429 — rate limited' },
-    { entryId: 'dlq_002', providerId: 'hubspot', orgId: 'org_acme', eventType: 'DEAL_UPDATE', failedAt: '2026-03-04T11:53:00Z', retryCount: 2, lastError: 'HTTP 429 — rate limited' },
-    { entryId: 'dlq_003', providerId: 'hubspot', orgId: 'org_acme', eventType: 'CONTACT_SYNC', failedAt: '2026-03-04T11:54:00Z', retryCount: 1, lastError: 'HTTP 500 — internal server error' },
-    { entryId: 'dlq_004', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:20:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_005', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:21:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_006', providerId: 'xero', orgId: 'org_beta', eventType: 'PAYMENT_SYNC', failedAt: '2026-03-04T10:22:00Z', retryCount: 4, lastError: 'Connection refused' },
-    { entryId: 'dlq_007', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:23:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_008', providerId: 'xero', orgId: 'org_beta', eventType: 'CONTACT_UPDATE', failedAt: '2026-03-04T10:24:00Z', retryCount: 3, lastError: 'Connection refused' },
-    { entryId: 'dlq_009', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:25:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_010', providerId: 'xero', orgId: 'org_beta', eventType: 'PAYMENT_SYNC', failedAt: '2026-03-04T10:26:00Z', retryCount: 4, lastError: 'Connection refused' },
-    { entryId: 'dlq_011', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:27:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_012', providerId: 'xero', orgId: 'org_beta', eventType: 'CONTACT_UPDATE', failedAt: '2026-03-04T10:28:00Z', retryCount: 3, lastError: 'Connection refused' },
-  ]
-}
 
 // ── UI helpers ─────────────────────────────────────────────────────────────
 
@@ -57,7 +28,7 @@ function RetryBadge({ count }: { count: number }) {
 export default async function DlqPage() {
   await requireRole('platform_admin', 'studio_admin', 'ops')
 
-  const entries = loadDlqEntries()
+  const entries = await getDlqEntries()
   const byProvider = entries.reduce<Record<string, number>>((acc, e) => {
     acc[e.providerId] = (acc[e.providerId] ?? 0) + 1
     return acc

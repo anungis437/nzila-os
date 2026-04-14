@@ -1,7 +1,8 @@
 /**
  * API — /api/stream/[assetId]
  *
- * GET  → Generate a signed streaming URL using zonga-streaming delivery.
+ * GET  → Generate a signed streaming URL.
+ *        Resolution order: CloudFront-backed → blob-backed → raw fallback.
  *        Quality is gated by the listener's subscription plan.
  *        Emits a play analytics event on successful stream grant.
  */
@@ -23,6 +24,8 @@ import {
   type CdnConfig,
 } from '@nzila/zonga-streaming'
 import { createPlayEvent } from '@nzila/zonga-analytics'
+import { getPlaybackUrl } from '@/features/media/playback-service'
+import type { QualityTier } from '@/features/media/types'
 
 interface RouteParams {
   params: Promise<{ assetId: string }>
@@ -52,6 +55,64 @@ export async function GET(request: Request, { params }: RouteParams) {
       const bestQuality = maxAudioQuality(planInfo.plan)
       const isPremium = planInfo.plan !== 'free'
 
+      // ── Provider-aware playback (CloudFront → blob → raw) ──
+      const qualityMap: Record<string, QualityTier> = {
+        low: 'preview',
+        standard: 'standard',
+        high: 'high',
+        lossless: 'hifi',
+      }
+      const gatedQuality = qualityMap[bestQuality] ?? 'standard'
+      const playback = await getPlaybackUrl(assetId, gatedQuality, gatedQuality)
+
+      if (playback.ok && playback.streamUrl) {
+        // Create a playback session for tracking
+        const session = createPlaybackSession(
+          assetId,
+          asset.duration_ms ?? 0,
+          ctx.userId,
+          bestQuality,
+        )
+
+        // Emit analytics event (fire-and-forget)
+        const playEvent = createPlayEvent(ctx.orgId, ctx.userId, {
+          assetId,
+          creatorId: asset.creator_id,
+          durationMs: asset.duration_ms ?? 0,
+          positionMs: 0,
+          completionPercent: 0,
+          quality: bestQuality,
+          isComplete: false,
+          source: 'direct',
+        })
+        platformDb.execute(sql`
+          INSERT INTO zonga_analytics_events (event_type, user_id, payload, created_at)
+          VALUES (${playEvent.type}, ${ctx.userId}, ${JSON.stringify(playEvent)}::jsonb, ${playEvent.timestamp}::timestamptz)
+        `).catch((err) => logger.error('Failed to persist play event', { err }))
+
+        logger.info('Stream granted', {
+          assetId,
+          userId: ctx.userId,
+          quality: playback.bitrate,
+          provider: playback.provider,
+          sessionId: session.id,
+        })
+
+        return NextResponse.json({
+          ok: true,
+          data: {
+            streamUrl: playback.streamUrl,
+            quality: playback.bitrate,
+            codec: playback.codec,
+            sessionId: session.id,
+            durationMs: asset.duration_ms,
+            provider: playback.provider,
+            expiresAt: new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
+          },
+        })
+      }
+
+      // ── Legacy fallback: zonga-streaming package CDN signing ──
       const allQualities = [
         { label: 'low', bitrate: 64, sampleRate: 22050, codec: 'aac' as const, container: 'mp4' as const, segmentDurationSec: 6 },
         { label: 'standard', bitrate: 128, sampleRate: 44100, codec: 'aac' as const, container: 'mp4' as const, segmentDurationSec: 6 },

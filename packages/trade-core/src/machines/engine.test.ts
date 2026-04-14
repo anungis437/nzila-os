@@ -228,7 +228,7 @@ describe('validateDealMachine — invalid structures', () => {
       transitions: [
         ...tradeDealMachine.transitions,
         {
-          ...tradeDealMachine.transitions[0],
+          ...tradeDealMachine.transitions[0]!,
           from: 'missing_from' as TradeDealStage,
           to: 'missing_to' as TradeDealStage,
         },

@@ -1,0 +1,40 @@
+{
+  "name": "@nzila/platform-jurisdiction-compliance",
+  "version": "1.0.0",
+  "description": "Multi-jurisdiction compliance policy framework for regulatory compliance across Africa (Kenya, Uganda, Nigeria)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./policies": "./src/policies.ts",
+    "./validators": "./src/validators.ts",
+    "./test-datasets": "./src/test-datasets.ts"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "compliance",
+    "jurisdiction",
+    "regulatory",
+    "Africa",
+    "Kenya",
+    "Uganda",
+    "Nigeria",
+    "policies",
+    "governance"
+  ],
+  "author": "Nzila OS",
+  "license": "PROPRIETARY",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "workspace:*",
+    "vitest": "workspace:*"
+  }
+}

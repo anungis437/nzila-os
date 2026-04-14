@@ -23,12 +23,16 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const dir = locale.startsWith('ar') ? 'rtl' : 'ltr';
+
   setRequestLocale(locale);
   const messages = await getMessages();
 
   return (
     <NextIntlClientProvider messages={messages}>
-      {children}
+      <div lang={locale} dir={dir}>
+        {children}
+      </div>
     </NextIntlClientProvider>
   );
 }

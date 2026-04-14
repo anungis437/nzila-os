@@ -24,6 +24,10 @@ import {
   FileText,
   Building2,
   ShieldCheck,
+  Radio,
+  DollarSign,
+  Cable,
+  MailWarning,
 } from "lucide-react";
 
 const navItems = [
@@ -40,6 +44,10 @@ const navItems = [
   { href: "/procurement", label: "Procurement", icon: FileCheck },
   { href: "/environments", label: "Environments", icon: Server },
   { href: "/architecture", label: "Architecture", icon: Landmark },
+  { href: "/streaming", label: "Streaming", icon: Radio },
+  { href: "/revenue", label: "Revenue", icon: DollarSign },
+  { href: "/integrations", label: "Integrations", icon: Cable },
+  { href: "/integrations/dead-letters", label: "Dead Letters", icon: MailWarning },
 ] as const;
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };

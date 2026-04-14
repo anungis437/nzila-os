@@ -177,7 +177,7 @@ describe('PlatformEventBus', () => {
 
   it('emit persists through store when configured', async () => {
     const persist = vi.fn(async () => {})
-    bus = new PlatformEventBus({ store: { persist } })
+    bus = new PlatformEventBus({ store: { persist, queryByType: vi.fn(), queryByCorrelation: vi.fn(), count: vi.fn() } })
 
     bus.emit(makeEvent())
     await new Promise((r) => setTimeout(r, 10))
@@ -191,7 +191,7 @@ describe('PlatformEventBus', () => {
       callOrder.push('persist')
     })
 
-    bus = new PlatformEventBus({ store: { persist } })
+    bus = new PlatformEventBus({ store: { persist, queryByType: vi.fn(), queryByCorrelation: vi.fn(), count: vi.fn() } })
     bus.on('test.event', async () => {
       callOrder.push('handler')
     })

@@ -68,7 +68,7 @@ describe('PlatformEventDispatcher', () => {
 
 describe('DrizzleEventStore', () => {
   it('persists event rows with mapped metadata', async () => {
-    const values = vi.fn(async () => ({}))
+    const values = vi.fn(async (_row: Record<string, unknown>) => ({}))
     const insert = vi.fn(() => ({ values }))
     const db = {
       insert,

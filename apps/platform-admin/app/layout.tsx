@@ -21,6 +21,9 @@ const NAV_ITEMS = [
   { href: '/reasoning', label: 'Reasoning' },
   { href: '/search', label: 'Search' },
   { href: '/data-fabric', label: 'Data Fabric' },
+  { href: '/orchestrator-ops', label: 'Orchestrator Ops' },
+  { href: '/platform-health', label: 'Platform Health' },
+  { href: '/integration-ops', label: 'Integration Ops' },
 ] as const
 
 export default async function RootLayout({

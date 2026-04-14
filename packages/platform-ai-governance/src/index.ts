@@ -45,3 +45,12 @@ export {
   getPendingReviewFlags,
   clearReviewFlags,
 } from './humanReview'
+
+export type { GovernanceStore, GovernanceCollection } from './store'
+export {
+  getGovernanceStore,
+  setGovernanceStore,
+  resetGovernanceStore,
+  persistGovernanceCollection,
+} from './store'
+

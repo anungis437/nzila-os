@@ -24,6 +24,8 @@ export interface QueryResult {
   answer: string
   confidence: number
   evidenceRefs: EvidenceReference[]
+  intent?: QueryIntent
+  plan?: QueryExecutionPlan
   timestamp: string
 }
 
@@ -57,3 +59,27 @@ export type QueryIntent =
   | 'anomaly'
   | 'compliance'
   | 'unknown'
+
+export interface IntentPrototype {
+  intent: QueryIntent
+  description: string
+  examples: string[]
+}
+
+export interface IntentClassificationResult {
+  intent: QueryIntent
+  confidence: number
+  scores: Record<QueryIntent, number>
+}
+
+export interface QueryPlanStep {
+  id: string
+  objective: string
+  source: 'events' | 'metrics' | 'policy' | 'audit' | 'context'
+}
+
+export interface QueryExecutionPlan {
+  intent: QueryIntent
+  steps: QueryPlanStep[]
+  strategy: 'direct' | 'comparative' | 'time_series' | 'forensic'
+}

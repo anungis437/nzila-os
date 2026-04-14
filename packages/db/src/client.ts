@@ -21,7 +21,8 @@ function getDb(): DbType {
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is required')
     }
-    const sql = postgres(connectionString, { max: 20, idle_timeout: 30 })
+    const poolSize = Number(process.env.DATABASE_POOL_SIZE ?? '20')
+    const sql = postgres(connectionString, { max: poolSize, idle_timeout: 30 })
     _db = drizzle(sql, { schema })
   }
   return _db

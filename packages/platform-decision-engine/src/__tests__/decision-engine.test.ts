@@ -665,22 +665,22 @@ describe('@nzila/platform-decision-engine', () => {
         decision_id: 'DEC-2025-0001',
         actor: 'admin',
         action: 'COMMENT',
-        note: 'First',
+        notes: 'First',
         created_at: '2026-01-01T00:00:00.000Z',
       })
       saveDecisionFeedback({
         decision_id: 'DEC-2025-0001',
         actor: 'admin',
         action: 'APPROVE',
-        note: 'Second',
+        notes: 'Second',
         created_at: '2026-01-02T00:00:00.000Z',
       })
 
       const feedback = loadDecisionFeedback('DEC-2025-0001')
 
       expect(feedback).toHaveLength(2)
-      expect(feedback[0].note).toBe('First')
-      expect(feedback[1].note).toBe('Second')
+      expect(feedback[0].notes).toBe('First')
+      expect(feedback[1].notes).toBe('Second')
     })
   })
 

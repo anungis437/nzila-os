@@ -7,6 +7,10 @@ export type {
   QueryResult,
   EvidenceReference,
   QueryIntent,
+  IntentPrototype,
+  IntentClassificationResult,
+  QueryPlanStep,
+  QueryExecutionPlan,
 } from './types'
 
 export {
@@ -15,5 +19,14 @@ export {
   evidenceReferenceSchema,
 } from './types'
 
-export { classifyIntent, parseQuery, buildQueryResult, executeQuery, getQueryLog, clearQueryLog } from './queryEngine'
+export {
+  classifyIntent,
+  classifyIntentDetailed,
+  buildExecutionPlan,
+  parseQuery,
+  buildQueryResult,
+  executeQuery,
+  getQueryLog,
+  clearQueryLog,
+} from './queryEngine'
 export { createEvidenceRef, validateEvidenceBacking } from './evidenceBacked'

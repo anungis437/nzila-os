@@ -1,0 +1,34 @@
+{
+  "name": "@nzila/platform-integrations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./connector-registry": "./src/connector-registry.ts",
+    "./execution-engine": "./src/execution-engine.ts",
+    "./mapping-engine": "./src/mapping-engine.ts",
+    "./webhook-engine": "./src/webhook-engine.ts",
+    "./identity-linker": "./src/identity-linker.ts",
+    "./audit-hooks": "./src/audit-hooks.ts",
+    "./idempotency": "./src/idempotency.ts",
+    "./signature": "./src/signature.ts",
+    "./rate-limiter": "./src/rate-limiter.ts",
+    "./schema": "./src/schema.ts",
+    "./sync-engine": "./src/sync-engine.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/platform-integrations-types": "workspace:*",
+    "@nzila/audit": "workspace:*",
+    "drizzle-orm": "^0.38.0",
+    "zod": "^3.24.0"
+  }
+}

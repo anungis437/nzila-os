@@ -25,6 +25,7 @@
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
+    "@nzila/platform-cost": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-evidence-pack": "workspace:*",
     "@nzila/platform-export": "workspace:*",

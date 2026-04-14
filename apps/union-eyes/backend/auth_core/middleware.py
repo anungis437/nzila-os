@@ -91,7 +91,12 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
     1. All database queries are scoped to user's organization
     2. Cross-organization data access is blocked
     3. Organization context is available in views via request.organization
+
+    The organization instance is cached in Redis (5-min TTL) to avoid a DB
+    query on every single request — critical for 10K+ concurrent connections.
     """
+
+    ORG_CACHE_TTL = 300  # 5 minutes
 
     def process_request(self, request):
         """Attach organization object to request for multi-org scoping."""
@@ -101,7 +106,18 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
             request.organization = None
             return None
 
-        # Try to get Organization model instance
+        # Try Redis cache first (avoids DB hit on every request)
+        from django.core.cache import cache
+
+        cache_key = f"org:ctx:{org_id}"
+        organization = cache.get(cache_key)
+
+        if organization is not None:
+            request.organization = organization
+            request.organization_id = organization.id
+            return None
+
+        # Cache miss — query DB and populate cache
         try:
             from auth_core.models import Organizations
 
@@ -116,6 +132,9 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
                 return JsonResponse(
                     {"error": "Organization not found. Contact support."}, status=403
                 )
+
+            # Cache for subsequent requests (graceful if Redis is down)
+            cache.set(cache_key, organization, self.ORG_CACHE_TTL)
 
             request.organization = organization
             request.organization_id = organization.id
@@ -162,7 +181,7 @@ class AuditLogMiddleware(MiddlewareMixin):
         return None
 
     def process_response(self, request, response):
-        """Log response after request is processed."""
+        """Log response after request is processed (async via Celery)."""
         if self._should_skip(request.path):
             return response
 
@@ -173,15 +192,34 @@ class AuditLogMiddleware(MiddlewareMixin):
         if hasattr(request, "_audit_start_time"):
             duration_ms = int((time.time() - request._audit_start_time) * 1000)
 
-        # Log authenticated requests
+        # Dispatch to Celery (fire-and-forget) for authenticated requests
         if hasattr(request, "clerk_user_id") and request.clerk_user_id:
-            logger.info(
-                f"AUTH_REQUEST user={request.clerk_user_id} "
-                f"org={getattr(request, 'clerk_org_id', 'none')} "
-                f"method={request.method} path={request.path} "
-                f"status={response.status_code} duration_ms={duration_ms} "
-                f"ip={self._get_client_ip(request)}"
-            )
+            try:
+                from auth_core.tasks import log_audit_event
+
+                log_audit_event.delay(
+                    user_id=request.clerk_user_id,
+                    org_id=getattr(request, "clerk_org_id", "none"),
+                    method=request.method,
+                    path=request.path,
+                    status_code=response.status_code,
+                    duration_ms=duration_ms,
+                    ip=self._get_client_ip(request),
+                    user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                )
+            except Exception:
+                # Celery unavailable — fall back to synchronous log
+                logger.info(
+                    "AUTH_REQUEST user=%s org=%s method=%s path=%s "
+                    "status=%s duration_ms=%s ip=%s",
+                    request.clerk_user_id,
+                    getattr(request, "clerk_org_id", "none"),
+                    request.method,
+                    request.path,
+                    response.status_code,
+                    duration_ms,
+                    self._get_client_ip(request),
+                )
 
         return response
 

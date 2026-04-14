@@ -44,7 +44,7 @@ export interface ProcessedVariant {
   createdAt: Date
 }
 
-export type QualityTier = 'standard' | 'high' | 'hifi' | 'preview'
+export type QualityTier = 'free' | 'standard' | 'high' | 'premium' | 'hifi' | 'preview'
 export type AudioFormat = 'aac' | 'mp3' | 'flac' | 'opus' | 'ogg'
 
 // ── Artwork Asset ───────────────────────────────────────────────────────────
@@ -95,9 +95,11 @@ export const PROCESSING_PROFILES: Record<QualityTier, {
   codec: string
   sampleRate: number
 }> = {
+  free: { format: 'opus', bitrate: 48, codec: 'opus', sampleRate: 22050 },
   preview: { format: 'opus', bitrate: 64, codec: 'opus', sampleRate: 22050 },
   standard: { format: 'aac', bitrate: 128, codec: 'aac', sampleRate: 44100 },
   high: { format: 'aac', bitrate: 256, codec: 'aac', sampleRate: 44100 },
+  premium: { format: 'flac', bitrate: 1411, codec: 'flac', sampleRate: 96000 },
   hifi: { format: 'flac', bitrate: 1411, codec: 'flac', sampleRate: 96000 },
 }
 

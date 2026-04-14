@@ -28,10 +28,10 @@ describe('computeRegionalChart', () => {
     const chart = computeRegionalChart('africa-east', assets)
     expect(chart).toHaveLength(2)
     // a2 should rank higher: fewer streams but more listeners (2x weight) and more saves (3x weight)
-    expect(chart[0].rank).toBe(1)
-    expect(chart[0].assetId).toBe('a2')
-    expect(chart[1].rank).toBe(2)
-    expect(chart[1].assetId).toBe('a1')
+    expect(chart[0]!.rank).toBe(1)
+    expect(chart[0]!.assetId).toBe('a2')
+    expect(chart[1]!.rank).toBe(2)
+    expect(chart[1]!.assetId).toBe('a1')
   })
 
   it('respects limit', () => {
@@ -45,8 +45,8 @@ describe('computeRegionalChart', () => {
 
     const chart = computeRegionalChart('global', assets, 3)
     expect(chart).toHaveLength(3)
-    expect(chart[0].rank).toBe(1)
-    expect(chart[2].rank).toBe(3)
+    expect(chart[0]!.rank).toBe(1)
+    expect(chart[2]!.rank).toBe(3)
   })
 
   it('includes region in output', () => {
@@ -54,7 +54,7 @@ describe('computeRegionalChart', () => {
       { assetId: 'a1', creatorId: 'c1', streams: 10, uniqueListeners: 5, saves: 1 },
     ]
     const chart = computeRegionalChart('africa-west', assets)
-    expect(chart[0].region).toBe('africa-west')
+    expect(chart[0]!.region).toBe('africa-west')
   })
 
   it('breaks ties deterministically by assetId', () => {
@@ -63,7 +63,7 @@ describe('computeRegionalChart', () => {
       { assetId: 'a1', creatorId: 'c2', streams: 100, uniqueListeners: 50, saves: 10 },
     ]
     const chart = computeRegionalChart('global', assets)
-    expect(chart[0].assetId).toBe('a1') // 'a1' < 'b1' lexicographically
+    expect(chart[0]!.assetId).toBe('a1') // 'a1' < 'b1' lexicographically
   })
 })
 
@@ -82,8 +82,8 @@ describe('computeVelocityRanking', () => {
     ]
 
     const ranked = computeVelocityRanking(inputs)
-    expect(ranked[0].assetId).toBe('rising')
-    expect(ranked[0].direction).toBe('rising')
+    expect(ranked[0]!.assetId).toBe('rising')
+    expect(ranked[0]!.direction).toBe('rising')
     expect(ranked.find((r) => r.assetId === 'stable')?.direction).toBe('stable')
     expect(ranked.find((r) => r.assetId === 'falling')?.direction).toBe('falling')
   })
@@ -93,8 +93,8 @@ describe('computeVelocityRanking', () => {
       { assetId: 'new', currentPeriodStreams: 100, previousPeriodStreams: 0, priorPeriodStreams: 0 },
     ]
     const ranked = computeVelocityRanking(inputs)
-    expect(ranked[0].direction).toBe('rising')
-    expect(ranked[0].velocity).toBeGreaterThan(0)
+    expect(ranked[0]!.direction).toBe('rising')
+    expect(ranked[0]!.velocity).toBeGreaterThan(0)
   })
 
   it('respects limit', () => {
@@ -115,7 +115,7 @@ describe('computeVelocityRanking', () => {
     ]
     const ranked = computeVelocityRanking(inputs)
     // velocity = (300-200)/200 = 0.5, prevVelocity = (200-100)/100 = 1.0, acceleration = -0.5
-    expect(ranked[0].acceleration).toBe(-0.5)
+    expect(ranked[0]!.acceleration).toBe(-0.5)
   })
 })
 

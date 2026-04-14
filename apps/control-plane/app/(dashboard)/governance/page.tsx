@@ -3,13 +3,14 @@ import { PageHeader } from "@/components/ui/page-header";
 import { CardSkeleton, TableSkeleton } from "@/components/ui/loading";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SummaryCard } from "@/components/ui/summary-card";
-import { Shield, FileCheck, Clock, Database } from "lucide-react";
+import { Shield, FileCheck, Clock, Database, Workflow } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import {
   getGovernanceStatusData,
   getGovernanceTimeline,
   getProcurementSummary,
 } from "@/server/data";
+import { getWorkflowSummary } from "@/server/workflow-data";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,11 @@ export const metadata = {
 };
 
 async function GovernanceContent() {
-  const [status, timeline, procurement] = await Promise.all([
+  const [status, timeline, procurement, workflowSummary] = await Promise.all([
     getGovernanceStatusData(),
     getGovernanceTimeline(),
     getProcurementSummary(),
+    getWorkflowSummary(),
   ]);
 
   return (
@@ -82,6 +84,65 @@ async function GovernanceContent() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Governed Workflows */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          Governed Workflows
+        </h2>
+        <div className="grid gap-4 md:grid-cols-4 mb-4">
+          <SummaryCard
+            title="Registered"
+            icon={<Workflow className="h-5 w-5" />}
+            value={workflowSummary.totalRegistered}
+          />
+          <SummaryCard
+            title="With Ingestion"
+            icon={<Database className="h-5 w-5" />}
+            value={workflowSummary.withIngestion}
+          />
+          <SummaryCard
+            title="With FSM"
+            icon={<Shield className="h-5 w-5" />}
+            value={workflowSummary.withFsm}
+          />
+          <SummaryCard
+            title="With Evidence"
+            icon={<FileCheck className="h-5 w-5" />}
+            value={workflowSummary.withEvidence}
+          />
+        </div>
+        <div className="rounded-lg border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/40">
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Workflow</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Version</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Ingestion</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">FSM</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {workflowSummary.workflows.map((w) => (
+                <tr key={`${w.name}@${w.version}`} className="border-b last:border-0">
+                  <td className="px-4 py-3 font-medium text-foreground">{w.name}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{w.version}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={w.hasIngestion ? "healthy" : "degraded"} label={w.hasIngestion ? "Yes" : "No"} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={w.hasFsm ? "healthy" : "degraded"} label={w.hasFsm ? "Yes" : "No"} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={w.hasEvidence ? "healthy" : "degraded"} label={w.hasEvidence ? "Yes" : "No"} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

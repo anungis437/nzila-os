@@ -42,12 +42,9 @@ export default function PlatformHealthPage() {
       ? sloEntries
       : sloEntries.filter(([, slo]) => (slo.category ?? 'uncategorized') === selectedCategory)
 
-  // Simulated current values (in prod these come from metrics)
-  const simulatedValues: Record<string, number> = {}
-  for (const [name, slo] of sloEntries) {
-    // Default to meeting the SLO in dev mode
-    simulatedValues[name] = slo.target + (slo.target > 1 ? -10 : 0.001)
-  }
+  // In production, metric values come from a metrics API.
+  // In dev, we show the SLO catalog without claiming any status.
+  const metricValues: Record<string, number | undefined> = {}
 
   return (
     <div>
@@ -98,7 +95,9 @@ export default function PlatformHealthPage() {
           </thead>
           <tbody>
             {filtered.map(([name, slo]) => {
-              const met = meetsSlo(slo, simulatedValues[name] ?? slo.target)
+              const value = metricValues[name]
+              const hasData = value !== undefined
+              const met = hasData ? meetsSlo(slo, value) : undefined
               return (
                 <tr key={name} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="px-4 py-2 font-mono text-xs text-gray-800">{name}</td>
@@ -112,11 +111,17 @@ export default function PlatformHealthPage() {
                   </td>
                   <td className="px-4 py-2 text-xs text-gray-500">{Math.round(slo.windowHours / 24)}d</td>
                   <td className="px-4 py-2">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${sloStatusColor(met)}`}
-                    >
-                      {met ? 'Met' : 'Breached'}
-                    </span>
+                    {hasData ? (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${sloStatusColor(met!)}`}
+                      >
+                        {met ? 'Met' : 'Breached'}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                        No data
+                      </span>
+                    )}
                   </td>
                 </tr>
               )

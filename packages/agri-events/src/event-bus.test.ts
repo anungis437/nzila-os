@@ -155,7 +155,7 @@ describe('createIntegrationHandler', () => {
 
     expect(calls).toHaveLength(2)
     expect(calls.map((c) => c.channel)).toEqual(['webhook', 'email'])
-    expect(calls[0].recipientRef).toBe('org-2')
+    expect(calls[0]!.recipientRef).toBe('org-2')
   })
 
   it('falls back to webhook route for unknown event type', async () => {
@@ -177,8 +177,8 @@ describe('createIntegrationHandler', () => {
     )
 
     expect(calls).toHaveLength(1)
-    expect(calls[0].channel).toBe('webhook')
-    expect(calls[0].templateId).toBeUndefined()
+    expect(calls[0]!.channel).toBe('webhook')
+    expect(calls[0]!.templateId).toBeUndefined()
   })
 
   it('routes lot certified events to email, sms and webhook', async () => {

@@ -1,5 +1,6 @@
 # Staging Environment Configuration
 # Nzila OS — GitOps
+# Pilot-ready: 1-2K concurrent connections
 
 environment: staging
 region: canadacentral
@@ -10,14 +11,20 @@ container_apps:
   environment: nzila-canada-staging-env
   revision_mode: Multiple
   min_replicas: 2
-  max_replicas: 5
+  max_replicas: 8
 
 apps:
   web:
     image_tag: "${VERSION}"
     port: 3000
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -27,8 +34,14 @@ apps:
   console:
     image_tag: "${VERSION}"
     port: 3001
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -36,8 +49,8 @@ apps:
   partners:
     image_tag: "${VERSION}"
     port: 3002
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
     env:
       - name: NODE_ENV
         value: production
@@ -45,17 +58,43 @@ apps:
   union-eyes:
     image_tag: "${VERSION}"
     port: 3003
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "40"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
+      - name: WEB_CONCURRENCY
+        value: "5"
+      - name: CONN_MAX_AGE
+        value: "600"
+      - name: DATABASE_POOL_SIZE
+        value: "50"
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-union-eyes
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   abr:
     image_tag: "${VERSION}"
     port: 3004
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
     env:
       - name: NODE_ENV
         value: production
@@ -63,8 +102,14 @@ apps:
   orchestrator-api:
     image_tag: "${VERSION}"
     port: 4000
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -72,20 +117,53 @@ apps:
   zonga:
     image_tag: "${VERSION}"
     port: 3006
-    cpu: 0.5
-    memory: 1Gi
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "50"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
+      - name: RATE_LIMIT_STORE
+        value: upstash
+      - name: DATABASE_POOL_SIZE
+        value: "50"
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-zonga
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
 database:
   name: nzila-staging-db
-  sku: Standard_B2s
-  tier: Burstable
+  sku: GP_Standard_D2ds_v5
+  tier: GeneralPurpose
   version: '15'
-  storage_gb: 32
+  storage_gb: 64
   backup_retention_days: 7
   high_availability: false
+  pgbouncer:
+    enabled: true
+    pool_mode: transaction
+    default_pool_size: 50
+    max_client_connections: 1000
+
+redis:
+  sku: Basic
+  capacity: 1
 
 acr:
   name: nzilacanadaacr
@@ -97,6 +175,12 @@ key_vault:
 monitoring:
   sampling_percentage: 50
   retention_days: 60
+
+otel_collector:
+  endpoint: "https://nzila-staging-otel.canadacentral.azurecontainerapps.io:4318"
+  protocol: http/protobuf
+  export_interval_ms: 30000
+  max_export_batch_size: 512
 
 quotas:
   max_orgs: 200

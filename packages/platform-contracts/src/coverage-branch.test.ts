@@ -298,14 +298,14 @@ describe('app registry validation branches', () => {
       name: 'One',
       basePath: '/one',
       tier: 'PILOT' as const,
-      integrationDependencies: [{ provider: 'entra', type: 'auth', required: true }],
+      integrationDependencies: [{ provider: 'entra', type: 'auth' as const, required: true }],
     }
     const two = {
       id: 'dup-app',
       name: 'Two',
       basePath: '/two',
       tier: 'PILOT' as const,
-      integrationDependencies: [{ provider: 'postgresql', type: 'storage', required: true }],
+      integrationDependencies: [{ provider: 'postgresql', type: 'storage' as const, required: true }],
     }
 
     const result = validateAppRegistry([one, two])

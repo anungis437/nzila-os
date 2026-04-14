@@ -9,6 +9,7 @@
  * @see @nzila/platform-ops/ops-score
  */
 import { requireRole } from '@/lib/rbac'
+import { getOpsScoreHistory } from '@/lib/server-data'
 import {
   computeOpsScore,
   computeOpsScoreDelta,
@@ -85,12 +86,7 @@ async function loadOpsScoreData() {
 
   const result = computeOpsScore(inputs)
 
-  // Mock 7-day history (in production, stored in DB)
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  const history = [
-    { date: sevenDaysAgo.toISOString().slice(0, 10), score: Math.max(0, result.score - 3), grade: result.grade },
-  ]
+  const history = await getOpsScoreHistory(result.score, result.grade)
   const delta = computeOpsScoreDelta(result.score, history)
 
   return { result, delta }

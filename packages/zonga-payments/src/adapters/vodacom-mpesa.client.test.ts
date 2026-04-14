@@ -17,6 +17,7 @@ const config = {
   apiKey: 'test-api-key',
   publicKey: 'MIICIjANBg...',
   serviceProviderCode: '000000',
+  market: 'TZ' as const,
   callbackUrl: 'https://example.com/callback',
 }
 
@@ -63,13 +64,11 @@ describe('createVodacomMpesaClient', () => {
 
       const result = await client.c2bPayment({
         input_Amount: '1000',
-        input_Country: 'TZN',
-        input_Currency: 'TZS',
         input_CustomerMSISDN: '000000000001',
         input_ServiceProviderCode: '000000',
         input_ThirdPartyConversationID: 'tp-1',
         input_TransactionReference: 'ref-1',
-        input_PurchasedItemsDesc: 'Test payment',
+        input_PurchaseItemDesc: 'Test payment',
       })
 
       expect(result.output_TransactionID).toBe('txn-123')
@@ -84,13 +83,11 @@ describe('createVodacomMpesaClient', () => {
 
       await expect(client.c2bPayment({
         input_Amount: '1000',
-        input_Country: 'TZN',
-        input_Currency: 'TZS',
         input_CustomerMSISDN: '000',
         input_ServiceProviderCode: '000',
         input_ThirdPartyConversationID: 'tp-err',
         input_TransactionReference: 'ref-err',
-        input_PurchasedItemsDesc: 'Test',
+        input_PurchaseItemDesc: 'Test',
       })).rejects.toThrow('HTTP 500')
     })
 
@@ -102,13 +99,11 @@ describe('createVodacomMpesaClient', () => {
 
       await expect(client.c2bPayment({
         input_Amount: '99999',
-        input_Country: 'TZN',
-        input_Currency: 'TZS',
         input_CustomerMSISDN: '000',
         input_ServiceProviderCode: '000',
         input_ThirdPartyConversationID: 'tp-app-err',
         input_TransactionReference: 'ref-app-err',
-        input_PurchasedItemsDesc: 'Test',
+        input_PurchaseItemDesc: 'Test',
       })).rejects.toThrow('M-Pesa error INS-1')
     })
   })
@@ -156,7 +151,6 @@ describe('createVodacomMpesaClient', () => {
 
       const result = await client.reverseTransaction({
         input_ReversalAmount: '500',
-        input_Country: 'TZN',
         input_ServiceProviderCode: '000000',
         input_ThirdPartyConversationID: 'tp-rev-1',
         input_TransactionID: 'txn-to-reverse',

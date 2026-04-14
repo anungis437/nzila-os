@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     '.venv/**',
     'backend/.venv/**',
+    'coverage/**',
   ]),
   {
     rules: {

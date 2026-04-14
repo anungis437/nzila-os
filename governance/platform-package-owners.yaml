@@ -323,3 +323,22 @@ packages:
     steward: null
     tier: foundational
     description: "Cross-vertical governance enforcement and compliance checks"
+
+  # ── Integration fabric ──────────────────────────────────────────────────────
+  platform-integrations:
+    owner: "@nzila/platform"
+    steward: null
+    tier: service
+    description: "Integration fabric — connectors, mapping, sync, webhooks"
+
+  platform-integrations-types:
+    owner: "@nzila/platform"
+    steward: null
+    tier: foundational
+    description: "Shared types and schemas for integration fabric"
+
+  platform-integrations-connectors:
+    owner: "@nzila/platform"
+    steward: null
+    tier: service
+    description: "Built-in connector adapters (webhook, REST, CSV/SFTP)"

@@ -243,6 +243,18 @@ export async function getRateLimitStore(redis?: RedisLike): Promise<RateLimitSto
 
   const storeType = process.env.RATE_LIMIT_STORE ?? 'memory'
 
+  // ── Upstash REST (Edge Runtime compatible) ──────────────────────────────
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if ((storeType === 'upstash' || storeType === 'redis') && upstashUrl && upstashToken) {
+    const { UpstashRateLimitStore } = await import('./upstash-store')
+    _globalStore = new UpstashRateLimitStore(upstashUrl, upstashToken)
+    console.log('[rate-limit] Using Upstash Redis REST distributed store')
+    return _globalStore
+  }
+
+  // ── ioredis (Node.js only — won't work in Edge Runtime) ────────────────
   if (storeType === 'redis') {
     if (redis) {
       _globalStore = new RedisRateLimitStore(redis)

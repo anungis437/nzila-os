@@ -101,10 +101,10 @@ describe('composeFeed', () => {
     )
 
     expect(sections.length).toBeGreaterThan(0)
-    const item = sections[0].items[0]
-    expect(item.actor?.userId).toBe('u1')
-    expect(item.content?.contentId).toBe('track-1')
-    expect(item.activityType).toBe('listened')
+    const item = sections[0]!.items[0]
+    expect(item!.actor?.userId).toBe('u1')
+    expect(item!.content?.contentId).toBe('track-1')
+    expect(item!.activityType).toBe('listened')
   })
 
   it('deduplicates same user + action + content within 1 hour', async () => {
@@ -140,9 +140,9 @@ describe('composeFeed', () => {
     const allItems = sections.flatMap((s) => s.items)
     // 3 users liked same track → grouped into 1 item
     expect(allItems).toHaveLength(1)
-    expect(allItems[0].type).toBe('grouped')
-    expect(allItems[0].groupCount).toBe(3)
-    expect(allItems[0].groupedActors).toHaveLength(3)
+    expect(allItems[0]!.type).toBe('grouped')
+    expect(allItems[0]!.groupCount).toBe(3)
+    expect(allItems[0]!.groupedActors).toHaveLength(3)
   })
 
   it('interleaves trending + recommendation cards for "for-you" feed', async () => {
@@ -239,6 +239,6 @@ describe('composeFeed', () => {
 
     const sections = await composeFeed({ activities, feedType: 'following', limit: 10 }, enrichment, NOW)
     const allItems = sections.flatMap((s) => s.items)
-    expect(allItems[0].content).toBeNull()
+    expect(allItems[0]!.content).toBeNull()
   })
 })

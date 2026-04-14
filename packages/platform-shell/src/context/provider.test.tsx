@@ -21,12 +21,12 @@ const testUser: ShellUser = {
   firstName: 'Alice',
   lastName: 'Bob',
   imageUrl: null,
-  roles: ['admin'],
+  roles: ['org_admin'],
 }
 
 const testOrgs: ShellOrg[] = [
-  { id: 'org-1', name: 'Org One', slug: 'org-one', imageUrl: null, role: 'admin' },
-  { id: 'org-2', name: 'Org Two', slug: 'org-two', imageUrl: null, role: 'member' },
+  { id: 'org-1', name: 'Org One', slug: 'org-one', imageUrl: null, role: 'org_admin' },
+  { id: 'org-2', name: 'Org Two', slug: 'org-two', imageUrl: null, role: 'org_member' },
 ]
 
 /** Consumer that exposes context for assertions. */
