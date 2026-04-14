@@ -34,7 +34,7 @@
   "license": "PROPRIETARY",
   "dependencies": {},
   "devDependencies": {
-    "typescript": "workspace:*",
-    "vitest": "workspace:*"
+    "typescript": "^6",
+    "vitest": "^4.1.2"
   }
 }
