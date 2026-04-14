@@ -37,13 +37,13 @@ describe('toDiscoveryItems', () => {
 describe('trendingToDiscoveryItems', () => {
   it('assigns "Rising fast" for velocity > 5', () => {
     const result = trendingToDiscoveryItems([makeTrendingScore('a1', 100, 10)])
-    expect(result[0].reason).toBe('Rising fast')
-    expect(result[0].metadata).toEqual({ velocity: 10 })
+    expect(result[0]!.reason).toBe('Rising fast')
+    expect(result[0]!.metadata).toEqual({ velocity: 10 })
   })
 
   it('assigns "Popular now" for velocity <= 5', () => {
     const result = trendingToDiscoveryItems([makeTrendingScore('a1', 100, 3)])
-    expect(result[0].reason).toBe('Popular now')
+    expect(result[0]!.reason).toBe('Popular now')
   })
 
   it('returns empty for empty input', () => {

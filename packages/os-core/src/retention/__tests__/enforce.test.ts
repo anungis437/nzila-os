@@ -86,7 +86,7 @@ describe('enforceRetention', () => {
     const result = await enforceRetention({
       actorId: 'user_1',
       policies: [
-        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive' },
+        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive', immutable: false },
       ],
     })
 
@@ -108,7 +108,7 @@ describe('enforceRetention', () => {
       actorId: 'user_1',
       dryRun: true,
       policies: [
-        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive' },
+        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive', immutable: false },
       ],
     })
 
@@ -131,7 +131,7 @@ describe('enforceRetention', () => {
       actorId: 'user_1',
       dryRun: true,
       policies: [
-        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'delete' },
+        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'delete', immutable: false },
       ],
     })
 
@@ -152,7 +152,7 @@ describe('enforceRetention', () => {
       actorId: 'user_1',
       dryRun: true,
       policies: [
-        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'redact' },
+        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'redact', immutable: false },
       ],
     })
 
@@ -176,7 +176,7 @@ describe('enforceRetention', () => {
       actorId: 'user_1',
       dryRun: false,
       policies: [
-        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive' },
+        { category: 'other', retentionClass: '7_YEARS' as const, expiryAction: 'archive', immutable: false },
       ],
     })
 

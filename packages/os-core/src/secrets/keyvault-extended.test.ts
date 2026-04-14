@@ -63,7 +63,7 @@ describe('keyvault extended', () => {
 
   describe('getSecret env fallback', () => {
     it('falls back to environment variable in dev', async () => {
-      process.env.NODE_ENV = 'development'
+      ;(process.env as any).NODE_ENV = 'development'
       process.env.DATABASE_URL = 'postgres://localhost:5432/test'
 
       const { getSecret, clearSecretCache } = await loadModule()
@@ -75,7 +75,7 @@ describe('keyvault extended', () => {
     })
 
     it('converts dashes to underscores for env var lookup', async () => {
-      process.env.NODE_ENV = 'test'
+      ;(process.env as any).NODE_ENV = 'test'
       process.env.MY_API_KEY = 'test-key-123'
 
       const { getSecret, clearSecretCache } = await loadModule()
@@ -87,7 +87,7 @@ describe('keyvault extended', () => {
     })
 
     it('throws when secret not found anywhere', async () => {
-      process.env.NODE_ENV = 'test'
+      ;(process.env as any).NODE_ENV = 'test'
       delete process.env.KEY_VAULT_URI
 
       const { getSecret, clearSecretCache } = await loadModule()
@@ -98,7 +98,7 @@ describe('keyvault extended', () => {
 
   describe('getSecret with Key Vault', () => {
     it('fetches from Key Vault in production when KEY_VAULT_URI is set', async () => {
-      process.env.NODE_ENV = 'production'
+      ;(process.env as any).NODE_ENV = 'production'
       process.env.KEY_VAULT_URI = 'https://my-vault.vault.azure.net/'
 
       vi.doMock('@azure/keyvault-secrets', () => ({
@@ -121,7 +121,7 @@ describe('keyvault extended', () => {
     })
 
     it('throws when @azure/keyvault-secrets is not installed', async () => {
-      process.env.NODE_ENV = 'production'
+      ;(process.env as any).NODE_ENV = 'production'
       process.env.KEY_VAULT_URI = 'https://my-vault.vault.azure.net/'
 
       vi.doMock('@azure/keyvault-secrets', () => {
@@ -134,7 +134,7 @@ describe('keyvault extended', () => {
     })
 
     it('throws when Key Vault secret has no value', async () => {
-      process.env.NODE_ENV = 'production'
+      ;(process.env as any).NODE_ENV = 'production'
       process.env.KEY_VAULT_URI = 'https://my-vault.vault.azure.net/'
 
       vi.doMock('@azure/keyvault-secrets', () => ({

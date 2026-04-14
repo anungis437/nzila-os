@@ -435,6 +435,8 @@ describe('events bridge', () => {
     type,
     payload,
     metadata,
+    schemaVersion: '1.0',
+    createdAt: new Date().toISOString(),
   });
 
   it('creates started and completed events', async () => {
@@ -442,8 +444,8 @@ describe('events bridge', () => {
     const ctx = makeCtx();
     const result = await runPipeline(def, ctx);
 
-    const started = pipelineStartedEvent(def, ctx, createEvent);
-    const completed = pipelineCompletedEvent(result, ctx.source, createEvent);
+    const started = pipelineStartedEvent(def, ctx, createEvent as any);
+    const completed = pipelineCompletedEvent(result, ctx.source, createEvent as any);
 
     expect(started.type).toBe('ingestion.pipeline.started');
     expect((started.payload as { pipelineName: string }).pipelineName).toBe('doc-ingest');
@@ -467,7 +469,7 @@ describe('events bridge', () => {
     const ctx = makeCtx();
     const result = await runPipeline(def, ctx);
 
-    const both = pipelineEventsFromResult(def, ctx, result, createEvent);
+    const both = pipelineEventsFromResult(def, ctx, result, createEvent as any);
     expect((both.completed.payload as { failedStage: string | null }).failedStage).toBe('kaboom');
     expect((both.completed.metadata as { causationId: string }).causationId).toBe(
       both.started.id,

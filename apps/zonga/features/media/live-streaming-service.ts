@@ -70,7 +70,7 @@ export async function createLiveStream(
   input: CreateLiveStreamInput,
 ): Promise<LiveStream> {
   // Import dynamically to allow this module to work without AWS deps in tests
-  const { createLiveChannel, buildRtmpIngestUrl } = await import(
+  const { createLiveChannel } = await import(
     '@nzila/zonga-streaming-aws/ivs-live'
   )
   const { resolveIvsConfig } = await import('@nzila/zonga-streaming-aws')

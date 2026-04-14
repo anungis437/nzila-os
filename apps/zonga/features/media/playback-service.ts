@@ -46,17 +46,17 @@ export async function getPlaybackUrl(
 
       const signed = await createSignedPlaybackUrl(resolveCloudFrontConfig(), {
         storageKey: awsVariant.storageKey,
-        qualityTier: awsVariant.qualityTier,
-        orgId: '', // not needed for signing
+        qualityTier: awsVariant.qualityTier as QualityTier,
+        orgId: '',
         assetId: contentAssetId,
-        ttlSeconds: 14400, // 4 hours
+        ttlSec: 14400,
       })
 
       return {
         ok: true,
         streamUrl: signed.url,
-        qualityTier: awsVariant.qualityTier,
-        bitrate: awsVariant.bitrate ?? PROCESSING_PROFILES[awsVariant.qualityTier]?.bitrate ?? 128,
+        qualityTier: awsVariant.qualityTier as QualityTier,
+        bitrate: awsVariant.bitrate ?? PROCESSING_PROFILES[awsVariant.qualityTier as QualityTier]?.bitrate ?? 128,
         codec: awsVariant.codec ?? 'aac',
         durationSeconds: awsVariant.durationSeconds ?? undefined,
         provider: 'aws_cloudfront',

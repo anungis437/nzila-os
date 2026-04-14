@@ -260,7 +260,7 @@ describe('platform-governed-ai', () => {
 
     it('null policy evaluator returns no violations', async () => {
       const evaluator = createNullPolicyEvaluator()
-      const result = await evaluator.evaluate()
+      const result = await evaluator.evaluate('tenant-1', AIOperationTypes.RECOMMENDATION, OntologyEntityTypes.CASE, {})
       expect(result).toEqual([])
     })
   })

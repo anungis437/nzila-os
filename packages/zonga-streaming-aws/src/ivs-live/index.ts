@@ -5,7 +5,7 @@
  * This module only manages AWS IVS resources and returns references.
  */
 import {
-  IVSClient,
+  IvsClient,
   CreateChannelCommand,
   DeleteChannelCommand,
   StopStreamCommand,
@@ -53,8 +53,8 @@ export interface IngestCredentials {
 
 // ── Client Factory ──────────────────────────────────────────────────────────
 
-function createIvsClient(config: IvsConfig): IVSClient {
-  return new IVSClient({
+function createIvsClient(config: IvsConfig): IvsClient {
+  return new IvsClient({
     region: config.region,
     ...(config.accessKeyId && config.secretAccessKey
       ? {

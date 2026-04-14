@@ -175,7 +175,7 @@ describe('createSharingService', () => {
         ['friend-1', 'friend-2'],
       )
       expect(result.length).toBe(1)
-      expect(result[0].userId).toBe('friend-1')
+      expect(result[0]!.userId).toBe('friend-1')
     })
   })
 

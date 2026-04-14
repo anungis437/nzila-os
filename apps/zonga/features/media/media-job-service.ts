@@ -67,11 +67,14 @@ export async function submitMediaConvertJob(params: {
 
   const result = await submitTranscodeJob(mcConfig, {
     inputBucket: s3Config.rawBucket,
-    inputKey: inputStorageKey,
-    outputBucket: s3Config.outputBucket,
+    inputStorageKey: inputStorageKey,
     assetId: contentAssetId,
     orgId,
     jobType,
+    qualities: [
+      { label: 'standard', bitrate: 128, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+      { label: 'high', bitrate: 256, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+    ],
   })
 
   const rows = await platformDb.execute(sql`

@@ -51,14 +51,14 @@ describe('fips extended coverage', () => {
     })
 
     it('reports fipsRequired=true in production', async () => {
-      process.env.NODE_ENV = 'production'
+      ;(process.env as any).NODE_ENV = 'production'
       const { getFipsStatus } = await loadModule()
       const status = getFipsStatus()
       expect(status.fipsRequired).toBe(true)
     })
 
     it('reports fipsRequired=true when NZILA_FIPS_REQUIRED=true', async () => {
-      process.env.NODE_ENV = 'test'
+      ;(process.env as any).NODE_ENV = 'test'
       process.env.NZILA_FIPS_REQUIRED = 'true'
       const { getFipsStatus } = await loadModule()
       const status = getFipsStatus()
@@ -75,7 +75,7 @@ describe('fips extended coverage', () => {
 
   describe('assertFipsMode', () => {
     it('returns status without crashing in dev/test mode', async () => {
-      process.env.NODE_ENV = 'test'
+      ;(process.env as any).NODE_ENV = 'test'
       process.env.NZILA_FIPS_REQUIRED = 'false'
       const { assertFipsMode } = await loadModule()
       const status = assertFipsMode()

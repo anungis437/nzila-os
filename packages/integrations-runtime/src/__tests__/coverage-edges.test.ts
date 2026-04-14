@@ -180,13 +180,17 @@ describe('telemetry bridge', () => {
 
   it('routes each integration action to the expected telemetry methods', () => {
     const telemetry = {
+      webhookReceived: vi.fn(),
+      payloadValidated: vi.fn(),
+      adapterExecuted: vi.fn(),
       providerRequest: vi.fn(),
       providerResponse: vi.fn(),
+      mappingApplied: vi.fn(),
       syncCompleted: vi.fn(),
       retryInvoked: vi.fn(),
       auditEmitted: vi.fn(),
     }
-    const createTelemetry = vi.fn(() => telemetry)
+    const createTelemetry = vi.fn((_provider: string, _channel: string) => telemetry)
 
     recordIntegrationTelemetry({
       provider: 'resend',
@@ -259,7 +263,7 @@ describe('telemetry bridge', () => {
     recordSendTelemetry('resend', 'email', 'org-1', 'corr-1', {
       ok: true,
       providerMessageId: 'msg-1',
-      rateLimitInfo: { limit: 10, remaining: 9, resetAt: '2026-03-01T00:00:00.000Z' },
+      rateLimitInfo: { isRateLimited: false, limit: 10, remaining: 9, resetAt: '2026-03-01T00:00:00.000Z' },
     }, 42, 1)
     recordSendTelemetry('resend', 'email', 'org-1', 'corr-2', {
       ok: false,

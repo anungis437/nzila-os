@@ -255,6 +255,9 @@ describe('referral', () => {
       const code = await service.createCode({
         referrerId: 'user-1',
         orgId: 'org-1',
+        campaignId: null,
+        maxUses: null,
+        expiryDays: null,
       })
 
       expect(repo.insertCode).toHaveBeenCalled()

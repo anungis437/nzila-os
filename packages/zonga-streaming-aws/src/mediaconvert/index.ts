@@ -242,8 +242,9 @@ export async function getTranscodeJobStatus(
     for (const group of job.OutputGroupDetails) {
       if (group.OutputDetails) {
         for (const output of group.OutputDetails) {
-          if (output.OutputFilePaths) {
-            outputKeys.push(...output.OutputFilePaths)
+          const filePaths = (output as Record<string, unknown>).OutputFilePaths
+          if (Array.isArray(filePaths)) {
+            outputKeys.push(...(filePaths as string[]))
           }
         }
       }

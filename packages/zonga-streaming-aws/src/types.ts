@@ -109,7 +109,7 @@ export type MediaJobType = (typeof MEDIA_JOB_TYPES)[number]
 
 // ── Quality Tiers ───────────────────────────────────────────────────────────
 
-export const QUALITY_TIERS = ['free', 'standard', 'high', 'premium'] as const
+export const QUALITY_TIERS = ['free', 'standard', 'high', 'premium', 'hifi', 'preview'] as const
 export type QualityTier = (typeof QUALITY_TIERS)[number]
 
 // ── Variant States ──────────────────────────────────────────────────────────

@@ -38,10 +38,12 @@ export interface ProviderPolicyConfig {
   sla: SlaPolicyConfig
 }
 
+type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] }
+
 export interface IntegrationPolicy {
   version: string
   defaults: ProviderPolicyConfig
-  providers: Record<string, Partial<ProviderPolicyConfig>>
+  providers: Record<string, DeepPartial<ProviderPolicyConfig>>
 }
 
 // ── Defaults ────────────────────────────────────────────────────────────────

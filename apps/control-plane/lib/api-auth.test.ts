@@ -21,40 +21,40 @@ describe('requireApiAuth', () => {
 
   afterEach(() => {
     process.env.CONTROL_PLANE_API_KEY = originalEnv.CONTROL_PLANE_API_KEY
-    process.env.NODE_ENV = originalEnv.NODE_ENV
+    ;(process.env as any).NODE_ENV = originalEnv.NODE_ENV
   })
 
   it('allows in development when no key is configured', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    process.env.NODE_ENV = 'development'
+    ;(process.env as any).NODE_ENV = 'development'
     const result = await requireApiAuth(makeRequest())
     expect(result).toEqual({ authenticated: true })
   })
 
   it('throws 500 when key not set in non-development', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    process.env.NODE_ENV = 'production'
+    ;(process.env as any).NODE_ENV = 'production'
     await expect(requireApiAuth(makeRequest())).rejects.toThrow('Server misconfiguration')
     await expect(requireApiAuth(makeRequest())).rejects.toMatchObject({ status: 500 })
   })
 
   it('throws 401 when no api key header provided', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'secret-key'
-    process.env.NODE_ENV = 'production'
+    ;(process.env as any).NODE_ENV = 'production'
     await expect(requireApiAuth(makeRequest())).rejects.toThrow('Unauthorized')
     await expect(requireApiAuth(makeRequest())).rejects.toMatchObject({ status: 401 })
   })
 
   it('throws 401 when wrong api key provided', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'secret-key'
-    process.env.NODE_ENV = 'production'
+    ;(process.env as any).NODE_ENV = 'production'
     const req = makeRequest({ 'x-api-key': 'wrong-key' })
     await expect(requireApiAuth(req)).rejects.toThrow('Unauthorized')
   })
 
   it('allows access with correct api key', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'my-key'
-    process.env.NODE_ENV = 'production'
+    ;(process.env as any).NODE_ENV = 'production'
     const req = makeRequest({ 'x-api-key': 'my-key' })
     const result = await requireApiAuth(req)
     expect(result).toEqual({ authenticated: true })
@@ -62,7 +62,7 @@ describe('requireApiAuth', () => {
 
   it('works without request argument in dev mode', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    process.env.NODE_ENV = 'development'
+    ;(process.env as any).NODE_ENV = 'development'
     const result = await requireApiAuth(undefined)
     expect(result).toEqual({ authenticated: true })
   })

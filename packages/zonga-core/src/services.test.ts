@@ -329,7 +329,7 @@ describe('@nzila/zonga-core — services', () => {
 
     it('builds recommendation request payloads with defaults', () => {
       const similar = buildSimilarTracksRequest({ listenerId: 'l1', seedAssetId: 'a1', genre: 'afrobeats' })
-      const regional = buildRegionalDiscoveryRequest({ listenerId: 'l1', region: 'east' })
+      const regional = buildRegionalDiscoveryRequest({ listenerId: 'l1', region: 'east_africa' })
       const session = buildSessionContinuationRequest({ listenerId: 'l1', recentAssetIds: ['a1', 'a2'] })
 
       expect(similar).toMatchObject({ type: 'similar_tracks', limit: 20, excludeAssetIds: ['a1'] })
@@ -349,11 +349,11 @@ describe('@nzila/zonga-core — services', () => {
       ])
 
       const [registration, profile, payout, activation] = CreatorOnboardingFlow.steps
-      expect(registration.validate?.({ email: 'creator@zonga.africa', acceptedTerms: true })).toBe(true)
-      expect(profile.validate?.({ displayName: 'Amina', genre: 'afropop', bio: 'Artist bio' })).toBe(true)
-      expect(payout.validate?.({ payoutMethod: 'mobile_money', payoutVerified: true })).toBe(true)
-      expect(activation.canStart?.({ payoutVerified: true })).toBe(true)
-      expect(activation.canStart?.({ payoutVerified: false })).toBe(false)
+      expect(registration!.validate?.({ email: 'creator@zonga.africa', acceptedTerms: true })).toBe(true)
+      expect(profile!.validate?.({ displayName: 'Amina', genre: 'afropop', bio: 'Artist bio' })).toBe(true)
+      expect(payout!.validate?.({ payoutMethod: 'mobile_money', payoutVerified: true })).toBe(true)
+      expect(activation!.canStart?.({ payoutVerified: true })).toBe(true)
+      expect(activation!.canStart?.({ payoutVerified: false })).toBe(false)
     })
 
     it('re-exports expected symbols from package barrel', () => {
