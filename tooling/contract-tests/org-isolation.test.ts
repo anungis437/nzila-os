@@ -75,6 +75,7 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
     || normalized.includes('/api/quote/')  // Quote response via share token (no auth, token-validated)
     || normalized.includes('/api/contact/')  // Public contact/demo-request form (marketing)
+    || normalized.includes('/api/metrics/')  // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {

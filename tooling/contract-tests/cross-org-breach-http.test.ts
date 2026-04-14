@@ -57,7 +57,8 @@ const SYSTEM_SKIP = (path: string) => {
   const rel = path.replace(/\\/g, '/')
   return rel.includes('/api/cron/') ||
          rel.includes('/api/docs/') ||
-         rel.includes('/api/emergency/')
+         rel.includes('/api/emergency/') ||
+         rel.includes('/api/metrics/')
 }
 
 // ── Auth patterns that enforce org-scoped access ──────────────────────────── 

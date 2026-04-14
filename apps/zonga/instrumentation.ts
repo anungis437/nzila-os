@@ -4,6 +4,7 @@
  * Runs the canonical Nzila boot sequence plus Sentry error monitoring.
  */
 import { createAppBoot } from '@nzila/os-core/telemetry'
+import { logger } from '@/lib/logger'
 
 export async function register() {
   await createAppBoot('zonga')()
@@ -17,9 +18,9 @@ export async function register() {
     const shutdown = () => {
       if (shuttingDown) return
       shuttingDown = true
-      console.log('[zonga] SIGTERM received — draining connections (30s grace)...')
+      logger.info('SIGTERM received, draining connections', { graceMs: 30_000 })
       setTimeout(() => {
-        console.log('[zonga] Grace period expired — exiting.')
+        logger.info('Grace period expired, exiting process')
         process.exit(0)
       }, 30_000)
     }
@@ -34,10 +35,10 @@ export async function register() {
     process.removeAllListeners('unhandledRejection')
     process.removeAllListeners('uncaughtException')
     process.on('unhandledRejection', (reason) => {
-      console.error('[zonga] Unhandled rejection:', reason)
+      logger.error('Unhandled promise rejection', { reason })
     })
     process.on('uncaughtException', (err) => {
-      console.error('[zonga] Uncaught exception:', err)
+      logger.error('Uncaught exception', { err })
       // Let the process crash after logging — Node is in an undefined state
       process.exit(1)
     })

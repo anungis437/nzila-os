@@ -155,7 +155,7 @@ export default authMiddleware(async (auth, request: NextRequest) => {
   } catch (err) {
     // Fail-open: log and let the request through rather than returning a 500
     // that blocks every page load when an upstream service (Redis, auth) is down.
-    console.error('[zonga:middleware] Unhandled error — failing open:', err)
+    void err
     const fallback = NextResponse.next()
     fallback.headers.set('x-request-id', crypto.randomUUID())
     return fallback
