@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
-import type { AILogEntry, AIRequest, AIResponse } from './schemas.js'
+import type { AILogEntry, AIRequest, AIResponse } from './schemas'
 
 // ─── AI Log Store ───────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import type { OutputClassification } from './schemas.js'
+import type { OutputClassification } from './schemas'
 
 // ─── Output Classifier ─────────────────────────────────────────────────────
 

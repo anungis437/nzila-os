@@ -18,14 +18,14 @@ export {
   aiPolicyContextSchema,
   aiPolicyDecisionSchema,
   aiLogEntrySchema,
-} from './schemas.js'
+} from './schemas'
 
 export {
   runAI,
   AIControlError,
   type AIProvider,
   type AIRunnerConfig,
-} from './runner.js'
+} from './runner'
 
 export {
   checkBudget,
@@ -33,7 +33,7 @@ export {
   getCurrentPeriod,
   type BudgetStore,
   InMemoryBudgetStore,
-} from './budget.js'
+} from './budget'
 
 export {
   checkAIPolicy,
@@ -43,17 +43,17 @@ export {
   restrictedDataPolicy,
   modelAllowlistPolicy,
   type AIPolicyRule,
-} from './policy.js'
+} from './policy'
 
 export {
   classifyOutput,
   OutputClassifier,
   type ClassificationRule,
   type ClassificationResult,
-} from './classifier.js'
+} from './classifier'
 
 export {
   createAILogEntry,
   type AILogStore,
   InMemoryAILogStore,
-} from './logging.js'
+} from './logging'

@@ -1,4 +1,4 @@
-import type { AIPolicyContext, AIPolicyDecision } from './schemas.js'
+import type { AIPolicyContext, AIPolicyDecision } from './schemas'
 
 // ─── Policy Rule ────────────────────────────────────────────────────────────
 

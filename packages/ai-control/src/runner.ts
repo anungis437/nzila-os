@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import { aiRequestSchema, type AIRequest, type AIResponse } from './schemas.js'
-import { checkBudget, recordSpend, type BudgetStore } from './budget.js'
-import { checkAIPolicy, type AIPolicyRegistry } from './policy.js'
-import { classifyOutput, type OutputClassifier } from './classifier.js'
-import { createAILogEntry, type AILogStore } from './logging.js'
+import { aiRequestSchema, type AIRequest, type AIResponse } from './schemas'
+import { checkBudget, recordSpend, type BudgetStore } from './budget'
+import { checkAIPolicy, type AIPolicyRegistry } from './policy'
+import { classifyOutput, type OutputClassifier } from './classifier'
+import { createAILogEntry, type AILogStore } from './logging'
 
 // ─── AI Provider Interface ──────────────────────────────────────────────────
 
