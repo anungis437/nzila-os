@@ -711,6 +711,12 @@ importers:
       '@nzila/platform-observability':
         specifier: workspace:*
         version: link:../../packages/platform-observability
+      '@nzila/platform-pilot-metrics':
+        specifier: workspace:*
+        version: link:../../packages/platform-pilot-metrics
+      '@nzila/platform-pilot-metrics-types':
+        specifier: workspace:*
+        version: link:../../packages/platform-pilot-metrics-types
       '@nzila/platform-policy-engine':
         specifier: workspace:*
         version: link:../../packages/platform-policy-engine
@@ -1798,6 +1804,9 @@ importers:
       '@nzila/platform-auth':
         specifier: workspace:*
         version: link:../../packages/platform-auth
+      '@nzila/platform-pilot-metrics':
+        specifier: workspace:*
+        version: link:../../packages/platform-pilot-metrics
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
@@ -2463,6 +2472,9 @@ importers:
       '@nzila/platform-auth':
         specifier: workspace:*
         version: link:../../packages/platform-auth
+      '@nzila/platform-pilot-metrics':
+        specifier: workspace:*
+        version: link:../../packages/platform-pilot-metrics
       '@nzila/platform-revenue':
         specifier: workspace:*
         version: link:../../packages/platform-revenue
@@ -5325,6 +5337,44 @@ importers:
       eslint:
         specifier: ^9.39.0
         version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/platform-pilot-metrics:
+    dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
+      '@nzila/platform-pilot-metrics-types':
+        specifier: workspace:*
+        version: link:../platform-pilot-metrics-types
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/platform-pilot-metrics-types:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../config
       typescript:
         specifier: ^6
         version: 6.0.2
