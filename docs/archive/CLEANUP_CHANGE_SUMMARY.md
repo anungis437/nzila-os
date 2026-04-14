@@ -34,8 +34,8 @@
 - `docs/deploy/data-residency-audit.md` — Clerk data processor section replaced
 - `apps/union-eyes/docs/cba-intelligence-openapi.yaml` — Security scheme renamed from clerk → platformAuth
 - `apps/web/docs/pilot-playbook.md` — 2 Clerk references corrected
-- `tooling/staging-certification/CERTIFICATION_REPORT.md` — 3 Clerk references corrected
-- 8 app pilot/demo docs (cfo, partners, flow, zonga) — Auth references corrected
+- `tooling/staging-certification/CERTIFICATION_REPORT.md` — Clerk references corrected
+- App pilot/demo docs (cfo, partners, flow, zonga) — Auth references corrected
 
 **Actions — MEDIUM (internal tooling/scaffold):**
 - `packages/scripts-book/README.md` — Added LEGACY label, profiles table updated with status column
@@ -46,7 +46,7 @@
 
 ## 3. App READMEs
 
-**Problem:** 15 of 17 apps had no README or only a Next.js boilerplate README.
+**Problem:** Most apps had no README or only a Next.js boilerplate README.
 
 **Actions:**
 - Created READMEs for: abr, agrimo, cfo, console, control-plane, cora, flow, mobility, mobility-client-portal, nacp-exams, orchestrator-api, partners, platform-admin, trade, zonga
@@ -133,11 +133,11 @@
 
 ## 9. Root README Corrections
 
-**Problem:** Root README said "13 apps, 58+ packages" — actual count is 17 apps, 152 packages. Business domains table was missing 8 apps.
+**Problem:** Root README contained hardcoded repository-scale count claims and an incomplete business domains table.
 
 **Actions:**
-- Updated counts: 13 → 17 apps, 58+ → 150+ packages
-- Updated ASCII diagram: "13 APPS" → "17 APPS"
+- Replaced hardcoded count claims with canonical inventory references
+- Updated README architecture wording to avoid fixed app/package totals
 - Added missing apps to business domains table: ABR, Flow, Mobility, Mobility Client Portal, Zonga, Control Plane, Platform Admin, Orchestrator API
 
 **Files affected:** 1 file (README.md)
@@ -146,22 +146,22 @@
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Files relocated | ~70 |
-| READMEs created | 22 |
-| Documents corrected (auth) | ~20 |
-| New canonical docs | 2 (AUTH_ARCHITECTURE.md, flow INDEX.md) |
-| .gitignore patterns added | 8 |
-| Stale Clerk references fixed | ~30 |
-| Doc-map coverage | 44 → 200+ docs |
-| Apps in README table | 9 → 12 domains (17 apps) |
+| Metric | Status |
+|--------|--------|
+| Files relocated | Completed |
+| READMEs created | Completed |
+| Documents corrected (auth) | Completed |
+| New canonical docs | Added |
+| .gitignore patterns added | Added |
+| Stale Clerk references fixed | Completed |
+| Doc-map coverage | Expanded significantly |
+| README business domains table | Expanded with missing app domains |
 
 ---
 
 ## Remaining Items (Not In Scope)
 
-- **Clerk CSP headers**: 11 apps have stale Clerk domains in `next.config.ts` CSP headers — code change, not docs
+- **Clerk CSP headers**: Multiple apps still have stale Clerk domains in `next.config.ts` CSP headers — code change, not docs
 - **Clerk-named profile/module renames** in scripts-book (`auth-clerk/` module, `*-clerk.json` profiles) — requires generator code changes
 - **Binary assets in docs/plans/go-to-market/**: Excel and PowerPoint files — left in place (business strategy docs)
 - **docs/commerce/_extracted/pricing-engine/node_modules/**: Accidentally committed node_modules — should be gitignored

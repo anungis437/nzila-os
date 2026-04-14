@@ -26,7 +26,7 @@ For a deeper overview, see [docs/platform/what-is-nzila.md](docs/platform/what-i
 
 ### UnionEyes
 
-Union case management — grievance lifecycle, collective bargaining, elections, strike funds, evidence-sealed audit trails, federation management. Full-stack Next.js + Django. 3,000+ source files. Production-deployed.
+Union case management — grievance lifecycle, collective bargaining, elections, strike funds, evidence-sealed audit trails, federation management. Full-stack Next.js + Django. Production-deployed.
 
 ### Zonga
 
@@ -100,7 +100,7 @@ pnpm install           # install all dependencies
 pnpm dev               # run all apps in parallel
 pnpm build             # build via Turborepo
 pnpm test              # Run test suite (canonical counts in tooling/repo-inventory/output/repo-inventory.md)
-pnpm contract-tests    # 380+ invariant enforcement tests
+pnpm contract-tests    # Run invariant enforcement tests (canonical counts in tooling/repo-inventory/output/repo-inventory.md)
 ```
 
 **Prerequisites:** Node.js ≥ 20 · pnpm ≥ 10 · Python ≥ 3.11 (for Django backends). See `.env.example` in each app for auth config.

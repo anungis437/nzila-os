@@ -37,7 +37,7 @@
 **Assessment**: **OVERSTATED**. Rollback & A/B testing ARE implemented. Gap: Feature flag coverage metrics not visible in audit; unclear which apps actively use platform-feature-flags beyond Console.
 
 **Residual Risk**:
-- Feature flag adoption may be incomplete across all 10 apps.
+- Feature flag adoption may be incomplete across all targeted apps.
 - African market-specific A/B testing (e.g., SME-vs-enterprise pricing) not explicitly visible.
 
 **Mitigation Effectiveness**: 80% — operational controls strong; coverage telemetry needed.

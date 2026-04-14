@@ -185,7 +185,7 @@
 | Governance Persistence | 100% audit compliance | Query governance DB for all decisions in past 90 days |
 | Load Projection | <2s p95 latency @ 10K VUs | k6 report artifact in CI |
 | Compliance Audit | 100% coverage | Jira checklist by region |
-| Localization | All 10 apps translated | i18n CI check passes |
+| Localization | All targeted apps translated | i18n CI check passes |
 
 ---
 

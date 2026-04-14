@@ -98,7 +98,7 @@ graph TB
 
 ### 3.1 Platform Ontology (`platform-ontology`)
 
-Defines the canonical business entity type system with **40+ entity types**:
+Defines the canonical business entity type system with multiple entity classes:
 
 - **People**: Organization, Person, User, Advisor, Member, Client, Family, Farmer
 - **Cases & Claims**: Case, Claim, Program
@@ -168,7 +168,7 @@ The following platform packages were observed in the environment and represent t
 
 ## 5. CI/CD & Security
 
-### 5.1 GitHub Workflows (20+)
+### 5.1 GitHub Workflows (Canonical Inventory)
 
 | Workflow | Purpose |
 |----------|---------|
@@ -249,7 +249,7 @@ The following platform packages were observed in the environment and represent t
 ### Strengths
 
 1. **Comprehensive governance model** — Evidence-first with hash-chained audit trails
-2. **Strong invariant enforcement** — 5,000+ contract tests
+2. **Strong invariant enforcement** — contract test coverage is tracked canonically in `tooling/repo-inventory/output/repo-inventory.md`
 3. **Well-structured monorepo** — Clear separation between apps, packages, and tooling
 4. **Extensive CI/CD** — workflow inventory tracked in `tooling/repo-inventory/output/repo-inventory.md`
 5. **Modern platform capabilities** — Ontology, reasoning engine, governed AI
