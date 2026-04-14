@@ -3,8 +3,8 @@
 > A governed system platform — not a repository. Every product, every payment, every audit trail runs through one control plane with enforced invariants.
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
-[![Contract Tests](https://img.shields.io/badge/contract%20tests-380%2B%20passing-blue)](#system-guarantees)
-[![GA Gates](https://img.shields.io/badge/GA%20gates-30%2F30-brightgreen)](#system-guarantees)
+[![Contract Tests](https://img.shields.io/badge/contract%20tests-canonical-blue)](#system-guarantees)
+[![GA Gates](https://img.shields.io/badge/GA%20gates-governed-brightgreen)](#system-guarantees)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](#license)
 
 ---
@@ -14,7 +14,7 @@
 Nzila OS is the operating system for Nzila Digital Ventures. It is a **governed platform** — not a collection of apps. Every business action flows through a single control plane with:
 
 - **Enforced revenue pipeline** — all financial events pass through `@nzila/platform-revenue`. No app can process payments outside it.
-- **Contract-enforced invariants** — 380+ contract tests enforce auth purity, revenue enforcement, control-plane authority, and platform drift prevention at CI time.
+- **Contract-enforced invariants** — canonical test and gate counts are generated in `tooling/repo-inventory/output/repo-inventory.md` and enforced in CI.
 - **Evidence-first audit** — every material action produces a tamper-evident audit entry with a deterministic trace ID and hash-chain verification.
 - **Org-scoped multi-tenancy** — every data query, API call, and evidence record is scoped to the authenticated organization.
 
@@ -76,7 +76,7 @@ Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
 | **SDK-only AI/ML** | Apps use `@nzila/ai-sdk` / `@nzila/ml-sdk` — never provider SDKs directly |
 | **Stack authority** | Django-authoritative apps (ABR, UnionEyes) must not mutate domain data via Drizzle |
 
-**30 GA gates — all passing. 380+ contract tests enforced on every PR.**
+**GA and contract checks are enforced on every PR with canonical counts in `tooling/repo-inventory/output/repo-inventory.md`.**
 
 ---
 
@@ -89,7 +89,7 @@ Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
 | **Growth** | Partners, ABR, Agrimo, NACP Exams, Trade | Pilot or support stage |
 | **INCUBATION** | Cora, Mobility, Mobility Client Portal, Platform Admin | Early-stage — not yet revenue-ready |
 
-> All 17 apps are governed by the same invariants. Incubation apps are structurally identical — same auth, same evidence, same contract enforcement. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+> All apps are governed by the same invariants. Incubation apps are structurally identical — same auth, same evidence, same contract enforcement. Canonical app count is generated in `tooling/repo-inventory/output/repo-inventory.md`. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 ---
 
@@ -99,7 +99,7 @@ Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
 pnpm install           # install all dependencies
 pnpm dev               # run all apps in parallel
 pnpm build             # build via Turborepo
-pnpm test              # 7,669 unit tests (Vitest)
+pnpm test              # Run test suite (canonical counts in tooling/repo-inventory/output/repo-inventory.md)
 pnpm contract-tests    # 380+ invariant enforcement tests
 ```
 
@@ -113,7 +113,7 @@ pnpm contract-tests    # 380+ invariant enforcement tests
 |-----|---------|
 | [docs/platform/what-is-nzila.md](docs/platform/what-is-nzila.md) | 30-second platform overview |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full architectural overview |
-| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | All 17 apps — tier, revenue readiness, strategic role |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | App portfolio tiers and strategic role (canonical counts in generated inventory) |
 | [docs/platform/revenue-architecture.md](docs/platform/revenue-architecture.md) | Revenue system design |
 | [README.business.md](README.business.md) | Non-technical business overview |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide + repo contract |

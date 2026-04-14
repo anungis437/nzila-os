@@ -51,6 +51,14 @@ async function IntegrationOverviewContent() {
         />
       </div>
 
+      {summary.state !== "ok" ? (
+        <div className="rounded-md border p-4 text-sm text-muted-foreground">
+          {summary.state === "no_data"
+            ? "NO DATA: No integration records found in integration_connections, integration_runs, integration_delivery_attempts, or integration_dead_letters."
+            : `DATA ERROR: ${summary.errorMessage ?? "Unable to read integration tables."}`}
+        </div>
+      ) : null}
+
       {/* Connector table */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">
@@ -67,7 +75,13 @@ async function IntegrationOverviewContent() {
               </tr>
             </thead>
             <tbody>
-              {connectors.map((c) => (
+              {connectors.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-4 text-muted-foreground" colSpan={4}>
+                    NO DATA: No connector records in integration_connections.
+                  </td>
+                </tr>
+              ) : connectors.map((c) => (
                 <tr key={c.type} className="border-b last:border-0">
                   <td className="px-4 py-3 font-medium text-foreground">{c.name}</td>
                   <td className="px-4 py-3">

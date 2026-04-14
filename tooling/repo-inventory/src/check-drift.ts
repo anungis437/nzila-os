@@ -22,6 +22,11 @@ interface DriftError {
   actual: string;
 }
 
+interface CanonicalRefError {
+  file: string;
+  issue: string;
+}
+
 // ── Load inventory ──────────────────────────────────────
 
 function loadInventory(): RepoInventory {
@@ -110,6 +115,57 @@ const DOCS_TO_CHECK = [
   'ARCHITECTURE.md',
 ];
 
+const CANONICAL_COUNT_DOCS = [
+  'README.md',
+  'docs/plans/REPO_ASSESSMENT.md',
+];
+
+function checkCanonicalCountReferences(inv: RepoInventory): CanonicalRefError[] {
+  const errors: CanonicalRefError[] = [];
+
+  for (const relPath of CANONICAL_COUNT_DOCS) {
+    const fullPath = join(ROOT, relPath);
+    if (!existsSync(fullPath)) continue;
+    const content = readFileSync(fullPath, 'utf-8');
+
+    const requiresReference =
+      content.includes('tooling/repo-inventory/output/repo-inventory.md') ||
+      content.includes('tooling/repo-inventory/output/repo-inventory.json');
+
+    if (!requiresReference) {
+      errors.push({
+        file: relPath,
+        issue: 'Missing canonical inventory reference (tooling/repo-inventory/output/repo-inventory.md)',
+      });
+    }
+
+    const hardcodedPatterns = [
+      /\b\d+\s+apps?\b/i,
+      /\b\d+\s+packages?\b/i,
+      /\b\d+\s+(workflows?|pipelines?)\b/i,
+      /\b\d+[\d,]*\+?\s+(tests?|test files?)\b/i,
+      /\|\s*Apps?\s*\|\s*\d+/i,
+      /\|\s*Packages?\s*\|\s*\d+/i,
+      /\|\s*(GitHub\s+)?Workflows?\s*\|\s*\d+/i,
+      /\|\s*Tests?\s*\|\s*\d+/i,
+    ];
+
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes('inventory') || line.includes('repo-inventory')) continue;
+      if (hardcodedPatterns.some((pattern) => pattern.test(line))) {
+        errors.push({
+          file: relPath,
+          issue: `Hardcoded count claim at line ${i + 1}: ${line.trim().slice(0, 120)}`,
+        });
+      }
+    }
+  }
+
+  return errors;
+}
+
 // ── App floor checks ────────────────────────────────────
 
 interface FloorError {
@@ -196,6 +252,19 @@ if (driftErrors.length > 0) {
   exitCode = 1;
 } else {
   console.log('✅ All docs consistent with canonical inventory.');
+}
+
+console.log('\n🔍 Enforcing canonical count references…\n');
+
+const canonicalErrors = checkCanonicalCountReferences(inv);
+if (canonicalErrors.length > 0) {
+  console.log('❌ Canonical count reference violations:\n');
+  for (const e of canonicalErrors) {
+    console.log(`  ${e.file}: ${e.issue}`);
+  }
+  exitCode = 1;
+} else {
+  console.log('✅ Canonical docs reference generated inventory and avoid hardcoded counts.');
 }
 
 console.log('\n🔍 Checking app operational floor…\n');

@@ -777,6 +777,172 @@ gate('HARD-30: what-is-nzila.md exists (repo-as-product)', () => {
   }
 })
 
+// ── HARD-31 Integration Endpoints Must Be Real ───────────────────────────
+
+gate('HARD-31: Control-plane integration endpoints are DB-backed (no placeholders)', () => {
+  const routePath = join(ROOT, 'apps/control-plane/app/api/control-plane/integrations/route.ts')
+  const dlqPath = join(ROOT, 'apps/control-plane/app/api/control-plane/integrations/dead-letters/route.ts')
+  const issues: string[] = []
+
+  if (!existsSync(routePath)) issues.push('integrations route missing')
+  if (!existsSync(dlqPath)) issues.push('dead-letters route missing')
+
+  if (existsSync(routePath)) {
+    const content = readFileSync(routePath, 'utf-8')
+    if (!content.includes('integration_connections')) issues.push('integrations route not reading integration_connections')
+    if (!content.includes('integration_runs')) issues.push('integrations route not reading integration_runs')
+    if (!content.includes('integration_delivery_attempts')) issues.push('integrations route not reading integration_delivery_attempts')
+    if (!content.includes('integration_dead_letters')) issues.push('integrations route not reading integration_dead_letters')
+    if (content.includes('Placeholder')) issues.push('integrations route contains placeholder logic')
+  }
+
+  if (existsSync(dlqPath)) {
+    const content = readFileSync(dlqPath, 'utf-8')
+    if (!content.includes('integration_dead_letters')) issues.push('dead-letters route not reading integration_dead_letters')
+    if (!/export\s+async\s+function\s+POST/.test(content)) issues.push('dead-letters replay trigger missing POST')
+    if (content.includes('Replay not yet wired')) issues.push('dead-letters replay still stubbed')
+    if (content.includes('Placeholder')) issues.push('dead-letters route contains placeholder logic')
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'Integration and dead-letter endpoints are DB-backed with replay trigger'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
+// ── HARD-32 No Seed-First Control-Plane Data ─────────────────────────────
+
+gate('HARD-32: Control-plane revenue/integration data has no seed/demo fallback', () => {
+  const revenuePath = join(ROOT, 'apps/control-plane/server/revenue-data.ts')
+  const integrationPath = join(ROOT, 'apps/control-plane/server/integration-data.ts')
+  const issues: string[] = []
+
+  for (const p of [revenuePath, integrationPath]) {
+    if (!existsSync(p)) {
+      issues.push(`${relative(ROOT, p)} missing`)
+      continue
+    }
+    const content = readFileSync(p, 'utf-8')
+    if (/seed|fallback|synthetic/i.test(content)) {
+      issues.push(`${relative(ROOT, p)} contains seed/fallback/synthetic markers`)
+    }
+    if (!content.includes('@nzila/db/platform')) {
+      issues.push(`${relative(ROOT, p)} not DB-backed via @nzila/db/platform`)
+    }
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'Control-plane revenue/integration layers are authoritative DB reads with explicit states'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
+// ── HARD-33 Canonical Repo Inventory References ───────────────────────────
+
+gate('HARD-33: Canonical docs reference generated repo inventory counts', () => {
+  const docs = [
+    'README.md',
+    'docs/plans/REPO_ASSESSMENT.md',
+  ]
+  const issues: string[] = []
+
+  for (const d of docs) {
+    const full = join(ROOT, d)
+    if (!existsSync(full)) {
+      issues.push(`${d} missing`)
+      continue
+    }
+    const content = readFileSync(full, 'utf-8')
+    if (!content.includes('tooling/repo-inventory/output/repo-inventory.md')) {
+      issues.push(`${d} missing canonical inventory reference`)
+    }
+    const hardcoded = [
+      /\b\d+\s+apps?\b/i,
+      /\b\d+\s+packages?\b/i,
+      /\b\d+[\d,]*\+?\s+tests?\b/i,
+      /\b\d+\+?\s+(workflows?|pipelines?)\b/i,
+    ]
+    const lines = content.split('\n')
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.includes('repo-inventory')) continue
+      if (hardcoded.some((r) => r.test(line))) {
+        issues.push(`${d}:${i + 1} has hardcoded count claim`)
+      }
+    }
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'README and REPO_ASSESSMENT use canonical generated inventory references'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
+// ── HARD-34 Zonga Streaming Path Clarity ──────────────────────────────────
+
+gate('HARD-34: Zonga stream route has unambiguous provider path', () => {
+  const streamPath = join(ROOT, 'apps/zonga/app/api/stream/[assetId]/route.ts')
+  if (!existsSync(streamPath)) {
+    return { passed: false, details: 'stream route missing' }
+  }
+
+  const content = readFileSync(streamPath, 'utf-8')
+  const legacyMarkers = [
+    'Legacy fallback',
+    'selectOptimalQuality',
+    'resolveStreamUrl',
+    'computeCdnSignedUrl',
+  ]
+  const foundLegacy = legacyMarkers.filter((m) => content.includes(m))
+  const hasProvider = content.includes('getPlaybackUrl') && content.includes('STREAM_PROVIDER_UNAVAILABLE')
+
+  return {
+    passed: hasProvider && foundLegacy.length === 0,
+    details: hasProvider && foundLegacy.length === 0
+      ? 'Streaming route is provider-backed only with explicit failure path'
+      : `Issues: ${[!hasProvider && 'provider-backed path/assertive failure missing', foundLegacy.length > 0 && `legacy markers present: ${foundLegacy.join(', ')}`].filter(Boolean).join('; ')}`,
+  }
+})
+
+// ── HARD-35 Control-Plane Authority Source Check ──────────────────────────
+
+gate('HARD-35: Control-plane data sources are authoritative (no app-local synth)', () => {
+  const revenuePath = join(ROOT, 'apps/control-plane/server/revenue-data.ts')
+  const integrationPath = join(ROOT, 'apps/control-plane/server/integration-data.ts')
+  const issues: string[] = []
+
+  if (existsSync(revenuePath)) {
+    const content = readFileSync(revenuePath, 'utf-8')
+    if (content.includes('revenue-aggregator')) issues.push('revenue-data still uses app-local aggregator')
+    if (!content.includes('zonga_revenue_events')) issues.push('revenue-data not reading persisted revenue ledger')
+  } else {
+    issues.push('revenue-data.ts missing')
+  }
+
+  if (existsSync(integrationPath)) {
+    const content = readFileSync(integrationPath, 'utf-8')
+    if (content.includes('connectorRegistry')) issues.push('integration-data still uses in-memory connector registry')
+    for (const table of ['integration_connections', 'integration_runs', 'integration_dead_letters']) {
+      if (!content.includes(table)) issues.push(`integration-data missing ${table} source`) 
+    }
+  } else {
+    issues.push('integration-data.ts missing')
+  }
+
+  return {
+    passed: issues.length === 0,
+    details: issues.length === 0
+      ? 'Control-plane core layers use persisted authoritative sources only'
+      : `Issues: ${issues.join('; ')}`,
+  }
+})
+
 // ── Runner ──────────────────────────────────────────────────────────────────
 
 function main() {
@@ -819,7 +985,7 @@ function main() {
     console.log('')
     process.exit(1)
   } else {
-    console.log('  ✅  HARDENING GATE PASSED — ALL 30 CONDITIONS MET  ✅')
+    console.log('  ✅  HARDENING GATE PASSED — ALL CONDITIONS MET  ✅')
     console.log('')
     process.exit(0)
   }

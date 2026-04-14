@@ -255,6 +255,8 @@ const inventory = generate();
 
 writeFileSync(join(outDir, 'inventory.json'), JSON.stringify(inventory, null, 2) + '\n');
 writeFileSync(join(outDir, 'inventory.md'), toMarkdown(inventory));
+writeFileSync(join(outDir, 'repo-inventory.json'), JSON.stringify(inventory, null, 2) + '\n');
+writeFileSync(join(outDir, 'repo-inventory.md'), toMarkdown(inventory));
 
 console.log(`✓ Repo inventory generated at ${new Date().toISOString().split('T')[0]}`);
 console.log(`  Apps: ${inventory.appCount}`);

@@ -54,6 +54,14 @@ async function RevenueContent() {
         />
       </div>
 
+      {data.state !== "ok" ? (
+        <div className="rounded-md border p-4 text-sm text-muted-foreground">
+          {data.state === "no_data"
+            ? "NO DATA: No persisted revenue events were found in zonga_revenue_events."
+            : `DATA ERROR: ${data.errorMessage ?? "Unable to read revenue ledger."}`}
+        </div>
+      ) : null}
+
       {/* Per-app breakdown */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">
@@ -70,7 +78,13 @@ async function RevenueContent() {
               </tr>
             </thead>
             <tbody>
-              {apps.map(([appName, info]) => {
+              {apps.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-4 text-muted-foreground" colSpan={4}>
+                    NO DATA: No per-app revenue rows available.
+                  </td>
+                </tr>
+              ) : apps.map(([appName, info]) => {
                 const share = data.totalRevenue > 0
                   ? Math.round((info.total / data.totalRevenue) * 100)
                   : 0;

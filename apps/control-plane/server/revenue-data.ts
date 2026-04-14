@@ -1,68 +1,87 @@
 /**
  * Control Plane — Revenue Data Layer
  *
- * Server-side functions for the Revenue dashboard.
- * Uses the existing revenue-aggregator service with seed fallback.
+ * Strictly reads persisted revenue events from storage.
+ * Never synthesizes totals.
  */
 import 'server-only'
 
-import {
-  type RevenueEvent,
-  RevenueEventType,
-} from '@nzila/platform-revenue'
-import { getRevenueOverview, type RevenueOverview } from '@/services/revenue-aggregator'
-
-// ── Types ────────────────────────────────────────────────────────────────
+import { platformDb } from '@nzila/db/platform'
+import { sql } from 'drizzle-orm'
 
 export interface RevenueDashboardData {
+  state: 'ok' | 'no_data' | 'error'
   totalRevenue: number
   byApp: Record<string, { total: number; count: number }>
   eventCount: number
   breakdown: { subscription: number; usage: number; transaction: number }
+  errorMessage?: string
 }
 
-// ── Seed data ────────────────────────────────────────────────────────────
-
-function seedRevenueDashboard(): RevenueDashboardData {
-  return {
-    totalRevenue: 184_320,
-    byApp: {
-      'union-eyes': { total: 72_500, count: 18 },
-      'zonga': { total: 45_200, count: 42 },
-      'flow': { total: 38_100, count: 12 },
-      'console': { total: 28_520, count: 8 },
-    },
-    eventCount: 80,
-    breakdown: { subscription: 112_000, usage: 38_100, transaction: 34_220 },
-  }
-}
-
-// ── Live data accessors ──────────────────────────────────────────────────
-
-/**
- * Get revenue dashboard data.
- * Uses @nzila/platform-revenue via the revenue-aggregator service.
- * Falls back to seed data when no revenue events exist.
- */
 export async function getRevenueDashboardData(): Promise<RevenueDashboardData> {
   try {
-    const overview = getRevenueOverview()
-    if (overview.eventCount > 0) {
-      const total = overview.totalRevenue
-      // Approximate breakdown from event types (in real prod, these come from DB)
+    const totalRows = (await platformDb.execute(sql`
+      SELECT COUNT(*)::int AS event_count,
+             COALESCE(SUM(amount), 0)::numeric AS total_revenue
+      FROM zonga_revenue_events
+    `)) as unknown as Array<{ event_count: number; total_revenue: string | number }>
+
+    const totals = totalRows[0]
+    const eventCount = totals?.event_count ?? 0
+
+    if (eventCount === 0) {
       return {
-        totalRevenue: total,
-        byApp: overview.byApp,
-        eventCount: overview.eventCount,
-        breakdown: {
-          subscription: Math.round(total * 0.6),
-          usage: Math.round(total * 0.2),
-          transaction: Math.round(total * 0.2),
-        },
+        state: 'no_data',
+        totalRevenue: 0,
+        byApp: {},
+        eventCount: 0,
+        breakdown: { subscription: 0, usage: 0, transaction: 0 },
       }
     }
-  } catch {
-    /* fall through to seed */
+
+    const byAppRows = (await platformDb.execute(sql`
+      SELECT COALESCE(source, 'zonga') AS app,
+             COALESCE(SUM(amount), 0)::numeric AS total,
+             COUNT(*)::int AS count
+      FROM zonga_revenue_events
+      GROUP BY COALESCE(source, 'zonga')
+      ORDER BY COALESCE(SUM(amount), 0) DESC
+    `)) as unknown as Array<{ app: string; total: string | number; count: number }>
+
+    const breakdownRows = (await platformDb.execute(sql`
+      SELECT
+        COALESCE(SUM(CASE WHEN type = 'subscription_share' THEN amount ELSE 0 END), 0)::numeric AS subscription,
+        COALESCE(SUM(CASE WHEN type IN ('stream', 'download') THEN amount ELSE 0 END), 0)::numeric AS usage,
+        COALESCE(SUM(CASE WHEN type IN ('tip', 'ticket_sale', 'merchandise', 'sync_license') THEN amount ELSE 0 END), 0)::numeric AS transaction
+      FROM zonga_revenue_events
+    `)) as unknown as Array<{ subscription: string | number; usage: string | number; transaction: string | number }>
+
+    const byApp: Record<string, { total: number; count: number }> = {}
+    for (const row of byAppRows) {
+      byApp[row.app] = { total: Number(row.total), count: row.count }
+    }
+
+    const breakdown = breakdownRows[0] ?? { subscription: 0, usage: 0, transaction: 0 }
+
+    return {
+      state: 'ok',
+      totalRevenue: Number(totals.total_revenue),
+      byApp,
+      eventCount,
+      breakdown: {
+        subscription: Number(breakdown.subscription),
+        usage: Number(breakdown.usage),
+        transaction: Number(breakdown.transaction),
+      },
+    }
+  } catch (error) {
+    return {
+      state: 'error',
+      totalRevenue: 0,
+      byApp: {},
+      eventCount: 0,
+      breakdown: { subscription: 0, usage: 0, transaction: 0 },
+      errorMessage: error instanceof Error ? error.message : 'Revenue data unavailable',
+    }
   }
-  return seedRevenueDashboard()
 }

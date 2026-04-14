@@ -8,16 +8,16 @@
 
 ## 1. Executive Summary
 
-**Nzila OS** is a sophisticated internal platform backbone for Nzila Digital Ventures. It is a **polyglot monorepo** (TypeScript + Python/Django) comprising **17 applications** and **159 shared packages**. The platform emphasizes **evidence-first governance**, **contract-enforced invariants**, and **org-scoped multi-tenancy**.
+**Nzila OS** is a sophisticated internal platform backbone for Nzila Digital Ventures. It is a **polyglot monorepo** (TypeScript + Python/Django) with canonical inventory generated at `tooling/repo-inventory/output/repo-inventory.json`. The platform emphasizes **evidence-first governance**, **contract-enforced invariants**, and **org-scoped multi-tenancy**.
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| Apps | 17 |
-| Packages | 159 |
-| Tests | 7,669+ passing |
-| CI/CD Workflows | 20+ |
+| Apps | See `tooling/repo-inventory/output/repo-inventory.md` |
+| Packages | See `tooling/repo-inventory/output/repo-inventory.md` |
+| Tests | See `tooling/repo-inventory/output/repo-inventory.md` |
+| CI/CD Workflows | See `tooling/repo-inventory/output/repo-inventory.md` |
 | Stack | Next.js + Django, TypeScript (strict), PostgreSQL 15, Redis 7 |
 
 ---
@@ -28,7 +28,7 @@
 
 ```mermaid
 graph TB
-    subgraph "17 Apps"
+    subgraph "Apps (canonical inventory)"
         A1[web]
         A2[console]
         A3[partners]
@@ -147,7 +147,7 @@ The following platform packages were observed in the environment and represent t
 
 ## 4. Governance & Invariants
 
-### 4.1 Contract Enforcement (5,000+ Tests)
+### 4.1 Contract Enforcement (Canonical Counts)
 
 | Invariant | Enforcement |
 |-----------|-------------|
@@ -200,7 +200,7 @@ The following platform packages were observed in the environment and represent t
 
 ### 6.1 Testing
 
-- **7,669+ tests** passing
+- **Canonical test totals** are generated in `tooling/repo-inventory/output/repo-inventory.md`
 - Contract tests enforce invariants
 - Integration tests for commerce domain
 - AI evaluation harness in `tooling/ai-evals/`
@@ -251,17 +251,17 @@ The following platform packages were observed in the environment and represent t
 1. **Comprehensive governance model** — Evidence-first with hash-chained audit trails
 2. **Strong invariant enforcement** — 5,000+ contract tests
 3. **Well-structured monorepo** — Clear separation between apps, packages, and tooling
-4. **Extensive CI/CD** — 20+ workflows covering security, compliance, and deployment
+4. **Extensive CI/CD** — workflow inventory tracked in `tooling/repo-inventory/output/repo-inventory.md`
 5. **Modern platform capabilities** — Ontology, reasoning engine, governed AI
 6. **Multi-org architecture** — Org-scoped RLS throughout
 
 ### Areas of Attention
 
-1. **Complexity** — 159 packages can create maintenance overhead
+1. **Complexity** — package volume is tracked canonically in `tooling/repo-inventory/output/repo-inventory.md`
 2. **Stack authority** — Django + TS dual-authority requires careful coordination
 3. **New platform packages** — Platform packages are still evolving (observed `platform-*` in development)
 4. **Documentation drift** — Large codebase requires up-to-date architecture docs
-5. **Test maintenance** — 7,669+ tests require ongoing maintenance
+5. **Test maintenance** — test volume is tracked canonically in `tooling/repo-inventory/output/repo-inventory.md`
 
 ---
 
@@ -282,5 +282,5 @@ The following platform packages were observed in the environment and represent t
 ### For Operations
 
 1. **Monitor bundle sizes** — Large monorepo can lead to deployment bloat
-2. **Optimize CI** — 20+ workflows need efficient caching strategies
+2. **Optimize CI** — workflow inventory in `tooling/repo-inventory/output/repo-inventory.md` should guide caching priorities
 3. **Incident response readiness** — Ensure runbooks cover new platform components
