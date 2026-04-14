@@ -67,7 +67,10 @@ describe('encryptIdentity / decryptIdentity', () => {
   it('throws on decryption with tampered ciphertext', () => {
     const encrypted = encryptIdentity(payload, key, keyId)
     // Flip a byte in the encrypted payload
-    const tampered = encrypted.encryptedPayload.substring(0, 4) + 'ff' + encrypted.encryptedPayload.substring(6)
+    // XOR the first byte to guarantee a deterministic change
+    const firstByte = parseInt(encrypted.encryptedPayload.slice(0, 2), 16)
+    const flippedByte = (firstByte ^ 0xff).toString(16).padStart(2, '0')
+    const tampered = flippedByte + encrypted.encryptedPayload.slice(2)
     expect(() => decryptIdentity({ ...encrypted, encryptedPayload: tampered }, key)).toThrow()
   })
 

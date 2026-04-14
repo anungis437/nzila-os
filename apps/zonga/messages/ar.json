@@ -1,0 +1,57 @@
+{
+  "app": {
+    "tagline": "موسيقى بلا حدود"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحبًا بك في Zonga",
+    "description": "أدر مكتبتك، تتبع الإيرادات، راجع المدفوعات، ووسّع جمهورك بسهولة."
+  },
+  "catalog": {
+    "title": "المكتبة",
+    "tracks": "المقاطع",
+    "albums": "الألبومات",
+    "podcasts": "البودكاست",
+    "videos": "فيديوهات الموسيقى",
+    "upload": "رفع ملف",
+    "publish": "نشر",
+    "noAssets": "لا توجد ملفات بعد",
+    "noAssetsDescription": "ارفع أول مقطع لك للبدء."
+  },
+  "revenue": {
+    "title": "الإيرادات",
+    "totalRevenue": "إجمالي الإيرادات",
+    "streamingRevenue": "إيرادات البث",
+    "downloadRevenue": "إيرادات التنزيل",
+    "netPayout": "صافي الدفعة"
+  },
+  "payouts": {
+    "title": "المدفوعات",
+    "description": "أرباح المبدعين وسجل المدفوعات",
+    "pending": "قيد الانتظار",
+    "processing": "قيد المعالجة",
+    "completed": "مكتملة",
+    "failed": "فشلت",
+    "requestPayout": "طلب دفعة",
+    "newPayout": "دفعة جديدة"
+  },
+  "marketing": {
+    "hero": {
+      "badge": "موسيقى أفريقية، منصة عالمية",
+      "title": "موسيقى بلا",
+      "titleAccent": "حدود",
+      "description": "استمع إلى أفضل الموسيقى الأفريقية. يحصل الفنانون على 85% من كل استماع.",
+      "ctaListen": "ابدأ الاستماع",
+      "ctaDistribute": "وزّع موسيقاك"
+    }
+  },
+  "footer": {
+    "ctaTitle": "هل أنت جاهز لمشاركة موسيقاك؟",
+    "ctaDescription": "انضم إلى آلاف المبدعين الأفارقة على Zonga.",
+    "ctaButton": "ابدأ مجانًا"
+  },
+  "signIn": {
+    "pageTitle": "تسجيل الدخول | Zonga",
+    "tagline": "موسيقاك، أرباحك"
+  }
+}

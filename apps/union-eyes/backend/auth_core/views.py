@@ -950,8 +950,54 @@ def me(request):
 
 @api_view(["GET"])
 def health_check(request):
-    """Health check endpoint for load balancers."""
-    return Response({"status": "healthy"})
+    """Deep health check — verifies DB and Redis connectivity.
+
+    Returns 200 if all dependencies are reachable, 503 if degraded.
+    Used by Azure Container Apps liveness/readiness probes.
+    """
+    checks = {}
+
+    # ── Database ──────────────────────────────────────────────────────
+    try:
+        from django.db import connection
+
+        connection.ensure_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        checks["db"] = True
+    except Exception:
+        checks["db"] = False
+
+    # ── Redis (cache backend) ─────────────────────────────────────────
+    try:
+        from django.core.cache import cache
+
+        cache.set("_health", "1", 10)
+        checks["redis"] = cache.get("_health") == "1"
+    except Exception:
+        checks["redis"] = False
+
+    # ── Celery broker ─────────────────────────────────────────────────
+    try:
+        from config.celery import app as celery_app
+
+        conn = celery_app.connection()
+        conn.ensure_connection(max_retries=1, timeout=2)
+        conn.close()
+        checks["celery_broker"] = True
+    except Exception:
+        checks["celery_broker"] = False
+
+    all_healthy = all(checks.values())
+    status_code = 200 if all_healthy else 503
+
+    return Response(
+        {
+            "status": "ok" if all_healthy else "degraded",
+            "checks": checks,
+        },
+        status=status_code,
+    )
 
 
 @api_view(["GET"])

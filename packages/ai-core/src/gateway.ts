@@ -15,6 +15,7 @@ import { redactText } from './redact'
 import { checkBudget, recordSpend, estimateCo2Grams } from './budgets'
 import { logAiRequest, sha256, appendAiAuditEvent, emitAiMetric } from './logging'
 import { resolvePrompt } from './prompts'
+import { CircuitBreaker, executeWithFallback, withTimeout, DEFAULT_FALLBACK_STRATEGY } from './fallback'
 import type {
   AiGenerateRequest,
   AiGenerateResponse,
@@ -31,6 +32,14 @@ import type {
   RedactionMode,
 } from './types'
 import { AiControlPlaneError as AiError } from './types'
+
+// ── Circuit Breaker (module-level singleton) ────────────────────────────────
+
+const circuitBreaker = new CircuitBreaker({
+  failureThreshold: 5,
+  successThreshold: 2,
+  timeout: 30_000, // 30 seconds
+})
 
 // ── Provider registry ───────────────────────────────────────────────────────
 
@@ -302,7 +311,6 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
   })
 
   const providerKey = deployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
-  const provider = getProvider(providerKey)
   const model = deployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT ?? env.OPENAI_MODEL_TEXT ?? env.ANTHROPIC_MODEL_TEXT ?? 'gpt-4o'
   const temperature = profile.determinismRequired
     ? 0
@@ -310,15 +318,76 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
   const featureMaxTokens = getFeatureMaxTokens(profile, 'generate')
   const maxTokens = featureMaxTokens ?? req.params?.maxTokens ?? deployment?.maxTokens ?? env.AI_MAX_TOKENS_DEFAULT
 
-  // 6. Call provider
+  // 6. Call provider with fallback strategy
   const startTime = Date.now()
-  const result = await provider.generate({
-    messages,
-    model,
-    temperature,
-    maxTokens,
-    topP: req.params?.topP,
-  })
+  let result
+  let usedProvider = providerKey
+  let fallbackAttempts = 0
+
+  try {
+    const { result: res, providerUsed, fallbackAttempts: attempts } = await executeWithFallback({
+      circuitBreaker,
+      strategy: {
+        ...DEFAULT_FALLBACK_STRATEGY,
+        providers: [providerKey, ...profile.allowedProviders.filter((p) => p !== providerKey)],
+      },
+      execute: async (provider) => {
+        const providerClient = getProvider(provider)
+        const res = await withTimeout(
+          providerClient.generate({
+            messages,
+            model,
+            temperature,
+            maxTokens,
+            topP: req.params?.topP,
+          }),
+          env.AI_PROVIDER_TIMEOUT_MS ?? 30_000,
+          `generate:${provider}`,
+        )
+        return { result: res, providerUsed: provider }
+      },
+      onFallback: (from, to, reason) => {
+        emitAiMetric({
+          appKey: req.appKey,
+          feature: 'generate',
+          provider: `${from}→${to}`,
+          latencyMs: Date.now() - startTime,
+          refused: false,
+          errored: true,
+          orgId: req.orgId,
+          correlationId: req.trace?.correlationId,
+        })
+      },
+    })
+    result = res
+    usedProvider = providerUsed
+    fallbackAttempts = attempts
+    // Provider call failed; log and rethrow
+    const latencyMs = Date.now() - startTime
+    await logAiRequest({
+      orgId: req.orgId,
+      appKey: req.appKey,
+      profileKey: req.profileKey,
+      feature: 'generate',
+      promptVersionId,
+      provider: providerKey,
+      modelOrDeployment: model,
+      requestBody: { messages, params: { temperature, maxTokens } },
+      responseBody: {},
+      inputRedacted: false,
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+      latencyMs,
+      status: 'failed',
+      createdBy: null,
+      dataClass: req.dataClass,
+      trace: req.trace,
+    })
+    throw err
+  }
+  }
+
   const latencyMs = Date.now() - startTime
 
   // 7. Estimate cost (simplified: Azure GPT-4o pricing approximation)
@@ -331,7 +400,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
     profileKey: req.profileKey,
     feature: 'generate',
     promptVersionId,
-    provider: providerKey,
+    provider: usedProvider,
     modelOrDeployment: model,
     requestBody: { messages, params: { temperature, maxTokens } },
     responseBody: { content: result.content },
@@ -344,6 +413,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
     createdBy: null, // set by API route
     dataClass: req.dataClass,
     trace: req.trace,
+    fallbackAttempts,
   })
 
   // 9. Record spend
@@ -381,7 +451,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
     costUsd,
     latencyMs,
     model: result.model,
-    provider: providerKey,
+    provider: usedProvider,
   }
 }
 
@@ -447,7 +517,6 @@ export async function* chatStream(
   })
 
   const providerKey = chatDeployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
-  const provider = getProvider(providerKey)
   const model = chatDeployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT ?? env.OPENAI_MODEL_TEXT ?? env.ANTHROPIC_MODEL_TEXT ?? 'gpt-4o'
   const temperature = profile.determinismRequired
     ? 0
@@ -457,17 +526,58 @@ export async function* chatStream(
 
   const startTime = Date.now()
   let fullContent = ''
+  let usedProvider = providerKey
 
-  for await (const chunk of provider.generateStream({
-    messages,
-    model,
-    temperature,
-    maxTokens,
-    topP: req.params?.topP,
-  })) {
-    fullContent += chunk.delta
-    yield chunk
+  // Check circuit breaker
+  if (!circuitBreaker.canAttempt(providerKey)) {
+    throw new Error(`Circuit breaker open for ${providerKey}; streaming unavailable`)
   }
+
+  const provider = getProvider(providerKey)
+
+  try {
+    for await (const chunk of withTimeout(
+      provider.generateStream({
+        messages,
+        model,
+        temperature,
+        maxTokens,
+        topP: req.params?.topP,
+      }),
+      env.AI_PROVIDER_TIMEOUT_MS ?? 30_000,
+      `chatStream:${providerKey}`,
+    )) {
+      fullContent += chunk.delta
+      yield chunk
+    }
+    circuitBreaker.recordSuccess(providerKey)
+  } catch (err) {
+    circuitBreaker.recordFailure(providerKey)
+    // Streaming error; log and rethrow
+    const latencyMs = Date.now() - startTime
+    await logAiRequest({
+      orgId: req.orgId,
+      appKey: req.appKey,
+      profileKey: req.profileKey,
+      feature: 'chat',
+      promptVersionId: undefined,
+      provider: providerKey,
+      modelOrDeployment: model,
+      requestBody: { messages, params: { temperature, maxTokens }, streaming: true },
+      responseBody: { content: fullContent },
+      inputRedacted: false,
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+      latencyMs,
+      status: 'failed',
+      createdBy: null,
+      dataClass: req.dataClass,
+      trace: req.trace,
+    })
+    throw err
+  }
+
 
   const latencyMs = Date.now() - startTime
 
@@ -483,7 +593,7 @@ export async function* chatStream(
     profileKey: req.profileKey,
     feature: 'chat',
     promptVersionId,
-    provider: providerKey,
+    provider: usedProvider,
     modelOrDeployment: model,
     requestBody: { messages, params: { temperature, maxTokens }, streaming: true },
     responseBody: { content: fullContent },

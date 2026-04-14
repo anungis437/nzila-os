@@ -1,0 +1,71 @@
+{
+  "app": {
+    "title": "NACP Mitihani",
+    "description": "Jukwaa la Kusimamia Mitihani ya Taifa"
+  },
+  "nav": {
+    "home": "Nyumbani",
+    "about": "Kuhusu",
+    "pricing": "Bei",
+    "contact": "Wasiliana Nasi",
+    "signIn": "Ingia",
+    "requestDemo": "Omba Demo"
+  },
+  "dashboard": {
+    "title": "Akaunti Yangu",
+    "examSessions": "Vikao vya Mitihani",
+    "candidates": "Wagombea",
+    "centers": "Vituo vya Mitihani",
+    "submissions": "Wasilisho",
+    "integrity": "Ukaguzi wa Ukweli",
+    "reports": "Ripoti"
+  },
+  "exams": {
+    "title": "Mitihani",
+    "examType": "Aina ya Mtihani",
+    "apprenticeship": "Mafunzo ya Ajira",
+    "competency": "Ujuzi wa Kazi",
+    "advancedCraft": "Ujuzi wa Kiwango Cha Juu",
+    "examDate": "Tarehe ya Mtihani",
+    "examCenter": "Kituo cha Mtihani",
+    "duration": "Muda wa Mtihani",
+    "totalMarks": "Jumla ya Alama",
+    "passingMarks": "Alama za Kupita",
+    "results": "Matokeo",
+    "certificateValidity": "Muda wa Cheti"
+  },
+  "compliance": {
+    "title": "Hifadhidata",
+    "jurisdictionRules": "Sheria za Eneo",
+    "minimumWage": "Mshahara Mdogo Kabisa",
+    "workingHours": "Saa za Kazi",
+    "leaveEntitlement": "Likizo Iliyohitajika",
+    "pensionContribution": "Mchango wa Pensheni",
+    "examBoardRules": "Sheria za Bodi ya Mitihani",
+    "certificateExpiry": "Taifa la Cheti",
+    "appealDeadline": "Tarehe ya Kuzuia Malalamiko"
+  },
+  "forms": {
+    "submit": "Tuma",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "edit": "Hariri",
+    "delete": "Futa",
+    "required": "Inahitajika",
+    "optional": "Iختiyari",
+    "error": "Hitilafu",
+    "success": "Imefanikiwa"
+  },
+  "messages": {
+    "loading": "Inapakia...",
+    "noResults": "Hakuna Matokeo",
+    "confirmDelete": "Je, una uhakika unataka kufuta hii?",
+    "sessionExpired": "Kikao kimeishia. Tafadhali ingia tena."
+  },
+  "errors": {
+    "invalidGrade": "Alama sio halali. Alama ya chini ni {minimumGrade}",
+    "certificateExpired": "Cheti kimeishia tarehe {expiryDate}",
+    "maxAttemptsExceeded": "Umefanya jaribio {attemptCount} kati ya {maxAttempts} jaribo",
+    "appealDeadlinePassed": "Tarehe ya malalamiko imepita {deadlineDate}"
+  }
+}

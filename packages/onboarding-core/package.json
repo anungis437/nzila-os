@@ -11,6 +11,10 @@
     "./registry": {
       "types": "./src/registry.ts",
       "import": "./src/registry.ts"
+    },
+    "./self-service": {
+      "types": "./src/self-service.ts",
+      "import": "./src/self-service.ts"
     }
   },
   "scripts": {

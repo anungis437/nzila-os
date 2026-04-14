@@ -1,0 +1,73 @@
+{
+  "app": {
+    "title": "منصة اختبارات NACP",
+    "description": "منصة إدارة الاختبارات الوطنية"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "about": "عن",
+    "pricing": "التسعير",
+    "contact": "اتصل بنا",
+    "signIn": "تسجيل الدخول",
+    "requestDemo": "اطلب عرض توضيحي"
+  },
+  "dashboard": {
+    "title": "لوحة المعلومات",
+    "examSessions": "جلسات الاختبار",
+    "candidates": "المرشحون",
+    "centers": "مراكز الاختبار",
+    "submissions": "الطلبات",
+    "integrity": "فحوصات النزاهة",
+    "reports": "التقارير"
+  },
+  "exams": {
+    "title": "الاختبارات",
+    "examType": "نوع الاختبار",
+    "apprenticeship": "التدريب المهني",
+    "competency": "تقييم الكفاءة",
+    "advancedCraft": "الحرف المتقدمة",
+    "nationalDiploma": "الدبلوم الوطني",
+    "advancedDiploma": "الدبلوم المتقدم",
+    "examDate": "تاريخ الاختبار",
+    "examCenter": "مركز الاختبار",
+    "duration": "مدة الاختبار",
+    "totalMarks": "إجمالي العلامات",
+    "passingMarks": "علامات النجاح",
+    "results": "النتائج",
+    "certificateValidity": "صلاحية الشهادة"
+  },
+  "compliance": {
+    "title": "الامتثال",
+    "jurisdictionRules": "قوانين الولاية القضائية",
+    "minimumWage": "الحد الأدنى للأجور",
+    "workingHours": "ساعات العمل",
+    "leaveEntitlement": "أيام الإجازة",
+    "pensionContribution": "مساهمات التقاعد",
+    "examBoardRules": "قوانين مجلس الاختبارات",
+    "certificateExpiry": "انتهاء صلاحية الشهادة",
+    "appealDeadline": "موعد الاستئناف"
+  },
+  "forms": {
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "error": "خطأ",
+    "success": "نجح"
+  },
+  "messages": {
+    "loading": "جاري التحميل...",
+    "noResults": "لا توجد نتائج",
+    "confirmDelete": "هل أنت متأكد من رغبتك في الحذف؟",
+    "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
+  },
+  "errors": {
+    "invalidGrade": "العلامة غير صحيحة. الحد الأدنى هو {minimumGrade}",
+    "certificateExpired": "انتهت صلاحية الشهادة في {expiryDate}",
+    "maxAttemptsExceeded": "لقد استنفدت {attemptCount} من {maxAttempts} محاولات",
+    "appealDeadlinePassed": "لقد مضى موعد الاستئناف {deadlineDate}"
+  }
+}

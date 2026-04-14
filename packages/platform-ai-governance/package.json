@@ -9,7 +9,8 @@
     "./model-registry": "./src/modelRegistry.ts",
     "./prompt-versioning": "./src/promptVersioning.ts",
     "./decision-log": "./src/decisionLog.ts",
-    "./review": "./src/humanReview.ts"
+    "./review": "./src/humanReview.ts",
+    "./postgres-store": "./src/postgresStore.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -17,6 +18,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",

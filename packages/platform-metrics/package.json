@@ -8,7 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./org": "./src/org-metrics.ts",
-    "./platform": "./src/platform-metrics.ts"
+    "./platform": "./src/platform-metrics.ts",
+    "./unit-economics": "./src/unit-economics.ts",
+    "./esg-impact": "./src/esg-impact.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

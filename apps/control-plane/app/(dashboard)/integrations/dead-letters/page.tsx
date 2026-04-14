@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { CardSkeleton } from "@/components/ui/loading";
+import { getDeadLetters } from "@/server/integration-data";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -9,15 +10,7 @@ export const metadata = {
 };
 
 async function DeadLettersContent() {
-  // Future: fetch dead letters from store
-  const deadLetters: Array<{
-    id: string;
-    eventType: string;
-    errorMessage: string;
-    totalAttempts: number;
-    replayed: boolean;
-    createdAt: string;
-  }> = [];
+  const deadLetters = await getDeadLetters();
 
   return (
     <div className="space-y-6">

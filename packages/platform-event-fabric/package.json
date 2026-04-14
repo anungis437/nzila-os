@@ -10,7 +10,8 @@
     "./types": "./src/types.ts",
     "./bus": "./src/bus.ts",
     "./schema": "./src/schema.ts",
-    "./registry": "./src/registry.ts"
+    "./registry": "./src/registry.ts",
+    "./analytics-bridge": "./src/analytics-bridge.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -20,44 +20,13 @@ import {
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
-import {
-  generateIntegrationsProofSection as _generateIntegrationsProofSection,
-} from '@nzila/platform-proof/integrations'
+import { getSloResults, type SloSummary } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-type ComplianceStatus = 'compliant' | 'breached' | 'no_data'
-
-interface SloSummary {
-  provider: string
-  displayName: string
-  availability: number
-  availabilityTarget: number
-  p95LatencyMs: number
-  p95LatencyTarget: number
-  errorRate: number
-  sentCount: number
-  failureCount: number
-  availabilityMet: boolean
-  latencyMet: boolean
-  compliant: boolean
-  status: ComplianceStatus
-}
-
-// ── Static seed data (replaced by SloComputer at runtime) ───────────────────
-
-const sloResults: SloSummary[] = [
-  { provider: 'resend', displayName: 'Resend', availability: 0.998, availabilityTarget: 0.99, p95LatencyMs: 120, p95LatencyTarget: 5000, errorRate: 0.002, sentCount: 14200, failureCount: 28, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'sendgrid', displayName: 'SendGrid', availability: 0.995, availabilityTarget: 0.99, p95LatencyMs: 180, p95LatencyTarget: 5000, errorRate: 0.005, sentCount: 8500, failureCount: 42, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'mailgun', displayName: 'Mailgun', availability: 0.997, availabilityTarget: 0.99, p95LatencyMs: 150, p95LatencyTarget: 5000, errorRate: 0.003, sentCount: 6200, failureCount: 18, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'twilio', displayName: 'Twilio', availability: 0.999, availabilityTarget: 0.99, p95LatencyMs: 80, p95LatencyTarget: 5000, errorRate: 0.001, sentCount: 3100, failureCount: 3, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'firebase', displayName: 'Firebase', availability: 0.996, availabilityTarget: 0.99, p95LatencyMs: 200, p95LatencyTarget: 5000, errorRate: 0.004, sentCount: 22000, failureCount: 88, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'slack', displayName: 'Slack', availability: 0.993, availabilityTarget: 0.99, p95LatencyMs: 250, p95LatencyTarget: 5000, errorRate: 0.007, sentCount: 4800, failureCount: 33, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'teams', displayName: 'Microsoft Teams', availability: 0.991, availabilityTarget: 0.99, p95LatencyMs: 300, p95LatencyTarget: 5000, errorRate: 0.009, sentCount: 1500, failureCount: 13, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-  { provider: 'hubspot', displayName: 'HubSpot', availability: 0.988, availabilityTarget: 0.99, p95LatencyMs: 400, p95LatencyTarget: 5000, errorRate: 0.012, sentCount: 9400, failureCount: 112, availabilityMet: false, latencyMet: true, compliant: false, status: 'breached' },
-]
+type ComplianceStatus = SloSummary['status']
 
 // ── Components ──────────────────────────────────────────────────────────────
 
@@ -136,7 +105,8 @@ function SummaryCard({ icon, title, value, subtext, variant }: {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function IntegrationsSlaPage() {
+export default async function IntegrationsSlaPage() {
+  const sloResults = await getSloResults()
   const compliant = sloResults.filter((r) => r.compliant).length
   const breached = sloResults.filter((r) => !r.compliant).length
   const overallCompliance = compliant / sloResults.length

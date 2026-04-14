@@ -6,8 +6,11 @@ import { GovernanceSummaryCard } from "@/components/overview/governance-summary-
 import { IntelligenceSummaryCard } from "@/components/overview/intelligence-summary-card";
 import { ModuleStatusCard } from "@/components/overview/module-status-card";
 import { ProcurementSummaryCard } from "@/components/overview/procurement-summary-card";
+import { UnitEconomicsCard } from "@/components/overview/unit-economics-card";
+import { ESGScoreCard } from "@/components/overview/esg-score-card";
 import { SummaryCard } from "@/components/ui/summary-card";
 import { AlertTriangle } from "lucide-react";
+import type { Anomaly } from "@nzila/platform-anomaly-engine/types";
 import {
   getOverviewSummary,
   getGovernanceStatusData,
@@ -17,6 +20,10 @@ import {
   getAnomalies,
   getProcurementSummary,
 } from "@/server/data";
+import {
+  getUnitEconomics,
+  getESGScorecard,
+} from "@/server/metrics-data";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +33,7 @@ export const metadata = {
 };
 
 async function OverviewContent() {
-  const [overview, governance, insights, signals, modules, anomalies, procurement] =
+  const [overview, governance, insights, signals, modules, anomalies, procurement, economics, esg] =
     await Promise.all([
       getOverviewSummary(),
       getGovernanceStatusData(),
@@ -35,6 +42,8 @@ async function OverviewContent() {
       getModules(),
       getAnomalies(),
       getProcurementSummary(),
+      getUnitEconomics(),
+      getESGScorecard(),
     ]);
 
   return (
@@ -54,10 +63,12 @@ async function OverviewContent() {
           title="Active Anomalies"
           icon={<AlertTriangle className="h-5 w-5" />}
           value={anomalies.length}
-          subtitle={`${anomalies.filter((a) => a.severity === "high" || a.severity === "critical").length} high/critical severity`}
+          subtitle={`${anomalies.filter((a: Anomaly) => a.severity === "high" || a.severity === "critical").length} high/critical severity`}
         />
         <ModuleStatusCard modules={modules} />
         <ProcurementSummaryCard procurement={procurement} />
+        <UnitEconomicsCard economics={economics} />
+        <ESGScoreCard scorecard={esg} />
       </div>
 
       {/* Recent anomalies preview */}
@@ -67,7 +78,7 @@ async function OverviewContent() {
             Recent Anomalies
           </h2>
           <div className="space-y-3">
-            {anomalies.slice(0, 3).map((anomaly) => (
+            {anomalies.slice(0, 3).map((anomaly: Anomaly) => (
               <div
                 key={anomaly.id}
                 className="rounded-lg border border-border bg-card p-4 flex items-start gap-4"

@@ -1,67 +1,111 @@
 import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { CardSkeleton } from "@/components/ui/loading";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Cable, Play, AlertTriangle, Plug } from "lucide-react";
+import { SummaryCard } from "@/components/ui/summary-card";
+import {
+  getIntegrationSummary,
+  getRegisteredConnectors,
+} from "@/server/integration-data";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Integration Fabric",
+  title: "Integration Fabric — Nzila OS Control Plane",
   description: "Manage external integrations, connections, deliveries, and identity links.",
 };
 
 async function IntegrationOverviewContent() {
-  // Future: fetch from @/server/data when stores are wired
-  const connections = { total: 0, active: 0, error: 0 };
-  const runs = { total: 0, completed: 0, failed: 0 };
-  const deadLetters = { total: 0, unresolved: 0 };
+  const [summary, connectors] = await Promise.all([
+    getIntegrationSummary(),
+    getRegisteredConnectors(),
+  ]);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Integration Fabric"
-        description="External system connections, event subscriptions, and delivery monitoring."
-      />
-
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           title="Connections"
-          total={connections.total}
-          detail={`${connections.active} active · ${connections.error} errors`}
+          icon={<Cable className="h-5 w-5" />}
+          value={summary.connections.total}
+          subtitle={`${summary.connections.active} active · ${summary.connections.error} errors`}
         />
         <SummaryCard
           title="Integration Runs"
-          total={runs.total}
-          detail={`${runs.completed} completed · ${runs.failed} failed`}
+          icon={<Play className="h-5 w-5" />}
+          value={summary.runs.total}
+          subtitle={`${summary.runs.completed} completed · ${summary.runs.failed} failed`}
         />
         <SummaryCard
           title="Dead Letters"
-          total={deadLetters.total}
-          detail={`${deadLetters.unresolved} unresolved`}
+          icon={<AlertTriangle className="h-5 w-5" />}
+          value={summary.deadLetters.total}
+          subtitle={`${summary.deadLetters.unresolved} unresolved`}
+        />
+        <SummaryCard
+          title="Registered Connectors"
+          icon={<Plug className="h-5 w-5" />}
+          value={summary.registeredConnectors}
+          subtitle={`${connectors.length} connector types`}
         />
       </div>
 
-      {/* Placeholder for tables */}
-      <div className="rounded-md border p-6 text-center text-muted-foreground">
-        <p>Connection list, recent runs, and delivery logs will appear here once data stores are connected.</p>
+      {/* Connector table */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          Connector Registry
+        </h2>
+        <div className="rounded-lg border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/40">
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Name</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Version</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Capabilities</th>
+              </tr>
+            </thead>
+            <tbody>
+              {connectors.map((c) => (
+                <tr key={c.type} className="border-b last:border-0">
+                  <td className="px-4 py-3 font-medium text-foreground">{c.name}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status="healthy" label={c.type} />
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.version}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {c.capabilities.map((cap) => (
+                        <span
+                          key={cap}
+                          className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        >
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function SummaryCard({ title, total, detail }: { title: string; total: number; detail: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-4 shadow-sm">
-      <p className="text-sm font-medium text-muted-foreground">{title}</p>
-      <p className="mt-1 text-2xl font-bold">{total}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
     </div>
   );
 }
 
 export default function IntegrationsPage() {
   return (
-    <Suspense fallback={<CardSkeleton />}>
-      <IntegrationOverviewContent />
-    </Suspense>
+    <>
+      <PageHeader
+        title="Integration Fabric"
+        description="External system connections, event subscriptions, and delivery monitoring."
+      />
+      <Suspense fallback={<CardSkeleton count={4} />}>
+        <IntegrationOverviewContent />
+      </Suspense>
+    </>
   );
 }

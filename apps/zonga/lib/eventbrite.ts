@@ -89,25 +89,33 @@ export class EventbriteClient {
       }
     }
 
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${this.token}` },
-      next: { revalidate: 0 }, // no cache — always fresh
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => '')
-      logger.error('Eventbrite API error', {
-        status: res.status,
-        path,
-        body: body.slice(0, 500),
+    try {
+      const res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${this.token}` },
+        signal: controller.signal,
+        next: { revalidate: 0 }, // no cache — always fresh
       })
-      throw new EventbriteApiError(
-        `Eventbrite API ${res.status}: ${res.statusText}`,
-        res.status,
-      )
-    }
 
-    return res.json() as Promise<T>
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        logger.error('Eventbrite API error', {
+          status: res.status,
+          path,
+          body: body.slice(0, 500),
+        })
+        throw new EventbriteApiError(
+          `Eventbrite API ${res.status}: ${res.statusText}`,
+          res.status,
+        )
+      }
+
+      return res.json() as Promise<T>
+    } finally {
+      clearTimeout(timeout)
+    }
   }
 
   /* ── Organizations ── */

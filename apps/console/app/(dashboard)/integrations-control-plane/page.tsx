@@ -10,8 +10,7 @@
  * @see @nzila/platform-integrations-control-plane
  */
 import { requireRole } from '@/lib/rbac'
-import type { ProviderHealth as _ProviderHealth } from '@nzila/platform-integrations-control-plane'
-import type { PlatformEvent as _PlatformEvent } from '@nzila/platform-events'
+import { getIntegrationProviders, type IntegrationProviderRow } from '@/lib/server-data'
 import {
   PuzzlePieceIcon,
   ShieldCheckIcon,
@@ -24,27 +23,7 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-// ── Placeholder data (replace with real ports/adapters) ────────────────────
-
-interface ProviderRow {
-  providerId: string
-  orgId: string
-  status: 'healthy' | 'degraded' | 'down'
-  lastCheckedAt: string
-  webhookVerified: boolean
-  rateLimitUsage: number
-  dlqDepth: number
-}
-
-function loadProviders(): ProviderRow[] {
-  return [
-    { providerId: 'stripe', orgId: 'org_acme', status: 'healthy', lastCheckedAt: '2026-03-04T12:00:00Z', webhookVerified: true, rateLimitUsage: 0.34, dlqDepth: 0 },
-    { providerId: 'hubspot', orgId: 'org_acme', status: 'degraded', lastCheckedAt: '2026-03-04T11:55:00Z', webhookVerified: true, rateLimitUsage: 0.72, dlqDepth: 3 },
-    { providerId: 'qbo', orgId: 'org_acme', status: 'healthy', lastCheckedAt: '2026-03-04T12:01:00Z', webhookVerified: true, rateLimitUsage: 0.18, dlqDepth: 0 },
-    { providerId: 'xero', orgId: 'org_beta', status: 'down', lastCheckedAt: '2026-03-04T10:30:00Z', webhookVerified: false, rateLimitUsage: 0.0, dlqDepth: 12 },
-    { providerId: 'stripe', orgId: 'org_beta', status: 'healthy', lastCheckedAt: '2026-03-04T12:02:00Z', webhookVerified: true, rateLimitUsage: 0.45, dlqDepth: 0 },
-  ]
-}
+type ProviderRow = IntegrationProviderRow
 
 // ── UI helpers ─────────────────────────────────────────────────────────────
 
@@ -73,7 +52,7 @@ function MetricCard({ title, value, icon: Icon, accent }: { title: string; value
 export default async function IntegrationsControlPlanePage() {
   await requireRole('platform_admin', 'studio_admin', 'ops')
 
-  const providers = loadProviders()
+  const providers = await getIntegrationProviders()
   const healthyCount = providers.filter((p) => p.status === 'healthy').length
   const degradedCount = providers.filter((p) => p.status === 'degraded').length
   const downCount = providers.filter((p) => p.status === 'down').length

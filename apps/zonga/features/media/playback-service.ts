@@ -14,9 +14,33 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { generateSasUrl } from '@nzila/blob'
 import { logger } from '@/lib/logger'
+import { cloudFrontBreaker, resilientAwsCall } from './resilience'
 import type { QualityTier, PlaybackSource } from './types'
 import { PROCESSING_PROFILES } from './types'
 import { getBestMediaVariant } from './media-job-service'
+
+// ── Quality tier ordering for entitlement enforcement ────────────────────────
+
+const QUALITY_RANK: Record<QualityTier, number> = {
+  preview: 0,
+  free: 1,
+  standard: 2,
+  high: 3,
+  premium: 4,
+  hifi: 5,
+}
+
+/**
+ * Clamp a requested quality tier to the maximum allowed by entitlement.
+ * Defense-in-depth: even if the caller passes a higher-than-allowed quality,
+ * the service enforces the ceiling.
+ */
+function clampQuality(requested: QualityTier, maxAllowed?: QualityTier): QualityTier {
+  if (!maxAllowed) return requested
+  return (QUALITY_RANK[requested] ?? 0) <= (QUALITY_RANK[maxAllowed] ?? 0)
+    ? requested
+    : maxAllowed
+}
 
 export interface PlaybackUrlResult {
   ok: boolean
@@ -32,25 +56,36 @@ export interface PlaybackUrlResult {
 /**
  * Get the best available streaming URL for a content asset.
  * Prefers CloudFront-backed variants, falls back through blob then raw.
+ *
+ * @param contentAssetId — The content asset to stream.
+ * @param preferredQuality — Desired quality tier (may be clamped by entitlement).
+ * @param maxQualityTier — Optional quality ceiling from subscription entitlement.
+ *   Defense-in-depth: the service enforces this ceiling even if the API route
+ *   already performed entitlement gating. Pass undefined to skip enforcement.
  */
 export async function getPlaybackUrl(
   contentAssetId: string,
   preferredQuality: QualityTier = 'high',
+  maxQualityTier?: QualityTier,
 ): Promise<PlaybackUrlResult> {
+  // Defense-in-depth: clamp to entitlement ceiling
+  const effectiveQuality = clampQuality(preferredQuality, maxQualityTier)
   // ── Priority 1: CloudFront-backed media variant (AWS path) ──
   try {
-    const awsVariant = await getBestMediaVariant(contentAssetId, preferredQuality)
+    const awsVariant = await getBestMediaVariant(contentAssetId, effectiveQuality)
     if (awsVariant) {
       const { createSignedPlaybackUrl } = await import('@nzila/zonga-streaming-aws/cloudfront-delivery')
       const { resolveCloudFrontConfig } = await import('@nzila/zonga-streaming-aws')
 
-      const signed = await createSignedPlaybackUrl(resolveCloudFrontConfig(), {
-        storageKey: awsVariant.storageKey,
-        qualityTier: awsVariant.qualityTier as QualityTier,
-        orgId: '',
-        assetId: contentAssetId,
-        ttlSec: 14400,
-      })
+      const signed = await resilientAwsCall(cloudFrontBreaker, async () =>
+        createSignedPlaybackUrl(resolveCloudFrontConfig(), {
+          storageKey: awsVariant.storageKey,
+          qualityTier: awsVariant.qualityTier as QualityTier,
+          orgId: '',
+          assetId: contentAssetId,
+          ttlSec: 14400,
+        }),
+      )
 
       return {
         ok: true,
@@ -68,7 +103,7 @@ export async function getPlaybackUrl(
   }
 
   // ── Priority 2: Blob-backed processed variant (legacy path) ──
-  const tiers: QualityTier[] = [preferredQuality, 'high', 'standard', 'preview']
+  const tiers: QualityTier[] = [effectiveQuality, 'high', 'standard', 'preview']
   const uniqueTiers = [...new Set(tiers)]
 
   for (const tier of uniqueTiers) {
@@ -132,7 +167,7 @@ export async function getPlaybackUrl(
 
   return {
     ok: false,
-    qualityTier: preferredQuality,
+    qualityTier: effectiveQuality,
     bitrate: 0,
     codec: 'unknown',
     error: 'No playable audio available for this track',

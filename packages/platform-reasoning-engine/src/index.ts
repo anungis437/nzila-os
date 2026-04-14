@@ -1,7 +1,8 @@
 /**
  * @nzila/platform-reasoning-engine
  *
- * Cross-vertical reasoning engine with citations and explainability.
+ * Cross-vertical reasoning engine with citations, explainability,
+ * and built-in strategies: deductive, causal, abductive, risk-based.
  */
 
 // Types & schemas
@@ -30,6 +31,15 @@ export {
   getReasoningHistory,
 } from './operations'
 export type { ExecuteReasoningOptions } from './operations'
+
+// Built-in strategies
+export {
+  createDeductiveStrategy,
+  createCausalStrategy,
+  createAbductiveStrategy,
+  createRiskBasedStrategy,
+  selectStrategy,
+} from './strategies'
 
 // In-memory store
 export { createInMemoryReasoningStore } from './memory-store'

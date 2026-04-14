@@ -15,6 +15,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { ivsBreaker, resilientAwsCall } from './resilience'
 import type { LiveStreamStatus, StreamEventType } from '@nzila/zonga-streaming-aws'
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -77,13 +78,16 @@ export async function createLiveStream(
 
   const config = resolveIvsConfig()
 
-  // Provision IVS channel
-  const channel = await createLiveChannel(config, {
-    eventId: input.eventId,
-    creatorId: input.creatorId,
-    orgId: input.orgId,
-    name: `event-${input.eventId}`,
-  })
+  // Provision IVS channel (circuit-breaker protected)
+  const channel = await resilientAwsCall(ivsBreaker, () =>
+    createLiveChannel(config, {
+      eventId: input.eventId,
+      creatorId: input.creatorId,
+      orgId: input.orgId,
+      name: `event-${input.eventId}`,
+    }),
+    { timeoutMs: 15_000 },
+  )
 
   // Persist live stream record
   const rows = await platformDb.execute(sql`
@@ -230,7 +234,9 @@ export async function endLiveStream(
     try {
       const { stopLiveStream: stopIvs } = await import('@nzila/zonga-streaming-aws/ivs-live')
       const { resolveIvsConfig } = await import('@nzila/zonga-streaming-aws')
-      await stopIvs(resolveIvsConfig(), stream.providerChannelId)
+      await resilientAwsCall(ivsBreaker, () =>
+        stopIvs(resolveIvsConfig(), stream.providerChannelId!),
+      )
     } catch (err) {
       logger.warn('Failed to stop IVS stream', { err, streamId })
     }
@@ -344,8 +350,10 @@ export async function rotateCreatorCredentials(
   `)
   const oldRef = (oldCredRows as unknown as Array<{ credential_ref: string }>)[0]?.credential_ref
 
-  // Rotate on AWS
-  const newKey = await rotateStreamKey(resolveIvsConfig(), stream.providerChannelId, oldRef)
+  // Rotate on AWS (circuit-breaker protected)
+  const newKey = await resilientAwsCall(ivsBreaker, () =>
+    rotateStreamKey(resolveIvsConfig(), stream.providerChannelId!, oldRef),
+  )
 
   // Mark old credentials inactive
   await platformDb.execute(sql`

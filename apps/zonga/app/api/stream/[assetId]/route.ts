@@ -63,7 +63,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         lossless: 'hifi',
       }
       const gatedQuality = qualityMap[bestQuality] ?? 'standard'
-      const playback = await getPlaybackUrl(assetId, gatedQuality)
+      const playback = await getPlaybackUrl(assetId, gatedQuality, gatedQuality)
 
       if (playback.ok && playback.streamUrl) {
         // Create a playback session for tracking

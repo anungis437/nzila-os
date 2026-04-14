@@ -11,7 +11,7 @@ import { requireRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { automationCommands, zongaOutbox, nacpOutbox } from '@nzila/db/schema'
 import { count, eq, sql, or } from 'drizzle-orm'
-import { getOutboxBacklogs, getWorkerMetrics, type OutboxBacklog as _OutboxBacklog, type WorkerMetrics as _WorkerMetrics } from '@nzila/platform-ops'
+import { getOutboxBacklogs, getWorkerMetrics } from '@nzila/platform-ops'
 import {
   ServerIcon,
   QueueListIcon,

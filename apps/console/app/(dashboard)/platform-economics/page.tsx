@@ -18,7 +18,7 @@ import {
   commerceQuotes,
   automationCommands,
 } from '@nzila/db/schema'
-import { count, sql, eq as _eq, and as _and, gte } from 'drizzle-orm'
+import { count, sql, gte } from 'drizzle-orm'
 import {
   CurrencyDollarIcon,
   BuildingOffice2Icon,

@@ -6,7 +6,7 @@
  * Shows egress allowlist enforcement status for sovereign profiles.
  * Role-restricted. No deployment secrets exposed.
  */
-import { requireRole, getUserRole as _getUserRole } from '@/lib/rbac'
+import { requireRole } from '@/lib/rbac'
 import {
   CloudIcon,
   ServerIcon,

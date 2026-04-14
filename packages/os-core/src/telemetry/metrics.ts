@@ -128,6 +128,53 @@ export const SLO_DEFINITIONS: SloDefinition[] = [
     description: 'QBO sync operations succeed 99% of the time',
     alertThreshold: 2,
   },
+
+  // ── Zonga ──────────────────────────────────────────────────────────
+  {
+    service: 'zonga',
+    name: 'api-availability',
+    target: 99.9,
+    metric: 'http_requests_success_rate',
+    windowHours: 720,
+    description: 'Zonga API returns 2xx/3xx for 99.9% of requests',
+    alertThreshold: 0.5,
+  },
+  {
+    service: 'zonga',
+    name: 'api-latency-p99',
+    target: 95,
+    metric: 'http_request_duration_p99_under_2s',
+    windowHours: 168,
+    description: '95% of Zonga API requests complete under 2s at p99',
+    alertThreshold: 2,
+  },
+  {
+    service: 'zonga',
+    name: 'playback-url-success',
+    target: 99.5,
+    metric: 'playback_url_success_rate',
+    windowHours: 720,
+    description: 'Playback URL generation succeeds 99.5% of the time',
+    alertThreshold: 1,
+  },
+  {
+    service: 'zonga',
+    name: 'transcode-success',
+    target: 98.0,
+    metric: 'transcode_job_success_rate',
+    windowHours: 720,
+    description: 'MediaConvert transcode jobs complete successfully 98% of the time',
+    alertThreshold: 3,
+  },
+  {
+    service: 'zonga',
+    name: 'live-stream-availability',
+    target: 99.0,
+    metric: 'live_stream_create_success_rate',
+    windowHours: 720,
+    description: 'IVS live stream provisioning succeeds 99% of the time',
+    alertThreshold: 2,
+  },
 ]
 
 // ── Metrics Registry ──────────────────────────────────────────────────────
@@ -310,4 +357,68 @@ export const metrics = new MetricsRegistry()
 export function initMetrics(appName: string): MetricsRegistry {
   metrics.init(appName)
   return metrics
+}
+
+// ── Normalized Error Rates ──────────────────────────────────────────────
+
+export interface NormalizedErrorRate {
+  service: string
+  metric: string
+  totalRequests: number
+  errorCount: number
+  errorRate: number
+  sloTarget: number
+  withinSlo: boolean
+}
+
+/**
+ * Compute normalized error rates for all services using RED metrics.
+ *
+ * Normalizes raw counters from the metrics registry against SLO definitions.
+ * Returns a per-service error rate expressed as a percentage, with
+ * SLO compliance status.
+ *
+ * This is the canonical function for cross-service error comparison —
+ * all apps' error rates are expressed on the same 0-100 scale.
+ */
+export function computeNormalizedErrorRates(
+  registry: MetricsRegistry = metrics,
+): NormalizedErrorRate[] {
+  const snapshot = registry.getSnapshot()
+  const results: NormalizedErrorRate[] = []
+
+  // Group counters by service name
+  const totalByService = new Map<string, number>()
+  const errorsByService = new Map<string, number>()
+
+  for (const counter of snapshot.counters) {
+    const app = counter.labels['app'] ?? 'unknown'
+
+    if (counter.name === 'http_requests_total') {
+      totalByService.set(app, (totalByService.get(app) ?? 0) + counter.value)
+    }
+    if (counter.name === 'http_errors_total') {
+      errorsByService.set(app, (errorsByService.get(app) ?? 0) + counter.value)
+    }
+  }
+
+  // Match against SLO definitions for availability metrics
+  for (const slo of SLO_DEFINITIONS.filter((s) => s.metric === 'http_requests_success_rate')) {
+    const total = totalByService.get(slo.service) ?? 0
+    const errors = errorsByService.get(slo.service) ?? 0
+    const errorRate = total > 0 ? (errors / total) * 100 : 0
+    const successRate = 100 - errorRate
+
+    results.push({
+      service: slo.service,
+      metric: slo.name,
+      totalRequests: total,
+      errorCount: errors,
+      errorRate: Math.round(errorRate * 1000) / 1000,
+      sloTarget: slo.target,
+      withinSlo: successRate >= slo.target,
+    })
+  }
+
+  return results
 }

@@ -159,6 +159,16 @@ export async function uploadCover(
       return { ok: false, error: 'Missing creatorId or assetId' }
     }
 
+    // Validate cover art size (max 10 MB) and content type before loading into memory
+    const COVER_MAX_BYTES = 10 * 1024 * 1024
+    if (file.size > COVER_MAX_BYTES) {
+      return { ok: false, error: `Cover art too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum is 10 MB.` }
+    }
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return { ok: false, error: `Invalid image type: ${file.type}. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}` }
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const result = await uploadCoverArt({
@@ -235,10 +245,29 @@ export async function bulkUploadAudio(
     return { ok: false, uploaded: [], failed: [], error: 'No files provided' }
   }
 
+  // Limit batch size to prevent memory exhaustion
+  const MAX_BULK_FILES = 50
+  if (files.length > MAX_BULK_FILES) {
+    return { ok: false, uploaded: [], failed: [], error: `Too many files (${files.length}). Maximum is ${MAX_BULK_FILES} per batch.` }
+  }
+
+  const AUDIO_MAX_BYTES = 500_000_000 // 500 MB per file
+  const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/wav', 'audio/flac', 'audio/ogg', 'audio/webm']
+
   const uploaded: BulkUploadResult['uploaded'] = []
   const failed: BulkUploadResult['failed'] = []
 
   for (const file of files) {
+    // Validate per-file size and content type before loading into memory
+    if (file.size > AUDIO_MAX_BYTES) {
+      failed.push({ fileName: file.name, error: `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB). Maximum is 500 MB.` })
+      continue
+    }
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
+      failed.push({ fileName: file.name, error: `Invalid audio type: ${file.type}` })
+      continue
+    }
+
     try {
       const assetId = crypto.randomUUID()
 

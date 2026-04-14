@@ -7,3 +7,8 @@ export { healthAdapter } from './health-adapter'
 export { metricsAdapter } from './metrics-adapter'
 export { governanceAdapter } from './governance-adapter'
 export { evidenceAdapter } from './evidence-adapter'
+export {
+  getPlatformRevenueSnapshot,
+  getRevenueEvents,
+  buildRevenueAuditEntries,
+} from './revenue-adapter'

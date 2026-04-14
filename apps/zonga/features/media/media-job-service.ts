@@ -10,6 +10,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { mediaConvertBreaker, resilientAwsCall } from './resilience'
 import type { MediaJobStatus, MediaJobType, QualityTier } from '@nzila/zonga-streaming-aws'
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -65,17 +66,20 @@ export async function submitMediaConvertJob(params: {
   const mcConfig = resolveMediaConvertConfig()
   const s3Config = resolveS3Config()
 
-  const result = await submitTranscodeJob(mcConfig, {
-    inputBucket: s3Config.rawBucket,
-    inputStorageKey: inputStorageKey,
-    assetId: contentAssetId,
-    orgId,
-    jobType,
-    qualities: [
-      { label: 'standard', bitrate: 128, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
-      { label: 'high', bitrate: 256, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
-    ],
-  })
+  const result = await resilientAwsCall(mediaConvertBreaker, () =>
+    submitTranscodeJob(mcConfig, {
+      inputBucket: s3Config.rawBucket,
+      inputStorageKey: inputStorageKey,
+      assetId: contentAssetId,
+      orgId,
+      jobType,
+      qualities: [
+        { label: 'standard', bitrate: 128, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+        { label: 'high', bitrate: 256, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+      ],
+    }),
+    { timeoutMs: 15_000 },
+  )
 
   const rows = await platformDb.execute(sql`
     INSERT INTO zonga_media_jobs (
@@ -112,7 +116,9 @@ export async function reconcileMediaJob(jobId: string): Promise<MediaJob> {
   const { getTranscodeJobStatus } = await import('@nzila/zonga-streaming-aws/mediaconvert')
   const { resolveMediaConvertConfig } = await import('@nzila/zonga-streaming-aws')
 
-  const status = await getTranscodeJobStatus(resolveMediaConvertConfig(), job.providerJobId)
+  const status = await resilientAwsCall(mediaConvertBreaker, () =>
+    getTranscodeJobStatus(resolveMediaConvertConfig(), job.providerJobId!),
+  )
 
   // Update job status
   await platformDb.execute(sql`

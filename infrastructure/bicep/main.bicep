@@ -138,6 +138,17 @@ module database 'modules/postgres.bicep' = if (dbAdminPassword != '') {
   }
 }
 
+// ── Azure Monitor Alerts (operational health) ────────────────────────────
+module alerts 'modules/alerts.bicep' = {
+  name: 'alerts-${env}'
+  params: {
+    location: location
+    logAnalyticsWorkspaceId: sentinel.outputs.workspaceId
+    env: env
+    alertEmails: env == 'prod' ? ['ops@nzila.io'] : []
+  }
+}
+
 // ── Secondary Region (Multi-Region Active-Active) ────────────────────────
 // Deploy a mirror container environment in the secondary region for global reach.
 // Traffic routing handled by Front Door origin groups (see waf.bicep).
@@ -167,3 +178,4 @@ output dbServerFqdn string = database.?outputs.?serverFqdn ?? ''
 output dbConnectionPort int = database.?outputs.?connectionPort ?? 5432
 output dbReplicaFqdns array = database.?outputs.?replicaFqdns ?? []
 output secondaryContainerEnvId string = containerAppsSecondary.?outputs.?environmentId ?? ''
+output alertActionGroupId string = alerts.outputs.actionGroupId

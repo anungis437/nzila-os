@@ -19,6 +19,8 @@
     "./actions/execute": "./src/actions/executeAction.ts",
     "./actions/attestation": "./src/actions/attestation.ts",
     "./actions/evidence-pack": "./src/actions/evidencePack.ts",
+    "./evaluation": "./src/evaluation.ts",
+    "./control-adapter": "./src/control-adapter.ts",
     "./tools/knowledge": "./src/tools/knowledgeTool.ts",
     "./tools/stripe": "./src/tools/stripeTool.ts"
   },
@@ -29,6 +31,7 @@
   },
   "dependencies": {
     "@nzila/blob": "workspace:*",
+    "@nzila/ai-control": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",

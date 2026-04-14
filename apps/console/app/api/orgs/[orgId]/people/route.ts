@@ -7,7 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
-import { authenticateUser as _authenticateUser, requireOrgAccess } from '@/lib/api-guards'
+import { requireOrgAccess } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'

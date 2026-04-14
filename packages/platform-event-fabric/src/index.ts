@@ -44,3 +44,19 @@ export { createInstrumentedEventBus } from './instrumented-bus'
 
 // Schema (Drizzle)
 export { platformEvents, eventSubscriptions } from './schema'
+
+// Analytics bridge
+export {
+  createAnalyticsBridge,
+  createConsoleAnalyticsAdapter,
+  createInMemoryAnalyticsAdapter,
+  stripPII,
+  defaultEventMapper,
+} from './analytics-bridge'
+export type {
+  AnalyticsAdapter,
+  AnalyticsEvent,
+  AnalyticsBridgeConfig,
+  EventMapper,
+  InMemoryAnalyticsStore,
+} from './analytics-bridge'

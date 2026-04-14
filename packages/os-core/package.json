@@ -33,6 +33,8 @@
     "./secrets": "./src/secrets/keyvault.ts",
     "./rateLimit": "./src/rateLimit.ts",
     "./rateLimit/store": "./src/rateLimit/store.ts",
+    "./rateLimit/distributed": "./src/rateLimit/distributed.ts",
+    "./rateLimit/upstash-store": "./src/rateLimit/upstash-store.ts",
     "./orgRateLimit": "./src/orgRateLimit.ts",
     "./mtls": "./src/mtls/index.ts",
     "./idempotency": "./src/idempotency.ts",

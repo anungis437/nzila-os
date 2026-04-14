@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { CardSkeleton, TableSkeleton } from "@/components/ui/loading";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Brain, Zap, AlertCircle as _AlertCircle } from "lucide-react";
+import { Brain, Zap } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { getInsights, getSignals } from "@/server/data";
 import { IntelligenceQueryBox } from "@/components/intelligence/query-box";

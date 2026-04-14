@@ -125,6 +125,47 @@ export interface IntelligenceCapability {
   readonly version: string
 }
 
+// ── Adaptive Routing & Correlation ─────────────────────────────────────────
+
+export interface CapabilityRouteDecision {
+  readonly selected?: IntelligenceCapability
+  readonly alternatives: readonly IntelligenceCapability[]
+  readonly reason: string
+}
+
+export interface DomainSignal {
+  readonly app: NilApp | string
+  readonly metric: string
+  readonly value: number
+  readonly timestamp: string
+  readonly sourceId?: string
+}
+
+export type CorrelationStrength =
+  | 'none'
+  | 'weak'
+  | 'moderate'
+  | 'strong'
+  | 'very_strong'
+
+export interface CrossDomainCorrelation {
+  readonly id: string
+  readonly left: {
+    readonly app: string
+    readonly metric: string
+  }
+  readonly right: {
+    readonly app: string
+    readonly metric: string
+  }
+  readonly coefficient: number
+  readonly strength: CorrelationStrength
+  readonly direction: 'positive' | 'negative'
+  readonly sampleSize: number
+  readonly overlapStart: string
+  readonly overlapEnd: string
+}
+
 // ── Error ───────────────────────────────────────────────────────────────────
 
 export type NilErrorCode =

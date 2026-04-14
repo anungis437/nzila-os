@@ -26,6 +26,10 @@ export type {
   ExplanationStep,
   ExplanationCitation,
   IntelligenceCapability,
+  CapabilityRouteDecision,
+  DomainSignal,
+  CrossDomainCorrelation,
+  CorrelationStrength,
   NilErrorCode,
 } from './types.js'
 
@@ -63,7 +67,28 @@ export {
   registerCapability,
   getCapability,
   resolveCapability,
+  resolveCapabilityAdaptive,
   listCapabilities,
   unregisterCapability,
   clearRegistry,
+  recordCapabilityExecution,
+  getCapabilityHealth,
+  listCapabilityHealth,
 } from './registry.js'
+
+export type {
+  CapabilityExecutionTelemetry,
+  CapabilityHealth,
+} from './registry.js'
+
+// ── Adaptive Routing ───────────────────────────────────────────────────────
+
+export { routeCapability } from './routing.js'
+
+// ── Cross-Domain Correlation ───────────────────────────────────────────────
+
+export {
+  pearsonCorrelation,
+  classifyCorrelationStrength,
+  detectCrossDomainCorrelations,
+} from './correlation.js'

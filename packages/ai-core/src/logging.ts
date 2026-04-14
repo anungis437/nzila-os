@@ -59,6 +59,7 @@ export interface LogAiRequestInput {
   createdBy: string | null
   dataClass: DataClass
   trace?: AiTrace
+  fallbackAttempts?: number
 }
 
 /**

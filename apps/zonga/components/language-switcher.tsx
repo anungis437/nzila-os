@@ -10,6 +10,7 @@ import { locales, localeLabels, type Locale } from '@/lib/locales'
  * Others fall back to en-CA automatically via i18n.ts try/catch.
  */
 const translatedLocales: Locale[] = ['en-CA', 'fr-CA', 'ln']
+const prioritizedAfricanLocales: Locale[] = ['sw', 'ha', 'ar']
 
 interface LanguageSwitcherProps {
   /** Current locale from the URL or default. */
@@ -47,7 +48,7 @@ export function LanguageSwitcher({
     return 'en-CA'
   })()
 
-  const available = showAll ? [...locales] : translatedLocales
+  const available = showAll ? [...locales] : [...translatedLocales, ...prioritizedAfricanLocales]
   const currentLabel =
     localeLabels[resolvedLocale as Locale] ??
     localeLabels['en-CA']

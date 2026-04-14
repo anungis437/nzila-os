@@ -39,6 +39,19 @@ export interface OCROptions {
   preprocessImage?: boolean;
 }
 
+async function importOptionalModule<T>(moduleName: string, timeoutMs = 1000): Promise<T> {
+  try {
+    return await Promise.race([
+      import(moduleName) as Promise<T>,
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Timed out importing optional module: ${moduleName}`)), timeoutMs);
+      }),
+    ]);
+  } catch {
+    throw new Error(`${moduleName} is not available`);
+  }
+}
+
 /**
  * Process image for OCR using Tesseract.js
  * This is the default provider and works client-side or server-side
@@ -127,7 +140,7 @@ async function processAWSTextractOCR(
 ): Promise<OCRResult> {
   // Check if AWS SDK is available
   try {
-    const { TextractClient, DetectDocumentTextCommand } = await import("@aws-sdk/client-textract");
+    const { TextractClient, DetectDocumentTextCommand } = await importOptionalModule<typeof import("@aws-sdk/client-textract")>("@aws-sdk/client-textract");
 
     const client = new TextractClient({
       region: process.env.AWS_REGION || "us-east-1",
@@ -172,8 +185,7 @@ async function processAWSTextractOCR(
       lines,
     };
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if (error instanceof Error && error.message.includes('@aws-sdk/client-textract is not available')) {
       throw new Error("AWS Textract SDK not installed. Run: npm install @aws-sdk/client-textract");
     }
     throw new Error(`AWS Textract OCR failed: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -188,7 +200,7 @@ async function processGoogleVisionOCR(
   imageBuffer: Buffer | string
 ): Promise<OCRResult> {
   try {
-    const vision = await import("@google-cloud/vision");
+    const vision = await importOptionalModule<typeof import("@google-cloud/vision")>("@google-cloud/vision");
     const client = new vision.ImageAnnotatorClient();
 
     const buffer = typeof imageBuffer === "string"
@@ -230,8 +242,7 @@ async function processGoogleVisionOCR(
       words,
     };
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if (error instanceof Error && error.message.includes('@google-cloud/vision is not available')) {
       throw new Error("Google Cloud Vision SDK not installed. Run: npm install @google-cloud/vision");
     }
     throw new Error(`Google Vision OCR failed: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -246,8 +257,8 @@ async function processAzureOCR(
   imageBuffer: Buffer | string
 ): Promise<OCRResult> {
   try {
-    const { ComputerVisionClient } = await import("@azure/cognitiveservices-computervision");
-    const { ApiKeyCredentials } = await import("@azure/ms-rest-js");
+    const { ComputerVisionClient } = await importOptionalModule<typeof import("@azure/cognitiveservices-computervision")>("@azure/cognitiveservices-computervision");
+    const { ApiKeyCredentials } = await importOptionalModule<typeof import("@azure/ms-rest-js")>("@azure/ms-rest-js");
 
     const key = process.env.AZURE_COMPUTER_VISION_KEY || "";
     const endpoint = process.env.AZURE_COMPUTER_VISION_ENDPOINT || "";
@@ -303,8 +314,13 @@ async function processAzureOCR(
       lines,
     };
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if (
+      error instanceof Error
+      && (
+        error.message.includes('@azure/cognitiveservices-computervision is not available')
+        || error.message.includes('@azure/ms-rest-js is not available')
+      )
+    ) {
       throw new Error("Azure Cognitive Services SDK not installed. Run: npm install @azure/cognitiveservices-computervision @azure/ms-rest-js");
     }
     throw new Error(`Azure OCR failed: ${error instanceof Error ? error.message : "Unknown error"}`);

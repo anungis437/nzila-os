@@ -87,6 +87,42 @@ export type Recommendation = z.infer<typeof RecommendationSchema>
 export type Alert = z.infer<typeof AlertSchema>
 export type Insight = z.infer<typeof InsightSchema>
 
+export const AssistIntentSchema = z.enum([
+  'harvest_timing',
+  'storage_risk',
+  'quality_pattern',
+  'market_opportunity',
+  'unknown',
+])
+
+export type AssistIntent = z.infer<typeof AssistIntentSchema>
+
+export interface AssistRequest {
+  orgId: string
+  query: string
+  batches?: {
+    id: string
+    crop_type: string
+    planted_at: string
+    expected_harvest_at?: string
+    status: string
+  }[]
+  collectionPoints?: {
+    id: string
+    name: string
+    capacity_kg: number
+    current_stock_kg: number
+  }[]
+}
+
+export interface AssistResponse {
+  intent: AssistIntent
+  confidence: number
+  recommendations: Recommendation[]
+  alerts: Alert[]
+  insights: Insight[]
+}
+
 // ── Engine ──────────────────────────────────────────────────────────────────
 
 function makeId(prefix: string): string {
@@ -266,4 +302,100 @@ export function checkStorageCapacity(collectionPoints: {
   }
 
   return alerts
+}
+
+const INTENT_KEYWORDS: Record<AssistIntent, string[]> = {
+  harvest_timing: ['harvest', 'ready', 'overdue', 'timing', 'crop'],
+  storage_risk: ['storage', 'capacity', 'stock', 'warehouse', 'overflow'],
+  quality_pattern: ['quality', 'pattern', 'defect', 'grade', 'consistency'],
+  market_opportunity: ['price', 'market', 'sell', 'opportunity', 'demand'],
+  unknown: [],
+}
+
+export function classifyAssistIntent(query: string): { intent: AssistIntent; confidence: number } {
+  const lower = query.toLowerCase()
+
+  let bestIntent: AssistIntent = 'unknown'
+  let bestScore = 0
+
+  for (const [intent, keywords] of Object.entries(INTENT_KEYWORDS) as Array<[AssistIntent, string[]]>) {
+    if (intent === 'unknown') continue
+    const hits = keywords.filter((keyword) => lower.includes(keyword)).length
+    const score = keywords.length > 0 ? hits / keywords.length : 0
+    if (score > bestScore) {
+      bestScore = score
+      bestIntent = intent
+    }
+  }
+
+  if (bestScore < 0.15) {
+    return { intent: 'unknown', confidence: 0.25 }
+  }
+
+  return { intent: bestIntent, confidence: Math.min(0.95, 0.45 + bestScore * 0.5) }
+}
+
+/**
+ * Intent-routed Agrimo assistant orchestration.
+ */
+export function runAssistEngine(request: AssistRequest): AssistResponse {
+  const classification = classifyAssistIntent(request.query)
+  const recommendations: Recommendation[] = []
+  const alerts: Alert[] = []
+  const insights: Insight[] = []
+
+  if (classification.intent === 'harvest_timing' && request.batches) {
+    recommendations.push(...analyseHarvestTiming(request.batches))
+  }
+
+  if (classification.intent === 'storage_risk' && request.collectionPoints) {
+    alerts.push(...checkStorageCapacity(request.collectionPoints))
+  }
+
+  if (classification.intent === 'quality_pattern') {
+    insights.push(
+      createInsight({
+        type: 'quality_pattern',
+        title: 'Quality pattern baseline prepared',
+        explanation: 'Quality pattern analysis requires grading observations and defect trends. Provide historical quality logs for full analysis.',
+        source_data_refs: [],
+        confidence_level: 'medium',
+        comparison_period: 'last_90_days',
+      }),
+    )
+  }
+
+  if (classification.intent === 'market_opportunity') {
+    recommendations.push(
+      createRecommendation({
+        type: 'price_timing',
+        title: 'Evaluate near-term market timing window',
+        explanation: 'Market opportunity intent detected. Combine price volatility, logistics readiness, and quality grade to optimise selling window.',
+        source_data_refs: [],
+        confidence_level: 'medium',
+        priority: 'medium',
+        suggested_action: 'Run price signal and inventory freshness checks before dispatch.',
+      }),
+    )
+  }
+
+  if (classification.intent === 'unknown') {
+    insights.push(
+      createInsight({
+        type: 'seasonal_pattern',
+        title: 'Clarify request for precise assistance',
+        explanation: 'The query could not be mapped to a known intent. Ask about harvest timing, storage risk, quality trends, or market opportunity.',
+        source_data_refs: [],
+        confidence_level: 'low',
+      }),
+    )
+  }
+
+  return {
+    intent: classification.intent,
+    confidence: classification.confidence,
+    recommendations,
+    alerts,
+    insights,
+  }
 }

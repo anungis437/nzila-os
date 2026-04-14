@@ -9,7 +9,6 @@
  */
 import { requireRole } from '@/lib/rbac'
 import {
-  generatePilotSummary as _generatePilotSummary,
   createDefaultPilotPorts,
   generatePilotPack,
   type PilotSummaryPack,

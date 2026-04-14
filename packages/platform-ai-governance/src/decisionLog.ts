@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { AIDecisionLogEntry } from './types'
-
-const decisionLog: AIDecisionLogEntry[] = []
+import { getGovernanceStore, persistGovernanceCollection } from './store'
 
 export function logAIDecision(params: {
   modelId: string
@@ -16,6 +15,7 @@ export function logAIDecision(params: {
   engineVersion?: string
   evidenceRefs?: string[]
 }): AIDecisionLogEntry {
+  const decisionLog = getGovernanceStore().getDecisionLog()
   // All AI outputs require human review — confidence threshold determines reviewStatus
   const threshold = params.confidenceThreshold ?? 0.7
   const requiresHumanReview = true
@@ -37,10 +37,12 @@ export function logAIDecision(params: {
     evidenceRefs: params.evidenceRefs,
   }
   decisionLog.push(entry)
+  persistGovernanceCollection('decisionLog')
   return entry
 }
 
 export function getDecisionsPendingReview(): AIDecisionLogEntry[] {
+  const decisionLog = getGovernanceStore().getDecisionLog()
   return decisionLog.filter(
     (d) => d.requiresHumanReview && d.reviewStatus === 'pending',
   )
@@ -50,11 +52,13 @@ export function reviewDecision(
   decisionId: string,
   params: { status: 'approved' | 'rejected'; reviewedBy: string },
 ): AIDecisionLogEntry | undefined {
+  const decisionLog = getGovernanceStore().getDecisionLog()
   const entry = decisionLog.find((d) => d.id === decisionId)
   if (entry) {
     entry.reviewStatus = params.status
     entry.reviewedBy = params.reviewedBy
     entry.reviewedAt = new Date().toISOString()
+    persistGovernanceCollection('decisionLog')
   }
   return entry
 }
@@ -63,6 +67,7 @@ export function getDecisionLog(filters?: {
   app?: string
   modelId?: string
 }): AIDecisionLogEntry[] {
+  const decisionLog = getGovernanceStore().getDecisionLog()
   let results = [...decisionLog]
   if (filters?.app) results = results.filter((d) => d.app === filters.app)
   if (filters?.modelId) results = results.filter((d) => d.modelId === filters.modelId)
@@ -70,5 +75,7 @@ export function getDecisionLog(filters?: {
 }
 
 export function clearDecisionLog(): void {
+  const decisionLog = getGovernanceStore().getDecisionLog()
   decisionLog.length = 0
+  persistGovernanceCollection('decisionLog')
 }

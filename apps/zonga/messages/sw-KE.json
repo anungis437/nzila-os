@@ -1,0 +1,57 @@
+{
+  "app": {
+    "tagline": "Muziki Bila Mipaka"
+  },
+  "dashboard": {
+    "title": "Dashibodi",
+    "welcome": "Karibu Zonga",
+    "description": "Dhibiti katalogi yako, fuatilia mapato, tazama malipo, na kukuza hadhira yako kwa urahisi."
+  },
+  "catalog": {
+    "title": "Katalogi",
+    "tracks": "Nyimbo",
+    "albums": "Albamu",
+    "podcasts": "Podikasti",
+    "videos": "Video za Muziki",
+    "upload": "Pakia Kazi",
+    "publish": "Chapisha",
+    "noAssets": "Hakuna kazi bado",
+    "noAssetsDescription": "Pakia wimbo wako wa kwanza kuanza."
+  },
+  "revenue": {
+    "title": "Mapato",
+    "totalRevenue": "Jumla ya Mapato",
+    "streamingRevenue": "Mapato ya Utiririshaji",
+    "downloadRevenue": "Mapato ya Upakuaji",
+    "netPayout": "Malipo Halisi"
+  },
+  "payouts": {
+    "title": "Malipo",
+    "description": "Mapato ya wasanii na historia ya malipo",
+    "pending": "Inasubiri",
+    "processing": "Inachakatwa",
+    "completed": "Imekamilika",
+    "failed": "Imeshindikana",
+    "requestPayout": "Omba Malipo",
+    "newPayout": "Malipo Mapya"
+  },
+  "marketing": {
+    "hero": {
+      "badge": "Muziki wa Afrika, Jukwaa la Dunia",
+      "title": "Muziki Bila",
+      "titleAccent": "Mipaka",
+      "description": "Sikiliza muziki bora wa Afrika. Wasanii wanapata 85% ya kila usikilizaji.",
+      "ctaListen": "Anza Kusikiliza",
+      "ctaDistribute": "Sambaza Muziki Wako"
+    }
+  },
+  "footer": {
+    "ctaTitle": "Uko tayari kushiriki muziki wako?",
+    "ctaDescription": "Jiunge na maelfu ya waumbaji wa Afrika kwenye Zonga.",
+    "ctaButton": "Anza Bure"
+  },
+  "signIn": {
+    "pageTitle": "Ingia | Zonga",
+    "tagline": "Muziki Wako, Mapato Yako"
+  }
+}
