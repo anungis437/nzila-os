@@ -39,7 +39,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^6",
     "vitest": "^4.1.2"
   }
