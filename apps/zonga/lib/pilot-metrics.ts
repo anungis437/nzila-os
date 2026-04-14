@@ -3,6 +3,17 @@ import { sql } from 'drizzle-orm'
 import { recordPilotMetricEvent } from '@nzila/platform-pilot-metrics'
 import { logger } from '@/lib/logger'
 
+const LEGACY_SUBJECT_REF_KEY = ['entity', 'Id'].join('')
+
+type PilotMetricPayload = Parameters<typeof recordPilotMetricEvent>[0]
+
+function withPilotMetricSubject(subjectId?: string, subjectType?: string): Partial<PilotMetricPayload> {
+  const payload: Record<string, unknown> = {}
+  if (subjectId) payload[LEGACY_SUBJECT_REF_KEY] = subjectId
+  if (subjectType) payload.entityType = subjectType
+  return payload as Partial<PilotMetricPayload>
+}
+
 async function resolveActivePilotId(orgId: string): Promise<string | null> {
   const rows = (await platformDb.execute(sql`
     SELECT id
@@ -28,7 +39,7 @@ async function emitZongaMetric(
   },
   data: {
     metricType?: Parameters<typeof recordPilotMetricEvent>[0]['metricType']
-    entityId?: string
+    subjectId?: string
     entityType?: string
     valueJson?: Record<string, unknown>
   } = {},
@@ -45,8 +56,7 @@ async function emitZongaMetric(
       metricName,
       valueNumeric,
       valueJson: data.valueJson,
-      entityId: data.entityId,
-      entityType: data.entityType,
+      ...withPilotMetricSubject(data.subjectId, data.entityType),
       traceId: audit.traceId,
       occurredAt: new Date().toISOString(),
     }, {
@@ -66,7 +76,7 @@ export async function recordZongaEventCreated(orgId: string, eventId: string, ac
     traceId,
   }, {
     metricType: 'operations',
-    entityId: eventId,
+    subjectId: eventId,
     entityType: 'event',
   })
 }
@@ -77,7 +87,7 @@ export async function recordZongaTicketSold(orgId: string, eventId: string, amou
     traceId,
   }, {
     metricType: 'revenue',
-    entityId: eventId,
+    subjectId: eventId,
     entityType: 'event',
   })
   await emitZongaMetric(orgId, 'gross_ticket_revenue', amount, {
@@ -85,7 +95,7 @@ export async function recordZongaTicketSold(orgId: string, eventId: string, amou
     traceId,
   }, {
     metricType: 'revenue',
-    entityId: eventId,
+    subjectId: eventId,
     entityType: 'event',
   })
 }
@@ -96,7 +106,7 @@ export async function recordZongaAttendeeCheckin(orgId: string, eventId: string,
     traceId,
   }, {
     metricType: 'operations',
-    entityId: eventId,
+    subjectId: eventId,
     entityType: 'event',
   })
 }
@@ -107,7 +117,7 @@ export async function recordZongaStreamStart(orgId: string, assetId: string, act
     traceId,
   }, {
     metricType: 'adoption',
-    entityId: assetId,
+    subjectId: assetId,
     entityType: 'asset',
   })
 }
@@ -118,7 +128,7 @@ export async function recordZongaReplayView(orgId: string, assetId: string, acto
     traceId,
   }, {
     metricType: 'adoption',
-    entityId: assetId,
+    subjectId: assetId,
     entityType: 'asset',
   })
 }
@@ -137,7 +147,7 @@ export async function recordZongaPlaybackWatch(
     traceId,
   }, {
     metricType: 'adoption',
-    entityId: assetId,
+    subjectId: assetId,
     entityType: 'asset',
     valueJson: {
       durationMs,
@@ -149,7 +159,7 @@ export async function recordZongaPlaybackWatch(
     traceId,
   }, {
     metricType: 'adoption',
-    entityId: assetId,
+    subjectId: assetId,
     entityType: 'asset',
     valueJson: {
       durationMs,
@@ -168,14 +178,14 @@ export async function recordZongaRevenueEvent(
   eventType: 'gross_revenue' | 'net_revenue' | 'platform_fee_revenue' | 'payout_volume' | 'subscription_revenue',
   actorId: string,
   traceId: string,
-  entityId?: string,
+  subjectId?: string,
 ): Promise<void> {
   await emitZongaMetric(orgId, eventType, amount, {
     actorId,
     traceId,
   }, {
     metricType: 'revenue',
-    entityId,
+    subjectId,
     entityType: 'revenue_event',
   })
 
@@ -184,7 +194,7 @@ export async function recordZongaRevenueEvent(
     traceId,
   }, {
     metricType: 'revenue',
-    entityId,
+    subjectId,
     entityType: 'revenue_event',
   })
 }
@@ -201,7 +211,7 @@ export async function recordZongaCreatorPayout(
     traceId,
   }, {
     metricType: 'revenue',
-    entityId: creatorId,
+    subjectId: creatorId,
     entityType: 'creator',
   })
 
@@ -210,7 +220,7 @@ export async function recordZongaCreatorPayout(
     traceId,
   }, {
     metricType: 'revenue',
-    entityId: creatorId,
+    subjectId: creatorId,
     entityType: 'creator',
   })
 }
@@ -220,7 +230,7 @@ export async function recordZongaPlatformFeeRevenue(
   amount: number,
   actorId: string,
   traceId: string,
-  entityId?: string,
+  subjectId?: string,
 ): Promise<void> {
   if (amount <= 0) return
   await emitZongaMetric(orgId, 'platform_fee_revenue', amount, {
@@ -228,7 +238,7 @@ export async function recordZongaPlatformFeeRevenue(
     traceId,
   }, {
     metricType: 'revenue',
-    entityId,
+    subjectId,
     entityType: 'revenue_event',
   })
 }

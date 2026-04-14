@@ -174,19 +174,22 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     appId: 'console',
     appName: 'NzilaOS Console',
     version: '1.0.0',
-    lastUpdated: '2026-02-28',
+    lastUpdated: '2026-04-14',
     dataCategories: [
       { name: 'Platform Metrics', description: 'Performance, health, and operational metrics', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Pilot Metrics & Alerts', description: 'Pilot telemetry and alerting state stored in pilot_definitions, pilot_metric_events, pilot_metric_rollups, pilot_health_scores, pilot_alerts, pilot_alert_rules, and pilot_alert_escalations', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Proof Packs', description: 'Generated governance proof packs', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Audit Logs', description: 'Console operation audit trail', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
     ],
     retentionSchedules: [
       { category: 'Platform Metrics', retentionClass: '1_YEAR', retentionPeriod: '1 year', legalBasis: 'Operational monitoring — rolling window' },
+      { category: 'Pilot Metrics & Alerts', retentionClass: '3_YEARS', retentionPeriod: '3 years', legalBasis: 'Pilot operations monitoring, alert review, and rollout evidence' },
       { category: 'Proof Packs', retentionClass: 'PERMANENT', retentionPeriod: 'Permanent', legalBasis: 'Immutable governance attestation' },
       { category: 'Audit Logs', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Audit trail integrity' },
     ],
     deletionPolicies: [
       { category: 'Platform Metrics', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
+      { category: 'Pilot Metrics & Alerts', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
       { category: 'Proof Packs', method: 'retention_expiry', verification: 'deletion_certificate', authorizedRoles: [], reversible: false },
       { category: 'Audit Logs', method: 'retention_expiry', verification: 'automated_scan', authorizedRoles: [], reversible: false },
     ],
