@@ -4,7 +4,7 @@
  * Links revenue events to the governance audit timeline and evidence-pack system.
  * Every revenue event, payout, and fee collection generates a traceable audit entry.
  */
-import type { RevenueEvent, UnifiedRevenueRecord } from './types.js'
+import type { RevenueEvent, UnifiedRevenueRecord } from './types'
 
 /** Governance audit entry shape for revenue events */
 export interface RevenueAuditEntry {

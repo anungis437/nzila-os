@@ -21,7 +21,7 @@ export {
   computePilotRollups,
   computePilotHealthScore,
   exportPilotReport,
-} from './service.js'
+} from './service'
 
 export type {
   PilotDefinition,

@@ -15,7 +15,7 @@ export type {
   RevenueSummary,
   BillingHook,
   UnifiedRevenueRecord,
-} from './types.js'
+} from './types'
 export {
   SubscriptionTier,
   BillingCycle,
@@ -27,21 +27,21 @@ export {
   RevenueType,
   RevenueStatus,
   UnifiedRevenueRecordSchema,
-} from './types.js'
+} from './types'
 
 // Service
-export type { RevenueService } from './service.js'
+export type { RevenueService } from './service'
 export {
   createInMemoryRevenueService,
   computeAppRevenueBreakdown,
   emitRevenueEvent,
   getRevenueAuditLog,
-} from './service.js'
+} from './service'
 
 // Evidence bridge
-export type { RevenueAuditEntry } from './evidence-bridge.js'
+export type { RevenueAuditEntry } from './evidence-bridge'
 export {
   buildRevenueAuditEntry,
   buildPayoutAuditEntry,
   buildFeeAuditEntry,
-} from './evidence-bridge.js'
+} from './evidence-bridge'
