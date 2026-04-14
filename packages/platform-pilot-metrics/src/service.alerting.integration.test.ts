@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { PilotAlertRule } from '@nzila/platform-pilot-metrics-types'
 
 interface MemAlert {
   id: string
@@ -143,7 +144,7 @@ describe('pilot alerting integration behavior', () => {
   })
 
   it('creates alert thread on first breach and updates occurrence on repeated breach', async () => {
-    const rule = {
+    const rule: PilotAlertRule = {
       id: '33333333-3333-3333-3333-333333333333',
       orgId: '11111111-1111-1111-1111-111111111111',
       pilotId: '22222222-2222-2222-2222-222222222222',

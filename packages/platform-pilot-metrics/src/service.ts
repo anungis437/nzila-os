@@ -1,6 +1,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import {
+  PilotAlertSchema,
   PilotAlertEscalationPolicySchema,
   PilotAlertOpsMetricsSchema,
   PilotAlertRuleSchema,
