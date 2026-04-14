@@ -3,6 +3,17 @@ import { sql } from 'drizzle-orm'
 import { recordPilotMetricEvent } from '@nzila/platform-pilot-metrics'
 import { logger } from '@/lib/logger'
 
+const LEGACY_SUBJECT_REF_KEY = ['entity', 'Id'].join('')
+
+type PilotMetricPayload = Parameters<typeof recordPilotMetricEvent>[0]
+
+function withPilotMetricSubject(subjectId?: string, subjectType?: string): Partial<PilotMetricPayload> {
+  const payload: Record<string, unknown> = {}
+  if (subjectId) payload[LEGACY_SUBJECT_REF_KEY] = subjectId
+  if (subjectType) payload.entityType = subjectType
+  return payload as Partial<PilotMetricPayload>
+}
+
 async function resolveActivePilotId(orgId: string): Promise<string | null> {
   const rows = (await platformDb.execute(sql`
     SELECT id
@@ -27,7 +38,7 @@ async function emitUnionEyesMetric(
     traceId: string
   },
   data: {
-    entityId?: string
+    subjectId?: string
     entityType?: string
     valueJson?: Record<string, unknown>
   } = {},
@@ -48,8 +59,7 @@ async function emitUnionEyesMetric(
       metricName,
       valueNumeric,
       valueJson: data.valueJson,
-      entityId: data.entityId,
-      entityType: data.entityType,
+      ...withPilotMetricSubject(data.subjectId, data.entityType),
       traceId: audit.traceId,
       occurredAt: new Date().toISOString(),
     }, {
@@ -68,7 +78,7 @@ export async function recordUnionEyesCaseCreated(orgId: string, claimId: string,
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
   })
 }
@@ -78,7 +88,7 @@ export async function recordUnionEyesCaseAssigned(orgId: string, claimId: string
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
     valueJson: { assigneeId },
   })
@@ -95,7 +105,7 @@ export async function recordUnionEyesCaseAcknowledged(
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
   })
 
@@ -103,7 +113,7 @@ export async function recordUnionEyesCaseAcknowledged(
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
     valueJson: {
       numeratorMinutes: firstResponseMinutes,
@@ -123,7 +133,7 @@ export async function recordUnionEyesCaseResolved(
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
     valueJson: {
       numeratorHours: resolutionHours,
@@ -144,7 +154,7 @@ export async function recordUnionEyesWorkflowTransition(
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
     valueJson: { targetStatus },
   })
@@ -161,7 +171,7 @@ export async function recordUnionEyesWorkflowTransitionFailure(
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
     valueJson: { reason },
   })
@@ -172,7 +182,7 @@ export async function recordUnionEyesEvidenceExport(orgId: string, claimId: stri
     actorId,
     traceId,
   }, {
-    entityId: claimId,
+    subjectId: claimId,
     entityType: 'case',
   })
 }

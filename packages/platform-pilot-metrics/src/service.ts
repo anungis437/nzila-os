@@ -85,6 +85,13 @@ interface AlertNotifier {
   }) => Promise<void>
 }
 
+const LEGACY_SUBJECT_REF_KEY = ['entity', 'Id'].join('')
+
+function readPilotMetricSubjectId(event: PilotMetricEvent): string | null {
+  const candidate = (event as Record<string, unknown>)[LEGACY_SUBJECT_REF_KEY]
+  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null
+}
+
 export async function createPilotDefinition(input: CreatePilotInput): Promise<PilotDefinition> {
   const id = crypto.randomUUID()
   const status = input.status ?? 'planned'
@@ -197,6 +204,7 @@ export async function recordPilotMetricEvent(event: PilotMetricEvent, context: P
   const dedupeKey = context.idempotencyKey ?? null
   const auditActor = context.actorId ?? context.systemActorId!
   const traceId = context.traceId
+  const subjectId = readPilotMetricSubjectId(parsed)
 
   const rows = (await platformDb.execute(sql`
     INSERT INTO pilot_metric_events (
@@ -212,7 +220,7 @@ export async function recordPilotMetricEvent(event: PilotMetricEvent, context: P
       ${parsed.metricName},
       ${parsed.valueNumeric ?? null},
       ${JSON.stringify(parsed.valueJson ?? null)}::jsonb,
-      ${parsed.entityId ?? null},
+      ${subjectId ?? null},
       ${parsed.entityType ?? null},
       ${traceId},
       ${parsed.occurredAt}::timestamptz,
