@@ -342,3 +342,9 @@ packages:
     steward: null
     tier: service
     description: "Built-in connector adapters (webhook, REST, CSV/SFTP)"
+
+  platform-jurisdiction-compliance:
+    owner: "@nzila/governance"
+    steward: null
+    tier: service
+    description: "Multi-jurisdiction compliance policy framework for regulatory compliance across Africa (Kenya, Uganda, Nigeria)"

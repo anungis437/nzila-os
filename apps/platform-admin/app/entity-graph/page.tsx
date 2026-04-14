@@ -44,7 +44,7 @@ async function initStore() {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function EntityGraphExplorer() {
-  const [selectedEntity, setSelectedEntity] = useState(SEED_NODES[0].entityId)
+  const [selectedIdx, setSelectedIdx] = useState(0)
   const [depth, setDepth] = useState(2)
   const [mode, setMode] = useState<'subgraph' | 'neighbors'>('subgraph')
   const [result, setResult] = useState<string | null>(null)
@@ -53,21 +53,21 @@ export default function EntityGraphExplorer() {
   useEffect(() => { initStore().then(() => setReady(true)) }, [])
 
   const handleTraverse = useCallback(async () => {
-    const entity = SEED_NODES.find((n) => n.entityId === selectedEntity)
-    if (!entity) return
+    const node = SEED_NODES[selectedIdx]
+    if (!node) return
 
     if (mode === 'subgraph') {
       const subgraph = await buildEntitySubgraph(
-        store, TENANT, entity.entityType, entity.entityId, depth,
+        store, TENANT, node.entityType, node.entityId, depth,
       )
       setResult(subgraph ? JSON.stringify(subgraph, null, 2) : 'No subgraph found')
     } else {
       const neighbors = await getEntityNeighbors(
-        store, TENANT, entity.entityType, entity.entityId,
+        store, TENANT, node.entityType, node.entityId,
       )
       setResult(JSON.stringify(neighbors, null, 2))
     }
-  }, [selectedEntity, depth, mode])
+  }, [selectedIdx, depth, mode])
 
   return (
     <div>
@@ -83,13 +83,13 @@ export default function EntityGraphExplorer() {
         </h2>
         <div className="flex flex-wrap gap-4">
           <select
-            value={selectedEntity}
-            onChange={(e) => setSelectedEntity(e.target.value)}
+            value={selectedIdx}
+            onChange={(e) => setSelectedIdx(Number(e.target.value))}
             className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
           >
-            {SEED_NODES.map((n) => (
-              <option key={n.entityId} value={n.entityId}>
-                {n.entityType}: {n.canonicalName} ({n.entityId})
+            {SEED_NODES.map((n, i) => (
+              <option key={i} value={i}>
+                {n.entityType}: {n.canonicalName} ({n.entityType})
               </option>
             ))}
           </select>
@@ -135,11 +135,12 @@ export default function EntityGraphExplorer() {
             </thead>
             <tbody>
               {SEED_NODES.map((n) => (
+              {SEED_NODES.map((n, i) => (
                 <tr
-                  key={n.entityId}
-                  onClick={() => setSelectedEntity(n.entityId)}
+                  key={i}
+                  onClick={() => setSelectedIdx(i)}
                   className={`cursor-pointer border-b border-gray-50 hover:bg-gray-50 ${
-                    selectedEntity === n.entityId ? 'bg-blue-50' : ''
+                    selectedIdx === i ? 'bg-blue-50' : ''
                   }`}
                 >
                   <td className="px-1 py-1.5 font-mono text-xs text-blue-600">{n.entityType}</td>

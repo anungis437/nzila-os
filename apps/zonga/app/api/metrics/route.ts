@@ -9,6 +9,7 @@
  * - Falls back to open access if no token configured (dev/test)
  * - Response cached for 10s to limit CPU overhead from frequent scrapes
  */
+import { timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { metrics } from '@nzila/os-core/telemetry'
 
@@ -48,11 +49,18 @@ function toPrometheusText(snapshot: ReturnType<typeof metrics.getSnapshot>): str
 }
 
 export async function GET(request: NextRequest) {
-  // Bearer token auth — optional, enabled when METRICS_BEARER_TOKEN is set
+  // Bearer token auth — required when METRICS_BEARER_TOKEN is set.
+  // Uses timingSafeEqual() to prevent timing-based token enumeration.
   const token = process.env.METRICS_BEARER_TOKEN
   if (token) {
-    const auth = request.headers.get('authorization')
-    if (auth !== `Bearer ${token}`) {
+    const auth = request.headers.get('authorization') ?? ''
+    const expected = `Bearer ${token}`
+    const authBytes = Buffer.from(auth)
+    const expectedBytes = Buffer.from(expected)
+    const valid =
+      authBytes.length === expectedBytes.length &&
+      timingSafeEqual(authBytes, expectedBytes)
+    if (!valid) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }

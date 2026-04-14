@@ -91,6 +91,9 @@ export const ORG_SCOPED_TABLES = [
   'aiKnowledgeIngestionRuns',
   'aiDeploymentRoutes',
 
+  // ── ai-governance.ts ────────────────────────────────────
+  'aiGovernanceDecisionLog',
+
   // ── ml.ts ───────────────────────────────────────────────
   'mlDatasets',
   'mlModels',
@@ -323,6 +326,10 @@ export const NON_ORG_SCOPED_TABLES = [
   // ── zonga.ts (no org_id) ────────────────────────────────
   { table: 'zongaReleaseTracks', reason: 'Scoped via release_id FK → zongaReleases (Org-scoped)' },
   { table: 'zongaPlaylistItems', reason: 'Scoped via playlist_id FK → zongaPlaylists (Org-scoped)' },
+  // ── ai-governance.ts (no org_id) ────────────────────────
+  { table: 'aiGovernanceModels', reason: 'Global AI governance model registry — not Org-specific' },
+  { table: 'aiGovernancePromptVersions', reason: 'Global prompt versioning for governance — not Org-specific' },
+  { table: 'aiGovernanceReviewFlags', reason: 'Scoped via decision_id FK → aiGovernanceDecisionLog (Org-scoped)' },
 ] as const
 
 /**
