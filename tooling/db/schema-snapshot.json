@@ -1,10 +1,14 @@
 {
-  "capturedAt": "2026-04-11T04:55:03.790Z",
+  "capturedAt": "2026-04-14T21:53:31.974Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
       "hash": "a617b9eb709f225d6242eafc7c5aebe5f65147ac3e279a75658fca9693a639fb",
       "size": 17545
+    },
+    "packages/db/src/schema/ai-governance.ts": {
+      "hash": "829cdc7c6830486527e0d15c822fdd103b96bc430d1d64d2753deec9dd6fbea5",
+      "size": 4466
     },
     "packages/db/src/schema/ai.ts": {
       "hash": "c603a283acbf601e9399a16e29b5f505c049ef926cc980affa3ca48c48403609",
@@ -99,8 +103,8 @@
       "size": 4293
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "726d53c9c6b6f2b7d089e180fec4666db1af77e86eef469dfe4e287a63d26d9f",
-      "size": 1349
+      "hash": "a838d0d7ba4d78b7da4610499b3033f69a2c4e3680efac115d5a271861ecd931",
+      "size": 1413
     },
     "packages/db/src/schema/ml.ts": {
       "hash": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304",
@@ -130,6 +134,10 @@
       "hash": "88a272b16aa5c75c8581370c68c887950002498655a9319835fd29f8d17eb5ef",
       "size": 9597
     },
+    "packages/db/src/schema/pilot-metrics.ts": {
+      "hash": "ac0e96763baad286410dc00a682605560912a2cea4533984ac7aaabc0047dfd9",
+      "size": 9085
+    },
     "packages/db/src/schema/platform.ts": {
       "hash": "52f3b8ec098e9fbce3fffc9adf5d5735c3b178e2095bf9081adb7c7b690cfeb3",
       "size": 7663
@@ -151,5 +159,5 @@
       "size": 37995
     }
   },
-  "compositeHash": "0f7bbf62d299aefa3c9e7642d28202b026447373c57bbfde004af73b9dfed1ce"
+  "compositeHash": "0e45f953d662450f513fefb66031e54a2a04dd94b6aab4ba62be016e5b776b2f"
 }

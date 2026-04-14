@@ -134,7 +134,6 @@ export default function EntityGraphExplorer() {
               </tr>
             </thead>
             <tbody>
-              {SEED_NODES.map((n) => (
               {SEED_NODES.map((n, i) => (
                 <tr
                   key={i}
