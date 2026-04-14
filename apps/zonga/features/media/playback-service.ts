@@ -3,6 +3,11 @@
  *
  * Generates streaming URLs from processed variants,
  * records playback telemetry, and handles fallback logic.
+ *
+ * Resolution order:
+ * 1. CloudFront-backed media variants (zonga_media_variants, provider=aws)
+ * 2. Blob-backed processed variants (zonga_processed_variants, legacy path)
+ * 3. Raw upload fallback (zonga_track_assets)
  */
 
 import { platformDb } from '@nzila/db/platform'
@@ -11,6 +16,7 @@ import { generateSasUrl } from '@nzila/blob'
 import { logger } from '@/lib/logger'
 import type { QualityTier, PlaybackSource } from './types'
 import { PROCESSING_PROFILES } from './types'
+import { getBestMediaVariant } from './media-job-service'
 
 export interface PlaybackUrlResult {
   ok: boolean
@@ -19,18 +25,49 @@ export interface PlaybackUrlResult {
   bitrate: number
   codec: string
   durationSeconds?: number
+  provider?: 'aws_cloudfront' | 'blob' | 'raw'
   error?: string
 }
 
 /**
  * Get the best available streaming URL for a content asset.
- * Prefers the requested quality; falls back to lower tiers.
+ * Prefers CloudFront-backed variants, falls back through blob then raw.
  */
 export async function getPlaybackUrl(
   contentAssetId: string,
   preferredQuality: QualityTier = 'high',
 ): Promise<PlaybackUrlResult> {
-  // Try to find a processed variant at the preferred quality
+  // ── Priority 1: CloudFront-backed media variant (AWS path) ──
+  try {
+    const awsVariant = await getBestMediaVariant(contentAssetId, preferredQuality)
+    if (awsVariant) {
+      const { createSignedPlaybackUrl } = await import('@nzila/zonga-streaming-aws/cloudfront-delivery')
+      const { resolveCloudFrontConfig } = await import('@nzila/zonga-streaming-aws')
+
+      const signed = await createSignedPlaybackUrl(resolveCloudFrontConfig(), {
+        storageKey: awsVariant.storageKey,
+        qualityTier: awsVariant.qualityTier,
+        orgId: '', // not needed for signing
+        assetId: contentAssetId,
+        ttlSeconds: 14400, // 4 hours
+      })
+
+      return {
+        ok: true,
+        streamUrl: signed.url,
+        qualityTier: awsVariant.qualityTier,
+        bitrate: awsVariant.bitrate ?? PROCESSING_PROFILES[awsVariant.qualityTier]?.bitrate ?? 128,
+        codec: awsVariant.codec ?? 'aac',
+        durationSeconds: awsVariant.durationSeconds ?? undefined,
+        provider: 'aws_cloudfront',
+      }
+    }
+  } catch (err) {
+    // AWS path unavailable — fall through to blob
+    logger.warn('CloudFront playback unavailable, falling back', { err, contentAssetId })
+  }
+
+  // ── Priority 2: Blob-backed processed variant (legacy path) ──
   const tiers: QualityTier[] = [preferredQuality, 'high', 'standard', 'preview']
   const uniqueTiers = [...new Set(tiers)]
 
@@ -60,11 +97,12 @@ export async function getPlaybackUrl(
         bitrate: variant.bitrate as number,
         codec: variant.codec as string,
         durationSeconds: variant.duration_seconds as number | undefined,
+        provider: 'blob',
       }
     }
   }
 
-  // Fallback: serve the raw upload if no variants exist yet
+  // ── Priority 3: Raw upload fallback ──
   const rawRows = await platformDb.execute(sql`
     SELECT ta.storage_key, ta.duration_seconds
     FROM zonga_track_assets ta
@@ -88,6 +126,7 @@ export async function getPlaybackUrl(
       bitrate: profile.bitrate,
       codec: profile.codec,
       durationSeconds: raw.duration_seconds as number | undefined,
+      provider: 'raw',
     }
   }
 

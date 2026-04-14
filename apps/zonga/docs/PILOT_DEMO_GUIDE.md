@@ -11,6 +11,10 @@
 | PostgreSQL | ✅ | Docker (`nzila-postgres`) or native on port 5433 |
 | Node.js 20+ | ✅ | With pnpm |
 | Azure Blob Storage | ✅ | `AZURE_STORAGE_ACCOUNT_NAME` + key for uploads |
+| AWS credentials | ✅ (streaming) | `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` |
+| AWS IVS | ✅ (live) | Provisioned automatically via `@nzila/zonga-streaming-aws` |
+| AWS S3 + MediaConvert | ✅ (VOD) | `ZONGA_S3_RAW_BUCKET`, `ZONGA_S3_OUTPUT_BUCKET`, `ZONGA_MEDIACONVERT_ENDPOINT`, `ZONGA_MEDIACONVERT_ROLE_ARN` |
+| AWS CloudFront | ✅ (delivery) | `ZONGA_CLOUDFRONT_DOMAIN`, `ZONGA_CLOUDFRONT_KEY_PAIR_ID`, `ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM` |
 | Stripe keys | ✅ | `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` for ticketing |
 | Platform auth | ✅ | Email/password default; Entra SSO optional (`AZURE_AD_CLIENT_ID` + `AZURE_AD_CLIENT_SECRET` + `AZURE_AD_TENANT_ID` + `AUTH_SECRET`) |
 
@@ -110,7 +114,38 @@ psql -U nzila -d nzila_automation -p 5433 -f scripts/zonga-seed-output.sql
 - Integrity signals auto-flag content for review
 - Case resolution updates entity status (release held/rejected/published)
 
-### 3.5 Revenue & Payouts
+### 3.5 Live Streaming (Creator Auth)
+
+| Route | What to show |
+|-------|-------------|
+| `POST /api/live` | Create a live stream for an event |
+| `GET /api/live` | List live streams (filter by `?status=live,ready`) |
+| `GET /api/live/[streamId]` | Real-time stream status from AWS IVS |
+| `GET /api/live/[streamId]/ingest` | RTMP ingest URL for OBS/creator |
+| `POST /api/live/[streamId]/ingest` | Rotate stream key |
+| `GET /api/live/[streamId]/playback` | Viewer playback URL (entitlement-gated) |
+| `PATCH /api/live/[streamId]` | Lifecycle: `{action: 'ready' \| 'live' \| 'end' \| 'fail'}` |
+
+**Key talking points:**
+- Live streams backed by AWS IVS with < 3 s latency
+- RTMP ingest URL generated per-stream for OBS Studio
+- Viewer playback checks listener subscription tier before serving HLS URL
+- Stream lifecycle events recorded in `zonga_stream_events` audit table
+- Credentials stored separately in `zonga_stream_credentials` (rotatable)
+
+### 3.6 VOD / Audio Streaming
+
+| Route | What to show |
+|-------|-------------|
+| `GET /api/stream/[assetId]` | Adaptive playback URL (CloudFront → blob → raw fallback) |
+
+**Key talking points:**
+- Three-tier playback resolution: (1) CloudFront signed URL from AWS-transcoded variants, (2) blob-backed processed audio, (3) raw upload fallback
+- MediaConvert transcode produces HLS + multi-quality MP3/AAC
+- Quality tier gated by listener plan (free → 128 kbps, premium → HiFi)
+- Transcode jobs tracked in `zonga_media_jobs` + output variants in `zonga_media_variants`
+
+### 3.7 Revenue & Payouts
 
 | Route | What to show |
 |-------|-------------|
@@ -170,7 +205,7 @@ These invariants are verified by contract tests and must hold:
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Audio streaming | Stub | `getStreamUrl()` returns signed blob URL, no adaptive bitrate |
+| Audio streaming | **Implemented** | AWS IVS live + S3/MediaConvert/CloudFront VOD with adaptive bitrate; legacy blob fallback preserved |
 | Push notifications | Not implemented | Only in-app notification feed (v1) |
 | Listener profiles | Basic | Profile CRUD exists but no avatar upload |
 | Search ranking | Simple | SQL `ILIKE` search, no full-text or vector ranking |

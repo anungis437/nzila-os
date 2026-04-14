@@ -24,6 +24,7 @@ import {
   FileText,
   Building2,
   ShieldCheck,
+  Radio,
 } from "lucide-react";
 
 const navItems = [
@@ -40,6 +41,7 @@ const navItems = [
   { href: "/procurement", label: "Procurement", icon: FileCheck },
   { href: "/environments", label: "Environments", icon: Server },
   { href: "/architecture", label: "Architecture", icon: Landmark },
+  { href: "/streaming", label: "Streaming", icon: Radio },
 ] as const;
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
