@@ -20,6 +20,10 @@ describe("InMemoryAuditStore", () => {
       resource: "r",
       payload: {},
     });
+    const e1Ms = Date.parse(e1.timestamp);
+    while (Date.now() <= e1Ms) {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    }
     const e2 = await engine.record({
       actorId: "u1",
       orgId: "org-1",

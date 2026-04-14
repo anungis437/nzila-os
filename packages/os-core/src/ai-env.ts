@@ -43,6 +43,7 @@ const aiEnvSchema = z
     // ── Model defaults ──────────────────────────────────────────────────
     AI_MAX_TOKENS_DEFAULT: z.coerce.number().int().positive().default(1024),
     AI_TEMPERATURE_DEFAULT: z.coerce.number().min(0).max(2).default(0.2),
+    AI_PROVIDER_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
 
     // ── Encryption (optional — required if storing sensitive payloads) ──
     AI_ENCRYPTION_KEY: z.string().optional(),

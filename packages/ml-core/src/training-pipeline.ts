@@ -67,7 +67,9 @@ export async function runTrainingPipeline(params: {
       const output = await stage.run()
       const stageEndMs = Date.now()
       stageState.status = 'success'
-      stageState.output = output
+      if (output !== undefined) {
+        stageState.output = output
+      }
       stageState.finishedAt = new Date(stageEndMs).toISOString()
       stageState.durationMs = stageEndMs - stageStartMs
     } catch (error) {

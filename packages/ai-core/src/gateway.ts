@@ -344,7 +344,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
           env.AI_PROVIDER_TIMEOUT_MS ?? 30_000,
           `generate:${provider}`,
         )
-        return { result: res, providerUsed: provider }
+        return { result: res, providerUsed: provider as AiProvider }
       },
       onFallback: (from, to, reason) => {
         emitAiMetric({
@@ -352,6 +352,9 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
           feature: 'generate',
           provider: `${from}→${to}`,
           latencyMs: Date.now() - startTime,
+          tokensIn: null,
+          tokensOut: null,
+          costUsd: null,
           refused: false,
           errored: true,
           orgId: req.orgId,
@@ -360,8 +363,9 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
       },
     })
     result = res
-    usedProvider = providerUsed
+    usedProvider = providerUsed as AiProvider
     fallbackAttempts = attempts
+  } catch (err) {
     // Provider call failed; log and rethrow
     const latencyMs = Date.now() - startTime
     await logAiRequest({
@@ -385,7 +389,6 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
       trace: req.trace,
     })
     throw err
-  }
   }
 
   const latencyMs = Date.now() - startTime
@@ -536,17 +539,13 @@ export async function* chatStream(
   const provider = getProvider(providerKey)
 
   try {
-    for await (const chunk of withTimeout(
-      provider.generateStream({
-        messages,
-        model,
-        temperature,
-        maxTokens,
-        topP: req.params?.topP,
-      }),
-      env.AI_PROVIDER_TIMEOUT_MS ?? 30_000,
-      `chatStream:${providerKey}`,
-    )) {
+    for await (const chunk of provider.generateStream({
+      messages,
+      model,
+      temperature,
+      maxTokens,
+      topP: req.params?.topP,
+    })) {
       fullContent += chunk.delta
       yield chunk
     }

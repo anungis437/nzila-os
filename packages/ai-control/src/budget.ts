@@ -1,4 +1,4 @@
-import type { BudgetConfig, BudgetStatus } from './schemas.js'
+import type { BudgetConfig, BudgetStatus } from './schemas'
 
 // ─── Budget Store Interface ─────────────────────────────────────────────────
 
