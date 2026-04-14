@@ -22,6 +22,12 @@ import { wrapSchemaQuery } from '@/lib/schema-error'
 import { z } from 'zod'
 import { eventBus, AppEvents } from '@/lib/events'
 import '@/lib/events/pilot-event-listeners'
+import {
+  recordUnionEyesCaseAcknowledged,
+  recordUnionEyesCaseResolved,
+  recordUnionEyesWorkflowTransition,
+  recordUnionEyesWorkflowTransitionFailure,
+} from '@/lib/pilot-metrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,6 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { claimNumber, targetStatus, notes } = parsed.data
+    const traceId = request.headers.get('x-trace-id') ?? crypto.randomUUID()
 
     // Fetch claim for pre-flight validation (org-scoped via RLS context, row-locked)
     return await withRLSContext(async (tx) => {
@@ -94,6 +101,17 @@ export async function POST(request: NextRequest) {
       // Pre-flight FSM guard — show allowed transitions
       const allowed = getAllowedClaimTransitions(currentStatus, 'steward')
       if (!allowed.includes(targetStatus)) {
+        recordUnionEyesWorkflowTransitionFailure(
+          organizationId || claim.organizationId,
+          claim.claimId,
+          `blocked:${currentStatus}->${targetStatus}`,
+          userId,
+          traceId,
+        ).catch((metricErr) => logger.warn('Pilot metric emit failed', {
+          error: String(metricErr),
+          metric: 'workflow_failures',
+        }))
+
         return NextResponse.json(
           {
             success: false,
@@ -133,6 +151,48 @@ export async function POST(request: NextRequest) {
         newStatus: targetStatus,
         isFirstUpdate: priorUpdates <= 1, // 1 = the update we just created
       }, { organizationId: organizationId || claim.organizationId, userId });
+
+      recordUnionEyesWorkflowTransition(
+        organizationId || claim.organizationId,
+        claim.claimId,
+        true,
+        targetStatus,
+        userId,
+        traceId,
+      ).catch((metricErr) => logger.warn('Pilot metric emit failed', {
+        error: String(metricErr),
+        metric: 'workflow_transition_success_rate',
+      }))
+
+      if (currentStatus === 'submitted' && targetStatus !== 'submitted') {
+        const createdAt = claim.createdAt ?? claim.updatedAt ?? new Date()
+        const firstResponseMinutes = Math.max(0, (Date.now() - new Date(createdAt).getTime()) / 60_000)
+        recordUnionEyesCaseAcknowledged(
+          organizationId || claim.organizationId,
+          claim.claimId,
+          firstResponseMinutes,
+          userId,
+          traceId,
+        ).catch((metricErr) => logger.warn('Pilot metric emit failed', {
+          error: String(metricErr),
+          metric: 'avg_time_to_first_response',
+        }))
+      }
+
+      if (targetStatus === 'resolved' || targetStatus === 'closed') {
+        const createdAt = claim.createdAt ?? claim.updatedAt ?? new Date()
+        const resolutionHours = Math.max(0, (Date.now() - new Date(createdAt).getTime()) / 3_600_000)
+        recordUnionEyesCaseResolved(
+          organizationId || claim.organizationId,
+          claim.claimId,
+          resolutionHours,
+          userId,
+          traceId,
+        ).catch((metricErr) => logger.warn('Pilot metric emit failed', {
+          error: String(metricErr),
+          metric: 'avg_time_to_resolution',
+        }))
+      }
 
       return NextResponse.json({ success: true, claim: result.claim })
     })

@@ -8,16 +8,15 @@
 
 | Role | What You Can Do |
 |------|----------------|
-| **Member** | File new cases, view your own cases, add notes, upload attachments |
-| **Steward** | All member actions + transition case status, add internal notes, view assigned cases |
+| **Member** | Submit new intakes, follow your own updates, add notes, upload attachments |
+| **Steward** | Review intakes, manage case status, add internal notes, view assigned work |
 | **Chief Steward** | All steward actions + assign cases, close resolved cases |
 | **Officer** | All above + reopen cases, export evidence packs |
 | **Admin** | Full access including user management and attachment deletion |
 
-## Filing a Case
+## Submitting an Intake
 
-1. Click **Cases** in the navigation
-2. Click **New Case**
+1. Open the intake flow from the member experience
 3. Fill in the form:
    - **Case Type**: Select the type (e.g., Workplace Safety, Discrimination)
    - **Priority**: Low, Medium, High, or Critical
@@ -25,12 +24,12 @@
    - **Description**: Full details (10–5,000 characters)
    - **Incident Date**: When it happened (cannot be a future date)
 4. Click **Submit**
-5. You'll receive a case number (e.g., `GRV-2025-0001`)
+5. The intake enters steward review. If formal representation is needed, a steward or officer converts it into official casework.
 
-## Checking Case Status
+## Checking Status
 
-1. Click **Cases** → find your case in the list
-2. The **Status** badge shows where it is in the process:
+1. Use **Inbox** to check updates and requests tied to your intake or related work
+2. The status shows where the matter is in the process:
    - 🟡 Submitted → Waiting for acknowledgement
    - 🔵 Under Review → Being reviewed by a steward
    - 🟣 Assigned → A steward is handling it
@@ -42,7 +41,7 @@
 
 ## Adding Notes
 
-1. Open your case
+1. Open your intake or related record
 2. Click the **Notes** tab
 3. Type your message and click **Add Note**
 4. Notes are visible to you and your assigned steward

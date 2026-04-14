@@ -6,10 +6,10 @@
 
 ## Daily Checks
 
-1. **Log in** and review the Workbench
-2. **Unassigned queue**: Assign any new cases to a steward
+1. **Log in** and review **Work** and **Priorities**
+2. **New intake / unassigned work**: Review newly submitted intakes and assign official casework where needed
 3. **Overdue queue**: Follow up on cases past SLA threshold
-4. **Urgent queue**: Prioritise critical/high-priority cases
+4. **Urgent queue**: Prioritise critical and high-priority matters
 
 ## Weekly Checks
 
@@ -22,11 +22,11 @@
 
 | Issue | Likely Cause | Fix |
 |-------|-------------|-----|
-| Cases not appearing | User in wrong org or RLS filtering | Verify org membership in Clerk |
+| Intake or casework not appearing | User in wrong org or RLS filtering | Verify org membership and role assignment |
 | Can't assign case | User role too low | Only chief_steward+ can assign |
 | Attachment upload fails | File type blocked or size exceeded | Check allowed types (PDF, DOCX, etc.), max 10 MB |
 | Dashboard shows wrong counts | Stale cache | Refresh page; metrics cache refreshes every 5 minutes |
-| User can't log in | Clerk invitation expired | Re-send invitation from Admin → Users |
+| User can't log in | Invitation expired or auth misconfiguration | Re-send invitation from Admin → Users and verify platform auth setup |
 
 ## Escalation Path
 
@@ -40,6 +40,6 @@
 If a critical issue requires pausing the pilot:
 
 1. Notify all users via email
-2. See CUPE_PILOT_ROLLBACK_RUNBOOK.md for steps to freeze new cases
+2. See CUPE_PILOT_ROLLBACK_RUNBOOK.md for steps to freeze new intake and casework creation
 3. Export all case data for safe keeping
 4. Contact platform support team

@@ -17,9 +17,10 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { buildEvidencePack } from '@/lib/evidence-export';
 import { auditCaseExport } from '@/lib/audited-case-mutations';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { recordUnionEyesEvidenceExport } from '@/lib/pilot-metrics';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
   const { userId, orgId } = await auth();
@@ -68,6 +69,11 @@ export async function GET(
 
   // Audit the export event
   await auditCaseExport({ userId, organizationId: orgId, caseId, format: 'json' });
+
+  const traceId = request.headers.get('x-trace-id') ?? crypto.randomUUID();
+  recordUnionEyesEvidenceExport(orgId, caseId, userId, traceId).catch(() => {
+    // Do not fail export path on observability errors.
+  })
 
   return NextResponse.json(pack, {
     headers: {

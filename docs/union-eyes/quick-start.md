@@ -1,35 +1,40 @@
 # Quick Start — UnionEyes
 
-> Create your first case in under 2 minutes.
+> Submit an intake and follow progress in under 2 minutes.
 
 ## Step 1: Log In
 
-Go to your UnionEyes URL and sign in with your email. If this is your first
-time, you'll see a short onboarding wizard — follow the 4 steps to get oriented.
+Go to your UnionEyes URL and sign in with your email.
 
-## Step 2: Create a Case
+- Members are usually routed to **Inbox**
+- Stewards and officers are usually routed to **Priorities**
 
-From the Dashboard, click the **Create Case** card.
+## Step 2: Submit an Intake
+
+Members start by submitting an **intake**, not by opening an official case.
 
 Fill in:
+
 - **Title** — Short description of the issue
-- **Category** — Select what kind of workplace issue this is (e.g., Safety, Scheduling, Discrimination)
-- **Priority** — How urgent (defaults to Medium)
-- **Description** — Describe what happened in your own words
-- **Date** — When did this happen?
+- **Category / type** — What kind of workplace issue this is
+- **Priority** — How urgent it is
+- **Description** — What happened, in your own words
+- **Date** — When it happened
 
-Click **Submit**. You'll get a case number and be taken to your new case.
+Submit the form. UnionEyes records the intake and routes it into steward review.
 
-## Step 3: Add an Update
+## Step 3: Add Context if Needed
 
-Open your case from **My Cases**. In the Timeline section, type a note and
-click **Add Update**. Updates keep your steward informed and create a record.
+If your steward requests more information, open the intake or related record,
+add a note, and upload any supporting material the workflow asks for.
 
 ## Step 4: Track Progress
 
-Return to **My Cases** on the Dashboard. You'll see all your active cases with
-their current status. The Dashboard also shows **Signals** — urgent items
-that need your attention.
+Use **Inbox** to follow updates, requests, and status movement. When work is
+resolved or follow-up is recorded, review it in **Outcomes**.
+
+Stewards and officers use **Priorities** and **Work** to handle the official
+casework side of the process.
 
 ---
 

@@ -12,7 +12,7 @@
 2. Verify LRO-led representation protocol is active
 3. Open browser tabs:
    - Tab 1: `/grievances/new` (intake form)
-   - Tab 2: `/grievances` (case queue)
+   - Tab 2: `/dashboard/work` (active casework surface)
    - Tab 3: `/dashboard/leadership` (leadership dashboard)
    - Tab 4: `/dashboard/pilot/onboarding` (onboarding checklist)
 
@@ -40,16 +40,16 @@
 
 - Fill in the form with a demo grievance (EC-06 Classification Dispute)
 - Point out the **auto-save**: "If the LRO closes their browser mid-form, the draft is preserved. When they return, a Resume Draft modal lets them pick up exactly where they left off."
-- Click **Create Case**
+- Submit the intake / filing flow
 - Show the confirmation / redirect to case detail
 
 ---
 
 ### Beat 3 — Case Queue & Assignment (1 min)
 
-**Show Tab 2:** `/grievances`
+**Show Tab 2:** `/dashboard/work`
 
-> "All cases land in a central queue. Notice the labels say 'Assign LRO' — not 'Assign Steward.' CAPE's LRO-led representation model is configured at the organization level. The system adapts terminology, assignment rules, and escalation paths automatically."
+> "Official casework is managed in the Work surface. Notice the labels say 'Assign LRO' — not 'Assign Steward.' CAPE's LRO-led representation model is configured at the organization level. The system adapts terminology, assignment rules, and escalation paths automatically."
 
 - Show the case we just filed in the queue
 - Point out status badges (Filed, Investigating, Mediation, Arbitration)
@@ -64,14 +64,15 @@
 > "CAPE officers see real-time KPIs without asking anyone for a report."
 
 Walk through the 6 KPI cards:
-1. **Active Grievances** — "8 open cases across all statuses"
+
+1. **Active Grievances** — "8 active grievance files across all statuses"
 2. **Resolved This Month** — "1 case resolved with trend indicator"
 3. **Avg. Time to Triage** — "3.2 days from filing to first action"
 4. **Avg. Time to Resolution** — "45 days average"
 5. **Arbitrations** — "1 case currently in arbitration"
 6. **Overdue Cases** — "Cases where deadlines are at risk"
 
-> "Below the KPIs, you see employer hotspots — which employers generate the most grievances — and LRO capacity charts showing who has room for new cases."
+> "Below the KPIs, you see employer hotspots — which employers generate the most grievances — and LRO capacity charts showing who has room for additional casework."
 
 - Show the **Employer Hotspots Table** — Treasury Board, CRA, PSPC, Statistics Canada
 - Show the **Compliance Summary Card** — alerts for approaching deadlines
@@ -82,7 +83,7 @@ Walk through the 6 KPI cards:
 ### Beat 5 — Evidence & Audit Trail (1 min)
 
 > "Every action in UnionEyes is audited. Grievance filed, draft saved, case assigned, communication logged — 14 distinct event types are captured with full metadata."
-
+>
 > "When a case is resolved, the system generates a sealed evidence pack — SHA-256 hash, HMAC signature, Azure Blob storage. This is the kind of audit trail that holds up in arbitration."
 
 - Reference the compliance summary card for audit visibility
@@ -102,6 +103,7 @@ Walk through the 6 KPI cards:
 ## Demo Data Cleanup
 
 After the demo:
+
 1. Navigate to `/dashboard/pilot/onboarding`
 2. Click **Purge Demo Data** on the Demo Data Badge
 3. Confirm purge

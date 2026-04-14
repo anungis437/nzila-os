@@ -63,6 +63,10 @@ const navSections: NavSection[] = [
     items: [
       { href: "/pipeline", label: "Pipeline", icon: TrendingUp },
       { href: "/pilots", label: "Pilots", icon: Rocket },
+      { href: "/pilots/health", label: "Pilot Health", icon: ShieldCheck },
+      { href: "/pilots/alerts", label: "Pilot Alerts", icon: AlertTriangle },
+      { href: "/pilots/compare", label: "Pilot Compare", icon: PieChart },
+      { href: "/pilots/reports", label: "Pilot Reports", icon: FileText },
       { href: "/ingestion", label: "Ingestion", icon: Database },
       { href: "/follow-ups", label: "Follow-ups", icon: Bell },
       { href: "/partners", label: "Partners", icon: Handshake },

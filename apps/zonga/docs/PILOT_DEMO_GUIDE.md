@@ -158,6 +158,20 @@ psql -U nzila -d nzila_automation -p 5433 -f scripts/zonga-seed-output.sql
 - Payout preview shows gross → platform fee → net
 - Stripe Connect / M-Pesa / bank transfer payout rails
 
+### 3.8 Pilot Proof Metrics Validation
+
+| Path | What to verify |
+|-------|----------------|
+| Event creation action | Emits `events_created` |
+| Ticket purchase action | Emits `tickets_sold`, `gross_ticket_revenue` |
+| `GET /api/stream/[assetId]` | Emits `stream_starts`; replay mode emits `replay_views` |
+| `POST /api/analytics` play events | Emits `stream_watch_minutes`, `avg_watch_time` |
+| Check-in service | Emits `attendee_checkins` |
+| Revenue recording action | Emits `gross_revenue`, `subscription_revenue`, `transaction_count`, optional `platform_fee_revenue` |
+| Payout execution action | Emits `creator_payouts`, `payout_volume` |
+
+Verification note: pilot metrics writes require actor/system identity and trace context at platform service level.
+
 ---
 
 ## 4. Contract Test Validation

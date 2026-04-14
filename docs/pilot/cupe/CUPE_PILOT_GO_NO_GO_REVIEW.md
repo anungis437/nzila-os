@@ -14,6 +14,7 @@ UnionEyes is being prepared for CUPE Local 1234 pilot deployment, enabling a sin
 
 - Grievance intake with taxonomy validation
 - Triage + assignment workflow
+- Intake-to-case conversion for representative-managed casework
 - Case status tracking (filed → acknowledged → investigating → resolved/escalated/denied)
 - Member + steward access roles (RLS enforced)
 - Case timeline + audit trail with cryptographic sealing
@@ -28,7 +29,7 @@ UnionEyes is being prepared for CUPE Local 1234 pilot deployment, enabling a sin
 - Multi-CUPE-local federation
 - Per-org taxonomy customization
 - Advanced analytics (composition trends, disparity analysis)
-- Mobile app or offline-capable workbench
+- Mobile app or offline-capable work surface
 - CUPE education platform integration
 - White-label or multi-brand support
 
@@ -59,7 +60,7 @@ UnionEyes is being prepared for CUPE Local 1234 pilot deployment, enabling a sin
 | **Audit Completeness** | ✅ PASS | 18 mutation tests; 5 timeline tests; 14 export-seal tests |
 | **Data Encryption** | ✅ In Place | TLS in transit; at-rest encryption via Azure defaults |
 | **Malware Scanning** | ⚠️ Compensating | File type whitelist (8 allowed / 20 blocked); ClamAV boundary documented |
-| **Secret Management** | ✅ In Place | Clerk auth; Azure Blob SAS tokens; no hardcoded secrets in git |
+| **Secret Management** | ✅ In Place | Platform auth secrets, Azure Blob SAS tokens, and no hardcoded secrets in git |
 
 ### 3. Operational Readiness
 

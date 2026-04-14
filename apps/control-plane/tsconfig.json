@@ -6,6 +6,8 @@
     "jsx": "preserve",
     "paths": {
       "@/*": ["./*"],
+      "@nzila/db": ["../../packages/db/src/index.ts"],
+      "@nzila/db/platform": ["../../packages/db/src/platform.ts"],
       "@nzila/os-core": ["../../packages/os-core/src/index.ts"],
       "@nzila/platform-governance": ["../../packages/platform-governance/src/index.ts"],
       "@nzila/platform-governance/types": ["../../packages/platform-governance/src/types.ts"],
@@ -30,6 +32,9 @@
       "@nzila/platform-compliance-snapshots": ["../../packages/platform-compliance-snapshots/src/index.ts"],
       "@nzila/platform-compliance-snapshots/types": ["../../packages/platform-compliance-snapshots/src/types.ts"],
       "@nzila/platform-policy-engine": ["../../packages/platform-policy-engine/src/index.ts"],
+      "@nzila/platform-pilot-metrics": ["../../packages/platform-pilot-metrics/src/index.ts"],
+      "@nzila/platform-pilot-metrics/service": ["../../packages/platform-pilot-metrics/src/service.ts"],
+      "@nzila/platform-pilot-metrics-types": ["../../packages/platform-pilot-metrics-types/src/index.ts"],
       "@nzila/ui": ["../../packages/ui/src"]
     }
   },

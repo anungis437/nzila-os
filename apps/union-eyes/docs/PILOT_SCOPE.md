@@ -1,90 +1,57 @@
 # UnionEyes — Pilot Scope Definition
 
-> Defines the boundaries of the CUPE pilot deployment.
-> This document is the canonical reference for what is included and excluded.
->
-> **Audience-friendly version:** [Pilot Overview](../../docs/union-eyes/pilot-overview.md)
+This document defines the current technical scope for UnionEyes pilot proof metrics after the pilot-metrics refactor.
+
+Audience-friendly overview: [Pilot Overview](../../docs/union-eyes/pilot-overview.md)
 
 ## Pilot Objective
 
-Validate that CUPE stewards and members can:
-1. Create and track workplace cases with minimal friction
-2. Add updates and monitor case progress
-3. Complete the full cycle from submission to resolution
+Validate pilot outcomes from real production actions by recording auditable metrics for:
+1. Case throughput and workflow movement
+2. Response/resolution timeliness
+3. SLA compliance and breach risk
+4. Evidence export and assignment efficiency
 
-## Included Features (Pilot Scope)
+## Included Runtime Scope
 
-| Feature | Description | UI Location |
-|---------|-------------|-------------|
-| **Pilot Dashboard** | Simplified view: My Cases, Create Case, Recent Activity | `/dashboard` |
-| **Create Case** | Submit a new workplace issue with type, priority, description | `/dashboard/claims/new` |
-| **My Cases** | View and filter your active and resolved cases | `/dashboard/claims` |
-| **Case Timeline** | Add updates, view history, track status changes | `/cases/[id]` |
-| **Onboarding Wizard** | 4-step first-login experience | Auto-shown on first login |
+The pilot proof path is now action-based and route-driven.
 
-## Excluded Features (Not in Pilot)
+| Runtime Path | Metrics Emitted |
+|---------|-------------|
+| `POST /api/cases` | `cases_created` |
+| `POST /api/cases/[caseId]/assign` | `assignment_efficiency` |
+| `POST /api/workflow/transition` | `workflow_transition_success_rate`, `workflow_failures`, `cases_acknowledged`, `avg_time_to_first_response`, `avg_time_to_resolution` |
+| `GET /api/cases/[caseId]/export` | `evidence_pack_exports` |
+| `POST /api/cron/sla-watchdog` | `sla_breach_count`, `sla_compliance_rate` |
 
-| Feature | Reason |
-|---------|--------|
-| Grievance Intake Wizard (6-step) | Full CBA workflow not needed for pilot |
-| CBA Intelligence | Advanced analytics deferred |
-| Bargaining Module | Out of pilot scope |
-| Strike Fund | Out of pilot scope |
-| Pension Admin | Out of pilot scope |
-| Financial Management | Out of pilot scope |
-| Voting / Elections | Out of pilot scope |
-| AI Assistant | Not validated for pilot |
-| Health & Safety Module | Deferred |
-| Organizing Campaigns | Deferred |
+All emits are executed through [apps/union-eyes/lib/pilot-metrics.ts](apps/union-eyes/lib/pilot-metrics.ts), which resolves the active pilot by `org_id + app_scope=union-eyes`.
 
-## Pilot Boundaries
+## Platform Write Guarantees
 
-- **Users:** CUPE local members and stewards only
-- **Duration:** Time-limited (defined per agreement)
-- **Data:** Pilot data in isolated org scope
-- **Support:** Via pilot admin runbook and SOP
-- **Monitoring:** Lightweight event tracking (no heavy analytics)
+Metric writes in [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) enforce:
+- required `traceId`
+- required identity (`actorId` or `systemActorId`)
+- required org/pilot scope consistency (`orgId` must match pilot owner org)
+- audit linkage write for successful metric events
 
-## Feature Flags
+## Out of Scope
 
-Pilot mode is controlled by the `pilot-mode` feature flag.
-When enabled for an organization:
-- Dashboard renders `PilotDashboard` (simplified)
-- Onboarding wizard shows on first login
-- Sidebar shows reduced nav (pilot scope only)
-- Feedback widget activates after first case
+The current pilot scope intentionally excludes:
+- synthetic/seed fallback in proof surfaces
+- backfilling historical pilot metrics from legacy tables
+- non-auditable metric writes without actor/trace context
+- metrics not tied to a declared active pilot definition
 
-## Observability (Pilot Phase)
+## Operational Dependencies
 
-Events tracked:
-- `user_login`, `session_started`, `session_ended`
-- `case_created`, `first_case_created`
-- `update_added`, `first_update_added`
-- `case_viewed`
+- An active pilot definition must exist in `pilot_definitions` for the org and app scope.
+- Requests should include `x-trace-id`; server fallback trace IDs are generated when absent.
+- SLA watchdog emits system-actor metrics under `system:ue-sla-watchdog`.
 
-Derived metrics:
-- Time to first case, time to first update
-- Cases per user, updates per case
-- Daily active users
+## Success and Readiness Inputs
 
-Friction detection:
-- Login without case creation
-- Case without updates
-- Inactive users (>3 days)
-
-## Conversion Readiness Criteria
-
-An org is "ready" when:
-- ≥ 3 unique active users in last 14 days
-- ≥ 10 total cases created
-- ≥ 5 total updates added
-- Activity on ≥ 5 of last 14 days
-
-## Champion Detection
-
-Users are flagged as potential champions when:
-- ≥ 3 cases created
-- ≥ 5 updates added
-- ≥ 5 active days
-
-Score = (cases × 3) + (updates × 2) + active days
+Pilot readiness should be evaluated from recorded metrics, not inferred UI activity:
+- volume: `cases_created`, `cases_acknowledged`
+- timeliness: `avg_time_to_first_response`, `avg_time_to_resolution`
+- reliability/compliance: `sla_compliance_rate`, `sla_breach_count`
+- operational completion: `workflow_transition_success_rate`, `evidence_pack_exports`

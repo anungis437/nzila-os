@@ -8,6 +8,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import type { CheckInResult } from './types'
+import { recordZongaAttendeeCheckin } from '@/lib/pilot-metrics'
 
 /**
  * Validate and check in a ticket via QR token.
@@ -38,6 +39,7 @@ export async function checkInTicket(params: {
       SELECT
         t.id,
         t.status,
+        t.org_id,
         t.event_id,
         t.holder_id,
         tt.name as ticket_type_name,
@@ -105,6 +107,14 @@ export async function checkInTicket(params: {
   }
 
   logger.info('Check-in successful', { ticketId, eventId, scannedBy })
+  const traceId = `checkin:${ticketId}:${Date.now()}`
+  const orgId = row.org_id as string | undefined
+  if (orgId) {
+    recordZongaAttendeeCheckin(orgId, eventId, scannedBy, traceId).catch((metricErr) =>
+      logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'attendee_checkins' }),
+    )
+  }
+
   return {
     ok: true,
     ticketId: row.id as string,

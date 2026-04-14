@@ -23,6 +23,7 @@ export * from './agri'
 export * from './auth'
 export * from './mobility'
 export * from './flow'
+export * from './pilot-metrics'
 
 // Platform OS schemas (re-exported from dedicated packages)
 export {

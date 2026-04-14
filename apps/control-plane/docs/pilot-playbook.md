@@ -2,43 +2,53 @@
 
 ## Purpose
 
-This playbook guides a pilot team through deploying, configuring, and
-evaluating the Control Plane for a real organisation.
+This playbook guides pilot operators through creating pilots, validating live metrics,
+and exporting proof-grade reports from the Control Plane.
 
-## Week 1 — Setup
+## Week 1 — Access and Baseline
 
-1. **Deploy**: `pnpm build:control-plane && pnpm --filter @nzila/control-plane start`
-2. **Seed demo data**: `pnpm --filter @nzila/control-plane demo:seed`
-3. **Verify access**: Open the control plane on port 3010 and confirm all 7 pages render.
-4. **Connect data sources**: Replace demo seed with real adapters in `server/data.ts`.
+1. Start Control Plane and confirm auth is working.
+2. Open pilot surfaces with org context:
+	- `/pilots?orgId=<org-uuid>`
+	- `/pilots/health?orgId=<org-uuid>`
+	- `/pilots/compare?orgId=<org-uuid>`
+	- `/pilots/reports?orgId=<org-uuid>`
+3. Create or verify pilot definitions via `POST /api/control-plane/pilot-metrics`.
+4. Confirm each active pilot has expected app scope (`union-eyes` or `zonga`).
 
-## Week 2 — Baseline
+## Week 2 — Runtime Verification
 
-1. Run the governance check and record the baseline score.
-2. Review the anomaly page daily — triage any critical anomalies.
-3. Review agent recommendations — mark each as "accepted" or "dismissed" in your tracking tool.
-4. Export the procurement pack and share with your compliance team.
+1. Trigger representative runtime actions in UnionEyes and Zonga.
+2. Verify pilot API responses:
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/metrics?orgId=...`
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/health?orgId=...`
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/alerts?orgId=...`
+3. Recompute health after activity spikes:
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/health?orgId=...&recompute=true`
+4. Track risk movement (`low` / `medium` / `high`) and open alerts.
 
-## Week 3 — Iterate
+## Week 3 — Governance and Remediation
 
-1. Tune anomaly thresholds using `platform-anomaly-engine` rule configuration.
-2. Add custom intelligence queries via the query box.
-3. Integrate the modules page with your CI/CD pipeline for health reporting.
-4. Review agent confidence scores and adjust the model if needed.
+1. Review alert classes: adoption, SLA spike, errors, dead letters, revenue mismatch.
+2. Confirm `orgId` and `pilotId` consistency in operational requests.
+3. Confirm each pilot metric write path has trace + actor/system identity.
+4. Document remediation actions and expected score impact.
 
-## Week 4 — Evaluate
+## Week 4 — Evidence Packaging
 
-1. Compare governance scores against the Week 2 baseline.
-2. Measure time-to-detection for anomalies vs. the previous process.
-3. Gather feedback from operators on the dashboard layout and information density.
-4. Write a summary report with recommendations for GA rollout.
+1. Export report bundles:
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/export?orgId=...&format=json`
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/export?orgId=...&format=csv`
+	- `GET /api/control-plane/pilot-metrics/{pilotId}/export?orgId=...&format=markdown`
+2. Include health trend, alert timeline, and KPI deltas in QBR/renewal packet.
+3. Record unresolved verification gaps separately from validated controls.
 
 ## Go/No-Go Criteria
 
 | Criterion | Target |
 |---|---|
-| All 7 pages render with real data | ✅ |
-| Governance score ≥ 75 | ✅ |
-| Anomaly detection MTTD < 15 min | ✅ |
-| Zero critical vulnerabilities in procurement pack | ✅ |
-| Operator NPS ≥ 7 | ✅ |
+| Pilot pages load with `orgId` context | ✅ |
+| Pilot health score computed for each active pilot | ✅ |
+| Open high-risk alerts triaged with owner/action | ✅ |
+| Report exports generated (JSON + CSV + markdown) | ✅ |
+| No synthetic seed/demo fallback in pilot proof paths | ✅ |

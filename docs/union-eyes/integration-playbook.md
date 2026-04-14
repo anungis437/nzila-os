@@ -13,7 +13,7 @@ Union Eyes is the first Nzila OS app to consume the Integration Fabric. This pla
 - Set up an external connection (e.g., Workday, employer HR system)
 - Register event subscriptions for outbound notifications
 - Configure mapping rules to transform data between UE and external formats
-- Handle inbound cases and members from external systems
+- Handle inbound casework and members from external systems
 - Emit outbound events when internal changes occur
 - Manage identity links between UE entities and external records
 - Monitor integrations via the Control Plane
@@ -99,20 +99,24 @@ await subscriptionStore.create({
 
 | Event | Trigger |
 |-------|---------|
-| `case.created` | New case filed |
-| `case.updated` | Case details changed |
-| `case.resolved` | Case resolution recorded |
-| `case.escalated` | Case escalated to higher level |
-| `grievance.filed` | New grievance submitted |
-| `grievance.updated` | Grievance details changed |
-| `grievance.resolved` | Grievance resolution recorded |
-| `member.created` | New member registered |
-| `member.updated` | Member details changed |
-| `member.terminated` | Member terminated |
-| `benefit.claimed` | Benefit claim submitted |
-| `benefit.approved` | Benefit claim approved |
-| `benefit.denied` | Benefit claim denied |
+| `case.created` | Official casework created by an authorized rep |
+| `case.updated` | Official casework details changed |
+| `case.status_changed` | Casework status changed |
+| `case.assigned` | Casework assigned to a rep |
+| `case.resolved` | Casework resolution recorded |
+| `case.escalated` | Casework escalated |
+| `grievance.filed` | Formal grievance or official grievance-style record filed |
+| `grievance.advanced` | Grievance advanced to the next stage |
+| `grievance.settled` | Grievance settled |
+| `member.created` | Member registered or linked |
+| `member.updated` | Member record updated |
+| `member.deactivated` | Member record deactivated |
 | `document.uploaded` | Supporting document uploaded |
+| `invoice.created` | Invoice created |
+
+Member intake submissions are part of the internal intake workflow and audit
+trail. Integrations should not assume that every intake is already official
+casework.
 
 ---
 
@@ -155,7 +159,7 @@ const preview = fabric.previewMapping(connectionId, inboundPayload)
 
 ## 6. Handling Inbound Cases
 
-When an external system sends a case via webhook:
+When an external system sends casework via webhook:
 
 ```ts
 // In your webhook API route handler
@@ -166,16 +170,16 @@ const result = await fabric.processInboundCase(
   rawPayload,      // the POST body from external system
   actorId,         // the integration service principal
 )
-// result.mappedPayload — the transformed case data
+// result.mappedPayload — the transformed casework data
 // result.identityLink — the external ↔ internal ID link
 ```
 
 ### What Happens Internally
 
 1. Mapping engine transforms the raw payload using configured rules
-2. Identity linker checks if a link already exists for this external case
-3. If new → creates identity link + case record
-4. If existing → updates the existing case (subject to sync policy)
+2. Identity linker checks if a link already exists for this external casework record
+3. If new → creates identity link and the internal record
+4. If existing → updates the existing record according to sync policy
 5. Audit record created
 6. Integration run recorded
 
@@ -196,6 +200,7 @@ await fabric.emitOutboundEvent('case.resolved', {
 ```
 
 The webhook engine will:
+
 1. Find all active subscriptions for `case.resolved` in this org
 2. Apply outbound mapping rules (if configured)
 3. POST to each subscriber's target URL with HMAC signature

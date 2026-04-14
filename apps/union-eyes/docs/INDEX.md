@@ -1,12 +1,11 @@
 # UnionEyes Documentation Index
 
-> Navigation hub for all UnionEyes documentation.
-> Find what you need by audience or topic.
+> Navigation hub for UnionEyes documentation.
+> This index reflects the current workflow model: intake, work, intelligence, and outcomes.
 
 ## Audience Guides
 
-> **Non-technical?** Start at the [UnionEyes Hub](../../docs/union-eyes/README.md) instead —
-> it has guides written for members, stewards, admins, and partners.
+> **Non-technical?** Start at the [UnionEyes Hub](../../docs/union-eyes/README.md).
 
 ## Quick Start
 
@@ -14,7 +13,7 @@
 |-----------|-----------|
 | **Pilot user (CUPE)** | [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) |
 | **Pilot admin** | [CUPE Pilot Admin Runbook](../../docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) |
-| **Steward / Rep** | [Steward Quick Start](#steward-quick-start) |
+| **Steward / rep** | [Steward Quick Start](#steward-quick-start) |
 | **Developer** | [Architecture](./ARCHITECTURE_SHAPE.md) |
 | **Platform ops** | [Demo Flow](./CAPE-DEMO-FLOW.md) |
 
@@ -24,8 +23,8 @@
 
 | Document | Purpose |
 |----------|---------|
-| [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | Step-by-step: login → create case → add update → track |
-| [CUPE Quick Start](../../docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md) | 2-minute onboarding checklist |
+| [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | Step-by-step: sign in, submit intake, follow progress |
+| [CUPE Quick Start](../../docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md) | Pilot onboarding checklist |
 | [CUPE Readiness Checklist](../../docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md) | Pre-pilot environment validation |
 
 ### For Admins
@@ -44,10 +43,11 @@
 |----------|---------|
 | [Architecture](./ARCHITECTURE_SHAPE.md) | System architecture and component map |
 | [Domain Model](./DOMAIN_MODEL.md) | Entities, relationships, state machines |
+| [Terminology Alignment](./TERMINOLOGY_ALIGNMENT.md) | Vocabulary contract across product, docs, and APIs |
 | [Enterprise Hardening](./enterprise-hardening-architecture.md) | Security, observability, deployment |
 | [CBA Intelligence API](./cba-intelligence-openapi.yaml) | Public source intelligence API spec |
 | [Pilot Playbook](./CAPE-PILOT-PLAYBOOK.md) | Adoption and rollout strategy |
-| [Pilot Audit Report](./CAPE-PILOT-AUDIT-REPORT.md) | Compliance and security findings |
+| [Pilot Audit Report](./CAPE-PILOT-AUDIT-REPORT.md) | Historical audit reference |
 
 ### Archive
 
@@ -55,9 +55,9 @@ Historical snapshots retained for traceability.
 
 | Document | Purpose |
 |----------|---------|
-| [TS Error Inventory](./archive/TS_ERROR_INVENTORY.md) | Historical snapshot of 2,795 TS errors after removing `@ts-nocheck` |
-| [World Class Plan](./archive/WORLD_CLASS_PLAN.md) | Original hardening plan (2026-03-05), superseded by PILOT_VALIDATION |
-| [WhatsApp PTT Transcript](./archive/) | Voice note transcript — union representation protocol discussion |
+| [TS Error Inventory](./archive/TS_ERROR_INVENTORY.md) | Historical TS error snapshot |
+| [World Class Plan](./archive/WORLD_CLASS_PLAN.md) | Original hardening plan, superseded by current validation docs |
+| [WhatsApp PTT Transcript](./archive/) | Historical representation protocol notes |
 
 ### Platform Operations
 
@@ -73,27 +73,25 @@ Historical snapshots retained for traceability.
 
 | Term | Definition | Where used |
 |------|-----------|-----------|
-| **Case** | A tracked workplace issue submitted by a member or steward | Dashboard, My Cases, Create Case |
-| **Grievance** | A formal dispute initiated under a collective agreement with structured steps | Grievance Queue, Workbench |
-| **Claim** | A member-submitted issue requesting union assistance | Submit New, My Cases |
-| **Update** | A timestamped note, response, or status change on a case | Case Timeline |
-| **Workbench** | A steward's personal workspace showing assigned cases and signals | Sidebar → Workbench |
-| **Queue** | A filterable list of grievances by status and priority | Sidebar → Grievances |
-| **Signal** | A real-time alert indicating SLA risk, overdue items, or required action | Dashboard Signals Widget |
-| **Timeline** | Chronological log of all events and updates on a case | Case Detail View |
-| **Deadline** | An SLA or contractual response deadline on a case | Deadline Manager |
-| **Pilot** | A time-limited trial deployment with reduced feature scope | Pilot Dashboard |
-| **Champion** | A high-engagement user identified for advocacy and adoption support | Internal metric |
+| **Intake** | A member-submitted issue awaiting steward review | Inbox, intake flows, grievances API |
+| **Case** | Official casework managed by a representative | Work, workbench, case APIs |
+| **Grievance** | Formal casework following a grievance-style representation path | Grievance APIs, work surface, formal workflows |
+| **Inbox** | Member landing area for updates, requests, and intake-related activity | `/dashboard/inbox` |
+| **Priorities** | Rep landing area for what needs action next | `/dashboard/priorities` |
+| **Work** | Consolidated steward casework surface | `/dashboard/work` |
+| **Intelligence** | Research, analytics, and reporting surface | `/dashboard/intelligence` |
+| **Outcomes** | Results and follow-through surface | `/dashboard/outcomes` |
+| **Pilot Program** | Officer-facing pilot health and readiness surface | `/dashboard/pilot` |
 
 ## Steward Quick Start
 
-1. **Log in** → You'll see the Pilot Dashboard
-2. **Create a case** → Click "Create Case" (green card) → Fill: member name, issue type, description → Submit
-3. **Add an update** → Open the case → Add a note in the Timeline
-4. **Track progress** → Return to "My Cases" to see all active cases
-5. **View signals** → Dashboard shows urgent items requiring attention
+1. **Log in** → Stewards typically land in **Priorities**
+2. **Review new work** → Check pending intake activity and urgent items
+3. **Convert or create casework** → Convert a member intake or create official casework when authorized
+4. **Manage progress** → Use **Work** to assign, advance, and document casework
+5. **Record outcomes** → Keep resolution and follow-through current
 
-> **Terminology note:** In the UI, "Case" is the primary term. "Grievance" appears when a case follows a formal CBA-defined process. "Claim" is what members submit. All three refer to tracked workplace issues.
+> **Terminology note:** Members submit **intakes**. Reps manage **casework**. "Grievance" is used for the formal representation track.
 
 ## Cross-References
 

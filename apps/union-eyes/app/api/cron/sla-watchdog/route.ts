@@ -18,6 +18,7 @@ import {
   type ClaimStatus,
   type ClaimPriority,
 } from '@/lib/services/claim-workflow-fsm'
+import { recordUnionEyesSlaCompliance, recordUnionEyesSlaWatchdog } from '@/lib/pilot-metrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,6 +128,36 @@ export const POST = withApi(
       atRisk: atRiskCount,
       breached: breachedCount,
     })
+
+    const watchdogTraceId = `sla-watchdog:${now.toISOString()}`
+    const orgCounts = new Map<string, { breached: number; atRisk: number; compliant: number; scanned: number }>()
+    for (const c of activeClaims) {
+      if (!c.organizationId) continue
+      const current = orgCounts.get(c.organizationId) ?? { breached: 0, atRisk: 0, compliant: 0, scanned: 0 }
+      const status = c.status as ClaimStatus
+      const priority = (c.priority as ClaimPriority) || 'medium'
+      const changedAt = c.updatedAt ?? c.createdAt ?? now
+      const deadline = slaDeadline(status, priority, changedAt)
+      const hoursRemaining = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60)
+      const totalHours = (CLAIM_SLA_STANDARDS[status] ?? 1) * (PRIORITY_MULTIPLIERS[priority] ?? 1)
+      current.scanned += 1
+      if (hoursRemaining <= 0) current.breached += 1
+      else {
+        current.compliant += 1
+        if (hoursRemaining < totalHours * 0.2) current.atRisk += 1
+      }
+      orgCounts.set(c.organizationId, current)
+    }
+
+    for (const [orgId, counts] of orgCounts.entries()) {
+      recordUnionEyesSlaWatchdog(orgId, counts.breached, counts.atRisk, watchdogTraceId).catch((err) =>
+        logger.warn('Pilot metric emit failed', { error: String(err), metric: 'sla_breach_count', orgId }),
+      )
+
+      recordUnionEyesSlaCompliance(orgId, counts.compliant, counts.scanned, watchdogTraceId).catch((err) =>
+        logger.warn('Pilot metric emit failed', { error: String(err), metric: 'sla_compliance_rate', orgId }),
+      )
+    }
 
     return {
       scanned: activeClaims.length,

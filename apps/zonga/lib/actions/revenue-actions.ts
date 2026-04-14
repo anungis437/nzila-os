@@ -21,6 +21,7 @@ import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { getCreatorPlan } from '@/lib/guards/plan-queries'
 import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
+import { recordZongaPlatformFeeRevenue, recordZongaRevenueEvent } from '@/lib/pilot-metrics'
 
 export interface RevenueOverview {
   totalRevenue: number
@@ -85,6 +86,7 @@ export async function recordRevenueEvent(data: {
   assetTitle?: string
   creatorId: string
   source?: string
+  metadata?: Record<string, unknown>
 }): Promise<{ success: boolean; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
@@ -147,6 +149,38 @@ export async function recordRevenueEvent(data: {
       actionId: crypto.randomUUID(),
     })
     await processEvidencePack(pack)
+
+    recordZongaRevenueEvent(
+      ctx.orgId,
+      Number(data.amount),
+      'gross_revenue',
+      ctx.actorId,
+      eventId,
+      eventId,
+    ).catch((metricErr) =>
+      logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'gross_revenue' }),
+    )
+
+    if (data.type === RevenueType.SUBSCRIPTION_SHARE) {
+      recordZongaRevenueEvent(
+        ctx.orgId,
+        Number(data.amount),
+        'subscription_revenue',
+        ctx.actorId,
+        eventId,
+        eventId,
+      ).catch((metricErr) =>
+        logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'subscription_revenue' }),
+      )
+    }
+
+    const platformFeeRaw = data.metadata?.platformFeeAmount
+    const platformFeeAmount = typeof platformFeeRaw === 'number' ? platformFeeRaw : Number(platformFeeRaw ?? 0)
+    if (Number.isFinite(platformFeeAmount) && platformFeeAmount > 0) {
+      recordZongaPlatformFeeRevenue(ctx.orgId, platformFeeAmount, ctx.actorId, eventId, eventId).catch((metricErr) =>
+        logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'platform_fee_revenue' }),
+      )
+    }
 
     revalidatePath('/dashboard/revenue')
     return { success: true }

@@ -19,6 +19,7 @@ import {
   type AnalyticsEvent,
 } from '@nzila/zonga-analytics'
 import { z } from 'zod'
+import { recordZongaPlaybackWatch } from '@/lib/pilot-metrics'
 
 const IngestSchema = z.object({
   type: z.enum(['play', 'skip', 'search', 'share', 'session']),
@@ -206,6 +207,19 @@ export async function POST(request: Request) {
         INSERT INTO zonga_analytics_events (event_type, user_id, payload, created_at)
         VALUES (${event.type}, ${userId}, ${JSON.stringify(event)}::jsonb, ${event.timestamp}::timestamptz)
       `)
+
+      if (type === 'play') {
+        const listenedMs = Number((parsed.data.data.listenedMs as number | undefined) ?? 0)
+        const playbackSource = String(parsed.data.data.source ?? 'direct')
+        const replayFlag = playbackSource === 'replay' || Boolean(parsed.data.data.isReplay)
+        const assetId = String(parsed.data.data.trackId ?? '')
+
+        if (assetId) {
+          recordZongaPlaybackWatch(orgId, assetId, listenedMs, userId, event.id, replayFlag).catch(() => {
+            // Keep analytics ingestion resilient; metric failures are non-blocking.
+          })
+        }
+      }
 
       return NextResponse.json({ ok: true, data: { eventId: event.id } }, { status: 201 })
     }),
