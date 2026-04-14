@@ -40,6 +40,8 @@
     "@nzila/platform-metrics": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
+    "@nzila/platform-pilot-metrics": "workspace:*",
+    "@nzila/platform-pilot-metrics-types": "workspace:*",
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-revenue": "workspace:*",
     "@nzila/schema-core": "workspace:*",

@@ -13,6 +13,7 @@ import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
 
 const caseCreateSchema = z.object({
@@ -210,6 +211,14 @@ export const POST = withApi(
       actorId: userId ?? 'unknown',
       artifacts: [{ type: 'case', data: { claimId: (inserted as Record<string, unknown>)?.claimId, claimType, priority } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_CREATED' }))
+
+    const createdClaimId = (inserted as Record<string, unknown>)?.claimId as string | undefined;
+    const traceId = request.headers.get('x-trace-id') ?? crypto.randomUUID();
+    if (createdClaimId) {
+      recordUnionEyesCaseCreated(organizationId, createdClaimId, userId ?? 'system:ue-case-create', traceId).catch((err) =>
+        logger.warn('Pilot metric emit failed', { error: String(err), metric: 'cases_created' }),
+      );
+    }
 
     // Audit: initial priority set on case creation
     if (priority) {

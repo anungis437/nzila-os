@@ -1,0 +1,13 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@nzila/db": ["../db/src/index.ts"],
+      "@nzila/db/platform": ["../db/src/platform.ts"],
+      "@nzila/platform-pilot-metrics-types": ["../platform-pilot-metrics-types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

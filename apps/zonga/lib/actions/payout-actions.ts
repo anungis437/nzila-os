@@ -24,6 +24,7 @@ import {
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { executeCommand } from '@/lib/control'
+import { recordZongaCreatorPayout } from '@/lib/pilot-metrics'
 
 export interface PayoutListResult {
   payouts: Payout[]
@@ -377,6 +378,17 @@ export async function executePayout(data: {
     actionId: crypto.randomUUID(),
   })
   await processEvidencePack(pack)
+
+  const payoutTraceId = result.data?.entity_id ?? crypto.randomUUID()
+  recordZongaCreatorPayout(
+    ctx.orgId,
+    data.creatorId,
+    Number(data.amount),
+    ctx.actorId,
+    payoutTraceId,
+  ).catch((metricErr) =>
+    logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'creator_payouts' }),
+  )
 
   revalidatePath('/dashboard/payouts')
   return { success: true, transferId: result.data?.entity_id }

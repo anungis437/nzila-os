@@ -23,6 +23,7 @@ import {
 } from '@/lib/zonga-services'
 import { createCheckoutSession } from '@/lib/stripe'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
+import { recordZongaEventCreated, recordZongaTicketSold } from '@/lib/pilot-metrics'
 
 /* ─── Types ─── */
 
@@ -283,6 +284,10 @@ export async function createEvent(data: {
     })
     await processEvidencePack(pack)
 
+    recordZongaEventCreated(ctx.orgId, eventId, ctx.actorId ?? 'system:zonga-events', eventId).catch((metricErr) =>
+      logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'events_created' }),
+    )
+
     revalidatePath('/dashboard/events')
     return { success: true, eventId }
   } catch (error) {
@@ -376,6 +381,10 @@ export async function purchaseTicket(data: {
 }): Promise<{ success: boolean; checkoutUrl?: string; error?: unknown }> {
   const ctx = await resolveListenerContext()
 
+  if (!ctx.orgId) {
+    return { success: false, error: 'Organization context required' }
+  }
+
   const parsed = PurchaseTicketSchema.safeParse(data)
   if (!parsed.success) {
     return { success: false, error: parsed.error.flatten().fieldErrors }
@@ -463,6 +472,17 @@ export async function purchaseTicket(data: {
     )
 
     logger.info('Ticket purchase initiated', { purchaseId, eventId: data.eventId })
+
+    recordZongaTicketSold(
+      ctx.orgId,
+      data.eventId,
+      Number(ticketType.price),
+      ctx.actorId ?? 'system:zonga-ticketing',
+      purchaseId,
+    ).catch((metricErr) =>
+      logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'tickets_sold' }),
+    )
+
     revalidatePath('/dashboard/events')
     return { success: true, checkoutUrl: session?.url ?? undefined }
   } catch (error) {

@@ -182,7 +182,7 @@
 **Gate Owner:** Release Manager
 
 - [x] PR-070: Observability completion
-  - [x] `withObservability()` middleware — Clerk auth, W3C traceparent, request/response logging
+  - [x] `withObservability()` middleware — auth context, W3C traceparent, request/response logging
   - [x] Correlation IDs propagate via `runWithContext()` + `getRequestContext()` (AsyncLocalStorage)
   - [x] Response headers: `x-request-id`, `x-response-time`
 - [x] PR-071: CI readiness gates + evidence artifact

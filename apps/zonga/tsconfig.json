@@ -7,6 +7,8 @@
       "@nzila/db/*": ["../../packages/db/src/*"],
       "@nzila/os-core": ["../../packages/os-core/src"],
       "@nzila/os-core/*": ["../../packages/os-core/src/*"],
+      "@nzila/platform-pilot-metrics": ["../../packages/platform-pilot-metrics/src/index.ts"],
+      "@nzila/platform-pilot-metrics-types": ["../../packages/platform-pilot-metrics-types/src/index.ts"],
       "@nzila/ui": ["../../packages/ui/src"],
       "@nzila/ui/*": ["../../packages/ui/src/*"],
       "@nzila/zonga-core": ["../../packages/zonga-core/src"],

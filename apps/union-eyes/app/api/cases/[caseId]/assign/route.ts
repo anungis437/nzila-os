@@ -16,6 +16,7 @@ import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { recordUnionEyesCaseAssigned } from '@/lib/pilot-metrics';
 
 export const dynamic = 'force-dynamic';
 
@@ -143,6 +144,8 @@ export async function POST(
       toAssignee: assigneeId,
     });
 
+    const traceId = request.headers.get('x-trace-id') ?? crypto.randomUUID();
+
     // Evidence: case assignment audit trail
     buildUnionEvidencePack({
       actionType: 'CASE_ASSIGNED',
@@ -150,6 +153,10 @@ export async function POST(
       actorId: userId,
       artifacts: [{ type: 'case_assignment', data: { caseId, fromAssignee: result.previousAssignee, toAssignee: assigneeId } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_ASSIGNED' }))
+
+    recordUnionEyesCaseAssigned(orgId, caseId, assigneeId, userId, traceId).catch((err) =>
+      logger.warn('Pilot metric emit failed', { error: String(err), metric: 'assignment_efficiency' }),
+    )
 
     return NextResponse.json(
       {

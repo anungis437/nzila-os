@@ -210,6 +210,15 @@ export const ORG_SCOPED_TABLES = [
   'platformCostBudgetBreaches',
   'platformRateLimitThrottles',
 
+  // ── pilot-metrics.ts ───────────────────────────────────
+  'pilotDefinitions',
+  'pilotMetricEvents',
+  'pilotMetricRollups',
+  'pilotHealthScores',
+  'pilotAlerts',
+  'pilotAlertRules',
+  'pilotAlertEscalations',
+
   // ── trade.ts ────────────────────────────────────────────
   'tradeParties',
   'tradeListings',

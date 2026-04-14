@@ -1,84 +1,115 @@
 # FAQ — UnionEyes
 
-> Common questions from members, stewards, and administrators.
+> Common questions from members, stewards, officers, and administrators.
 
 ## General
 
 ### What is UnionEyes?
-A digital case-tracking system for unions. Members report workplace issues,
-stewards manage them, and administrators monitor progress. See the
-[Partner Overview](./partner-overview.md) for a plain-language explanation.
 
-### What is a "case"?
-A tracked workplace issue — the primary unit of work in UnionEyes. You may
-also see the word "grievance" when a case follows a formal collective
-agreement (CBA) process. Both refer to tracked workplace issues.
+UnionEyes is a union operations system that supports the workflow from member
+intake to steward casework to outcomes. Members submit issues, representatives
+manage the work, and administrators monitor operational health.
+
+### What is an intake?
+
+An intake is a member-submitted workplace issue awaiting review. It is the
+member entry point into the representation process.
+
+### What is a case?
+
+A case is official steward or LRO casework. In many situations, a member's
+intake is reviewed first and then converted into formal casework.
+
+### What is a grievance?
+
+"Grievance" is used when the work follows a formal representation or collective
+agreement process. In practice, UnionEyes separates member intake from the
+official grievance or casework handled by representatives.
 
 ### What is the pilot?
-A time-limited trial with a small group of users. It includes core features
-(creating and tracking cases) but not advanced tools like analytics or
-bargaining support. See [Pilot Overview](./pilot-overview.md).
+
+A time-limited trial with a smaller group of users. The pilot focuses on the
+core workflow: intake capture, steward work management, updates, and outcome
+visibility. See [Pilot Overview](./pilot-overview.md).
 
 ## Using the System
 
-### How do I create a case?
-From the Dashboard, click the green **Create Case** card, fill in the form,
-and click Submit. See the [Quick Start](./quick-start.md) for a 2-minute walkthrough.
+### How do I open a case?
 
-### How do I check the status of my case?
-Go to **My Cases** on the Dashboard. Each case shows a status badge
-(Submitted, Under Review, Assigned, etc.). Click on a case to see the
-full Timeline.
+Members do not directly open official cases. Members submit an intake. A
+steward, LRO, or officer reviews it and decides whether to convert it into
+official casework.
 
-### How do I add an update to my case?
-Open the case from My Cases, type your note in the Timeline section, and
-click **Add Update**.
+### Where do I check status?
 
-### Who can see my case?
-You and your assigned steward. Administrators can see all cases within
-their organization. Cases are never visible to other organizations.
+Members use **Inbox** to follow updates, requests, and activity. When work is
+resolved or a result is recorded, it appears in **Outcomes**.
+
+### How do I add more information?
+
+Open the intake or related record, add a note, and upload any requested
+documents if the workflow allows it.
+
+### Who can see my information?
+
+You and the authorized representatives working on the matter. Administrators
+can access records according to role and organization scope. Records are never
+shared across organizations.
 
 ### What is the feedback widget?
-After you create your first case, a small optional widget appears in the
-bottom-right corner. Use it to share what's working well or what could
-be improved. It's completely voluntary.
 
-## For Stewards
+Some pilot experiences include an optional feedback widget. It is voluntary and
+used to collect pilot usability feedback.
 
-### How do I see cases assigned to me?
-Open the **Workbench** from the sidebar. It shows all cases assigned to
-you with their current status and priority.
+## For Stewards and Officers
 
-### How do I change a case's status?
-Open the case and use the status controls. Stewards can move cases through
-the workflow (e.g., Submitted → Under Review → Investigation → Resolved).
+### Where do I see assigned work?
+
+Use **Priorities** for the action-oriented view and **Work** for the active
+casework surface and queue management.
+
+### Can I create a case directly?
+
+Yes, steward-level users and above can create official casework when the role
+and workflow allow it. Members cannot do this directly.
+
+### Can I convert an intake into a case?
+
+Yes. Steward-level users and above can review a member intake and convert it
+into official casework.
 
 ## For Administrators
 
 ### How do I invite users?
-Admin → Users → enter their email → select a role → Send Invite.
+
+Open the admin area, go to **Users**, enter the email address, select the role,
+and send the invite.
 
 ### How do I monitor pilot adoption?
-Go to `/admin/pilot` to see the Pilot Admin Dashboard with metrics on
-active users, case creation, friction signals, and conversion readiness.
 
-### Something is broken — what do I do?
-Check the [Common Issues](./admin-guide.md#common-issues) table first. For
-anything not listed, follow the [escalation path](./admin-guide.md#escalation-path)
-or see the [Support SOP](../pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md).
+Officer-level users and above can review pilot health in the **Pilot Program**
+surface at `/dashboard/pilot`.
 
-## Privacy & Security
+### Something is broken. What do I do?
+
+Check the [Common Issues](./admin-guide.md#common-issues) table first. If the
+issue is not covered there, follow the [escalation path](./admin-guide.md#escalation-path)
+or use the [Support SOP](../pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md).
+
+## Privacy and Security
 
 ### Is my data shared with anyone?
-No. Each organization's data is isolated. Only users within your
-organization can access your cases, and only based on their role.
+
+No. Each organization's data is isolated. Access is role-based and scoped to
+the organization.
 
 ### Is there an audit trail?
-Yes. Every action (case creation, status change, note added) is logged
-with a timestamp and the user who performed it.
+
+Yes. Intake submission, review, conversion, case actions, document uploads,
+and related activity are logged for traceability.
 
 ## Related Documents
 
-- [Quick Start](./quick-start.md) — Create your first case in 2 minutes
+- [Quick Start](./quick-start.md) — Submit an intake in 2 minutes
 - [User Guide](./user-guide.md) — Full feature walkthrough
 - [Admin Guide](./admin-guide.md) — Day-to-day administration

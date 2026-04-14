@@ -16,6 +16,7 @@ import { type AudioQuality } from '@/lib/plans'
 import { createPlaybackSession } from '@nzila/zonga-streaming'
 import { createPlayEvent } from '@nzila/zonga-analytics'
 import { getPlaybackUrl } from '@/features/media/playback-service'
+import { recordZongaReplayView, recordZongaStreamStart } from '@/lib/pilot-metrics'
 import type { QualityTier } from '@/features/media/types'
 
 interface RouteParams {
@@ -101,6 +102,17 @@ export async function GET(request: Request, { params }: RouteParams) {
         provider: playback.provider,
         sessionId: session.id,
       })
+
+      recordZongaStreamStart(ctx.orgId, assetId, ctx.userId, playEvent.id).catch((metricErr) =>
+        logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'stream_starts' }),
+      )
+
+      const isReplay = url.searchParams.get('mode') === 'replay' || url.searchParams.get('replay') === '1'
+      if (isReplay) {
+        recordZongaReplayView(ctx.orgId, assetId, ctx.userId, playEvent.id).catch((metricErr) =>
+          logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'replay_views' }),
+        )
+      }
 
       return NextResponse.json({
         ok: true,

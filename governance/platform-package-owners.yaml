@@ -348,3 +348,15 @@ packages:
     steward: null
     tier: service
     description: "Multi-jurisdiction compliance policy framework for regulatory compliance across Africa (Kenya, Uganda, Nigeria)"
+
+  platform-pilot-metrics-types:
+    owner: "@nzila/governance"
+    steward: null
+    tier: foundational
+    description: "Shared pilot-metrics contracts and canonical taxonomy"
+
+  platform-pilot-metrics:
+    owner: "@nzila/governance"
+    steward: null
+    tier: service
+    description: "Pilot proof metrics layer: ingestion, rollups, scoring, alerts, reports"
