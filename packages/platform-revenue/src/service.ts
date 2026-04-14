@@ -15,8 +15,8 @@ import {
   RevenueEventType as ET,
   RevenueEventSchema,
   UnifiedRevenueRecordSchema,
-} from './types.js'
-import { buildRevenueAuditEntry, type RevenueAuditEntry } from './evidence-bridge.js'
+} from './types'
+import { buildRevenueAuditEntry, type RevenueAuditEntry } from './evidence-bridge'
 
 /** Audit log emitted by emitRevenueEvent for governance traceability */
 const auditLog: RevenueAuditEntry[] = []

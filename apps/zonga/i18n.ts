@@ -1,6 +1,9 @@
 import { getRequestConfig } from 'next-intl/server';
 
-type Messages = Record<string, any>;
+type MessageValue = string | number | boolean | null | MessageMap | MessageValue[];
+type MessageMap = Record<string, MessageValue>;
+
+type Messages = MessageMap;
 
 function isObject(value: unknown): value is Messages {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
