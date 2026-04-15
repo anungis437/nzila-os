@@ -1,39 +1,34 @@
-import { and, eq, lte, or, gte, isNull, desc } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { db } from "../../db";
-import { schema } from "../../db";
 import type { RuleResolutionContext } from "./types";
 
-export async function resolveActiveCbaRuleVersion(context: RuleResolutionContext) {
-  const workDate = new Date(context.workDate);
+type CbaRuleVersionRow = {
+  id: string;
+  ruleVersionCode: string;
+  sourceHash: string;
+  rulesJson: Record<string, unknown>;
+};
 
-  const rows = await db
-    .select()
-    .from(schema.cbaRuleVersions)
-    .where(
-      and(
-        eq(schema.cbaRuleVersions.organizationId, context.organizationId),
-        eq(schema.cbaRuleVersions.status, "active"),
-        lte(schema.cbaRuleVersions.effectiveFrom, workDate.toISOString().slice(0, 10)),
-        or(
-          gte(schema.cbaRuleVersions.effectiveTo, workDate.toISOString().slice(0, 10)),
-          isNull(schema.cbaRuleVersions.effectiveTo),
-        ),
-        or(
-          eq(schema.cbaRuleVersions.employerId, context.employerId ?? null),
-          isNull(schema.cbaRuleVersions.employerId),
-        ),
-        or(
-          eq(schema.cbaRuleVersions.worksiteId, context.worksiteId ?? null),
-          isNull(schema.cbaRuleVersions.worksiteId),
-        ),
-        or(
-          eq(schema.cbaRuleVersions.bargainingUnitId, context.bargainingUnitId ?? null),
-          isNull(schema.cbaRuleVersions.bargainingUnitId),
-        ),
-      ),
-    )
-    .orderBy(desc(schema.cbaRuleVersions.effectiveFrom))
-    .limit(1);
+export async function resolveActiveCbaRuleVersion(context: RuleResolutionContext) {
+  const workDate = new Date(context.workDate).toISOString().slice(0, 10);
+
+  const rows = (await db.execute(sql`
+    select
+      id,
+      rule_version_code as "ruleVersionCode",
+      source_hash as "sourceHash",
+      rules_json as "rulesJson"
+    from cba_rule_versions
+    where organization_id = ${context.organizationId}
+      and status = 'active'
+      and effective_from <= ${workDate}::date
+      and (effective_to is null or effective_to >= ${workDate}::date)
+      and (employer_id is null or employer_id = ${context.employerId ?? null})
+      and (worksite_id is null or worksite_id = ${context.worksiteId ?? null})
+      and (bargaining_unit_id is null or bargaining_unit_id = ${context.bargainingUnitId ?? null})
+    order by effective_from desc
+    limit 1
+  `)) as CbaRuleVersionRow[];
 
   return rows[0] ?? null;
 }

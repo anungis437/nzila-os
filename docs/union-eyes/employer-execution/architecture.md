@@ -1,33 +1,45 @@
 # Employer Execution Architecture
 
 ## Scope
-Employer Execution is a first-class capability inside Union Eyes. It extends the existing UE financial/compliance architecture and does not replace imported remittance reconciliation.
+Employer Execution is implemented inside Union Eyes and remains aligned to existing UE governance primitives. This pass finalizes hardening without introducing a parallel architecture.
 
-## Core Flow
-1. Runtime profile + entitlements enable contractor execution mode for an organization.
-2. Operator uploads timesheet CSV.
-3. Timesheet rows normalize into execution tables with validation summary.
-4. Payroll engine performs deterministic staged calculation.
-5. Official run locks immutable snapshot and trace.
-6. Remittance engine generates package outputs and due date.
-7. Compliance engine emits actionable and blocking events.
-8. Replay engine compares original and replayed outcomes.
-9. Evidence artifacts are hashed and sealed.
+## Authoritative Layers
+1. Next API routes: auth/context, entitlements, request validation, delegation, response shaping.
+2. Financial service engines: rule resolution semantics, payroll math, replay attribution, compliance policy.
+3. Persistence: immutable run snapshots, item traces, compliance events, replay records, evidence artifacts.
 
-## Bounded Contexts
-- Schema domain: apps/union-eyes/db/schema/domains/employer-execution
-- Service engines: apps/union-eyes/services/financial-service/src/services/employer-execution
-- Next APIs: apps/union-eyes/app/api/employer-execution
-- Dashboard workspace: apps/union-eyes/app/[locale]/dashboard/employer-execution
-- Worker jobs: apps/union-eyes/lib/workers/employer-execution
+## Executable CBA Semantics
+Resolved CBA rules are represented as typed executable rules with `kind`, `strategy`, `sourceRuleId`, and `path` lineage.
+Calculation is driven by executable rules, not flat rates.
+Flattened values are retained only as compatibility summaries.
 
-## Data Separation
-- Existing employer remittance import/reconciliation remains unchanged.
-- Generated remittance runs are persisted in dedicated employer_execution remittance tables.
+### Supported executable rule kinds
+- `base_rate`
+- `overtime`
+- `double_time`
+- `shift_premium`
+- `travel`
+- `dues`
+- `benefits`
+- `pension`
+- `statutory_holiday`
+- `regional_override`
+- `classification_override`
+
+## Official Trust Boundary
+- Preview runs are mutable simulation outputs.
+- Official runs require lifecycle controls and compliance gates.
+- Approval locks immutable snapshot semantics.
+- Sealing/posted state finalizes authoritative artifacts.
+
+## Evidence Model
+For official payroll and generated remittance runs:
+- structured manifest includes input refs, timesheet batch ids, rule version ids, engine version, status timeline, approvers, artifact hashes, calc trace summary hash
+- manifest hash and seal are persisted as evidence artifacts
+- replay references trace/evidence lineage for auditability
 
 ## Determinism Controls
-- Input snapshot persisted before official calc.
-- Rule-version resolution trace persisted with source hash.
-- Per-run engineVersion persisted.
-- Item-level trace and trace hash persisted.
-- Replay diff persisted for audit explainability.
+- deterministic snapshot hash from normalized input + executable rule resolution
+- item trace hashes for every payroll item
+- run trace hash for run-level integrity
+- replay diff hash for audit persistence

@@ -226,11 +226,11 @@ export const POST = withApi(
           organizationId,
           payrollRunId: createdRun.id,
           eventCode: "missing_classification",
-          severity: "high",
+          severity: "error",
           status: "open",
           summary: "Payroll includes entries without classification mapping",
           details: { count: missingClassificationCount },
-          blocking: "yes",
+          blocking: "no",
         });
       }
 
@@ -261,7 +261,7 @@ export const POST = withApi(
             snapshotHash: sha256(JSON.stringify(body)),
             cbaRuleVersionId: activeRuleVersion.id,
           },
-          blocking: "yes",
+          blocking: "no",
         });
       }
 

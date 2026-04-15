@@ -494,11 +494,17 @@ async function seed() {
   if (!replay) {
     const diff = {
       changed: true,
-      fieldsChanged: [
+      differences: [
         {
+          scope: "run",
+          entityId: PAYROLL_RUN_ID,
           field: "totalGross",
-          before: calc.totals.gross,
-          after: calc.totals.gross + 1,
+          originalValue: calc.totals.gross,
+          replayValue: calc.totals.gross + 1,
+          causeType: "derived_change",
+          causeDetail: "seeded replay variance",
+          originalRulePath: ["seed", "baseline"],
+          replayRulePath: ["seed", "simulated"],
         },
       ],
       summary: "Simulated replay produced a gross-pay variance.",

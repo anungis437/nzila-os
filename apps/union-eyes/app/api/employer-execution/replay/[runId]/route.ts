@@ -153,18 +153,52 @@ export const POST = withApi(
         ? "rule change: rule version override"
         : body.mode === "new_engine"
           ? "engine change: replay engine version override"
-          : "exact replay mismatch";
+          : "input change: exact replay mismatch";
 
-    const baseDiff = buildReplayDiff(originalTotals, replayedTotals, reasonByMode);
+    const baseDiff = buildReplayDiff(originalTotals, replayedTotals, reasonByMode, {
+      scope: "run",
+      entityId: sourceRun.id,
+      originalRulePath: ["payroll_run", sourceRun.id, "calcTraceHash"],
+      replayRulePath: ["payroll_run", sourceRun.id, "replayCalcTraceHash"],
+    });
 
     const sourceByEmployee = new Map(sourceItems.map((item) => [item.employeeExternalId, item]));
     const employeeDiffs = replayCalc.items.flatMap((item) => {
       const source = sourceByEmployee.get(item.employeeExternalId);
+      const replayRulePath =
+        ((item.trace as { calc_trace?: { applied_rule_path?: Record<string, unknown> } } | undefined)?.calc_trace
+          ?.applied_rule_path as string[] | undefined) ?? [];
+      const sourceRulePath =
+        ((source?.traceJson as { calc_trace?: { applied_rule_path?: Record<string, unknown> } } | undefined)?.calc_trace
+          ?.applied_rule_path as string[] | undefined) ?? [];
+
       if (!source) {
-        return [{ field: `employee:${item.employeeExternalId}:missing_in_original`, original: null, replay: item.grossPay, reason: reasonByMode }];
+        return [
+          {
+            scope: "employee_item" as const,
+            entityId: item.employeeExternalId,
+            field: "presence",
+            originalValue: null,
+            replayValue: "present",
+            causeType: "derived_change" as const,
+            causeDetail: reasonByMode,
+            originalRulePath: sourceRulePath,
+            replayRulePath,
+          },
+        ];
       }
 
-      const output: Array<{ field: string; original: unknown; replay: unknown; reason: string }> = [];
+      const output: Array<{
+        scope: "employee_item";
+        entityId: string;
+        field: string;
+        originalValue: unknown;
+        replayValue: unknown;
+        causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+        causeDetail: string;
+        originalRulePath?: string[];
+        replayRulePath?: string[];
+      }> = [];
       const pairs: Array<[string, number, number]> = [
         ["gross_pay", Number(source.grossPay), item.grossPay],
         ["net_pay", Number(source.netPay), item.netPay],
@@ -172,13 +206,26 @@ export const POST = withApi(
         ["benefit_amount", Number(source.benefitAmount), item.benefitAmount],
         ["pension_amount", Number(source.pensionAmount), item.pensionAmount],
       ];
+
+      const causeType =
+        body.mode === "new_rule"
+          ? "rule_change"
+          : body.mode === "new_engine"
+            ? "engine_change"
+            : "input_change";
+
       for (const [fieldName, originalValue, replayValue] of pairs) {
         if (originalValue !== replayValue) {
           output.push({
-            field: `${item.employeeExternalId}.${fieldName}`,
-            original: originalValue,
-            replay: replayValue,
-            reason: reasonByMode,
+            scope: "employee_item",
+            entityId: item.employeeExternalId,
+            field: fieldName,
+            originalValue,
+            replayValue,
+            causeType,
+            causeDetail: reasonByMode,
+            originalRulePath: sourceRulePath,
+            replayRulePath,
           });
         }
       }
@@ -232,7 +279,7 @@ export const POST = withApi(
           organizationId,
           payrollRunId: sourceRun.id,
           eventCode: "inconsistent_replay_results",
-          severity: "high",
+          severity: "error",
           status: "open",
           summary: "Replay produced variance against source payroll run",
           details: {

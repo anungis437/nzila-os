@@ -1,16 +1,31 @@
 # Remittance Lifecycle
 
-## Lifecycle Stages
-1. Payroll approved: official payroll run enters approved state.
-2. Package generated: employer_remittance_runs row created.
-3. Remittance items grouped: employer_remittance_run_items rows persisted.
-4. Artifacts written: CSV/JSON/summary artifacts with hashes.
-5. Evidence sealed: evidence manifest + seal artifacts created.
-6. Compliance monitored: due-date and blocking checks tracked.
+## Stage Model
+1. Payroll calculated.
+2. Official payroll approved (critical clear + error acknowledged).
+3. Remittance generated from approved payroll only.
+4. Remittance items and package artifacts persisted.
+5. Evidence manifest + seal persisted.
+6. Compliance monitoring continues until operational closeout.
 
-## Important Distinction
-- Imported remittances and reconciliation stay in existing dues/remittance architecture.
-- Generated execution remittance runs are separate lifecycle records.
+## Status Policy
+- Payroll lifecycle: `draft` -> `calculated` -> `approved` -> `posted`
+- Remittance lifecycle: generated package remains immutable and traceable
+- Replay lifecycle: audit record only; no mutation of authoritative payroll/remittance rows
 
-## Due Date Logic
-Pilot default is period_end + 15 days via runtime profile.
+## Invariants
+- Remittance generation is rejected for non-approved payroll runs.
+- Replay does not mutate source run data.
+- Adjustments must produce explicit new runs rather than mutating approved runs.
+
+## Evidence Semantics
+Remittance evidence manifest captures:
+- input refs (payroll run / source batch)
+- rule version references
+- engine version
+- status timeline
+- approver context from payroll
+- artifact hashes
+- calc trace summary hash linkage
+
+The evidence seal is derived from manifest hash and run identity for tamper-evident verification.

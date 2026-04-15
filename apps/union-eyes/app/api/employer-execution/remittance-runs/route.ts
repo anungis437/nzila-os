@@ -11,7 +11,7 @@ import {
   employerExecutionProfiles,
 } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
-import { sha256 } from "../_lib";
+import { createEvidencePack, sha256 } from "../_lib";
 
 type RemittanceFormatter = {
   formatCode: string;
@@ -202,6 +202,44 @@ export const POST = withApi(
       return createdRun;
     });
 
+    const evidencePack = createEvidencePack({
+      entityType: "remittance_run",
+      runRefId: remittanceRun.id,
+      organizationId,
+      createdBy: userId,
+      metadata: {
+        runCode: remittanceRun.runCode,
+        status: remittanceRun.status,
+        engineVersion: payrollRun.engineVersion,
+        ruleVersionIds: payrollRun.cbaRuleVersionId ? [payrollRun.cbaRuleVersionId] : [],
+        inputRefs: { payrollRunId: payrollRun.id, sourceBatchId: payrollRun.sourceBatchId },
+        timesheetBatchIds: payrollRun.sourceBatchId ? [payrollRun.sourceBatchId] : [],
+        approvers: payrollRun.approvedBy ? [{ userId: payrollRun.approvedBy, at: payrollRun.approvedAt }] : [],
+        statusTimestamps: {
+          generatedAt: remittanceRun.generatedAt,
+          payrollApprovedAt: payrollRun.approvedAt,
+        },
+        calcTraceSummaryHash: payrollRun.calcTraceHash,
+      },
+      artifacts: [
+        {
+          artifactType: "remittance_csv",
+          artifactName: "remittance.csv",
+          payload: { hash: csvHash },
+        },
+        {
+          artifactType: "remittance_json",
+          artifactName: "remittance.json",
+          payload: { hash: jsonHash },
+        },
+        {
+          artifactType: "summary",
+          artifactName: "remittance-summary.json",
+          payload: summary,
+        },
+      ],
+    });
+
     await withRLSContext(async (tx) => tx.insert(employerExecutionArtifacts).values([
       {
         organizationId,
@@ -239,8 +277,8 @@ export const POST = withApi(
         artifactType: "evidence_manifest",
         artifactName: "evidence-manifest.json",
         storageRef: `inline://employer-execution/${remittanceRun.id}/manifest`,
-        artifactHash: sha256(JSON.stringify({ remittanceRunId: remittanceRun.id, summary, csvHash, jsonHash })),
-        manifestJson: { remittanceRunId: remittanceRun.id, summary, csvHash, jsonHash },
+        artifactHash: evidencePack.manifestHash,
+        manifestJson: evidencePack.manifest,
         createdBy: userId ?? undefined,
       },
       {
@@ -249,8 +287,8 @@ export const POST = withApi(
         artifactType: "evidence_seal",
         artifactName: "evidence-seal.sig",
         storageRef: `inline://employer-execution/${remittanceRun.id}/seal`,
-        artifactHash: sha256(`${remittanceRun.id}:${sha256(JSON.stringify(summary))}`),
-        manifestJson: { sealAlgorithm: "sha256" },
+        artifactHash: evidencePack.seal,
+        manifestJson: { sealAlgorithm: "sha256", manifestHash: evidencePack.manifestHash },
         createdBy: userId ?? undefined,
       },
     ]));

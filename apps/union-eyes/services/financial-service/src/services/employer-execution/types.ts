@@ -16,7 +16,125 @@ export type RuleResolutionResult = {
     outcome: string;
     details?: Record<string, unknown>;
   }>;
-  rules: Record<string, unknown>;
+  rules: {
+    version: Record<string, unknown>;
+    items: Array<Record<string, unknown>>;
+  };
+  executableRules: ExecutableRule[];
+  flattenedValues: FlattenedRuleValues;
+};
+
+export type ComplianceSeverity = "info" | "warning" | "error" | "critical";
+
+export type RuleStrategy =
+  | "hourly"
+  | "daily_threshold"
+  | "after_threshold"
+  | "flat_per_hour"
+  | "flat_per_shift"
+  | "flat"
+  | "per_km"
+  | "percent_gross"
+  | "per_hour"
+  | "calendar_match"
+  | "replace"
+  | "augment";
+
+export type ExecutableRule =
+  | {
+      kind: "base_rate";
+      strategy: "hourly";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "overtime";
+      strategy: "daily_threshold";
+      thresholdHours: number;
+      multiplier: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "double_time";
+      strategy: "after_threshold";
+      thresholdHours: number;
+      multiplier: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "shift_premium";
+      strategy: "flat_per_hour" | "flat_per_shift";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "travel";
+      strategy: "flat" | "per_km" | "hourly";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "dues";
+      strategy: "percent_gross" | "per_hour" | "flat";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "benefits";
+      strategy: "per_hour" | "percent_gross" | "flat";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "pension";
+      strategy: "per_hour" | "percent_gross" | "flat";
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "statutory_holiday";
+      strategy: "calendar_match";
+      holidayCode: string;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "regional_override";
+      strategy: "replace" | "augment";
+      targetRuleKind: string;
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    }
+  | {
+      kind: "classification_override";
+      strategy: "replace" | "augment";
+      targetRuleKind: string;
+      amount: number;
+      sourceRuleId: string;
+      path: string[];
+    };
+
+export type FlattenedRuleValues = {
+  baseRate: number;
+  overtimeMultiplier: number;
+  doubleTimeMultiplier: number;
+  shiftPremiumRate: number;
+  travelPremiumRate: number;
+  duesRate: number;
+  benefitRate: number;
+  pensionRate: number;
+  statutoryHolidayMultiplier: number;
+  regionalOverride: number;
+  classificationOverride: number;
 };
 
 export type NormalizedTimesheetEntry = {
@@ -40,19 +158,8 @@ export type PayrollRunInput = {
     ruleVersionId?: string;
     ruleVersionCode?: string;
     sourceHash?: string;
-    values: {
-      baseRate: number;
-      overtimeMultiplier: number;
-      doubleTimeMultiplier: number;
-      shiftPremiumRate: number;
-      travelPremiumRate: number;
-      duesRate: number;
-      benefitRate: number;
-      pensionRate: number;
-      statutoryHolidayMultiplier: number;
-      regionalOverride: number;
-      classificationOverride: number;
-    };
+    executableRules: ExecutableRule[];
+    values: FlattenedRuleValues;
     ruleResolution: Array<Record<string, unknown>>;
     appliedRules: Array<Record<string, unknown>>;
   };
@@ -73,6 +180,8 @@ export type PayrollRunResult = {
     duesAmount: number;
     benefitAmount: number;
     pensionAmount: number;
+    remittanceGroupKey?: string;
+    traceHash: string;
     trace: Record<string, unknown>;
   }>;
   trace: Record<string, unknown>;
@@ -95,11 +204,18 @@ export type RemittanceGenerationResult = {
 
 export type ReplayDiff = {
   changed: boolean;
-  differences: Array<{
-    field: string;
-    original: unknown;
-    replay: unknown;
-    reason: string;
-  }>;
+  differences: ReplayDiffEntry[];
   summary: string;
+};
+
+export type ReplayDiffEntry = {
+  scope: "run" | "employee_item" | "remittance_item";
+  entityId: string;
+  field: string;
+  originalValue: unknown;
+  replayValue: unknown;
+  causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+  causeDetail: string;
+  originalRulePath?: string[];
+  replayRulePath?: string[];
 };

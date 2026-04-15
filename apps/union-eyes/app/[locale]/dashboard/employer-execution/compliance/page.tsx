@@ -27,8 +27,11 @@ export default async function EmployerExecutionCompliancePage() {
         events={events.map((event) => ({
           id: event.id,
           eventCode: event.eventCode,
-          severity: event.severity,
+          severity: event.severity as "info" | "warning" | "error" | "critical",
           blocking: event.blocking,
+          status: event.status,
+          payrollRunId: event.payrollRunId,
+          remittanceRunId: event.remittanceRunId,
           summary: event.summary,
           detectedAt: String(event.detectedAt),
         }))}

@@ -1,6 +1,12 @@
 import { requireUser } from "@/lib/api-auth-guard";
 import { db } from "@/db";
-import { employerPayrollRuns, employerPayrollRunItems, employerExecutionReplays } from "@/db/schema";
+import {
+  employerPayrollRuns,
+  employerPayrollRunItems,
+  employerExecutionReplays,
+  employerExecutionComplianceEvents,
+  employerExecutionArtifacts,
+} from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { PayrollRunTracePanel, ReplayDiffViewer } from "@/components/employer-execution";
 
@@ -37,6 +43,33 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
     .orderBy(desc(employerExecutionReplays.createdAt))
     .limit(1);
 
+  const complianceEvents = await db
+    .select()
+    .from(employerExecutionComplianceEvents)
+    .where(
+      and(
+        eq(employerExecutionComplianceEvents.organizationId, organizationId),
+        eq(employerExecutionComplianceEvents.payrollRunId, run.id),
+      ),
+    )
+    .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
+
+  const artifacts = await db
+    .select()
+    .from(employerExecutionArtifacts)
+    .where(
+      and(
+        eq(employerExecutionArtifacts.organizationId, organizationId),
+        eq(employerExecutionArtifacts.payrollRunId, run.id),
+      ),
+    )
+    .orderBy(desc(employerExecutionArtifacts.createdAt));
+
+  const calcTrace = (run.calcTrace ?? {}) as {
+    ruleVersionId?: string;
+    sourceHash?: string;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -44,9 +77,57 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
         <p className="text-sm text-muted-foreground">Status: {run.status}</p>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-md border p-4 text-sm">
+          <h2 className="font-medium">Source Snapshot</h2>
+          <p className="mt-1 text-muted-foreground">Batch: {String(run.sourceBatchId ?? "n/a")}</p>
+          <p className="text-muted-foreground">Period: {String(run.periodStart)} to {String(run.periodEnd)}</p>
+          <p className="text-muted-foreground">Engine: {run.engineVersion}</p>
+          <p className="text-muted-foreground">Rule Version: {String(calcTrace.ruleVersionId ?? run.cbaRuleVersionId ?? "n/a")}</p>
+          <p className="text-muted-foreground">Rule Source Hash: {String(calcTrace.sourceHash ?? "n/a")}</p>
+        </div>
+        <div className="rounded-md border p-4 text-sm">
+          <h2 className="font-medium">Evidence / Seal</h2>
+          <p className="mt-1 text-muted-foreground">Artifacts: {artifacts.length}</p>
+          {artifacts.slice(0, 4).map((artifact) => (
+            <p key={artifact.id} className="text-muted-foreground">
+              {artifact.artifactType}: {artifact.artifactHash}
+            </p>
+          ))}
+        </div>
+      </div>
+
       <PayrollRunTracePanel trace={run.calcTrace as Record<string, unknown>} />
 
-      <ReplayDiffViewer diff={(latestReplay?.diffJson as { changed: boolean; summary: string; fieldsChanged: Array<{ field: string; before: unknown; after: unknown }>; }) ?? null} />
+      <ReplayDiffViewer
+        diff={
+          (latestReplay?.diffJson as {
+            changed: boolean;
+            summary: string;
+            differences: Array<{
+              scope: "run" | "employee_item" | "remittance_item";
+              entityId: string;
+              field: string;
+              originalValue: unknown;
+              replayValue: unknown;
+              causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+              causeDetail: string;
+              originalRulePath?: string[];
+              replayRulePath?: string[];
+            }>;
+          }) ?? null
+        }
+      />
+
+      <div className="rounded-md border p-4 text-sm">
+        <h2 className="font-medium">Open Compliance Events</h2>
+        {complianceEvents.length === 0 ? <p className="mt-1 text-muted-foreground">No compliance events.</p> : null}
+        {complianceEvents.map((event) => (
+          <p key={event.id} className="mt-1 text-muted-foreground">
+            {event.severity} | {event.status} | {event.summary}
+          </p>
+        ))}
+      </div>
 
       <div className="rounded-md border">
         <table className="min-w-full text-sm">

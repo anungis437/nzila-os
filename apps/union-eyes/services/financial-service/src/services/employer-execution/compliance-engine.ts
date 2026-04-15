@@ -26,7 +26,7 @@ export function runEmployerExecutionComplianceChecks(context: ComplianceContext)
     events.push({
       eventCode: "missing_classification",
       severity: "error",
-      blocking: true,
+      blocking: false,
       summary: "Timesheet rows are missing classification mapping",
       details: { count: context.missingClassificationCount },
     });

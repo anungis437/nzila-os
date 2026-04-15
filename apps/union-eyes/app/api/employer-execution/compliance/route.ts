@@ -7,7 +7,7 @@ const createSchema = z.object({
   payrollRunId: z.string().uuid().optional(),
   remittanceRunId: z.string().uuid().optional(),
   eventCode: z.string(),
-  severity: z.enum(["info", "warning", "high", "critical"]).default("warning"),
+  severity: z.enum(["info", "warning", "error", "critical"]).default("warning"),
   summary: z.string(),
   details: z.record(z.unknown()).default({}),
   blocking: z.enum(["yes", "no"]).default("no"),
