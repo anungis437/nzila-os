@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export function LoginForm() {
@@ -40,11 +41,21 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Sign in to your account to continue
-        </p>
+      <div className="space-y-4">
+        <Image
+          src="/UnionEyes-LO-FF.png"
+          alt="UnionEyes logo"
+          width={200}
+          height={62}
+          className="h-10 w-auto object-contain"
+          priority
+        />
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Sign in to your account to continue
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

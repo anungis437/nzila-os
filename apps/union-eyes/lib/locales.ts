@@ -9,7 +9,7 @@
  */
 
 // Supported locales
-export const locales = ['en-CA', 'fr-CA'] as const;
+export const locales = ['en-CA', 'fr-CA', 'it', 'pt'] as const;
 export type Locale = (typeof locales)[number];
 
 // Default locale

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,10 +14,13 @@ import {
 const locales = [
   { code: "en-CA", label: "English", flag: "🇨🇦" },
   { code: "fr-CA", label: "Français", flag: "🇨🇦" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
 ] as const;
 
 export default function LanguageSwitcher() {
   const pathname = usePathname();
+  const router = useRouter();
   
   // Extract locale from pathname (e.g., /en-CA/... or /fr-CA/...)
   const pathSegments = pathname.split("/");
@@ -46,9 +49,7 @@ export default function LanguageSwitcher() {
       newPath = `/${newLocale}${rest}`;
     }
 
-    // Force a full page reload to ensure translations are updated
-    // eslint-disable-next-line react-hooks/immutability
-    window.location.href = newPath;
+    router.replace(newPath);
   };
 
   return (

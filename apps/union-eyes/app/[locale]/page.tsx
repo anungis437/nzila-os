@@ -331,7 +331,7 @@ export default async function LocaleRootPage({
                       </div>
                       <div className="w-px h-10 bg-white/30" />
                       <div>
-                        <div className="text-2xl font-bold">4</div>
+                        <div className="text-2xl font-bold">6</div>
                         <div className="text-xs text-gray-100">{t('languages')}</div>
                       </div>
                       <div className="w-px h-10 bg-white/30" />
