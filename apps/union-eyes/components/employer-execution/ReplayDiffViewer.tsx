@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ReplayDiffEntry = {
   scope: "run" | "employee_item" | "remittance_item";
-  entityId: string;
+  subjectId: string;
   field: string;
   originalValue: unknown;
   replayValue: unknown;
@@ -40,9 +40,9 @@ export function ReplayDiffViewer({ diff }: { diff: ReplayDiff | null }) {
           <p className="text-sm text-muted-foreground">No changed items.</p>
         ) : null}
         {changedOnly.map((entry, index) => (
-          <div key={`${entry.scope}:${entry.entityId}:${entry.field}:${index}`} className="rounded-md border p-3 text-sm">
+          <div key={`${entry.scope}:${entry.subjectId}:${entry.field}:${index}`} className="rounded-md border p-3 text-sm">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-medium">{entry.entityId}.{entry.field}</p>
+              <p className="font-medium">{entry.subjectId}.{entry.field}</p>
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs uppercase">{entry.scope}</span>
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs uppercase">{entry.causeType.replace("_", " ")}</span>
             </div>

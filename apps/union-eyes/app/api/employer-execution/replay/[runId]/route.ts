@@ -157,7 +157,7 @@ export const POST = withApi(
 
     const baseDiff = buildReplayDiff(originalTotals, replayedTotals, reasonByMode, {
       scope: "run",
-      entityId: sourceRun.id,
+      subjectId: sourceRun.id,
       originalRulePath: ["payroll_run", sourceRun.id, "calcTraceHash"],
       replayRulePath: ["payroll_run", sourceRun.id, "replayCalcTraceHash"],
     });
@@ -176,7 +176,7 @@ export const POST = withApi(
         return [
           {
             scope: "employee_item" as const,
-            entityId: item.employeeExternalId,
+            subjectId: item.employeeExternalId,
             field: "presence",
             originalValue: null,
             replayValue: "present",
@@ -190,7 +190,7 @@ export const POST = withApi(
 
       const output: Array<{
         scope: "employee_item";
-        entityId: string;
+        subjectId: string;
         field: string;
         originalValue: unknown;
         replayValue: unknown;
@@ -218,7 +218,7 @@ export const POST = withApi(
         if (originalValue !== replayValue) {
           output.push({
             scope: "employee_item",
-            entityId: item.employeeExternalId,
+            subjectId: item.employeeExternalId,
             field: fieldName,
             originalValue,
             replayValue,

@@ -497,7 +497,7 @@ async function seed() {
       differences: [
         {
           scope: "run",
-          entityId: PAYROLL_RUN_ID,
+          subjectId: PAYROLL_RUN_ID,
           field: "totalGross",
           originalValue: calc.totals.gross,
           replayValue: calc.totals.gross + 1,

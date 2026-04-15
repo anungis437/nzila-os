@@ -190,7 +190,7 @@ export function buildReplayDiff(
   reasonHint: string,
   options?: {
     scope?: ReplayDiffEntry["scope"];
-    entityId?: string;
+    subjectId?: string;
     originalRulePath?: string[];
     replayRulePath?: string[];
   },

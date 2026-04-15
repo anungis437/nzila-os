@@ -106,7 +106,7 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
             summary: string;
             differences: Array<{
               scope: "run" | "employee_item" | "remittance_item";
-              entityId: string;
+              subjectId: string;
               field: string;
               originalValue: unknown;
               replayValue: unknown;

@@ -157,7 +157,7 @@ describe("Employer Execution hardening helpers", () => {
   it("builds replay diffs with cause attribution and rule paths", () => {
     const noDiff = buildReplayDiff({ totalDues: 100 }, { totalDues: 100 }, "input change: exact replay mismatch", {
       scope: "run",
-      entityId: "run-1",
+      subjectId: "run-1",
     });
     expect(noDiff.changed).toBe(false);
     expect(noDiff.differences).toHaveLength(0);
@@ -168,7 +168,7 @@ describe("Employer Execution hardening helpers", () => {
       "rule change: dues rate override",
       {
         scope: "employee_item",
-        entityId: "EMP-001",
+        subjectId: "EMP-001",
         originalRulePath: ["rules", "dues", "v1"],
         replayRulePath: ["rules", "dues", "v2"],
       },
@@ -177,7 +177,7 @@ describe("Employer Execution hardening helpers", () => {
     expect(withDiff.changed).toBe(true);
     expect(withDiff.differences[0]).toEqual({
       scope: "employee_item",
-      entityId: "EMP-001",
+      subjectId: "EMP-001",
       field: "dues_amount",
       originalValue: 120.5,
       replayValue: 125.75,

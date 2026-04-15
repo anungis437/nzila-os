@@ -19,7 +19,7 @@ export function replayDiff(
   causeDetail = "derived replay variance",
   options?: {
     scope?: ReplayDiffEntry["scope"];
-    entityId?: string;
+    subjectId?: string;
     originalRulePath?: string[];
     replayRulePath?: string[];
   },
@@ -33,7 +33,7 @@ export function replayDiff(
     if (!jsonEqual(originalValue, replayValue)) {
       differences.push({
         scope: options?.scope ?? "run",
-        entityId: options?.entityId ?? "run",
+        subjectId: options?.subjectId ?? "run",
         field,
         originalValue,
         replayValue,
