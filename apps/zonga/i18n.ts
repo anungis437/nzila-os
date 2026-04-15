@@ -1,7 +1,11 @@
 import { getRequestConfig } from 'next-intl/server';
 
-type MessageValue = string | number | boolean | null | MessageMap | MessageValue[];
-type MessageMap = Record<string, MessageValue>;
+type MessagePrimitive = string | number | boolean | null;
+interface MessageMap {
+  [key: string]: MessageValue;
+}
+interface MessageList extends Array<MessageValue> {}
+type MessageValue = MessagePrimitive | MessageMap | MessageList;
 
 type Messages = MessageMap;
 
