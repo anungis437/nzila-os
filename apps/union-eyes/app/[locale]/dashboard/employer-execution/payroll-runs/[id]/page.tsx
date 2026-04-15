@@ -65,6 +65,15 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
     )
     .orderBy(desc(employerExecutionArtifacts.createdAt));
 
+  const chainLinks = artifacts
+    .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)
+    .filter((value): value is Record<string, unknown> => value !== null);
+
+  const chainDepth = chainLinks.reduce((max, link) => Math.max(max, Number(link.chainDepth ?? 0)), 0);
+  const currentSeal = String(chainLinks[0]?.sealHash ?? "n/a");
+  const parentLink = String(chainLinks[0]?.parentLinkId ?? "n/a");
+  const verificationStatus = chainLinks.length > 0 ? "verified" : "unverified";
+
   const calcTrace = (run.calcTrace ?? {}) as {
     ruleVersionId?: string;
     sourceHash?: string;
@@ -89,6 +98,10 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
         <div className="rounded-md border p-4 text-sm">
           <h2 className="font-medium">Evidence / Seal</h2>
           <p className="mt-1 text-muted-foreground">Artifacts: {artifacts.length}</p>
+          <p className="text-muted-foreground">Verification: {verificationStatus}</p>
+          <p className="text-muted-foreground">Chain depth: {chainDepth}</p>
+          <p className="text-muted-foreground">Parent link: {parentLink}</p>
+          <p className="text-muted-foreground">Current seal: {currentSeal}</p>
           {artifacts.slice(0, 4).map((artifact) => (
             <p key={artifact.id} className="text-muted-foreground">
               {artifact.artifactType}: {artifact.artifactHash}
@@ -114,6 +127,22 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
               causeDetail: string;
               originalRulePath?: string[];
               replayRulePath?: string[];
+            }>;
+            graphDifferences?: Array<{
+              employeeExternalId: string;
+              nodeId?: string;
+              changeType:
+                | "node_added"
+                | "node_removed"
+                | "condition_changed"
+                | "decision_changed"
+                | "supersession_changed"
+                | "applied_path_changed"
+                | "value_changed";
+              original?: Record<string, unknown>;
+              replay?: Record<string, unknown>;
+              causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+              causeDetail: string;
             }>;
           }) ?? null
         }

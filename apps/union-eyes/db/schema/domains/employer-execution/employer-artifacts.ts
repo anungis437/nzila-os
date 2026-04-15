@@ -4,6 +4,7 @@ import {
   uuid,
   varchar,
   text,
+  numeric,
   timestamp,
   jsonb,
   index,
@@ -25,6 +26,14 @@ export const employerExecutionArtifactTypeEnum = pgEnum("employer_execution_arti
 export const employerExecutionReplayModeEnum = pgEnum("employer_execution_replay_mode", [
   "exact",
   "simulated",
+]);
+
+export const employerExecutionEvidenceEntityTypeEnum = pgEnum("employer_execution_evidence_entity_type", [
+  "payroll_run",
+  "remittance_run",
+  "replay",
+  "approval",
+  "adjustment_run",
 ]);
 
 export const employerExecutionArtifacts = pgTable(
@@ -84,5 +93,30 @@ export const employerExecutionReplays = pgTable(
   }),
 );
 
+export const employerExecutionEvidenceLinks = pgTable(
+  "employer_execution_evidence_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id").notNull(),
+    entityType: employerExecutionEvidenceEntityTypeEnum("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    parentLinkId: uuid("parent_link_id"),
+    parentSealHash: varchar("parent_seal_hash", { length: 64 }),
+    manifestHash: varchar("manifest_hash", { length: 64 }).notNull(),
+    sealHash: varchar("seal_hash", { length: 64 }).notNull(),
+    chainDepth: numeric("chain_depth", { precision: 8, scale: 0 }).notNull().default("1"),
+    metadataJson: jsonb("metadata_json").$type<Record<string, unknown>>().notNull().default({}),
+    createdBy: text("created_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    orgIdx: index("employer_execution_evidence_links_org_idx").on(table.organizationId),
+    entityIdx: index("employer_execution_evidence_links_entity_idx").on(table.entityType, table.entityId),
+    parentIdx: index("employer_execution_evidence_links_parent_idx").on(table.parentLinkId),
+  }),
+);
+
 export type EmployerExecutionArtifact = typeof employerExecutionArtifacts.$inferSelect;
 export type EmployerExecutionReplay = typeof employerExecutionReplays.$inferSelect;
+export type EmployerExecutionEvidenceLink = typeof employerExecutionEvidenceLinks.$inferSelect;

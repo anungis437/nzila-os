@@ -16,6 +16,22 @@ type ReplayDiff = {
   changed: boolean;
   summary: string;
   differences: ReplayDiffEntry[];
+  graphDifferences?: Array<{
+    employeeExternalId: string;
+    nodeId?: string;
+    changeType:
+      | "node_added"
+      | "node_removed"
+      | "condition_changed"
+      | "decision_changed"
+      | "supersession_changed"
+      | "applied_path_changed"
+      | "value_changed";
+    original?: Record<string, unknown>;
+    replay?: Record<string, unknown>;
+    causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+    causeDetail: string;
+  }>;
 };
 
 function formatValue(value: unknown): string {
@@ -27,6 +43,7 @@ function formatValue(value: unknown): string {
 
 export function ReplayDiffViewer({ diff }: { diff: ReplayDiff | null }) {
   const changedOnly = diff?.differences ?? [];
+  const graphOnly = diff?.graphDifferences ?? [];
 
   return (
     <Card>
@@ -55,6 +72,21 @@ export function ReplayDiffViewer({ diff }: { diff: ReplayDiff | null }) {
                 <p>Replay rule path: {(entry.replayRulePath ?? []).join(" > ") || "n/a"}</p>
               </div>
             )}
+          </div>
+        ))}
+
+        {graphOnly.length > 0 ? <p className="text-sm font-medium">Evaluation Graph Changes</p> : null}
+        {graphOnly.map((entry, index) => (
+          <div key={`${entry.employeeExternalId}:${entry.changeType}:${index}`} className="rounded-md border border-amber-200 bg-amber-50/40 p-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-medium">{entry.employeeExternalId}</p>
+              <span className="rounded bg-amber-100 px-2 py-0.5 text-xs uppercase">{entry.changeType.replace("_", " ")}</span>
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs uppercase">{entry.causeType.replace("_", " ")}</span>
+            </div>
+            <p className="text-muted-foreground">Cause: {entry.causeDetail}</p>
+            <p className="text-muted-foreground">Node: {entry.nodeId ?? "n/a"}</p>
+            <p className="text-muted-foreground">Original: {formatValue(entry.original ?? null)}</p>
+            <p className="text-muted-foreground">Replay: {formatValue(entry.replay ?? null)}</p>
           </div>
         ))}
       </CardContent>

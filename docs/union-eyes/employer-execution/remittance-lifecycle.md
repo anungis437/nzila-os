@@ -6,7 +6,8 @@
 3. Remittance generated from approved payroll only.
 4. Remittance items and package artifacts persisted.
 5. Evidence manifest + seal persisted.
-6. Compliance monitoring continues until operational closeout.
+6. Remittance evidence is chain-linked to parent payroll approval lineage.
+7. Compliance monitoring continues until operational closeout.
 
 ## Status Policy
 - Payroll lifecycle: `draft` -> `calculated` -> `approved` -> `posted`
@@ -17,6 +18,8 @@
 - Remittance generation is rejected for non-approved payroll runs.
 - Replay does not mutate source run data.
 - Adjustments must produce explicit new runs rather than mutating approved runs.
+- Approval actions and downstream artifacts must preserve evidence chain continuity.
+- Adjustment runs should link to parent approved payroll lineage as `adjustment_run` evidence entities.
 
 ## Evidence Semantics
 Remittance evidence manifest captures:
@@ -29,3 +32,8 @@ Remittance evidence manifest captures:
 - calc trace summary hash linkage
 
 The evidence seal is derived from manifest hash and run identity for tamper-evident verification.
+
+## Replay and remittance interplay
+- Replay runs are audit-only and produce standalone evidence manifests.
+- Replay evidence is parent-linked to source payroll evidence for forensic continuity.
+- Remittance evidence and replay evidence can co-exist on the same payroll lineage branch.

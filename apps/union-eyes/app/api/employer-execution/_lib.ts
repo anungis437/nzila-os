@@ -2,9 +2,12 @@ import { createHash } from "crypto";
 import {
   buildExecutableRules,
   calculatePayrollRun,
+  diffEvaluationGraph,
   replayDiff,
+  type EvidenceChainLink,
   type ExecutableRule,
   type FlattenedRuleValues,
+  type ReplayDiff,
   type ReplayDiffEntry,
 } from "@/services/financial-service/src/services/employer-execution";
 
@@ -28,6 +31,7 @@ export type ResolvedPayrollRules = {
   executableRules: ExecutableRule[];
   values: FlattenedRuleValues;
   ruleResolution: Array<Record<string, unknown>>;
+  compositionTrace: Array<Record<string, unknown>>;
   appliedRules: Array<Record<string, unknown>>;
 };
 
@@ -146,6 +150,8 @@ export function resolvePayrollRules(input: {
     ...trace,
   ];
 
+  const compositionTrace = trace.filter((step) => step.step === "rule_item_composed");
+
   return {
     ruleVersionId: input.ruleVersionId,
     ruleVersionCode: input.ruleVersionCode,
@@ -153,10 +159,14 @@ export function resolvePayrollRules(input: {
     executableRules,
     values: flattenedValues,
     ruleResolution,
+    compositionTrace,
     appliedRules: executableRules.map((rule) => ({
       kind: rule.kind,
       strategy: rule.strategy,
       sourceRuleId: rule.sourceRuleId,
+      ruleCode: rule.ruleCode,
+      compositionMode: rule.compositionMode,
+      precedence: rule.precedence,
       path: rule.path,
     })),
   };
@@ -184,6 +194,8 @@ export function calculatePayroll(
 
 export type ReplayDifference = ReplayDiffEntry;
 
+export type ReplayGraphDifference = ReplayDiff["graphDifferences"][number];
+
 export function buildReplayDiff(
   original: Record<string, unknown>,
   replayed: Record<string, unknown>,
@@ -198,8 +210,85 @@ export function buildReplayDiff(
   return replayDiff(original, replayed, reasonHint, options);
 }
 
+export function buildEvaluationGraphDiff(input: {
+  employeeExternalId: string;
+  originalTrace: unknown;
+  replayTrace: unknown;
+  causeDetail: string;
+}) {
+  return diffEvaluationGraph(input);
+}
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+export function createEvidenceChainLink(input: {
+  organizationId: string;
+  entityType: EvidenceChainLink["entityType"];
+  entityId: string;
+  manifestHash: string;
+  sealHash: string;
+  parent?: Pick<EvidenceChainLink, "linkId" | "sealHash" | "chainDepth"> | null;
+}): EvidenceChainLink {
+  return {
+    linkId: sha256(`${input.entityType}:${input.entityId}:${input.manifestHash}`),
+    organizationId: input.organizationId,
+    entityType: input.entityType,
+    entityId: input.entityId,
+    parentLinkId: input.parent?.linkId ?? null,
+    parentSealHash: input.parent?.sealHash ?? null,
+    manifestHash: input.manifestHash,
+    sealHash: input.sealHash,
+    chainDepth: (input.parent?.chainDepth ?? 0) + 1,
+    createdAt: nowIso(),
+  };
+}
+
+export function verifyEvidenceChainFromLinks(chain: EvidenceChainLink[]): {
+  valid: boolean;
+  checkedLinks: number;
+  brokenAt?: string;
+  issues: string[];
+} {
+  if (chain.length === 0) {
+    return { valid: false, checkedLinks: 0, issues: ["No evidence chain links found"] };
+  }
+
+  const byId = new Map(chain.map((link) => [link.linkId, link]));
+  const issues: string[] = [];
+  let checkedLinks = 0;
+  let brokenAt: string | undefined;
+
+  for (const link of chain) {
+    checkedLinks += 1;
+    if (!link.parentLinkId) continue;
+    const parent = byId.get(link.parentLinkId);
+    if (!parent) {
+      brokenAt = link.linkId;
+      issues.push(`Missing parent link ${link.parentLinkId} for ${link.linkId}`);
+      continue;
+    }
+    if (link.parentSealHash !== parent.sealHash) {
+      brokenAt = link.linkId;
+      issues.push(`Parent seal mismatch for ${link.linkId}`);
+    }
+    if (link.chainDepth !== parent.chainDepth + 1) {
+      brokenAt = link.linkId;
+      issues.push(`Invalid chain depth transition for ${link.linkId}`);
+    }
+  }
+
+  return {
+    valid: issues.length === 0,
+    checkedLinks,
+    brokenAt,
+    issues,
+  };
+}
+
 export function createEvidencePack(input: {
-  entityType: "payroll_run" | "remittance_run";
+  entityType: "payroll_run" | "remittance_run" | "replay" | "approval" | "adjustment_run";
   runRefId: string;
   organizationId: string;
   createdBy?: string | null;
@@ -208,6 +297,7 @@ export function createEvidencePack(input: {
       | "summary"
       | "evidence_manifest"
       | "evidence_seal"
+      | "replay_diff"
       | "payroll_snapshot"
       | "payroll_trace"
       | "remittance_csv"
@@ -242,11 +332,23 @@ export function createEvidencePack(input: {
 
   const manifestHash = sha256(JSON.stringify(manifest));
   const seal = sha256(`${input.entityType}:${input.runRefId}:${manifestHash}`);
+  const chainLink = createEvidenceChainLink({
+    organizationId: input.organizationId,
+    entityType: input.entityType,
+    entityId: input.runRefId,
+    manifestHash,
+    sealHash: seal,
+    parent:
+      typeof input.metadata.parentLink === "object" && input.metadata.parentLink !== null
+        ? (input.metadata.parentLink as Pick<EvidenceChainLink, "linkId" | "sealHash" | "chainDepth">)
+        : null,
+  });
 
   return {
     manifest,
     manifestHash,
     seal,
+    chainLink,
   };
 }
 

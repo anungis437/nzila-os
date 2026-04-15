@@ -26,6 +26,16 @@ export type RuleResolutionResult = {
 
 export type ComplianceSeverity = "info" | "warning" | "error" | "critical";
 
+export type RuleCompositionMode = "replace" | "augment" | "stack" | "suppress";
+
+export type RuleScope = {
+  employerId?: string | null;
+  bargainingUnitId?: string | null;
+  worksiteId?: string | null;
+  regionCode?: string | null;
+  classificationCode?: string | null;
+};
+
 export type RuleStrategy =
   | "hourly"
   | "daily_threshold"
@@ -40,89 +50,94 @@ export type RuleStrategy =
   | "replace"
   | "augment";
 
-export type ExecutableRule =
-  | {
-      kind: "base_rate";
-      strategy: "hourly";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "overtime";
-      strategy: "daily_threshold";
-      thresholdHours: number;
-      multiplier: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "double_time";
-      strategy: "after_threshold";
-      thresholdHours: number;
-      multiplier: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "shift_premium";
-      strategy: "flat_per_hour" | "flat_per_shift";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "travel";
-      strategy: "flat" | "per_km" | "hourly";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "dues";
-      strategy: "percent_gross" | "per_hour" | "flat";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "benefits";
-      strategy: "per_hour" | "percent_gross" | "flat";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "pension";
-      strategy: "per_hour" | "percent_gross" | "flat";
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "statutory_holiday";
-      strategy: "calendar_match";
-      holidayCode: string;
-      multiplier: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "regional_override";
-      strategy: "replace" | "augment";
-      targetRuleKind: string;
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    }
-  | {
-      kind: "classification_override";
-      strategy: "replace" | "augment";
-      targetRuleKind: string;
-      amount: number;
-      sourceRuleId: string;
-      path: string[];
-    };
+export type ExecutableRuleKind =
+  | "base_rate"
+  | "overtime"
+  | "double_time"
+  | "shift_premium"
+  | "travel"
+  | "dues"
+  | "benefits"
+  | "pension"
+  | "statutory_holiday"
+  | "regional_override"
+  | "classification_override";
+
+export type ExecutableRule = {
+  kind: ExecutableRuleKind;
+  strategy: RuleStrategy;
+  sourceRuleId: string;
+  ruleCode: string;
+  precedence: number;
+  compositionMode: RuleCompositionMode;
+  scope: RuleScope;
+  conditions?: Record<string, unknown>;
+  action: Record<string, unknown>;
+  path: string[];
+  amount?: number;
+  multiplier?: number;
+  thresholdHours?: number;
+  holidayCode?: string;
+  targetRuleKind?: string;
+};
+
+export type RuleEvaluationNode = {
+  nodeId: string;
+  payrollRunId: string;
+  employeeExternalId: string;
+  ruleKind: string;
+  ruleCode: string;
+  sourceRuleId: string;
+  strategy: string;
+  precedence: number;
+  conditionResult: "true" | "false" | "not_applicable";
+  decision: "considered" | "skipped" | "superseded" | "applied";
+  decisionReason: string;
+  parentNodeId?: string | null;
+  supersededByNodeId?: string | null;
+  compositionMode: RuleCompositionMode;
+  path: string[];
+  evaluationOrder: number;
+  inputSnapshotHash: string;
+  createdAt: string;
+};
+
+export type EvaluationGraphDiffEntry = {
+  employeeExternalId: string;
+  nodeId?: string;
+  changeType:
+    | "node_added"
+    | "node_removed"
+    | "condition_changed"
+    | "decision_changed"
+    | "supersession_changed"
+    | "applied_path_changed"
+    | "value_changed";
+  original?: Record<string, unknown>;
+  replay?: Record<string, unknown>;
+  causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
+  causeDetail: string;
+};
+
+export type EvidenceChainLink = {
+  linkId: string;
+  organizationId: string;
+  entityType: "payroll_run" | "remittance_run" | "replay" | "approval" | "adjustment_run";
+  entityId: string;
+  parentLinkId?: string | null;
+  parentSealHash?: string | null;
+  manifestHash: string;
+  sealHash: string;
+  chainDepth: number;
+  createdAt: string;
+};
+
+export type EvidenceChainVerification = {
+  valid: boolean;
+  checkedLinks: number;
+  brokenAt?: string;
+  issues: string[];
+};
 
 export type FlattenedRuleValues = {
   baseRate: number;
@@ -163,6 +178,7 @@ export type PayrollRunInput = {
     values: FlattenedRuleValues;
     ruleResolution: Array<Record<string, unknown>>;
     appliedRules: Array<Record<string, unknown>>;
+    compositionTrace?: Array<Record<string, unknown>>;
   };
 };
 
@@ -206,6 +222,7 @@ export type RemittanceGenerationResult = {
 export type ReplayDiff = {
   changed: boolean;
   differences: ReplayDiffEntry[];
+  graphDifferences: EvaluationGraphDiffEntry[];
   summary: string;
 };
 

@@ -7,6 +7,7 @@ import {
   employerRemittanceRuns,
   employerRemittanceRunItems,
   employerExecutionArtifacts,
+  employerExecutionEvidenceLinks,
   cbaRuleVersions,
   employerExecutionProfiles,
 } from "@/db/schema";
@@ -80,6 +81,24 @@ export const POST = withApi(
 
     if (!payrollRun) throw ApiError.notFound("Payroll run not found");
     if (payrollRun.status !== "approved") throw ApiError.badRequest("Only approved payroll runs can generate remittance");
+
+    const [payrollEvidenceManifest] = await db
+      .select()
+      .from(employerExecutionArtifacts)
+      .where(
+        and(
+          eq(employerExecutionArtifacts.organizationId, organizationId),
+          eq(employerExecutionArtifacts.payrollRunId, payrollRun.id),
+          eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
+        ),
+      )
+      .orderBy(desc(employerExecutionArtifacts.createdAt))
+      .limit(1);
+
+    const parentLink =
+      ((payrollEvidenceManifest?.manifestJson as Record<string, unknown> | undefined)?.chainLink as
+        | { linkId?: string; sealHash?: string; chainDepth?: number }
+        | undefined) ?? undefined;
 
     const items = await db
       .select()
@@ -220,6 +239,14 @@ export const POST = withApi(
           payrollApprovedAt: payrollRun.approvedAt,
         },
         calcTraceSummaryHash: payrollRun.calcTraceHash,
+        parentLink:
+          parentLink && parentLink.linkId && parentLink.sealHash
+            ? {
+                linkId: parentLink.linkId,
+                sealHash: parentLink.sealHash,
+                chainDepth: Number(parentLink.chainDepth ?? 1),
+              }
+            : null,
       },
       artifacts: [
         {
@@ -278,7 +305,10 @@ export const POST = withApi(
         artifactName: "evidence-manifest.json",
         storageRef: `inline://employer-execution/${remittanceRun.id}/manifest`,
         artifactHash: evidencePack.manifestHash,
-        manifestJson: evidencePack.manifest,
+        manifestJson: {
+          ...evidencePack.manifest,
+          chainLink: evidencePack.chainLink,
+        },
         createdBy: userId ?? undefined,
       },
       {
@@ -288,10 +318,32 @@ export const POST = withApi(
         artifactName: "evidence-seal.sig",
         storageRef: `inline://employer-execution/${remittanceRun.id}/seal`,
         artifactHash: evidencePack.seal,
-        manifestJson: { sealAlgorithm: "sha256", manifestHash: evidencePack.manifestHash },
+        manifestJson: {
+          sealAlgorithm: "sha256",
+          manifestHash: evidencePack.manifestHash,
+          chainLink: evidencePack.chainLink,
+        },
         createdBy: userId ?? undefined,
       },
     ]));
+
+    await withRLSContext(async (tx) =>
+      tx.insert(employerExecutionEvidenceLinks).values({
+        organizationId,
+        entityType: "remittance_run",
+        entityId: remittanceRun.id,
+        parentLinkId: evidencePack.chainLink.parentLinkId,
+        parentSealHash: evidencePack.chainLink.parentSealHash,
+        manifestHash: evidencePack.manifestHash,
+        sealHash: evidencePack.seal,
+        chainDepth: String(evidencePack.chainLink.chainDepth),
+        metadataJson: {
+          payrollRunId: payrollRun.id,
+          runCode: remittanceRun.runCode,
+        },
+        createdBy: userId ?? undefined,
+      }),
+    );
 
     return { data: { remittanceRun } };
   },

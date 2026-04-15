@@ -42,6 +42,15 @@ export default async function EmployerExecutionRemittanceRunDetailPage({ params 
     )
     .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
 
+  const chainLinks = artifacts
+    .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)
+    .filter((value): value is Record<string, unknown> => value !== null);
+
+  const chainDepth = chainLinks.reduce((max, link) => Math.max(max, Number(link.chainDepth ?? 0)), 0);
+  const verificationStatus = chainLinks.length > 0 ? "verified" : "unverified";
+  const parentLink = String(chainLinks[0]?.parentLinkId ?? "n/a");
+  const sealHash = String(chainLinks[0]?.sealHash ?? "n/a");
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,6 +64,10 @@ export default async function EmployerExecutionRemittanceRunDetailPage({ params 
         <p className="text-muted-foreground">Due Date: {String(run.dueDate)}</p>
         <p className="text-muted-foreground">Total Due: {String(run.totalDue)}</p>
         <p className="text-muted-foreground">Generated At: {String(run.generatedAt ?? "n/a")}</p>
+        <p className="text-muted-foreground">Verification: {verificationStatus}</p>
+        <p className="text-muted-foreground">Chain depth: {chainDepth}</p>
+        <p className="text-muted-foreground">Parent link: {parentLink}</p>
+        <p className="text-muted-foreground">Current seal: {sealHash}</p>
       </div>
 
       <div className="rounded-md border p-4 text-sm">

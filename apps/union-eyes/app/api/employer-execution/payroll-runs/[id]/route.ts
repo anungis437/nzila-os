@@ -7,11 +7,12 @@ import {
   employerPayrollRunItems,
   employerExecutionComplianceEvents,
   employerExecutionArtifacts,
+  employerExecutionEvidenceLinks,
   cbaRuleVersions,
   employerExecutionProfiles,
 } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
-import { createEvidencePack, enforcePayrollLifecycleTransition, sha256 } from "../../_lib";
+import { createEvidencePack, enforcePayrollLifecycleTransition, sha256, verifyEvidenceChainFromLinks } from "../../_lib";
 
 const transitionSchema = z.object({
   action: z.enum(["approve", "seal"]),
@@ -42,7 +43,41 @@ export const GET = withApi(
       .from(employerPayrollRunItems)
       .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, id)));
 
-    return { data: { run, items } };
+    const artifacts = await db
+      .select()
+      .from(employerExecutionArtifacts)
+      .where(
+        and(
+          eq(employerExecutionArtifacts.organizationId, organizationId),
+          eq(employerExecutionArtifacts.payrollRunId, id),
+          eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
+        ),
+      );
+
+    const chainLinks = artifacts
+      .map((artifact) => ((artifact.manifestJson as Record<string, unknown>)?.chainLink ?? null) as Record<string, unknown> | null)
+      .filter((value): value is Record<string, unknown> => value !== null)
+      .map((value) => ({
+        linkId: String(value.linkId ?? ""),
+        organizationId: String(value.organizationId ?? organizationId),
+        entityType: (value.entityType ?? "payroll_run") as
+          | "payroll_run"
+          | "remittance_run"
+          | "replay"
+          | "approval"
+          | "adjustment_run",
+        entityId: String(value.entityId ?? id),
+        parentLinkId: value.parentLinkId ? String(value.parentLinkId) : null,
+        parentSealHash: value.parentSealHash ? String(value.parentSealHash) : null,
+        manifestHash: String(value.manifestHash ?? ""),
+        sealHash: String(value.sealHash ?? ""),
+        chainDepth: Number(value.chainDepth ?? 0),
+        createdAt: String(value.createdAt ?? new Date().toISOString()),
+      }));
+
+    const chainVerification = verifyEvidenceChainFromLinks(chainLinks);
+
+    return { data: { run, items, chainLinks, chainVerification } };
   },
 );
 
@@ -214,6 +249,7 @@ export const PATCH = withApi(
           },
           approvers: userId ? [{ userId, at: new Date().toISOString() }] : [],
           inputSnapshotHash: sha256(JSON.stringify(run.inputSnapshot ?? {})),
+          parentLink: null,
         },
         artifacts: [
           {
@@ -260,7 +296,10 @@ export const PATCH = withApi(
             artifactName: "evidence-manifest.json",
             storageRef: `inline://employer-execution/${run.id}/evidence-manifest`,
             artifactHash: evidencePack.manifestHash,
-            manifestJson: evidencePack.manifest,
+            manifestJson: {
+              ...evidencePack.manifest,
+              chainLink: evidencePack.chainLink,
+            },
             createdBy: userId ?? undefined,
           },
           {
@@ -270,10 +309,69 @@ export const PATCH = withApi(
             artifactName: "evidence-seal.sig",
             storageRef: `inline://employer-execution/${run.id}/evidence-seal`,
             artifactHash: evidencePack.seal,
-            manifestJson: { algorithm: "sha256", manifestHash: evidencePack.manifestHash },
+            manifestJson: {
+              algorithm: "sha256",
+              manifestHash: evidencePack.manifestHash,
+              chainLink: evidencePack.chainLink,
+            },
             createdBy: userId ?? undefined,
           },
         ]);
+
+        await tx.insert(employerExecutionEvidenceLinks).values({
+          organizationId,
+          entityType: "payroll_run",
+          entityId: run.id,
+          parentLinkId: null,
+          parentSealHash: null,
+          manifestHash: evidencePack.manifestHash,
+          sealHash: evidencePack.seal,
+          chainDepth: "1",
+          metadataJson: {
+            runCode: run.runCode,
+            status: "approved",
+            evidenceLinkId: evidencePack.chainLink.linkId,
+          },
+          createdBy: userId ?? undefined,
+        });
+
+        const approvalEvent = createEvidencePack({
+          entityType: "approval",
+          runRefId: run.id,
+          organizationId,
+          createdBy: userId,
+          metadata: {
+            action: "approve",
+            parentLink: {
+              linkId: evidencePack.chainLink.linkId,
+              sealHash: evidencePack.chainLink.sealHash,
+              chainDepth: evidencePack.chainLink.chainDepth,
+            },
+          },
+          artifacts: [
+            {
+              artifactType: "summary",
+              artifactName: "approval-event-summary.json",
+              payload: { payrollRunId: run.id, approvedBy: userId, approvedAt: new Date().toISOString() },
+            },
+          ],
+        });
+
+        await tx.insert(employerExecutionEvidenceLinks).values({
+          organizationId,
+          entityType: "approval",
+          entityId: run.id,
+          parentLinkId: evidencePack.chainLink.linkId,
+          parentSealHash: evidencePack.chainLink.sealHash,
+          manifestHash: approvalEvent.manifestHash,
+          sealHash: approvalEvent.seal,
+          chainDepth: String(approvalEvent.chainLink.chainDepth),
+          metadataJson: {
+            event: "approve",
+            parent: evidencePack.chainLink.linkId,
+          },
+          createdBy: userId ?? undefined,
+        });
 
         await tx.insert(employerExecutionComplianceEvents).values({
           organizationId,

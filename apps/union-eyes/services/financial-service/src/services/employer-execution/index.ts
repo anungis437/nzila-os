@@ -6,3 +6,4 @@ export * from "./payroll-calculation-engine";
 export * from "./remittance-generation-engine";
 export * from "./compliance-engine";
 export * from "./replay-engine";
+export * from "./evidence-chain";

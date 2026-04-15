@@ -7,12 +7,20 @@ import {
   employerTimesheetEntries,
   employerExecutionReplays,
   employerExecutionArtifacts,
+  employerExecutionEvidenceLinks,
   employerExecutionComplianceEvents,
   cbaRuleVersions,
   cbaRuleSetItems,
 } from "@/db/schema";
-import { and, asc, eq } from "drizzle-orm";
-import { buildReplayDiff, calculatePayroll, resolvePayrollRules, sha256 } from "../../_lib";
+import { and, asc, desc, eq } from "drizzle-orm";
+import {
+  buildEvaluationGraphDiff,
+  buildReplayDiff,
+  calculatePayroll,
+  createEvidencePack,
+  resolvePayrollRules,
+  sha256,
+} from "../../_lib";
 
 const replaySchema = z.object({
   mode: z.enum(["exact", "new_engine", "new_rule"]).default("exact"),
@@ -52,6 +60,19 @@ export const POST = withApi(
           eq(employerPayrollRunItems.payrollRunId, sourceRun.id),
         ),
       );
+
+    const [sourceEvidenceManifest] = await db
+      .select()
+      .from(employerExecutionArtifacts)
+      .where(
+        and(
+          eq(employerExecutionArtifacts.organizationId, organizationId),
+          eq(employerExecutionArtifacts.payrollRunId, sourceRun.id),
+          eq(employerExecutionArtifacts.artifactType, "evidence_manifest"),
+        ),
+      )
+      .orderBy(desc(employerExecutionArtifacts.createdAt))
+      .limit(1);
 
     const timesheetEntries = await db
       .select()
@@ -163,6 +184,17 @@ export const POST = withApi(
     });
 
     const sourceByEmployee = new Map(sourceItems.map((item) => [item.employeeExternalId, item]));
+    const graphDifferences = replayCalc.items.flatMap((item) => {
+      const source = sourceByEmployee.get(item.employeeExternalId);
+      if (!source) return [];
+      return buildEvaluationGraphDiff({
+        employeeExternalId: item.employeeExternalId,
+        originalTrace: source.traceJson,
+        replayTrace: item.trace,
+        causeDetail: reasonByMode,
+      });
+    });
+
     const employeeDiffs = replayCalc.items.flatMap((item) => {
       const source = sourceByEmployee.get(item.employeeExternalId);
       const replayRulePath =
@@ -229,17 +261,69 @@ export const POST = withApi(
           });
         }
       }
+
+      const graphDiffs = graphDifferences.filter((diffEntry) => diffEntry.employeeExternalId === item.employeeExternalId);
+
+      for (const graphDiff of graphDiffs) {
+        output.push({
+          scope: "employee_item",
+          subjectId: item.employeeExternalId,
+          field: `evaluation_graph:${graphDiff.changeType}`,
+          originalValue: graphDiff.original ?? null,
+          replayValue: graphDiff.replay ?? null,
+          causeType: graphDiff.causeType,
+          causeDetail: graphDiff.causeDetail,
+          originalRulePath: sourceRulePath,
+          replayRulePath,
+        });
+      }
+
       return output;
     });
 
+    const graphDifferenceCount = graphDifferences.length;
     const diff = {
       differences: [...baseDiff.differences, ...employeeDiffs],
-      changed: baseDiff.changed || employeeDiffs.length > 0,
+      graphDifferences,
+      changed: baseDiff.changed || employeeDiffs.length > 0 || graphDifferences.length > 0,
       summary:
-        baseDiff.changed || employeeDiffs.length > 0
-          ? `Replay changed ${baseDiff.differences.length + employeeDiffs.length} field(s)`
+        baseDiff.changed || employeeDiffs.length > 0 || graphDifferences.length > 0
+          ? `Replay changed ${baseDiff.differences.length + employeeDiffs.length} field(s), including ${graphDifferenceCount} graph divergence(s)`
           : "Replay matched original run",
     };
+
+    const parentLink =
+      ((sourceEvidenceManifest?.manifestJson as Record<string, unknown> | undefined)?.chainLink as
+        | { linkId?: string; sealHash?: string; chainDepth?: number }
+        | undefined) ?? undefined;
+
+    const replayEvidencePack = createEvidencePack({
+      entityType: "replay",
+      runRefId: sourceRun.id,
+      organizationId,
+      createdBy: userId,
+      metadata: {
+        mode: body.mode,
+        sourcePayrollRunId: sourceRun.id,
+        replayRuleVersionId: ruleVersion.id,
+        replayEngineVersion,
+        parentLink:
+          parentLink && parentLink.linkId && parentLink.sealHash
+            ? {
+                linkId: parentLink.linkId,
+                sealHash: parentLink.sealHash,
+                chainDepth: Number(parentLink.chainDepth ?? 1),
+              }
+            : null,
+      },
+      artifacts: [
+        {
+          artifactType: "replay_diff",
+          artifactName: `replay-${sourceRun.id}.json`,
+          payload: diff,
+        },
+      ],
+    });
 
     const [replay] = await withRLSContext(async (tx) => {
       const [createdReplay] = await tx
@@ -270,6 +354,53 @@ export const POST = withApi(
           replayEngineVersion,
           replayRuleVersionId: ruleVersion.id,
           sourceRuleVersionId: sourceRun.cbaRuleVersionId,
+          evidenceChain: replayEvidencePack.chainLink,
+        },
+        createdBy: userId ?? undefined,
+      });
+
+      await tx.insert(employerExecutionArtifacts).values([
+        {
+          organizationId,
+          payrollRunId: sourceRun.id,
+          artifactType: "evidence_manifest",
+          artifactName: `replay-${createdReplay.id}-evidence-manifest.json`,
+          storageRef: `inline://employer-execution/replays/${createdReplay.id}/manifest`,
+          artifactHash: replayEvidencePack.manifestHash,
+          manifestJson: {
+            ...replayEvidencePack.manifest,
+            chainLink: replayEvidencePack.chainLink,
+          },
+          createdBy: userId ?? undefined,
+        },
+        {
+          organizationId,
+          payrollRunId: sourceRun.id,
+          artifactType: "evidence_seal",
+          artifactName: `replay-${createdReplay.id}-evidence-seal.sig`,
+          storageRef: `inline://employer-execution/replays/${createdReplay.id}/seal`,
+          artifactHash: replayEvidencePack.seal,
+          manifestJson: {
+            manifestHash: replayEvidencePack.manifestHash,
+            algorithm: "sha256",
+            chainLink: replayEvidencePack.chainLink,
+          },
+          createdBy: userId ?? undefined,
+        },
+      ]);
+
+      await tx.insert(employerExecutionEvidenceLinks).values({
+        organizationId,
+        entityType: "replay",
+        entityId: createdReplay.id,
+        parentLinkId: replayEvidencePack.chainLink.parentLinkId,
+        parentSealHash: replayEvidencePack.chainLink.parentSealHash,
+        manifestHash: replayEvidencePack.manifestHash,
+        sealHash: replayEvidencePack.seal,
+        chainDepth: String(replayEvidencePack.chainLink.chainDepth),
+        metadataJson: {
+          sourcePayrollRunId: sourceRun.id,
+          replayMode: body.mode,
         },
         createdBy: userId ?? undefined,
       });
