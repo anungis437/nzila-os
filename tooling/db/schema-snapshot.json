@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-04-14T21:53:31.974Z",
+  "capturedAt": "2026-04-15T13:22:10.992Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -47,8 +47,8 @@
       "size": 791
     },
     "packages/db/src/schema/flow/enums.ts": {
-      "hash": "4473a8ddde1a3ce9985837533e4c8134947cb8b1f2ec25080ff255b3845355ad",
-      "size": 2919
+      "hash": "4317d20bef6453d21f945f11454d4a0e8c038b9bc3108761bf98ce72b0f366f4",
+      "size": 2992
     },
     "packages/db/src/schema/flow/events.ts": {
       "hash": "6fd8db52636c1400713f90ed8a39e93676fdacf7e824c42e7ce527556f5a4d72",
@@ -159,5 +159,5 @@
       "size": 37995
     }
   },
-  "compositeHash": "0e45f953d662450f513fefb66031e54a2a04dd94b6aab4ba62be016e5b776b2f"
+  "compositeHash": "d235bba8b2f198485554e24b1e0712ef561f9d80b81e06627c185205f1f06e81"
 }
