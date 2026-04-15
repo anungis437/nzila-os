@@ -5,7 +5,6 @@ import {
   getOrderById,
   getOrderByRef,
   listOrderLines,
-  createOrder,
   updateOrder,
   createOrderLine,
   updateOrderLine,
@@ -56,10 +55,24 @@ export async function createOrderAction(data: {
   billingAddress?: Record<string, unknown> | null
   notes?: string | null
 }) {
+  if (!data.quoteId) {
+    return { error: 'Direct order creation is blocked. Provide quoteId and use command-driven conversion.' }
+  }
+
+  const commandResult = await executeCommand({
+    type: 'convert_quote_to_order',
+    quote_id: data.quoteId,
+    actor_id: '',
+  })
+  if (!commandResult.ok) return { error: commandResult.error ?? 'Failed to create order' }
+
+  const orderId = commandResult.data?.entity_id
+  if (!orderId) return { error: 'Order conversion succeeded without entity id' }
+
   const ctx = await getDbContext()
-  const result = await createOrder(ctx, { ...data, createdBy: ctx.actorId })
-  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
-  return result
+  const order = await getOrderById(ctx, orderId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { orderId } }))
+  return order
 }
 
 /**

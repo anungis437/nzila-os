@@ -12,6 +12,10 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { db, flowDomainEvents, flowPayments } from '@nzila/db'
 import { sql, eq } from 'drizzle-orm'
+import {
+  getWorkflowTransitionErrorCount,
+  getEventEmissionGapCount,
+} from '@/lib/telemetry/counters'
 
 // ── Governance counters (in-process, augmented by DB) ────────────────────────────────────────────────────
 
@@ -61,7 +65,9 @@ export async function GET(request: Request) {
         anomaly_count: anomalyCount,
         audit_event_volume: dbAuditEventVolume,
         payment_gate_blocks: dbPaymentGateBlocks,
-        timestamp: new Date().toISOString(),
+        workflow_transition_error_count: getWorkflowTransitionErrorCount(),
+        event_emission_gap_count: getEventEmissionGapCount(),
+        generated_at: new Date().toISOString(),
       })
     }),
   )

@@ -18,7 +18,29 @@
 import type { CommandContext, CommandResult, CommandHandler } from './types'
 import { logger } from '@/lib/logger'
 import { FlowWorkflowError } from '@/lib/workflows/errors'
+import { recordEventEmissionGap } from '@/lib/telemetry/counters'
+import { enforceCriticalCommandEventRequirement } from '@/lib/control/dispatch/event-requirement'
 
+export const REQUIRED_CRITICAL_COMMAND_TYPES = [
+  'send_quote',
+  'accept_quote',
+  'convert_quote_to_order',
+  'confirm_order',
+  'require_deposit',
+  'record_payment',
+  'confirm_payment',
+  'create_purchase_order',
+  'send_purchase_order',
+  'confirm_purchase_order',
+  'start_production',
+  'complete_production',
+  'create_shipment',
+  'mark_shipment_shipped',
+  'mark_shipment_delivered',
+] as const
+
+// Commands that MUST emit at least one domain event on success
+const CRITICAL_COMMANDS: ReadonlySet<string> = new Set(REQUIRED_CRITICAL_COMMAND_TYPES)
 // ── Handler Registry ───────────────────────────────────────────────────────
 // ga-check:exempt — command handler registry, not data persistence
 const registry = new Map<string, CommandHandler<unknown>>()
@@ -58,6 +80,22 @@ export async function execute<T extends { type: string }>(
 
   try {
     const result = await handler.execute(command, context)
+
+    // ── Event Emission Guardrail ─────────────────────────────────────────
+    // Critical commands MUST emit at least one domain event on success.
+    const eventRequirement = enforceCriticalCommandEventRequirement({
+      commandType: command.type,
+      isCritical: CRITICAL_COMMANDS.has(command.type),
+      success: result.success,
+      emittedEventIds: result.emitted_event_ids,
+    })
+    if (!eventRequirement.ok) {
+      recordEventEmissionGap()
+      return {
+        success: false,
+        errors: [{ code: 'EVENT_REQUIREMENT_VIOLATION', message: eventRequirement.message ?? 'Critical command missing required domain event emission' }],
+      }
+    }
 
     logger.info('Command bus: completed', {
       commandType: command.type,
@@ -104,4 +142,8 @@ export async function execute<T extends { type: string }>(
 
 export function getRegisteredCommandTypes(): string[] {
   return Array.from(registry.keys())
+}
+
+export function getRequiredCriticalCommandTypes(): readonly string[] {
+  return REQUIRED_CRITICAL_COMMAND_TYPES
 }

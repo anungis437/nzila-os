@@ -16,20 +16,41 @@ import { onFlowEvent } from './emitter'
 // ── DB-supported event types ───────────────────────────────────────────────
 // Must match the pgEnum values in packages/db/src/schema/flow/enums.ts
 const DB_EVENT_TYPES = new Set([
+  // Quote
   'quote_created',
   'quote_sent',
   'quote_accepted',
   'quote_revision_requested',
+  'quote_submitted_for_review',
+  // Order
   'order_created',
+  'order_confirmed',
+  'order_ready_for_procurement',
+  'order_shipped',
+  'order_completed',
+  'order_delivered',
+  // Payment
   'deposit_required',
   'payment_received',
+  // Purchase Order
   'po_created',
   'po_sent',
   'po_confirmed',
+  'po_line_received',
+  'purchase_order_cancelled',
+  // Production
   'production_started',
   'production_completed',
+  'production_readiness_achieved',
+  // Fulfillment / Shipment
+  'fulfillment_started',
   'shipment_created',
-  'order_delivered',
+  // Invoice
+  'invoice_created',
+  'invoice_issued',
+  'invoice_voided',
+  // System
+  'sales_to_procurement_triggered',
 ] as const)
 
 type DbEventType = typeof DB_EVENT_TYPES extends Set<infer T> ? T : never
@@ -62,6 +83,10 @@ export async function persistFlowEvent(event: FlowEvent): Promise<boolean> {
 // ── Bootstrap: register the persistence listener ───────────────────────────
 
 let initialized = false
+
+export function isEventPersistenceInitialized(): boolean {
+  return initialized
+}
 
 export function initEventPersistence(): void {
   if (initialized) return

@@ -95,8 +95,12 @@ export function forecastYieldPerHaTrend(
   let numerator = 0
   let denominator = 0
   for (let i = 0; i < n; i++) {
-    const dx = x[i] - meanX
-    numerator += dx * (series[i] - meanY)
+    const xValue = x[i]
+    const seriesValue = series[i]
+    if (xValue === undefined || seriesValue === undefined) continue
+
+    const dx = xValue - meanX
+    numerator += dx * (seriesValue - meanY)
     denominator += dx * dx
   }
 
@@ -106,7 +110,10 @@ export function forecastYieldPerHaTrend(
 
   const ssTot = series.reduce((sum, y) => sum + (y - meanY) ** 2, 0)
   const ssRes = series.reduce((sum, y, i) => {
-    const predicted = intercept + slope * x[i]
+    const xValue = x[i]
+    if (xValue === undefined) return sum
+
+    const predicted = intercept + slope * xValue
     return sum + (y - predicted) ** 2
   }, 0)
   const r2 = ssTot === 0 ? 0 : 1 - ssRes / ssTot

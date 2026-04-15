@@ -174,6 +174,7 @@ function buildCausalSteps(
   // Step 2: Temporal ordering — determine which factors precede the outcome
   const mid = performance.now()
   const orderedFactors = factorCitations.sort((a, b) => b.relevance - a.relevance)
+  const topOrderedFactor = orderedFactors[0]
   const step2: ReasoningStep = {
     stepNumber: 2,
     description: 'Establish temporal ordering and precedence relationships',
@@ -186,7 +187,7 @@ function buildCausalSteps(
       strongPrecedence: orderedFactors.filter((c) => c.relevance > 0.7).length,
     },
     citations: orderedFactors.slice(0, 3),
-    confidence: orderedFactors.length > 0 ? Math.min(0.85, orderedFactors[0].relevance) : 0.3,
+    confidence: topOrderedFactor ? Math.min(0.85, topOrderedFactor.relevance) : 0.3,
     durationMs: performance.now() - mid,
   }
 
@@ -255,16 +256,17 @@ function buildAbductiveSteps(
   const mid = performance.now()
   const weighted = weightEvidence(allCitations, question)
   const hypotheses = generateHypotheses(weighted)
+  const topHypothesis = hypotheses[0]
   const step2: ReasoningStep = {
     stepNumber: 2,
     description: 'Generate candidate hypotheses ranked by explanatory power',
     input: { observations: observationCitations.length },
     output: {
       hypothesesGenerated: hypotheses.length,
-      topHypothesis: hypotheses[0] ?? null,
+      topHypothesis: topHypothesis ?? null,
     },
     citations: weighted.slice(0, 5).map((w) => w.citation),
-    confidence: hypotheses.length > 0 ? hypotheses[0].score : 0.2,
+    confidence: topHypothesis?.score ?? 0.2,
     durationMs: performance.now() - mid,
   }
 
@@ -474,7 +476,7 @@ function categorizeRiskLevel(
   scores: Array<{ riskScore: number }>,
 ): 'low' | 'medium' | 'high' | 'critical' {
   if (scores.length === 0) return 'low'
-  const maxScore = scores[0].riskScore
+  const maxScore = scores[0]?.riskScore ?? 0
   const avgScore = scores.reduce((s, r) => s + r.riskScore, 0) / scores.length
   if (maxScore > 0.8 || avgScore > 0.6) return 'critical'
   if (maxScore > 0.6 || avgScore > 0.4) return 'high'

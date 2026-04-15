@@ -122,3 +122,97 @@ export async function isDepositMet(quoteId: string): Promise<boolean> {
   if (!snapshot.deposit_required) return true
   return snapshot.payment_status === 'PAID' || snapshot.payment_status === 'NOT_REQUIRED'
 }
+
+// ── Extended canonical functions ───────────────────────────────────────────
+
+  export type OrderPaymentState =
+    | 'NOT_REQUIRED'
+    | 'PENDING_DEPOSIT'
+    | 'PARTIAL'
+    | 'PAID'
+    | 'OVERDUE'
+    | 'FAILED'
+
+  /**
+   * Compute the canonical payment state for an order from its payments.
+   * This is the authoritative source — do not derive payment state from
+   * the order.paymentStatus column alone; that column should be synced
+   * via syncOrderPaymentState.
+   */
+  export async function computeOrderPaymentState(
+    orderId: string,
+    orgId: string,
+  ): Promise<OrderPaymentState> {
+    const snapshot = await getPaymentSnapshotForOrder(orderId, orgId)
+    if (!snapshot) return 'NOT_REQUIRED'
+
+    if (!snapshot.deposit_required) return 'NOT_REQUIRED'
+    if (snapshot.amount_paid <= 0) return 'PENDING_DEPOSIT'
+    if (snapshot.amount_paid >= snapshot.amount_due) return 'PAID'
+    return 'PARTIAL'
+  }
+
+  /**
+   * Sync the order.paymentStatus column to match the computed canonical state.
+   * Call after any payment record is created or updated.
+   */
+  export async function syncOrderPaymentState(
+    orderId: string,
+    orgId: string,
+  ): Promise<OrderPaymentState> {
+    const state = await computeOrderPaymentState(orderId, orgId)
+
+    await orderRepo.update(orderId, orgId, {
+      paymentStatus: state,
+    })
+
+    return state
+  }
+
+  /**
+   * Return the outstanding balance for an order (amount_due - amount_paid).
+   * Returns 0 if no payment record exists.
+   */
+  export async function getOutstandingBalance(
+    orderId: string,
+    orgId: string,
+  ): Promise<number> {
+    const snapshot = await getPaymentSnapshotForOrder(orderId, orgId)
+    if (!snapshot) return 0
+    return Math.max(0, snapshot.amount_due - snapshot.amount_paid)
+  }
+
+  /**
+   * Return human-readable reasons why payment is blocking an order.
+   * Empty array means the order is payment-clear.
+   */
+  export async function getPaymentBlockingReasons(
+    orderId: string,
+    orgId: string,
+  ): Promise<string[]> {
+    const snapshot = await getPaymentSnapshotForOrder(orderId, orgId)
+    if (!snapshot) return []
+
+    const reasons: string[] = []
+
+    if (snapshot.deposit_required) {
+      const depositAmount =
+        snapshot.deposit_amount ??
+        (snapshot.deposit_percent != null ? (snapshot.deposit_percent / 100) * snapshot.amount_due : 0)
+
+      if (snapshot.amount_paid < depositAmount) {
+        reasons.push(
+          `Deposit required: $${depositAmount.toFixed(2)} — only $${snapshot.amount_paid.toFixed(2)} received`,
+        )
+      }
+    }
+
+    if (snapshot.payment_status === 'OVERDUE') {
+      reasons.push('Order has overdue payment')
+    }
+    if (snapshot.payment_status === 'FAILED') {
+      reasons.push('Order has a failed payment requiring resolution')
+    }
+
+    return reasons
+  }

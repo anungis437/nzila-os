@@ -57,6 +57,7 @@ export interface PaymentGateCheckResult {
   reasons: string[]
   required_actions: string[]
   snapshot: {
+    order_id?: string
     payment_status: string
     amount_due: number
     amount_paid: number

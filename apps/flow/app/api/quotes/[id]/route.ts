@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { quoteRepo } from '@/lib/db'
-import { transitionQuote } from '@/lib/quote-machine'
 import { auditQuoteTransition } from '@/lib/evidence'
 import { logTransition } from '@/lib/commerce-telemetry'
 import { logger } from '@/lib/logger'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommand } from '@/lib/control/control-adapter'
 
 /**
  * GET /api/quotes/[id] — fetch a single quote.
@@ -63,7 +63,7 @@ export async function PATCH(
     try {
       const body = await request.json()
 
-    // ── If status is being changed, enforce state machine ───────────
+    // ── Status updates are command-driven only ───────────────────────
     if (body.status) {
       const existing = await quoteRepo.findById(id)
       if (!existing) {
@@ -73,27 +73,57 @@ export async function PATCH(
         )
       }
 
-      const transition = transitionQuote(
-        existing.status as Parameters<typeof transitionQuote>[0],
-        body.status,
-        { orgId, actorId: userId, role: 'admin' as Parameters<typeof transitionQuote>[2]['role'], meta: {} },
-        id,
-      )
-      if (!transition.ok) {
+      const status = String(body.status).toUpperCase()
+      let commandResult: Awaited<ReturnType<typeof executeCommand>> | null = null
+
+      if (status === 'INTERNAL_REVIEW') {
+        commandResult = await executeCommand({ type: 'submit_for_review', quote_id: id, actor_id: userId })
+      } else if (status === 'SENT_TO_CLIENT') {
+        commandResult = await executeCommand({ type: 'send_quote', quote_id: id, actor_id: userId })
+      } else if (status === 'ACCEPTED') {
+        commandResult = await executeCommand({
+          type: 'accept_quote',
+          quote_id: id,
+          actor_id: userId,
+          customer_name: typeof body.customerName === 'string' ? body.customerName : undefined,
+          customer_email: typeof body.customerEmail === 'string' ? body.customerEmail : undefined,
+          message: typeof body.message === 'string' ? body.message : undefined,
+        })
+      } else if (status === 'REVISION_REQUESTED') {
+        if (typeof body.requestMessage !== 'string' || body.requestMessage.trim().length === 0) {
+          return NextResponse.json(
+            { ok: false, error: 'requestMessage is required for REVISION_REQUESTED transition' },
+            { status: 400 },
+          )
+        }
+        commandResult = await executeCommand({
+          type: 'request_quote_revision',
+          quote_id: id,
+          actor_id: userId,
+          request_message: body.requestMessage,
+        })
+      } else {
         return NextResponse.json(
-          { ok: false, error: `Invalid transition: ${transition.reason}` },
+          { ok: false, error: `Direct status mutation to ${status} is not allowed. Use command handlers.` },
+          { status: 400 },
+        )
+      }
+
+      if (!commandResult?.ok) {
+        return NextResponse.json(
+          { ok: false, error: commandResult?.error ?? 'Failed to process quote status transition' },
           { status: 422 },
         )
       }
 
-      const quote = await quoteRepo.update(id, body)
+      const quote = await quoteRepo.findById(id)
 
       // Audit + telemetry (non-blocking)
       try {
         auditQuoteTransition({
           quoteId: id,
           fromStatus: existing.status,
-          toStatus: body.status,
+          toStatus: status,
           userId,
           orgId,
         })
@@ -101,7 +131,7 @@ export async function PATCH(
           { orgId },
           'quote',
           existing.status,
-          body.status,
+          status,
           true,
         )
       } catch (auditErr) {

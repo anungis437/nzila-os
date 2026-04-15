@@ -5,14 +5,9 @@
  * env validation, and boot invariant assertions.
  */
 import { createAppBoot } from '@nzila/os-core/telemetry'
+import { bootstrapFlowControlLayer } from '@/lib/control/bootstrap'
 
 export async function register() {
   await createAppBoot('flow')()
-
-  try {
-    const { initEventPersistence } = await import('@/lib/events/persist')
-    initEventPersistence()
-  } catch {
-    // Non-critical — events still work in-process without persistence
-  }
+  await bootstrapFlowControlLayer()
 }

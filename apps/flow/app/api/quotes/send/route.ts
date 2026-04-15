@@ -9,6 +9,7 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { quoteRepo } from '@/lib/db'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommand } from '@/lib/control/control-adapter'
 import { attemptQuoteTransition } from '@/lib/workflows/quote-state-machine'
 import { createShareLink } from '@/lib/services/share-link-service'
 import { emitWorkflowAuditEvent } from '@/lib/services/workflow-audit-service'
@@ -63,7 +64,14 @@ export async function POST(request: NextRequest) {
       ctx.orgId,
     )
 
-    await quoteRepo.update(parsed.data.quoteId, { status: 'SENT_TO_CLIENT' })
+    const commandResult = await executeCommand({
+      type: 'send_quote',
+      quote_id: parsed.data.quoteId,
+      actor_id: authResult.userId,
+    })
+    if (!commandResult.ok) {
+      return NextResponse.json({ error: commandResult.error ?? 'Failed to send quote' }, { status: 400 })
+    }
 
     await recordTimelineEvent({
       quoteId: parsed.data.quoteId,

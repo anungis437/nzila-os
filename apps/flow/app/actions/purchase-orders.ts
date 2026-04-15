@@ -5,7 +5,6 @@ import {
   getPurchaseOrderById,
   getPurchaseOrderWithLines,
   getPurchaseOrdersSummary,
-  createPurchaseOrder,
   addPurchaseOrderLine,
   updatePurchaseOrder,
   updatePurchaseOrderLine,
@@ -16,6 +15,14 @@ import {
 import { getDbContext, getReadContext } from '@/lib/org-resolver'
 import { executeCommand } from '@/lib/control/control-adapter'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
+import { resolveOrgContext } from '@/lib/resolve-org'
+
+// Status mutations for PO workflow that must go through command bus
+const PO_STATUS_COMMAND_MAP: Record<string, string> = {
+  sent: 'send_purchase_order',
+  acknowledged: 'confirm_purchase_order',
+  cancelled: 'cancel_purchase_order',
+}
 
 type POStatus =
   | 'draft'
@@ -24,7 +31,6 @@ type POStatus =
   | 'partial_received'
   | 'received'
   | 'cancelled'
-
 // ── Read Actions ──────────────────────────────────────────────────────────
 
 export async function getPurchaseOrdersAction(opts?: {
@@ -60,17 +66,33 @@ export async function generatePORefAction() {
 // ── Write Actions ─────────────────────────────────────────────────────────
 
 export async function createPurchaseOrderAction(data: {
+  orderId?: string
   supplierId: string
   ref?: string
   currency?: string
   expectedDeliveryDate?: Date | null
   notes?: string | null
 }) {
-  const ctx = await getDbContext()
-  const ref = data.ref ?? (await generatePORef(ctx))
-  const result = await createPurchaseOrder(ctx, { ...data, ref })
+  // Route through command bus — payment gate is enforced inside the handler
+  const ctx = await resolveOrgContext()
+
+  if (!data.orderId) {
+    return { error: 'orderId is required for command-driven purchase order creation' }
+  }
+
+  const result = await executeCommand({
+    type: 'create_purchase_order',
+    vendor_id: data.supplierId,
+    order_id: data.orderId,
+    actor_id: ctx.actorId,
+    notes: data.notes ?? undefined,
+    expected_delivery: data.expectedDeliveryDate?.toISOString() ?? undefined,
+  })
+
+  if (!result.ok) return { error: result.error ?? 'Failed to create purchase order' }
+
   await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
-  return result
+  return result.data
 }
 
 export async function addPurchaseOrderLineAction(
@@ -103,10 +125,33 @@ export async function updatePurchaseOrderAction(
     taxTotal: string
   }>,
 ) {
-  const ctx = await getDbContext()
-  const result = await updatePurchaseOrder(ctx, purchaseOrderId, data)
-  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { purchaseOrderId } }))
-  return result
+    // If there is a status transition, route through command bus — never mutate status directly
+    if (data.status) {
+      const commandType = PO_STATUS_COMMAND_MAP[data.status]
+      if (commandType) {
+        const result = await executeCommand({
+          type: commandType,
+          purchase_order_id: purchaseOrderId,
+          actor_id: '',
+        })
+        if (!result.ok) return { error: result.error ?? 'Status transition failed' }
+      } else {
+        // Statuses not driven by command bus (e.g. partial_received, received) are managed
+        // via receive_po_line handler — reject direct writes to these
+        return { error: `Direct status mutation to "${data.status}" is not permitted. Use the appropriate command.` }
+      }
+    }
+
+    // Non-status field updates (notes, dates, costs) are safe to write directly
+    const { status: _, ...nonStatusFields } = data
+    if (Object.keys(nonStatusFields).length > 0) {
+      const ctx = await getDbContext()
+      await updatePurchaseOrder(ctx, purchaseOrderId, nonStatusFields)
+      await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { purchaseOrderId } }))
+    }
+
+    const ctx = await getReadContext()
+    return getPurchaseOrderById(ctx, purchaseOrderId)
 }
 
 export async function updatePurchaseOrderLineAction(

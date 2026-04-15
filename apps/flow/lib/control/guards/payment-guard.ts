@@ -29,7 +29,6 @@ async function loadPaymentContext(orderId: string, orgId: string) {
 
   const totalPaid = await paymentRepo.totalPaidForOrder(orderId)
 
-  // Map Drizzle camelCase/lowercase to domain snake_case/UPPERCASE shape
   const order: Pick<Order, 'id' | 'total_amount' | 'payment_status' | 'status' | 'quote_id'> = {
     id: dbOrder.id,
     total_amount: Number(dbOrder.total ?? 0),
@@ -38,7 +37,6 @@ async function loadPaymentContext(orderId: string, orgId: string) {
     quote_id: dbOrder.quoteId ?? null,
   }
 
-  // Look up deposit requirement — if order has quote_id, check quote-level requirement
   let depositRule: DepositRequirement = DEFAULT_DEPOSIT
   if (order.quote_id) {
     const req = await paymentRequirementRepo.findByQuoteId(order.quote_id)
@@ -61,6 +59,7 @@ function toGateCheckResult(
   amountDue: number,
   amountPaid: number,
   depositRule: DepositRequirement,
+  orderId?: string,
 ): PaymentGateCheckResult {
   return {
     allowed: gate.allowed,
@@ -68,6 +67,7 @@ function toGateCheckResult(
     reasons: gate.blockers,
     required_actions: gate.allowed ? [] : gate.blockers.map(b => `Resolve: ${b}`),
     snapshot: {
+      order_id: orderId,
       payment_status: paymentStatus,
       amount_due: amountDue,
       amount_paid: amountPaid,
@@ -88,7 +88,7 @@ export async function checkCanGeneratePO(
       gate_state: 'blocked',
       reasons: [`Order "${orderId}" not found`],
       required_actions: ['Provide valid order ID'],
-      snapshot: { payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
+      snapshot: { order_id: orderId, payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
     }
   }
 
@@ -101,6 +101,7 @@ export async function checkCanGeneratePO(
     ctx.order.total_amount,
     ctx.totalPaid,
     ctx.depositRule,
+    orderId,
   )
 }
 
@@ -115,7 +116,7 @@ export async function checkCanStartProduction(
       gate_state: 'blocked',
       reasons: [`Order "${orderId}" not found`],
       required_actions: ['Provide valid order ID'],
-      snapshot: { payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
+      snapshot: { order_id: orderId, payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
     }
   }
 
@@ -128,6 +129,7 @@ export async function checkCanStartProduction(
     ctx.order.total_amount,
     ctx.totalPaid,
     ctx.depositRule,
+    orderId,
   )
 }
 
@@ -142,7 +144,7 @@ export async function checkCanShipOrder(
       gate_state: 'blocked',
       reasons: [`Order "${orderId}" not found`],
       required_actions: ['Provide valid order ID'],
-      snapshot: { payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
+      snapshot: { order_id: orderId, payment_status: 'unknown', amount_due: 0, amount_paid: 0, deposit_required: false, due_before_production: false },
     }
   }
 
@@ -155,6 +157,7 @@ export async function checkCanShipOrder(
     ctx.order.total_amount,
     ctx.totalPaid,
     ctx.depositRule,
+    orderId,
   )
 }
 

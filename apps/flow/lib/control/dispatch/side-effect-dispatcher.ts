@@ -28,11 +28,22 @@ export interface SideEffectResult {
 type SideEffectHandler = (request: SideEffectRequest) => Promise<SideEffectResult>
 const handlers = new Map<SideEffectType, SideEffectHandler>()
 
+export const REQUIRED_SIDE_EFFECT_TYPES: readonly SideEffectType[] = [
+  'zoho_sync',
+  'shopify_sync',
+  'canva_update',
+  'customer_notification',
+] as const
+
 export function registerSideEffectHandler(
   type: SideEffectType,
   handler: SideEffectHandler,
 ): void {
   handlers.set(type, handler)
+}
+
+export function getRegisteredSideEffectTypes(): SideEffectType[] {
+  return Array.from(handlers.keys())
 }
 
 export async function dispatchSideEffect(

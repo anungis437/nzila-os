@@ -1,12 +1,7 @@
 /**
  * Flow — Trigger Sales to Procurement Handler
  *
- * Governed version of the quote → PO handoff:
- * 1. Validates quote is in ACCEPTED or READY_FOR_PO state
- * 2. Creates order from quote (if not already created)
- * 3. Transitions quote to READY_FOR_PO
- * 4. Creates PO via quote-to-po service
- * 5. Emits events and audit trail
+ * Governed quote → order → PO handoff using command bus only.
  */
 import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { TriggerSalesToProcurementCommand } from '@/lib/commands/types'
@@ -16,6 +11,7 @@ import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
+import { execute } from '@/lib/control/command-bus'
 
 export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProcurementCommand> = {
   commandType: 'trigger_sales_to_procurement',
@@ -32,19 +28,15 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
     const currentStatus = (quote.status ?? '').toUpperCase()
-
-    // Allow from ACCEPTED (transition to READY_FOR_PO first) or directly from READY_FOR_PO
     if (currentStatus === 'ACCEPTED') {
       const wf = validateTransition('quote', currentStatus, 'READY_FOR_PO')
       if (!wf.allowed) {
         return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? 'Cannot transition to READY_FOR_PO' }] }
       }
-      await quoteRepo.update(input.quote_id, context.org_id, { status: 'accepted' })
     } else if (currentStatus !== 'READY_FOR_PO') {
       return { success: false, errors: [{ code: 'INVALID_STATE', message: `Quote must be ACCEPTED or READY_FOR_PO. Current: ${currentStatus}` }] }
     }
 
-    // Find or create default supplier
     const { db, commerceSuppliers } = await import('@nzila/db')
     const { eq } = await import('drizzle-orm')
 
@@ -66,18 +58,36 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
         .returning()
     }
 
-    // Use the quote-to-po service
-    const { createPurchaseOrderFromQuote } = await import('@/lib/services/quote-to-po-service')
-    const result = await createPurchaseOrderFromQuote(
-      input.quote_id,
-      supplier.id,
-      input.actor_id,
-      context.org_id,
-    )
+    const conversion = await execute({
+      type: 'convert_quote_to_order',
+      quote_id: input.quote_id,
+      actor_id: input.actor_id,
+      org_id: context.org_id,
+    }, context)
 
-    if (!result.ok) {
-      return { success: false, errors: [{ code: 'PO_CREATION_FAILED', message: result.error ?? 'Failed to create PO from quote' }] }
+    if (!conversion.success || !conversion.entity_id) {
+      return {
+        success: false,
+        errors: [{ code: 'ORDER_CONVERSION_FAILED', message: conversion.errors?.map((e) => e.message).join('; ') ?? 'Failed to convert quote to order' }],
+      }
     }
+    const orderId = conversion.entity_id
+
+    const poCreation = await execute({
+      type: 'create_purchase_order',
+      order_id: orderId,
+      vendor_id: supplier.id,
+      actor_id: input.actor_id,
+      org_id: context.org_id,
+    }, context)
+
+    if (!poCreation.success || !poCreation.entity_id) {
+      return {
+        success: false,
+        errors: [{ code: 'PO_CREATION_FAILED', message: poCreation.errors?.map((e) => e.message).join('; ') ?? 'Failed to create purchase order' }],
+      }
+    }
+    const poId = poCreation.entity_id
 
     const eventId = dispatchDomainEvent({
       type: 'sales_to_procurement_triggered',
@@ -86,7 +96,7 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
       entity_type: 'quote',
       entity_id: input.quote_id,
       correlation_id: context.correlation_id,
-      metadata: { order_id: result.orderId, po_id: result.poId },
+      metadata: { order_id: orderId, po_id: poId },
     })
 
     const auditRef = await dispatchAuditEntry({
@@ -98,7 +108,7 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
       status_before: currentStatus,
       status_after: 'READY_FOR_PO',
       correlation_id: context.correlation_id,
-      metadata: { order_id: result.orderId, po_id: result.poId },
+      metadata: { order_id: orderId, po_id: poId },
     })
 
     return {
@@ -108,7 +118,7 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
       status_after: 'READY_FOR_PO',
       emitted_event_ids: [eventId],
       audit_ref: auditRef,
-      message: 'Sales → Procurement handoff complete',
+      message: 'Sales to procurement handoff complete',
     }
   },
 }

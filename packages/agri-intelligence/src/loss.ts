@@ -106,11 +106,14 @@ export function detectLossAnomalies(
 
   const anomalies: LossAnomaly[] = []
   for (let i = 0; i < lossPercents.length; i++) {
-    const zScore = (lossPercents[i] - mu) / sigma
+    const lossPercent = lossPercents[i]
+    if (lossPercent === undefined) continue
+
+    const zScore = (lossPercent - mu) / sigma
     if (Math.abs(zScore) >= zThreshold) {
       anomalies.push({
         index: i,
-        lossPercent: lossPercents[i],
+        lossPercent,
         zScore,
       })
     }

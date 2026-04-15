@@ -28,6 +28,8 @@ export const FlowEventType = z.enum([
   'order_shipped',
   'order_delivered',
   'order_closed',
+  'order_payment_blocked',
+  'order_payment_cleared',
 
   // Payment
   'payment_received',

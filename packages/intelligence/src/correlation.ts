@@ -34,8 +34,12 @@ export function pearsonCorrelation(x: readonly number[], y: readonly number[]): 
   let sumSqY = 0
 
   for (let i = 0; i < x.length; i++) {
-    const dx = x[i] - mx
-    const dy = y[i] - my
+    const xValue = x[i]
+    const yValue = y[i]
+    if (xValue === undefined || yValue === undefined) continue
+
+    const dx = xValue - mx
+    const dy = yValue - my
     numerator += dx * dy
     sumSqX += dx * dx
     sumSqY += dy * dy
@@ -98,11 +102,16 @@ export function detectCrossDomainCorrelations(params: {
 
   for (let i = 0; i < entries.length; i++) {
     for (let j = i + 1; j < entries.length; j++) {
-      const [leftKey, leftSignals] = entries[i]
-      const [rightKey, rightSignals] = entries[j]
+      const leftEntry = entries[i]
+      const rightEntry = entries[j]
+      if (!leftEntry || !rightEntry) continue
+
+      const [leftKey, leftSignals] = leftEntry
+      const [rightKey, rightSignals] = rightEntry
 
       const [leftApp, leftMetric] = leftKey.split(':')
       const [rightApp, rightMetric] = rightKey.split(':')
+      if (!leftApp || !leftMetric || !rightApp || !rightMetric) continue
 
       // Focus on cross-domain relationships only.
       if (leftApp === rightApp) continue
@@ -122,6 +131,10 @@ export function detectCrossDomainCorrelations(params: {
       const strength = classifyCorrelationStrength(coefficient)
       const direction = coefficient >= 0 ? 'positive' : 'negative'
 
+      const overlapStart = overlapDays[0]
+      const overlapEnd = overlapDays[overlapDays.length - 1]
+      if (!overlapStart || !overlapEnd) continue
+
       results.push({
         id: `${leftKey}|${rightKey}`,
         left: { app: leftApp, metric: leftMetric },
@@ -130,8 +143,8 @@ export function detectCrossDomainCorrelations(params: {
         strength,
         direction,
         sampleSize: overlapDays.length,
-        overlapStart: overlapDays[0],
-        overlapEnd: overlapDays[overlapDays.length - 1],
+        overlapStart,
+        overlapEnd,
       })
     }
   }
