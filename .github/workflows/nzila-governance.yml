@@ -78,7 +78,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Audit (fail on critical)
-        run: pnpm audit --audit-level=critical
+        run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical
 
   # ── Container Scan ───────────────────────────────────────────────────────
   trivy:

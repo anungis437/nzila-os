@@ -92,7 +92,7 @@ jobs:
 
       - name: pnpm audit (no critical vulnerabilities)
         run: |
-          pnpm audit --audit-level=critical
+          node tooling/security/npm-bulk-audit.mjs --audit-level=critical
 
       - name: TruffleHog secret scan
         uses: trufflesecurity/trufflehog@v3.94.2 # pin to release tag, not mutable @main

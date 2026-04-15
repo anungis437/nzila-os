@@ -45,7 +45,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=critical
+      - run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical
 
   # ── Trivy scan ───────────────────────────────────────────────────────────
   trivy:

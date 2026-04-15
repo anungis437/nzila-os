@@ -43,14 +43,14 @@ jobs:
         id: audit
         run: |
           # Write report to file; allow non-zero so waiver policy is the gate (ga-check:exempt)
-          pnpm audit --audit-level=critical --json > audit-report.json || true
+          node tooling/security/npm-bulk-audit.mjs --audit-level=critical --output=audit-report.json || true
           echo "Audit report written to audit-report.json"
 
       # Also capture a high-severity JSON report for artifact upload (always runs)
       - name: Capture high-severity audit report
         if: always()
         run: |
-          set +e; pnpm audit --audit-level=high --json > audit-report-high.json 2>/dev/null; set -e
+          set +e; node tooling/security/npm-bulk-audit.mjs --audit-level=high --output=audit-report-high.json; set -e
           echo "High/critical audit report written to audit-report-high.json"
 
       - name: Enforce vulnerability waiver policy

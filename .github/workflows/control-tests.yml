@@ -176,7 +176,7 @@ jobs:
         if: matrix.test_id == 'CT-06'
         run: |
           echo "::group::CT-06 — Dependency Audit"
-          set +e; pnpm audit --audit-level=high --json > /tmp/ct-06-audit.json 2>&1; set -e
+          set +e; node tooling/security/npm-bulk-audit.mjs --audit-level=high --output=/tmp/ct-06-audit.json; set -e
           VULNS=$(jq '.metadata.vulnerabilities.high + .metadata.vulnerabilities.critical' /tmp/ct-06-audit.json 2>/dev/null || echo "0")
           RESULT="PASS"
           if [[ "$VULNS" -gt 0 ]]; then RESULT="FAIL"; fi

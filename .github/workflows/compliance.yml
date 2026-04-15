@@ -115,7 +115,7 @@ jobs:
 
           # Dependency audit
           echo "### Dependency Audit" >> evidence/risk-assessment.md
-          pnpm audit --json 2>/dev/null | head -100 >> evidence/risk-assessment.md || echo "No audit data" >> evidence/risk-assessment.md
+          node tooling/security/npm-bulk-audit.mjs --audit-level=low --json 2>/dev/null | head -100 >> evidence/risk-assessment.md || echo "No audit data" >> evidence/risk-assessment.md
           echo "" >> evidence/risk-assessment.md
 
           # Supply chain policy
