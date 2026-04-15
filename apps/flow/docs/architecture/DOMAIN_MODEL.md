@@ -64,10 +64,10 @@
 | Service | File | Purpose |
 |---------|------|---------|
 | Order Payment Gating | `lib/services/order-payment-gating.ts` | Order-centric payment enforcement |
-| Quote-to-PO | `lib/services/quote-to-po-service.ts` | Convert approved quote to PO |
-| Quote Approval | `lib/services/quote-approval-service.ts` | Approval workflow |
+| Quote-to-PO | `lib/control/handlers/trigger-sales-to-procurement.handler.ts` | Convert approved quote to order + PO |
+| Quote Approval | `lib/services/quote-approval-service.ts` | Tokenized approval workflow (command-routed mutations) |
 | Payment Gating | `lib/services/payment-gating-service.ts` | Quote-level payment validation gates |
-| Production Gating | `lib/services/production-gating-service.ts` | Production readiness gates |
+| Production Gating | `lib/control/guards/payment-guard.ts` + `lib/control/guards/production-guard.ts` | Production readiness gates |
 | Share Link | `lib/services/share-link-service.ts` | Shareable quote links |
 | Workflow Audit | `lib/services/workflow-audit-service.ts` | Audit trail for workflow actions |
 

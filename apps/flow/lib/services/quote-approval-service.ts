@@ -7,11 +7,11 @@
 import { SubmitApprovalInput } from '@/lib/schemas/workflow-schemas'
 import type { QuoteApproval, QuoteRevision } from '@/lib/schemas/workflow-schemas'
 import { validateShareLink, markShareLinkUsed } from '@/lib/services/share-link-service'
-import { attemptQuoteTransition } from '@/lib/workflows/quote-state-machine'
 import { approvalRepo, revisionRepo, recordTimelineEvent } from '@/lib/repositories/workflow-repository'
 import { emitWorkflowAuditEvent } from '@/lib/services/workflow-audit-service'
 import { quoteRepo } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { executeCommand } from '@/lib/control/control-adapter'
 import { SHOPMOICA_BRANDING } from '@nzila/platform-commerce-org/defaults'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -72,19 +72,29 @@ export async function processQuoteApproval(
   // 4. Determine target status
   const targetStatus = parsed.data.action === 'ACCEPT' ? 'ACCEPTED' : 'REVISION_REQUESTED'
 
-  // 5. Validate transition
-  const transition = attemptQuoteTransition(
-    currentStatus as 'SENT_TO_CLIENT',
-    targetStatus,
-  )
-  if (!transition.ok) {
-    return { ok: false, error: transition.reason }
+  // 5. Route lifecycle mutation through control layer
+  const actorId = parsed.data.customerEmail || parsed.data.customerName
+  if (parsed.data.action === 'ACCEPT') {
+    const cmd = await executeCommand({
+      type: 'accept_quote',
+      quote_id: quote.id,
+      actor_id: actorId,
+      customer_name: parsed.data.customerName,
+      customer_email: parsed.data.customerEmail,
+      message: parsed.data.message ?? undefined,
+    })
+    if (!cmd.ok) return { ok: false, error: cmd.error ?? 'Failed to accept quote' }
+  } else {
+    const cmd = await executeCommand({
+      type: 'request_quote_revision',
+      quote_id: quote.id,
+      actor_id: actorId,
+      request_message: parsed.data.message || 'Revision requested',
+    })
+    if (!cmd.ok) return { ok: false, error: cmd.error ?? 'Failed to request revision' }
   }
 
-  // 6. Update quote status
-  await quoteRepo.update(quote.id, { status: targetStatus })
-
-  // 7. Record approval
+  // 6. Record approval
   const ipHash = clientIp ? await hashIp(clientIp) : null
   const approval: QuoteApproval = {
     id: crypto.randomUUID(),
@@ -99,7 +109,7 @@ export async function processQuoteApproval(
   }
   await approvalRepo.save(approval)
 
-  // 8. If revision requested, create revision record
+  // 7. If revision requested, create revision record
   if (parsed.data.action === 'REQUEST_REVISION') {
     const revision: QuoteRevision = {
       id: crypto.randomUUID(),
@@ -113,10 +123,10 @@ export async function processQuoteApproval(
     await revisionRepo.save(revision)
   }
 
-  // 9. Mark share link as used
+  // 8. Mark share link as used
   await markShareLinkUsed(link.id)
 
-  // 10. Record timeline event
+  // 9. Record timeline event
   await recordTimelineEvent({
     quoteId: quote.id,
     event: parsed.data.action === 'ACCEPT' ? 'accepted' : 'revision_requested',
@@ -128,7 +138,7 @@ export async function processQuoteApproval(
     metadata: { approvalId: approval.id },
   })
 
-  // 11. Emit audit event
+  // 10. Emit audit event
   const auditEvent =
     parsed.data.action === 'ACCEPT'
       ? 'quote_accepted_by_client' as const
@@ -147,7 +157,7 @@ export async function processQuoteApproval(
     },
   })
 
-  // 12. Log share link viewed event
+  // 11. Log share link viewed event
   emitWorkflowAuditEvent({
     event: 'quote_share_link_viewed',
     quoteId: quote.id,

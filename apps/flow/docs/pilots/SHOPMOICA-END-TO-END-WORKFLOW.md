@@ -47,13 +47,13 @@
 
 9. Purchase Order Created for Supplier
    └─ status: READY_FOR_PO
-   └─ quote-to-po-service validates: accepted + payment cleared + supplier selected
+   └─ command handler validates: accepted + payment cleared + supplier selected
    └─ PO created via po-service (PO-YYYY-### format)
    └─ audit: po_created_from_quote
 
 10. Production Starts
     └─ status: IN_PRODUCTION
-    └─ production-gating-service validates: PO valid + payment clear + details complete
+   └─ control guards validate: PO valid + payment clear + details complete
     └─ order fulfilment and allocation via production-service
     └─ audit: production_started
 
@@ -139,8 +139,8 @@ DELIVERED          → CLOSED
 | Quote Repository              | lib/db.ts                                   | CRUD for quotes and customers            |
 | Quote State Machine           | lib/workflows/quote-state-machine.ts        | Enforces status transitions              |
 | Payment Gating Service        | lib/services/payment-gating-service.ts      | Evaluates deposit/payment requirements   |
-| Quote-to-PO Service           | lib/services/quote-to-po-service.ts         | Validates and creates PO from quote      |
-| Production Gating Service     | lib/services/production-gating-service.ts   | Validates production readiness           |
+| Sales→Procurement Handler     | lib/control/handlers/trigger-sales-to-procurement.handler.ts | Converts quote to order + PO |
+| Production/Payment Guards     | lib/control/guards/production-guard.ts + lib/control/guards/payment-guard.ts | Validates production readiness |
 | Financial Service             | lib/financial-service.ts                    | Invoicing, payments, aging               |
 | PO Service                    | lib/po-service.ts                           | Purchase order CRUD                      |
 | Production Service            | lib/production-service.ts                   | Order fulfilment and allocation          |

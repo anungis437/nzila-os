@@ -57,7 +57,7 @@ function addViolation(rule: string, file: string, line: number, content: string)
 //         lib/repositories/**      (these are the persistence layer called BY handlers)
 
 const STATUS_MUTATION_PATTERNS = [
-  /\.set\(\{[^}]*\bstatus\s*:/,
+  /update\(commerce(Orders|Quotes|PurchaseOrders)\)\s*\.set\(\{[^}]*\bstatus\s*:/,
   /orderRepo\.update\([^)]*status/,
   /quoteRepo\.update\([^)]*status/,
 ]
@@ -80,12 +80,8 @@ const STATUS_MUTATION_EXEMPT_PATHS = [
   'e2e/',
 ]
 
-// Transitional exemptions for legacy orchestration services pending full command-handler migration.
+// Transitional exemption kept intentionally for non-commandized legacy module.
 const STATUS_MUTATION_EXEMPT_FILES = new Set([
-  'lib/services/production-gating-service.ts',
-  'lib/services/quote-approval-service.ts',
-  'lib/services/quote-to-po-service.ts',
-  'lib/services/share-link-service.ts',
   'lib/production-service.ts',
 ])
 

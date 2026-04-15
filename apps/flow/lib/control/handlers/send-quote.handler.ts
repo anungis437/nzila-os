@@ -9,6 +9,7 @@ import { quoteCanBeSent } from '@/domain/invariants'
 import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
+import { dispatchSideEffect } from '@/lib/control/dispatch/side-effect-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
 
 export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
@@ -69,6 +70,22 @@ export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
       status_before: statusBefore,
       status_after: 'SENT_TO_CLIENT',
       correlation_id: context.correlation_id,
+    })
+
+    // Side effects happen after authoritative state mutation + event + audit.
+    await dispatchSideEffect({
+      type: 'customer_notification',
+      entity_type: 'quote',
+      entity_id: input.quote_id,
+      org_id: context.org_id,
+      payload: {
+        channel: 'email',
+        template: 'quote_sent',
+      },
+      metadata: {
+        correlation_id: context.correlation_id,
+        actor_id: input.actor_id,
+      },
     })
 
     return {

@@ -14,7 +14,6 @@ import {
   createOrder,
   getOrder,
   listOrders,
-  markOrderShipped,
   allocateInventory,
   fulfillAllocation,
   cancelAllocation,
@@ -180,21 +179,22 @@ export async function markOrderShippedAction(
   orderId: string,
   trackingInfo?: { carrier?: string; trackingNumber?: string },
 ): Promise<ActionResult<typeof commerceOrders.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const order = await markOrderShipped(orderId, trackingInfo)
+  const result = await executeCommandV2({
+    type: 'ship_order',
+    order_id: orderId,
+    actor_id: '', // resolved by control adapter
+    notes: trackingInfo
+      ? `carrier=${trackingInfo.carrier ?? ''}; tracking=${trackingInfo.trackingNumber ?? ''}`
+      : undefined,
+  })
 
-    revalidatePath('/orders')
-    revalidatePath(`/orders/${orderId}`)
-    revalidatePath('/production')
+  if (!result.success) return { success: false, error: result.error }
 
-    return { success: true, data: order }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to mark order as shipped',
-    }
-  }
+  revalidatePath('/orders')
+  revalidatePath(`/orders/${orderId}`)
+  revalidatePath('/production')
+
+  return { success: true }
 }
 
 export async function completeOrderAction(
