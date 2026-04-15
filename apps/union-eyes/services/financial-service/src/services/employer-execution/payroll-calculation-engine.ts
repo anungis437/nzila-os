@@ -12,6 +12,17 @@ function lastRuleByKind(rules: ExecutableRule[], kind: ExecutableRule["kind"]): 
   return null;
 }
 
+function requiredRule<TKind extends ExecutableRule["kind"]>(
+  rules: ExecutableRule[],
+  kind: TKind,
+): Extract<ExecutableRule, { kind: TKind }> {
+  const rule = lastRuleByKind(rules, kind) as Extract<ExecutableRule, { kind: TKind }> | null;
+  if (!rule) {
+    throw new Error(`Missing required executable rule: ${kind}`);
+  }
+  return rule;
+}
+
 function deductionAmount(
   grossPay: number,
   totalHours: number,
@@ -35,76 +46,46 @@ export function calculatePayrollRun(input: PayrollRunInput): PayrollRunResult {
   const snapshotHash = createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
   const executableRules = [...(input.resolvedRules.executableRules ?? [])];
 
-  const baseRateRule = lastRuleByKind(executableRules, "base_rate") as Extract<
-    ExecutableRule,
-    { kind: "base_rate" }
-  > | null;
-  const overtimeRule = lastRuleByKind(executableRules, "overtime") as Extract<
-    ExecutableRule,
-    { kind: "overtime" }
-  > | null;
-  const doubleTimeRule = lastRuleByKind(executableRules, "double_time") as Extract<
-    ExecutableRule,
-    { kind: "double_time" }
-  > | null;
-  const shiftPremiumRule = lastRuleByKind(executableRules, "shift_premium") as Extract<
-    ExecutableRule,
-    { kind: "shift_premium" }
-  > | null;
-  const travelRule = lastRuleByKind(executableRules, "travel") as Extract<
-    ExecutableRule,
-    { kind: "travel" }
-  > | null;
-  const duesRule = lastRuleByKind(executableRules, "dues") as Extract<
-    ExecutableRule,
-    { kind: "dues" }
-  > | null;
-  const benefitsRule = lastRuleByKind(executableRules, "benefits") as Extract<
-    ExecutableRule,
-    { kind: "benefits" }
-  > | null;
-  const pensionRule = lastRuleByKind(executableRules, "pension") as Extract<
-    ExecutableRule,
-    { kind: "pension" }
-  > | null;
-  const regionalOverrideRule = lastRuleByKind(executableRules, "regional_override") as Extract<
-    ExecutableRule,
-    { kind: "regional_override" }
-  > | null;
-  const classificationOverrideRule = lastRuleByKind(executableRules, "classification_override") as Extract<
-    ExecutableRule,
-    { kind: "classification_override" }
-  > | null;
+  const baseRateRule = requiredRule(executableRules, "base_rate");
+  const overtimeRule = requiredRule(executableRules, "overtime");
+  const doubleTimeRule = requiredRule(executableRules, "double_time");
+  const shiftPremiumRule = requiredRule(executableRules, "shift_premium");
+  const travelRule = requiredRule(executableRules, "travel");
+  const duesRule = requiredRule(executableRules, "dues");
+  const benefitsRule = requiredRule(executableRules, "benefits");
+  const pensionRule = requiredRule(executableRules, "pension");
+  const statutoryHolidayRule = requiredRule(executableRules, "statutory_holiday");
+  const regionalOverrideRule = requiredRule(executableRules, "regional_override");
+  const classificationOverrideRule = requiredRule(executableRules, "classification_override");
 
   const items = input.entries.map((entry) => {
-    const baseRate = baseRateRule?.amount ?? input.resolvedRules.values.baseRate;
-    const overtimeMultiplier = overtimeRule?.multiplier ?? input.resolvedRules.values.overtimeMultiplier;
-    const doubleMultiplier = doubleTimeRule?.multiplier ?? input.resolvedRules.values.doubleTimeMultiplier;
+    const baseRate = baseRateRule.amount;
+    const overtimeMultiplier = overtimeRule.multiplier;
+    const doubleMultiplier = doubleTimeRule.multiplier;
 
     const regularBase = entry.regularHours * baseRate;
     const overtimeBase = entry.overtimeHours * baseRate * overtimeMultiplier;
     const doubleTimeBase = entry.doubletimeHours * baseRate * doubleMultiplier;
 
     const travelPremium =
-      travelRule?.strategy === "flat"
+      travelRule.strategy === "flat"
         ? travelRule.amount
-        : travelRule?.strategy === "per_km"
+        : travelRule.strategy === "per_km"
           ? 0
-          : entry.travelHours * baseRate * (travelRule?.amount ?? input.resolvedRules.values.travelPremiumRate);
+          : entry.travelHours * baseRate * travelRule.amount;
 
     const shiftPremium =
-      shiftPremiumRule && entry.premiumCode
+      entry.premiumCode
         ? shiftPremiumRule.strategy === "flat_per_shift"
           ? shiftPremiumRule.amount
           : entry.regularHours * shiftPremiumRule.amount
         : 0;
 
     const statutoryHolidayAmount =
-      (regularBase + overtimeBase + doubleTimeBase) * (input.resolvedRules.values.statutoryHolidayMultiplier - 1);
+      (regularBase + overtimeBase + doubleTimeBase) * (statutoryHolidayRule.multiplier - 1);
 
-    const regionalOverride = regionalOverrideRule?.amount ?? input.resolvedRules.values.regionalOverride;
-    const classificationOverride =
-      classificationOverrideRule?.amount ?? input.resolvedRules.values.classificationOverride;
+    const regionalOverride = regionalOverrideRule.amount;
+    const classificationOverride = classificationOverrideRule.amount;
 
     const grossPay = round2(
       (regularBase + overtimeBase + doubleTimeBase + travelPremium + shiftPremium + statutoryHolidayAmount) *
@@ -146,19 +127,19 @@ export function calculatePayrollRun(input: PayrollRunInput): PayrollRunResult {
           {
             step: "travel",
             value: round2(travelPremium),
-            strategy: travelRule?.strategy ?? "hourly",
-            amount: travelRule?.amount ?? input.resolvedRules.values.travelPremiumRate,
+            strategy: travelRule.strategy,
+            amount: travelRule.amount,
           },
           {
             step: "shift_premium",
             value: round2(shiftPremium),
-            strategy: shiftPremiumRule?.strategy ?? "flat_per_hour",
-            amount: shiftPremiumRule?.amount ?? input.resolvedRules.values.shiftPremiumRate,
+            strategy: shiftPremiumRule.strategy,
+            amount: shiftPremiumRule.amount,
           },
           {
             step: "statutory_holiday",
             value: round2(statutoryHolidayAmount),
-            multiplier: input.resolvedRules.values.statutoryHolidayMultiplier,
+            multiplier: statutoryHolidayRule.multiplier,
           },
           { step: "regional_override", value: regionalOverride },
           { step: "classification_override", value: classificationOverride },

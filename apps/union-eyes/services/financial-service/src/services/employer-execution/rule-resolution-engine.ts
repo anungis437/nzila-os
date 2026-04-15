@@ -39,6 +39,7 @@ export function buildExecutableRules(input: {
 }): { executableRules: ExecutableRule[]; flattenedValues: FlattenedRuleValues; trace: RuleResolutionResult["trace"] } {
   const executableRules: ExecutableRule[] = [];
   const trace: RuleResolutionResult["trace"] = [];
+  const latestByKind = new Map<ExecutableRule["kind"], ExecutableRule>();
 
   const defaults: FlattenedRuleValues = {
     baseRate: fromRuleJson(input.rulesJson, ["base_rate", "baseRate", "hourly_rate"], 0),
@@ -113,6 +114,14 @@ export function buildExecutableRules(input: {
     path: ["rulesJson", "pension"],
   });
   executableRules.push({
+    kind: "statutory_holiday",
+    strategy: "calendar_match",
+    holidayCode: "GENERIC",
+    multiplier: defaults.statutoryHolidayMultiplier,
+    sourceRuleId: input.ruleVersionId,
+    path: ["rulesJson", "statutory_holiday"],
+  });
+  executableRules.push({
     kind: "regional_override",
     strategy: "augment",
     targetRuleKind: "gross",
@@ -128,6 +137,10 @@ export function buildExecutableRules(input: {
     sourceRuleId: input.ruleVersionId,
     path: ["rulesJson", "classification_override"],
   });
+
+  for (const baseRule of executableRules) {
+    latestByKind.set(baseRule.kind, baseRule);
+  }
 
   trace.push({ step: "rule_semantics_defaults", outcome: "resolved", details: { defaults } });
 
@@ -151,6 +164,22 @@ export function buildExecutableRules(input: {
     const threshold = toNumber(action.thresholdHours) ?? toNumber(action.threshold_hours) ?? 8;
     const strategy = String(action.strategy ?? "").toLowerCase();
     const path = ["ruleItems", String(item.precedence), item.ruleCode];
+    const condition = item.conditionJson ?? {};
+    const enabled = condition.enabled !== false;
+
+    if (!enabled) {
+      trace.push({
+        step: "rule_item_skipped",
+        outcome: "condition_false",
+        details: {
+          ruleCode: item.ruleCode,
+          itemType: item.itemType,
+          precedence: item.precedence,
+          condition,
+        },
+      });
+      continue;
+    }
 
     let applied: ExecutableRule | null = null;
     if (itemType === "base_rate" || ruleCode.includes("base_rate")) {
@@ -246,7 +275,25 @@ export function buildExecutableRules(input: {
     }
 
     if (applied) {
+      const previous = latestByKind.get(applied.kind);
       executableRules.push(applied);
+      latestByKind.set(applied.kind, applied);
+
+      if (previous) {
+        trace.push({
+          step: "rule_item_suppressed",
+          outcome: "superseded",
+          details: {
+            kind: applied.kind,
+            supersededSourceRuleId: previous.sourceRuleId,
+            supersededPath: previous.path,
+            supersededBySourceRuleId: applied.sourceRuleId,
+            supersededByPath: applied.path,
+            precedence: item.precedence,
+          },
+        });
+      }
+
       trace.push({
         step: "rule_item_applied",
         outcome: "override",
@@ -257,6 +304,8 @@ export function buildExecutableRules(input: {
           kind: applied.kind,
           strategy: applied.strategy,
           sourceRuleId: applied.sourceRuleId,
+          condition,
+          supersededSourceRuleId: previous?.sourceRuleId,
         },
       });
     }

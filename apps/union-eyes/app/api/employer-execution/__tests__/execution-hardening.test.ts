@@ -130,6 +130,31 @@ describe("Employer Execution hardening helpers", () => {
     });
   });
 
+  it("fails closed when required executable rules are missing", () => {
+    const resolvedRules = resolvePayrollRules({
+      ruleVersionId: "v1",
+      ruleVersionCode: "2026-04A",
+      sourceHash: "hash-v1",
+      rulesJson: {
+        base_rate: 52,
+      },
+      ruleItems: [],
+    });
+
+    const invalidRules = {
+      ...resolvedRules,
+      executableRules: resolvedRules.executableRules.filter((rule) => rule.kind !== "base_rate"),
+    };
+
+    expect(() =>
+      calculatePayroll(sampleEntries, invalidRules, {
+        engineVersion: "engine-v1",
+        periodStart: "2026-04-01",
+        periodEnd: "2026-04-15",
+      }),
+    ).toThrow("Missing required executable rule: base_rate");
+  });
+
   it("enforces lifecycle FSM transitions", () => {
     expect(() =>
       enforcePayrollLifecycleTransition({

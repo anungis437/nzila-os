@@ -103,6 +103,7 @@ export type ExecutableRule =
       kind: "statutory_holiday";
       strategy: "calendar_match";
       holidayCode: string;
+      multiplier: number;
       sourceRuleId: string;
       path: string[];
     }
