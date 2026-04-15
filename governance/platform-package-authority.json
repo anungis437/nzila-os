@@ -1,0 +1,110 @@
+{
+  "version": "2026-04-14",
+  "description": "Authoritative package map for platform concerns. This file is normative for platform consolidation gates.",
+  "concerns": [
+    {
+      "id": "auth",
+      "authoritative": ["@nzila/platform-auth"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Platform identity, session, and authorization primitives for app and API surfaces."
+    },
+    {
+      "id": "contracts",
+      "authoritative": ["@nzila/platform-contracts"],
+      "supporting": ["@nzila/contracts"],
+      "legacy": [],
+      "deprecatedForNewWork": ["@nzila/contracts"],
+      "notes": "Use platform-contracts for cross-app contracts; contracts remains valid for domain-level helpers and migration support."
+    },
+    {
+      "id": "eventing",
+      "authoritative": ["@nzila/platform-events", "@nzila/platform-event-fabric"],
+      "supporting": ["@nzila/events"],
+      "legacy": [],
+      "deprecatedForNewWork": ["@nzila/events"],
+      "notes": "platform-events defines canonical event envelope and dispatch; platform-event-fabric handles cross-service correlation and orchestration."
+    },
+    {
+      "id": "observability",
+      "authoritative": ["@nzila/os-core", "@nzila/platform-observability"],
+      "supporting": ["@nzila/otel-core", "@nzila/observability"],
+      "legacy": [],
+      "deprecatedForNewWork": ["@nzila/observability"],
+      "notes": "Use os-core telemetry boot path and platform-observability primitives."
+    },
+    {
+      "id": "org-context",
+      "authoritative": ["@nzila/org"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Canonical org scope and actor context contract."
+    },
+    {
+      "id": "evidence",
+      "authoritative": ["@nzila/platform-evidence-pack"],
+      "supporting": ["@nzila/evidence"],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Use platform-evidence-pack for lifecycle/export and evidence for cryptographic primitives."
+    },
+    {
+      "id": "notifications",
+      "authoritative": ["@nzila/platform-notifications"],
+      "supporting": ["@nzila/comms-email", "@nzila/comms-sms", "@nzila/comms-push"],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Platform notification contracts and dispatch orchestration."
+    },
+    {
+      "id": "integrations",
+      "authoritative": ["@nzila/platform-integrations", "@nzila/platform-integrations-control-plane"],
+      "supporting": ["@nzila/integrations-core", "@nzila/integrations-runtime", "@nzila/integrations-db"],
+      "legacy": ["@nzila/integrations"],
+      "deprecatedForNewWork": ["@nzila/integrations"],
+      "notes": "Use platform-integrations for orchestration and platform-integrations-control-plane for operations UI surfaces."
+    },
+    {
+      "id": "revenue",
+      "authoritative": ["@nzila/platform-revenue"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Cross-app revenue modeling and rollups."
+    },
+    {
+      "id": "billing",
+      "authoritative": ["@nzila/platform-billing"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Billing primitives and invoice/subscription contracts."
+    },
+    {
+      "id": "deployment",
+      "authoritative": ["@nzila/platform-deploy"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Canonical deployment profile and release orchestration layer."
+    },
+    {
+      "id": "feature-flags",
+      "authoritative": ["@nzila/platform-feature-flags"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Flag evaluation and rollout policy integration."
+    },
+    {
+      "id": "data-fabric",
+      "authoritative": ["@nzila/platform-data-fabric"],
+      "supporting": [],
+      "legacy": [],
+      "deprecatedForNewWork": [],
+      "notes": "Canonical ingestion/mapping/reconciliation data fabric layer."
+    }
+  ]
+}

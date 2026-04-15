@@ -92,6 +92,14 @@ TS-authoritative apps must not introduce a Django backend.
 See [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md).
 Enforced by `tooling/contract-tests/stack-authority.test.ts` (STACK_AUTHORITY_001).
 
+### 4b. Platform Package Authority
+Every shared concern has an authoritative platform package boundary.
+Supporting packages may remain for compatibility or domain-specific layering,
+but they are not expanded as parallel sources of truth.
+See [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](./docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md)
+and [docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md](./docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md).
+Enforced by `scripts/platform-authority-check.ts` and `scripts/platform-adoption-gate.ts`.
+
 ### 5. Correlation IDs Everywhere
 Every API request carries a `requestId` (UUID) and optional `traceId`. All audit events reference these.
 

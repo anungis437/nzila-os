@@ -1,15 +1,10 @@
 /**
- * Platform Adoption Gate — enforces that every governed Next.js app adopts
- * the four mandatory platform packages introduced during consolidation:
+ * Platform Adoption Gate
  *
- *   1. Shell:        imports NzilaAppShell from @nzila/platform-shell
- *   2. Schema-core:  declares @nzila/schema-core as dependency
- *   3. Workflow:     declares @nzila/governed-workflow as dependency
- *   4. Observability: instrumentation.ts imports createAppBoot from @nzila/os-core/telemetry
+ * Concern-based adoption validation that measures real app adoption of the
+ * authoritative platform package map in governance/platform-package-authority.json.
  *
  * Usage: pnpm platform:adoption:check
- *
- * Exceptions listed in KNOWN_EXCEPTIONS are documented and do NOT fail the gate.
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
@@ -19,57 +14,80 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const ROOT = path.resolve(__dirname, '..')
 
-// ── Governed apps — all Next.js apps under apps/ ────
-const GOVERNED_APPS = [
-  'abr',
-  'agrimo',
-  'cfo',
-  'console',
-  'control-plane',
-  'cora',
-  'flow',
-  'mobility',
-  'mobility-client-portal',
-  'nacp-exams',
-  'partners',
-  'platform-admin',
-  'trade',
-  'web',
-  'zonga',
-]
+const REGISTRY_PATH = path.join(ROOT, 'platform', 'registry', 'platform-registry.json')
+const AUTHORITY_PATH = path.join(ROOT, 'governance', 'platform-package-authority.json')
+const EXCEPTIONS_PATH = path.join(ROOT, 'governance', 'exceptions', 'platform-concern-adoption-exceptions.json')
+const REPORT_PATH = path.join(ROOT, 'governance', 'reports', 'platform-concern-adoption-report.json')
 
-// ── Documented exceptions ───────────────────────────
-// union-eyes:       Django hybrid — custom instrumentation, shell-free SSR
-// orchestrator-api: Fastify (non-Next.js) — different boot path
-// web:              Public marketing site — own nav/footer, not internal app shell
-// mobility-client-portal: External client portal — own branding, not internal ops shell
-const KNOWN_EXCEPTIONS: Record<string, string[]> = {
-  'union-eyes': ['shell', 'observability'],
-  'orchestrator-api': ['shell', 'schema-core', 'observability'],
-  'web': ['shell'],
-  'mobility-client-portal': ['shell'],
+type Tier = 'PRODUCTION' | 'PILOT' | 'INCUBATING' | 'EXPERIMENTAL'
+type ConcernId =
+  | 'auth'
+  | 'contracts'
+  | 'eventing'
+  | 'observability'
+  | 'org-context'
+  | 'evidence'
+  | 'notifications'
+  | 'integrations'
+  | 'revenue'
+  | 'billing'
+  | 'deployment'
+  | 'feature-flags'
+  | 'data-fabric'
+
+type AppClassification =
+  | 'fully adopted'
+  | 'partially adopted'
+  | 'exception-approved'
+  | 'legacy migration path'
+
+interface RegistryApp {
+  name: string
+  path: string
+  tier: Tier
 }
 
-// ── Results ─────────────────────────────────────────
+interface ConcernAuthority {
+  id: ConcernId
+  authoritative: string[]
+}
 
-interface CheckResult {
+interface AuthorityMap {
+  concerns: ConcernAuthority[]
+}
+
+interface ExceptionEntry {
   app: string
-  check: string
-  passed: boolean
-  detail: string
-  exception?: boolean
+  concern: ConcernId
+  status: 'exception-approved' | 'legacy-migration-path'
+  owner: string
+  justification: string
+  expiresOn: string
 }
 
-const results: CheckResult[] = []
+interface ExceptionFile {
+  entries: ExceptionEntry[]
+}
 
-function record(
-  app: string,
-  check: string,
-  passed: boolean,
-  detail: string,
-) {
-  const exception = KNOWN_EXCEPTIONS[app]?.includes(check) ?? false
-  results.push({ app, check, passed: passed || exception, detail, exception })
+interface ConcernResult {
+  concern: ConcernId
+  passed: boolean
+  required: boolean
+  detail: string
+  exception?: ExceptionEntry
+  blockingFailure: boolean
+}
+
+interface AppResult {
+  app: string
+  tier: Tier
+  classification: AppClassification
+  requiredConcerns: ConcernId[]
+  concernResults: ConcernResult[]
+}
+
+function readJson<T>(filePath: string): T {
+  return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as T
 }
 
 function readFileText(p: string): string | null {
@@ -80,34 +98,36 @@ function readFileText(p: string): string | null {
   }
 }
 
-function readPkgJson(appDir: string): Record<string, unknown> | null {
-  const text = readFileText(path.join(appDir, 'package.json'))
-  if (!text) return null
+function readPkg(appDir: string): Record<string, unknown> {
+  const pkgPath = path.join(appDir, 'package.json')
+  if (!fs.existsSync(pkgPath)) return {}
   try {
-    return JSON.parse(text) as Record<string, unknown>
+    return readJson<Record<string, unknown>>(pkgPath)
   } catch {
-    return null
+    return {}
   }
 }
 
-function hasDep(pkg: Record<string, unknown>, dep: string): boolean {
+function appDeps(pkg: Record<string, unknown>): Set<string> {
   const deps = (pkg.dependencies ?? {}) as Record<string, string>
   const devDeps = (pkg.devDependencies ?? {}) as Record<string, string>
-  return dep in deps || dep in devDeps
+  return new Set<string>([...Object.keys(deps), ...Object.keys(devDeps)])
 }
 
-// ── Walk to find import string in .ts/.tsx files ────
+function hasAnyDep(deps: Set<string>, names: string[]): boolean {
+  return names.some((name) => deps.has(name))
+}
 
-function walkFiles(dir: string, match: RegExp, maxDepth = 4): boolean {
+function walkFiles(dir: string, match: RegExp, maxDepth = 5): boolean {
   if (!fs.existsSync(dir)) return false
   const search = (d: string, depth: number): boolean => {
     if (depth > maxDepth) return false
     for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
-      if (entry.name === 'node_modules' || entry.name === '.next') continue
+      if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === 'dist') continue
       const full = path.join(d, entry.name)
       if (entry.isDirectory()) {
         if (search(full, depth + 1)) return true
-      } else if (/\.tsx?$/.test(entry.name)) {
+      } else if (/\.(ts|tsx|js|mjs)$/.test(entry.name)) {
         const text = readFileText(full)
         if (text && match.test(text)) return true
       }
@@ -117,102 +137,326 @@ function walkFiles(dir: string, match: RegExp, maxDepth = 4): boolean {
   return search(dir, 0)
 }
 
-// ── Run checks ──────────────────────────────────────
+function exceptionFor(
+  app: string,
+  concern: ConcernId,
+  exceptions: ExceptionEntry[],
+): ExceptionEntry | undefined {
+  const now = new Date()
+  return exceptions.find((e) => {
+    if (e.app !== app || e.concern !== concern) return false
+    const expiry = new Date(`${e.expiresOn}T23:59:59Z`)
+    return expiry >= now
+  })
+}
 
-for (const app of GOVERNED_APPS) {
-  const appDir = path.join(ROOT, 'apps', app)
+function isExpired(entry: ExceptionEntry): boolean {
+  const expiry = new Date(`${entry.expiresOn}T23:59:59Z`)
+  return expiry < new Date()
+}
+
+const BASE_REQUIRED_BY_TIER: Record<Tier, ConcernId[]> = {
+  PRODUCTION: ['auth', 'org-context', 'observability'],
+  PILOT: ['auth', 'org-context', 'observability'],
+  INCUBATING: ['auth', 'observability'],
+  EXPERIMENTAL: ['auth'],
+}
+
+const EXTRA_REQUIRED_BY_APP: Record<string, ConcernId[]> = {
+  'control-plane': ['eventing', 'contracts', 'evidence', 'feature-flags', 'integrations', 'revenue'],
+  'console': ['eventing', 'evidence', 'integrations'],
+  'flow': ['eventing', 'contracts', 'revenue'],
+  'cfo': ['contracts', 'revenue'],
+  'partners': ['revenue'],
+  'trade': ['revenue', 'evidence'],
+  'zonga': ['revenue'],
+  'platform-admin': ['eventing', 'integrations', 'data-fabric'],
+  'orchestrator-api': ['eventing'],
+}
+
+function evaluateConcern(
+  concern: ConcernId,
+  appDir: string,
+  deps: Set<string>,
+): { passed: boolean; detail: string } {
+  switch (concern) {
+    case 'auth': {
+      const passed = deps.has('@nzila/platform-auth')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-auth' : 'missing @nzila/platform-auth dependency',
+      }
+    }
+    case 'contracts': {
+      const hasAdaptersDir = fs.existsSync(path.join(appDir, 'lib', 'platform-adapters'))
+      const passed = deps.has('@nzila/platform-contracts') || hasAdaptersDir
+      return {
+        passed,
+        detail: passed
+          ? 'platform contracts adapter/dependency present'
+          : 'no @nzila/platform-contracts dependency or platform-adapters scaffold',
+      }
+    }
+    case 'eventing': {
+      const passed = hasAnyDep(deps, ['@nzila/platform-events', '@nzila/platform-event-fabric'])
+      return {
+        passed,
+        detail: passed
+          ? 'depends on platform event layer'
+          : 'missing @nzila/platform-events or @nzila/platform-event-fabric dependency',
+      }
+    }
+    case 'observability': {
+      const hasInstrumentation = fs.existsSync(path.join(appDir, 'instrumentation.ts'))
+      const usesBoot = hasInstrumentation
+        ? /createAppBoot/.test(readFileText(path.join(appDir, 'instrumentation.ts')) ?? '')
+        : false
+      const passed = deps.has('@nzila/os-core')
+      return {
+        passed,
+        detail: passed
+          ? usesBoot
+            ? 'os-core telemetry dependency with canonical boot wiring'
+            : 'os-core telemetry dependency present (custom boot wiring)'
+          : 'missing canonical os-core telemetry dependency or boot wiring',
+      }
+    }
+    case 'org-context': {
+      const passed =
+        deps.has('@nzila/platform-auth') ||
+        walkFiles(appDir, /resolveOrgContext|OrgContext|@nzila\/org/, 6)
+      return {
+        passed,
+        detail: passed
+          ? 'org context propagation markers or platform-auth boundary found'
+          : 'no resolveOrgContext/OrgContext/@nzila/org usage detected',
+      }
+    }
+    case 'evidence': {
+      const passed = hasAnyDep(deps, ['@nzila/platform-evidence-pack', '@nzila/evidence'])
+      return {
+        passed,
+        detail: passed
+          ? 'evidence dependency present'
+          : 'missing @nzila/platform-evidence-pack or @nzila/evidence dependency',
+      }
+    }
+    case 'notifications': {
+      const passed = deps.has('@nzila/platform-notifications')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-notifications' : 'notifications package not adopted',
+      }
+    }
+    case 'integrations': {
+      const passed = hasAnyDep(deps, [
+        '@nzila/platform-integrations',
+        '@nzila/platform-integrations-control-plane',
+        '@nzila/integrations-runtime',
+      ])
+      return {
+        passed,
+        detail: passed ? 'integration layer dependency present' : 'no platform integration dependency found',
+      }
+    }
+    case 'revenue': {
+      const passed = deps.has('@nzila/platform-revenue')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-revenue' : 'platform revenue dependency not adopted',
+      }
+    }
+    case 'billing': {
+      const passed = deps.has('@nzila/platform-billing')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-billing' : 'platform billing dependency not adopted',
+      }
+    }
+    case 'deployment': {
+      const passed = deps.has('@nzila/platform-deploy')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-deploy' : 'platform deploy dependency not adopted',
+      }
+    }
+    case 'feature-flags': {
+      const passed = deps.has('@nzila/platform-feature-flags')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-feature-flags' : 'feature flag dependency not adopted',
+      }
+    }
+    case 'data-fabric': {
+      const passed = deps.has('@nzila/platform-data-fabric')
+      return {
+        passed,
+        detail: passed ? 'depends on @nzila/platform-data-fabric' : 'data fabric dependency not adopted',
+      }
+    }
+  }
+}
+
+const registry = readJson<{ apps: RegistryApp[] }>(REGISTRY_PATH)
+const authority = readJson<AuthorityMap>(AUTHORITY_PATH)
+const exceptionFile = readJson<ExceptionFile>(EXCEPTIONS_PATH)
+
+const concernIds = authority.concerns.map((c) => c.id)
+const appResults: AppResult[] = []
+const failures: string[] = []
+
+for (const entry of exceptionFile.entries) {
+  if (isExpired(entry)) {
+    failures.push(
+      `[${entry.app}] ${entry.concern}: exception expired on ${entry.expiresOn} (owner: ${entry.owner})`,
+    )
+  }
+}
+
+for (const app of registry.apps) {
+  const appDir = path.join(ROOT, app.path)
   if (!fs.existsSync(appDir)) {
-    record(app, 'exists', false, `apps/${app} not found`)
+    failures.push(`[${app.name}] app path missing: ${app.path}`)
     continue
   }
 
-  const pkg = readPkgJson(appDir)
+  const pkg = readPkg(appDir)
+  const deps = appDeps(pkg)
+  const required = new Set<ConcernId>([
+    ...BASE_REQUIRED_BY_TIER[app.tier],
+    ...(EXTRA_REQUIRED_BY_APP[app.name] ?? []),
+  ])
 
-  // 1. Shell — NzilaAppShell import in layout or components
-  const shellImport = walkFiles(
-    appDir,
-    /from\s+['"]@nzila\/platform-shell/,
-    5,
-  )
-  record(app, 'shell', shellImport, shellImport
-    ? 'imports @nzila/platform-shell'
-    : 'missing NzilaAppShell import')
+  const concernResults: ConcernResult[] = concernIds.map((concern) => {
+    const evaluated = evaluateConcern(concern, appDir, deps)
+    const requiredConcern = required.has(concern)
+    const ex = exceptionFor(app.name, concern, exceptionFile.entries)
 
-  // 2. Schema-core — declared as dependency
-  const hasSchema = pkg ? hasDep(pkg, '@nzila/schema-core') : false
-  record(app, 'schema-core', hasSchema, hasSchema
-    ? '@nzila/schema-core in dependencies'
-    : '@nzila/schema-core not in package.json')
+    if (evaluated.passed || !requiredConcern) {
+      return {
+        concern,
+        passed: evaluated.passed,
+        required: requiredConcern,
+        detail: evaluated.detail,
+        blockingFailure: false,
+      }
+    }
 
-  // 3. Governed-workflow — declared as dependency
-  const hasWorkflow = pkg ? hasDep(pkg, '@nzila/governed-workflow') : false
-  record(app, 'governed-workflow', hasWorkflow, hasWorkflow
-    ? '@nzila/governed-workflow in dependencies'
-    : '@nzila/governed-workflow not in package.json')
+    if (ex) {
+      return {
+        concern,
+        passed: true,
+        required: true,
+        detail: `${evaluated.detail} (exception: ${ex.status}, expires ${ex.expiresOn})`,
+        exception: ex,
+        blockingFailure: false,
+      }
+    }
 
-  // 4. Observability — instrumentation.ts with createAppBoot
-  const instrPath = path.join(appDir, 'instrumentation.ts')
-  const instrText = readFileText(instrPath)
-  const hasCanonicalBoot =
-    instrText !== null && /createAppBoot/.test(instrText)
-  record(app, 'observability', hasCanonicalBoot, hasCanonicalBoot
-    ? 'instrumentation.ts uses createAppBoot'
-    : instrText === null
-      ? 'instrumentation.ts missing'
-      : 'instrumentation.ts does not use createAppBoot')
+    const blocking = app.tier === 'PRODUCTION' || app.tier === 'PILOT'
+    return {
+      concern,
+      passed: false,
+      required: true,
+      detail: evaluated.detail,
+      blockingFailure: blocking,
+    }
+  })
+
+  const requiredResults = concernResults.filter((r) => r.required)
+  const requiredFailed = requiredResults.filter((r) => !r.passed)
+  const hasBlocking = requiredFailed.some((r) => r.blockingFailure)
+  const hasLegacyException = requiredResults.some((r) => r.exception?.status === 'legacy-migration-path')
+  const hasAnyException = requiredResults.some((r) => Boolean(r.exception))
+
+  let classification: AppClassification = 'fully adopted'
+  if (hasBlocking || requiredFailed.length > 0) {
+    classification = 'partially adopted'
+  } else if (hasLegacyException) {
+    classification = 'legacy migration path'
+  } else if (hasAnyException) {
+    classification = 'exception-approved'
+  }
+
+  if (hasBlocking) {
+    for (const failure of requiredFailed.filter((r) => r.blockingFailure)) {
+      failures.push(`[${app.name}] ${failure.concern}: ${failure.detail}`)
+    }
+  }
+
+  appResults.push({
+    app: app.name,
+    tier: app.tier,
+    classification,
+    requiredConcerns: Array.from(required),
+    concernResults,
+  })
 }
 
-// ── Scorecard ───────────────────────────────────────
-
-const CHECKS = ['shell', 'schema-core', 'governed-workflow', 'observability'] as const
-
-const appScores: Record<string, { total: number; passed: number; exceptions: number }> = {}
-for (const r of results) {
-  if (r.check === 'exists') continue
-  if (!appScores[r.app]) appScores[r.app] = { total: 0, passed: 0, exceptions: 0 }
-  appScores[r.app].total++
-  if (r.passed) appScores[r.app].passed++
-  if (r.exception) appScores[r.app].exceptions++
+const byClassification: Record<AppClassification, number> = {
+  'fully adopted': 0,
+  'partially adopted': 0,
+  'exception-approved': 0,
+  'legacy migration path': 0,
 }
 
-const failed = results.filter((r) => !r.passed)
-const totalChecks = results.filter((r) => r.check !== 'exists').length
-const totalPassed = results.filter((r) => r.check !== 'exists' && r.passed).length
+for (const app of appResults) {
+  byClassification[app.classification]++
+}
 
 process.stdout.write('\n')
 process.stdout.write('═══════════════════════════════════════\n')
-process.stdout.write('  Platform Adoption Gate\n')
+process.stdout.write('  Platform Concern Adoption Gate\n')
 process.stdout.write('═══════════════════════════════════════\n\n')
+process.stdout.write(`  Apps scanned: ${appResults.length}\n`)
+process.stdout.write(`  Fully adopted: ${byClassification['fully adopted']}\n`)
+process.stdout.write(`  Exception-approved: ${byClassification['exception-approved']}\n`)
+process.stdout.write(`  Legacy migration path: ${byClassification['legacy migration path']}\n`)
+process.stdout.write(`  Partially adopted: ${byClassification['partially adopted']}\n\n`)
 
-// Per-check summary
-for (const check of CHECKS) {
-  const checkResults = results.filter((r) => r.check === check)
-  const pass = checkResults.filter((r) => r.passed).length
-  const total = checkResults.length
-  const icon = pass === total ? '✓' : '◐'
-  process.stdout.write(`  ${icon} ${check}: ${pass}/${total} apps\n`)
+for (const app of appResults) {
+  const required = app.concernResults.filter((c) => c.required)
+  const passed = required.filter((c) => c.passed).length
+  const icon =
+    app.classification === 'fully adopted'
+      ? '✓'
+      : app.classification === 'partially adopted'
+        ? '◐'
+        : '•'
+  process.stdout.write(`  ${icon} ${app.app} [${app.tier}] ${app.classification} (${passed}/${required.length})\n`)
 }
 
 process.stdout.write('\n')
 
-// Per-app scorecard
-for (const [app, score] of Object.entries(appScores)) {
-  const pct = Math.round((score.passed / score.total) * 100)
-  const icon = pct === 100 ? '✓' : pct >= 50 ? '◐' : '✗'
-  const excNote = score.exceptions > 0 ? ` (${score.exceptions} exception${score.exceptions > 1 ? 's' : ''})` : ''
-  process.stdout.write(`  ${icon} ${app}: ${score.passed}/${score.total} (${pct}%)${excNote}\n`)
+const reportDir = path.dirname(REPORT_PATH)
+if (!fs.existsSync(reportDir)) {
+  fs.mkdirSync(reportDir, { recursive: true })
 }
 
-process.stdout.write('\n')
-process.stdout.write(`  Total: ${totalPassed}/${totalChecks} checks passing\n\n`)
+fs.writeFileSync(
+  REPORT_PATH,
+  JSON.stringify(
+    {
+      generatedAt: new Date().toISOString(),
+      authorityMap: path.relative(ROOT, AUTHORITY_PATH).replaceAll('\\\\', '/'),
+      exceptions: path.relative(ROOT, EXCEPTIONS_PATH).replaceAll('\\\\', '/'),
+      summary: byClassification,
+      apps: appResults,
+    },
+    null,
+    2,
+  ),
+)
 
-if (failed.length > 0) {
-  process.stderr.write('  Failures:\n')
-  for (const f of failed) {
-    process.stderr.write(`    ✗ [${f.app}] ${f.check}: ${f.detail}\n`)
+process.stdout.write(`  Report: ${path.relative(ROOT, REPORT_PATH).replaceAll('\\\\', '/')}\n\n`)
+
+if (failures.length > 0) {
+  process.stderr.write('  Blocking failures:\n')
+  for (const failure of failures) {
+    process.stderr.write(`    ✗ ${failure}\n`)
   }
   process.stderr.write('\n')
   process.exit(1)
-} else {
-  process.stdout.write('  ✓ All governed apps meet platform adoption requirements\n\n')
 }
+
+process.stdout.write('  ✓ Platform concern adoption policy satisfied\n\n')

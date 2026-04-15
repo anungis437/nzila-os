@@ -89,6 +89,7 @@
 | `scripts/platform-registry-check.ts` | `pnpm registry:check` | Validate platform-registry.json shape and path existence |
 | `scripts/control-plane-surface-check.ts` | `pnpm control-plane:surface:check` | Validate control-plane routes against surface responsibilities |
 | `scripts/platform-vs-app-check.ts` | `pnpm platform:vs-app:check` | Validate platform vs app classification and registry coverage |
+| `scripts/platform-authority-check.ts` | `pnpm platform:authority:check` | Enforce concern authority map and detect package overlap drift |
 | `scripts/package-ownership-check.ts` | `pnpm package:ownership:check` | Validate `package.meta.json` schema across all packages |
 | `scripts/dependency-boundary-check.ts` | `pnpm deps:check` | Detect circular deps, cross-vertical deps, deprecated usage |
 | `scripts/ai-contract-check.ts` | `pnpm ai:contract:check` | Scan apps for prohibited AI patterns |
@@ -106,7 +107,7 @@
 
 | Command | Purpose |
 |---|---|
-| `pnpm architecture:check` | Run all architecture checks: layers, domain-core, surface model, contracts, registry, coherence |
+| `pnpm architecture:check` | Run architecture checks: layers, domain-core, surface model, package authority, contracts, registry, coherence, and adoption |
 
 ## Contract Tests
 

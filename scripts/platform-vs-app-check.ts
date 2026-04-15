@@ -25,6 +25,15 @@ interface Violation {
   severity: 'error' | 'warning'
 }
 
+interface AuthorityConcern {
+  id: string
+  authoritative: string[]
+}
+
+interface AuthorityMap {
+  concerns: AuthorityConcern[]
+}
+
 const violations: Violation[] = []
 
 // ── Load platform registry ─────────────────────────
@@ -42,6 +51,67 @@ const registeredServiceNames = new Set<string>(
 const registeredPackageNames = new Set<string>(
   (registry.shared_packages || []).map((p: { name: string }) => p.name),
 )
+
+// ── Validate concern authority map ──────────────────
+
+const authorityMapPath = path.join(ROOT, 'governance', 'platform-package-authority.json')
+if (!fs.existsSync(authorityMapPath)) {
+  violations.push({
+    source: 'governance/',
+    issue: 'Missing governance/platform-package-authority.json',
+    severity: 'error',
+  })
+} else {
+  try {
+    const authority = JSON.parse(fs.readFileSync(authorityMapPath, 'utf-8')) as AuthorityMap
+    const concerns = authority.concerns || []
+    if (concerns.length === 0) {
+      violations.push({
+        source: 'governance/platform-package-authority.json',
+        issue: 'Concern authority map has no concerns',
+        severity: 'error',
+      })
+    }
+
+    for (const concern of concerns) {
+      if (!concern.authoritative || concern.authoritative.length === 0) {
+        violations.push({
+          source: 'governance/platform-package-authority.json',
+          issue: `Concern ${concern.id} has no authoritative package`,
+          severity: 'error',
+        })
+        continue
+      }
+
+      for (const pkgName of concern.authoritative) {
+        const short = pkgName.replace('@nzila/', '')
+        const pkgDir = path.join(ROOT, 'packages', short)
+        if (!fs.existsSync(path.join(pkgDir, 'package.json'))) {
+          violations.push({
+            source: `packages/${short}`,
+            issue: `Authoritative concern package missing for ${concern.id}`,
+            severity: 'error',
+          })
+          continue
+        }
+
+        if (!registeredServiceNames.has(short) && !registeredPackageNames.has(short)) {
+          violations.push({
+            source: `packages/${short}`,
+            issue: `Authoritative concern package not registered in platform-registry.json`,
+            severity: 'warning',
+          })
+        }
+      }
+    }
+  } catch {
+    violations.push({
+      source: 'governance/platform-package-authority.json',
+      issue: 'Invalid JSON in platform-package-authority.json',
+      severity: 'error',
+    })
+  }
+}
 
 // ── Check ADR template exists ───────────────────────
 

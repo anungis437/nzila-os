@@ -18,5 +18,5 @@
     "Commerce observability + evidence pipeline wired",
     "RBAC fully implemented with platform + org role hierarchy"
   ],
-  "app_tier": "PRODUCTION"
+  "app_tier": "PILOT"
 }

@@ -64,6 +64,7 @@ Governance, architecture, and readiness enforcement scripts.
 | Script | Purpose |
 |--------|---------|
 | `governance-check.ts` | Governance enforcement |
+| `platform-authority-check.ts` | Enforces authoritative package map and overlap drift rules |
 | `governance-snapshot.ts` | Governance snapshot generator |
 | `architecture-layer-check.ts` | Architecture layer enforcement |
 | `platform-contract-check.ts` | Platform contract validation |

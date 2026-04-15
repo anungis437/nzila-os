@@ -93,12 +93,66 @@
       "control_plane_visible": true
     },
     {
+      "name": "platform-auth",
+      "path": "packages/platform-auth",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["authentication", "authorization", "session guards"],
+      "used_by": ["all apps"],
+      "control_plane_visible": false
+    },
+    {
+      "name": "platform-contracts",
+      "path": "packages/platform-contracts",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["platform contracts", "health", "metrics", "governance"],
+      "used_by": ["all apps"],
+      "control_plane_visible": false
+    },
+    {
       "name": "platform-observability",
       "path": "packages/platform-observability",
       "owner": "platform",
       "lifecycle": "STABLE",
       "apis": ["telemetry collection", "metrics export", "trace propagation"],
       "used_by": ["all apps"],
+      "control_plane_visible": false
+    },
+    {
+      "name": "platform-notifications",
+      "path": "packages/platform-notifications",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["notification orchestration", "dispatch contracts"],
+      "used_by": ["all apps"],
+      "control_plane_visible": false
+    },
+    {
+      "name": "platform-billing",
+      "path": "packages/platform-billing",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["billing primitives", "invoice and subscription contracts"],
+      "used_by": ["commerce apps", "finance apps"],
+      "control_plane_visible": false
+    },
+    {
+      "name": "platform-revenue",
+      "path": "packages/platform-revenue",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["revenue aggregation", "monetization contracts"],
+      "used_by": ["control-plane", "commerce apps", "media apps"],
+      "control_plane_visible": true
+    },
+    {
+      "name": "platform-integrations",
+      "path": "packages/platform-integrations",
+      "owner": "platform",
+      "lifecycle": "STABLE",
+      "apis": ["connector orchestration", "integration runtime governance"],
+      "used_by": ["control-plane", "platform-admin", "app runtimes"],
       "control_plane_visible": false
     },
     {
@@ -418,6 +472,9 @@
     { "name": "otel-core", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
     { "name": "secrets", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
     { "name": "evidence", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
+    { "name": "contracts", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
+    { "name": "events", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
+    { "name": "observability", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
     { "name": "analytics", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
     { "name": "data-lifecycle", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
     { "name": "tools-runtime", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },

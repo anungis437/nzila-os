@@ -1,5 +1,7 @@
 # Platform Consolidation — Adoption Matrix & Closeout
 
+> Superseded for current authority/adoption consolidation by `docs/platform/PLATFORM_CONSOLIDATION_COMPLETION_REPORT.md` (2026-04-14).
+
 > Branch: `feat/platform-consolidation-10`
 > Date: 2026-04-11
 > Total: 92 files changed, 3,767 insertions, 271 deletions

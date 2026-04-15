@@ -38,6 +38,8 @@ All UnionEyes docs for end users live in [union-eyes/](union-eyes/README.md).
 - [Architecture](../ARCHITECTURE.md) — System design
 - [Auth Architecture](architecture/AUTH_ARCHITECTURE.md) — Email/password + Entra SSO dual auth model
 - [Stack Authority](architecture/STACK_AUTHORITY.md) — Technology standards
+- [Platform Package Authority](architecture/PLATFORM_PACKAGE_AUTHORITY.md) — Authoritative package map by shared concern
+- [When To Use Which Platform Package](platform/WHEN_TO_USE_PLATFORM_PACKAGES.md) — Package selection golden path
 - [Package Catalogue](reference/packages.md) — All packages
 - [Tutorials](tutorials/README.md) · [How-To Guides](how-to/README.md) · [Reference](reference/README.md) · [Explanation](explanation/README.md)
 

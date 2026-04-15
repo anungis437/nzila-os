@@ -1,0 +1,54 @@
+{
+  "ruleId": "platform-concern-adoption",
+  "description": "Time-bound exceptions for concern adoption checks where migration is intentional and documented.",
+  "entries": [
+    {
+      "app": "orchestrator-api",
+      "concern": "auth",
+      "status": "exception-approved",
+      "owner": "platform-team",
+      "justification": "Headless Fastify API uses API key trust boundary rather than end-user session middleware.",
+      "expiresOn": "2027-01-01"
+    },
+    {
+      "app": "orchestrator-api",
+      "concern": "org-context",
+      "status": "legacy-migration-path",
+      "owner": "platform-team",
+      "justification": "Org context is currently inferred from orchestrator request metadata; migration to shared org context contract is tracked.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "app": "web",
+      "concern": "contracts",
+      "status": "legacy-migration-path",
+      "owner": "platform-team",
+      "justification": "Public web remains thin and does not yet expose platform-contract adapters for governance endpoints.",
+      "expiresOn": "2026-10-31"
+    },
+    {
+      "app": "union-eyes",
+      "concern": "contracts",
+      "status": "legacy-migration-path",
+      "owner": "union-team",
+      "justification": "Django-authoritative hybrid uses existing domain contract surfaces while route-level adapters are consolidated incrementally.",
+      "expiresOn": "2026-11-30"
+    },
+    {
+      "app": "partners",
+      "concern": "contracts",
+      "status": "legacy-migration-path",
+      "owner": "commerce-team",
+      "justification": "Partners relies on domain-shared contracts; migration to platform-contract adapters is in-progress.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "app": "zonga",
+      "concern": "eventing",
+      "status": "legacy-migration-path",
+      "owner": "media-team",
+      "justification": "Zonga events currently route through domain event packages; platform-events envelope migration is staged.",
+      "expiresOn": "2026-10-31"
+    }
+  ]
+}

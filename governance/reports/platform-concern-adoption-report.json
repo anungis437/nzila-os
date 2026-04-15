@@ -1,0 +1,1781 @@
+{
+  "generatedAt": "2026-04-15T01:47:03.906Z",
+  "authorityMap": "governance\\platform-package-authority.json",
+  "exceptions": "governance\\exceptions\\platform-concern-adoption-exceptions.json",
+  "summary": {
+    "fully adopted": 16,
+    "partially adopted": 0,
+    "exception-approved": 1,
+    "legacy migration path": 0
+  },
+  "apps": [
+    {
+      "app": "union-eyes",
+      "tier": "PRODUCTION",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": false,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency present (custom boot wiring)",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": false,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "flow",
+      "tier": "PRODUCTION",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability",
+        "eventing",
+        "contracts",
+        "revenue"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": true,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": true,
+          "required": true,
+          "detail": "depends on platform event layer",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "web",
+      "tier": "PRODUCTION",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": false,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "partners",
+      "tier": "PILOT",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability",
+        "revenue"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": false,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "cfo",
+      "tier": "PILOT",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability",
+        "contracts",
+        "revenue"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": true,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "console",
+      "tier": "PILOT",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability",
+        "eventing",
+        "evidence",
+        "integrations"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": true,
+          "required": true,
+          "detail": "depends on platform event layer",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": true,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": true,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "control-plane",
+      "tier": "PILOT",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "org-context",
+        "observability",
+        "eventing",
+        "contracts",
+        "evidence",
+        "feature-flags",
+        "integrations",
+        "revenue"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": true,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": true,
+          "required": true,
+          "detail": "depends on platform event layer",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": true,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": true,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": true,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-feature-flags",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "zonga",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability",
+        "revenue"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": true,
+          "required": false,
+          "detail": "platform contracts adapter/dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "abr",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": false,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "cora",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": false,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "trade",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability",
+        "revenue",
+        "evidence"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": true,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": false,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-revenue",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "agrimo",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": true,
+          "required": false,
+          "detail": "evidence dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": false,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "platform-admin",
+      "tier": "INCUBATING",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth",
+        "observability",
+        "eventing",
+        "integrations",
+        "data-fabric"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": true,
+          "required": true,
+          "detail": "depends on platform event layer",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": true,
+          "required": true,
+          "detail": "integration layer dependency present",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-data-fabric",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "orchestrator-api",
+      "tier": "INCUBATING",
+      "classification": "exception-approved",
+      "requiredConcerns": [
+        "auth",
+        "observability",
+        "eventing"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "missing @nzila/platform-auth dependency (exception: exception-approved, expires 2027-01-01)",
+          "exception": {
+            "app": "orchestrator-api",
+            "concern": "auth",
+            "status": "exception-approved",
+            "owner": "platform-team",
+            "justification": "Headless Fastify API uses API key trust boundary rather than end-user session middleware.",
+            "expiresOn": "2027-01-01"
+          },
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": true,
+          "required": true,
+          "detail": "depends on platform event layer",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": true,
+          "detail": "os-core telemetry dependency present (custom boot wiring)",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": false,
+          "required": false,
+          "detail": "no resolveOrgContext/OrgContext/@nzila/org usage detected",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "nacp-exams",
+      "tier": "EXPERIMENTAL",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": false,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "mobility",
+      "tier": "EXPERIMENTAL",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": false,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    },
+    {
+      "app": "mobility-client-portal",
+      "tier": "EXPERIMENTAL",
+      "classification": "fully adopted",
+      "requiredConcerns": [
+        "auth"
+      ],
+      "concernResults": [
+        {
+          "concern": "auth",
+          "passed": true,
+          "required": true,
+          "detail": "depends on @nzila/platform-auth",
+          "blockingFailure": false
+        },
+        {
+          "concern": "contracts",
+          "passed": false,
+          "required": false,
+          "detail": "no @nzila/platform-contracts dependency or platform-adapters scaffold",
+          "blockingFailure": false
+        },
+        {
+          "concern": "eventing",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-events or @nzila/platform-event-fabric dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "observability",
+          "passed": true,
+          "required": false,
+          "detail": "os-core telemetry dependency with canonical boot wiring",
+          "blockingFailure": false
+        },
+        {
+          "concern": "org-context",
+          "passed": true,
+          "required": false,
+          "detail": "org context propagation markers or platform-auth boundary found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "evidence",
+          "passed": false,
+          "required": false,
+          "detail": "missing @nzila/platform-evidence-pack or @nzila/evidence dependency",
+          "blockingFailure": false
+        },
+        {
+          "concern": "notifications",
+          "passed": false,
+          "required": false,
+          "detail": "notifications package not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "integrations",
+          "passed": false,
+          "required": false,
+          "detail": "no platform integration dependency found",
+          "blockingFailure": false
+        },
+        {
+          "concern": "revenue",
+          "passed": false,
+          "required": false,
+          "detail": "platform revenue dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "billing",
+          "passed": false,
+          "required": false,
+          "detail": "platform billing dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "deployment",
+          "passed": false,
+          "required": false,
+          "detail": "platform deploy dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "feature-flags",
+          "passed": false,
+          "required": false,
+          "detail": "feature flag dependency not adopted",
+          "blockingFailure": false
+        },
+        {
+          "concern": "data-fabric",
+          "passed": false,
+          "required": false,
+          "detail": "data fabric dependency not adopted",
+          "blockingFailure": false
+        }
+      ]
+    }
+  ]
+}

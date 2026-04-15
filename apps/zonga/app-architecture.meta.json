@@ -17,5 +17,5 @@
     "recommendation-engine.ts AI productization in @nzila/zonga-intelligence",
     "engagement-engine.ts creator economy loop in @nzila/zonga-growth"
   ],
-  "app_tier": "PRODUCTION"
+  "app_tier": "INCUBATING"
 }
