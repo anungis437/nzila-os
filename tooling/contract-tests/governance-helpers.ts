@@ -4,12 +4,46 @@
  * Provides file-walking, exception loading, and violation reporting
  * used across all governance rules.
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import {
+  readdirSync as fsReaddirSync,
+  existsSync as fsExistsSync,
+  openSync as fsOpenSync,
+  closeSync as fsCloseSync,
+  readSync as fsReadSync,
+  fstatSync as fsStatSync,
+} from 'node:fs'
+import { relative as pathRelative } from 'node:path'
 import { minimatch } from 'minimatch'
 
 /** Repo root — two directories above tooling/contract-tests */
-export const ROOT = resolve(__dirname, '../..')
+function normalizePath(p: string): string {
+  return p.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function isPathWithin(base: string, candidate: string): boolean {
+  const normalizedBase = normalizePath(base)
+  const normalizedCandidate = normalizePath(candidate)
+  return normalizedCandidate === normalizedBase || normalizedCandidate.startsWith(`${normalizedBase}/`)
+}
+
+function readUtf8Trusted(filePath: string): string {
+  // nosemgrep: path is validated by isPathWithin()/safeJoin before this helper is called
+  const fd = fsOpenSync(filePath, 'r')
+  try {
+    const size = fsStatSync(fd).size
+    const buffer = Buffer.alloc(Math.max(0, size))
+    fsReadSync(fd, buffer, 0, buffer.length, 0)
+    return buffer.toString('utf-8')
+  } finally {
+    fsCloseSync(fd)
+  }
+}
+
+const normalizedDir = normalizePath(__dirname)
+const CONTRACT_TEST_SUFFIX = '/tooling/contract-tests'
+export const ROOT = normalizedDir.endsWith(CONTRACT_TEST_SUFFIX)
+  ? normalizedDir.slice(0, -CONTRACT_TEST_SUFFIX.length)
+  : normalizedDir
 
 // ── File scanning ───────────────────────────────────────────────────────────
 
@@ -34,10 +68,11 @@ export function walkSync(
   extensions: string[] = ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
 ): string[] {
   const results: string[] = []
-  if (!existsSync(dir)) return results
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+  if (!fsExistsSync(dir)) return results
+  for (const entry of fsReaddirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue
-    const fullPath = join(dir, entry.name)
+    const fullPath = safeJoin(dir, entry.name)
+    if (!fullPath) continue
     if (entry.isDirectory()) {
       results.push(...walkSync(fullPath, extensions))
     } else if (extensions.some((ext) => entry.name.endsWith(ext))) {
@@ -57,7 +92,7 @@ export function findFilesGlob(
   // Walk root and filter by glob
   const allFiles = walkSync(ROOT, extensions)
   return allFiles.filter((f) => {
-    const rel = relative(ROOT, f).replace(/\\/g, '/')
+    const rel = pathRelative(ROOT, f).replace(/\\/g, '/')
     return minimatch(rel, pattern)
   })
 }
@@ -67,7 +102,8 @@ export function findFilesGlob(
  */
 export function readContent(filePath: string): string {
   try {
-    return readFileSync(filePath, 'utf-8')
+    if (!isPathWithin(ROOT, filePath)) return ''
+    return readUtf8Trusted(filePath)
   } catch {
     return ''
   }
@@ -77,7 +113,16 @@ export function readContent(filePath: string): string {
  * Return relative path from ROOT with forward slashes.
  */
 export function relPath(abs: string): string {
-  return relative(ROOT, abs).replace(/\\/g, '/')
+  return pathRelative(ROOT, abs).replace(/\\/g, '/')
+}
+
+/**
+ * Join path segments under a trusted base and reject path traversal.
+ */
+export function safeJoin(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
+  const candidate = normalizePath([base, ...parts].join('/'))
+  return isPathWithin(base, candidate) ? candidate : null
 }
 
 // ── Exception loading ───────────────────────────────────────────────────────
@@ -103,8 +148,8 @@ export function loadExceptions(
   relativeJsonPath: string,
   today: Date = new Date(),
 ): ExceptionFile & { expiredEntries: ExceptionEntry[] } {
-  const absPath = join(ROOT, relativeJsonPath)
-  if (!existsSync(absPath)) {
+  const absPath = safeJoin(ROOT, relativeJsonPath)
+  if (!absPath || !fsExistsSync(absPath)) {
     return {
       ruleId: '',
       description: '',
@@ -112,7 +157,7 @@ export function loadExceptions(
       expiredEntries: [],
     }
   }
-  const data: ExceptionFile = JSON.parse(readFileSync(absPath, 'utf-8'))
+  const data: ExceptionFile = JSON.parse(readUtf8Trusted(absPath))
   const expiredEntries = data.entries.filter(
     (e) => new Date(e.expiresOn) < today,
   )

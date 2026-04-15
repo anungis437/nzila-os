@@ -7,9 +7,38 @@ import {
   employerRemittanceRuns,
   employerRemittanceRunItems,
   employerExecutionArtifacts,
+  cbaRuleVersions,
+  employerExecutionProfiles,
 } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { sha256 } from "../_lib";
+
+type RemittanceFormatter = {
+  formatCode: string;
+  buildCsv: (rows: Array<{ employeeExternalId: string; dues: number; benefits: number; pension: number; gross: number; net: number }>) => string;
+  buildJson: (summary: Record<string, unknown>, rows: Array<Record<string, unknown>>) => string;
+};
+
+const defaultFormatter: RemittanceFormatter = {
+  formatCode: "default",
+  buildCsv(rows) {
+    const header = "employee_external_id,gross_pay,dues_amount,benefit_amount,pension_amount,net_pay";
+    const body = rows.map((row) =>
+      [
+        row.employeeExternalId,
+        row.gross.toFixed(2),
+        row.dues.toFixed(2),
+        row.benefits.toFixed(2),
+        row.pension.toFixed(2),
+        row.net.toFixed(2),
+      ].join(","),
+    );
+    return [header, ...body].join("\n");
+  },
+  buildJson(summary, rows) {
+    return JSON.stringify({ summary, rows }, null, 2);
+  },
+};
 
 const createSchema = z.object({
   payrollRunId: z.string().uuid(),
@@ -57,8 +86,38 @@ export const POST = withApi(
       .from(employerPayrollRunItems)
       .where(and(eq(employerPayrollRunItems.organizationId, organizationId), eq(employerPayrollRunItems.payrollRunId, body.payrollRunId)));
 
+    const [ruleVersion] = payrollRun.cbaRuleVersionId
+      ? await db
+          .select()
+          .from(cbaRuleVersions)
+          .where(
+            and(
+              eq(cbaRuleVersions.organizationId, organizationId),
+              eq(cbaRuleVersions.id, payrollRun.cbaRuleVersionId),
+            ),
+          )
+          .limit(1)
+      : [];
+
+    const [profile] = ruleVersion
+      ? await db
+          .select()
+          .from(employerExecutionProfiles)
+          .where(
+            and(
+              eq(employerExecutionProfiles.organizationId, organizationId),
+              eq(employerExecutionProfiles.id, ruleVersion.profileId),
+            ),
+          )
+          .limit(1)
+      : [];
+
+    const profileConfig = (profile?.configJson ?? {}) as Record<string, unknown>;
+    const dueDaysValue = Number(profileConfig.remittance_due_days ?? 15);
+    const dueDays = Number.isFinite(dueDaysValue) && dueDaysValue > 0 ? dueDaysValue : 15;
+
     const dueDate = new Date(String(payrollRun.periodEnd));
-    dueDate.setDate(dueDate.getDate() + 15);
+    dueDate.setDate(dueDate.getDate() + dueDays);
     const dueDateIso = dueDate.toISOString().slice(0, 10);
 
     const totals = items.reduce(
@@ -70,6 +129,31 @@ export const POST = withApi(
       },
       { dues: 0, benefits: 0, pension: 0 },
     );
+
+    const mappedRows = items.map((item) => ({
+      employeeExternalId: item.employeeExternalId,
+      dues: Number(item.duesAmount),
+      benefits: Number(item.benefitAmount),
+      pension: Number(item.pensionAmount),
+      gross: Number(item.grossPay),
+      net: Number(item.netPay),
+    }));
+
+    const summary = {
+      runCode: payrollRun.runCode,
+      payrollRunId: payrollRun.id,
+      dueDate: dueDateIso,
+      totals,
+      itemCount: items.length,
+      formatter: defaultFormatter.formatCode,
+      generatedAt: new Date().toISOString(),
+    };
+
+    const csvOutput = defaultFormatter.buildCsv(mappedRows);
+    const jsonOutput = defaultFormatter.buildJson(summary, mappedRows);
+    const summaryHash = sha256(JSON.stringify(summary));
+    const csvHash = sha256(csvOutput);
+    const jsonHash = sha256(jsonOutput);
 
     const remittanceRun = await withRLSContext(async (tx) => {
       const [createdRun] = await tx
@@ -88,6 +172,9 @@ export const POST = withApi(
             benefits: totals.benefits,
             pension: totals.pension,
             itemCount: items.length,
+            summaryHash,
+            csvHash,
+            jsonHash,
           },
           outputFormats: ["csv", "json"],
           immutableSnapshotLocked: true,
@@ -115,21 +202,34 @@ export const POST = withApi(
       return createdRun;
     });
 
-    const summary = {
-      runCode: remittanceRun.runCode,
-      dueDate: remittanceRun.dueDate,
-      totals,
-      itemCount: items.length,
-    };
-
     await withRLSContext(async (tx) => tx.insert(employerExecutionArtifacts).values([
+      {
+        organizationId,
+        remittanceRunId: remittanceRun.id,
+        artifactType: "remittance_csv",
+        artifactName: "remittance.csv",
+        storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.csv`,
+        artifactHash: csvHash,
+        manifestJson: { format: "csv", content: csvOutput, generatedAt: summary.generatedAt },
+        createdBy: userId ?? undefined,
+      },
+      {
+        organizationId,
+        remittanceRunId: remittanceRun.id,
+        artifactType: "remittance_json",
+        artifactName: "remittance.json",
+        storageRef: `inline://employer-execution/${remittanceRun.id}/remittance.json`,
+        artifactHash: jsonHash,
+        manifestJson: { format: "json", content: jsonOutput, generatedAt: summary.generatedAt },
+        createdBy: userId ?? undefined,
+      },
       {
         organizationId,
         remittanceRunId: remittanceRun.id,
         artifactType: "summary",
         artifactName: "remittance-summary.json",
         storageRef: `inline://employer-execution/${remittanceRun.id}/summary`,
-        artifactHash: sha256(JSON.stringify(summary)),
+        artifactHash: summaryHash,
         manifestJson: summary,
         createdBy: userId ?? undefined,
       },
@@ -139,8 +239,8 @@ export const POST = withApi(
         artifactType: "evidence_manifest",
         artifactName: "evidence-manifest.json",
         storageRef: `inline://employer-execution/${remittanceRun.id}/manifest`,
-        artifactHash: sha256(JSON.stringify({ remittanceRunId: remittanceRun.id, summary })),
-        manifestJson: { remittanceRunId: remittanceRun.id, summary },
+        artifactHash: sha256(JSON.stringify({ remittanceRunId: remittanceRun.id, summary, csvHash, jsonHash })),
+        manifestJson: { remittanceRunId: remittanceRun.id, summary, csvHash, jsonHash },
         createdBy: userId ?? undefined,
       },
       {

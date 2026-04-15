@@ -15,6 +15,7 @@ checkCanShipOrder(orderId, orgId): Promise<PaymentGateCheckResult>
 ```
 
 Each returns a `PaymentGateCheckResult` with:
+
 - `allowed: boolean` — whether the operation is permitted
 - `gate_state: 'clear' | 'blocked'`
 - `reasons: string[]` — human-readable block reasons

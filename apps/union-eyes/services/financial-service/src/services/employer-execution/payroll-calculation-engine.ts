@@ -10,24 +10,30 @@ export function calculatePayrollRun(input: PayrollRunInput): PayrollRunResult {
     periodStart: input.periodStart,
     periodEnd: input.periodEnd,
     engineVersion: input.engineVersion,
-    baseRate: input.baseRate,
-    duesRate: input.duesRate,
-    benefitRate: input.benefitRate,
-    pensionRate: input.pensionRate,
+    resolvedRules: input.resolvedRules,
     entries: input.entries,
   };
 
   const snapshotHash = createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
 
   const items = input.entries.map((entry) => {
-    const normalizedHours = entry.regularHours + entry.overtimeHours * 1.5 + entry.doubletimeHours * 2;
-    const basePay = normalizedHours * input.baseRate;
-    const premiumPay = entry.travelHours * input.baseRate * 0.5;
-    const grossPay = round2(basePay + premiumPay);
+    const rules = input.resolvedRules.values;
+    const regularBase = entry.regularHours * rules.baseRate;
+    const overtimeBase = entry.overtimeHours * rules.baseRate * rules.overtimeMultiplier;
+    const doubleTimeBase = entry.doubletimeHours * rules.baseRate * rules.doubleTimeMultiplier;
+    const travelPremium = entry.travelHours * rules.baseRate * rules.travelPremiumRate;
+    const shiftPremium = entry.premiumCode ? regularBase * rules.shiftPremiumRate : 0;
+    const statutoryHolidayAmount = (regularBase + overtimeBase + doubleTimeBase) * (rules.statutoryHolidayMultiplier - 1);
 
-    const duesAmount = round2(grossPay * input.duesRate);
-    const benefitAmount = round2(grossPay * input.benefitRate);
-    const pensionAmount = round2(grossPay * input.pensionRate);
+    const grossPay = round2(
+      (regularBase + overtimeBase + doubleTimeBase + travelPremium + shiftPremium + statutoryHolidayAmount) *
+        rules.regionalOverride *
+        rules.classificationOverride,
+    );
+
+    const duesAmount = round2(grossPay * rules.duesRate);
+    const benefitAmount = round2(grossPay * rules.benefitRate);
+    const pensionAmount = round2(grossPay * rules.pensionRate);
     const netPay = round2(grossPay - duesAmount - benefitAmount - pensionAmount);
 
     return {
@@ -38,18 +44,26 @@ export function calculatePayrollRun(input: PayrollRunInput): PayrollRunResult {
       benefitAmount,
       pensionAmount,
       trace: {
-        stages: {
-          input_snapshot: { snapshotHash },
-          hour_normalization: { regular: entry.regularHours, overtime: entry.overtimeHours, doubletime: entry.doubletimeHours },
-          base_rate_resolution: { baseRate: input.baseRate },
-          overtime_doubletime_logic: { normalizedHours },
-          premium_travel_logic: { travelHours: entry.travelHours, premiumPay },
-          dues_benefits_pension_logic: {
-            duesRate: input.duesRate,
-            benefitRate: input.benefitRate,
-            pensionRate: input.pensionRate,
+        calc_trace: {
+          rule_resolution: input.resolvedRules.ruleResolution,
+          applied_rules: input.resolvedRules.appliedRules,
+          intermediate_steps: [
+            { step: "regular_base", value: round2(regularBase) },
+            { step: "overtime", value: round2(overtimeBase), multiplier: rules.overtimeMultiplier },
+            { step: "double_time", value: round2(doubleTimeBase), multiplier: rules.doubleTimeMultiplier },
+            { step: "travel", value: round2(travelPremium), rate: rules.travelPremiumRate },
+            { step: "shift_premium", value: round2(shiftPremium), rate: rules.shiftPremiumRate },
+            { step: "statutory_holiday", value: round2(statutoryHolidayAmount), multiplier: rules.statutoryHolidayMultiplier },
+            { step: "regional_override", value: rules.regionalOverride },
+            { step: "classification_override", value: rules.classificationOverride },
+          ],
+          final_values: {
+            grossPay,
+            duesAmount,
+            benefitAmount,
+            pensionAmount,
+            netPay,
           },
-          remittance_grouping: { group: "default" },
         },
       },
     };
@@ -71,16 +85,16 @@ export function calculatePayrollRun(input: PayrollRunInput): PayrollRunResult {
     stage_order: [
       "input_snapshot",
       "rule_resolution",
-      "hour_normalization",
-      "base_rate_resolution",
-      "overtime_doubletime_logic",
-      "premium_travel_logic",
-      "dues_benefits_pension_logic",
-      "remittance_grouping",
+      "calculation",
       "compliance_checks",
       "calc_trace_persistence",
     ],
     snapshotHash,
+    engineVersion: input.engineVersion,
+    ruleVersionId: input.resolvedRules.ruleVersionId,
+    ruleVersionCode: input.resolvedRules.ruleVersionCode,
+    sourceHash: input.resolvedRules.sourceHash,
+    ruleInputs: input.resolvedRules.values,
     itemCount: items.length,
     totals,
   };

@@ -1,14 +1,18 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { PLATFORM_MODULES, requireEntitlement } from "@/services/platform-economics/entitlement-guard";
 import {
   employerTimesheetEntries,
+  employerTimesheetBatches,
   employerPayrollRuns,
   employerPayrollRunItems,
   employerExecutionComplianceEvents,
+  cbaRuleVersions,
+  cbaRuleSetItems,
 } from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
-import { calculatePayroll, sha256 } from "../_lib";
+import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
+import { calculatePayroll, resolvePayrollRules, sha256 } from "../_lib";
 
 const createSchema = z.object({
   timesheetBatchId: z.string().uuid(),
@@ -16,10 +20,6 @@ const createSchema = z.object({
   periodEnd: z.string(),
   runType: z.enum(["preview", "official"]),
   engineVersion: z.string().default("employer-execution-v1"),
-  baseRate: z.number().positive().default(52),
-  duesRate: z.number().min(0).max(1).default(0.02),
-  benefitRate: z.number().min(0).max(1).default(0.03),
-  pensionRate: z.number().min(0).max(1).default(0.04),
 });
 
 export const GET = withApi(
@@ -50,6 +50,42 @@ export const POST = withApi(
   async ({ organizationId, userId, body }) => {
     if (!organizationId) throw ApiError.badRequest("Organization context required");
 
+    if (body.runType === "official") {
+      await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId ?? undefined);
+    }
+
+    const [sourceBatch] = await db
+      .select()
+      .from(employerTimesheetBatches)
+      .where(
+        and(
+          eq(employerTimesheetBatches.organizationId, organizationId),
+          eq(employerTimesheetBatches.id, body.timesheetBatchId),
+        ),
+      )
+      .limit(1);
+
+    if (!sourceBatch) throw ApiError.notFound("Timesheet batch not found");
+
+    if (body.runType === "official") {
+      const [existingApproved] = await db
+        .select({ id: employerPayrollRuns.id })
+        .from(employerPayrollRuns)
+        .where(
+          and(
+            eq(employerPayrollRuns.organizationId, organizationId),
+            eq(employerPayrollRuns.sourceBatchId, body.timesheetBatchId),
+            eq(employerPayrollRuns.runType, "official"),
+            eq(employerPayrollRuns.status, "approved"),
+          ),
+        )
+        .limit(1);
+
+      if (existingApproved) {
+        throw ApiError.badRequest("Official run already approved for this batch; create an adjustment run instead");
+      }
+    }
+
     const timesheetEntries = await db
       .select()
       .from(employerTimesheetEntries)
@@ -63,6 +99,56 @@ export const POST = withApi(
 
     if (!timesheetEntries.length) throw ApiError.badRequest("No valid timesheet entries found");
 
+    const workDate = String(timesheetEntries[0]?.shiftDate ?? body.periodEnd);
+
+    const worksiteScope = sourceBatch.worksiteId
+      ? or(eq(cbaRuleVersions.worksiteId, sourceBatch.worksiteId), isNull(cbaRuleVersions.worksiteId))
+      : isNull(cbaRuleVersions.worksiteId);
+    const bargainingScope = sourceBatch.bargainingUnitId
+      ? or(eq(cbaRuleVersions.bargainingUnitId, sourceBatch.bargainingUnitId), isNull(cbaRuleVersions.bargainingUnitId))
+      : isNull(cbaRuleVersions.bargainingUnitId);
+
+    const [activeRuleVersion] = await db
+      .select()
+      .from(cbaRuleVersions)
+      .where(
+        and(
+          eq(cbaRuleVersions.organizationId, organizationId),
+          eq(cbaRuleVersions.status, "active"),
+          lte(cbaRuleVersions.effectiveFrom, workDate),
+          or(gte(cbaRuleVersions.effectiveTo, workDate), isNull(cbaRuleVersions.effectiveTo)),
+          or(eq(cbaRuleVersions.employerId, sourceBatch.employerId), isNull(cbaRuleVersions.employerId)),
+          worksiteScope,
+          bargainingScope,
+        ),
+      )
+      .orderBy(desc(cbaRuleVersions.effectiveFrom))
+      .limit(1);
+
+    if (!activeRuleVersion) {
+      throw ApiError.badRequest("No active CBA rule version found for payroll period");
+    }
+
+    const ruleItems = await db
+      .select()
+      .from(cbaRuleSetItems)
+      .where(
+        and(
+          eq(cbaRuleSetItems.organizationId, organizationId),
+          eq(cbaRuleSetItems.cbaRuleVersionId, activeRuleVersion.id),
+        ),
+      )
+      .orderBy(asc(cbaRuleSetItems.precedence));
+
+    const resolvedRules = resolvePayrollRules({
+      ruleVersionId: activeRuleVersion.id,
+      ruleVersionCode: activeRuleVersion.ruleVersionCode,
+      sourceHash: activeRuleVersion.sourceHash,
+      rulesJson: activeRuleVersion.rulesJson,
+      ruleItems,
+      workDate,
+    });
+
     const calc = calculatePayroll(
       timesheetEntries.map((entry) => ({
         rowNumber: entry.rowNumber,
@@ -75,11 +161,16 @@ export const POST = withApi(
         premiumCode: entry.premiumCode ?? undefined,
         validationErrors: [],
       })),
-      body.baseRate,
-      body.duesRate,
-      body.benefitRate,
-      body.pensionRate,
+      resolvedRules,
+      {
+        engineVersion: body.engineVersion,
+        periodStart: body.periodStart,
+        periodEnd: body.periodEnd,
+      },
     );
+
+    const missingClassificationCount = timesheetEntries.filter((entry) => !entry.jobClassificationId).length;
+    const missingEmploymentMappingCount = timesheetEntries.filter((entry) => !entry.memberEmploymentId).length;
 
     const run = await withRLSContext(async (tx) => {
       const [createdRun] = await tx
@@ -88,12 +179,19 @@ export const POST = withApi(
           organizationId,
           runCode: `pr-${Date.now()}`,
           runType: body.runType,
-          status: body.runType === "official" ? "approved" : "calculated",
+          status: "calculated",
           periodStart: body.periodStart,
           periodEnd: body.periodEnd,
           sourceBatchId: body.timesheetBatchId,
+          cbaRuleVersionId: activeRuleVersion.id,
           engineVersion: body.engineVersion,
-          inputSnapshot: { body },
+          inputSnapshot: {
+            request: body,
+            sourceBatchId: body.timesheetBatchId,
+            sourceFileHash: sourceBatch.sourceFileHash,
+            creatorUserId: userId,
+            snapshotHash: calc.snapshotHash,
+          },
           calcTrace: calc.calcTrace,
           calcTraceHash: calc.calcTraceHash,
           totalGross: calc.totals.gross.toString(),
@@ -101,9 +199,7 @@ export const POST = withApi(
           totalDues: calc.totals.dues.toString(),
           totalBenefits: calc.totals.benefits.toString(),
           totalPension: calc.totals.pension.toString(),
-          immutableSnapshotLocked: body.runType === "official",
-          approvedBy: body.runType === "official" ? userId ?? undefined : undefined,
-          approvedAt: body.runType === "official" ? new Date() : undefined,
+          immutableSnapshotLocked: false,
         })
         .returning();
 
@@ -125,20 +221,47 @@ export const POST = withApi(
         })),
       );
 
+      if (missingClassificationCount > 0) {
+        await tx.insert(employerExecutionComplianceEvents).values({
+          organizationId,
+          payrollRunId: createdRun.id,
+          eventCode: "missing_classification",
+          severity: "high",
+          status: "open",
+          summary: "Payroll includes entries without classification mapping",
+          details: { count: missingClassificationCount },
+          blocking: "yes",
+        });
+      }
+
+      if (missingEmploymentMappingCount > 0) {
+        await tx.insert(employerExecutionComplianceEvents).values({
+          organizationId,
+          payrollRunId: createdRun.id,
+          eventCode: "missing_employment_mapping",
+          severity: "critical",
+          status: "open",
+          summary: "Payroll includes entries without member employment mapping",
+          details: { count: missingEmploymentMappingCount },
+          blocking: "yes",
+        });
+      }
+
       if (body.runType === "official") {
         await tx.insert(employerExecutionComplianceEvents).values({
           organizationId,
           payrollRunId: createdRun.id,
-          eventCode: "official_run_approved",
-          severity: "info",
+          eventCode: "official_run_pending_approval",
+          severity: "warning",
           status: "open",
-          summary: "Official payroll run approved",
+          summary: "Official payroll run calculated and awaiting approval",
           details: {
-            approvedBy: userId,
+            requestedBy: userId,
             calcTraceHash: calc.calcTraceHash,
             snapshotHash: sha256(JSON.stringify(body)),
+            cbaRuleVersionId: activeRuleVersion.id,
           },
-          blocking: "no",
+          blocking: "yes",
         });
       }
 

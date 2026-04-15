@@ -9,21 +9,27 @@ Every critical state change in Flow emits a **domain event** — an immutable, p
 Events are defined in `lib/events/event-types.ts` as a Zod enum (`FlowEventType`).
 
 ### Quote Events (7)
+
 `quote_created`, `quote_line_added`, `quote_sent`, `quote_accepted`, `quote_revised`, `quote_rejected`, `quote_expired`
 
 ### Order Events (11)  
+
 `order_created`, `order_confirmed`, `order_updated`, `order_cancelled`, `order_needs_attention`, `order_locked`, `order_payment_blocked`, `order_payment_cleared`, `fulfillment_started`, `order_shipped`, `order_delivered`
 
 ### Payment Events (5)  
+
 `payment_required`, `payment_recorded`, `payment_confirmed`, `payment_failed`, `payment_refunded`
 
 ### Purchase Order Events (9)  
+
 `po_draft_created`, `po_sent_to_vendor`, `po_vendor_acknowledged`, `po_partially_received`, `po_fully_received`, `po_revision_requested`, `po_overdue`, `po_cancelled`, `po_line_added`
 
 ### Production Events (9)  
+
 `production_job_created`, `proof_sent`, `proof_approved`, `production_started`, `production_completed`, `production_quality_check`, `production_blocked`, `production_unblocked`, `production_delayed`
 
 ### Invoice/Fulfillment/Shipment/System (10+)  
+
 `invoice_generated`, `invoice_sent`, `invoice_paid`, `fulfillment_started`, `shipment_created`, `shipment_shipped`, `shipment_delivered`, `workflow_guard_blocked`, `workflow_guard_cleared`, `system_health_check`
 
 ## Emission

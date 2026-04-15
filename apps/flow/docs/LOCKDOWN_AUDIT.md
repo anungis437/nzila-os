@@ -64,6 +64,7 @@ The following use repository methods directly but are currently classified as tr
 Run `pnpm lockdown:check` from `apps/flow` to statically verify no bypass regressions have been introduced.
 
 Rules enforced:
+
 - `DIRECT_STATUS_MUTATION` — `.set({ status: ... })` outside handlers/repos
 - `DIRECT_STATUS_MUTATION` — multiline `*.update(..., { status: ... })` outside handlers/repos
 - `DIRECT_INTEGRATION_IMPORT` — ZohoBooksClient/ShopifyClient outside adapter files

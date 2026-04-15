@@ -22,6 +22,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import {
   ROOT,
+  safeJoin,
   loadExceptions,
   isExcepted,
   formatViolations,
@@ -110,7 +111,8 @@ function walkTsFiles(dir: string): string[] {
   if (!existsSync(dir)) return results
 
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = join(dir, entry.name)
+    const fullPath = safeJoin(dir, entry.name)
+    if (!fullPath) continue
     if (entry.isDirectory()) {
       if (SKIP_DIRS.has(entry.name)) continue
       results.push(...walkTsFiles(fullPath))
