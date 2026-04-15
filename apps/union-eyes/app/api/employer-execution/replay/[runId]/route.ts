@@ -1,5 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import { employerPayrollRuns, employerExecutionReplays, employerExecutionArtifacts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sha256 } from "../../_lib";
@@ -83,16 +84,18 @@ export const POST = withApi(
       })
       .returning();
 
-    await db.insert(employerExecutionArtifacts).values({
-      organizationId,
-      payrollRunId: sourceRun.id,
-      artifactType: "replay_diff",
-      artifactName: `replay-${replay.id}.json`,
-      storageRef: `inline://employer-execution/replays/${replay.id}`,
-      artifactHash: sha256(JSON.stringify(diff)),
-      manifestJson: diff,
-      createdBy: userId ?? undefined,
-    });
+    await withRLSContext(async (tx) =>
+      tx.insert(employerExecutionArtifacts).values({
+        organizationId,
+        payrollRunId: sourceRun.id,
+        artifactType: "replay_diff",
+        artifactName: `replay-${replay.id}.json`,
+        storageRef: `inline://employer-execution/replays/${replay.id}`,
+        artifactHash: sha256(JSON.stringify(diff)),
+        manifestJson: diff,
+        createdBy: userId ?? undefined,
+      }),
+    );
 
     return { data: { replay, diff } };
   },
