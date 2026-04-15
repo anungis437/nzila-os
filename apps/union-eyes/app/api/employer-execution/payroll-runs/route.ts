@@ -1,5 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   employerTimesheetEntries,
   employerPayrollRuns,
@@ -80,65 +81,69 @@ export const POST = withApi(
       body.pensionRate,
     );
 
-    const [run] = await db
-      .insert(employerPayrollRuns)
-      .values({
-        organizationId,
-        runCode: `pr-${Date.now()}`,
-        runType: body.runType,
-        status: body.runType === "official" ? "approved" : "calculated",
-        periodStart: body.periodStart,
-        periodEnd: body.periodEnd,
-        sourceBatchId: body.timesheetBatchId,
-        engineVersion: body.engineVersion,
-        inputSnapshot: { body },
-        calcTrace: calc.calcTrace,
-        calcTraceHash: calc.calcTraceHash,
-        totalGross: calc.totals.gross.toString(),
-        totalNet: calc.totals.net.toString(),
-        totalDues: calc.totals.dues.toString(),
-        totalBenefits: calc.totals.benefits.toString(),
-        totalPension: calc.totals.pension.toString(),
-        immutableSnapshotLocked: body.runType === "official",
-        approvedBy: body.runType === "official" ? userId ?? undefined : undefined,
-        approvedAt: body.runType === "official" ? new Date() : undefined,
-      })
-      .returning();
-
-    if (!run) throw ApiError.internal("Failed to create payroll run");
-
-    await db.insert(employerPayrollRunItems).values(
-      calc.items.map((item) => ({
-        organizationId,
-        payrollRunId: run.id,
-        employeeExternalId: item.employeeExternalId,
-        grossPay: item.grossPay.toString(),
-        netPay: item.netPay.toString(),
-        duesAmount: item.duesAmount.toString(),
-        benefitAmount: item.benefitAmount.toString(),
-        pensionAmount: item.pensionAmount.toString(),
-        remittanceGroupKey: item.remittanceGroupKey,
-        traceJson: item.trace,
-        traceHash: item.traceHash,
-      })),
-    );
-
-    if (body.runType === "official") {
-      await db.insert(employerExecutionComplianceEvents).values({
-        organizationId,
-        payrollRunId: run.id,
-        eventCode: "official_run_approved",
-        severity: "info",
-        status: "open",
-        summary: "Official payroll run approved",
-        details: {
-          approvedBy: userId,
+    const run = await withRLSContext(async (tx) => {
+      const [createdRun] = await tx
+        .insert(employerPayrollRuns)
+        .values({
+          organizationId,
+          runCode: `pr-${Date.now()}`,
+          runType: body.runType,
+          status: body.runType === "official" ? "approved" : "calculated",
+          periodStart: body.periodStart,
+          periodEnd: body.periodEnd,
+          sourceBatchId: body.timesheetBatchId,
+          engineVersion: body.engineVersion,
+          inputSnapshot: { body },
+          calcTrace: calc.calcTrace,
           calcTraceHash: calc.calcTraceHash,
-          snapshotHash: sha256(JSON.stringify(body)),
-        },
-        blocking: "no",
-      });
-    }
+          totalGross: calc.totals.gross.toString(),
+          totalNet: calc.totals.net.toString(),
+          totalDues: calc.totals.dues.toString(),
+          totalBenefits: calc.totals.benefits.toString(),
+          totalPension: calc.totals.pension.toString(),
+          immutableSnapshotLocked: body.runType === "official",
+          approvedBy: body.runType === "official" ? userId ?? undefined : undefined,
+          approvedAt: body.runType === "official" ? new Date() : undefined,
+        })
+        .returning();
+
+      if (!createdRun) throw ApiError.internal("Failed to create payroll run");
+
+      await tx.insert(employerPayrollRunItems).values(
+        calc.items.map((item) => ({
+          organizationId,
+          payrollRunId: createdRun.id,
+          employeeExternalId: item.employeeExternalId,
+          grossPay: item.grossPay.toString(),
+          netPay: item.netPay.toString(),
+          duesAmount: item.duesAmount.toString(),
+          benefitAmount: item.benefitAmount.toString(),
+          pensionAmount: item.pensionAmount.toString(),
+          remittanceGroupKey: item.remittanceGroupKey,
+          traceJson: item.trace,
+          traceHash: item.traceHash,
+        })),
+      );
+
+      if (body.runType === "official") {
+        await tx.insert(employerExecutionComplianceEvents).values({
+          organizationId,
+          payrollRunId: createdRun.id,
+          eventCode: "official_run_approved",
+          severity: "info",
+          status: "open",
+          summary: "Official payroll run approved",
+          details: {
+            approvedBy: userId,
+            calcTraceHash: calc.calcTraceHash,
+            snapshotHash: sha256(JSON.stringify(body)),
+          },
+          blocking: "no",
+        });
+      }
+
+      return createdRun;
+    });
 
     return { data: { run, totals: calc.totals } };
   },

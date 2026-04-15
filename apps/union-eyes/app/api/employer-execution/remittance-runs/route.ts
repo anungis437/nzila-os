@@ -1,5 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   employerPayrollRuns,
   employerPayrollRunItems,
@@ -70,45 +71,49 @@ export const POST = withApi(
       { dues: 0, benefits: 0, pension: 0 },
     );
 
-    const [remittanceRun] = await db
-      .insert(employerRemittanceRuns)
-      .values({
-        organizationId,
-        payrollRunId: payrollRun.id,
-        runCode: `rr-${Date.now()}`,
-        status: "generated",
-        periodStart: payrollRun.periodStart,
-        periodEnd: payrollRun.periodEnd,
-        dueDate: dueDateIso,
-        totalDue: (totals.dues + totals.benefits + totals.pension).toString(),
-        packageSummary: {
-          dues: totals.dues,
-          benefits: totals.benefits,
-          pension: totals.pension,
-          itemCount: items.length,
-        },
-        outputFormats: ["csv", "json"],
-        immutableSnapshotLocked: true,
-        generatedBy: userId ?? undefined,
-        generatedAt: new Date(),
-      })
-      .returning();
+    const remittanceRun = await withRLSContext(async (tx) => {
+      const [createdRun] = await tx
+        .insert(employerRemittanceRuns)
+        .values({
+          organizationId,
+          payrollRunId: payrollRun.id,
+          runCode: `rr-${Date.now()}`,
+          status: "generated",
+          periodStart: payrollRun.periodStart,
+          periodEnd: payrollRun.periodEnd,
+          dueDate: dueDateIso,
+          totalDue: (totals.dues + totals.benefits + totals.pension).toString(),
+          packageSummary: {
+            dues: totals.dues,
+            benefits: totals.benefits,
+            pension: totals.pension,
+            itemCount: items.length,
+          },
+          outputFormats: ["csv", "json"],
+          immutableSnapshotLocked: true,
+          generatedBy: userId ?? undefined,
+          generatedAt: new Date(),
+        })
+        .returning();
 
-    await db.insert(employerRemittanceRunItems).values(
-      [
-        { groupKey: "dues", contributionType: "dues", amount: totals.dues },
-        { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits },
-        { groupKey: "pension", contributionType: "pension", amount: totals.pension },
-      ].map((item) => ({
-        organizationId,
-        remittanceRunId: remittanceRun.id,
-        groupKey: item.groupKey,
-        contributionType: item.contributionType,
-        amount: item.amount.toString(),
-        memberCount: items.length.toString(),
-        traceJson: { sourcePayrollRunId: payrollRun.id },
-      })),
-    );
+      await tx.insert(employerRemittanceRunItems).values(
+        [
+          { groupKey: "dues", contributionType: "dues", amount: totals.dues },
+          { groupKey: "benefits", contributionType: "benefits", amount: totals.benefits },
+          { groupKey: "pension", contributionType: "pension", amount: totals.pension },
+        ].map((item) => ({
+          organizationId,
+          remittanceRunId: createdRun.id,
+          groupKey: item.groupKey,
+          contributionType: item.contributionType,
+          amount: item.amount.toString(),
+          memberCount: items.length.toString(),
+          traceJson: { sourcePayrollRunId: payrollRun.id },
+        })),
+      );
+
+      return createdRun;
+    });
 
     const summary = {
       runCode: remittanceRun.runCode,
@@ -117,7 +122,7 @@ export const POST = withApi(
       itemCount: items.length,
     };
 
-    await db.insert(employerExecutionArtifacts).values([
+    await withRLSContext(async (tx) => tx.insert(employerExecutionArtifacts).values([
       {
         organizationId,
         remittanceRunId: remittanceRun.id,
@@ -148,7 +153,7 @@ export const POST = withApi(
         manifestJson: { sealAlgorithm: "sha256" },
         createdBy: userId ?? undefined,
       },
-    ]);
+    ]));
 
     return { data: { remittanceRun } };
   },

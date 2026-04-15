@@ -139,6 +139,14 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'financial/expenses/page.tsx',                 minRole: 'member',               description: 'Expense management' },
   { path: 'financial/budgets/page.tsx',                  minRole: 'member',               description: 'Budget list (85+ for full access)' },
   { path: 'financial/budgets/[id]/page.tsx',             minRole: 'member',               description: 'Budget detail' },
+  { path: 'employer-execution/page.tsx',                 minRole: 'member',               description: 'Employer execution overview' },
+  { path: 'employer-execution/compliance/page.tsx',      minRole: 'member',               description: 'Employer execution compliance events' },
+  { path: 'employer-execution/timesheets/page.tsx',      minRole: 'member',               description: 'Employer execution timesheet ingestion' },
+  { path: 'employer-execution/settings/page.tsx',        minRole: 'member',               description: 'Employer execution runtime settings' },
+  { path: 'employer-execution/payroll-runs/page.tsx',    minRole: 'member',               description: 'Employer execution payroll runs list' },
+  { path: 'employer-execution/payroll-runs/[id]/page.tsx', minRole: 'member',             description: 'Employer execution payroll run detail' },
+  { path: 'employer-execution/remittance-runs/page.tsx', minRole: 'member',               description: 'Employer execution remittance runs list' },
+  { path: 'employer-execution/remittance-runs/[id]/page.tsx', minRole: 'member',          description: 'Employer execution remittance run detail' },
 
   // ── Bargaining (requires bargaining_committee, level 40) ───────────────
   { path: 'bargaining/page.tsx',                         minRole: 'bargaining_committee', description: 'Bargaining dashboard' },

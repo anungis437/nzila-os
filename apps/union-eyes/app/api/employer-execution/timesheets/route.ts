@@ -1,6 +1,7 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { employerTimesheetBatches, employerTimesheetEntries } from "@/db/schema";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import { and, desc, eq } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
@@ -44,45 +45,49 @@ export const POST = withApi(
 
     const normalized = normalizeCsv(body.csvContent);
 
-    const [batch] = await db
-      .insert(employerTimesheetBatches)
-      .values({
-        organizationId,
-        employerId: body.employerId,
-        worksiteId: body.worksiteId,
-        bargainingUnitId: body.bargainingUnitId,
-        batchCode: `ts-${Date.now()}`,
-        sourceFileName: body.sourceFileName,
-        sourceFileHash: sha256(body.csvContent),
-        periodStart: body.periodStart,
-        periodEnd: body.periodEnd,
-        status: normalized.summary.invalid > 0 ? "rejected" : "validated",
-        validationSummary: normalized.summary,
-        uploadedBy: userId ?? undefined,
-      })
-      .returning();
-
-    if (!batch) throw ApiError.internal("Failed to create timesheet batch");
-
-    if (normalized.entries.length > 0) {
-      await db.insert(employerTimesheetEntries).values(
-        normalized.entries.map((entry) => ({
+    const batch = await withRLSContext(async (tx) => {
+      const [createdBatch] = await tx
+        .insert(employerTimesheetBatches)
+        .values({
           organizationId,
-          batchId: batch.id,
-          employeeExternalId: entry.employeeExternalId,
-          shiftDate: entry.shiftDate,
-          regularHours: entry.regularHours.toString(),
-          overtimeHours: entry.overtimeHours.toString(),
-          doubletimeHours: entry.doubletimeHours.toString(),
-          travelHours: entry.travelHours.toString(),
-          premiumCode: entry.premiumCode,
-          rowNumber: entry.rowNumber,
-          sourceRowHash: sha256(`${entry.rowNumber}|${entry.employeeExternalId}|${entry.shiftDate}`),
-          validationErrors: entry.validationErrors,
-          status: entry.validationErrors.length > 0 ? ("invalid" as const) : ("valid" as const),
-        })),
-      );
-    }
+          employerId: body.employerId,
+          worksiteId: body.worksiteId,
+          bargainingUnitId: body.bargainingUnitId,
+          batchCode: `ts-${Date.now()}`,
+          sourceFileName: body.sourceFileName,
+          sourceFileHash: sha256(body.csvContent),
+          periodStart: body.periodStart,
+          periodEnd: body.periodEnd,
+          status: normalized.summary.invalid > 0 ? "rejected" : "validated",
+          validationSummary: normalized.summary,
+          uploadedBy: userId ?? undefined,
+        })
+        .returning();
+
+      if (!createdBatch) throw ApiError.internal("Failed to create timesheet batch");
+
+      if (normalized.entries.length > 0) {
+        await tx.insert(employerTimesheetEntries).values(
+          normalized.entries.map((entry) => ({
+            organizationId,
+            batchId: createdBatch.id,
+            employeeExternalId: entry.employeeExternalId,
+            shiftDate: entry.shiftDate,
+            regularHours: entry.regularHours.toString(),
+            overtimeHours: entry.overtimeHours.toString(),
+            doubletimeHours: entry.doubletimeHours.toString(),
+            travelHours: entry.travelHours.toString(),
+            premiumCode: entry.premiumCode,
+            rowNumber: entry.rowNumber,
+            sourceRowHash: sha256(`${entry.rowNumber}|${entry.employeeExternalId}|${entry.shiftDate}`),
+            validationErrors: entry.validationErrors,
+            status: entry.validationErrors.length > 0 ? ("invalid" as const) : ("valid" as const),
+          })),
+        );
+      }
+
+      return createdBatch;
+    });
 
     return {
       data: {
