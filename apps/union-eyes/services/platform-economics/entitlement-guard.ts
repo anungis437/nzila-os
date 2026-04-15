@@ -42,6 +42,13 @@ export const PLATFORM_MODULES = {
   EXPORT_SUITE: 'export_suite',
   HEALTH_SAFETY: 'health_safety',
   PERFORMANCE_TARGETS: 'performance_targets',
+  EMPLOYER_EXECUTION: 'employer_execution',
+  EMPLOYER_TIMESHEET_INGEST: 'employer_timesheet_ingest',
+  EMPLOYER_PAYROLL_PREVIEW: 'employer_payroll_preview',
+  EMPLOYER_PAYROLL_OFFICIAL: 'employer_payroll_official',
+  EMPLOYER_REMITTANCE_GENERATION: 'employer_remittance_generation',
+  EMPLOYER_EXECUTION_REPLAY: 'employer_execution_replay',
+  EMPLOYER_EXECUTION_COMPLIANCE: 'employer_execution_compliance',
 } as const;
 
 export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES];

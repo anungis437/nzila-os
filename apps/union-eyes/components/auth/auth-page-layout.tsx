@@ -70,26 +70,6 @@ export default function AuthPageLayout({
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between w-full p-12 lg:p-16">
-          {/* Top: Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Link href="/" className="inline-flex items-center gap-3 group">
-              <Image
-                src="/images/brand/icon.png"
-                alt="UnionEyes"
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-xl shadow-lg shadow-electric/25"
-              />
-              <span className="text-xl font-bold text-white group-hover:text-electric-light transition-colors">
-                {appName}
-              </span>
-            </Link>
-          </motion.div>
-
           {/* Center: Tagline */}
           <div className="flex-1 flex flex-col justify-center max-w-lg">
             <motion.div
@@ -173,10 +153,14 @@ export default function AuthPageLayout({
         {/* Mobile header (hidden on desktop) */}
         <div className="lg:hidden bg-navy p-6">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-electric to-violet flex items-center justify-center">
-              <span className="text-white font-bold text-xs">UE</span>
-            </div>
-            <span className="text-lg font-bold text-white">{appName}</span>
+            <Image
+              src="/UnionEyes-LO-FF.png"
+              alt={`${appName} logo`}
+              width={144}
+              height={44}
+              className="h-8 w-auto object-contain"
+              priority
+            />
           </Link>
           <p className="text-gray-400 text-sm mt-2 max-w-sm">{subtitle}</p>
         </div>

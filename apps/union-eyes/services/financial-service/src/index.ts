@@ -33,6 +33,11 @@ import stipendsRouter from './routes/stipends';
 import paymentsRouter from './routes/payments';
 import notificationsRouter from './routes/notifications';
 import analyticsRouter from './routes/analytics';
+import employerTimesheetsRouter from './routes/employer-timesheets';
+import employerPayrollRunsRouter from './routes/employer-payroll-runs';
+import employerRemittanceRunsRouter from './routes/employer-remittance-runs';
+import employerComplianceRouter from './routes/employer-compliance';
+import employerReplayRouter from './routes/employer-replay';
 import { startAnalyticsJobs, stopAnalyticsJobs } from './jobs/analytics-processor';
 import { startDuesCalculationWorkflow, stopDuesCalculationWorkflow } from './jobs/dues-calculation-workflow';
 import { startArrearsManagementWorkflow, stopArrearsManagementWorkflow } from './jobs/arrears-management-workflow';
@@ -310,6 +315,13 @@ app.use('/api/analytics', authenticate, analyticsRouter);
 
 // Financial Reports (authentication applied)
 app.use('/api/reports', authenticate, reportsRouter);
+
+// Employer Execution
+app.use('/api/employer-execution/timesheets', authenticate, employerTimesheetsRouter);
+app.use('/api/employer-execution/payroll-runs', authenticate, employerPayrollRunsRouter);
+app.use('/api/employer-execution/remittance-runs', authenticate, employerRemittanceRunsRouter);
+app.use('/api/employer-execution/compliance', authenticate, employerComplianceRouter);
+app.use('/api/employer-execution/replay', authenticate, employerReplayRouter);
 
 // Public Donations (no auth required for donations)
 app.use('/api/donations', donationsRouter);

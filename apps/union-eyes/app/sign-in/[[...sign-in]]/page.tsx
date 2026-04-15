@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 }
 
 const stats = [
-  { value: '200+', label: 'Locals' },
-  { value: '50K+', label: 'Members' },
+  { value: '35+', label: 'Union roles' },
+  { value: '6', label: 'Languages' },
   { value: '99.9%', label: 'Uptime' },
 ]
 

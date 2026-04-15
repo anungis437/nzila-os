@@ -32,6 +32,7 @@ export * from './health-safety';   // Priority 10b: Workplace health & safety ma
 
 // Operations Domains
 export * from './dispatch';         // Dispatch hall automation
+export * from './employer-execution'; // Employer payroll/remittance execution
 
 // Pilot Domains
 export * from './pilot';            // CAPE-CLC pilot onboarding and demo data

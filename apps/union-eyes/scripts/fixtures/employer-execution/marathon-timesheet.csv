@@ -1,0 +1,7 @@
+employee_external_id,shift_date,regular_hours,overtime_hours,doubletime_hours,travel_hours,premium_code
+MAR-0001,2026-04-01,8,2,0,1,remote_site
+MAR-0001,2026-04-02,8,0,0,0,
+MAR-0002,2026-04-01,8,0,0,0,
+MAR-0002,2026-04-02,8,1,0,0,
+MAR-0003,2026-04-01,10,0,2,1,hazard
+MAR-0003,2026-04-02,8,0,0,0,

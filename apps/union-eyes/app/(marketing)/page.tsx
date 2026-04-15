@@ -14,6 +14,7 @@ import ScrollReveal from '@/components/public/scroll-reveal';
 import WorkflowSection from './components/workflow-section';
 import RolesSection from './components/roles-section';
 import AnimatedCTA from './components/animated-cta';
+import UnionWorkCarousel from './components/union-work-carousel';
 
 export const metadata: Metadata = {
   title: 'UnionEyes — A Decision System for Labour Leadership',
@@ -24,8 +25,6 @@ export const metadata: Metadata = {
     images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — UnionEyes' }],
   },
 };
-
-const pilotPartners = ['CUPE', 'CAPE', 'PSAC', 'UNIFOR', 'USW'];
 
 export default function HomePage() {
   return (
@@ -136,6 +135,28 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════════════ UNION WORK CAROUSEL ═══════════════════════ */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="mb-8 text-center">
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                Real Workflows
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-navy mb-3">
+                Union work, in one continuous workflow
+              </h2>
+              <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                A quick look at the day-to-day work UnionEyes is designed to support, from intake to leadership action.
+              </p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <UnionWorkCarousel />
+          </ScrollReveal>
+        </div>
+      </section>
+
       {/* ═══════════════════════ TRUST ═══════════════════════ */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -179,26 +200,6 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-linear-to-t from-navy/40 to-transparent" />
               </div>
             </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ PILOT PARTNERS ═══════════════════════ */}
-      <section className="py-20 px-4 md:px-6 bg-white">
-        <div className="max-w-5xl mx-auto text-center">
-          <ScrollReveal>
-            <p className="text-sm font-semibold tracking-widest uppercase text-gray-400 mb-8">
-              Piloting with leading Canadian unions
-            </p>
-          </ScrollReveal>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-            {pilotPartners.map((name) => (
-              <ScrollReveal key={name}>
-                <div className="px-8 py-4 rounded-xl border border-gray-200 bg-gray-50 text-navy font-bold text-xl tracking-wide">
-                  {name}
-                </div>
-              </ScrollReveal>
-            ))}
           </div>
         </div>
       </section>

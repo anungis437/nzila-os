@@ -89,6 +89,9 @@ export * from "./domains/marketing";        // Impact metrics, case studies, pil
 // Dispatch
 export * from "./domains/dispatch/dispatch"; // Dispatch-hall automation
 
+// Employer Execution
+export * from "./domains/employer-execution";
+
 // Board Packets
 export * from "./board-packet-schema";       // Governance meeting packet generation
 
