@@ -315,23 +315,24 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     // Instead of just letting it pass through, redirect to a clean URL
     // This prevents the accumulation of large cookies
     
-    // Extract the base URL path without query parameters (same-origin only)
+    // Restrict redirect targets to safe internal paths only.
     const cleanUrl = req.nextUrl.pathname;
-    
+    const safePath = /^\/[a-zA-Z0-9\-._~/]*$/.test(cleanUrl) ? cleanUrl : '/';
+
     // Create a new URL object based on the current request (same-origin redirect)
-    const url = new URL(cleanUrl, req.url);
-    
-    // Ensure the redirect stays on the same origin to prevent open-redirect attacks
-    if (url.origin !== new URL(req.url).origin) {
-      return withRequestId(NextResponse.next(), requestId);
-    }
+    const url = new URL(safePath, req.nextUrl.origin);
     
     // Important: Add a small cache-busting parameter to ensure the browser doesn't use cached data
     // This helps avoid cookie-related issues without adding significant query string size
     url.searchParams.set('cb', Date.now().toString().slice(-4));
     
     // Return a redirect response to the clean URL (same-origin)
-    return withRequestId(NextResponse.redirect(url), requestId);
+    const location = `${url.pathname}?${url.searchParams.toString()}`;
+    const redirectResponse = new NextResponse(null, {
+      status: 307,
+      headers: { location },
+    });
+    return withRequestId(redirectResponse, requestId);
   }
 
   // Auth enforcement moved to server-side layouts (dashboard/layout.tsx,

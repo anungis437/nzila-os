@@ -4,24 +4,25 @@ import type { ReplayDiff } from "./types";
 export function replayDiff(
   original: Record<string, unknown>,
   replayed: Record<string, unknown>,
+  reason = "replay variance",
 ): ReplayDiff {
   const fields = new Set([...Object.keys(original), ...Object.keys(replayed)]);
-  const fieldsChanged: ReplayDiff["fieldsChanged"] = [];
+  const differences: ReplayDiff["differences"] = [];
 
   for (const field of fields) {
-    const before = original[field];
-    const after = replayed[field];
-    if (JSON.stringify(before) !== JSON.stringify(after)) {
-      fieldsChanged.push({ field, before, after });
+    const originalValue = original[field];
+    const replayValue = replayed[field];
+    if (JSON.stringify(originalValue) !== JSON.stringify(replayValue)) {
+      differences.push({ field, original: originalValue, replay: replayValue, reason });
     }
   }
 
-  const changed = fieldsChanged.length > 0;
+  const changed = differences.length > 0;
   const summary = changed
-    ? `Replay changed ${fieldsChanged.length} field(s): ${fieldsChanged.map((f) => f.field).join(", ")}`
+    ? `Replay changed ${differences.length} field(s): ${differences.map((f) => f.field).join(", ")}`
     : "Replay matched original output";
 
-  return { changed, fieldsChanged, summary };
+  return { changed, differences, summary };
 }
 
 export function hashReplayDiff(diff: ReplayDiff): string {

@@ -33,7 +33,7 @@ import {
   bargainingUnits,
 } from "@/db/schema/union-structure-schema";
 import { collectiveAgreements } from "@/db/schema/collective-agreements-schema";
-import { normalizeCsv, calculatePayroll, sha256 } from "@/app/api/employer-execution/_lib";
+import { normalizeCsv, calculatePayroll, resolvePayrollRules, sha256 } from "@/app/api/employer-execution/_lib";
 
 const ORG_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087";
 const MEMBER_ID = "44444444-4444-4444-8444-444444444444";
@@ -330,7 +330,19 @@ async function seed() {
   }
 
   const validEntries = normalized.entries.filter((entry) => entry.validationErrors.length === 0);
-  const calc = calculatePayroll(validEntries, 52, 0.02, 0.03, 0.04);
+  const resolvedRules = resolvePayrollRules({
+    ruleVersionId: RULE_VERSION_ID,
+    ruleVersionCode: "MAR-2026-04A",
+    sourceHash: sha256("MAR-2026-04A"),
+    rulesJson: { base_rate: 52, dues: 0.02, benefits: 0.03, pension: 0.04, overtime: 1.5, double_time: 2 },
+    ruleItems: [{ itemType: "base_rate", ruleCode: "base_rate_default", precedence: 1, actionJson: { rate: 52 } }],
+    workDate: "2026-04-15",
+  });
+  const calc = calculatePayroll(validEntries, resolvedRules, {
+    engineVersion: "employer-execution-v1",
+    periodStart: "2026-04-01",
+    periodEnd: "2026-04-15",
+  });
 
   const [payrollRun] = await db.select().from(employerPayrollRuns).where(eq(employerPayrollRuns.id, PAYROLL_RUN_ID)).limit(1);
   if (!payrollRun) {

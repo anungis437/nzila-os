@@ -27,6 +27,7 @@
 ### Phase 1 — Unsafe Bypass Elimination
 
 **`app/actions/purchase-orders.ts`** (CRITICAL FIX):
+
 - `createPurchaseOrderAction` was calling `createPurchaseOrder` from `@nzila/commerce-db` directly — bypassing payment gate and command bus.
 - `updatePurchaseOrderAction` was allowing raw `status` field writes without command validation.
 - **Fix**: Both now route through `executeCommand` via `PO_STATUS_COMMAND_MAP`.
@@ -35,11 +36,13 @@
 
 **`lib/control/types.ts`**: Added `order_id?: string` to `PaymentGateCheckResult.snapshot`.
 
-**`lib/control/guards/payment-guard.ts`**: 
+**`lib/control/guards/payment-guard.ts`**:
+
 - Rewrote to single clean `toGateCheckResult()` accepting `orderId`.
 - All three guard functions (`checkCanGeneratePO`, `checkCanStartProduction`, `checkCanShipOrder`) now pass `orderId` into snapshots.
 
 **`lib/services/payment-state-service.ts`**: Added 4 canonical functions:
+
 - `computeOrderPaymentState()` — derives canonical payment state enum
 - `syncOrderPaymentState()` — syncs `order.paymentStatus` to computed state
 - `getOutstandingBalance()` — returns `max(0, amount_due - amount_paid)`
@@ -62,6 +65,7 @@ Already correct. Documented in `docs/INTEGRATION_LOCKDOWN_AUDIT.md`.
 ### Phase 5 — Truthful Metrics
 
 **`app/api/metrics/route.ts`**: Added 9 new DB-backed fields:
+
 - `quote_count`, `active_orders_count`, `delivered_orders_count`
 - `blocked_orders_by_payment_count`, `purchase_orders_pending_count`
 - `purchase_orders_overdue_count`, `production_jobs_in_progress_count`
@@ -69,12 +73,14 @@ Already correct. Documented in `docs/INTEGRATION_LOCKDOWN_AUDIT.md`.
 - Renamed `timestamp` → `generated_at`
 
 **`app/api/governance/telemetry/route.ts`**: Added:
+
 - `workflow_transition_error_count`, `event_emission_gap_count`
 - Renamed `timestamp` → `generated_at`
 
 ### Phase 6 — E2E Tests
 
 **`e2e/flow.spec.ts`**: Rewritten with 7 business-invariant scenarios:
+
 1. Platform contract smoke (all API shapes + field counts)
 2. Quote lifecycle auth enforcement
 3. Payment gating blocked state proof
@@ -112,6 +118,7 @@ pnpm lockdown:check  # Static integrity enforcement
 ```
 
 E2E (requires running server):
+
 ```bash
 pnpm exec playwright test e2e/flow.spec.ts
 ```

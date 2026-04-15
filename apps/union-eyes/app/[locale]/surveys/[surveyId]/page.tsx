@@ -548,7 +548,7 @@ toast({
               </div>
             )}
 
-            <ScrollArea className="h-[600px]">
+            <ScrollArea className="h-150">
               <div className="space-y-8 pr-4">
                 {questions.map((question, index) => (
                   <Card key={question.id}>

@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import {
   ROOT,
   relPath,
+  safeJoin,
   formatViolations,
   type Violation,
 } from './governance-helpers'
@@ -46,12 +47,14 @@ const EXEMPT_APPS = new Set([
 ])
 
 function hasApiRoutes(appDir: string): boolean {
-  const apiDir = join(appDir, 'app', 'api')
+  const apiDir = safeJoin(appDir, 'app', 'api')
+  if (!apiDir) return false
   return existsSync(apiDir)
 }
 
 function hasVersionedRoutes(appDir: string): boolean {
-  const apiDir = join(appDir, 'app', 'api')
+  const apiDir = safeJoin(appDir, 'app', 'api')
+  if (!apiDir) return false
   if (!existsSync(apiDir)) return false
   try {
     const entries = readdirSync(apiDir, { withFileTypes: true })
@@ -69,7 +72,8 @@ describe('API_VERSION_001 — API apps should adopt versioned routes', () => {
 
     for (const app of API_APPS) {
       if (EXEMPT_APPS.has(app)) continue
-      const appDir = join(ROOT, 'apps', app)
+      const appDir = safeJoin(ROOT, 'apps', app)
+      if (!appDir) continue
       if (!existsSync(appDir)) continue
 
       if (hasApiRoutes(appDir) && !hasVersionedRoutes(appDir)) {
@@ -84,7 +88,11 @@ describe('API_VERSION_001 — API apps should adopt versioned routes', () => {
     // Warn but don't fail — this is an adoption gate, not a blocker
     if (violations.length > 0) {
       const versioned = API_APPS.filter(
-        (a) => !EXEMPT_APPS.has(a) && hasVersionedRoutes(join(ROOT, 'apps', a)),
+        (a) => {
+          if (EXEMPT_APPS.has(a)) return false
+          const appDir = safeJoin(ROOT, 'apps', a)
+          return appDir ? hasVersionedRoutes(appDir) : false
+        },
       )
       const total = API_APPS.filter((a) => !EXEMPT_APPS.has(a)).length
       console.warn(
@@ -95,7 +103,8 @@ describe('API_VERSION_001 — API apps should adopt versioned routes', () => {
 
     // Assert that known-versioned apps haven't regressed
     for (const app of VERSIONED_APPS) {
-      const appDir = join(ROOT, 'apps', app)
+      const appDir = safeJoin(ROOT, 'apps', app)
+      if (!appDir) continue
       if (!existsSync(appDir)) continue
       expect(
         hasVersionedRoutes(appDir),
@@ -110,7 +119,8 @@ describe('API_VERSION_002 — Consistent versioning within apps', () => {
     const violations: Violation[] = []
 
     for (const app of VERSIONED_APPS) {
-      const apiDir = join(ROOT, 'apps', app, 'app', 'api')
+      const apiDir = safeJoin(ROOT, 'apps', app, 'app', 'api')
+      if (!apiDir) continue
       if (!existsSync(apiDir)) continue
 
       try {

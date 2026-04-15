@@ -31,6 +31,7 @@ Failures in side effects produce logged warnings only — they do not roll back 
 ### ✅ CLEAN: Register-integrations.ts
 
 `lib/control/register-integrations.ts` registers all 4 side-effect handlers:
+
 - `zoho_sync` → ZohoBooksAdapter
 - `shopify_sync` → ShopifyAdapter
 - `canva_update` → CanvaAdapter
@@ -49,6 +50,7 @@ export async function syncWithZoho(vendorId: string, booksClient: ZohoBooksClien
 ```
 
 The caller in `lib/supplier-actions.ts` has the direct client instantiation commented out:
+
 ```typescript
 // const booksClient = new ZohoBooksClient(...)  // temporarily disabled
 ```

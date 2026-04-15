@@ -36,10 +36,26 @@ export type PayrollRunInput = {
   periodStart: string;
   periodEnd: string;
   entries: NormalizedTimesheetEntry[];
-  baseRate: number;
-  duesRate: number;
-  benefitRate: number;
-  pensionRate: number;
+  resolvedRules: {
+    ruleVersionId?: string;
+    ruleVersionCode?: string;
+    sourceHash?: string;
+    values: {
+      baseRate: number;
+      overtimeMultiplier: number;
+      doubleTimeMultiplier: number;
+      shiftPremiumRate: number;
+      travelPremiumRate: number;
+      duesRate: number;
+      benefitRate: number;
+      pensionRate: number;
+      statutoryHolidayMultiplier: number;
+      regionalOverride: number;
+      classificationOverride: number;
+    };
+    ruleResolution: Array<Record<string, unknown>>;
+    appliedRules: Array<Record<string, unknown>>;
+  };
 };
 
 export type PayrollRunResult = {
@@ -79,10 +95,11 @@ export type RemittanceGenerationResult = {
 
 export type ReplayDiff = {
   changed: boolean;
-  fieldsChanged: Array<{
+  differences: Array<{
     field: string;
-    before: unknown;
-    after: unknown;
+    original: unknown;
+    replay: unknown;
+    reason: string;
   }>;
   summary: string;
 };

@@ -19,7 +19,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { ROOT, walkSync, readContent, relPath, formatViolations, type Violation } from './governance-helpers'
+import { ROOT, walkSync, readContent, relPath, safeJoin, formatViolations, type Violation } from './governance-helpers'
 
 // ── Configuration ───────────────────────────────────────────────────────────
 
@@ -347,7 +347,9 @@ function findPageFiles(): string[] {
 }
 
 function findApiRoute(apiPath: string): string | null {
-  const routeFile = join(API_DIR, apiPath, 'route.ts')
+  if (!/^[a-zA-Z0-9_\-/]+$/.test(apiPath)) return null
+  const routeFile = safeJoin(API_DIR, apiPath, 'route.ts')
+  if (!routeFile) return null
   return existsSync(routeFile) ? routeFile : null
 }
 
@@ -551,7 +553,7 @@ describe('PERSONA_ACCESS_001 — All CRUD routes import valid schema tables', ()
   // Find all route.ts files that use crudRoutes
   const allRoutes = walkSync(API_DIR, ['.ts']).filter(f => f.endsWith('route.ts'))
   const crudRoutes = allRoutes.filter(f => {
-    try { return readFileSync(f, 'utf-8').includes('crudRoutes') } catch { return false }
+    return readContent(f).includes('crudRoutes')
   })
 
   it('discovers CRUD routes to validate', () => {
