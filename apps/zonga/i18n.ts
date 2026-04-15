@@ -4,6 +4,7 @@ type MessagePrimitive = string | number | boolean | null;
 interface MessageMap {
   [key: string]: MessageValue;
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- recursive type requires interface indirection
 interface MessageList extends Array<MessageValue> {}
 type MessageValue = MessagePrimitive | MessageMap | MessageList;
 
