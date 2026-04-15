@@ -4,6 +4,7 @@
   "entries": [
     {
       "app": "orchestrator-api",
+      "path": "apps/orchestrator-api",
       "concern": "auth",
       "status": "exception-approved",
       "owner": "platform-team",
@@ -12,6 +13,7 @@
     },
     {
       "app": "orchestrator-api",
+      "path": "apps/orchestrator-api",
       "concern": "org-context",
       "status": "legacy-migration-path",
       "owner": "platform-team",
@@ -20,6 +22,7 @@
     },
     {
       "app": "web",
+      "path": "apps/web",
       "concern": "contracts",
       "status": "legacy-migration-path",
       "owner": "platform-team",
@@ -28,6 +31,7 @@
     },
     {
       "app": "union-eyes",
+      "path": "apps/union-eyes",
       "concern": "contracts",
       "status": "legacy-migration-path",
       "owner": "union-team",
@@ -36,6 +40,7 @@
     },
     {
       "app": "partners",
+      "path": "apps/partners",
       "concern": "contracts",
       "status": "legacy-migration-path",
       "owner": "commerce-team",
@@ -44,6 +49,7 @@
     },
     {
       "app": "zonga",
+      "path": "apps/zonga",
       "concern": "eventing",
       "status": "legacy-migration-path",
       "owner": "media-team",
