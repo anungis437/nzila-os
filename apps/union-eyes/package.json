@@ -107,7 +107,7 @@
     "@types/twilio": "^3.19.3",
     "@upstash/redis": "^1.35.8",
     "axios": "^1.9.0",
-    "bullmq": "^5.66.0",
+    "bullmq": "^5.73.5",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.0",
