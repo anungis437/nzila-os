@@ -28,7 +28,7 @@
     "test": "turbo test",
     "test:all": "vitest run",
     "test:fast": "vitest run --project=!contract-tests",
-    "test:changed": "turbo test --filter='...[HEAD~1]' --output-logs=new-only",
+    "test:changed": "turbo test --filter=...[HEAD~1] --output-logs=new-only",
     "test:platform": "vitest run --project @nzila/platform-contracts --project @nzila/platform-auth --project @nzila/platform-shell --project @nzila/platform-notifications --project @nzila/platform-billing --project @nzila/org",
     "test:coverage": "turbo test:coverage",
     "contract-tests": "vitest run --project contract-tests",

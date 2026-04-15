@@ -11,7 +11,7 @@ function createConnection(
   return {
     id: 'conn-1',
     orgId: 'org-1',
-    appScope: 'platform_admin',
+    appScope: 'platform',
     connectorType,
     name: 'Test Connection',
     status: 'active',

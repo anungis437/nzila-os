@@ -98,7 +98,14 @@ jobs:
         with:
           name: coverage-reports-${{ github.run_id }}
           path: |
-            **/coverage/
+            coverage/
+            coverage.xml
+            coverage_html/
+            **/coverage-final.json
+            !**/node_modules/**
+            !**/.pnpm-store/**
+            !**/.git/**
+            !**/.turbo/**
           retention-days: 30
 
   build:
