@@ -68,7 +68,7 @@ describe("Employer Execution hardening helpers", () => {
     expect(first.items).toEqual(second.items);
   });
 
-  it("changes output when rule version inputs change", () => {
+  it("changes output when executable rule strategy inputs change", () => {
     const baseRules = resolvePayrollRules({
       ruleVersionId: "v1",
       ruleVersionCode: "2026-04A",
@@ -79,7 +79,14 @@ describe("Employer Execution hardening helpers", () => {
         benefits: 0.03,
         pension: 0.04,
       },
-      ruleItems: [],
+      ruleItems: [
+        {
+          itemType: "travel",
+          ruleCode: "travel.hourly",
+          precedence: 10,
+          actionJson: { strategy: "hourly", amount: 0.25 },
+        },
+      ],
     });
 
     const overriddenRules = resolvePayrollRules({
@@ -88,11 +95,18 @@ describe("Employer Execution hardening helpers", () => {
       sourceHash: "hash-v2",
       rulesJson: {
         base_rate: 52,
-        dues: 0.025,
+        dues: 0.02,
         benefits: 0.03,
         pension: 0.04,
       },
-      ruleItems: [],
+      ruleItems: [
+        {
+          itemType: "travel",
+          ruleCode: "travel.flat",
+          precedence: 10,
+          actionJson: { strategy: "flat", amount: 75 },
+        },
+      ],
     });
 
     const original = calculatePayroll(sampleEntries, baseRules, {
@@ -106,7 +120,14 @@ describe("Employer Execution hardening helpers", () => {
       periodEnd: "2026-04-15",
     });
 
-    expect(replay.totals.dues).not.toBe(original.totals.dues);
+    expect(replay.totals.gross).not.toBe(original.totals.gross);
+    expect(replay.items[0]?.trace).toMatchObject({
+      calc_trace: {
+        applied_rules: expect.arrayContaining([
+          expect.objectContaining({ kind: "travel", strategy: "flat" }),
+        ]),
+      },
+    });
   });
 
   it("enforces lifecycle FSM transitions", () => {
@@ -116,8 +137,8 @@ describe("Employer Execution hardening helpers", () => {
         action: "approve",
         immutableSnapshotLocked: false,
         criticalOpenCount: 0,
-        highOpenCount: 0,
-        acknowledgedHighCount: 0,
+        errorOpenCount: 0,
+        acknowledgedErrorCount: 0,
       }),
     ).toThrow("Official run can only be approved from calculated status");
 
@@ -127,24 +148,43 @@ describe("Employer Execution hardening helpers", () => {
         action: "seal",
         immutableSnapshotLocked: false,
         criticalOpenCount: 0,
-        highOpenCount: 0,
-        acknowledgedHighCount: 0,
+        errorOpenCount: 0,
+        acknowledgedErrorCount: 0,
       }),
     ).toThrow("Only approved payroll runs can be sealed");
   });
 
-  it("builds replay diffs with deterministic field-level reasons", () => {
-    const noDiff = buildReplayDiff({ totalDues: 100 }, { totalDues: 100 }, "exact replay mismatch");
+  it("builds replay diffs with cause attribution and rule paths", () => {
+    const noDiff = buildReplayDiff({ totalDues: 100 }, { totalDues: 100 }, "input change: exact replay mismatch", {
+      scope: "run",
+      subjectId: "run-1",
+    });
     expect(noDiff.changed).toBe(false);
     expect(noDiff.differences).toHaveLength(0);
 
-    const withDiff = buildReplayDiff({ dues_amount: 120.5 }, { dues_amount: 125.75 }, "rule change: dues rate override");
+    const withDiff = buildReplayDiff(
+      { dues_amount: 120.5 },
+      { dues_amount: 125.75 },
+      "rule change: dues rate override",
+      {
+        scope: "employee_item",
+        subjectId: "EMP-001",
+        originalRulePath: ["rules", "dues", "v1"],
+        replayRulePath: ["rules", "dues", "v2"],
+      },
+    );
+
     expect(withDiff.changed).toBe(true);
     expect(withDiff.differences[0]).toEqual({
+      scope: "employee_item",
+      subjectId: "EMP-001",
       field: "dues_amount",
-      original: 120.5,
-      replay: 125.75,
-      reason: "rule change: dues rate override",
+      originalValue: 120.5,
+      replayValue: 125.75,
+      causeType: "rule_change",
+      causeDetail: "rule change: dues rate override",
+      originalRulePath: ["rules", "dues", "v1"],
+      replayRulePath: ["rules", "dues", "v2"],
     });
   });
 
@@ -155,8 +195,8 @@ describe("Employer Execution hardening helpers", () => {
         action: "approve",
         immutableSnapshotLocked: false,
         criticalOpenCount: 1,
-        highOpenCount: 0,
-        acknowledgedHighCount: 0,
+        errorOpenCount: 0,
+        acknowledgedErrorCount: 0,
       }),
     ).toThrow("Cannot approve official payroll run while critical compliance events are unresolved");
 
@@ -166,10 +206,10 @@ describe("Employer Execution hardening helpers", () => {
         action: "approve",
         immutableSnapshotLocked: false,
         criticalOpenCount: 0,
-        highOpenCount: 2,
-        acknowledgedHighCount: 1,
+        errorOpenCount: 2,
+        acknowledgedErrorCount: 1,
       }),
-    ).toThrow("All high-severity compliance events must be acknowledged before approval");
+    ).toThrow("All error-severity compliance events must be acknowledged before approval");
 
     expect(() =>
       enforcePayrollLifecycleTransition({
@@ -177,8 +217,8 @@ describe("Employer Execution hardening helpers", () => {
         action: "approve",
         immutableSnapshotLocked: false,
         criticalOpenCount: 0,
-        highOpenCount: 2,
-        acknowledgedHighCount: 2,
+        errorOpenCount: 2,
+        acknowledgedErrorCount: 2,
       }),
     ).not.toThrow();
   });

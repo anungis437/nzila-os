@@ -37,7 +37,82 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     const body = createSchema.parse(req.body);
-    const run = calculatePayrollRun(body);
+    const run = calculatePayrollRun({
+      engineVersion: body.engineVersion,
+      periodStart: body.periodStart,
+      periodEnd: body.periodEnd,
+      entries: body.entries.map((entry) => ({
+        ...entry,
+        premiumCode: undefined,
+        validationErrors: [],
+      })),
+      resolvedRules: {
+        ruleVersionId: "service-inline",
+        ruleVersionCode: "service-inline",
+        sourceHash: "service-inline",
+        executableRules: [
+          {
+            kind: "base_rate",
+            strategy: "hourly",
+            amount: body.baseRate,
+            sourceRuleId: "service-inline",
+            path: ["request", "baseRate"],
+          },
+          {
+            kind: "dues",
+            strategy: "percent_gross",
+            amount: body.duesRate,
+            sourceRuleId: "service-inline",
+            path: ["request", "duesRate"],
+          },
+          {
+            kind: "benefits",
+            strategy: "percent_gross",
+            amount: body.benefitRate,
+            sourceRuleId: "service-inline",
+            path: ["request", "benefitRate"],
+          },
+          {
+            kind: "pension",
+            strategy: "percent_gross",
+            amount: body.pensionRate,
+            sourceRuleId: "service-inline",
+            path: ["request", "pensionRate"],
+          },
+          {
+            kind: "overtime",
+            strategy: "daily_threshold",
+            thresholdHours: 8,
+            multiplier: 1.5,
+            sourceRuleId: "service-inline",
+            path: ["request", "defaults"],
+          },
+          {
+            kind: "double_time",
+            strategy: "after_threshold",
+            thresholdHours: 12,
+            multiplier: 2,
+            sourceRuleId: "service-inline",
+            path: ["request", "defaults"],
+          },
+        ],
+        values: {
+          baseRate: body.baseRate,
+          overtimeMultiplier: 1.5,
+          doubleTimeMultiplier: 2,
+          shiftPremiumRate: 0,
+          travelPremiumRate: 0,
+          duesRate: body.duesRate,
+          benefitRate: body.benefitRate,
+          pensionRate: body.pensionRate,
+          statutoryHolidayMultiplier: 1,
+          regionalOverride: 1,
+          classificationOverride: 1,
+        },
+        ruleResolution: [{ source: "inline_financial_service_route" }],
+        appliedRules: [],
+      },
+    });
 
     const insertRun = await db.execute(sql`
       insert into employer_payroll_runs (

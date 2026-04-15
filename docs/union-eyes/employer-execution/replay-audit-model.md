@@ -1,17 +1,35 @@
-# Replay And Audit Model
+# Replay Audit Model
 
-## Replay Modes
-- exact: same engine version and rule references.
-- simulated: newer engine version and/or changed rule path.
+## Replay Intent
+Replay is an audit control, not a mutating operation. It explains drift in deterministic execution and captures cause attribution.
 
-## Diff Model
-- changed: boolean
-- fieldsChanged: [{ field, before, after }]
-- summary: human-readable explanation
-- diffHash: sha256 hash for tamper detection
+## Replay Diff Contract
+Each diff entry uses:
+- `scope`: `run` | `employee_item` | `remittance_item`
+- `entityId`
+- `field`
+- `originalValue`
+- `replayValue`
+- `causeType`: `input_change` | `rule_change` | `engine_change` | `derived_change`
+- `causeDetail`
+- `originalRulePath` / `replayRulePath` (when available)
 
-## Audit Path
-1. Original payroll run captures calc trace and snapshot hash.
-2. Replay run executed with selected mode/version.
-3. Diff generated and persisted in employer_execution_replays.
-4. Replay diff artifact generated for evidence package.
+## Cause Attribution
+- `rule_change`: replay uses different resolved rules or rule version lineage.
+- `engine_change`: replay engine version differs from source execution.
+- `input_change`: source vs replay input snapshot differs.
+- `derived_change`: downstream variance where direct root signal is not explicit.
+
+## Persistence
+1. Source run context and replay context are materialized.
+2. Structured diff is stored in `employer_execution_replays.diff_json`.
+3. Diff hash is persisted for tamper detection.
+4. Replay artifact is attached to evidence artifacts for operator inspection.
+
+## Operator UX Requirements
+Replay views prioritize changed items by default and expose:
+- totals delta
+- entity-level changed fields
+- cause type + detail
+- rule path lineage
+- source/replay engine + rule context

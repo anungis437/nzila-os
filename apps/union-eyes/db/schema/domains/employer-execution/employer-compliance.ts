@@ -13,7 +13,7 @@ import { employerRemittanceRuns } from "./employer-remittance-runs";
 
 export const employerExecutionComplianceSeverityEnum = pgEnum(
   "employer_execution_compliance_severity",
-  ["info", "warning", "high", "critical"],
+  ["info", "warning", "error", "critical"],
 );
 
 export const employerExecutionComplianceStatusEnum = pgEnum(

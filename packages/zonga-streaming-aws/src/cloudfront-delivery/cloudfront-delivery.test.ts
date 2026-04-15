@@ -25,7 +25,7 @@ describe('cloudfront-delivery', () => {
 
   describe('createSignedPlaybackUrl', () => {
     it('should return a signed URL with expiry', async () => {
-      const { createSignedPlaybackUrl } = await import('../src/cloudfront-delivery')
+      const { createSignedPlaybackUrl } = await import('.')
       const result = await createSignedPlaybackUrl(config, {
         storageKey: 'processed/org-1/asset-1/high/output.m3u8',
         qualityTier: 'high',
@@ -43,7 +43,7 @@ describe('cloudfront-delivery', () => {
 
   describe('buildPublicUrl', () => {
     it('should construct an unsigned HTTPS URL', async () => {
-      const { buildPublicUrl } = await import('../src/cloudfront-delivery')
+      const { buildPublicUrl } = await import('.')
       const url = buildPublicUrl(config, 'artwork/poster.jpg')
       expect(url).toBe('https://d1234.cloudfront.net/artwork/poster.jpg')
     })
@@ -51,7 +51,7 @@ describe('cloudfront-delivery', () => {
 
   describe('computeVariantKeys', () => {
     it('should compute master + variant storage keys', async () => {
-      const { computeVariantKeys } = await import('../src/cloudfront-delivery')
+      const { computeVariantKeys } = await import('.')
       const result = computeVariantKeys('org-1', 'asset-1', ['standard', 'high'])
       expect(result.masterKey).toBe('processed/org-1/asset-1/master.m3u8')
       expect(result.variantKeys).toHaveLength(2)
@@ -62,7 +62,7 @@ describe('cloudfront-delivery', () => {
 
   describe('createHlsPlaybackGrant', () => {
     it('should return signed master + variant URLs', async () => {
-      const { createHlsPlaybackGrant } = await import('../src/cloudfront-delivery')
+      const { createHlsPlaybackGrant } = await import('.')
       const result = await createHlsPlaybackGrant(config, {
         orgId: 'org-1',
         assetId: 'asset-1',

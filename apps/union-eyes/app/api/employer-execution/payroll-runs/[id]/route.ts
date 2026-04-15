@@ -95,12 +95,12 @@ export const PATCH = withApi(
             eq(employerExecutionComplianceEvents.organizationId, organizationId),
             eq(employerExecutionComplianceEvents.payrollRunId, run.id),
             eq(employerExecutionComplianceEvents.status, "open"),
-            eq(employerExecutionComplianceEvents.severity, "high"),
+            eq(employerExecutionComplianceEvents.severity, "error"),
           ),
         );
 
-      const openHighIds = new Set(openHighEvents.map((event) => event.id));
-      const acknowledgedIds = body.acknowledgedEventIds.filter((eventId) => openHighIds.has(eventId));
+      const openErrorIds = new Set(openHighEvents.map((event) => event.id));
+      const acknowledgedIds = body.acknowledgedEventIds.filter((eventId) => openErrorIds.has(eventId));
 
       try {
         enforcePayrollLifecycleTransition({
@@ -108,8 +108,8 @@ export const PATCH = withApi(
           action: "approve",
           immutableSnapshotLocked: run.immutableSnapshotLocked,
           criticalOpenCount: blockingCritical.length,
-          highOpenCount: openHighEvents.length,
-          acknowledgedHighCount: acknowledgedIds.length,
+          errorOpenCount: openHighEvents.length,
+          acknowledgedErrorCount: acknowledgedIds.length,
         });
       } catch (error) {
         throw ApiError.badRequest(error instanceof Error ? error.message : "Invalid lifecycle transition");
@@ -203,9 +203,16 @@ export const PATCH = withApi(
         createdBy: userId,
         metadata: {
           runCode: run.runCode,
+          status: run.status,
           engineVersion: run.engineVersion,
-          cbaRuleVersionId: run.cbaRuleVersionId,
-          calcTraceHash: run.calcTraceHash,
+          ruleVersionIds: run.cbaRuleVersionId ? [run.cbaRuleVersionId] : [],
+          inputRefs: { sourceBatchId: run.sourceBatchId },
+          timesheetBatchIds: run.sourceBatchId ? [run.sourceBatchId] : [],
+          calcTraceSummaryHash: run.calcTraceHash,
+          statusTimestamps: {
+            approvedAt: new Date().toISOString(),
+          },
+          approvers: userId ? [{ userId, at: new Date().toISOString() }] : [],
           inputSnapshotHash: sha256(JSON.stringify(run.inputSnapshot ?? {})),
         },
         artifacts: [
@@ -296,8 +303,8 @@ export const PATCH = withApi(
           action: "seal",
           immutableSnapshotLocked: run.immutableSnapshotLocked,
           criticalOpenCount: 0,
-          highOpenCount: 0,
-          acknowledgedHighCount: 0,
+          errorOpenCount: 0,
+          acknowledgedErrorCount: 0,
         });
       } catch (error) {
         throw ApiError.badRequest(error instanceof Error ? error.message : "Invalid lifecycle transition");

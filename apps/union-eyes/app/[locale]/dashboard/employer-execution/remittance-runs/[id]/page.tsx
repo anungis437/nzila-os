@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/api-auth-guard";
 import { db } from "@/db";
-import { employerRemittanceRuns, employerExecutionArtifacts } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { employerRemittanceRuns, employerExecutionArtifacts, employerExecutionComplianceEvents } from "@/db/schema";
+import { and, desc, eq } from "drizzle-orm";
 import { RemittanceArtifactCard } from "@/components/employer-execution";
 
 export const dynamic = "force-dynamic";
@@ -28,13 +28,43 @@ export default async function EmployerExecutionRemittanceRunDetailPage({ params 
         eq(employerExecutionArtifacts.organizationId, organizationId),
         eq(employerExecutionArtifacts.remittanceRunId, run.id),
       ),
-    );
+    )
+    .orderBy(desc(employerExecutionArtifacts.createdAt));
+
+  const complianceEvents = await db
+    .select()
+    .from(employerExecutionComplianceEvents)
+    .where(
+      and(
+        eq(employerExecutionComplianceEvents.organizationId, organizationId),
+        eq(employerExecutionComplianceEvents.remittanceRunId, run.id),
+      ),
+    )
+    .orderBy(desc(employerExecutionComplianceEvents.detectedAt));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Remittance Run {run.runCode}</h1>
         <p className="text-sm text-muted-foreground">Status: {run.status}</p>
+      </div>
+
+      <div className="rounded-md border p-4 text-sm">
+        <h2 className="font-medium">Run Summary</h2>
+        <p className="mt-1 text-muted-foreground">Payroll Run: {String(run.payrollRunId)}</p>
+        <p className="text-muted-foreground">Due Date: {String(run.dueDate)}</p>
+        <p className="text-muted-foreground">Total Due: {String(run.totalDue)}</p>
+        <p className="text-muted-foreground">Generated At: {String(run.generatedAt ?? "n/a")}</p>
+      </div>
+
+      <div className="rounded-md border p-4 text-sm">
+        <h2 className="font-medium">Compliance State</h2>
+        {complianceEvents.length === 0 ? <p className="mt-1 text-muted-foreground">No compliance events.</p> : null}
+        {complianceEvents.map((event) => (
+          <p key={event.id} className="mt-1 text-muted-foreground">
+            {event.severity} | {event.status} | {event.summary}
+          </p>
+        ))}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
