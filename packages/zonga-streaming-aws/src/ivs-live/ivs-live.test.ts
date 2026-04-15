@@ -50,7 +50,7 @@ describe('ivs-live', () => {
           },
         })
 
-      const { createLiveChannel } = await import('../src/ivs-live')
+      const { createLiveChannel } = await import('.')
       const result = await createLiveChannel(config, {
         eventId: 'evt-1',
         creatorId: 'user-1',
@@ -67,7 +67,7 @@ describe('ivs-live', () => {
 
   describe('buildRtmpIngestUrl', () => {
     it('should produce RTMPS URL', async () => {
-      const { buildRtmpIngestUrl } = await import('../src/ivs-live')
+      const { buildRtmpIngestUrl } = await import('.')
       const url = buildRtmpIngestUrl('abc.global-contribute.live-video.net', 'sk-live-abc123')
       expect(url).toBe('rtmps://abc.global-contribute.live-video.net:443/app/sk-live-abc123')
     })
@@ -93,7 +93,7 @@ describe('ivs-live', () => {
           },
         })
 
-      const { getLiveChannelInfo } = await import('../src/ivs-live')
+      const { getLiveChannelInfo } = await import('.')
       const info = await getLiveChannelInfo(config, 'arn:aws:ivs:us-east-1:123:channel/abc')
 
       expect(info.state).toBe('live')
@@ -112,7 +112,7 @@ describe('ivs-live', () => {
         })
         .mockRejectedValueOnce({ name: 'ChannelNotBroadcasting' })
 
-      const { getLiveChannelInfo } = await import('../src/ivs-live')
+      const { getLiveChannelInfo } = await import('.')
       const info = await getLiveChannelInfo(config, 'arn:aws:ivs:us-east-1:123:channel/abc')
 
       expect(info.state).toBe('ready')

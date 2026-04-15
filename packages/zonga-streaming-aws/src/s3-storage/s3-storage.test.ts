@@ -28,7 +28,7 @@ describe('s3-storage', () => {
 
   describe('computeRawStorageKey', () => {
     it('should produce a deterministic, sanitized key', async () => {
-      const { computeRawStorageKey } = await import('../src/s3-storage')
+      const { computeRawStorageKey } = await import('.')
       const key = computeRawStorageKey('org-1', 'asset-42', 'My Track (Final).wav')
       expect(key).toBe('raw/org-1/asset-42/My_Track__Final_.wav')
       expect(key).not.toContain('(')
@@ -36,7 +36,7 @@ describe('s3-storage', () => {
     })
 
     it('should handle files with special characters', async () => {
-      const { computeRawStorageKey } = await import('../src/s3-storage')
+      const { computeRawStorageKey } = await import('.')
       const key = computeRawStorageKey('org-1', 'asset-1', '../../etc/passwd')
       expect(key).toMatch(/^raw\/org-1\/asset-1\//)
       expect(key).not.toContain('..')
@@ -45,7 +45,7 @@ describe('s3-storage', () => {
 
   describe('computeOutputStorageKey', () => {
     it('should include quality tier in path', async () => {
-      const { computeOutputStorageKey } = await import('../src/s3-storage')
+      const { computeOutputStorageKey } = await import('.')
       const key = computeOutputStorageKey('org-1', 'asset-1', 'high', 'output.m3u8')
       expect(key).toBe('processed/org-1/asset-1/high/output.m3u8')
     })
@@ -53,7 +53,7 @@ describe('s3-storage', () => {
 
   describe('createPresignedUpload', () => {
     it('should return a presigned URL and metadata', async () => {
-      const { createPresignedUpload } = await import('../src/s3-storage')
+      const { createPresignedUpload } = await import('.')
       const result = await createPresignedUpload(
         { rawBucket: 'test-raw', outputBucket: 'test-output', region: 'us-east-1' },
         {

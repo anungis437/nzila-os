@@ -41,7 +41,7 @@ describe('mediaconvert', () => {
         },
       })
 
-      const { submitTranscodeJob } = await import('../src/mediaconvert')
+      const { submitTranscodeJob } = await import('.')
       const result = await submitTranscodeJob(config, {
         inputKey: 'raw/org-1/audio-abc.flac',
         inputBucket: 'my-raw-bucket',

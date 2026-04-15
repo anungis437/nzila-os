@@ -5,7 +5,7 @@
  * No AWS or DB dependencies.
  */
 import { describe, it, expect } from 'vitest'
-import { computeStreamingMetrics } from '../src/metrics'
+import { computeStreamingMetrics } from '.'
 
 describe('metrics', () => {
   describe('computeStreamingMetrics', () => {
