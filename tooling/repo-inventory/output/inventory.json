@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-16T15:10:56.579Z",
+  "generatedAt": "2026-04-16T17:04:18.796Z",
   "appCount": 17,
   "packageCount": 166,
   "workflowCount": 35,
@@ -493,7 +493,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3126
+      "codeFileCount": 3132
     },
     {
       "name": "web",
