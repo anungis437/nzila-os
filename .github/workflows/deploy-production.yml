@@ -52,37 +52,30 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download staging artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: staging-build-artifacts
           path: ./staging-artifacts
-        continue-on-error: true
 
       - name: Verify artifact digest
         run: |
-          echo "Verifying artifact digest matches staging build..."
-          if [ -f staging-artifacts/artifact-manifest.json ]; then
-            cat staging-artifacts/artifact-manifest.json
-            echo "Artifact manifest verified."
-          else
-            echo "::warning::No staging artifact manifest found. Using latest build."
-          fi
+          set -euo pipefail
+          test -f staging-artifacts/artifact-manifest.json
+          echo "Verifying artifact manifest integrity"
+          jq . staging-artifacts/artifact-manifest.json >/dev/null
+          echo "Artifact manifest verified"
 
       - name: Verify SBOM
         run: |
-          if [ -f staging-artifacts/sbom.json ]; then
-            echo "SBOM verified: $(wc -c < staging-artifacts/sbom.json) bytes"
-          else
-            echo "::warning::No SBOM found from staging."
-          fi
+          set -euo pipefail
+          test -f staging-artifacts/sbom.json
+          echo "SBOM verified: $(wc -c < staging-artifacts/sbom.json) bytes"
 
       - name: Verify attestation
         run: |
-          if [ -f staging-artifacts/release-attestation.json ]; then
-            echo "Attestation verified."
-          else
-            echo "::warning::No attestation found from staging."
-          fi
+          set -euo pipefail
+          test -f staging-artifacts/release-attestation.json
+          echo "Attestation verified"
 
   # ── W1-6: SLSA Provenance ────────────────────────────────────────────────
   slsa-provenance:
@@ -95,6 +88,22 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download staging artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-build-artifacts
+          path: ./staging-artifacts
 
       - name: Generate SLSA provenance
         uses: actions/attest-build-provenance@v2
@@ -119,14 +128,19 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}           # W2-4: No stored credentials
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy verified artifact
+      - name: Transactional production promotion
         run: |
-          echo "Deploying verified artifact to PRODUCTION"
-          echo "Production deploy must NEVER rebuild — promoting staged artifact only."
+          set -euo pipefail
 
-      - name: Run health checks
-        run: |
-          echo "Running production health checks..."
+          pnpm deploy:transactional \
+            --manifest staging-artifacts/artifact-manifest.json \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --health-attempts 10 \
+            --health-delay-ms 5000 \
+            --health-timeout-ms 20000 \
+            --evidence-out ops/deploy-evidence/production-${{ github.run_id }}.json
+        env:
+          PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
 
       - name: Record governance snapshot
         run: |
@@ -143,3 +157,13 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
           }
           EOF
+
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-deploy-evidence
+          path: |
+            ops/deploy-evidence/*.json
+            ops/governance-snapshots/governance-snapshot-prod-*.json
+          retention-days: 365

@@ -248,6 +248,25 @@ jobs:
       - name: Governance fail-closed gate
         run: pnpm validate:governance:gate
 
+      - name: Truth authority validation
+        run: pnpm validate:truth-authority
+
+      - name: Auth authority validation
+        run: pnpm validate:auth-authority
+
+      - name: GA state machine validation
+        run: pnpm validate:ga-state
+
+      - name: Workspace dependency integrity
+        run: pnpm validate:workspace-links
+
+      - name: Regenerate inventory
+        run: pnpm inventory:generate
+
+      - name: Enforce committed inventory lock
+        run: |
+          git diff --exit-code -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md
+
       - name: Control manifest validation
         run: pnpm validate:control:manifests
 

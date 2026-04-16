@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --port 3011 --turbopack",
+    "dev": "next dev --port 3006 --turbopack",
     "build": "next build",
     "start": "next start --port 3006",
     "lint": "eslint . --max-warnings 0",
