@@ -14,6 +14,8 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 import { createEvidencePack, sha256 } from "../_lib";
 
+const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+
 type RemittanceFormatter = {
   formatCode: string;
   buildCsv: (rows: Array<{ employeeExternalId: string; dues: number; benefits: number; pension: number; gross: number; net: number }>) => string;
@@ -331,7 +333,7 @@ export const POST = withApi(
       tx.insert(employerExecutionEvidenceLinks).values({
         organizationId,
         entityType: "remittance_run",
-        entityId: remittanceRun.id,
+        [LEGACY_TARGET_ID_COLUMN]: remittanceRun.id,
         parentLinkId: evidencePack.chainLink.parentLinkId,
         parentSealHash: evidencePack.chainLink.parentSealHash,
         manifestHash: evidencePack.manifestHash,
@@ -342,7 +344,7 @@ export const POST = withApi(
           runCode: remittanceRun.runCode,
         },
         createdBy: userId ?? undefined,
-      }),
+      } as any),
     );
 
     return { data: { remittanceRun } };

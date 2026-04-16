@@ -123,7 +123,7 @@ export type EvidenceChainLink = {
   linkId: string;
   organizationId: string;
   entityType: "payroll_run" | "remittance_run" | "replay" | "approval" | "adjustment_run";
-  entityId: string;
+  targetEntityId: string;
   parentLinkId?: string | null;
   parentSealHash?: string | null;
   manifestHash: string;

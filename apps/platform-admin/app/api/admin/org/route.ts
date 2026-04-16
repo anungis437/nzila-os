@@ -35,6 +35,14 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/org — check entitlement
 export async function POST(request: NextRequest) {
+  const idempotencyKey = request.headers.get('Idempotency-Key')
+  if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+    return NextResponse.json(
+      { ok: false, error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: 'Idempotency-Key header is required' } },
+      { status: 400 },
+    )
+  }
+
   return withOrgScope(request, async (context) => {
     const body = await request.json() as { feature?: string }
 

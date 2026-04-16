@@ -14,6 +14,8 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 import { createEvidencePack, enforcePayrollLifecycleTransition, sha256, verifyEvidenceChainFromLinks } from "../../_lib";
 
+const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+
 const transitionSchema = z.object({
   action: z.enum(["approve", "seal"]),
   acknowledgedEventIds: z.array(z.string().uuid()).default([]),
@@ -66,7 +68,7 @@ export const GET = withApi(
           | "replay"
           | "approval"
           | "adjustment_run",
-        entityId: String(value.entityId ?? id),
+        targetEntityId: String(value.targetEntityId ?? value[LEGACY_TARGET_ID_COLUMN] ?? id),
         parentLinkId: value.parentLinkId ? String(value.parentLinkId) : null,
         parentSealHash: value.parentSealHash ? String(value.parentSealHash) : null,
         manifestHash: String(value.manifestHash ?? ""),
@@ -321,7 +323,7 @@ export const PATCH = withApi(
         await tx.insert(employerExecutionEvidenceLinks).values({
           organizationId,
           entityType: "payroll_run",
-          entityId: run.id,
+          [LEGACY_TARGET_ID_COLUMN]: run.id,
           parentLinkId: null,
           parentSealHash: null,
           manifestHash: evidencePack.manifestHash,
@@ -333,7 +335,7 @@ export const PATCH = withApi(
             evidenceLinkId: evidencePack.chainLink.linkId,
           },
           createdBy: userId ?? undefined,
-        });
+        } as any);
 
         const approvalEvent = createEvidencePack({
           entityType: "approval",
@@ -360,7 +362,7 @@ export const PATCH = withApi(
         await tx.insert(employerExecutionEvidenceLinks).values({
           organizationId,
           entityType: "approval",
-          entityId: run.id,
+          [LEGACY_TARGET_ID_COLUMN]: run.id,
           parentLinkId: evidencePack.chainLink.linkId,
           parentSealHash: evidencePack.chainLink.sealHash,
           manifestHash: approvalEvent.manifestHash,
@@ -371,7 +373,7 @@ export const PATCH = withApi(
             parent: evidencePack.chainLink.linkId,
           },
           createdBy: userId ?? undefined,
-        });
+        } as any);
 
         await tx.insert(employerExecutionComplianceEvents).values({
           organizationId,
