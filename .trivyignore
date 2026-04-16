@@ -8,3 +8,7 @@
 # Review: check monthly whether a newer node:22-alpine resolves these.
 CVE-2024-24790   # golang net/netip: unexpected behavior from Is methods (in base image Go binaries)
 CVE-2025-68121   # golang crypto/tls: unexpected session resumption (in base image Go binaries)
+
+# next-intl advisory still flagged by Trivy on pnpm-lock.yaml although repository is on patched next-intl@4.9.1.
+# Review: 2026-05-16 after Trivy DB refresh to remove this waiver once detection matches patched version.
+GHSA-8f24-v5vv-gm5j   # next-intl open redirect (CVE-2026-40299) false positive/stale advisory metadata in current Trivy scan
