@@ -97,6 +97,7 @@ jobs:
           exit-code: ${{ inputs.fail-on-critical && '1' || '0' }}
           format: sarif
           output: trivy-results.sarif
+            trivyignores: .trivyignore
 
       - name: Upload Trivy SARIF
         if: always()
