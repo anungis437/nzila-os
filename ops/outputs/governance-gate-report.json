@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-16T23:30:16.219Z",
+  "timestamp": "2026-04-16T23:45:02.525Z",
   "total": 20,
   "passed": 20,
   "failed": 0,
@@ -87,7 +87,7 @@
     {
       "name": "GOV-GATE-017: DORA and cost attribution outputs exist",
       "status": "pass",
-      "detail": "DORA + cost attribution pipeline verified"
+      "detail": "DORA + cost attribution pipeline verified with enforcement controls"
     },
     {
       "name": "GOV-GATE-018: Container seccomp profile exists",

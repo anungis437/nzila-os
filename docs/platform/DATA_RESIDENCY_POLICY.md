@@ -36,6 +36,15 @@ Azure OpenAI inference calls (`nzila-openai-eastus`, `nzila-openai-eastus2`) sen
 - Azure OpenAI Data Processing Addendum accepted; no data used for model training (Microsoft commitment)
 - Whisper (voice transcription) is East US 2 only — audio files must be stripped of identifying metadata before upload
 
+### Azure OpenAI Risk Mitigation Strategy
+
+| Risk | Mitigation | Enforcement |
+|---|---|---|
+| Prompt contains direct identifiers | Pre-inference redaction middleware + deny-list checks | CI contract tests + runtime request validator |
+| Cross-border transfer over-collection | Data minimization templates by use case | Prompt schema review before deployment |
+| Inference misuse for regulated decisions | Human-in-the-loop for high-impact outputs | Product policy gate + audit trail |
+| Region outage for East US/East US 2 | Documented fallback mode (degraded local-only workflows) | Incident drill twice per year |
+
 ---
 
 ## Org-Level Data Isolation
@@ -46,6 +55,17 @@ All user-facing data is isolated by `org_id` at the database layer:
 - `org_id` index present on every tenant-scoped table
 - `auth()` resolution enforces org boundary; `getOrganizationIdForUser()` used for all role lookups
 - Cross-org queries require explicit Platform Admin or Super Admin role — audited in `evidence_exports`
+
+## Data Classification Framework
+
+| Class | Examples | Storage and transfer policy |
+|---|---|---|
+| Public | Marketing content, docs | Any approved region; integrity controls required |
+| Internal | Operational telemetry, non-PII logs | Canada preferred; approved exception needed for non-Canada |
+| Confidential | Member records, case notes, payroll data | Canada-only storage; encrypted in transit and at rest |
+| Restricted | Identity docs, sensitive legal records | Canada-only, least-privilege access, explicit access review |
+
+Every new field in app schemas must declare a classification label before production rollout.
 
 ---
 
@@ -106,6 +126,17 @@ Breach response procedure: `SECURITY.md` → "Incident Response" section.
 | AI prompt PII audit | Each AI SDK version bump | `packages/ai-core` owner |
 | Storage account region audit | Semi-annual | DevOps / Infrastructure |
 | DB connection string region check | CI (governance gate) | Automated |
+
+## Automated Compliance Checks
+
+Runtime and CI controls for residency compliance:
+
+1. CI verifies policy presence and required sections via governance gate.
+2. Contract tests validate org scoping and tenant isolation boundaries.
+3. Deployment checks ensure region-locked infrastructure declarations.
+4. Quarterly automated scan compares provisioned resource regions against approved residency matrix.
+
+Any detected non-Canada data store for Confidential or Restricted classes is a fail-closed release blocker.
 
 ---
 

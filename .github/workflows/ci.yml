@@ -252,7 +252,17 @@ jobs:
         run: pnpm validate:evidence:lifecycle
 
       - name: Collect DORA metrics
-        run: pnpm collect:dora
+        run: pnpm collect:dora:enforce
+        env:
+          DORA_MIN_DEPLOYS_PER_WEEK: "1"
+          DORA_MAX_LEAD_TIME_HOURS: "720"
+          DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"
+
+      - name: Collect cost attribution
+        run: pnpm collect:cost
+        env:
+          COST_ENABLE_AZURE_API: "${{ vars.COST_ENABLE_AZURE_API || '0' }}"
+          AZURE_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Truth authority validation
         run: pnpm validate:truth-authority

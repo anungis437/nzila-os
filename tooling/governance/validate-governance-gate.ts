@@ -270,7 +270,24 @@ check('GOV-GATE-017: DORA and cost attribution outputs exist', () => {
   }
   const dora = JSON.parse(readFileSync(required[0], 'utf-8'))
   if (!dora.metrics?.deployment_frequency) throw new Error('dora-metrics.json missing deployment_frequency')
-  return 'DORA + cost attribution pipeline verified'
+  if (!dora.metrics?.predictive_signal) throw new Error('dora-metrics.json missing predictive_signal')
+
+  const cost = JSON.parse(readFileSync(required[1], 'utf-8'))
+  if (typeof cost.data_source !== 'string') throw new Error('cost-allocation.json missing data_source')
+  if (typeof cost.unresolved_app_count !== 'number') {
+    throw new Error('cost-allocation.json missing unresolved_app_count')
+  }
+
+  const doraCollector = readFileSync(required[2], 'utf-8')
+  if (!doraCollector.includes('DORA_ENFORCE_THRESHOLDS') || !doraCollector.includes('--enforce')) {
+    throw new Error('collect-dora-metrics.mjs missing threshold enforcement controls')
+  }
+  const costCollector = readFileSync(required[3], 'utf-8')
+  if (!costCollector.includes('COST_ENFORCE_REAL_DATA') || !costCollector.includes('--enforce-real-data')) {
+    throw new Error('collect-cost-attribution.mjs missing real-data enforcement controls')
+  }
+
+  return 'DORA + cost attribution pipeline verified with enforcement controls'
 })
 
 check('GOV-GATE-018: Container seccomp profile exists', () => {

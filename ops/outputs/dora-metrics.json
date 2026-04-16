@@ -1,7 +1,11 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-04-16T23:27:26.173Z",
+  "collected_at": "2026-04-16T23:44:58.992Z",
   "window_days": 30,
+  "source": {
+    "branch": "main",
+    "lookback_weeks_for_trend": 12
+  },
   "metrics": {
     "deployment_frequency": {
       "value": 10.47,
@@ -25,6 +29,27 @@
       "unit": "hours",
       "tier": "unknown",
       "note": "Requires incident tracker integration (e.g. PagerDuty API)"
+    },
+    "predictive_signal": {
+      "value": "normal",
+      "unit": "state",
+      "slope_per_week": 0.87,
+      "trailing_4_week_average": 7.75,
+      "projected_next_week_deploys": 21.87,
+      "weekly_deploy_series": [
+        0,
+        0,
+        0,
+        11,
+        18,
+        17,
+        19,
+        18,
+        2,
+        6,
+        2,
+        21
+      ]
     }
   }
 }

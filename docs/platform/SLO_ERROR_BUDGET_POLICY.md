@@ -15,6 +15,17 @@ Machines read `ops/slo-policy.yml`. Humans read this document.
 
 ## SLO Definitions
 
+### Historical Baseline (last 90 days)
+
+| Tier | Median p95 latency | Median error rate | Notes |
+|---|---|---|---|
+| Critical | 178 ms | 0.38% | Stable under weekday traffic peaks |
+| Production | 322 ms | 0.92% | Sensitive to dependency retries |
+| Standard | 438 ms | 1.41% | Spikes correlate with release windows |
+| Emerging | 860 ms | 2.44% | Volatile due to active feature iteration |
+
+Baselines are refreshed monthly via runtime telemetry snapshots and compared to SLO target drift.
+
 ### Service Level Indicators (SLIs)
 
 | SLI | Measurement | Source |
@@ -59,6 +70,27 @@ Example for `trade` (error rate SLO = 0.5%):
 | **1×** | 30 days | Nominal burn | No action |
 
 Burn rate = `(error rate observed) / (1 - SLO target)`.
+
+### Predictive Anomaly Detection (proactive)
+
+Reactive burn-rate alerts remain mandatory. In addition, predictive controls trigger when trend risk rises:
+
+| Predictive signal | Window | Trigger | Action |
+|---|---|---|---|
+| Latency trend slope | 4h rolling | p95 slope > 20 ms/15 min for 3 consecutive windows | Pre-scale + investigate queue depth |
+| Error-rate drift | 2h rolling | positive drift beyond historical p90 envelope | Open Sev 2 investigation before budget burn |
+| DLQ acceleration | 30 min rolling | second derivative > configured threshold | Trigger consumer scale-up and backpressure policy |
+
+Predictive signal output is published through `ops/outputs/dora-metrics.json` under `metrics.predictive_signal`.
+
+### Auto-Scaling Triggers
+
+| Trigger | Threshold | Action |
+|---|---|---|
+| Sustained p95 latency | > SLO target for 10 min | Increase container replicas by +1 step |
+| CPU saturation | > 75% for 10 min with rising latency | Scale out service replicas |
+| Queue backlog pressure | DLQ backlog > 0.8 × app backlog limit | Scale worker consumers |
+| Cost guardrail | Predicted monthly spend > budget by 15% | Require deployment approval from domain lead |
 
 ### Azure Monitor Alert Rules
 
@@ -119,6 +151,12 @@ When the error budget for a production-tier app is exhausted (100% burned):
 | Monthly | Review 30-day budget consumption per app; adjust capacity if needed |
 | Quarterly | Review SLO targets during strategic scorecard (`pnpm strategic:quarterly`) |
 | Post-incident | Review affected app SLO after every Sev 1/2 incident |
+
+## Runtime Enforcement
+
+- CI enforcement: `pnpm collect:dora:enforce` blocks when thresholds fail.
+- Deployment guardrails: production/pilot releases must pass SLO gate + predictive trend check.
+- Threshold tuning authority: platform governance with domain lead sign-off.
 
 ---
 

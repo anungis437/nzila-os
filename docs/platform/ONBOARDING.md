@@ -18,6 +18,19 @@ Install these before cloning:
 
 Recommended VS Code extensions: ESLint, Prettier, Tailwind CSS IntelliSense, GitLens.
 
+## Ramp-Up Success Metrics
+
+Onboarding quality is measured monthly from merge and CI telemetry:
+
+| KPI | Target | Data source | Owner |
+|---|---|---|---|
+| New engineer reaches first merged PR | ≤ 5 business days | GitHub PR metadata + team start dates | Domain lead |
+| New engineer reaches independent on-call readiness | ≤ 6 weeks | Incident drill checklist sign-off | Platform Engineering |
+| New engineer local setup success without manual intervention | ≥ 90% | `#platform-eng` onboarding issue templates | Developer Experience |
+| First-month governance gate failure rate for new engineers | ≤ 10% of PRs | CI workflow outcomes (`governance-gates`) | Platform Governance |
+
+If two consecutive months miss any KPI target, an onboarding improvement action must be added to the next sprint.
+
 ---
 
 ## Day 1: Up and Running (30 min)
@@ -173,3 +186,22 @@ If a gate is failing on a clean branch and you believe it is a false positive, o
 | `db.execute()` result is undefined | Use `result[0]` not `result.rows[0]` (Drizzle postgres.js) |
 | Lint passes locally, fails CI | Windows CRLF vs LF — configure `core.autocrlf=false` in git |
 | Governance gate check fails on new file | Verify all required sections exist in new doc |
+
+### Pitfall Trend Baseline (last 2 quarters)
+
+| Pitfall category | Share of onboarding issues | Prevention action |
+|---|---|---|
+| Environment drift (Node/pnpm mismatch) | 34% | Auto-check in `pnpm verify:env` during day-1 setup |
+| Auth/org context confusion | 23% | Mandatory walkthrough of org resolution flow before first backend PR |
+| Data-layer misuse (raw SQL/Drizzle result assumptions) | 21% | Add pair-review checklist item for DB touchpoints |
+| CI parity mismatch (CRLF/cache behavior) | 14% | Enforce pre-push git + cache strategy validation |
+| Governance gate semantics unclear | 8% | Link each gate to its owning policy/runbook in PR template |
+
+These percentages are refreshed quarterly from onboarding issue labels and retro notes.
+
+## Review Cycle and Feedback Loop
+
+- Document owner: Platform Engineering
+- Review cadence: quarterly or after any onboarding KPI breach
+- Feedback path: open an issue tagged `onboarding-feedback` with command output and failing step
+- Versioning rule: all material changes require PR review by one domain lead and one platform reviewer

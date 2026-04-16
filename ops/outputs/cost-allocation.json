@@ -1,9 +1,12 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-04-16T23:27:26.365Z",
+  "collected_at": "2026-04-16T23:45:00.559Z",
   "currency": "USD",
   "period": "monthly",
   "total_monthly_cost_usd": null,
+  "data_source": "template",
+  "unresolved_app_count": 17,
+  "errors": [],
   "apps": [
     {
       "app_id": "union-eyes",
@@ -19,9 +22,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "flow",
@@ -37,9 +44,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "web",
@@ -55,9 +66,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "partners",
@@ -73,9 +88,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "cfo",
@@ -91,9 +110,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "console",
@@ -109,9 +132,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "control-plane",
@@ -127,9 +154,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "zonga",
@@ -145,9 +176,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "abr",
@@ -163,9 +198,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "cora",
@@ -181,9 +220,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "trade",
@@ -199,9 +242,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "agrimo",
@@ -217,9 +264,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "platform-admin",
@@ -235,9 +286,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "orchestrator-api",
@@ -253,9 +308,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "nacp-exams",
@@ -271,9 +330,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "mobility",
@@ -289,9 +352,13 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     },
     {
       "app_id": "mobility-client-portal",
@@ -307,14 +374,18 @@
         "ai_inference_usd": null,
         "other_usd": null
       },
+      "sustainability": {
+        "estimated_energy_kwh": null,
+        "estimated_carbon_kg_co2e": null
+      },
       "azure_resource_group": null,
       "azure_container_app_name": null,
-      "note": "Stub — run with Azure Cost Management API credentials to populate"
+      "note": "Stub — set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID to populate"
     }
   ],
   "_instructions": [
-    "Set AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, and run `az login` before extending",
-    "Populate azure_resource_group and azure_container_app_name per app for tag-based filtering",
-    "Monthly totals are summed automatically when all app costs are populated"
+    "Set COST_ENABLE_AZURE_API=1 and AZURE_SUBSCRIPTION_ID, then run az login for real billing data",
+    "Populate platform/registry/apps.json with azure_resource_group for each app to map API cost rows",
+    "Set COST_ENFORCE_REAL_DATA=1 in CI to fail when unresolved_app_count > 0"
   ]
 }

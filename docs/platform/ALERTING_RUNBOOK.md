@@ -6,6 +6,23 @@ This runbook defines alert definitions, escalation paths, and response procedure
 
 For SLO burn-rate alert thresholds, see [`SLO_ERROR_BUDGET_POLICY.md`](./SLO_ERROR_BUDGET_POLICY.md).
 
+## Incident Management Integration
+
+Alert routing must be integrated with at least one incident platform and one chat destination:
+
+| System | Integration mode | Required for |
+|---|---|---|
+| PagerDuty | Webhook + service escalation policy | Sev 1 and Sev 2 alerts |
+| Opsgenie | API integration (backup routing) | Sev 1 fallback path |
+| Slack | Channel notification (`#incidents`, `#platform-eng`, `#security`) | All severities |
+
+Required behavior:
+
+1. Sev 1 alerts auto-create an incident and page primary on-call.
+2. If unacknowledged after 5 minutes, auto-escalate to secondary.
+3. Incident platform status updates must mirror in Slack every 30 minutes.
+4. Alert suppression and maintenance windows must sync to incident platform timelines.
+
 ---
 
 ## Alert Inventory
@@ -49,6 +66,19 @@ For SLO burn-rate alert thresholds, see [`SLO_ERROR_BUDGET_POLICY.md`](./SLO_ERR
 ---
 
 ## Azure Monitor KQL Query Templates
+
+## Cloud-Portability Mapping
+
+Azure Monitor is the primary implementation, but each alert class must have an equivalent query on non-Azure stacks:
+
+| Alert class | Azure Monitor | Portable equivalent |
+|---|---|---|
+| Request latency and errors | KQL on `requests` | PromQL on histogram buckets / OpenTelemetry metrics |
+| Availability checks | `availabilityResults` in KQL | Synthetic checks in Grafana Cloud / Datadog Synthetics |
+| Security auth anomaly | KQL over auth routes | SIEM query over standardized auth events |
+| Queue backlog | KQL/metric alerts | Cloud-native queue metrics with equivalent threshold logic |
+
+When adding an alert, include both the Azure query and one portable query in the owning service runbook.
 
 ### Error Rate Burn Rate (ALERT-SLO-001/002/003)
 
@@ -173,3 +203,12 @@ When adding a new alert:
 | DLQ / data | ✅ | ⚠️ Manual setup required | ✅ |
 
 > **Action required**: Alert rules must be provisioned via `infrastructure/monitoring/`. This runbook defines the complete spec — implementation in Azure Monitor is the next step (tracked in backlog).
+
+## Review and Validation Cadence
+
+| Activity | Cadence | Evidence |
+|---|---|---|
+| Incident routing test (PagerDuty/Opsgenie) | Monthly | Test incident IDs + acknowledgement timestamps |
+| Alert query drift review | Monthly | Query diff and false-positive rate notes |
+| Sev 1 simulation drill | Quarterly | Incident timeline and corrective actions |
+| Multi-cloud portability check | Quarterly | Equivalent query validation in secondary stack |
