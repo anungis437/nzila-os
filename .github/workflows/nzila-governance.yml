@@ -93,6 +93,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: '.'
+          scanners: vuln
           severity: CRITICAL,HIGH
           exit-code: ${{ inputs.fail-on-critical && '1' || '0' }}
           format: sarif
