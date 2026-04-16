@@ -15,6 +15,7 @@ import {
   Users,
   Lock,
 } from "lucide-react";
+import { CaseIntelligencePanel } from "@/components/grievances/case-intelligence-panel";
 import { StewardRecommendations } from "@/components/steward-recommendations";
 import { ClauseSuggestions } from "@/components/clause-suggestions";
 
@@ -507,6 +508,9 @@ export function GrievanceDetailConsole() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Case Intelligence */}
+      <CaseIntelligencePanel caseId={id} />
 
       {/* Secondary Access */}
       <Card>

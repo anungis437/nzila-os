@@ -130,6 +130,54 @@ Both grievance upload and repository upload now require `privacyLabel`.
   - upload form with mandatory label
   - version append action
 
+## Case Knowledge Graph and Related Documents
+
+### API
+
+- `GET /api/grievances/[id]/related-documents`
+
+### Query Parameters
+
+- `limit` (1..100, default 20)
+- `label` (privacy label exact match)
+- `documentType` (document type exact match)
+- `source` (substring match against explainability reasons)
+- `includeGraph` (`true` or `false`)
+
+### Response
+
+- `documents`: ranked, authorized related documents
+- `total`: count after authorization and filters
+- `graph` (optional): on-demand case graph snapshot when `includeGraph=true`
+
+### Ranking Signals
+
+- `same_case`
+- `same_member`
+- `same_agreement`
+- `same_employer_or_worksite`
+- `shared_tags`
+- `same_document_type`
+- `recent_assigned_lro_activity`
+- `similar_case`
+
+Every returned result includes deterministic scoring and plain-language reasons.
+
+### Authorization Guarantees
+
+- Uses centralized `document-authorization-service`.
+- Applies label policy through `isDocumentVisibleByPolicy(...)`.
+- Honors explicit grants from `document_access_grants`.
+- Preserves primary/secondary/steward case scope.
+
+### UI Surface
+
+- Grievance detail console now includes `RelatedDocumentsPanel`:
+  - explainable reason badges
+  - privacy label chips
+  - linked-entity badges
+  - optional knowledge graph snapshot with node/edge counts
+
 ## Audit Semantics
 
 - Access lifecycle actions are case-audited.
