@@ -15,7 +15,7 @@ const publicPaths = ['/', '/sign-in', '/sign-up', '/api/health', '/api/auth']
 export default auth((req: any) => {
   const { pathname } = req.nextUrl
 
-  // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
+  // -- Idempotency-Key enforcement (fail-closed in pilot/prod) --
   if (process.env.NODE_ENV !== 'development') {
     if (
       ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
@@ -39,24 +39,27 @@ export default auth((req: any) => {
     }
   }
 
-  // ── Authentication ────────────────────────────────────────────────────
+  // -- Authentication --
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
   if (!isPublic && !req.auth) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
-  // ── Internationalisation ──────────────────────────────────────────────
+  // -- Request-ID + Correlation-ID propagation --
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
+  const correlationId = req.headers.get('x-correlation-id') ?? requestId
+
+  // -- Internationalisation --
   if (!pathname.startsWith('/api')) {
     const intlResponse = intlMiddleware(req)
-    const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
     intlResponse.headers.set('x-request-id', requestId)
+    intlResponse.headers.set('x-correlation-id', correlationId)
     return intlResponse
   }
 
-  // ── Request-ID propagation ────────────────────────────────────────────
-  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
+  response.headers.set('x-correlation-id', correlationId)
   return response
 })
 

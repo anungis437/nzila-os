@@ -1,0 +1,135 @@
+/**
+ * Orchestrator API — Workflow Execution Routes
+ *
+ * POST /execute            — Submit a workflow execution (requires CP authorization)
+ * GET  /execute/:runId     — Get run status
+ * POST /execute/:runId/cancel — Cancel a running workflow
+ * GET  /execute            — List runs (filterable by orgId, workflowId, status)
+ *
+ * All executions must carry a Control Plane authorization decision ID.
+ * Policy-deaf: this engine never evaluates policy.
+ */
+import type { FastifyInstance } from 'fastify'
+import { randomUUID } from 'node:crypto'
+import { z } from 'zod'
+import {
+  executeWorkflow,
+  cancelWorkflowRun,
+  getWorkflowRun,
+  listWorkflowRuns,
+} from '../execution-engine.js'
+import { WorkflowTriggerRequestSchema, ExecutionStatusSchema } from '@nzila/platform-contracts/control-system'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('orchestrator:routes:execute')
+
+const ExecuteBodySchema = WorkflowTriggerRequestSchema.extend({
+  /** Decision ID from Control Plane authorization (required for live execution) */
+  authorizationDecisionId: z.string().uuid().optional(),
+})
+
+const ListQuerySchema = z.object({
+  orgId: z.string().uuid().optional(),
+  workflowId: z.string().optional(),
+  status: ExecutionStatusSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+})
+
+export async function executeRoutes(app: FastifyInstance) {
+  /**
+   * POST /execute — Submit a workflow for execution.
+   *
+   * Body must conform to WorkflowTriggerRequest + authorizationDecisionId.
+   * If dryRun=true, no actual execution occurs.
+   * If dryRun=false, authorizationDecisionId is required.
+   */
+  app.post('/', async (req, reply) => {
+    const parsed = ExecuteBodySchema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.status(400).send({
+        ok: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Invalid workflow execution request',
+          details: parsed.error.flatten(),
+        },
+      })
+    }
+
+    const body = parsed.data
+    const correlationId = (req.headers['x-correlation-id'] as string | undefined)
+      ?? body.correlationEnvelope?.correlationId
+      ?? randomUUID()
+
+    logger.info('Execution request received', {
+      workflowId: body.workflowId,
+      orgId: body.orgId,
+      requestId: body.requestId,
+      initiatedBy: body.initiatedBy.actorId,
+      dryRun: body.executionContext?.dryRun,
+      correlationId,
+    })
+
+    const result = await executeWorkflow({
+      ...body,
+      correlationEnvelope: {
+        ...(body.correlationEnvelope ?? {}),
+        requestId: body.requestId,
+        correlationId,
+        initiatedAt: new Date().toISOString(),
+      },
+    })
+
+    const httpStatus = result.status === 'failed' || result.status === 'dead_lettered' ? 500 : 202
+    return reply.status(result.idempotent ? 200 : httpStatus).send({ ok: true, data: result })
+  })
+
+  /**
+   * GET /execute/:runId — Get a specific run's status and metadata.
+   */
+  app.get<{ Params: { runId: string } }>('/:runId', async (req, reply) => {
+    const run = getWorkflowRun(req.params.runId)
+    if (!run) {
+      return reply.status(404).send({
+        ok: false,
+        error: { code: 'RUN_NOT_FOUND', message: `Run ${req.params.runId} not found` },
+      })
+    }
+    return { ok: true, data: run }
+  })
+
+  /**
+   * POST /execute/:runId/cancel — Cancel a workflow run.
+   */
+  app.post<{ Params: { runId: string }; Body: { cancelledBy?: string } }>(
+    '/:runId/cancel',
+    async (req, reply) => {
+      const cancelledBy = req.body?.cancelledBy ?? 'operator'
+      const result = await cancelWorkflowRun(req.params.runId, cancelledBy)
+      if (!result.cancelled) {
+        return reply.status(409).send({
+          ok: false,
+          error: { code: 'CANNOT_CANCEL', message: result.reason ?? 'Cannot cancel this run' },
+        })
+      }
+      return { ok: true, data: { cancelled: true, runId: req.params.runId } }
+    },
+  )
+
+  /**
+   * GET /execute — List workflow runs with optional filters.
+   */
+  app.get('/', async (req, reply) => {
+    const parsed = ListQuerySchema.safeParse(req.query)
+    if (!parsed.success) {
+      return reply.status(400).send({
+        ok: false,
+        error: { code: 'INVALID_QUERY', message: 'Invalid query parameters' },
+      })
+    }
+
+    const { orgId, workflowId, status, limit } = parsed.data
+    const runs = listWorkflowRuns({ orgId, workflowId, status, limit })
+    return { ok: true, data: runs, count: runs.length }
+  })
+}

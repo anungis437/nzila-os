@@ -1,9 +1,12 @@
 /**
  * Orchestrator API — Platform Integration Hooks
  *
- * Wires platform-event-fabric and platform-governed-ai so that
- * command lifecycle events are observable and AI dispatch requests
- * are policy-gated.
+ * Wires platform-event-fabric so that command lifecycle events are
+ * observable across the platform.
+ *
+ * Policy evaluation is NOT the Orchestrator's concern. All policy
+ * decisions flow through the Control Plane before commands reach here.
+ * The Orchestrator is a pure execution engine.
  */
 import {
   createPlatformEventBus,
@@ -11,12 +14,6 @@ import {
   buildPlatformEvent,
   type PlatformEventBus,
 } from '@nzila/platform-event-fabric'
-import {
-  createInMemoryAIRunStore,
-  createNullPolicyEvaluator,
-  type AIRunStore,
-  type PolicyEvaluator,
-} from '@nzila/platform-governed-ai'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('orchestrator-platform')
@@ -53,25 +50,4 @@ export async function emitCommandEvent(
   })
   await bus.publish(event)
   logger.info('Platform event emitted', { eventType, actorId })
-}
-
-// ── Governed AI ─────────────────────────────────────────────────────────────
-
-let aiRunStore: AIRunStore | null = null
-let policyEvaluator: PolicyEvaluator | null = null
-
-export function getAIRunStore(): AIRunStore {
-  if (!aiRunStore) {
-    aiRunStore = createInMemoryAIRunStore()
-    logger.info('Governed AI run store initialized (in-memory)')
-  }
-  return aiRunStore
-}
-
-export function getPolicyEvaluator(): PolicyEvaluator {
-  if (!policyEvaluator) {
-    policyEvaluator = createNullPolicyEvaluator()
-    logger.info('Governed AI policy evaluator initialized (null/pass-through)')
-  }
-  return policyEvaluator
 }

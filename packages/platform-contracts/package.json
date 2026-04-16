@@ -25,7 +25,10 @@
     "./notification": "./src/notification.ts",
     "./entitlement": "./src/entitlement.ts",
     "./file-metadata": "./src/file-metadata.ts",
-    "./audit-event": "./src/audit-event.ts"
+    "./audit-event": "./src/audit-event.ts",
+    "./control-system": "./src/control-system.ts",
+    "./control-plane-client": "./src/control-plane-client.ts",
+    "./correlation-middleware": "./src/correlation-middleware.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

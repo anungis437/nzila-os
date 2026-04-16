@@ -1,9 +1,11 @@
 {
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "control-plane",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "role": "policy-authority",
+  "description": "The ONLY policy and decision authority in the control system. All policy evaluation, workflow authorization, entitlement resolution, governance lifecycle, and audit recording flows through this app. No other app may make these decisions.",
   "riskLevel": "high",
-  "policyProfile": null,
+  "policyProfile": "system-authority",
   "controls": {
     "enforcement": true,
     "governance": true,
@@ -14,5 +16,22 @@
     "contracts": true,
     "events": true
   },
+  "authorityServices": [
+    "entitlements",
+    "workflow-authorizer",
+    "decision-recorder",
+    "governance-state-machine",
+    "audit-db",
+    "policy-evaluator",
+    "capability-ownership"
+  ],
+  "nonNegotiableRules": [
+    "This app is the ONLY source of policy decisions",
+    "All workflow triggers must be authorized through authority/authorize-workflow",
+    "All governance mutations must flow through server/governance/state-machine",
+    "All audit events must be recorded with hash-chain integrity",
+    "Decision events are immutable once written",
+    "No other app may call platformDb for policy/governance/audit operations"
+  ],
   "exceptions": []
 }

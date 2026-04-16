@@ -129,3 +129,139 @@ Governance Action ──► buildEvidencePackFromAction()
 ## Security Architecture
 
 See [SECURITY.md](./SECURITY.md) for threat model, supply chain controls, and incident response.
+
+---
+
+## Control System Unification
+
+> **Added in the Master Alignment Pass (2025)**
+> Single canonical execution flow. No policy logic outside Control Plane. No governance logic outside Control Plane.
+
+### App Authority Boundaries
+
+| App | Role | Owns | Does NOT Own |
+|-----|------|------|--------------|
+| `control-plane` | **Authority layer** | Policy enforcement, governance lifecycle, org lifecycle, entitlements, feature flags, workflow definitions, audit policy, approval policy, integration registry | Any execution, job state, operator UI |
+| `orchestrator-api` | **Execution engine** | Workflow execution, job state, command dispatch, event fabric | Policy decisions, governance approval, org lifecycle |
+| `console` | **Operator interface** | Operator dashboard, break-glass ops, audit visualization, system monitoring | Policy evaluation (proxied to CP), governance DB writes (proxied to CP) |
+| `platform-admin` | **Org-scoped admin** | Org users, org settings, member roles | Cross-org operations, global policy, entitlement grants |
+
+### Canonical Execution Flow
+
+```
+Console / PlatformAdmin
+       │
+       │  (user initiates action)
+       ▼
+Control Plane ──► evaluatePolicies()   [POST /api/control-plane/policy/evaluate]
+       │               │
+       │          blocked? → reject
+       │          needsApproval? → createGovernanceAction() → pending_approval
+       │               │
+       │          all approved?
+       ▼
+Orchestrator API ──► executes workflow
+       │
+       ▼
+State Update ──► Orchestrator stores job state
+       │
+       ▼
+Control Plane ──► recordAuditEvent() + hash chain
+       │
+       ▼
+UI (Console / PlatformAdmin polls or subscribes)
+```
+
+### Capability Ownership Map
+
+Defined in `apps/control-plane/lib/capability-ownership.ts` — the single source of truth.
+Enforced by `tests/system/control-plane-boundaries.test.ts`.
+
+```
+policyEnforcement    → control-plane  (authoritative)
+governanceActions    → control-plane  (authoritative)
+orgLifecycle         → control-plane  (authoritative)
+auditPolicy          → control-plane  (authoritative)
+entitlements         → control-plane  (authoritative, readable by others)
+featureFlags         → control-plane  (authoritative, readable by others)
+workflowDefinitions  → control-plane  (authoritative, readable by others)
+approvalPolicy       → control-plane  (authoritative)
+integrationRegistry  → control-plane  (authoritative, readable by others)
+contracts            → control-plane  (authoritative, readable by others)
+
+workflowExecution    → orchestrator   (authoritative)
+commandDispatch      → orchestrator   (authoritative)
+eventFabric          → orchestrator   (authoritative)
+jobState             → orchestrator   (authoritative, readable by others)
+
+operatorDashboard    → console        (authoritative)
+breakGlass           → console        (authoritative)
+auditVisualization   → console        (authoritative)
+systemMonitoring     → console        (authoritative, readable by others)
+
+orgUsers             → platform-admin (authoritative)
+orgSettings          → platform-admin (authoritative)
+memberRoles          → platform-admin (authoritative)
+```
+
+### Control Plane API Surface
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/control-plane/policy/evaluate` | POST | Single canonical policy evaluation for all apps |
+| `/api/control-plane/governance/actions` | POST | Create / submit / decide / execute governance actions |
+| `/api/control-plane/governance/actions?orgId=` | GET | List governance actions for an org |
+
+All endpoints require `x-api-key` matching `CONTROL_PLANE_API_KEY`.
+
+### Boundary Enforcement
+
+The following invariants are checked in CI by `tests/system/control-plane-boundaries.test.ts`:
+
+1. `console/lib/policy-enforcement.ts` does NOT import `@nzila/platform-policy-engine` — all policy calls are proxied to Control Plane.
+2. `console/lib/governance/state-machine.ts` does NOT import `platformDb` — all governance mutations are proxied to Control Plane.
+3. `orchestrator-api/src/platform.ts` does NOT export `getPolicyEvaluator` or `getAIRunStore`.
+4. `orchestrator-api/src/index.ts` does NOT call `getPolicyEvaluator`.
+5. Control Plane governance and policy routes export properly auth-gated `POST`/`GET` handlers.
+
+### Control Manifests
+
+Each app declares its control posture in `control-manifest.json`:
+
+
+### Authority Services (Control Plane)
+
+All authorization decisions are made in `apps/control-plane/server/authority/`:
+
+| Service | File | Purpose |
+|---------|------|---------|
+| `resolveEntitlements` | `entitlements.ts` | Resolve feature entitlements for an org/actor |
+| `authorizeWorkflowTrigger` | `workflow-authorizer.ts` | Entitlement + policy check → authorization token |
+| `recordDecisionEvent` | `decision.ts` | Hash-chained immutable audit decision log |
+| `getDecisionsForOrg` | `decision.ts` | Retrieve decision history for an org |
+
+**Consumers** (Console, Platform Admin) MUST use `@nzila/platform-contracts/control-plane-client`
+(`createControlPlaneClient` / `getControlPlaneClient`) — never call CP authority APIs directly.
+
+### Execution Engine (Orchestrator)
+
+The canonical execution entry point is `apps/orchestrator-api/src/execution-engine.ts`:
+
+- `executeWorkflow(input)` — idempotent, deduplicates by `requestId` + `idempotencyKey`
+- `cancelWorkflowRun(runId, cancelledBy)` — cancels in-flight runs
+- `getWorkflowRun(runId)` / `listWorkflowRuns(filter?)` — read access
+
+Non-dry-run executions require an `authorizationDecisionId` from the Control Plane. Requests
+missing it are rejected with `auth_failure` status. This enforces the invariant: **the
+Orchestrator never executes unapproved workflows**.
+
+### Observability: Correlation IDs
+
+All three Next.js apps (`control-plane`, `console`, `platform-admin`) propagate:
+
+- `x-correlation-id` — stable ID for a logical operation spanning services (echoed from inbound or generated)
+- `x-request-id` — unique per HTTP request
+
+Set in each app's `middleware.ts`. The Orchestrator reads/forwards `x-correlation-id` on all
+emitted events via `ExecutionRunSchema.correlationId`.
+

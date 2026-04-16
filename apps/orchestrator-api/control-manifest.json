@@ -1,12 +1,14 @@
 {
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "orchestrator-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "role": "execution-engine",
+  "description": "Durable, idempotent workflow execution engine. Executes what the Control Plane has already authorized. Completely policy-deaf — never evaluates or decides policy. Provides retry semantics, DLQ, cancellation, and execution telemetry.",
   "riskLevel": "high",
   "policyProfile": null,
   "controls": {
-    "enforcement": true,
-    "governance": true,
+    "enforcement": false,
+    "governance": false,
     "audit": true,
     "observability": true,
     "security": true,
@@ -14,5 +16,16 @@
     "contracts": true,
     "events": true
   },
+  "executesWorkflows": true,
+  "decidesPolicy": false,
+  "idempotent": true,
+  "nonNegotiableRules": [
+    "Never evaluate policy — call Control Plane for authorization",
+    "All /execute submissions must carry authorizationDecisionId (unless dryRun)",
+    "Idempotency key deduplication must prevent double-execution",
+    "All execution events must be emitted via the platform event bus",
+    "Retry only transient and timeout failures — never policy_denied or auth_failure",
+    "Dead-letter permanently failed runs — never silently drop"
+  ],
   "exceptions": []
 }

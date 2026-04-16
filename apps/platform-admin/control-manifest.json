@@ -1,25 +1,31 @@
 {
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "platform-admin",
-  "version": "1.0.0",
-  "riskLevel": "none",
-  "policyProfile": null,
+  "version": "2.0.0",
+  "role": "org-scoped-admin",
+  "description": "Org-scoped operator surface. Provides visibility and admin actions strictly within a single organization. Cannot access system-level controls, cross-org data, or evaluate policy directly.",
+  "riskLevel": "medium",
+  "policyProfile": "org-admin",
   "controls": {
     "enforcement": false,
     "governance": false,
-    "audit": false,
+    "audit": true,
     "observability": true,
     "security": true,
     "aiControl": false,
     "contracts": false,
     "events": false
   },
-  "exceptions": [
-    {
-      "control": "enforcement",
-      "reason": "Scaffold app with 1 route, no P0/P1 endpoints",
-      "expiresOn": "2026-12-31",
-      "owner": "platform-team"
-    }
-  ]
+  "orgScoped": true,
+  "systemControl": false,
+  "businessLogic": false,
+  "routesMutationsThroughControlPlane": true,
+  "nonNegotiableRules": [
+    "All API routes must call requireOrgScope() before processing",
+    "Cross-org requests must be blocked at the API layer",
+    "All mutations must be routed through getOrgScopedCpClient()",
+    "No direct DB calls from Platform Admin routes",
+    "No local policy evaluation — proxy to Control Plane"
+  ],
+  "exceptions": []
 }

@@ -9,8 +9,9 @@ import { jobRoutes } from './routes/jobs.js'
 import { runRoutes } from './routes/runs.js'
 import { metricsRoutes } from './routes/metrics.js'
 import { statusRoutes } from './routes/status.js'
+import { executeRoutes } from './routes/execute.js'
 import { createLogger } from '@nzila/os-core'
-import { getEventBus, getAIRunStore, getPolicyEvaluator } from './platform.js'
+import { getEventBus } from './platform.js'
 import { telemetryHooks } from './telemetry-hooks.js'
 
 const logger = createLogger('orchestrator-api')
@@ -51,12 +52,10 @@ const PORT = Number(process.env.PORT ?? 4000)
 const HOST = process.env.HOST ?? '0.0.0.0'
 const API_KEY = process.env.ORCHESTRATOR_API_KEY ?? ''
 
-// ── Platform Integration (event-fabric + governed-ai) ───────────────────────
+// ── Platform Integration (event-fabric) ────────────────────────────────────
 try {
   getEventBus()
-  getAIRunStore()
-  getPolicyEvaluator()
-  logger.info('Platform integration hooks initialized')
+  logger.info('Platform event bus initialized')
 } catch (err) {
   logger.warn('Platform integration init skipped', { error: err })
 }
@@ -153,6 +152,7 @@ app.register(jobRoutes, { prefix: '/jobs' })
 app.register(runRoutes, { prefix: '/runs' })
 app.register(statusRoutes, { prefix: '/status' })
 app.register(proofCenterRoutes, { prefix: '/api/proof-center' })
+app.register(executeRoutes, { prefix: '/execute' })
 
 // ── Start ──
 async function main() {

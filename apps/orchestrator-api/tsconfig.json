@@ -12,7 +12,15 @@
     "paths": {
       "@nzila/db": ["../../packages/db/src"],
       "@nzila/db/*": ["../../packages/db/src/*"],
-      "@nzila/db/schema": ["../../packages/db/src/schema/index"]
+        "@nzila/db/schema": ["../../packages/db/src/schema/index"],
+        "@nzila/os-core": ["../../packages/os-core/src/index.ts"],
+        "@nzila/platform-utils": ["../../packages/platform-utils/src/index.ts"],
+        "@nzila/platform-utils/time": ["../../packages/platform-utils/src/time.ts"],
+        "@nzila/platform-event-fabric": ["../../packages/platform-event-fabric/src/index.ts"],
+        "@nzila/platform-observability": ["../../packages/platform-observability/src/index.ts"],
+        "@nzila/platform-contracts": ["../../packages/platform-contracts/src/index.ts"],
+        "@nzila/platform-contracts/control-system": ["../../packages/platform-contracts/src/control-system.ts"],
+        "@nzila/platform-contracts/control-plane-client": ["../../packages/platform-contracts/src/control-plane-client.ts"]
     },
     "types": ["node"]
   },
