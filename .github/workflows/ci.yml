@@ -248,6 +248,9 @@ jobs:
       - name: Governance fail-closed gate
         run: pnpm validate:governance:gate
 
+      - name: Evidence lifecycle policy gate
+        run: pnpm validate:evidence:lifecycle
+
       - name: Truth authority validation
         run: pnpm validate:truth-authority
 
@@ -527,6 +530,9 @@ jobs:
       - name: Generate platform health report
         run: pnpm health:report
 
+      - name: Generate quarterly strategic scorecard
+        run: pnpm strategic:quarterly
+
       - name: Generate build attestation
         run: pnpm attest:build
 
@@ -540,6 +546,8 @@ jobs:
             ops/security/build-attestation.json
             ops/outputs/platform-health.json
             ops/outputs/procurement-pack-*.zip
+            reports/strategy/quarterly-scorecard.md
+            reports/strategy/quarterly-scorecard.json
           retention-days: 90
 
   # ─── Performance Regression Gate ──────────────────────────────────────────
@@ -560,9 +568,14 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update && sudo apt-get install -y k6
 
-      - name: Run k6 baseline smoke test
-        run: k6 run --env PROFILE=baseline --env BASE_URL=http://localhost:3000 tests/load/smoke.js --duration 10s --vus 1 --no-thresholds
-        continue-on-error: true
+      - name: Run k6 fail-closed performance gate
+        run: |
+          k6 run \
+            --env PROFILE=ci \
+            --env BASE_URL="${{ vars.PERF_BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io' }}" \
+            --env AUTH_TOKEN="${{ secrets.PERF_AUTH_TOKEN }}" \
+            --summary-export=tests/load/k6-summary.json \
+            tests/load/smoke.js
 
       - name: Upload k6 results
         if: always()

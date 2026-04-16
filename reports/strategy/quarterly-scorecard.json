@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-04-16T22:52:06.204Z",
+  "adoption": {
+    "totalApps": 17,
+    "pilotApps": 4,
+    "productionApps": 3,
+    "pilotToProductionConversionPct": 75
+  },
+  "cost": {
+    "costAttributionMappedPct": null,
+    "source": "missing"
+  },
+  "delivery": {
+    "leadTimeP50Hours": null,
+    "leadTimeP95Hours": null,
+    "changeFailureRatePct": null,
+    "source": "missing"
+  },
+  "quality": {
+    "coverageLinePct": 21.39
+  },
+  "gaps": [
+    "Missing cost allocation input: ops/outputs/cost-allocation.json",
+    "Missing DORA input: ops/outputs/dora-metrics.json"
+  ]
+}

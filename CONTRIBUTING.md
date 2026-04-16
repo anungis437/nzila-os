@@ -65,3 +65,7 @@ See [SECURITY.md](SECURITY.md). Never commit secrets. Use `.env.local` for local
 - [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
 - [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
 - [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
+- [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+- [Command Catalog](docs/platform/COMMAND_CATALOG.md)
+- [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
+- [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)

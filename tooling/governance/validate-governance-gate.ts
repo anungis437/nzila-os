@@ -182,6 +182,53 @@ check('GOV-GATE-011: Vitest config includes governance packages', () => {
   return `${GOVERNANCE_PACKAGES.length} packages in vitest workspace`
 })
 
+check('GOV-GATE-012: Evidence lifecycle policy exists and is structured', () => {
+  const policyPath = join(ROOT, 'docs', 'platform', 'EVIDENCE_LIFECYCLE_POLICY.md')
+  if (!existsSync(policyPath)) {
+    throw new Error('docs/platform/EVIDENCE_LIFECYCLE_POLICY.md not found')
+  }
+  const content = readFileSync(policyPath, 'utf-8')
+  const required = [
+    '## Evidence Classes',
+    '## Legal Hold',
+    '## Chain of Custody Requirements',
+    '## Minimum CI Expectations',
+  ]
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) {
+    throw new Error(`Evidence lifecycle policy missing sections: ${missing.join(', ')}`)
+  }
+  return 'Evidence lifecycle policy present with required sections'
+})
+
+check('GOV-GATE-013: AI incident playbooks exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DATA_POISONING.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_DRILL_RUNBOOK.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing AI incident playbooks: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  return `${required.length} AI incident playbooks verified`
+})
+
+check('GOV-GATE-014: Strategic telemetry and command catalog exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'STRATEGIC_TELEMETRY.md'),
+    join(ROOT, 'docs', 'platform', 'COMMAND_CATALOG.md'),
+    join(ROOT, 'tooling', 'scripts', 'generate-quarterly-strategic-scorecard.mjs'),
+    join(ROOT, 'tooling', 'scripts', 'show-command-catalog.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing telemetry/catalog artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  return `${required.length} telemetry/catalog artifacts verified`
+})
+
 // ── Helper ──────────────────────────────────────────────────────────────────
 
 function findTestFiles(dir: string): string[] {

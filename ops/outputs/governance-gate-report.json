@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-03-19T22:42:38.767Z",
-  "total": 11,
-  "passed": 11,
+  "timestamp": "2026-04-16T22:52:14.646Z",
+  "total": 14,
+  "passed": 14,
   "failed": 0,
   "checks": [
     {
@@ -58,6 +58,21 @@
       "name": "GOV-GATE-011: Vitest config includes governance packages",
       "status": "pass",
       "detail": "8 packages in vitest workspace"
+    },
+    {
+      "name": "GOV-GATE-012: Evidence lifecycle policy exists and is structured",
+      "status": "pass",
+      "detail": "Evidence lifecycle policy present with required sections"
+    },
+    {
+      "name": "GOV-GATE-013: AI incident playbooks exist",
+      "status": "pass",
+      "detail": "4 AI incident playbooks verified"
+    },
+    {
+      "name": "GOV-GATE-014: Strategic telemetry and command catalog exist",
+      "status": "pass",
+      "detail": "4 telemetry/catalog artifacts verified"
     }
   ]
 }
