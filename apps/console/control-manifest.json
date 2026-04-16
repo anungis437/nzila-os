@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "role": "operator-interface",
   "riskLevel": "critical",
-  "policyProfile": "operator-interface",
+  "policyProfile": "advisory",
   "operatorFacing": true,
   "businessLogic": false,
   "policyDecisions": false,
