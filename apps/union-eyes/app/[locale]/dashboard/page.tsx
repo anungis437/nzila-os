@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
  */
 
 import { useUser } from '@nzila/platform-auth/entra/client';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserRole } from "@/lib/auth/roles";
 import { useOrganization } from "@/contexts/organization-context";
@@ -123,8 +123,7 @@ export default function DashboardPage() {
   const [tier, setTier] = useState<DashboardTier | null>(null);
   const [resolvedRole, setResolvedRole] = useState<string | null>(null);
   const [isPlatformViewer, setIsPlatformViewer] = useState(false);
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const redirectAttemptedRef = useRef(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
@@ -177,16 +176,16 @@ export default function DashboardPage() {
   // Redirect once after tier + role are resolved. If the landing page is the
   // dashboard itself (null), or the user is a platform viewer, skip the redirect.
   useEffect(() => {
-    if (!tier || !resolvedRole || redirectAttempted || isPlatformViewer) return;
+    if (!tier || !resolvedRole || redirectAttemptedRef.current || isPlatformViewer) return;
     // Pilot-mode users stay on their pilot dashboard
     if (isPilotMode) return;
 
     const landing = getDefaultLanding(resolvedRole, tier);
     if (landing) {
-      setRedirectAttempted(true);
+      redirectAttemptedRef.current = true;
       router.replace(landing);
     }
-  }, [tier, resolvedRole, redirectAttempted, isPlatformViewer, isPilotMode, router]);
+  }, [tier, resolvedRole, isPlatformViewer, isPilotMode, router]);
 
   // Loading skeleton while we resolve the user and their tier
   if (!mounted || !user || tier === null || orgLoading) {
@@ -242,7 +241,7 @@ export default function DashboardPage() {
   return (
     <>
       {shouldShowOnboarding && (
-        <PilotOnboardingWizard onComplete={() => setShowOnboarding(false)} />
+        <PilotOnboardingWizard onComplete={() => {}} />
       )}
       {adminBanner}
       {dashboard}

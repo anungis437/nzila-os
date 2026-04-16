@@ -13,7 +13,7 @@
 
 import crypto from "crypto";
 import { db } from "@/db";
-import { eq, and, desc, asc, sql, inArray, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { createAuditLog } from "@/lib/services/audit-service";
 import {
@@ -22,7 +22,6 @@ import {
   correspondenceAuditTrail,
   userSignatures,
   type CorrespondenceInsert,
-  type CorrespondenceRecipientInsert,
 } from "@/db/schema/domains/documents/correspondence";
 
 // ============================================================================

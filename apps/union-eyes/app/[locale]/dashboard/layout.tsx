@@ -21,8 +21,8 @@ import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organiz
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { db } from "@/db/db";
 import { profiles } from "@/db/schema";
-import { organizations, organizationMembers } from "@/db/schema-organizations";
-import { eq, and } from "drizzle-orm";
+import { organizationMembers } from "@/db/schema-organizations";
+import { eq } from "drizzle-orm";
 // Credits system disabled — platform does not require credits
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 

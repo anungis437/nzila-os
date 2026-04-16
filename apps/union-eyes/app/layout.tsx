@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/nextjs';
 import type { Metadata } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
+import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
 import { Poppins } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import './globals.css';
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <OrganizationProvider>
               <LayoutWrapper>
                 <PaymentStatusAlert />
+                <DemoModeOverlay />
                 {children}
               </LayoutWrapper>
               <CookieConsentProvider />

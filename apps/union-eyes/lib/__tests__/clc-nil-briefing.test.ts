@@ -10,7 +10,6 @@ import {
   generateAffiliateEngagementBriefing,
   generateKnowledgeIndexBriefing,
   generateGovernanceBriefing,
-  type BriefingFinding,
   type IntelligenceBriefing,
 } from '@/lib/clc/nil-briefing';
 import type { SectorSignal, AffiliateTrend, SharedKnowledgeIndex, GovernanceSummary } from '@/lib/clc/data-products';

@@ -28,6 +28,7 @@ const envSchema = z.object({
   NEXT_RUNTIME: z.string().optional(),
   NEXT_PHASE: z.string().optional(),
   NEXT_TELEMETRY_DISABLED: z.string().optional(),
+  NZILA_MODE: z.enum(['development', 'test', 'staging', 'internal', 'pilot', 'demo', 'production']).optional(),
 
   // ============== CRITICAL - Database ==============
   DATABASE_TYPE: z.enum(['postgresql', 'azure-sql', 'mssql']).default('postgresql').optional(),

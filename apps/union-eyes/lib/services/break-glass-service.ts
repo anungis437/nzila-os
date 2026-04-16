@@ -73,6 +73,10 @@ export interface RecoveryStatus {
   backupSource: 'swiss' | 'canadian';
 }
 
+interface LegacyShamirModule {
+  combine(shares: string[]): string;
+}
+
 export class BreakGlassService {
   private readonly REQUIRED_KEY_HOLDERS = 3;
   private readonly TOTAL_KEY_HOLDERS = 5;
@@ -219,7 +223,7 @@ export class BreakGlassService {
     }
 
     // Combine key fragments using Shamir's Secret Sharing
-    const masterKey = this.combineKeyFragments(
+    const masterKey = await this.combineKeyFragments(
       keyHolders.map(h => h.keyFragment)
     );
 
@@ -246,12 +250,11 @@ export class BreakGlassService {
   }
 
   /**
-   * Combine key fragments using Shamir's Secret Sharing
-   * In production, use proper cryptographic library (e.g., secrets.js)
+    * Combine key fragments using true Shamir Secret Sharing reconstruction.
    */
-  private combineKeyFragments(fragments: string[]): string {
-    // Simplified combination (in production, use proper Shamir implementation)
-    const combined = fragments.join('-');
+  private async combineKeyFragments(fragments: string[]): Promise<string> {
+    const shamir = await this.loadShamirModule();
+    const combined = shamir.combine(fragments);
     return createHash('sha256').update(combined).digest('hex');
   }
 
@@ -259,9 +262,26 @@ export class BreakGlassService {
    * Decrypt cold storage access credentials
    */
   private decryptColdStorageAccess(masterKey: string): string {
-    // In production, decrypt stored encrypted credentials
-    // For now, return placeholder
-    return `COLD_STORAGE_ACCESS_${masterKey.substring(0, 16)}`;
+    const configuredAccess = process.env.UE_BREAK_GLASS_COLD_STORAGE_ACCESS;
+    if (!configuredAccess) {
+      throw new Error('NZILA_UNIMPLEMENTED: UE_BREAK_GLASS_COLD_STORAGE_ACCESS');
+    }
+
+    logger.info('Break-glass cold storage access resolved from secure configuration', {
+      auditEvent: 'reconstruction_attempt',
+      masterKeyFingerprint: createHash('sha256').update(masterKey).digest('hex').slice(0, 16),
+    });
+
+    return configuredAccess;
+  }
+
+  private async loadShamirModule(): Promise<LegacyShamirModule> {
+    const mod = await import('secrets.js-grempe') as unknown as { default?: LegacyShamirModule } & Partial<LegacyShamirModule>;
+    const resolved = mod.default ?? mod;
+    if (typeof resolved.combine !== 'function') {
+      throw new Error('NZILA_UNIMPLEMENTED: union-eyes.break-glass.threshold-crypto');
+    }
+    return resolved as LegacyShamirModule;
   }
 
   /**

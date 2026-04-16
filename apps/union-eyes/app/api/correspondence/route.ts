@@ -5,7 +5,6 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
-import { ApiError } from "@/lib/api/errors";
 import {
   createCorrespondence,
   listCorrespondence,
@@ -45,7 +44,7 @@ export const GET = withApi(
     auth: { required: true, minRole: "steward" },
     openapi: { tags: ["Correspondence"], summary: "List correspondence" },
   },
-  async ({ organizationId, userId, request }) => {
+  async ({ organizationId, userId: _userId, request }) => {
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") ?? undefined;
     const draftedBy = searchParams.get("draftedBy") ?? undefined;

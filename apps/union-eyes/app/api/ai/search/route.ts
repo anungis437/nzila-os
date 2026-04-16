@@ -13,7 +13,6 @@ import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 import { db } from '@/db/db';
-import { knowledgeBase } from '@/db/schema';
 import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
 import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';

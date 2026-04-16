@@ -32,6 +32,7 @@ interface PilotState {
   demo: {
     isActive: boolean;
     dataset?: DemoDataset;
+    telemetryTag?: string;
   };
   support?: PilotSupportInfo;
 }
@@ -151,6 +152,7 @@ export default function OnboardingConsole() {
         <DemoDataBadge
           isActive={state?.demo.isActive ?? false}
           dataset={state?.demo.dataset}
+          telemetryTag={state?.demo.telemetryTag}
           onSeed={handleSeedDemo}
           onPurge={handlePurgeDemo}
         />

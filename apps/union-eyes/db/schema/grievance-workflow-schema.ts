@@ -18,7 +18,6 @@ import {
   jsonb, 
   decimal, 
   date, 
-  time,
   bigint,
   index
 } from "drizzle-orm/pg-core";

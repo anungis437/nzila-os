@@ -73,9 +73,9 @@ const PRIORITY_COLORS: Record<string, string> = {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function CorrespondenceDashboard({
-  organizationId,
+  organizationId: _organizationId,
   userId,
-  userRole,
+  userRole: _userRole,
   canSign,
 }: CorrespondenceDashboardProps) {
   const [items, setItems] = useState<CorrespondenceItem[]>([]);

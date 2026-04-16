@@ -13,7 +13,7 @@
  *   (whichever happens first).
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 const STORAGE_KEY = "ue_onboarding";
 
@@ -48,46 +48,54 @@ function writeState(userId: string, state: OnboardingState): void {
 }
 
 export function useOnboarding(userId: string | undefined) {
-  const [state, setState] = useState<OnboardingState>({
-    hasCompleted: true, // default to true to avoid flash
-    lastStep: 0,
-  });
-  const [ready, setReady] = useState(false);
-
-  // Hydrate from localStorage once userId is available
-  useEffect(() => {
-    if (!userId) return;
-    const saved = readState(userId);
-    setState(saved);
-    setReady(true);
+  const storageKey = userId ? getStorageKey(userId) : null;
+  const hydratedState = useMemo<OnboardingState>(() => {
+    if (!userId) {
+      return { hasCompleted: true, lastStep: 0 };
+    }
+    return readState(userId);
   }, [userId]);
+
+  const [persistedState, setPersistedState] = useState<{
+    storageKey: string | null;
+    state: OnboardingState;
+  }>({
+    storageKey: null,
+    state: { hasCompleted: true, lastStep: 0 },
+  });
+
+  const state = persistedState.storageKey === storageKey
+    ? persistedState.state
+    : hydratedState;
+  const ready = Boolean(userId);
 
   const advanceStep = useCallback(() => {
-    if (!userId) return;
-    setState((prev) => {
-      const next = { ...prev, lastStep: prev.lastStep + 1 };
+    if (!userId || !storageKey) return;
+    setPersistedState((prev) => {
+      const base = prev.storageKey === storageKey ? prev.state : hydratedState;
+      const next = { ...base, lastStep: base.lastStep + 1 };
       writeState(userId, next);
-      return next;
+      return { storageKey, state: next };
     });
-  }, [userId]);
+  }, [userId, storageKey, hydratedState]);
 
   const completeOnboarding = useCallback(() => {
-    if (!userId) return;
+    if (!userId || !storageKey) return;
     const completed: OnboardingState = {
       hasCompleted: true,
       lastStep: -1,
       completedAt: new Date().toISOString(),
     };
     writeState(userId, completed);
-    setState(completed);
-  }, [userId]);
+    setPersistedState({ storageKey, state: completed });
+  }, [userId, storageKey]);
 
   const resetOnboarding = useCallback(() => {
-    if (!userId) return;
+    if (!userId || !storageKey) return;
     const fresh: OnboardingState = { hasCompleted: false, lastStep: 0 };
     writeState(userId, fresh);
-    setState(fresh);
-  }, [userId]);
+    setPersistedState({ storageKey, state: fresh });
+  }, [userId, storageKey]);
 
   return {
     /** True once localStorage has been read */

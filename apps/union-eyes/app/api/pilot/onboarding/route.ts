@@ -20,6 +20,8 @@ import {
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotChecklistItems } from "@/db/schema/domains/pilot/pilot-onboarding";
+import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
+import { getDemoDatasetSummary } from "@/lib/pilot/cape-demo-data";
 import { eq, and } from "drizzle-orm";
 
 const CHECKLIST_ITEM_IDS = [
@@ -51,6 +53,12 @@ export const GET = withOrganizationAuth(async (_request, context) => {
       .from(pilotChecklistItems)
       .where(eq(pilotChecklistItems.organizationId, organizationId));
 
+    const demoSeedRows = await db
+      .select()
+      .from(pilotDemoSeeds)
+      .where(eq(pilotDemoSeeds.organizationId, organizationId))
+      .limit(1);
+
     // Build items map — fill in defaults for any missing items
     const items: Record<string, boolean> = {};
     const rowMap = new Map(rows.map((r) => [r.itemId, r.completed]));
@@ -60,12 +68,28 @@ export const GET = withOrganizationAuth(async (_request, context) => {
 
     const completedCount = Object.values(items).filter(Boolean).length;
     const totalCount = CHECKLIST_ITEM_IDS.length;
+    const demoSeed = demoSeedRows[0];
+    const demoDefaults = getDemoDatasetSummary(organizationId);
+    const demoIsActive = Boolean(demoSeed && !demoSeed.purgedAt);
 
     return standardSuccessResponse({
       items,
       completedCount,
       totalCount,
       isComplete: completedCount === totalCount,
+      demo: {
+        isActive: demoIsActive,
+        dataset: demoIsActive
+          ? {
+              members: demoSeed?.memberCount ?? demoDefaults.members,
+              employers: demoSeed?.employerCount ?? demoDefaults.employers,
+              grievances: demoSeed?.grievanceCount ?? demoDefaults.grievances,
+              timelines: demoDefaults.timelines,
+              resolutions: demoDefaults.resolutions,
+            }
+          : undefined,
+        telemetryTag: demoIsActive ? 'demo_mode_active' : 'demo_mode_inactive',
+      },
     });
   } catch (_error) {
     return standardErrorResponse(

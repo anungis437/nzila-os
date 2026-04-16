@@ -44,16 +44,13 @@ import {
   DollarSign,
   GraduationCap,
   AlertTriangle,
-  Handshake,
   Receipt,
   Activity,
   ChevronDown,
   Globe,
   Clock,
   Database,
-  Gift,
   TrendingUp,
-  User,
   Send,
 } from "lucide-react";
 import Link from "next/link";

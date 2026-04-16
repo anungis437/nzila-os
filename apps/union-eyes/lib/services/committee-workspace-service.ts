@@ -6,8 +6,7 @@
  */
 
 import { db } from '@/db';
-import { eq, and, desc, asc, sql, inArray, between, isNull } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
+import { eq, and, desc, asc, sql, inArray, between } from 'drizzle-orm';
 import { createAuditLog } from './audit-service';
 import {
   committeeMeetings,

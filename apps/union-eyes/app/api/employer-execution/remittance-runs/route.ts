@@ -14,7 +14,7 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 import { createEvidencePack, sha256 } from "../_lib";
 
-const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
 type RemittanceFormatter = {
   formatCode: string;
@@ -344,7 +344,7 @@ export const POST = withApi(
           runCode: remittanceRun.runCode,
         },
         createdBy: userId ?? undefined,
-      } as any),
+      }),
     );
 
     return { data: { remittanceRun } };

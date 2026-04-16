@@ -86,6 +86,8 @@
     "validate:docs": "tsx packages/platform-validation/src/doc-consistency.ts",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
     "validate:runtime": "tsx scripts/validate-runtime.ts",
+    "validate:runtime-truth": "vitest run --project contract-tests tooling/contract-tests/no-fake-production-behavior.test.ts tooling/contract-tests/api-completeness.test.ts tooling/contract-tests/observability-coverage.test.ts tooling/contract-tests/generated-runtime-separation.test.ts tooling/contract-tests/crypto-integrity.test.ts tooling/contract-tests/evidence-chain-integrity.test.ts tooling/contract-tests/ue-domain-service-boundary.test.ts tooling/contract-tests/ue-demo-mode-surface.test.ts",
+    "validate:maturity": "vitest run --project contract-tests tooling/contract-tests/app-maturity-enforcement.test.ts tooling/contract-tests/truth-manifest-coherence.test.ts",
     "validate:portfolio": "tsx scripts/validate-portfolio.ts",
     "validate:truth-authority": "tsx scripts/validate-truth-authority.ts",
     "validate:auth-authority": "tsx scripts/validate-auth-authority.ts",

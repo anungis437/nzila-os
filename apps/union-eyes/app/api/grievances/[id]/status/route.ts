@@ -17,7 +17,6 @@ import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   validateTransition,
-  type LifecycleState,
   type ActorRole,
 } from "@/lib/workflow/case-lifecycle";
 import { toLifecycleState } from "@/lib/workflow/state-bridge";

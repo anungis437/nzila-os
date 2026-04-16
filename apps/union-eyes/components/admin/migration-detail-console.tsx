@@ -8,7 +8,6 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Clock,
   Info,
 } from "lucide-react";
@@ -146,7 +145,6 @@ export default function MigrationDetailConsole({ batchId }: Props) {
   };
 
   const failedRecords = batch?.records.filter((r) => r.status === "failed") ?? [];
-  const succeededRecords = batch?.records.filter((r) => r.status === "succeeded") ?? [];
 
   if (loading && !batch) {
     return <div className="p-6 text-muted-foreground">Loading batch details...</div>;

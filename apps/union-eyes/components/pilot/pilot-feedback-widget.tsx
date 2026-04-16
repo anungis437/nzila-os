@@ -13,7 +13,7 @@
  * Non-intrusive: dismissible, appears as a bottom-right card.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
@@ -45,48 +45,49 @@ export default function PilotFeedbackWidget({ forceShow }: PilotFeedbackWidgetPr
   const organizationId = useOrganizationId();
   const { isPilotMode } = usePilotMode();
 
-  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [category, setCategory] = useState<FeedbackCategory | null>(null);
   const [comment, setComment] = useState("");
-  const [trigger, setTrigger] = useState<"first_case" | "milestone_usage">("first_case");
-
-  // Determine whether to show the widget
-  useEffect(() => {
+  const promptState = useMemo(() => {
     if (forceShow) {
-      setVisible(true);
-      return;
+      return { visible: true, trigger: 'first_case' as const };
     }
-    if (!isPilotMode) return;
+
+    if (!isPilotMode) {
+      return { visible: false, trigger: 'first_case' as const };
+    }
 
     try {
       const alreadyGiven = localStorage.getItem(FEEDBACK_GIVEN_KEY);
-      if (alreadyGiven) return;
-
-      const caseCount = parseInt(localStorage.getItem(CASE_COUNT_KEY) ?? "0", 10);
-
-      // Show after first case
-      if (caseCount === 1) {
-        setTrigger("first_case");
-        setVisible(true);
+      if (alreadyGiven) {
+        return { visible: false, trigger: 'first_case' as const };
       }
-      // Show again at 3–5 uses
-      else if (caseCount >= 3 && caseCount <= 5) {
-        setTrigger("milestone_usage");
-        setVisible(true);
+
+      const caseCount = parseInt(localStorage.getItem(CASE_COUNT_KEY) ?? '0', 10);
+      if (caseCount === 1) {
+        return { visible: true, trigger: 'first_case' as const };
+      }
+      if (caseCount >= 3 && caseCount <= 5) {
+        return { visible: true, trigger: 'milestone_usage' as const };
       }
     } catch {
-      // ignore
+      return { visible: false, trigger: 'first_case' as const };
     }
-  }, [isPilotMode, forceShow]);
 
-  const dismiss = useCallback(() => {
-    setVisible(false);
-  }, []);
+    return { visible: false, trigger: 'first_case' as const };
+  }, [forceShow, isPilotMode]);
 
-  const submit = useCallback(async () => {
+  const visible = submitted || (!dismissed && promptState.visible);
+  const trigger = promptState.trigger;
+
+  const dismiss = () => {
+    setDismissed(true);
+  };
+
+  const submit = async () => {
     if (!user?.id || !organizationId || rating === 0) return;
 
     try {
@@ -105,11 +106,14 @@ export default function PilotFeedbackWidget({ forceShow }: PilotFeedbackWidgetPr
 
       localStorage.setItem(FEEDBACK_GIVEN_KEY, "true");
       setSubmitted(true);
-      setTimeout(() => setVisible(false), 2000);
+      window.setTimeout(() => {
+        setSubmitted(false);
+        setDismissed(true);
+      }, 2000);
     } catch {
       // fail silently
     }
-  }, [user?.id, organizationId, rating, category, comment, trigger]);
+  };
 
   if (!visible) return null;
 

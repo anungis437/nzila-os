@@ -70,7 +70,8 @@ describe('TemplateEngine', () => {
     vi.clearAllMocks();
     controller = new UnionEyesAIController();
     // Mock private getProvider — no real AI provider in tests
-    vi.spyOn(controller as any, 'getProvider').mockReturnValue({
+    const controllerWithPrivate = controller as unknown as { getProvider: () => unknown };
+    vi.spyOn(controllerWithPrivate, 'getProvider').mockReturnValue({
       generateResponse: vi.fn().mockResolvedValue({
         content: 'Mock AI response',
         tokensUsed: 42,

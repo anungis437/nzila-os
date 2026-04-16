@@ -1,0 +1,27 @@
+{
+  "platform_status": "pilot-safe",
+  "last_audit": "2026-04-16",
+  "apps": {
+    "union-eyes": "pilot",
+    "flow": "pilot",
+    "web": "pilot",
+    "partners": "pilot",
+    "cfo": "pilot",
+    "console": "internal",
+    "control-plane": "internal",
+    "zonga": "internal",
+    "abr": "internal",
+    "trade": "internal",
+    "cora": "internal",
+    "agrimo": "internal",
+    "platform-admin": "internal",
+    "orchestrator-api": "scaffold",
+    "nacp-exams": "internal",
+    "mobility": "internal",
+    "mobility-client-portal": "internal"
+  },
+  "blocking_gaps": [
+    "production-grade maturity remains undeclared for all apps until contract and observability coverage are closed",
+    "union-eyes break-glass requires secure runtime secrets to activate threshold recovery"
+  ]
+}

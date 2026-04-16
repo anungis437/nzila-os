@@ -16,14 +16,11 @@
  */
 
 import { db } from '@/db/db';
-import { sql, eq, and } from 'drizzle-orm';
-import { grievances } from '@/db/schema/grievance-schema';
+import { sql, eq } from 'drizzle-orm';
 import { organizations } from '@/db/schema-organizations';
-import { documents, caseDocuments } from '@/db/schema/documents-schema';
 import {
   ingestionBatches,
   ingestionRecords,
-  grievanceTimelineEvents,
 } from '@/db/schema/ingestion-schema';
 import { logger } from '@/lib/logger';
 import {

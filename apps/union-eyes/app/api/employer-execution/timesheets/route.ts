@@ -2,7 +2,7 @@ import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { employerTimesheetBatches, employerTimesheetEntries } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { normalizeCsv, sha256 } from "../_lib";
 
 const createSchema = z.object({

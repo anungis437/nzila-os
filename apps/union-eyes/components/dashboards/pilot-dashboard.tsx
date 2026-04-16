@@ -30,7 +30,6 @@ import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
-import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
 import PilotFeedbackWidget from "@/components/pilot/pilot-feedback-widget";
 
 interface PilotStats {
@@ -44,7 +43,6 @@ export default function PilotDashboard() {
   const t = useTranslations();
   const organizationId = useOrganizationId();
   const { hasCompletedOnboarding } = usePilotMode();
-  const { trackCaseViewed } = usePilotTracking();
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<PilotStats>({ activeClaims: 0, resolvedCases: 0 });
   const [isLoading, setIsLoading] = useState(true);

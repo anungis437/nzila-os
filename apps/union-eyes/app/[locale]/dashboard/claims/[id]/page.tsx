@@ -121,7 +121,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
     if (claimId) {
       fetchClaim();
     }
-  }, [claimId]);
+  }, [claimId, trackCaseViewed]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUploadComplete = (attachment: any) => {

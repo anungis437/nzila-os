@@ -46,7 +46,7 @@ export const GET = withApi(
     auth: { required: true, minRole: "member" },
     openapi: { tags: ["Committees"], summary: "List committee meetings" },
   },
-  async ({ organizationId, params, request }) => {
+  async ({ organizationId: _organizationId, params, request }) => {
     const { id: committeeId } = params as { id: string };
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") ?? undefined;

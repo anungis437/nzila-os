@@ -11,13 +11,10 @@
  *  4. Entity type mapping for identity linking
  */
 import type { IntegrationConnection, MappingRuleDefinition } from '@nzila/platform-integrations-types'
-import type { ConnectorExecutionResult } from '@nzila/platform-integrations/connector-registry'
 import { IntegrationExecutionEngine } from '@nzila/platform-integrations/execution-engine'
 import { MappingEngine } from '@nzila/platform-integrations/mapping-engine'
 import { WebhookEngine } from '@nzila/platform-integrations/webhook-engine'
 import { IdentityLinker } from '@nzila/platform-integrations/identity-linker'
-import { DefaultIntegrationAuditHooks } from '@nzila/platform-integrations/audit-hooks'
-import { InMemoryIdempotencyStore } from '@nzila/platform-integrations/idempotency'
 
 // ─── UE Entity Types ─────────────────────────────────────────────────────────
 

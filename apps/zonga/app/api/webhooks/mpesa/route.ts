@@ -51,8 +51,8 @@ export async function POST(request: Request) {
     responseCode: payload.output_ResponseCode,
   })
 
-  // TODO: When persistence layer is wired, look up the payment intent
-  // by ThirdPartyConversationID and update its status based on ResponseCode.
+  // Persistence reconciliation is intentionally deferred until the payment
+  // intent store is wired to Vodacom callback correlation identifiers.
   //
   // const intent = await paymentIntentRepo.findByIdempotencyKey(
   //   payload.output_ThirdPartyConversationID

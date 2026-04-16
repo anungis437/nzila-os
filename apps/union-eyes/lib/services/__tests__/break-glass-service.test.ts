@@ -57,6 +57,14 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock('secrets.js-grempe', () => {
+  const combine = vi.fn(() => 'reconstructed-master-secret');
+  return {
+    combine,
+    default: { combine },
+  };
+});
+
 // ── Imports ──────────────────────────────────────────────────────────────────
 
 import { BreakGlassService, type KeyHolderAuth } from '../break-glass-service';
@@ -82,6 +90,7 @@ describe('BreakGlassService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.NODE_ENV = 'test';
+    process.env.UE_BREAK_GLASS_COLD_STORAGE_ACCESS = 'COLD_STORAGE_ACCESS_test';
     service = new BreakGlassService();
     mocks.mockReturning.mockResolvedValue([{
       id: 'emg-1',

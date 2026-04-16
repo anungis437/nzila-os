@@ -50,7 +50,9 @@ export async function register() {
       const { logger } = await import('./lib/logger');
       // Import and run comprehensive environment validation
       const { validateEnvironment, printEnvironmentReport: _printEnvironmentReport } = await import('./lib/config/env-validation');
+      const { getPilotDemoRuntimeValidation } = await import('./lib/config/pilot-demo-runtime');
       const envValidation = validateEnvironment();
+      const pilotDemoRuntime = getPilotDemoRuntimeValidation();
       
       if (!envValidation.isValid) {
         logger.error('❌ [ERROR] Environment validation failed');
@@ -82,6 +84,14 @@ export async function register() {
         envValidation.warnings.forEach((warning, index) => {
           logger.warn(`  ${index + 1}. ${warning}`);
         });
+      }
+
+      if (!pilotDemoRuntime.isKnownMode && pilotDemoRuntime.runtimeMode) {
+        logger.error('Pilot demo runtime mode is invalid', { runtimeMode: pilotDemoRuntime.runtimeMode });
+      } else if (pilotDemoRuntime.allowsDemoMutations) {
+        logger.info(pilotDemoRuntime.startupMessage, { runtimeMode: pilotDemoRuntime.normalizedMode });
+      } else {
+        logger.warn(pilotDemoRuntime.startupMessage, { runtimeMode: pilotDemoRuntime.runtimeMode });
       }
 
       // Run database startup checks (optional, can be disabled with env var)

@@ -14,7 +14,7 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 import { createEvidencePack, enforcePayrollLifecycleTransition, sha256, verifyEvidenceChainFromLinks } from "../../_lib";
 
-const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
 const transitionSchema = z.object({
   action: z.enum(["approve", "seal"]),
@@ -335,7 +335,7 @@ export const PATCH = withApi(
             evidenceLinkId: evidencePack.chainLink.linkId,
           },
           createdBy: userId ?? undefined,
-        } as any);
+        });
 
         const approvalEvent = createEvidencePack({
           entityType: "approval",
@@ -373,7 +373,7 @@ export const PATCH = withApi(
             parent: evidencePack.chainLink.linkId,
           },
           createdBy: userId ?? undefined,
-        } as any);
+        });
 
         await tx.insert(employerExecutionComplianceEvents).values({
           organizationId,
