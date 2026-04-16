@@ -31,6 +31,15 @@ Onboarding quality is measured monthly from merge and CI telemetry:
 
 If two consecutive months miss any KPI target, an onboarding improvement action must be added to the next sprint.
 
+Automated KPI report generation:
+
+```bash
+pnpm collect:onboarding:kpis
+```
+
+Source input: `ops/inputs/onboarding-metrics.json`  
+Generated output: `ops/outputs/onboarding-kpis.json`
+
 ---
 
 ## Day 1: Up and Running (30 min)

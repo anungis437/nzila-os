@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-16T23:45:02.525Z",
-  "total": 20,
-  "passed": 20,
+  "timestamp": "2026-04-16T23:54:56.939Z",
+  "total": 25,
+  "passed": 25,
   "failed": 0,
   "checks": [
     {
@@ -103,6 +103,31 @@
       "name": "GOV-GATE-020: Domain expertise map and turbo cache strategy exist",
       "status": "pass",
       "detail": "Knowledge docs + turbo cache hardening verified (14 pass-through vars)"
+    },
+    {
+      "name": "GOV-GATE-021: Vendor diversification strategy and registry exist",
+      "status": "pass",
+      "detail": "Vendor diversification verified across 4 capabilities"
+    },
+    {
+      "name": "GOV-GATE-022: Emerging threat model covers hallucination, quantum, and dependency confusion",
+      "status": "pass",
+      "detail": "Emerging threat model includes required future-risk categories"
+    },
+    {
+      "name": "GOV-GATE-023: Runtime data residency verifier exists",
+      "status": "pass",
+      "detail": "Runtime data residency verifier is present and configurable"
+    },
+    {
+      "name": "GOV-GATE-024: Human-factor resilience automation exists",
+      "status": "pass",
+      "detail": "Human-factor resilience targets verified for 6 domains"
+    },
+    {
+      "name": "GOV-GATE-025: Regulatory monitoring artifacts exist",
+      "status": "pass",
+      "detail": "Regulatory monitoring verified across 5 tracked regulations"
     }
   ]
 }

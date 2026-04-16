@@ -334,6 +334,110 @@ check('GOV-GATE-020: Domain expertise map and turbo cache strategy exist', () =>
   return `Knowledge docs + turbo cache hardening verified (${turbo.globalPassThroughEnv.length} pass-through vars)`
 })
 
+check('GOV-GATE-021: Vendor diversification strategy and registry exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'VENDOR_DIVERSIFICATION_STRATEGY.md'),
+    join(ROOT, 'governance', 'resilience', 'vendor-diversification-registry.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing vendor diversification artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const registry = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    capabilities?: Array<{ name?: string; secondary_provider?: string }>
+  }
+  const capabilities = Array.isArray(registry.capabilities) ? registry.capabilities : []
+  if (capabilities.length < 3) throw new Error('Vendor diversification registry must list at least 3 capabilities')
+  const missingSecondary = capabilities
+    .filter((c) => !c.secondary_provider)
+    .map((c) => c.name ?? 'unknown')
+  if (missingSecondary.length > 0) {
+    throw new Error(`Capabilities missing secondary_provider: ${missingSecondary.join(', ')}`)
+  }
+  return `Vendor diversification verified across ${capabilities.length} capabilities`
+})
+
+check('GOV-GATE-022: Emerging threat model covers hallucination, quantum, and dependency confusion', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'EMERGING_THREAT_MODEL.md'),
+    join(ROOT, 'governance', 'resilience', 'emerging-threat-register.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing emerging threat artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const register = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    threats?: Array<{ id?: string }>
+  }
+  const ids = new Set((register.threats ?? []).map((t) => t.id))
+  const expected = ['THREAT-AI-HALLUCINATION', 'THREAT-QUANTUM-CRYPTO', 'THREAT-DEPENDENCY-CONFUSION']
+  const missingIds = expected.filter((id) => !ids.has(id))
+  if (missingIds.length > 0) {
+    throw new Error(`Emerging threat register missing: ${missingIds.join(', ')}`)
+  }
+  return 'Emerging threat model includes required future-risk categories'
+})
+
+check('GOV-GATE-023: Runtime data residency verifier exists', () => {
+  const required = [
+    join(ROOT, 'tooling', 'scripts', 'verify-data-residency-runtime.mjs'),
+    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing residency enforcement artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const script = readFileSync(required[0], 'utf-8')
+  if (!script.includes('--enforce') || !script.includes('RESIDENCY_ALLOWED_REGIONS')) {
+    throw new Error('verify-data-residency-runtime.mjs must support enforce mode and allowed-region controls')
+  }
+  return 'Runtime data residency verifier is present and configurable'
+})
+
+check('GOV-GATE-024: Human-factor resilience automation exists', () => {
+  const required = [
+    join(ROOT, 'tooling', 'scripts', 'collect-onboarding-kpis.mjs'),
+    join(ROOT, 'governance', 'resilience', 'succession-and-cross-training.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing human-factor resilience artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const succession = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    domains?: Array<{
+      domain?: string
+      mandatory_cross_training_hours_per_quarter?: number
+      succession_backup_count?: number
+    }>
+  }
+  if (!Array.isArray(succession.domains) || succession.domains.length < 5) {
+    throw new Error('succession-and-cross-training.json must include at least 5 domains')
+  }
+  const missingTargets = succession.domains
+    .filter((d) => d.mandatory_cross_training_hours_per_quarter == null || d.succession_backup_count == null)
+    .map((d) => d.domain ?? 'unknown')
+  if (missingTargets.length > 0) {
+    throw new Error(`Domains missing cross-training/succession targets: ${missingTargets.join(', ')}`)
+  }
+  return `Human-factor resilience targets verified for ${succession.domains.length} domains`
+})
+
+check('GOV-GATE-025: Regulatory monitoring artifacts exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'REGULATORY_CHANGE_MONITORING.md'),
+    join(ROOT, 'governance', 'resilience', 'regulatory-watchlist.json'),
+    join(ROOT, 'tooling', 'scripts', 'validate-strategic-resilience.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing regulatory monitoring artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const watchlist = JSON.parse(readFileSync(required[1], 'utf-8'))
+  const entries = Array.isArray(watchlist.watchlist) ? watchlist.watchlist : []
+  if (entries.length < 5) throw new Error('regulatory-watchlist.json must include at least 5 tracked regulations')
+  return `Regulatory monitoring verified across ${entries.length} tracked regulations`
+})
+
 // ── Helper ──────────────────────────────────────────────────────────────────
 
 function findTestFiles(dir: string): string[] {

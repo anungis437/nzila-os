@@ -66,6 +66,18 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 | Mobility ↔ Platform | Auth for client portal | Entra SSO for external users | Q3 2026 |
 | Finance ↔ Commerce | Zonga revenue reporting | DAPL ledger extensions | Q4 2026 |
 
+## Mandatory Cross-Training Program (Enforced)
+
+All domains must complete mandatory cross-training hours every quarter. Targets are tracked in `governance/resilience/succession-and-cross-training.json` and validated in CI.
+
+| Rule | Minimum |
+|---|---|
+| Quarterly cross-training participation | 100% of engineers in high-risk domains |
+| Cross-domain incident drill attendance | At least 2 representatives per domain |
+| Evidence submission | Training log + reviewer sign-off in quarterly governance review |
+
+Missed targets require a remediation plan in the next sprint.
+
 ---
 
 ## On-Call Rotation
@@ -88,6 +100,26 @@ When a domain's primary owner is unavailable (leave, departure):
 | > 2 weeks absence | Deputy must be briefed; critical runbooks reviewed |
 | Permanent departure | ADR or internal wiki page for all non-obvious design decisions within 30 days |
 | Team restructuring | Expertise map updated in this document within 1 sprint |
+
+## Succession Alerting Protocol
+
+Succession risk is fail-closed for domains with bus factor 1:
+
+1. If a domain remains with bus factor 1 for > 30 days, raise a governance action item.
+2. If a critical owner is unavailable without a documented deputy, block non-emergency releases in that domain.
+3. Every high-risk domain must maintain at least 2 validated backups in the succession registry.
+
+Automated checks are enforced via `pnpm validate:strategic-resilience`.
+
+## Diversity and Coverage Metrics
+
+The platform tracks diversity of operational knowledge to reduce concentration risk:
+
+| Metric | Target |
+|---|---|
+| Cross-domain review share | ≥ 30% |
+| Multi-region reviewer participation | ≥ 35% |
+| Incident commander diversity over rolling quarter | ≥ 3 domains represented |
 
 ---
 

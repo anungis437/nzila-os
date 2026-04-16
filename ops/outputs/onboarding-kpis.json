@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-04-16T23:54:43.563Z",
+  "period": "quarterly",
+  "population_size": 0,
+  "metrics": {
+    "avg_days_to_first_merged_pr": null,
+    "avg_days_to_oncall_ready": null,
+    "setup_success_pct": null
+  },
+  "targets": {
+    "max_days_to_first_merged_pr": 5,
+    "max_days_to_oncall_ready": 42,
+    "min_setup_success_pct": 90
+  },
+  "source_file": "ops/inputs/onboarding-metrics.json"
+}

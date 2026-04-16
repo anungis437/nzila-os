@@ -1,0 +1,36 @@
+{
+  "schema": "1.0",
+  "last_reviewed": "2026-04-16",
+  "watchlist": [
+    {
+      "regulation": "GDPR",
+      "jurisdiction": "EU",
+      "cadence": "monthly",
+      "owner": "compliance"
+    },
+    {
+      "regulation": "CCPA_CPRA",
+      "jurisdiction": "US-CA",
+      "cadence": "monthly",
+      "owner": "compliance"
+    },
+    {
+      "regulation": "LAW_25",
+      "jurisdiction": "CA-QC",
+      "cadence": "monthly",
+      "owner": "compliance"
+    },
+    {
+      "regulation": "PIPEDA",
+      "jurisdiction": "CA",
+      "cadence": "monthly",
+      "owner": "compliance"
+    },
+    {
+      "regulation": "EU_AI_ACT",
+      "jurisdiction": "EU",
+      "cadence": "monthly",
+      "owner": "compliance"
+    }
+  ]
+}

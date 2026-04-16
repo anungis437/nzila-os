@@ -134,9 +134,12 @@ Runtime and CI controls for residency compliance:
 1. CI verifies policy presence and required sections via governance gate.
 2. Contract tests validate org scoping and tenant isolation boundaries.
 3. Deployment checks ensure region-locked infrastructure declarations.
-4. Quarterly automated scan compares provisioned resource regions against approved residency matrix.
+4. Runtime verifier `pnpm verify:data-residency:runtime` exports deployed region compliance report.
+5. Quarterly automated scan compares provisioned resource regions against approved residency matrix.
 
 Any detected non-Canada data store for Confidential or Restricted classes is a fail-closed release blocker.
+
+Machine-readable output: `ops/outputs/data-residency-runtime.json`.
 
 ---
 

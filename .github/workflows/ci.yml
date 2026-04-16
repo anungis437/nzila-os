@@ -264,6 +264,18 @@ jobs:
           COST_ENABLE_AZURE_API: "${{ vars.COST_ENABLE_AZURE_API || '0' }}"
           AZURE_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
+      - name: Collect onboarding KPIs
+        run: pnpm collect:onboarding:kpis
+
+      - name: Validate strategic resilience
+        run: pnpm validate:strategic-resilience
+
+      - name: Verify runtime data residency (report)
+        run: pnpm verify:data-residency:runtime
+        env:
+          AZURE_RESIDENCY_RESOURCE_GROUP: "${{ vars.AZURE_RESIDENCY_RESOURCE_GROUP || '' }}"
+          RESIDENCY_ALLOWED_REGIONS: "${{ vars.RESIDENCY_ALLOWED_REGIONS || 'canadacentral,canadaeast' }}"
+
       - name: Truth authority validation
         run: pnpm validate:truth-authority
 
@@ -304,6 +316,9 @@ jobs:
             ops/outputs/governance-gate-report.json
             ops/outputs/dora-metrics.json
             ops/outputs/cost-allocation.json
+            ops/outputs/onboarding-kpis.json
+            ops/outputs/strategic-resilience-report.json
+            ops/outputs/data-residency-runtime.json
             ops/outputs/control-manifest-report.json
             proof-artifacts/**
           retention-days: 90
