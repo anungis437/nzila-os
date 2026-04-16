@@ -76,6 +76,7 @@ const ENTITY_ID_EXCEPTIONS = [
   /entityId\?\s*:/,         // optional domain event entity ref field (e.g. EventQueryFilter)
   /entityId:\s*z\.string/,  // Zod schema definition in canonical event/workflow schemas
   /entityId:\s*UUID/,       // test fixture referencing canonical schema entityId field
+  /LEGACY_TARGET_ID_COLUMN/, // documented legacy DB column constant (employer-execution routes)
 ]
 
 function isExceptionLine(line: string): boolean {

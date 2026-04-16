@@ -137,19 +137,19 @@ describe('INV-PE-03 — Policy enforcement middleware is correctly structured', 
     expect(src).toMatch(/export\s+function\s+clearPolicyCache/)
   })
 
-  it('imports from @nzila/platform-policy-engine', () => {
+  it('delegates policy evaluation to Control Plane (not direct policy-engine)', () => {
     const src = readFileSync(middlewarePath, 'utf-8')
-    expect(src).toContain('evaluatePolicies')
-    expect(src).toContain('isBlocked')
-    expect(src).toContain('requiresApproval')
-    expect(src).toMatch(/from\s+['"]@nzila\/platform-policy-engine['"]/)
+    expect(src).toContain('CONTROL_PLANE_URL')
+    expect(src).toContain('/api/control-plane/policy/evaluate')
+    // Console must NOT directly import the policy engine (boundary enforcement)
+    expect(src).not.toMatch(/from\s+['"']@nzila\/platform-policy-engine['"']/)
   })
 
-  it('loads policies from ops/policies/*.yml', () => {
+  it('fails closed (blocked: true) when Control Plane is unavailable', () => {
     const src = readFileSync(middlewarePath, 'utf-8')
-    expect(src).toContain("'ops'")
-    expect(src).toContain("'policies'")
-    expect(src).toContain(".endsWith('.yml')")
+    expect(src).toContain('createUnavailableResult')
+    expect(src).toContain('blocked: true')
+    expect(src).toContain('Control Plane policy evaluation unavailable')
   })
 
   it('records audit event on every enforcement decision', () => {
@@ -289,14 +289,16 @@ describe('INV-PE-08 — Enforcement removal breaks contract', () => {
     }
   })
 
-  it('policy-enforcement module references all three policy action domains', () => {
-    // The middleware must handle access, voting, and financial policies.
-    // This proves the policy engine is generic — not hard-coded to one flow.
+  it('policy-enforcement module delegates generically via Control Plane proxy', () => {
+    // The middleware must delegate to the Control Plane, which handles all policies.
+    // This proves the console is a generic proxy — not hard-coded to one flow.
     const src = readFileSync(join(CONSOLE, 'lib', 'policy-enforcement.ts'), 'utf-8')
-    // It must evaluate ALL policies (wildcard policyId)
-    expect(src).toContain("policyId: '*'")
-    // It must load from yaml files in ops/policies
-    expect(src).toContain('readdirSync')
-    expect(src).toContain("endsWith('.yml')")
+    // Delegates to Control Plane generically (action string is passed through)
+    expect(src).toContain('CONTROL_PLANE_URL')
+    expect(src).toContain('/api/control-plane/policy/evaluate')
+    // Must fail closed on Control Plane unavailability (not open by default)
+    expect(src).toContain('blocked: true')
+    // Console must not load YAML files directly (control-plane boundary enforced)
+    expect(src).not.toContain('readdirSync')
   })
 })
