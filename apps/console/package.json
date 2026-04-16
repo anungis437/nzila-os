@@ -43,7 +43,7 @@
     "@nzila/tax": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@types/dompurify": "^3.2.0",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.0",
     "drizzle-orm": "^0.39.0",
     "framer-motion": "^11.3.30",
     "gray-matter": "^4.0.3",
