@@ -54,6 +54,7 @@ These are **hand-written SQL patches** for features not handled by Drizzle's sch
 - `067_advanced_analytics_q1_2025_azure.sql` - Azure-specific analytics (285 lines)
 - `068_add_encrypted_pii_fields.sql` - PII encryption (218 lines)
 - `069_feature_flags_system.sql` - Feature flags system (75 lines)
+- `070_governed_case_access_documents.sql` - Secondary case access + governed document grants
 
 **Patch Migrations**:
 

@@ -1,8 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+function queryText(query: unknown): string {
+  const chunks = (query as { queryChunks?: unknown[] }).queryChunks ?? []
+  return chunks
+    .map((c: unknown) => {
+      if (typeof c === 'string') return c
+      if (typeof c === 'number') return String(c)
+      if (c !== null && typeof c === 'object' && Array.isArray((c as { value?: unknown }).value)) {
+        return ((c as { value: string[] }).value).join('')
+      }
+      return ''
+    })
+    .join('')
+}
+
+const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
+
+vi.mock('@nzila/db/platform', () => ({
+  platformDb: {
+    execute: executeMock,
+  },
+}))
+
+import { acknowledgeAlert, escalateAlert, recordPilotMetricEvent, resolveAlert } from './service'
+
 let pilotOrgId = '11111111-1111-1111-1111-111111111111'
-const executeMock = vi.fn(async (query: unknown) => {
-  const text = String(query)
+
+executeMock.mockImplementation(async (query: unknown) => {
+  const text = queryText(query)
 
   if (text.includes('FROM pilot_definitions') && text.includes('LIMIT 1')) {
     return [{ orgId: pilotOrgId, appScope: 'union-eyes' }]
@@ -18,14 +43,6 @@ const executeMock = vi.fn(async (query: unknown) => {
 
   return []
 })
-
-vi.mock('@nzila/db/platform', () => ({
-  platformDb: {
-    execute: executeMock,
-  },
-}))
-
-import { acknowledgeAlert, escalateAlert, recordPilotMetricEvent, resolveAlert } from './service'
 
 describe('recordPilotMetricEvent audit enforcement', () => {
   beforeEach(() => {
@@ -138,14 +155,14 @@ describe('recordPilotMetricEvent audit enforcement', () => {
       traceId: 'trace-3',
     })
 
-    const sqlTexts = executeMock.mock.calls.map((call) => String(call[0]))
+    const sqlTexts = executeMock.mock.calls.map((call) => queryText(call[0]))
     expect(sqlTexts.some((text) => text.includes('INSERT INTO pilot_metric_events'))).toBe(true)
     expect(sqlTexts.some((text) => text.includes('INSERT INTO audit_log'))).toBe(true)
   })
 
   it('audits alert lifecycle actions', async () => {
     executeMock.mockImplementation(async (query: unknown) => {
-      const text = String(query)
+      const text = queryText(query)
       if (text.includes('FROM pilot_alerts') && text.includes('ORDER BY last_seen_at DESC')) {
         return [{
           id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
@@ -252,7 +269,7 @@ describe('recordPilotMetricEvent audit enforcement', () => {
       traceId: 'trace-escalate',
     }, true)
 
-    const sqlTexts = executeMock.mock.calls.map((call) => String(call[0]))
+    const sqlTexts = executeMock.mock.calls.map((call) => queryText(call[0]))
     expect(sqlTexts.some((text) => text.includes('pilot.alert.acknowledged'))).toBe(true)
     expect(sqlTexts.some((text) => text.includes('pilot.alert.resolved'))).toBe(true)
     expect(sqlTexts.some((text) => text.includes('pilot.alert.escalated'))).toBe(true)

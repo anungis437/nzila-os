@@ -11,10 +11,10 @@ describe('metrics', () => {
   describe('computeStreamingMetrics', () => {
     it('should return zero metrics for empty inputs', () => {
       const result = computeStreamingMetrics([], [], [])
-      expect(result.live.total).toBe(0)
-      expect(result.live.active).toBe(0)
-      expect(result.jobs.total).toBe(0)
-      expect(result.jobs.completed).toBe(0)
+      expect(result.liveStreams.active).toBe(0)
+      expect(result.liveStreams.scheduled).toBe(0)
+      expect(result.mediaJobs.backlogSize).toBe(0)
+      expect(result.mediaJobs.completed).toBe(0)
     })
 
     it('should count active streams correctly', () => {
@@ -25,8 +25,9 @@ describe('metrics', () => {
         { status: 'scheduled', startedAt: null },
       ]
       const result = computeStreamingMetrics(streams as never[], [], [])
-      expect(result.live.total).toBe(4)
-      expect(result.live.active).toBe(2) // live + ready
+      expect(result.liveStreams.active).toBe(1)
+      expect(result.liveStreams.scheduled).toBe(2) // ready + scheduled
+      expect(result.liveStreams.ended).toBe(1)
     })
 
     it('should compute job metrics with averages', () => {
@@ -38,12 +39,12 @@ describe('metrics', () => {
       ]
 
       const result = computeStreamingMetrics([], jobs as never[], [])
-      expect(result.jobs.total).toBe(4)
-      expect(result.jobs.completed).toBe(2)
-      expect(result.jobs.failed).toBe(1)
-      expect(result.jobs.processing).toBe(1)
+      expect(result.mediaJobs.completed).toBe(2)
+      expect(result.mediaJobs.failed).toBe(1)
+      expect(result.mediaJobs.processing).toBe(1)
+      expect(result.mediaJobs.backlogSize).toBe(1)
       // Average of 5min + 10min = 7.5min = 450s
-      expect(result.jobs.avgProcessingTimeSec).toBeCloseTo(450, 0)
+      expect(result.mediaJobs.avgProcessingTimeSec).toBeCloseTo(450, 0)
     })
 
     it('should categorize playback events', () => {
@@ -52,14 +53,14 @@ describe('metrics', () => {
         { eventType: 'playback_granted' },
         { eventType: 'playback_denied' },
         { eventType: 'stream_created' },
-        { eventType: 'provider_error' },
+        { eventType: 'stream_failed' },
       ]
 
       const result = computeStreamingMetrics([], [], events as never[])
-      expect(result.playback.granted).toBe(2)
-      expect(result.playback.denied).toBe(1)
-      expect(result.playback.successRate).toBeCloseTo(2 / 3, 2)
-      expect(result.errors.total).toBe(1)
+      expect(result.playbackGrants.granted).toBe(2)
+      expect(result.playbackGrants.denied).toBe(1)
+      expect(result.playbackGrants.successRate).toBe(67)
+      expect(result.providerErrors.total).toBe(1)
     })
   })
 })

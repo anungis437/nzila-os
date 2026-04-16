@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-19T22:51:28.006Z",
+  "timestamp": "2026-04-16T06:34:03.937Z",
   "total": 137,
   "passed": 137,
   "failed": 0,
@@ -277,12 +277,12 @@
     {
       "name": "CM-005: console profile valid",
       "status": "pass",
-      "detail": "no profile (allowed)"
+      "detail": "profile: advisory"
     },
     {
       "name": "CM-005: control-plane profile valid",
       "status": "pass",
-      "detail": "no profile (allowed)"
+      "detail": "profile: advisory"
     },
     {
       "name": "CM-005: cora profile valid",
@@ -322,7 +322,7 @@
     {
       "name": "CM-005: platform-admin profile valid",
       "status": "pass",
-      "detail": "no profile (allowed)"
+      "detail": "profile: advisory"
     },
     {
       "name": "CM-005: agrimo profile valid",
@@ -347,7 +347,7 @@
     {
       "name": "CM-005: zonga profile valid",
       "status": "pass",
-      "detail": "profile: agtech"
+      "detail": "profile: media"
     },
     {
       "name": "CM-006: abr high-risk controls",
@@ -662,7 +662,7 @@
     {
       "name": "CM-009: platform-admin exception expiry",
       "status": "pass",
-      "detail": "1 exceptions, all dated"
+      "detail": "no exceptions"
     },
     {
       "name": "CM-009: agrimo exception expiry",

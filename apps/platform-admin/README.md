@@ -1,6 +1,6 @@
 # Platform Admin
 
-> Internal admin console for managing platform intelligence services — events, knowledge, ontology, and more.
+> Internal admin console for managing platform services — events, knowledge, ontology, and more.
 
 ## Stack
 
@@ -21,7 +21,6 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 
 | Route | Purpose |
 |-------|---------|
-| `/ai-runs` | AI execution monitoring |
 | `/data-fabric` | Data fabric management |
 | `/decisions` | Decision graph explorer |
 | `/entity-graph` | Entity relationship viewer |

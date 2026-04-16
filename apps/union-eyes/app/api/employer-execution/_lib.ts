@@ -226,16 +226,16 @@ function nowIso(): string {
 export function createEvidenceChainLink(input: {
   organizationId: string;
   entityType: EvidenceChainLink["entityType"];
-  entityId: string;
+  targetEntityId: string;
   manifestHash: string;
   sealHash: string;
   parent?: Pick<EvidenceChainLink, "linkId" | "sealHash" | "chainDepth"> | null;
 }): EvidenceChainLink {
   return {
-    linkId: sha256(`${input.entityType}:${input.entityId}:${input.manifestHash}`),
+    linkId: sha256(`${input.entityType}:${input.targetEntityId}:${input.manifestHash}`),
     organizationId: input.organizationId,
     entityType: input.entityType,
-    entityId: input.entityId,
+    targetEntityId: input.targetEntityId,
     parentLinkId: input.parent?.linkId ?? null,
     parentSealHash: input.parent?.sealHash ?? null,
     manifestHash: input.manifestHash,
@@ -335,7 +335,7 @@ export function createEvidencePack(input: {
   const chainLink = createEvidenceChainLink({
     organizationId: input.organizationId,
     entityType: input.entityType,
-    entityId: input.runRefId,
+    targetEntityId: input.runRefId,
     manifestHash,
     sealHash: seal,
     parent:

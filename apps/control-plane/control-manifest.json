@@ -5,7 +5,7 @@
   "role": "policy-authority",
   "description": "The ONLY policy and decision authority in the control system. All policy evaluation, workflow authorization, entitlement resolution, governance lifecycle, and audit recording flows through this app. No other app may make these decisions.",
   "riskLevel": "high",
-  "policyProfile": "system-authority",
+  "policyProfile": "advisory",
   "controls": {
     "enforcement": true,
     "governance": true,

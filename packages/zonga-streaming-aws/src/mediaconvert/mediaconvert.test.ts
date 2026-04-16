@@ -10,9 +10,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockSend = vi.fn()
 
 vi.mock('@aws-sdk/client-mediaconvert', () => ({
-  MediaConvertClient: vi.fn().mockImplementation(() => ({
-    send: mockSend,
-  })),
+  MediaConvertClient: class {
+    send = mockSend
+  },
   CreateJobCommand: vi.fn(),
   GetJobCommand: vi.fn(),
   CancelJobCommand: vi.fn(),
@@ -43,11 +43,27 @@ describe('mediaconvert', () => {
 
       const { submitTranscodeJob } = await import('.')
       const result = await submitTranscodeJob(config, {
-        inputKey: 'raw/org-1/audio-abc.flac',
-        inputBucket: 'my-raw-bucket',
         assetId: 'asset-1',
         orgId: 'org-1',
-        tiers: ['standard', 'high'],
+        inputStorageKey: 'raw/org-1/audio-abc.flac',
+        inputBucket: 'my-raw-bucket',
+        jobType: 'transcode_audio',
+        qualities: [
+          {
+            label: 'standard',
+            bitrate: 128,
+            codec: 'aac',
+            container: 'mp4',
+            sampleRate: 44100,
+          },
+          {
+            label: 'high',
+            bitrate: 320,
+            codec: 'aac',
+            container: 'mp4',
+            sampleRate: 48000,
+          },
+        ],
       })
 
       expect(result.providerJobId).toBe('mc-job-123')
@@ -71,11 +87,11 @@ describe('mediaconvert', () => {
         },
       })
 
-      const { getTranscodeJobStatus } = await import('../src/mediaconvert')
+      const { getTranscodeJobStatus } = await import('.')
       const result = await getTranscodeJobStatus(config, 'mc-job-123')
 
       expect(result.status).toBe('completed')
-      expect(result.outputPaths).toContain('s3://out/transcoded/org-1/asset-1/standard/master.m3u8')
+      expect(result.outputKeys).toContain('s3://out/transcoded/org-1/asset-1/standard/master.m3u8')
     })
 
     it('should map ERROR → failed with error message', async () => {
@@ -88,7 +104,7 @@ describe('mediaconvert', () => {
         },
       })
 
-      const { getTranscodeJobStatus } = await import('../src/mediaconvert')
+      const { getTranscodeJobStatus } = await import('.')
       const result = await getTranscodeJobStatus(config, 'mc-job-123')
 
       expect(result.status).toBe('failed')
@@ -104,11 +120,11 @@ describe('mediaconvert', () => {
         },
       })
 
-      const { getTranscodeJobStatus } = await import('../src/mediaconvert')
+      const { getTranscodeJobStatus } = await import('.')
       const result = await getTranscodeJobStatus(config, 'mc-job-123')
 
       expect(result.status).toBe('processing')
-      expect(result.percentComplete).toBe(65)
+      expect(result.progress).toBe(65)
     })
   })
 
@@ -116,7 +132,7 @@ describe('mediaconvert', () => {
     it('should send cancel command', async () => {
       mockSend.mockResolvedValueOnce({})
 
-      const { cancelTranscodeJob } = await import('../src/mediaconvert')
+      const { cancelTranscodeJob } = await import('.')
       await cancelTranscodeJob(config, 'mc-job-123')
 
       expect(mockSend).toHaveBeenCalledTimes(1)

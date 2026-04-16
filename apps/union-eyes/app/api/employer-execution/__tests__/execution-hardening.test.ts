@@ -367,7 +367,7 @@ describe("Employer Execution hardening helpers", () => {
     const payrollLink = createEvidenceChainLink({
       organizationId: "org-1",
       entityType: "payroll_run",
-      entityId: "run-1",
+      targetEntityId: "run-1",
       manifestHash: "manifest-1",
       sealHash: "seal-1",
       parent: null,
@@ -375,7 +375,7 @@ describe("Employer Execution hardening helpers", () => {
     const remittanceLink = createEvidenceChainLink({
       organizationId: "org-1",
       entityType: "remittance_run",
-      entityId: "remit-1",
+      targetEntityId: "remit-1",
       manifestHash: "manifest-2",
       sealHash: "seal-2",
       parent: {

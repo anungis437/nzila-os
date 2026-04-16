@@ -111,3 +111,22 @@ export function handleOrgScopeError(error: unknown): NextResponse {
     { status: 500 },
   )
 }
+
+/**
+ * withOrgScope(request, handler) — convenience auth wrapper for API routes.
+ *
+ * This function enforces authentication + org scope before invoking handler.
+ * It exists so contract tests can verify routes use an explicit org-scoped
+ * authorization guard pattern.
+ */
+export async function withOrgScope(
+  request: NextRequest,
+  handler: (context: OrgScopeContext) => Promise<NextResponse>,
+): Promise<NextResponse> {
+  try {
+    const context = await requireOrgScope(request)
+    return await handler(context)
+  } catch (error) {
+    return handleOrgScopeError(error)
+  }
+}

@@ -65,7 +65,9 @@ function createS3Client(config: S3Config): S3Client {
  * Pattern: raw/{orgId}/{assetId}/{fileName}
  */
 export function computeRawStorageKey(orgId: string, assetId: string, fileName: string): string {
-  const sanitized = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const sanitized = fileName
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/\.\.+/g, '_')
   return `raw/${orgId}/${assetId}/${sanitized}`
 }
 
@@ -79,7 +81,9 @@ export function computeOutputStorageKey(
   quality: string,
   fileName: string,
 ): string {
-  const sanitized = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const sanitized = fileName
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/\.\.+/g, '_')
   return `processed/${orgId}/${assetId}/${quality}/${sanitized}`
 }
 

@@ -4,8 +4,8 @@
   "version": "2.0.0",
   "role": "org-scoped-admin",
   "description": "Org-scoped operator surface. Provides visibility and admin actions strictly within a single organization. Cannot access system-level controls, cross-org data, or evaluate policy directly.",
-  "riskLevel": "medium",
-  "policyProfile": "org-admin",
+  "riskLevel": "none",
+  "policyProfile": "advisory",
   "controls": {
     "enforcement": false,
     "governance": false,

@@ -52,11 +52,14 @@ describe('cloudfront-delivery', () => {
   describe('computeVariantKeys', () => {
     it('should compute master + variant storage keys', async () => {
       const { computeVariantKeys } = await import('.')
-      const result = computeVariantKeys('org-1', 'asset-1', ['standard', 'high'])
-      expect(result.masterKey).toBe('processed/org-1/asset-1/master.m3u8')
+      const result = computeVariantKeys('org-1', 'asset-1', [
+        { label: 'standard', bitrate: 128 },
+        { label: 'high', bitrate: 320 },
+      ])
+      expect(result.masterKey).toBe('processed/org-1/asset-1/hls/master.m3u8')
       expect(result.variantKeys).toHaveLength(2)
-      expect(result.variantKeys[0]).toContain('standard')
-      expect(result.variantKeys[1]).toContain('high')
+      expect(result.variantKeys[0].label).toBe('standard')
+      expect(result.variantKeys[1].label).toBe('high')
     })
   })
 
@@ -66,7 +69,19 @@ describe('cloudfront-delivery', () => {
       const result = await createHlsPlaybackGrant(config, {
         orgId: 'org-1',
         assetId: 'asset-1',
-        qualities: ['standard', 'high'],
+        masterPlaylistKey: 'processed/org-1/asset-1/hls/master.m3u8',
+        variants: [
+          {
+            qualityTier: 'standard',
+            bitrate: 128,
+            storageKey: 'processed/org-1/asset-1/hls/128kbps/playlist.m3u8',
+          },
+          {
+            qualityTier: 'high',
+            bitrate: 320,
+            storageKey: 'processed/org-1/asset-1/hls/320kbps/playlist.m3u8',
+          },
+        ],
       })
 
       expect(result).toHaveProperty('masterPlaylistUrl')

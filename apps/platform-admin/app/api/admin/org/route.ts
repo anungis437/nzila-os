@@ -9,13 +9,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireOrgScope, handleOrgScopeError } from '../../../../lib/org-scope-guard'
+import { withOrgScope } from '../../../../lib/org-scope-guard'
 import { getOrgScopedCpClient } from '../../../../lib/control-plane-client'
 
 // GET /api/admin/org?orgId=<uuid>
 export async function GET(request: NextRequest) {
-  try {
-    const context = await requireOrgScope(request)
+  return withOrgScope(request, async (context) => {
     const cp = getOrgScopedCpClient(context.orgId)
 
     const [decisions] = await Promise.all([
@@ -31,15 +30,20 @@ export async function GET(request: NextRequest) {
         recentDecisions: decisions.slice(0, 10),
       },
     })
-  } catch (error) {
-    return handleOrgScopeError(error)
-  }
+  })
 }
 
 // POST /api/admin/org — check entitlement
 export async function POST(request: NextRequest) {
-  try {
-    const context = await requireOrgScope(request)
+  const idempotencyKey = request.headers.get('Idempotency-Key')
+  if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+    return NextResponse.json(
+      { ok: false, error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: 'Idempotency-Key header is required' } },
+      { status: 400 },
+    )
+  }
+
+  return withOrgScope(request, async (context) => {
     const body = await request.json() as { feature?: string }
 
     if (!body.feature || typeof body.feature !== 'string') {
@@ -53,7 +57,5 @@ export async function POST(request: NextRequest) {
     const entitlement = await cp.checkEntitlement(body.feature, context.actorId)
 
     return NextResponse.json({ ok: true, data: entitlement })
-  } catch (error) {
-    return handleOrgScopeError(error)
-  }
+  })
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,6 +11,9 @@ import {
   ArrowLeft,
   CheckCircle,
   AlertCircle,
+  Shield,
+  Users,
+  Lock,
 } from "lucide-react";
 import { StewardRecommendations } from "@/components/steward-recommendations";
 import { ClauseSuggestions } from "@/components/clause-suggestions";
@@ -33,6 +36,29 @@ interface GrievanceDocument {
   createdAt: string;
 }
 
+interface GovernedDocument {
+  id: string;
+  title: string;
+  filename: string;
+  fileUrl: string;
+  documentType: string;
+  privacyLabel: string;
+  createdAt: string;
+}
+
+interface CollaboratorAccess {
+  id: string;
+  userId: string;
+  accessRole: string;
+  status: string;
+  expiresAt: string | null;
+  canComment: boolean;
+  canUploadDocuments: boolean;
+  canEditCaseNotes: boolean;
+  canDraftActions: boolean;
+  canViewPrivateDocuments: boolean;
+}
+
 interface GrievanceDetail {
   id: string;
   grievanceNumber: string;
@@ -45,11 +71,28 @@ interface GrievanceDetail {
   resolvedAt: string | null;
   closedAt: string | null;
   unionRepId: string | null;
+  primaryLroId?: string | null;
   employerName: string | null;
   cbaArticle: string | null;
   events: GrievanceEvent[];
   documents: GrievanceDocument[];
+  governedDocuments?: GovernedDocument[];
+  collaborators?: CollaboratorAccess[];
+  effectiveAccess?: {
+    isPrimaryOwner: boolean;
+    canManageAssignments: boolean;
+    canUploadDocuments: boolean;
+  };
 }
+
+const PRIVACY_LABELS = [
+  'public_internal',
+  'team_confidential',
+  'lro_confidential',
+  'privileged',
+  'case_restricted',
+  'highly_sensitive',
+] as const;
 
 const STATUS_PIPELINE = [
   "new",
@@ -82,13 +125,32 @@ export function GrievanceDetailConsole() {
   const [loading, setLoading] = useState(true);
   const [statusNote, setStatusNote] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [collabUserId, setCollabUserId] = useState("");
+  const [collabRole, setCollabRole] = useState<'secondary_lro' | 'reviewer' | 'read_only'>('reviewer');
+  const [collabCanViewPrivate, setCollabCanViewPrivate] = useState(false);
+  const [accessSaving, setAccessSaving] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadPayload, setUploadPayload] = useState({
+    title: '',
+    filename: '',
+    fileUrl: '',
+    mimeType: 'application/pdf',
+    documentType: 'evidence',
+    privacyLabel: 'team_confidential',
+  });
+
+  const refetchGrievance = useCallback(async () => {
+    const refetch = await fetch(`/api/grievances/${id}`);
+    const refetchJson = await refetch.json();
+    if (refetchJson.data) {
+      setGrievance(refetchJson.data);
+    }
+  }, [id]);
 
   useEffect(() => {
     async function fetchGrievance() {
       try {
-        const res = await fetch(`/api/grievances/${id}`);
-        const json = await res.json();
-        if (json.data) setGrievance(json.data);
+        await refetchGrievance();
       } catch {
         // fallback
       } finally {
@@ -96,7 +158,7 @@ export function GrievanceDetailConsole() {
       }
     }
     fetchGrievance();
-  }, [id]);
+  }, [refetchGrievance]);
 
   async function advanceStatus(newStatus: string) {
     setUpdating(true);
@@ -113,12 +175,84 @@ export function GrievanceDetailConsole() {
         );
         setStatusNote("");
         // Refetch to get updated events
-        const refetch = await fetch(`/api/grievances/${id}`);
-        const refetchJson = await refetch.json();
-        if (refetchJson.data) setGrievance(refetchJson.data);
+        await refetchGrievance();
       }
     } finally {
       setUpdating(false);
+    }
+  }
+
+  async function grantCollaborator() {
+    if (!collabUserId) {
+      return;
+    }
+    setAccessSaving(true);
+    try {
+      await fetch(`/api/grievances/${id}/access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: collabUserId,
+          accessRole: collabRole,
+          canComment: true,
+          canUploadDocuments: collabRole !== 'read_only',
+          canEditCaseNotes: collabRole === 'secondary_lro',
+          canDraftActions: collabRole === 'secondary_lro',
+          canViewPrivateDocuments: collabCanViewPrivate,
+        }),
+      });
+      setCollabUserId('');
+      setCollabRole('reviewer');
+      setCollabCanViewPrivate(false);
+      await refetchGrievance();
+    } finally {
+      setAccessSaving(false);
+    }
+  }
+
+  async function revokeCollaborator(assignmentId: string) {
+    setAccessSaving(true);
+    try {
+      await fetch(`/api/grievances/${id}/access`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId, status: 'revoked' }),
+      });
+      await refetchGrievance();
+    } finally {
+      setAccessSaving(false);
+    }
+  }
+
+  async function uploadGovernedDocument(e: React.FormEvent) {
+    e.preventDefault();
+    if (!uploadPayload.privacyLabel || !uploadPayload.fileUrl || !uploadPayload.filename || !uploadPayload.title) {
+      return;
+    }
+
+    setUploadingDoc(true);
+    try {
+      await fetch(`/api/grievances/${id}/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...uploadPayload,
+          fileSize: 0,
+          contentHash: `manual:${Date.now()}`,
+        }),
+      });
+
+      setUploadPayload({
+        title: '',
+        filename: '',
+        fileUrl: '',
+        mimeType: 'application/pdf',
+        documentType: 'evidence',
+        privacyLabel: 'team_confidential',
+      });
+      await refetchGrievance();
+    } finally {
+      setUploadingDoc(false);
     }
   }
 
@@ -241,6 +375,9 @@ export function GrievanceDetailConsole() {
             {grievance.unionRepId && (
               <p><span className="font-medium">Assigned Steward:</span> {grievance.unionRepId}</p>
             )}
+            {grievance.primaryLroId && (
+              <p><span className="font-medium">Primary LRO:</span> {grievance.primaryLroId}</p>
+            )}
           </CardContent>
         </Card>
 
@@ -287,15 +424,15 @@ export function GrievanceDetailConsole() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Upload className="h-4 w-4" /> Documents
+            <Upload className="h-4 w-4" /> Governed Documents
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {grievance.documents.length === 0 ? (
+        <CardContent className="space-y-4">
+          {(grievance.governedDocuments?.length ?? 0) === 0 ? (
             <p className="text-sm text-gray-400">No documents uploaded</p>
           ) : (
             <ul className="space-y-2">
-              {grievance.documents.map((doc) => (
+              {grievance.governedDocuments?.map((doc) => (
                 <li key={doc.id} className="flex items-center gap-2 text-sm">
                   <FileText className="h-4 w-4 text-gray-400" />
                   <a
@@ -304,14 +441,149 @@ export function GrievanceDetailConsole() {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {doc.documentType.replace(/_/g, " ")}
+                    {doc.title || doc.filename || doc.documentType.replace(/_/g, " ")}
                   </a>
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    <Lock className="mr-1 inline h-3 w-3" />
+                    {doc.privacyLabel}
+                  </span>
                   <span className="text-xs text-gray-400">
                     {new Date(doc.createdAt).toLocaleDateString()}
                   </span>
                 </li>
               ))}
             </ul>
+          )}
+
+          <form className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-2" onSubmit={uploadGovernedDocument}>
+            <input
+              value={uploadPayload.title}
+              onChange={(e) => setUploadPayload((prev) => ({ ...prev, title: e.target.value }))}
+              placeholder="Document title"
+              className="rounded border px-3 py-2 text-sm"
+              required
+            />
+            <input
+              value={uploadPayload.filename}
+              onChange={(e) => setUploadPayload((prev) => ({ ...prev, filename: e.target.value }))}
+              placeholder="Filename"
+              className="rounded border px-3 py-2 text-sm"
+              required
+            />
+            <input
+              value={uploadPayload.fileUrl}
+              onChange={(e) => setUploadPayload((prev) => ({ ...prev, fileUrl: e.target.value }))}
+              placeholder="File URL"
+              className="rounded border px-3 py-2 text-sm md:col-span-2"
+              required
+            />
+            <select
+              value={uploadPayload.documentType}
+              onChange={(e) => setUploadPayload((prev) => ({ ...prev, documentType: e.target.value }))}
+              className="rounded border px-3 py-2 text-sm"
+            >
+              <option value="evidence">evidence</option>
+              <option value="witness_statement">witness_statement</option>
+              <option value="correspondence">correspondence</option>
+              <option value="other">other</option>
+            </select>
+            <select
+              value={uploadPayload.privacyLabel}
+              onChange={(e) => setUploadPayload((prev) => ({ ...prev, privacyLabel: e.target.value }))}
+              className="rounded border px-3 py-2 text-sm"
+              required
+            >
+              {PRIVACY_LABELS.map((label) => (
+                <option key={label} value={label}>{label}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              disabled={uploadingDoc}
+              className="rounded bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 md:col-span-2"
+            >
+              {uploadingDoc ? 'Uploading…' : 'Upload governed document'}
+            </button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Secondary Access */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4" /> Secondary LRO Access
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+            <Shield className="mr-1 inline h-4 w-4" />
+            Primary ownership remains with {grievance.primaryLroId ?? grievance.unionRepId ?? 'assigned LRO'}. Collaborators get scoped rights only.
+          </div>
+
+          {(grievance.collaborators?.length ?? 0) === 0 ? (
+            <p className="text-sm text-gray-500">No secondary access assignments yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {grievance.collaborators?.map((assignment) => (
+                <div key={assignment.id} className="flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-sm">
+                  <span className="font-medium">{assignment.userId}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{assignment.accessRole}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${assignment.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                    {assignment.status}
+                  </span>
+                  {assignment.expiresAt && (
+                    <span className="text-xs text-gray-500">expires {new Date(assignment.expiresAt).toLocaleDateString()}</span>
+                  )}
+                  {grievance.effectiveAccess?.canManageAssignments && assignment.status === 'active' && (
+                    <button
+                      type="button"
+                      disabled={accessSaving}
+                      onClick={() => revokeCollaborator(assignment.id)}
+                      className="ml-auto rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                    >
+                      Revoke
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {grievance.effectiveAccess?.canManageAssignments && (
+            <div className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-3">
+              <input
+                value={collabUserId}
+                onChange={(e) => setCollabUserId(e.target.value)}
+                placeholder="Collaborator user ID"
+                className="rounded border px-3 py-2 text-sm"
+              />
+              <select
+                value={collabRole}
+                onChange={(e) => setCollabRole(e.target.value as 'secondary_lro' | 'reviewer' | 'read_only')}
+                className="rounded border px-3 py-2 text-sm"
+              >
+                <option value="secondary_lro">secondary_lro</option>
+                <option value="reviewer">reviewer</option>
+                <option value="read_only">read_only</option>
+              </select>
+              <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={collabCanViewPrivate}
+                  onChange={(e) => setCollabCanViewPrivate(e.target.checked)}
+                />
+                Can view private docs
+              </label>
+              <button
+                type="button"
+                disabled={accessSaving || !collabUserId}
+                onClick={grantCollaborator}
+                className="rounded bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50 md:col-span-3"
+              >
+                {accessSaving ? 'Saving…' : 'Grant collaborator access'}
+              </button>
+            </div>
           )}
         </CardContent>
       </Card>

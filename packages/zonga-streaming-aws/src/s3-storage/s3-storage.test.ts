@@ -8,9 +8,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock AWS SDK
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn().mockImplementation(() => ({
-    send: vi.fn(),
-  })),
+  S3Client: class {
+    send = vi.fn()
+  },
   PutObjectCommand: vi.fn(),
   GetObjectCommand: vi.fn(),
   HeadObjectCommand: vi.fn(),
@@ -61,7 +61,7 @@ describe('s3-storage', () => {
           assetId: 'asset-1',
           fileName: 'track.wav',
           contentType: 'audio/wav',
-          fileSizeBytes: 1024,
+          maxSizeBytes: 1024,
         },
       )
 

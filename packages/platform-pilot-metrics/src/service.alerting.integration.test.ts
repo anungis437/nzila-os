@@ -50,8 +50,32 @@ const escalationPolicy = {
   updatedAt: new Date().toISOString(),
 }
 
-const executeMock = vi.fn(async (query: unknown) => {
-  const text = String(query)
+const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
+
+vi.mock('@nzila/db/platform', () => ({
+  platformDb: {
+    execute: executeMock,
+  },
+}))
+
+import { __test__ } from './service'
+
+function queryText(query: unknown): string {
+  const chunks = (query as { queryChunks?: unknown[] }).queryChunks ?? []
+  return chunks
+    .map((c: unknown) => {
+      if (typeof c === 'string') return c
+      if (typeof c === 'number') return String(c)
+      if (c !== null && typeof c === 'object' && Array.isArray((c as { value?: unknown }).value)) {
+        return ((c as { value: string[] }).value).join('')
+      }
+      return ''
+    })
+    .join('')
+}
+
+executeMock.mockImplementation(async (query: unknown) => {
+  const text = queryText(query)
 
   if (text.includes('FROM pilot_alerts') && text.includes('dedup_key') && text.includes("status IN ('open', 'acknowledged', 'in_progress')")) {
     return memAlerts.filter((a) => a.status === 'open' || a.status === 'acknowledged' || a.status === 'in_progress').slice(0, 1)
@@ -128,14 +152,6 @@ const executeMock = vi.fn(async (query: unknown) => {
 
   return []
 })
-
-vi.mock('@nzila/db/platform', () => ({
-  platformDb: {
-    execute: executeMock,
-  },
-}))
-
-import { __test__ } from './service'
 
 describe('pilot alerting integration behavior', () => {
   beforeEach(() => {

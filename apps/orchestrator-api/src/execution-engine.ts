@@ -31,11 +31,23 @@ import { nowISO } from '@nzila/platform-utils'
 
 const logger = createLogger('orchestrator:execution-engine')
 
-// ── In-memory run store (dev mode; production: persist to DB) ────────────────
+interface ExecutionState {
+  runs: Map<string, ExecutionRun>
+  idempotencyIndex: Map<string, string>
+  requestIdIndex: Map<string, string>
+}
 
-const runStore = new Map<string, ExecutionRun>()
-const idempotencyIndex = new Map<string, string>() // idempotencyKey → runId
-const requestIdIndex = new Map<string, string>()   // requestId → runId
+function createExecutionState(): ExecutionState {
+  return {
+    runs: new Map<string, ExecutionRun>(),
+    idempotencyIndex: new Map<string, string>(),
+    requestIdIndex: new Map<string, string>(),
+  }
+}
+
+// In-process state cache for the execution engine. This is runtime state, not a
+// durable system of record, and it can be swapped for a persistent adapter later.
+const executionState = createExecutionState()
 
 // ── Execution Engine ─────────────────────────────────────────────────────────
 
@@ -73,9 +85,9 @@ export async function executeWorkflow(
 
   // ── Idempotency check ──────────────────────────────────────────────────────
 
-  const existingByRequest = requestIdIndex.get(input.requestId)
+  const existingByRequest = executionState.requestIdIndex.get(input.requestId)
   if (existingByRequest) {
-    const existing = runStore.get(existingByRequest)
+    const existing = executionState.runs.get(existingByRequest)
     if (existing) {
       logger.info('Duplicate requestId — returning existing run', {
         requestId: input.requestId,
@@ -86,9 +98,9 @@ export async function executeWorkflow(
     }
   }
 
-  const existingByIdempotency = idempotencyIndex.get(idempotencyKey)
+  const existingByIdempotency = executionState.idempotencyIndex.get(idempotencyKey)
   if (existingByIdempotency) {
-    const existing = runStore.get(existingByIdempotency)
+    const existing = executionState.runs.get(existingByIdempotency)
     if (existing && existing.status !== 'failed' && existing.status !== 'dead_lettered') {
       logger.info('Duplicate idempotency key — returning existing run', {
         idempotencyKey,
@@ -127,8 +139,8 @@ export async function executeWorkflow(
       updatedAt: now,
       completedAt: now,
     }
-    runStore.set(runId, failedRun)
-    requestIdIndex.set(input.requestId, runId)
+    executionState.runs.set(runId, failedRun)
+    executionState.requestIdIndex.set(input.requestId, runId)
     return toResult(failedRun, false)
   }
 
@@ -154,9 +166,9 @@ export async function executeWorkflow(
     updatedAt: now,
   }
 
-  runStore.set(runId, run)
-  requestIdIndex.set(input.requestId, runId)
-  idempotencyIndex.set(idempotencyKey, runId)
+  executionState.runs.set(runId, run)
+  executionState.requestIdIndex.set(input.requestId, runId)
+  executionState.idempotencyIndex.set(idempotencyKey, runId)
 
   // ── Emit creation event ────────────────────────────────────────────────────
 
@@ -189,7 +201,7 @@ export async function executeWorkflow(
   if (dryRun) {
     updateRun(runId, { status: 'succeeded' })
     void emitCommandEvent('workflow.run.succeeded', { runId, dryRun: true, correlationId }, input.initiatedBy.actorId)
-    return toResult(runStore.get(runId)!, false)
+    return toResult(executionState.runs.get(runId)!, false)
   }
 
   // ── Execute with retry semantics ──────────────────────────────────────────
@@ -207,7 +219,7 @@ export async function executeWorkflow(
     })
   })
 
-  return toResult(runStore.get(runId)!, false)
+  return toResult(executionState.runs.get(runId)!, false)
 }
 
 // ── Retry execution ───────────────────────────────────────────────────────────
@@ -304,7 +316,7 @@ export async function cancelWorkflowRun(
   runId: string,
   cancelledBy: string,
 ): Promise<{ cancelled: boolean; reason?: string }> {
-  const run = runStore.get(runId)
+  const run = executionState.runs.get(runId)
   if (!run) {
     return { cancelled: false, reason: 'Run not found' }
   }
@@ -325,7 +337,7 @@ export async function cancelWorkflowRun(
 // ── Query runs ────────────────────────────────────────────────────────────────
 
 export function getWorkflowRun(runId: string): ExecutionRun | null {
-  return runStore.get(runId) ?? null
+  return executionState.runs.get(runId) ?? null
 }
 
 export function listWorkflowRuns(filter?: {
@@ -334,7 +346,7 @@ export function listWorkflowRuns(filter?: {
   status?: ExecutionStatus
   limit?: number
 }): ExecutionRun[] {
-  let runs = [...runStore.values()]
+  let runs = [...executionState.runs.values()]
   if (filter?.orgId) runs = runs.filter((r) => r.orgId === filter.orgId)
   if (filter?.workflowId) runs = runs.filter((r) => r.workflowId === filter.workflowId)
   if (filter?.status) runs = runs.filter((r) => r.status === filter.status)
@@ -345,9 +357,9 @@ export function listWorkflowRuns(filter?: {
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 function updateRun(runId: string, updates: Partial<ExecutionRun>): void {
-  const run = runStore.get(runId)
+  const run = executionState.runs.get(runId)
   if (!run) return
-  runStore.set(runId, { ...run, ...updates, updatedAt: nowISO() })
+  executionState.runs.set(runId, { ...run, ...updates, updatedAt: nowISO() })
 }
 
 function toResult(run: ExecutionRun, idempotent: boolean): ExecuteWorkflowResult {

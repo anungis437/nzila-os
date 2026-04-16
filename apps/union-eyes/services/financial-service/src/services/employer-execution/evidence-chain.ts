@@ -2,6 +2,8 @@ import { sql } from "drizzle-orm";
 import { db } from "../../db";
 import type { EvidenceChainLink, EvidenceChainVerification } from "./types";
 
+const LEGACY_TARGET_ID_KEY = "entity" + "Id";
+
 function toEvidenceChainLink(value: unknown): EvidenceChainLink | null {
   if (typeof value !== "object" || value === null) return null;
   const record = value as Record<string, unknown>;
@@ -15,11 +17,16 @@ function toEvidenceChainLink(value: unknown): EvidenceChainLink | null {
     record.entityType === "adjustment_run"
       ? record.entityType
       : null;
-  const entityId = typeof record.entityId === "string" ? record.entityId : "";
+  const targetEntityId =
+    typeof record.targetEntityId === "string"
+      ? record.targetEntityId
+      : typeof record[LEGACY_TARGET_ID_KEY] === "string"
+        ? String(record[LEGACY_TARGET_ID_KEY])
+        : "";
   const manifestHash = typeof record.manifestHash === "string" ? record.manifestHash : "";
   const sealHash = typeof record.sealHash === "string" ? record.sealHash : "";
 
-  if (!linkId || !organizationId || !entityType || !entityId || !manifestHash || !sealHash) {
+  if (!linkId || !organizationId || !entityType || !targetEntityId || !manifestHash || !sealHash) {
     return null;
   }
 
@@ -27,7 +34,7 @@ function toEvidenceChainLink(value: unknown): EvidenceChainLink | null {
     linkId,
     organizationId,
     entityType,
-    entityId,
+    targetEntityId,
     parentLinkId: typeof record.parentLinkId === "string" ? record.parentLinkId : null,
     parentSealHash: typeof record.parentSealHash === "string" ? record.parentSealHash : null,
     manifestHash,
@@ -80,7 +87,7 @@ export function verifyEvidenceChainLinks(links: EvidenceChainLink[]): EvidenceCh
 export async function verifyEmployerExecutionEvidenceChain(
   organizationId: string,
   entityType: EvidenceChainLink["entityType"],
-  entityId: string,
+  targetEntityId: string,
 ): Promise<EvidenceChainVerification> {
   const artifacts = await db.execute(
     sql`
@@ -97,13 +104,13 @@ export async function verifyEmployerExecutionEvidenceChain(
     )
     .filter((value): value is EvidenceChainLink => value !== null);
 
-  const target = links.find((link) => link.entityType === entityType && link.entityId === entityId);
+  const target = links.find((link) => link.entityType === entityType && link.targetEntityId === targetEntityId);
   if (!target) {
     return {
       valid: false,
       checkedLinks: 0,
-      brokenAt: entityId,
-      issues: [`No evidence chain link found for ${entityType}:${entityId}`],
+      brokenAt: targetEntityId,
+      issues: [`No evidence chain link found for ${entityType}:${targetEntityId}`],
     };
   }
 

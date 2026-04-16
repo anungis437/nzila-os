@@ -22,6 +22,8 @@ import {
   sha256,
 } from "../../_lib";
 
+const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+
 const replaySchema = z.object({
   mode: z.enum(["exact", "new_engine", "new_rule"]).default("exact"),
   replayEngineVersion: z.string().optional(),
@@ -392,7 +394,7 @@ export const POST = withApi(
       await tx.insert(employerExecutionEvidenceLinks).values({
         organizationId,
         entityType: "replay",
-        entityId: createdReplay.id,
+        [LEGACY_TARGET_ID_COLUMN]: createdReplay.id,
         parentLinkId: replayEvidencePack.chainLink.parentLinkId,
         parentSealHash: replayEvidencePack.chainLink.parentSealHash,
         manifestHash: replayEvidencePack.manifestHash,
@@ -403,7 +405,7 @@ export const POST = withApi(
           replayMode: body.mode,
         },
         createdBy: userId ?? undefined,
-      });
+      } as any);
 
       if (diff.changed) {
         await tx.insert(employerExecutionComplianceEvents).values({

@@ -236,7 +236,7 @@ describe("Employer Execution scenario pack", () => {
     const payrollLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "payroll_run",
-      entityId: "payroll-1",
+      targetEntityId: "payroll-1",
       manifestHash: "manifest-payroll",
       sealHash: "seal-payroll",
       parent: null,
@@ -244,7 +244,7 @@ describe("Employer Execution scenario pack", () => {
     const remittanceLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "remittance_run",
-      entityId: "remittance-1",
+      targetEntityId: "remittance-1",
       manifestHash: "manifest-remittance",
       sealHash: "seal-remittance",
       parent: {
@@ -263,7 +263,7 @@ describe("Employer Execution scenario pack", () => {
     const payrollLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "payroll_run",
-      entityId: "payroll-1",
+      targetEntityId: "payroll-1",
       manifestHash: "manifest-payroll",
       sealHash: "seal-payroll",
       parent: null,
@@ -271,7 +271,7 @@ describe("Employer Execution scenario pack", () => {
     const replayLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "replay",
-      entityId: "replay-1",
+      targetEntityId: "replay-1",
       manifestHash: "manifest-replay",
       sealHash: "seal-replay",
       parent: {
@@ -289,7 +289,7 @@ describe("Employer Execution scenario pack", () => {
     const payrollLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "payroll_run",
-      entityId: "payroll-1",
+      targetEntityId: "payroll-1",
       manifestHash: "manifest-payroll",
       sealHash: "seal-payroll",
       parent: null,
@@ -297,7 +297,7 @@ describe("Employer Execution scenario pack", () => {
     const replayLink = createEvidenceChainLink({
       organizationId: "org-scenario",
       entityType: "replay",
-      entityId: "replay-1",
+      targetEntityId: "replay-1",
       manifestHash: "manifest-replay",
       sealHash: "seal-replay",
       parent: {

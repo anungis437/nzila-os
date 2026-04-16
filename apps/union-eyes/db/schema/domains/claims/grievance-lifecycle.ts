@@ -14,6 +14,7 @@ import {
   text,
   timestamp,
   index,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { grievances } from "./grievances";
 
@@ -61,6 +62,18 @@ export const grievanceDocumentTypeEnum = pgEnum("grievance_document_type", [
   "correspondence",
   "photo",
   "other",
+]);
+
+export const caseAccessRoleEnum = pgEnum("case_access_role", [
+  "secondary_lro",
+  "reviewer",
+  "read_only",
+]);
+
+export const caseAccessStatusEnum = pgEnum("case_access_status", [
+  "active",
+  "revoked",
+  "expired",
 ]);
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
@@ -116,6 +129,40 @@ export const grievanceDocuments = pgTable(
   ],
 );
 
+/**
+ * Secondary case access assignments.
+ * Primary LRO ownership remains on grievances.unionRepId and is never replaced by this table.
+ */
+export const grievanceCaseAccessAssignments = pgTable(
+  "grievance_case_access_assignments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id").notNull(),
+    grievanceId: uuid("grievance_id")
+      .notNull()
+      .references(() => grievances.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").notNull(),
+    accessRole: caseAccessRoleEnum("access_role").notNull().default("secondary_lro"),
+    grantedBy: uuid("granted_by").notNull(),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    canComment: boolean("can_comment").notNull().default(true),
+    canUploadDocuments: boolean("can_upload_documents").notNull().default(false),
+    canEditCaseNotes: boolean("can_edit_case_notes").notNull().default(false),
+    canDraftActions: boolean("can_draft_actions").notNull().default(false),
+    canViewPrivateDocuments: boolean("can_view_private_documents").notNull().default(false),
+    status: caseAccessStatusEnum("status").notNull().default("active"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_case_access_grievance").on(table.grievanceId),
+    index("idx_case_access_user").on(table.userId),
+    index("idx_case_access_org").on(table.organizationId),
+    index("idx_case_access_status").on(table.status),
+    index("idx_case_access_expires").on(table.expiresAt),
+  ],
+);
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type GrievanceLifecycleStatus =
@@ -124,8 +171,14 @@ export type GrievanceEventType =
   (typeof grievanceEventTypeEnum.enumValues)[number];
 export type GrievanceDocumentType =
   (typeof grievanceDocumentTypeEnum.enumValues)[number];
+export type CaseAccessRole = (typeof caseAccessRoleEnum.enumValues)[number];
+export type CaseAccessStatus = (typeof caseAccessStatusEnum.enumValues)[number];
 
 export type GrievanceEvent = typeof grievanceEvents.$inferSelect;
 export type GrievanceEventInsert = typeof grievanceEvents.$inferInsert;
 export type GrievanceDocument = typeof grievanceDocuments.$inferSelect;
 export type GrievanceDocumentInsert = typeof grievanceDocuments.$inferInsert;
+export type GrievanceCaseAccessAssignment =
+  typeof grievanceCaseAccessAssignments.$inferSelect;
+export type GrievanceCaseAccessAssignmentInsert =
+  typeof grievanceCaseAccessAssignments.$inferInsert;
