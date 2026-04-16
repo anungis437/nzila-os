@@ -206,6 +206,8 @@ check('GOV-GATE-013: AI incident playbooks exist', () => {
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DATA_POISONING.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_DRILL_RUNBOOK.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))

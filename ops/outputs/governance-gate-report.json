@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-16T22:52:14.646Z",
+  "timestamp": "2026-04-16T22:57:51.031Z",
   "total": 14,
   "passed": 14,
   "failed": 0,
@@ -67,7 +67,7 @@
     {
       "name": "GOV-GATE-013: AI incident playbooks exist",
       "status": "pass",
-      "detail": "4 AI incident playbooks verified"
+      "detail": "6 AI incident playbooks verified"
     },
     {
       "name": "GOV-GATE-014: Strategic telemetry and command catalog exist",
