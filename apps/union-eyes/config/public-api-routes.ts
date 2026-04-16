@@ -157,6 +157,16 @@ export const CRON_API_ROUTES: PublicRouteConfig[] = [
     category: 'webhook',
   },
   {
+    pattern: '/api/cron/billing-lifecycle',
+    reason: 'Billing lifecycle automation cron job (authenticates via X-Cron-Secret header)',
+    category: 'webhook',
+  },
+  {
+    pattern: '/api/cron/observability-alerts',
+    reason: 'Real-time observability alert sweep cron job (authenticates via X-Cron-Secret header)',
+    category: 'webhook',
+  },
+  {
     pattern: '/api/rewards/cron',
     reason: 'Rewards processing cron job (authenticates via X-Cron-Secret header)',
     category: 'webhook',

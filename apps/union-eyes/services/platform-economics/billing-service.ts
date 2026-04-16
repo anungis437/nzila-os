@@ -24,7 +24,7 @@ import {
   organizations,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, inArray, sql } from 'drizzle-orm';
+import { eq, and, desc, inArray, sql, or, lt } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
 import { requireReconciliation } from './reconciliation-service';
@@ -592,6 +592,231 @@ export async function recordPayment(input: RecordPaymentInput) {
   });
 
   return result;
+}
+
+// ============================================================================
+// Billing Lifecycle Automation
+// ============================================================================
+
+interface ReconcileExternalInvoicePaymentInput {
+  organizationId: string;
+  invoiceId: string;
+  amount: string;
+  method: string;
+  externalReference: string;
+  paidAt?: Date;
+  status?: 'completed' | 'failed';
+  failureReason?: string;
+  metadata?: Record<string, unknown>;
+  createdBy?: string;
+}
+
+export async function reconcileExternalInvoicePayment(input: ReconcileExternalInvoicePaymentInput) {
+  const [invoice] = await db
+    .select()
+    .from(platformInvoices)
+    .where(
+      and(
+        eq(platformInvoices.id, input.invoiceId),
+        eq(platformInvoices.organizationId, input.organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!invoice) {
+    throw new Error(`Invoice ${input.invoiceId} not found for org ${input.organizationId}`);
+  }
+
+  const [existingPayment] = await db
+    .select()
+    .from(platformPayments)
+    .where(eq(platformPayments.externalReference, input.externalReference))
+    .limit(1);
+
+  if (existingPayment) return existingPayment;
+
+  const account = await getBillingAccount(input.organizationId);
+  if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
+
+  const normalizedStatus = input.status ?? 'completed';
+  const paymentAmountCents = centsSafe(input.amount);
+
+  const [payment] = await db
+    .insert(platformPayments)
+    .values({
+      billingAccountId: account.id,
+      organizationId: input.organizationId,
+      amount: input.amount,
+      currency: 'CAD',
+      status: normalizedStatus,
+      method: input.method,
+      externalReference: input.externalReference,
+      paidAt: input.paidAt ?? new Date(),
+      failureReason: input.failureReason,
+      metadata: input.metadata,
+      createdBy: input.createdBy,
+    })
+    .returning();
+
+  if (normalizedStatus === 'completed' && paymentAmountCents > 0) {
+    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
+    const totalDueCents = centsSafe(invoice.totalAmount);
+    const newStatus = newAmountPaidCents >= totalDueCents ? 'paid' : 'partially_paid';
+
+    await db.transaction(async (tx) => {
+      await tx.insert(paymentAllocations).values({
+        paymentId: payment.id,
+        invoiceId: invoice.id,
+        amount: input.amount,
+        createdBy: input.createdBy,
+      });
+
+      await tx
+        .update(platformInvoices)
+        .set({
+          amountPaid: centsToDecimal(newAmountPaidCents),
+          status: newStatus,
+          updatedAt: new Date(),
+          metadata: {
+            ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
+            lifecycleState: newStatus === 'paid' ? 'paid' : 'finalized',
+            lastReconciledPaymentId: payment.id,
+          },
+        })
+        .where(eq(platformInvoices.id, invoice.id));
+    });
+  } else if (normalizedStatus === 'failed') {
+    await db
+      .update(platformInvoices)
+      .set({
+        status: invoice.status === 'paid' ? invoice.status : 'overdue',
+        updatedAt: new Date(),
+        metadata: {
+          ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
+          lifecycleState: 'failed',
+          lastFailedPaymentRef: input.externalReference,
+          lastFailureReason: input.failureReason ?? null,
+        },
+      })
+      .where(eq(platformInvoices.id, invoice.id));
+  }
+
+  return payment;
+}
+
+export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 'system:billing-cron') {
+  const subscriptions = await db
+    .select({
+      organizationId: orgSubscriptions.organizationId,
+    })
+    .from(orgSubscriptions)
+    .where(eq(orgSubscriptions.status, 'active'));
+
+  const monthStart = new Date(Date.UTC(runAt.getUTCFullYear(), runAt.getUTCMonth(), 1, 0, 0, 0));
+  const monthEnd = new Date(Date.UTC(runAt.getUTCFullYear(), runAt.getUTCMonth() + 1, 0, 23, 59, 59));
+  const periodLabel = `${runAt.getUTCFullYear()}-${String(runAt.getUTCMonth() + 1).padStart(2, '0')}`;
+
+  let periodsCreatedOrFound = 0;
+  let invoicesGenerated = 0;
+  let invoiceGenerationSkipped = 0;
+  let invoicesFinalized = 0;
+  let invoicesMarkedOverdue = 0;
+
+  for (const subscription of subscriptions) {
+    const period = await getOrCreateBillingPeriod(
+      subscription.organizationId,
+      periodLabel,
+      monthStart,
+      monthEnd,
+    );
+    periodsCreatedOrFound += 1;
+
+    try {
+      await generateInvoice({
+        organizationId: subscription.organizationId,
+        billingPeriodId: period.id,
+        createdBy: actor,
+      });
+      invoicesGenerated += 1;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('already exists')) {
+        invoiceGenerationSkipped += 1;
+      } else {
+        throw error;
+      }
+    }
+
+    const draftInvoices = await db
+      .select()
+      .from(platformInvoices)
+      .where(
+        and(
+          eq(platformInvoices.organizationId, subscription.organizationId),
+          eq(platformInvoices.status, 'draft'),
+          lt(platformInvoices.issueDate, runAt),
+        ),
+      );
+
+    for (const draft of draftInvoices) {
+      await db
+        .update(platformInvoices)
+        .set({
+          status: 'issued',
+          updatedAt: runAt,
+          metadata: {
+            ...((draft.metadata as Record<string, unknown> | null) ?? {}),
+            lifecycleState: 'finalized',
+            finalizedAt: runAt.toISOString(),
+            finalizedBy: actor,
+          },
+        })
+        .where(eq(platformInvoices.id, draft.id));
+      invoicesFinalized += 1;
+    }
+
+    const overdueInvoices = await db
+      .select()
+      .from(platformInvoices)
+      .where(
+        and(
+          eq(platformInvoices.organizationId, subscription.organizationId),
+          or(
+            eq(platformInvoices.status, 'issued'),
+            eq(platformInvoices.status, 'partially_paid'),
+          ),
+          lt(platformInvoices.dueDate, runAt),
+        ),
+      );
+
+    for (const inv of overdueInvoices) {
+      await db
+        .update(platformInvoices)
+        .set({
+          status: 'overdue',
+          updatedAt: runAt,
+          metadata: {
+            ...((inv.metadata as Record<string, unknown> | null) ?? {}),
+            lifecycleState: 'failed',
+            failureReason: 'invoice_due_date_passed',
+            failedAt: runAt.toISOString(),
+          },
+        })
+        .where(eq(platformInvoices.id, inv.id));
+      invoicesMarkedOverdue += 1;
+    }
+  }
+
+  return {
+    runAt: runAt.toISOString(),
+    organizationsScanned: subscriptions.length,
+    periodLabel,
+    periodsCreatedOrFound,
+    invoicesGenerated,
+    invoiceGenerationSkipped,
+    invoicesFinalized,
+    invoicesMarkedOverdue,
+  };
 }
 
 // ============================================================================

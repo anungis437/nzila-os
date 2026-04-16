@@ -12,7 +12,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
-import { evaluateFee, captureTransactionFee, reverseTransactionFee } from '@/services/platform-economics';
+import { evaluateFee, captureTransactionFee, reverseTransactionFee, reconcileExternalInvoicePayment } from '@/services/platform-economics';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
@@ -96,23 +96,37 @@ export async function POST(request: NextRequest) {
         const pi = event.data?.object;
         if (pi) {
           const orgId = (pi.metadata?.organization_id as string) ?? null;
+          const platformInvoiceId = (pi.metadata?.platform_invoice_id as string) ?? null;
           const billingAcctId = orgId ? await resolveBillingAccountId(orgId) : null;
-          if (orgId && billingAcctId) {
-            await withSystemContext(async () =>
-              db.insert(platformPayments).values({
-                organizationId: orgId,
-                billingAccountId: billingAcctId,
-                externalReference: eventId,
-                method: 'stripe',
-                amount: String((pi.amount ?? 0) / 100),
-                currency: pi.currency?.toUpperCase() ?? 'CAD',
-                status: 'completed',
-                paidAt: new Date(),
-                metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
-              })
-            );
 
-            // Capture transaction fee if a rule applies
+          if (orgId && billingAcctId) {
+            if (platformInvoiceId) {
+              await reconcileExternalInvoicePayment({
+                organizationId: orgId,
+                invoiceId: platformInvoiceId,
+                amount: String((pi.amount ?? 0) / 100),
+                method: 'stripe',
+                externalReference: eventId,
+                status: 'completed',
+                metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
+                createdBy: 'system:stripe-webhook',
+              });
+            } else {
+              await withSystemContext(async () =>
+                db.insert(platformPayments).values({
+                  organizationId: orgId,
+                  billingAccountId: billingAcctId,
+                  externalReference: eventId,
+                  method: 'stripe',
+                  amount: String((pi.amount ?? 0) / 100),
+                  currency: pi.currency?.toUpperCase() ?? 'CAD',
+                  status: 'completed',
+                  paidAt: new Date(),
+                  metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
+                })
+              );
+            }
+
             const grossAmount = String((pi.amount ?? 0) / 100);
             const feeResult = await evaluateFee({
               organizationId: orgId,
@@ -145,23 +159,40 @@ export async function POST(request: NextRequest) {
         const inv = event.data?.object;
         if (inv) {
           const orgId = (inv.metadata?.organization_id as string) ?? null;
+          const platformInvoiceId =
+            (inv.metadata?.platform_invoice_id as string)
+            ?? (inv.metadata?.invoice_id as string)
+            ?? null;
           const billingAcctId = orgId ? await resolveBillingAccountId(orgId) : null;
-          if (orgId && billingAcctId) {
-            await withSystemContext(async () =>
-              db.insert(platformPayments).values({
-                organizationId: orgId,
-                billingAccountId: billingAcctId,
-                externalReference: eventId,
-                method: 'stripe',
-                amount: String((inv.amount_paid ?? 0) / 100),
-                currency: inv.currency?.toUpperCase() ?? 'CAD',
-                status: 'completed',
-                paidAt: new Date(),
-                metadata: { stripeEventType: eventType, invoiceId: inv.id },
-              })
-            );
 
-            // Capture transaction fee if a rule applies
+          if (orgId && billingAcctId) {
+            if (platformInvoiceId) {
+              await reconcileExternalInvoicePayment({
+                organizationId: orgId,
+                invoiceId: platformInvoiceId,
+                amount: String((inv.amount_paid ?? 0) / 100),
+                method: 'stripe',
+                externalReference: eventId,
+                status: 'completed',
+                metadata: { stripeEventType: eventType, invoiceId: inv.id },
+                createdBy: 'system:stripe-webhook',
+              });
+            } else {
+              await withSystemContext(async () =>
+                db.insert(platformPayments).values({
+                  organizationId: orgId,
+                  billingAccountId: billingAcctId,
+                  externalReference: eventId,
+                  method: 'stripe',
+                  amount: String((inv.amount_paid ?? 0) / 100),
+                  currency: inv.currency?.toUpperCase() ?? 'CAD',
+                  status: 'completed',
+                  paidAt: new Date(),
+                  metadata: { stripeEventType: eventType, invoiceId: inv.id },
+                })
+              );
+            }
+
             const grossAmount = String((inv.amount_paid ?? 0) / 100);
             const feeResult = await evaluateFee({
               organizationId: orgId,
@@ -185,6 +216,32 @@ export async function POST(request: NextRequest) {
             }
           } else {
             logger.warn(`[stripe-webhook] Cannot resolve org/billing for event ${eventId}`);
+          }
+        }
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const inv = event.data?.object;
+        if (inv) {
+          const orgId = (inv.metadata?.organization_id as string) ?? null;
+          const platformInvoiceId =
+            (inv.metadata?.platform_invoice_id as string)
+            ?? (inv.metadata?.invoice_id as string)
+            ?? null;
+
+          if (orgId && platformInvoiceId) {
+            await reconcileExternalInvoicePayment({
+              organizationId: orgId,
+              invoiceId: platformInvoiceId,
+              amount: String((inv.amount_due ?? inv.amount_remaining ?? 0) / 100),
+              method: 'stripe',
+              externalReference: eventId,
+              status: 'failed',
+              failureReason: 'stripe_invoice_payment_failed',
+              metadata: { stripeEventType: eventType, invoiceId: inv.id },
+              createdBy: 'system:stripe-webhook',
+            });
           }
         }
         break;
