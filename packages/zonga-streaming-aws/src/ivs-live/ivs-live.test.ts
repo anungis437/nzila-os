@@ -10,9 +10,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockSend = vi.fn()
 
 vi.mock('@aws-sdk/client-ivs', () => ({
-  IvsClient: vi.fn().mockImplementation(() => ({
-    send: mockSend,
-  })),
+  IvsClient: class {
+    send = mockSend
+  },
   CreateChannelCommand: vi.fn(),
   GetChannelCommand: vi.fn(),
   GetStreamCommand: vi.fn(),
