@@ -14,6 +14,7 @@ import {
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
   isDocumentVisibleByPolicy,
@@ -186,46 +187,53 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document payload', parsed.error.flatten());
   }
 
-  const [created] = await db
-    .insert(documents)
-    .values({
-      organizationId,
-      title: parsed.data.title,
-      filename: parsed.data.filename,
-      name: parsed.data.title,
-      fileUrl: parsed.data.fileUrl,
-      fileType: parsed.data.documentType,
-      documentType: parsed.data.documentType,
-      mimeType: parsed.data.mimeType,
-      fileSize: parsed.data.fileSize,
-      uploadedBy: userId,
-      privacyLabel: parsed.data.privacyLabel,
-      containsPii: parsed.data.containsPii ?? false,
-      containsMedicalSensitive: parsed.data.containsMedicalSensitive ?? false,
-      containsLegalPrivilege: parsed.data.containsLegalPrivilege ?? false,
-      memberPii: parsed.data.memberPii ?? false,
-      medicalSensitive: parsed.data.medicalSensitive ?? false,
-      disciplinarySensitive: parsed.data.disciplinarySensitive ?? false,
-    })
-    .returning();
+  const created = await withRLSContext({ organizationId }, async (tx) => {
+    const [insertedDocument] = await tx
+      .insert(documents)
+      .values({
+        organizationId,
+        title: parsed.data.title,
+        filename: parsed.data.filename,
+        name: parsed.data.title,
+        fileUrl: parsed.data.fileUrl,
+        fileType: parsed.data.documentType,
+        documentType: parsed.data.documentType,
+        mimeType: parsed.data.mimeType,
+        fileSize: parsed.data.fileSize,
+        uploadedBy: userId,
+        privacyLabel: parsed.data.privacyLabel,
+        containsPii: parsed.data.containsPii ?? false,
+        containsMedicalSensitive: parsed.data.containsMedicalSensitive ?? false,
+        containsLegalPrivilege: parsed.data.containsLegalPrivilege ?? false,
+        memberPii: parsed.data.memberPii ?? false,
+        medicalSensitive: parsed.data.medicalSensitive ?? false,
+        disciplinarySensitive: parsed.data.disciplinarySensitive ?? false,
+      })
+      .returning();
 
-  await db.insert(documentVersions).values({
-    organizationId,
-    documentId: created.id,
-    versionNo: 1,
-    storageKey: parsed.data.fileUrl,
-    contentHash: parsed.data.contentHash,
-    uploadedBy: userId,
+    await tx.insert(documentVersions).values({
+      organizationId,
+      documentId: insertedDocument.id,
+      versionNo: 1,
+      storageKey: parsed.data.fileUrl,
+      contentHash: parsed.data.contentHash,
+      uploadedBy: userId,
+    });
+
+    if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
+      await tx.insert(documentLinks).values({
+        organizationId,
+        documentId: insertedDocument.id,
+        linkedEntityType: parsed.data.linkedEntityType,
+        linkedEntityId: parsed.data.linkedEntityId,
+        linkedBy: userId,
+      });
+    }
+
+    return insertedDocument;
   });
 
   if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
-    await db.insert(documentLinks).values({
-      organizationId,
-      documentId: created.id,
-      linkedEntityType: parsed.data.linkedEntityType,
-      linkedEntityId: parsed.data.linkedEntityId,
-      linkedBy: userId,
-    });
 
     if (parsed.data.linkedEntityType === 'grievance') {
       await auditCaseMutation({

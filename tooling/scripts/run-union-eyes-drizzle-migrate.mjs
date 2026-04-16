@@ -1,12 +1,17 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 
-const appRoot = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, '..', '..');
+const appRoot = path.join(repoRoot, 'apps', 'union-eyes');
+
 loadEnv({ path: path.join(appRoot, '.env.local') });
 
 if (!process.env.DATABASE_URL) {
@@ -29,7 +34,6 @@ function readJournalEntries() {
     const migrationPath = path.join(migrationsFolder, `${entry.tag}.sql`);
     const sql = fs.readFileSync(migrationPath, 'utf8');
     return {
-      tag: entry.tag,
       when: entry.when,
       hash: crypto.createHash('sha256').update(sql).digest('hex'),
     };
@@ -97,7 +101,7 @@ async function runMigrations() {
   try {
     await client.connect();
     const db = drizzle(client);
-    await migrate(db, { migrationsFolder: './db/migrations' });
+    await migrate(db, { migrationsFolder });
     console.log('Drizzle migrations are up to date.');
   } catch (error) {
     console.error('Failed to run Drizzle migrations.');
