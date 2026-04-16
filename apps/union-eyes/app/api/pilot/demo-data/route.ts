@@ -21,6 +21,7 @@ import {
   generateDemoGrievances,
   getDemoDatasetSummary,
 } from "@/lib/pilot/cape-demo-data";
+import { assertPilotDemoMutationRuntime } from "@/lib/config/pilot-demo-runtime";
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
@@ -28,12 +29,38 @@ import { employers } from "@/db/schema/domains/compliance/employer-compliance";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { eq, and, like } from "drizzle-orm";
 
+function requireDemoRuntimeMode() {
+  try {
+    const runtimeMode = assertPilotDemoMutationRuntime();
+    return { runtimeMode, failure: null };
+  } catch (error) {
+    return {
+      runtimeMode: null,
+      failure: standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        error instanceof Error
+          ? error.message
+          : "Demo data operations are disabled unless NZILA_MODE is set to pilot or demo",
+        {
+          runtimeMode: process.env.NZILA_MODE ?? null,
+          requiredModes: ["pilot", "demo"],
+        },
+      ),
+    };
+  }
+}
+
 // ── POST — Seed demo data ───────────────────────────────────────────────────
 
 export const POST = withOrganizationAuth(async (_request, context) => {
   const { organizationId, userId } = context;
 
   try {
+    const { runtimeMode, failure } = requireDemoRuntimeMode();
+    if (failure) {
+      return failure;
+    }
+
     const canAccess = await hasMinRole("officer");
     if (!canAccess) {
       return standardErrorResponse(
@@ -103,7 +130,11 @@ export const POST = withOrganizationAuth(async (_request, context) => {
       userId,
       organizationId,
       resource: "pilot_demo_data",
-      details: summary,
+      details: {
+        ...summary,
+        runtimeMode,
+        telemetryTag: "demo_mode_mutation",
+      },
     });
 
     return standardSuccessResponse({
@@ -124,6 +155,11 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
   const { organizationId, userId } = context;
 
   try {
+    const { runtimeMode, failure } = requireDemoRuntimeMode();
+    if (failure) {
+      return failure;
+    }
+
     const canAccess = await hasMinRole("officer");
     if (!canAccess) {
       return standardErrorResponse(
@@ -178,6 +214,10 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
       userId,
       organizationId,
       resource: "pilot_demo_data",
+      details: {
+        runtimeMode,
+        telemetryTag: "demo_mode_mutation",
+      },
     });
 
     return standardSuccessResponse({ purged: true });

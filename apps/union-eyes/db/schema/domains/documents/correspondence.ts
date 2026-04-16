@@ -22,7 +22,6 @@ import {
   boolean,
   pgEnum,
   index,
-  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";

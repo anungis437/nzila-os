@@ -6,7 +6,6 @@
  * - Runs daily to send session reminders and certification expiry warnings
  */
 
-import { NextResponse } from "next/server";
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';

@@ -52,17 +52,6 @@ export const POST = withApi(
       body.committeeIds
     );
 
-    // Build synthesis material (actual AI call would go here)
-    const minutesSummary = meetings
-      .filter((m) => m.minutes)
-      .map((m) => ({
-        committeeId: m.committeeId,
-        title: m.title,
-        date: m.meetingDate,
-        minutes: m.minutes,
-        decisions: m.decisions,
-      }));
-
     // For now, create a placeholder snapshot — AI integration layer can be plugged in
     const snapshot = await createIntelligenceSnapshot({
       organizationId: organizationId!,

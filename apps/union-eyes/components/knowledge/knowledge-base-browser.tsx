@@ -7,7 +7,7 @@
  * Supports search and filtering by source type.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
   BookOpen,
@@ -19,10 +19,7 @@ import {
   Tag,
   ChevronDown,
   ChevronUp,
-  ChevronRight,
   Globe,
-  Copy,
-  Check,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -193,8 +190,6 @@ export default function KnowledgeBaseBrowser() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [docContent, setDocContent] = useState<Record<string, string>>({});
   const [contentLoading, setContentLoading] = useState<string | null>(null);
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const [copied, setCopied] = useState(false);
   const expandedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -237,7 +232,6 @@ export default function KnowledgeBaseBrowser() {
       return;
     }
     setExpandedId(docId);
-    setCopied(false);
     if (!docContent[docId]) {
       setContentLoading(docId);
       try {
@@ -254,21 +248,6 @@ export default function KnowledgeBaseBrowser() {
       }
     }
   };
-
-  const handleCopy = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, []);
-
-  const toggleGroup = useCallback((group: string) => {
-    setCollapsedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) next.delete(group);
-      else next.add(group);
-      return next;
-    });
-  }, []);
 
   // Client-side filtering (search + sourceType)
   const filtered = useMemo(() => {
@@ -287,24 +266,6 @@ export default function KnowledgeBaseBrowser() {
     }
     return list;
   }, [records, sourceFilter, search]);
-
-  // Group filtered records by parent document title (text before ":")
-  const grouped = useMemo(() => {
-    const groups: { key: string; label: string; sourceType: string | null; docs: KBRecord[] }[] = [];
-    const map = new Map<string, typeof groups[number]>();
-    for (const doc of filtered) {
-      const colonIdx = doc.title.indexOf(":");
-      const key = colonIdx > 0 ? doc.title.slice(0, colonIdx).trim() : doc.title;
-      let group = map.get(key);
-      if (!group) {
-        group = { key, label: key, sourceType: doc.sourceType, docs: [] };
-        map.set(key, group);
-        groups.push(group);
-      }
-      group.docs.push(doc);
-    }
-    return groups;
-  }, [filtered]);
 
   const totalBySource = useMemo(() => {
     const map: Record<string, number> = {};

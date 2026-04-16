@@ -6,7 +6,7 @@
  * Powers the Migration Detail View (§2).
  */
 
-import { withApi, z, ApiError } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getBatchDetail } from '@/lib/ingestion/migration-metrics';
 

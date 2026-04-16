@@ -68,14 +68,6 @@ interface CommitteeDoc {
   createdAt: string;
 }
 
-interface Stats {
-  totalMeetings: number;
-  upcomingMeetings: number;
-  openActionItems: number;
-  overdueActionItems: number;
-  totalDocuments: number;
-}
-
 interface CommitteeWorkspaceProps {
   committeeId: string;
   organizationId: string;
@@ -87,15 +79,14 @@ interface CommitteeWorkspaceProps {
 
 export function CommitteeWorkspace({
   committeeId,
-  organizationId,
-  userId,
+  organizationId: _organizationId,
+  userId: _userId,
   userRole,
 }: CommitteeWorkspaceProps) {
   const [committee, setCommittee] = useState<CommitteeDetail | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [documents, setDocuments] = useState<CommitteeDoc[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 

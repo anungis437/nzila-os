@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => {
   const grievanceAssignmentsFindMany = vi.fn();
   const insertReturning = vi.fn();
   const selectLimit = vi.fn();
-  const updateWhere = vi.fn();
   const notificationSend = vi.fn();
   const getNotificationService = vi.fn();
 

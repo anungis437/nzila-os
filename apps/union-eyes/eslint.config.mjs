@@ -6,6 +6,22 @@ import noShadowMl from '../../packages/ml-sdk/eslint-no-shadow-ml.mjs'
 import noShadowDb from '../../packages/db/eslint-no-shadow-db.mjs'
 import noDirectProvider from '../../packages/config/eslint-no-direct-provider.mjs'
 
+const domainImportRestrictions = {
+  'case-intelligence': ['clc', 'observability', 'pki', 'platform-economics'],
+  clc: ['case-intelligence', 'observability', 'pki', 'platform-economics'],
+  observability: ['case-intelligence', 'clc', 'pki', 'platform-economics'],
+  pki: ['case-intelligence', 'clc', 'observability', 'platform-economics'],
+  'platform-economics': ['case-intelligence', 'clc', 'observability', 'pki'],
+}
+
+const libServiceClusterRestrictions = {
+  ai: ['rewards', 'external-data', 'messaging', 'cba-intelligence'],
+  rewards: ['ai', 'external-data', 'messaging', 'cba-intelligence'],
+  'external-data': ['ai', 'rewards', 'messaging', 'cba-intelligence'],
+  messaging: ['ai', 'rewards', 'external-data', 'cba-intelligence'],
+  'cba-intelligence': ['ai', 'rewards', 'external-data', 'messaging'],
+}
+
 // Re-use plugin instances already loaded by eslint-config-next so the custom
 // rules block below can reference react/* , react-hooks/* and @next/next/* rules.
 const nextPlugins = nextVitals[0]?.plugins ?? {}
@@ -74,6 +90,30 @@ const eslintConfig = defineConfig([
       'react-hooks/refs': 'warn',
     },
   },
+  ...Object.entries(domainImportRestrictions).map(([domain, disallowedDomains]) => ({
+    files: [`services/${domain}/**/*.{ts,tsx}`],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: disallowedDomains.flatMap((disallowedDomain) => ([
+          {
+            group: [`@/services/${disallowedDomain}`, `@/services/${disallowedDomain}/*`],
+            message: `Union Eyes ${domain} domain must not import ${disallowedDomain} directly. Use contracts, events, or API composition instead.`,
+          },
+        ])),
+      }],
+    },
+  })),
+  ...Object.entries(libServiceClusterRestrictions).map(([cluster, disallowedClusters]) => ({
+    files: [`lib/services/${cluster}/**/*.{ts,tsx}`],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: disallowedClusters.map((disallowedCluster) => ({
+          group: [`@/lib/services/${disallowedCluster}`, `@/lib/services/${disallowedCluster}/*`],
+          message: `Union Eyes lib/services/${cluster} cluster must not import lib/services/${disallowedCluster} directly. Use shared contracts or higher-level composition instead.`,
+        })),
+      }],
+    },
+  })),
   // Allow console.log in CLI scripts and test helpers — they are not production code
   {
     files: ['scripts/**'],

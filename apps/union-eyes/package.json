@@ -160,6 +160,7 @@
     "require-in-the-middle": "^8.0.1",
     "resend": "^6.6.0",
     "rrule": "^2.8.1",
+    "secrets.js-grempe": "^2.0.0",
     "server-only": "^0.0.1",
     "simple-statistics": "^7.8.8",
     "sonner": "^2.0.7",

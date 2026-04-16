@@ -22,7 +22,7 @@ import {
   sha256,
 } from "../../_lib";
 
-const LEGACY_TARGET_ID_COLUMN = "entity" + "Id";
+const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
 
 const replaySchema = z.object({
   mode: z.enum(["exact", "new_engine", "new_rule"]).default("exact"),
@@ -405,7 +405,7 @@ export const POST = withApi(
           replayMode: body.mode,
         },
         createdBy: userId ?? undefined,
-      } as any);
+      });
 
       if (diff.changed) {
         await tx.insert(employerExecutionComplianceEvents).values({

@@ -47,10 +47,15 @@ export interface DisasterDrill {
   conductedBy: string;
 }
 
+interface ShamirModule {
+  share(secret: string, total: number, threshold: number): string[];
+}
+
 export class BreakGlassService {
   private static readonly REQUIRED_SIGNATURES = 3;
   private static readonly TOTAL_KEY_HOLDERS = 5;
   private static readonly DRILL_FREQUENCY_DAYS = 90; // Quarterly
+  private static readonly SHARE_ENCRYPTION_ENV = "UE_BREAK_GLASS_SHARE_MASTER_KEY";
 
   /**
    * Initialize break-glass system with Shamir's Secret Sharing
@@ -86,7 +91,7 @@ export class BreakGlassService {
       })
       .returning();
 
-    // Generate Shamir shares (simplified - in production use proper SSS library)
+    // Generate threshold shares and store encrypted envelopes for each key holder.
     await this.generateShamirShares(params.keyHolderIds);
 
     return system;
@@ -94,73 +99,41 @@ export class BreakGlassService {
 
   /**
    * Generate Shamir's Secret Sharing keys for key holders
-   * 
-   * PRODUCTION IMPLEMENTATION REQUIRED:
-   * 
-   * 1. Install SSS Library:
-   *    npm install secrets.js-grempe
-   *    import * as secrets from 'secrets.js-grempe';
-   * 
-   * 2. Generate Master Secret (256-bit):
-   *    const masterSecret = secrets.random(256); // Generates 256-bit hex string
-   * 
-   * 3. Split into Shares (3-of-5 threshold):
-   *    const shares = secrets.share(masterSecret, 5, 3);
-   *    // shares = ['801...', '802...', '803...', '804...', '805...']
-   * 
-   * 4. Distribute Shares Securely:
-   *    - Encrypt each share with key holder's public key (RSA-2048 or ED25519)
-   *    - Store encrypted shares in key_holder_registry.shamir_share_encrypted
-   *    - Store SHA-256 fingerprint in key_holder_registry.shamir_share_fingerprint
-   *    - Never log or transmit unencrypted shares
-   * 
-   * 5. Recovery Process (3 shares required):
-   *    const recoveredSecret = secrets.combine([share1, share2, share3]);
-   *    // Use recoveredSecret to decrypt Swiss cold storage backups
-   * 
-   * 6. Security Requirements:
-   *    - Master secret never stored anywhere (only exists during initial generation)
-   *    - Shares encrypted with key holder public keys (PKI infrastructure required)
-   *    - Fingerprints used to verify share integrity during recovery
-   *    - Annual key rotation (regenerate shares with new master secret)
-   *    - Audit all share access attempts
-   * 
-   * 7. Testing:
-   *    - Quarterly disaster recovery drills
-   *    - Verify 3-share combination produces correct master secret
-   *    - Test Swiss vault decryption with recovered secret
-   *    - Document recovery time: target RTO = 48 hours
+    *
+    * The active implementation uses true threshold share generation via
+    * secrets.js-grempe and encrypts each share with AES-256-GCM using a
+    * per-holder HKDF-derived key. The plaintext master secret is generated
+    * once, split into shares, and never persisted.
    */
   private static async generateShamirShares(keyHolderIds: string[]) {
-    // Simplified implementation - use proper SSS library in production
-    // This generates random shares without proper threshold cryptography
-    // For production: Replace with secrets.js-grempe implementation above
-    const _masterSecret = crypto.randomBytes(32).toString("hex");
-    
-    logger.info('Break-glass: Generating SSS shares', {
+    const shamir = await this.loadShamirModule();
+    const masterSecret = crypto.randomBytes(32).toString("hex");
+    const shares = shamir.share(masterSecret, this.TOTAL_KEY_HOLDERS, this.REQUIRED_SIGNATURES);
+
+    logger.info('Break-glass: Generating threshold shares', {
+      auditEvent: 'share_creation',
       threshold: this.REQUIRED_SIGNATURES,
       totalShares: this.TOTAL_KEY_HOLDERS,
       keyHolders: keyHolderIds.length,
-      implementationStatus: 'SIMPLIFIED - Production requires secrets.js-grempe'
+      algorithm: 'shamir-secret-sharing',
+      encryption: 'aes-256-gcm',
+      kdf: 'hkdf-sha256',
     });
-    
+
     for (let i = 0; i < keyHolderIds.length; i++) {
       const userId = keyHolderIds[i];
-      
-      // Generate a "share" (in production, use proper SSS algorithm)
-      const share = crypto.randomBytes(32).toString("hex");
+      const share = shares[i];
       const shareFingerprint = crypto.createHash("sha256").update(share).digest("hex");
-      
-      // Encrypt share (placeholder - in production, encrypt with key holder's public key)
+
       const encryptedShare = this.encryptShare(share, userId);
-      
+
       // Calculate rotation dates
       const keyRotationDue = new Date();
       keyRotationDue.setFullYear(keyRotationDue.getFullYear() + 1); // Annual rotation
-      
+
       const trainingExpiresAt = new Date();
       trainingExpiresAt.setFullYear(trainingExpiresAt.getFullYear() + 1);
-      
+
       const nextVerificationDue = new Date();
       nextVerificationDue.setMonth(nextVerificationDue.getMonth() + 6); // Biannual verification
 
@@ -178,60 +151,75 @@ export class BreakGlassService {
         nextVerificationDue,
       });
       
-      logger.info('Break-glass: SSS share generated', {
+      logger.info('Break-glass: Threshold share generated', {
+        auditEvent: 'share_created',
         keyHolderId: userId,
         keyHolderNumber: i + 1,
         shareFingerprint: shareFingerprint.substring(0, 16) + '...',
-        rotationDue: keyRotationDue.toISOString()
+        rotationDue: keyRotationDue.toISOString(),
       });
     }
   }
 
   /**
-   * Encrypt SSS share with key holder's public key
-   * 
-   * PRODUCTION IMPLEMENTATION REQUIRED:
-   * 
-   * 1. PKI Infrastructure Setup:
-   *    - Generate RSA-2048 or ED25519 key pairs for each key holder
-   *    - Store public keys in key_holder_registry
-   *    - Key holders maintain private keys (hardware tokens/Yubikeys recommended)
-   * 
-   * 2. Encryption Process:
-   *    import { publicEncrypt } from 'crypto';
-   *    
-   *    const publicKey = await getKeyHolderPublicKey(userId);
-   *    const encrypted = publicEncrypt(
-   *      {
-   *        key: publicKey,
-   *        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-   *        oaepHash: 'sha256',
-   *      },
-   *      Buffer.from(share, 'hex')
-   *    );
-   *    return encrypted.toString('base64');
-   * 
-   * 3. Decryption (during emergency):
-   *    - Key holder uses private key from hardware token
-   *    - Decrypt share: privateDecrypt(privateKey, Buffer.from(encrypted, 'base64'))
-   *    - Submit decrypted share for SSS recovery
-   * 
-   * 4. Key Management:
-   *    - Public keys stored in database
-   *    - Private keys on hardware tokens (never in database)
-   *    - Annual key rotation with share re-encryption
-   *    - Revocation process for departed key holders
+    * Encrypt a threshold share using AES-256-GCM and a per-holder key derived
+    * from the repo-configured break-glass master key seed via HKDF-SHA256.
    */
   private static encryptShare(share: string, userId: string): string {
-    // Simplified implementation - uses base64 encoding only
-    // Production: Replace with proper RSA/ED25519 asymmetric encryption
-    logger.debug('Break-glass: Encrypting SSS share', {
+    const masterKeySeed = this.getShareEncryptionSeed();
+    const salt = crypto.randomBytes(32);
+    const iv = crypto.randomBytes(12);
+    const derivedKey = crypto.hkdfSync(
+      'sha256',
+      masterKeySeed,
+      salt,
+      Buffer.from(`ue-break-glass-share:${userId}`, 'utf8'),
+      32,
+    );
+    const cipher = crypto.createCipheriv('aes-256-gcm', derivedKey, iv);
+    const ciphertext = Buffer.concat([
+      cipher.update(share, 'utf8'),
+      cipher.final(),
+    ]);
+    const tag = cipher.getAuthTag();
+
+    logger.info('Break-glass: Share encrypted', {
+      auditEvent: 'share_access',
       keyHolderId: userId,
-      encryptionMethod: 'BASE64 (SIMPLIFIED)',
-      productionRequired: 'RSA-2048/ED25519 asymmetric encryption with PKI'
+      algorithm: 'aes-256-gcm',
+      kdf: 'hkdf-sha256',
     });
-    
-    return Buffer.from(share).toString("base64");
+
+    return Buffer.from(JSON.stringify({
+      version: 1,
+      algorithm: 'aes-256-gcm',
+      kdf: 'hkdf-sha256',
+      holder: userId,
+      salt: salt.toString('base64'),
+      iv: iv.toString('base64'),
+      tag: tag.toString('base64'),
+      ciphertext: ciphertext.toString('base64'),
+    }), 'utf8').toString('base64');
+  }
+
+  private static getShareEncryptionSeed(): Buffer {
+    const configuredKey = process.env[this.SHARE_ENCRYPTION_ENV];
+    if (!configuredKey) {
+      throw new Error(`NZILA_UNIMPLEMENTED: ${this.SHARE_ENCRYPTION_ENV}`);
+    }
+
+    return /^[0-9a-f]{64}$/i.test(configuredKey)
+      ? Buffer.from(configuredKey, 'hex')
+      : Buffer.from(configuredKey, 'utf8');
+  }
+
+  private static async loadShamirModule(): Promise<ShamirModule> {
+    const mod = await import('secrets.js-grempe') as unknown as { default?: ShamirModule } & Partial<ShamirModule>;
+    const resolved = mod.default ?? mod;
+    if (typeof resolved.share !== 'function') {
+      throw new Error('NZILA_UNIMPLEMENTED: union-eyes.break-glass.threshold-crypto');
+    }
+    return resolved as ShamirModule;
   }
 
   /**
@@ -292,6 +280,12 @@ export class BreakGlassService {
     activationId: string,
     signature: KeyHolderSignature
   ): Promise<{ authorizationComplete: boolean; signaturesReceived: number }> {
+    logger.info('Break-glass signature submitted', {
+      auditEvent: 'share_access',
+      activationId,
+      keyHolderId: signature.keyHolderId,
+    });
+
     // Verify key holder is registered
     const keyHolder = await db
       .select()
@@ -349,6 +343,11 @@ export class BreakGlassService {
     if (authorizationComplete) {
       updateData.authorizationComplete = true;
       updateData.authorizationCompletedAt = new Date();
+      logger.info('Break-glass reconstruction threshold reached', {
+        auditEvent: 'reconstruction_attempt',
+        activationId,
+        signaturesReceived,
+      });
     }
 
     await db
@@ -369,7 +368,10 @@ export class BreakGlassService {
   private static async executeRecoveryProcedure(activationId: string) {
     // This would trigger actual recovery actions
     // For now, log the authorization
-    logger.info('Break-glass authorization complete', { activationId });
+    logger.info('Break-glass authorization complete', {
+      auditEvent: 'reconstruction_attempt',
+      activationId,
+    });
     logger.info('Recovery procedure initiated', {
       steps: [
         'Access Swiss cold storage for encrypted backups',

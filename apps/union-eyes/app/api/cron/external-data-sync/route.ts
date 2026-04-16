@@ -10,7 +10,6 @@
  *   - Contributions: Weekly (Sunday at midnight UTC)
  */
 
-import { NextResponse } from 'next/server';
 import { wageEnrichmentService, type SyncResult } from '@/lib/services/external-data/wage-enrichment-service';
 import { logger } from '@/lib/logger';
 import { withApi } from '@/lib/api/framework';

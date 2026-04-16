@@ -11,7 +11,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { AlertTriangle, CheckCircle, XCircle, FileText, ArrowRight } from "lucide-react";
+import { AlertTriangle, XCircle, FileText, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

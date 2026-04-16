@@ -17,7 +17,7 @@ import {
   canOverridePriority,
   type AuthorityRole,
 } from '@nzila/workload-intelligence';
-import { getUserRole, type UserRole } from '@/lib/api-auth-guard';
+import { type UserRole } from '@/lib/api-auth-guard';
 
 /**
  * Map UE UserRole to WIL AuthorityRole.

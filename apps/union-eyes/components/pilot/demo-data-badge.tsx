@@ -29,6 +29,7 @@ export interface DemoDataset {
 export interface DemoDataBadgeProps {
   isActive: boolean;
   dataset?: DemoDataset;
+  telemetryTag?: string;
   onSeed?: () => Promise<void>;
   onPurge?: () => Promise<void>;
   className?: string;
@@ -39,6 +40,7 @@ export interface DemoDataBadgeProps {
 export function DemoDataBadge({
   isActive,
   dataset,
+  telemetryTag,
   onSeed,
   onPurge,
   className,
@@ -58,13 +60,18 @@ export function DemoDataBadge({
   if (!isActive && !onSeed) return null;
 
   return (
-    <Card className={cn("p-4 space-y-3", className)}>
+    <Card className={cn("relative overflow-hidden p-4 space-y-3", className)} data-telemetry-tag={telemetryTag}>
+      {isActive && (
+        <div className="pointer-events-none absolute -right-10 top-5 rotate-12 rounded-md border border-amber-300/70 bg-amber-100/85 px-10 py-1 text-[10px] font-bold uppercase tracking-[0.35em] text-amber-900">
+          Demo Mode
+        </div>
+      )}
       <div className="flex items-center gap-2">
-        <TestTube2 className="h-4 w-4 text-purple-600" />
-        <h3 className="text-sm font-semibold">Demo Environment</h3>
+        <TestTube2 className="h-4 w-4 text-amber-700" />
+        <h3 className="text-sm font-semibold uppercase tracking-[0.2em]">Demo Mode</h3>
         <Badge
           variant={isActive ? "default" : "secondary"}
-          className="text-[10px] ml-auto"
+          className="ml-auto text-[10px]"
         >
           {isActive ? "Demo Active" : "No Demo Data"}
         </Badge>

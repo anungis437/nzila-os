@@ -6,7 +6,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { relations } from 'drizzle-orm';
 
 // Mock drizzle-orm (needed since ingestion-schema imports relations)
 vi.mock('drizzle-orm', async () => {

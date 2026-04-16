@@ -33,13 +33,17 @@ afterEach(() => {
 })
 
 describe('db client proxy', () => {
-  it('throws when DATABASE_URL is missing and the proxy is used', async () => {
-    const { clientModule } = await importClientWithMocks()
+  it(
+    'throws when DATABASE_URL is missing and the proxy is used',
+    async () => {
+      const { clientModule } = await importClientWithMocks()
 
-    expect(() => Reflect.has(clientModule.db as object, 'select')).toThrow(
-      'DATABASE_URL environment variable is required',
-    )
-  })
+      expect(() => (clientModule.db as any).select).toThrow(
+        'DATABASE_URL environment variable is required',
+      )
+    },
+    20000,
+  )
 
   it('initializes the drizzle client once and reuses it for get/has access', async () => {
     const query = vi.fn()

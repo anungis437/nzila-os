@@ -15,7 +15,6 @@ import {
   ingestionBatches,
   ingestionRecords,
 } from '@/db/schema/ingestion-schema';
-import { ingestGrievanceBatch } from '@/lib/ingestion';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
 const retryBodySchema = z.object({

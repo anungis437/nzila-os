@@ -1,0 +1,49 @@
+name: Nzila GA Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  governance-baseline:
+    name: Governance Baseline
+    uses: ./.github/workflows/nzila-governance.yml
+    secrets: inherit
+
+  ga-truth-hardening:
+    name: GA Truth Hardening
+    needs: governance-baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate app maturity
+        run: pnpm validate:maturity
+
+      - name: Validate runtime truth
+        run: pnpm validate:runtime-truth
+
+      - name: Run GA check
+        run: pnpm ga-check
+
+      - name: Generate SBOM
+        run: pnpm generate:sbom

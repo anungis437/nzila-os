@@ -2,7 +2,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useUser, useAuthActions } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/use-toast';
@@ -39,7 +39,7 @@ type SettingsSection =
 export default function ProfilePage() {
   const t = useTranslations();
   const { toast } = useToast();
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const { signOut } = useAuthActions();
   const { organization, userMemberships } = useOrganization();
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
@@ -53,6 +53,17 @@ export default function ProfilePage() {
   const roleDisplay = currentMembership?.role
     ? currentMembership.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     : 'Member';
+
+  const userName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || '';
+  const userEmail = user?.primaryEmailAddress?.emailAddress || '';
+  const userPhone = user?.primaryPhoneNumber?.phoneNumber || '';
+  const orgName = organization?.name || '';
+
+  const [profileDraft, setProfileDraft] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+  }>({});
 
   // User settings state
   const [settings, setSettings] = useState({
@@ -94,29 +105,14 @@ export default function ProfilePage() {
     },
   });
 
-  // Derive stable primitives for the effect dependency array.
-  // useUser() returns a new object reference every render (Entra adapter),
-  // so depending on `user` directly would cause an infinite re-render loop.
-  const userName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || '';
-  const userEmail = user?.primaryEmailAddress?.emailAddress || '';
-  const userPhone = user?.primaryPhoneNumber?.phoneNumber || '';
-  const orgName = organization?.name || '';
-
-  // Sync user data + org context into profile settings when loaded
-  useEffect(() => {
-    if (!isLoaded || !userName) return;
-    setSettings(prev => ({
-      ...prev,
-      profile: {
-        ...prev.profile,
-        name: userName || prev.profile.name,
-        email: userEmail || prev.profile.email,
-        phone: userPhone || prev.profile.phone,
-        local: orgName || prev.profile.local,
-        role: roleDisplay,
-      },
-    }));
-  }, [isLoaded, userName, userEmail, userPhone, orgName, roleDisplay]);
+  const resolvedProfile = useMemo(() => ({
+    name: profileDraft.name ?? userName,
+    email: profileDraft.email ?? userEmail,
+    phone: profileDraft.phone ?? userPhone,
+    local: orgName,
+    memberNumber: settings.profile.memberNumber,
+    role: roleDisplay,
+  }), [profileDraft.name, profileDraft.email, profileDraft.phone, userName, userEmail, userPhone, orgName, settings.profile.memberNumber, roleDisplay]);
 
   const settingsSections = [
     {
@@ -231,7 +227,7 @@ export default function ProfilePage() {
                     {/* Profile Picture */}
                     <div className="flex items-center gap-6">
                       <div className="w-24 h-24 bg-linear-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                        {settings.profile.name
+                        {resolvedProfile.name
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
@@ -254,12 +250,9 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="text"
-                          value={settings.profile.name}
+                          value={resolvedProfile.name}
                           onChange={(e) => {
-                            setSettings({
-                              ...settings,
-                              profile: { ...settings.profile, name: e.target.value },
-                            });
+                            setProfileDraft((prev) => ({ ...prev, name: e.target.value }));
                             setHasChanges(true);
                           }}
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -272,12 +265,9 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="email"
-                          value={settings.profile.email}
+                          value={resolvedProfile.email}
                           onChange={(e) => {
-                            setSettings({
-                              ...settings,
-                              profile: { ...settings.profile, email: e.target.value },
-                            });
+                            setProfileDraft((prev) => ({ ...prev, email: e.target.value }));
                             setHasChanges(true);
                           }}
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -290,12 +280,9 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="tel"
-                          value={settings.profile.phone}
+                          value={resolvedProfile.phone}
                           onChange={(e) => {
-                            setSettings({
-                              ...settings,
-                              profile: { ...settings.profile, phone: e.target.value },
-                            });
+                            setProfileDraft((prev) => ({ ...prev, phone: e.target.value }));
                             setHasChanges(true);
                           }}
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -308,7 +295,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="text"
-                          value={settings.profile.memberNumber}
+                          value={resolvedProfile.memberNumber}
                           disabled
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
                         />
@@ -320,7 +307,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="text"
-                          value={settings.profile.local}
+                          value={resolvedProfile.local}
                           disabled
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
                         />
@@ -332,7 +319,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           type="text"
-                          value={settings.profile.role}
+                          value={resolvedProfile.role}
                           disabled
                           className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
                         />

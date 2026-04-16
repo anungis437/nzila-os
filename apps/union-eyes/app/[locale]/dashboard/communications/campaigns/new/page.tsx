@@ -199,8 +199,7 @@ export default function NewCampaignPage() {
         throw new Error(error.message || 'Failed to create campaign');
       }
 
-      const result = await response.json();
-      const campaignId = result.data?.id;
+      await response.json();
 
       // Redirect to campaigns list (detail page not yet built)
       router.push(`/${locale}/dashboard/communications/campaigns`);

@@ -411,7 +411,7 @@ export default function FinancialOverview() {
         const execJson = await execRes.value.json();
         setExecutive(execJson.data ?? execJson);
       }
-    } catch (e) {
+    } catch {
       setError('Failed to load financial data');
     } finally {
       setLoading(false);

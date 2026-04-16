@@ -15,6 +15,9 @@
 
  
 import { logger } from '@/lib/logger';
+import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export interface ChaosConfig {
   enabled: boolean;
@@ -211,10 +214,6 @@ export class ChaosMonkey {
    * Simulate disk pressure by writing temp files
    */
   private exhaustDisk(durationMs: number): void {
-    const os = require('os');
-    const fs = require('fs');
-    const path = require('path');
-
     const tmpDir = path.join(os.tmpdir(), 'chaos-monkey-disk');
     fs.mkdirSync(tmpDir, { recursive: true });
 

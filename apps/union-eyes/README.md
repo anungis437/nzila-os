@@ -494,6 +494,7 @@ pnpm --filter @nzila/union-eyes e2e           # Run Playwright suite
 ```
 
 **16 E2E tests** covering 6 workflow groups:
+
 - Grievance draft save & resume
 - Grievance submission flow
 - Pilot readiness checklist
@@ -529,6 +530,7 @@ Union-Eyes ships with a 3-layer observability stack, initialised in [`instrument
 ### Startup Checks
 
 On boot, Union-Eyes validates:
+
 1. Environment variables (fail-fast in production)
 2. Database connectivity
 3. Redis connectivity (fail-closed — rate-limited endpoints reject all if Redis is down)
@@ -622,6 +624,7 @@ Starts: PostgreSQL 15, Redis 7, Django (Gunicorn, 4 workers), Celery (4 workers 
 ### Azure SWA (CI/CD)
 
 The `deploy-union-eyes.yml` GitHub Actions workflow deploys on push to `main`. Requires:
+
 - `AZURE_SWA_TOKEN_UE`
 - `AUTH_SECRET` (+ optional Entra federation variables)
 
