@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Trivy (filesystem mode)
+      - name: Run Trivy (filesystem mode) [BLOCKING]
         uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
         with:
           scan-type: fs
@@ -96,8 +96,20 @@ jobs:
           scanners: vuln
           severity: CRITICAL,HIGH
           exit-code: ${{ inputs.fail-on-critical && '1' || '0' }}
+          format: table
+          trivyignores: .trivyignore
+
+      - name: Run Trivy (filesystem mode) — SARIF (non-blocking)
+        uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
+        if: always()
+        continue-on-error: true
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          scanners: vuln
           format: sarif
           output: trivy-results.sarif
+          exit-code: '0'
           trivyignores: .trivyignore
 
       - name: Upload Trivy SARIF
