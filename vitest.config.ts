@@ -197,6 +197,8 @@ export default defineConfig({
       'packages/schema-core',
       // Governed workflow
       'packages/governed-workflow',
+      // System boundary tests
+      'tests/system',
     ],
   },
 })

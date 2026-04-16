@@ -5,8 +5,8 @@
   "riskLevel": "high",
   "policyProfile": null,
   "controls": {
-    "enforcement": true,
-    "governance": true,
+    "enforcement": false,
+    "governance": false,
     "audit": true,
     "observability": true,
     "security": true,

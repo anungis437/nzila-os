@@ -1,57 +1,80 @@
 /**
- * Nzila OS — Governance Action State Machine
+ * Console — Governance Action Proxy
  *
- * This is the server-side gate that enforces:
- *   1. Policy engine evaluation before submission
- *   2. Required approvals before execution
- *   3. Audit events at every state transition
- *   4. Evidence pack generation on execution
- *   5. Entity scope enforced end-to-end
+ * The Console no longer owns governance state. All governance mutations
+ * are delegated to the Control Plane via its authority API.
  *
- * State flow:
+ * Authority: apps/control-plane/app/api/control-plane/governance/actions/route.ts
+ *
+ * State flow (enforced by Control Plane):
  *   draft → pending_approval → approved → executed
  *                            ↘ rejected
  *
  * A governance action CANNOT transition to "executed" unless all
- * required approvals are in "approved" status. This is the #1
- * acceptance test for the backbone.
+ * required approvals are in "approved" status — the Control Plane
+ * enforces this gate.
  */
-// Platform DB for governance state machine — complex multi-table operations
-// with explicit audit via recordAuditEvent()
-import { platformDb } from '@nzila/db/platform'
 import { createLogger } from '@nzila/os-core'
-import {
-  governanceActions,
-  approvals,
-  orgs,
-} from '@nzila/db/schema'
-import { eq, and } from 'drizzle-orm'
-import {
-  evaluateGovernanceRequirements,
-  type GovernanceActionType,
-  type PolicyConfig,
-  type PolicyEvaluation,
-  getResolutionTemplate,
+import type {
+  GovernanceActionType,
+  PolicyEvaluation,
 } from '@nzila/os-core'
-import { buildEvidencePackFromAction } from '@nzila/os-core/evidence/builder'
-import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
+import type { buildEvidencePackFromAction } from '@nzila/os-core/evidence/builder'
 
-const logger = createLogger('state-machine')
+const logger = createLogger('console:governance:state-machine')
 
-// ── Types ───────────────────────────────────────────────────────────────────
+// ── Control Plane connection ──────────────────────────────────────────────
+
+const CP_URL = process.env.CONTROL_PLANE_URL ?? 'http://localhost:3010'
+const CP_KEY = process.env.CONTROL_PLANE_API_KEY ?? ''
+
+async function callControlPlane<T>(body: Record<string, unknown>): Promise<T> {
+  const response = await fetch(
+    `${CP_URL}/api/control-plane/governance/actions`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CP_KEY,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '(no body)')
+    logger.error('Control Plane governance call failed', {
+      status: response.status,
+      body: text,
+      operation: body.operation,
+    })
+    const json = JSON.parse(text || '{}') as { error?: { code?: string; message?: string } }
+    const err = json.error ?? { code: 'CP_ERROR', message: `HTTP ${response.status}` }
+    throw Object.assign(new Error(err.message ?? 'Control Plane error'), { code: err.code })
+  }
+
+  const json = (await response.json()) as { ok: boolean; data: T; error?: unknown }
+  if (!json.ok) {
+    const err = json.error as { code?: string; message?: string } ?? {}
+    throw Object.assign(new Error(err.message ?? 'Governance operation failed'), { code: err.code })
+  }
+
+  return json.data
+}
+
+// ── Types (preserved for callers) ────────────────────────────────────────
 
 export interface CreateActionInput {
   orgId: string
   actionType: GovernanceActionType
   payload: Record<string, unknown>
-  createdBy: string // clerk_user_id
+  createdBy: string
 }
 
 export interface SubmitActionInput {
   actionId: string
   orgId: string
   submittedBy: string
-  /** Context for policy evaluation (shares outstanding, amount, etc.) */
   context?: {
     totalSharesOutstanding?: number
     quantity?: number
@@ -86,265 +109,47 @@ type Result<T> =
   | { ok: true; data: T }
   | { ok: false; error: GovernanceError }
 
-// ── 1. Create a governance action (draft) ───────────────────────────────────
+// ── Proxy functions ───────────────────────────────────────────────────────
 
 export async function createGovernanceAction(
   input: CreateActionInput,
 ): Promise<Result<{ id: string }>> {
-  const [action] = await platformDb
-    .insert(governanceActions)
-    .values({
-      orgId: input.orgId,
-      actionType: input.actionType,
-      payload: input.payload,
-      status: 'draft',
-      createdBy: input.createdBy,
-    })
-    .returning({ id: governanceActions.id })
-
-  await recordAuditEvent({
-    orgId: input.orgId,
-    actorClerkUserId: input.createdBy,
-    action: AUDIT_ACTIONS.GOVERNANCE_ACTION_CREATE,
-    targetType: 'governance_action',
-    targetId: action.id,
-    afterJson: {
-      actionType: input.actionType,
-      status: 'draft',
-      payload: input.payload,
-    },
-  })
-
-  return { ok: true, data: { id: action.id } }
+  try {
+    const data = await callControlPlane<{ id: string }>({ operation: 'create', ...input })
+    return { ok: true, data }
+  } catch (err) {
+    const e = err as { code?: string; message?: string }
+    return { ok: false, error: { code: e.code ?? 'CP_ERROR', message: e.message ?? 'Unknown error' } }
+  }
 }
 
-// ── 2. Submit for approval (draft → pending_approval) ───────────────────────
-
-/**
- * Evaluates the policy engine and creates approval records.
- * Transitions action from `draft` → `pending_approval`.
- *
- * This is a GATE: if the policy engine returns blockers, the action
- * stays in draft and the blockers are returned.
- */
 export async function submitGovernanceAction(
   input: SubmitActionInput,
 ): Promise<Result<{ evaluation: PolicyEvaluation; approvalIds: string[] }>> {
-  // 1. Load the action
-  const [action] = await platformDb
-    .select()
-    .from(governanceActions)
-    .where(and(eq(governanceActions.orgId, input.orgId), eq(governanceActions.id, input.actionId)))
-    .limit(1)
-
-  if (!action) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Governance action not found' } }
-  }
-  if (action.status !== 'draft') {
-    return {
-      ok: false,
-      error: { code: 'INVALID_STATE', message: `Cannot submit: action is "${action.status}", expected "draft"` },
-    }
-  }
-
-  // 2. Load entity policy config
-  const [entity] = await platformDb
-    .select({ policyConfig: orgs.policyConfig })
-    .from(orgs)
-    .where(eq(orgs.id, input.orgId))
-    .limit(1)
-
-  const policyConfig = (entity?.policyConfig ?? {}) as Partial<PolicyConfig>
-
-  // 3. Evaluate policy engine
-  const evaluation = evaluateGovernanceRequirements(
-    action.actionType as GovernanceActionType,
-    input.context ?? {},
-    policyConfig,
-  )
-
-  // 4. Check blockers
-  if (evaluation.blockers.length > 0) {
-    return {
-      ok: false,
-      error: {
-        code: 'POLICY_BLOCKED',
-        message: 'Action blocked by policy engine',
-        details: { blockers: evaluation.blockers, evaluation },
-      },
-    }
-  }
-
-  // 5. Create approval records for each requirement
-  const approvalIds: string[] = []
-
-  for (const req of evaluation.requirements) {
-    if (req.kind === 'notice' || req.kind === 'filing') continue // tracked separately
-
-    const [approval] = await platformDb
-      .insert(approvals)
-      .values({
-        orgId: input.orgId,
-        subjectType: 'governance_action',
-        subjectId: input.actionId,
-        approvalType: req.kind === 'board_approval' ? 'board' : 'shareholder',
-        threshold: req.threshold?.toString() ?? null,
-        status: 'pending',
-      })
-      .returning({ id: approvals.id })
-
-    approvalIds.push(approval.id)
-
-    await recordAuditEvent({
-      orgId: input.orgId,
-      actorClerkUserId: input.submittedBy,
-      action: AUDIT_ACTIONS.APPROVAL_CREATE,
-      targetType: 'approval',
-      targetId: approval.id,
-      afterJson: {
-        subjectType: 'governance_action',
-        subjectId: input.actionId,
-        approvalType: req.kind,
-        threshold: req.threshold,
-      },
+  try {
+    const data = await callControlPlane<{ evaluation: PolicyEvaluation; approvalIds: string[] }>({
+      operation: 'submit',
+      ...input,
     })
+    return { ok: true, data }
+  } catch (err) {
+    const e = err as { code?: string; message?: string }
+    return { ok: false, error: { code: e.code ?? 'CP_ERROR', message: e.message ?? 'Unknown error' } }
   }
-
-  // 6. Update action status + store evaluation
-  await platformDb
-    .update(governanceActions)
-    .set({
-      status: 'pending_approval',
-      requirements: evaluation as unknown as Record<string, unknown>,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(governanceActions.orgId, input.orgId), eq(governanceActions.id, input.actionId)))
-
-  await recordAuditEvent({
-    orgId: input.orgId,
-    actorClerkUserId: input.submittedBy,
-    action: AUDIT_ACTIONS.GOVERNANCE_ACTION_SUBMIT,
-    targetType: 'governance_action',
-    targetId: input.actionId,
-    beforeJson: { status: 'draft' },
-    afterJson: {
-      status: 'pending_approval',
-      requirements: evaluation.requirements.map((r) => r.kind),
-      approvalIds,
-    },
-  })
-
-  return { ok: true, data: { evaluation, approvalIds } }
 }
 
-// ── 3. Decide on an approval ────────────────────────────────────────────────
-
-/**
- * Record an approval/rejection decision.
- * If all approvals are now approved, auto-transitions action to "approved".
- * If any approval is rejected, action transitions to "rejected".
- */
 export async function decideApproval(
   input: ApproveActionInput,
 ): Promise<Result<{ actionStatus: string }>> {
-  // 1. Update the approval
-  const [approval] = await platformDb
-    .select()
-    .from(approvals)
-    .where(and(eq(approvals.orgId, input.orgId), eq(approvals.id, input.approvalId)))
-    .limit(1)
-
-  if (!approval) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Approval not found' } }
+  try {
+    const data = await callControlPlane<{ actionStatus: string }>({ operation: 'decide', ...input })
+    return { ok: true, data }
+  } catch (err) {
+    const e = err as { code?: string; message?: string }
+    return { ok: false, error: { code: e.code ?? 'CP_ERROR', message: e.message ?? 'Unknown error' } }
   }
-  if (approval.status !== 'pending') {
-    return {
-      ok: false,
-      error: { code: 'INVALID_STATE', message: `Approval already decided: "${approval.status}"` },
-    }
-  }
-
-  await platformDb
-    .update(approvals)
-    .set({
-      status: input.decision,
-      decidedAt: new Date(),
-      notes: input.notes ?? null,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(approvals.orgId, input.orgId), eq(approvals.id, input.approvalId)))
-
-  await recordAuditEvent({
-    orgId: input.orgId,
-    actorClerkUserId: input.decidedBy,
-    action: AUDIT_ACTIONS.APPROVAL_DECIDE,
-    targetType: 'approval',
-    targetId: input.approvalId,
-    beforeJson: { status: 'pending' },
-    afterJson: { status: input.decision, notes: input.notes },
-  })
-
-  // 2. Check all approvals for this action
-  const allApprovals = await platformDb
-    .select()
-    .from(approvals)
-    .where(and(eq(approvals.orgId, input.orgId), eq(approvals.subjectType, 'governance_action')))
-
-  const hasRejection = allApprovals.some((a) => a.status === 'rejected')
-  const allApproved = allApprovals.every((a) => a.status === 'approved')
-
-  let newActionStatus: string
-
-  if (hasRejection) {
-    newActionStatus = 'rejected'
-  } else if (allApproved) {
-    newActionStatus = 'approved'
-  } else {
-    // Some still pending
-    return { ok: true, data: { actionStatus: 'pending_approval' } }
-  }
-
-  // 3. Transition the governance action
-  await platformDb
-    .update(governanceActions)
-    .set({ status: newActionStatus as 'approved' | 'rejected', updatedAt: new Date() })
-    .where(and(eq(governanceActions.orgId, input.orgId), eq(governanceActions.id, input.actionId)))
-
-  await recordAuditEvent({
-    orgId: input.orgId,
-    actorClerkUserId: input.decidedBy,
-    action:
-      newActionStatus === 'approved'
-        ? AUDIT_ACTIONS.GOVERNANCE_ACTION_APPROVE
-        : AUDIT_ACTIONS.GOVERNANCE_ACTION_REJECT,
-    targetType: 'governance_action',
-    targetId: input.actionId,
-    beforeJson: { status: 'pending_approval' },
-    afterJson: { status: newActionStatus },
-  })
-
-  return { ok: true, data: { actionStatus: newActionStatus } }
 }
 
-// ── 4. Execute a governance action (approved → executed) ────────────────────
-
-/**
- * THE CRITICAL GATE: Execute a governance action.
- *
- * This function REFUSES to execute unless:
- *   - Action status is "approved"
- *   - All approvals are in "approved" state
- *
- * On execution:
- *   - Generates a resolution artifact (markdown)
- *   - Builds an evidence pack request
- *   - Records audit events
- *   - Transitions to "executed"
- *
- * Note: The actual Blob upload + evidence pack persistence is handled
- * by the evidence-index CLI job or a follow-up pipeline step.
- * This function returns the evidence pack request for the caller.
- */
 export async function executeGovernanceAction(
   input: ExecuteActionInput,
 ): Promise<
@@ -353,126 +158,35 @@ export async function executeGovernanceAction(
     evidencePackRequest: ReturnType<typeof buildEvidencePackFromAction> | null
   }>
 > {
-  // 1. Load and validate action state
-  const [action] = await platformDb
-    .select()
-    .from(governanceActions)
-    .where(and(eq(governanceActions.orgId, input.orgId), eq(governanceActions.id, input.actionId)))
-    .limit(1)
-
-  if (!action) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Governance action not found' } }
-  }
-  if (action.status !== 'approved') {
-    return {
-      ok: false,
-      error: {
-        code: 'INVALID_STATE',
-        message: `Cannot execute: action is "${action.status}", expected "approved". ` +
-          'All required approvals must be granted before execution.',
-      },
-    }
-  }
-
-  // 2. Double-check all approvals (defense in depth)
-  const allApprovals = await platformDb
-    .select()
-    .from(approvals)
-    .where(and(eq(approvals.orgId, input.orgId), eq(approvals.subjectType, 'governance_action')))
-
-  const unapproved = allApprovals.filter((a) => a.status !== 'approved')
-  if (unapproved.length > 0) {
-    return {
-      ok: false,
-      error: {
-        code: 'APPROVALS_INCOMPLETE',
-        message: `${unapproved.length} approval(s) not yet granted`,
-        details: unapproved.map((a) => ({ id: a.id, status: a.status })),
-      },
-    }
-  }
-
-  // 3. Generate resolution artifact (markdown)
-  let resolution: { title: string; bodyMarkdown: string } | null = null
-  const payload = action.payload as Record<string, string>
   try {
-    resolution = getResolutionTemplate(action.actionType, payload) ?? null
-  } catch {
-    // Template may not exist for this action type — that's OK
-  }
-
-  // 4. Build evidence pack request
-  let evidencePackRequest: ReturnType<typeof buildEvidencePackFromAction> | null = null
-  try {
-    evidencePackRequest = buildEvidencePackFromAction({
-      actionId: action.id,
-      actionType: action.actionType,
-      orgId: action.orgId,
-      executedBy: input.executedBy,
-      resolutionDocument: resolution
-        ? {
-            filename: `resolution-${action.id.slice(0, 8)}.md`,
-            buffer: Buffer.from(resolution.bodyMarkdown),
-            contentType: 'text/markdown',
-          }
-        : undefined,
-    })
-  } catch {
-    // Evidence pack build is best-effort; log and continue
-    logger.warn('[GOVERNANCE] Evidence pack build failed for action', { detail: action.id })
-  }
-
-  // 5. Transition to executed
-  const now = new Date()
-  await platformDb
-    .update(governanceActions)
-    .set({
-      status: 'executed',
-      executedAt: now,
-      updatedAt: now,
-    })
-    .where(and(eq(governanceActions.orgId, input.orgId), eq(governanceActions.id, input.actionId)))
-
-  // 6. Audit event
-  await recordAuditEvent({
-    orgId: input.orgId,
-    actorClerkUserId: input.executedBy,
-    action: AUDIT_ACTIONS.GOVERNANCE_ACTION_EXECUTE,
-    targetType: 'governance_action',
-    targetId: input.actionId,
-    beforeJson: { status: 'approved' },
-    afterJson: {
-      status: 'executed',
-      executedAt: now.toISOString(),
-      hasResolution: !!resolution,
-      hasEvidencePack: !!evidencePackRequest,
-    },
-  })
-
-  return {
-    ok: true,
-    data: { resolution, evidencePackRequest },
+    const data = await callControlPlane<{
+      resolution: { title: string; bodyMarkdown: string } | null
+      evidencePackRequest: ReturnType<typeof buildEvidencePackFromAction> | null
+    }>({ operation: 'execute', ...input })
+    return { ok: true, data }
+  } catch (err) {
+    const e = err as { code?: string; message?: string }
+    return { ok: false, error: { code: e.code ?? 'CP_ERROR', message: e.message ?? 'Unknown error' } }
   }
 }
 
-// ── Utility: get action with its approvals ──────────────────────────────────
+// ── Utility: get action with its approvals (read from CP) ────────────────
 
 export async function getGovernanceActionWithApprovals(
   actionId: string,
   orgId: string,
 ) {
-  const [action] = await platformDb
-    .select()
-    .from(governanceActions)
-    .where(and(eq(governanceActions.orgId, orgId), eq(governanceActions.id, actionId)))
-    .limit(1)
-
-  if (!action) return null
-
-  const actionApprovals = await platformDb
-    .select()
-    .from(approvals)
-    .where(and(eq(approvals.orgId, orgId), eq(approvals.subjectType, 'governance_action')))
-
-  return { ...action, approvals: actionApprovals }
+  try {
+    const response = await fetch(
+      `${CP_URL}/api/control-plane/governance/actions?orgId=${encodeURIComponent(orgId)}`,
+      { headers: { 'x-api-key': CP_KEY } },
+    )
+    if (!response.ok) return null
+    const json = (await response.json()) as { ok: boolean; data: unknown[] }
+    const actions = json.data ?? []
+    const action = (actions as Array<{ id: string }>).find((a) => a.id === actionId)
+    return action ?? null
+  } catch {
+    return null
+  }
 }

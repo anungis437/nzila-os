@@ -5,7 +5,7 @@
   "riskLevel": "critical",
   "policyProfile": null,
   "controls": {
-    "enforcement": true,
+    "enforcement": false,
     "governance": true,
     "audit": true,
     "observability": true,
