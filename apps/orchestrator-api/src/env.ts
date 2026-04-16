@@ -1,8 +1,5 @@
 /**
  * Orchestrator API environment contract.
- *
- * Keeps the app's required runtime settings in one place so startup validation
- * is explicit and reusable outside the main entrypoint.
  */
 import { z } from 'zod'
 

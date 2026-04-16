@@ -1,7 +1,5 @@
 /**
  * Orchestrator API guard helpers.
- *
- * Centralizes API-key and idempotency enforcement for route and hook usage.
  */
 import { timingSafeEqual } from 'node:crypto'
 import type { FastifyReply, FastifyRequest } from 'fastify'
