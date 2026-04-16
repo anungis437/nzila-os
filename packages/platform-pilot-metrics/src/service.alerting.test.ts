@@ -1,7 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const executeMock = vi.fn(async (query: unknown) => {
-  const text = String(query)
+function queryText(query: unknown): string {
+  const chunks = (query as { queryChunks?: unknown[] }).queryChunks ?? []
+  return chunks
+    .map((c: unknown) => {
+      if (typeof c === 'string') return c
+      if (typeof c === 'number') return String(c)
+      if (c !== null && typeof c === 'object' && Array.isArray((c as { value?: unknown }).value)) {
+        return ((c as { value: string[] }).value).join('')
+      }
+      return ''
+    })
+    .join('')
+}
+
+const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
+
+vi.mock('@nzila/db/platform', () => ({
+  platformDb: {
+    execute: executeMock,
+  },
+}))
+
+import { __test__, computeAlertOpsMetrics } from './service'
+
+executeMock.mockImplementation(async (query: unknown) => {
+  const text = queryText(query)
 
   if (text.includes('FROM pilot_alerts') && text.includes('detected_at >=')) {
     return [
@@ -24,14 +48,6 @@ const executeMock = vi.fn(async (query: unknown) => {
 
   return []
 })
-
-vi.mock('@nzila/db/platform', () => ({
-  platformDb: {
-    execute: executeMock,
-  },
-}))
-
-import { __test__, computeAlertOpsMetrics } from './service'
 
 describe('pilot alerting unit behavior', () => {
   beforeEach(() => {
