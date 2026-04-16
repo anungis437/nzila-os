@@ -22,6 +22,8 @@ import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { trackPilotEvent } from '@/lib/services/pilot-tracking';
+import { recordUsage } from '@/services/platform-economics';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 import {
@@ -206,6 +208,43 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       actorId: userId,
       artifacts: [{ type: 'grievance_document', data: { grievanceId: params.id, documentId: result.governedDoc.id, documentType: parsed.data.documentType, privacyLabel: parsed.data.privacyLabel } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_DOCUMENT_UPLOADED' }));
+
+    await trackPilotEvent({
+      userId,
+      organizationId,
+      sessionId: `server:${params.id}`,
+      eventType: 'document_uploaded',
+      metadata: {
+        grievanceId: params.id,
+        documentId: result.governedDoc.id,
+        documentType: parsed.data.documentType,
+      },
+    });
+
+    await trackPilotEvent({
+      userId,
+      organizationId,
+      sessionId: `server:${params.id}`,
+      eventType: 'document_attached',
+      metadata: {
+        grievanceId: params.id,
+        documentId: result.governedDoc.id,
+        privacyLabel: parsed.data.privacyLabel,
+      },
+    });
+
+    await recordUsage({
+      meterCode: 'document_uploaded',
+      organizationId,
+      userId,
+      quantity: 1,
+      idempotencyKey: `usage:document_uploaded:${result.governedDoc.id}`,
+      metadata: {
+        grievanceId: params.id,
+        documentId: result.governedDoc.id,
+        documentType: parsed.data.documentType,
+      },
+    }).catch((err) => logger.warn('Usage meter write skipped', { error: String(err), meterCode: 'document_uploaded' }));
 
     return standardSuccessResponse({
       ...result.governedDoc,

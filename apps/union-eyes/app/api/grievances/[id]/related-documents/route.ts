@@ -13,6 +13,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { getRelatedDocuments } from '@/lib/services/case-related-documents-service';
 import { buildCaseGraph } from '@/lib/services/case-knowledge-graph-service';
+import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 
 const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
@@ -97,6 +98,18 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         },
       })
     : undefined;
+
+  await trackPilotEvent({
+    userId,
+    organizationId,
+    sessionId: `server:${params.id}`,
+    eventType: 'document_accessed',
+    metadata: {
+      grievanceId: params.id,
+      documentCount: filtered.length,
+      includeGraph: !!query.data.includeGraph,
+    },
+  });
 
   return standardSuccessResponse({
     documents: filtered,

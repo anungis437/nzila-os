@@ -14,6 +14,7 @@ import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   validateTransition,
   type LifecycleState,
@@ -176,6 +177,31 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       actorId: userId,
       artifacts: [{ type: 'grievance', data: { grievanceId: params.id, from: currentStatus, to: newStatus } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_STATUS_CHANGED' }));
+
+    await trackPilotEvent({
+      userId,
+      organizationId,
+      sessionId: `server:${params.id}`,
+      eventType: 'case_transitioned',
+      metadata: {
+        grievanceId: params.id,
+        fromStatus: currentStatus,
+        toStatus: newStatus,
+      },
+    });
+
+    if (newStatus === 'closed' || newStatus === 'settled' || newStatus === 'withdrawn' || newStatus === 'denied') {
+      await trackPilotEvent({
+        userId,
+        organizationId,
+        sessionId: `server:${params.id}`,
+        eventType: 'case_closed',
+        metadata: {
+          grievanceId: params.id,
+          finalStatus: newStatus,
+        },
+      });
+    }
 
     return standardSuccessResponse(updated);
   } catch (_error) {

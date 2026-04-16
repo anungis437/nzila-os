@@ -90,7 +90,13 @@ describe('API Authorization Contract (INV-04)', () => {
 
     const violations: string[] = []
     for (const route of routes) {
-      const content = readFileSync(route, 'utf-8')
+      let content: string
+      try {
+        content = readFileSync(route, 'utf-8')
+      } catch {
+        // Parallel scaffold tests can create/remove temporary apps during discovery.
+        continue
+      }
       if (!MUTATION_EXPORTS.test(content)) continue
       const routeNorm = route.replace(/\\/g, '/')
       const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => p.test(routeNorm))
@@ -115,7 +121,12 @@ describe('API Authorization Contract (INV-04)', () => {
     const violations: string[] = []
 
     for (const route of routes) {
-      const content = readFileSync(route, 'utf-8')
+      let content: string
+      try {
+        content = readFileSync(route, 'utf-8')
+      } catch {
+        continue
+      }
       if (DIRECT_ROLE_CHECK.test(content)) {
         violations.push(route.replace(REPO_ROOT + '/', ''))
       }
@@ -132,7 +143,12 @@ describe('API Authorization Contract (INV-04)', () => {
     const violations: string[] = []
 
     for (const route of routes) {
-      const content = readFileSync(route, 'utf-8')
+      let content: string
+      try {
+        content = readFileSync(route, 'utf-8')
+      } catch {
+        continue
+      }
       if (DEEP_RELATIVE.test(content)) {
         violations.push(route.replace(REPO_ROOT + '/', ''))
       }

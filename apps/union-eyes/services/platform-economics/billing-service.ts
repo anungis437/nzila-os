@@ -18,10 +18,13 @@ import {
   platformPayments,
   paymentAllocations,
   subscriptionPlans,
+  usageAggregates,
+  usageEvents,
+  usageMeters,
   organizations,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, inArray } from 'drizzle-orm';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
 import { requireReconciliation } from './reconciliation-service';
@@ -274,6 +277,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     quantity: string;
     unitPrice: string;
     amount: string;
+    metadata?: Record<string, unknown>;
   }> = [];
 
   const baseFee = centsSafe(plan.baseFee);
@@ -321,6 +325,61 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       unitPrice: plan.perModuleFee!,
       amount: centsToDecimal(perModuleFeeCents * modules.length),
     });
+  }
+
+  // Usage-driven line items with explicit event lineage.
+  if (period) {
+    const aggregates = await db
+      .select({
+        id: usageAggregates.id,
+        meterId: usageAggregates.meterId,
+        billableQuantity: usageAggregates.billableQuantity,
+        unitPrice: usageAggregates.unitPrice,
+        totalAmount: usageAggregates.totalAmount,
+        status: usageAggregates.status,
+        meterCode: usageMeters.code,
+        meterUnit: usageMeters.unit,
+      })
+      .from(usageAggregates)
+      .innerJoin(usageMeters, eq(usageMeters.id, usageAggregates.meterId))
+      .where(
+        and(
+          eq(usageAggregates.organizationId, input.organizationId),
+          eq(usageAggregates.billingPeriodId, input.billingPeriodId),
+        ),
+      );
+
+    for (const agg of aggregates) {
+      const amountCents = centsSafe(agg.totalAmount);
+      if (amountCents <= 0) continue;
+
+      const usageEventRows = await db
+        .select({ id: usageEvents.id })
+        .from(usageEvents)
+        .where(
+          and(
+            eq(usageEvents.organizationId, input.organizationId),
+            eq(usageEvents.meterId, agg.meterId),
+            sql`${usageEvents.eventTime} >= ${period.periodStart}`,
+            sql`${usageEvents.eventTime} <= ${period.periodEnd}`,
+          ),
+        );
+
+      lineItems.push({
+        description: `Usage ${agg.meterCode} (${agg.billableQuantity} ${agg.meterUnit})`,
+        costType: 'usage_fee',
+        quantity: String(agg.billableQuantity),
+        unitPrice: String(agg.unitPrice),
+        amount: String(agg.totalAmount),
+        metadata: {
+          usageAggregateId: agg.id,
+          meterId: agg.meterId,
+          meterCode: agg.meterCode,
+          usageAggregateStatus: agg.status,
+          usageEventIds: usageEventRows.map((r) => r.id),
+        },
+      });
+    }
   }
 
   // Apply discount — cents-safe arithmetic
@@ -373,6 +432,10 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
         totalAmount: centsToDecimal(totalCents),
         currency: 'CAD',
         status: 'issued',
+        metadata: {
+          pricingRuleVersion: `plan:${plan.id}@${plan.updatedAt?.toISOString?.() ?? 'unknown'}`,
+          pricingPlanCode: plan.code,
+        },
         createdBy: input.createdBy,
       })
       .returning();
@@ -387,6 +450,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
         unitPrice: li.unitPrice,
         amount: li.amount,
         currency: 'CAD',
+        metadata: li.metadata,
       });
     }
 
@@ -558,6 +622,47 @@ export async function getInvoiceWithLineItems(invoiceId: string) {
     .where(eq(platformInvoiceLineItems.invoiceId, invoiceId));
 
   return { ...invoice, lineItems };
+}
+
+export async function replayInvoiceDeterministically(invoiceId: string) {
+  const invoiceData = await getInvoiceWithLineItems(invoiceId);
+  if (!invoiceData) return null;
+
+  let recomputedSubtotalCents = 0;
+  const lineage: Array<Record<string, unknown>> = [];
+
+  for (const item of invoiceData.lineItems) {
+    const amountCents = centsSafe(item.amount);
+    recomputedSubtotalCents += amountCents;
+
+    const metadata = (item.metadata ?? {}) as Record<string, unknown>;
+    const usageEventIds = Array.isArray(metadata.usageEventIds)
+      ? metadata.usageEventIds.map(String)
+      : [];
+
+    lineage.push({
+      lineItemId: item.id,
+      costType: item.costType,
+      amount: String(item.amount),
+      usageAggregateId: metadata.usageAggregateId ?? null,
+      usageEventIds,
+    });
+  }
+
+  const recomputedSubtotal = centsToDecimal(recomputedSubtotalCents);
+  const storedSubtotal = String(invoiceData.subtotal);
+
+  return {
+    invoiceId: invoiceData.id,
+    pricingRuleVersion: (invoiceData.metadata as Record<string, unknown> | null | undefined)?.pricingRuleVersion ?? null,
+    recomputed: {
+      subtotal: recomputedSubtotal,
+      storedSubtotal,
+      totalAmount: String(invoiceData.totalAmount),
+      isMatch: recomputedSubtotal === storedSubtotal,
+    },
+    lineage,
+  };
 }
 
 export async function getPayments(organizationId: string, invoiceId?: string, limit = 50) {

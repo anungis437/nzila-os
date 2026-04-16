@@ -13,6 +13,7 @@ import { sql } from 'drizzle-orm'
 import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
 import { withApi } from '@/lib/api/framework'
+import { trackPilotEvent } from '@/lib/services/pilot-tracking'
 import {
   CLAIM_SLA_STANDARDS,
   type ClaimStatus,
@@ -100,6 +101,21 @@ export const POST = withApi(
           organizationId: c.organizationId ?? undefined,
           source: 'sla-watchdog',
         })
+
+        if (c.organizationId) {
+          await trackPilotEvent({
+            userId: 'system:sla-watchdog',
+            organizationId: c.organizationId,
+            sessionId: `system:${c.claimId}`,
+            eventType: 'sla_breached',
+            metadata: {
+              claimId: c.claimId,
+              claimNumber: c.claimNumber,
+              status,
+              priority,
+            },
+          })
+        }
       } else if (atRisk) {
         atRiskCount++
         eventBus.emit('claim_events', {
@@ -120,6 +136,40 @@ export const POST = withApi(
           organizationId: c.organizationId ?? undefined,
           source: 'sla-watchdog',
         })
+
+        eventBus.emit('claim_events', {
+          claim_id: c.claimId,
+          event_type: 'sla_breach_risk',
+          actor: 'system:sla-watchdog',
+          timestamp: now.toISOString(),
+          payload: {
+            claimNumber: c.claimNumber,
+            status,
+            priority,
+            deadline: deadline.toISOString(),
+            hoursRemaining: hoursRemaining.toFixed(1),
+            organizationId: c.organizationId,
+            assignedTo: c.assignedTo,
+          },
+        }, {
+          organizationId: c.organizationId ?? undefined,
+          source: 'sla-watchdog',
+        })
+
+        if (c.organizationId) {
+          await trackPilotEvent({
+            userId: 'system:sla-watchdog',
+            organizationId: c.organizationId,
+            sessionId: `system:${c.claimId}`,
+            eventType: 'sla_breach_risk',
+            metadata: {
+              claimId: c.claimId,
+              claimNumber: c.claimNumber,
+              status,
+              priority,
+            },
+          })
+        }
       }
     }
 

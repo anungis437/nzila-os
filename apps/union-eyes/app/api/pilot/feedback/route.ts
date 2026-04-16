@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { pilotFeedback } from "@/db/schema";
+import { trackPilotEvent } from "@/lib/services/pilot-tracking";
 import { eq, sql } from "drizzle-orm";
 
 /**
@@ -52,6 +53,29 @@ export const POST = withRoleAuth('member', async (req) => {
         comment: comment ?? null,
         trigger,
       });
+    });
+
+    await trackPilotEvent({
+      userId,
+      organizationId,
+      sessionId: `server:pilot-feedback:${trigger}`,
+      eventType: 'feedback_submitted',
+      metadata: {
+        easeRating,
+        category: category ?? null,
+        trigger,
+      },
+    });
+
+    await trackPilotEvent({
+      userId,
+      organizationId,
+      sessionId: `server:pilot-feedback:${trigger}`,
+      eventType: 'feature_used',
+      metadata: {
+        feature: 'pilot_feedback',
+        trigger,
+      },
     });
 
     return NextResponse.json({ ok: true });

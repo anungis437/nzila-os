@@ -15,6 +15,7 @@ import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { getEffectiveCaseAccess, expireElapsedCaseAccessAssignments } from "@/lib/services/case-access-service";
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from "@/lib/services/document-governance-service";
+import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -135,6 +136,20 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
       }),
     );
+
+    if (governedDocuments.length > 0 || legacyDocuments.length > 0) {
+      await trackPilotEvent({
+        userId,
+        organizationId,
+        sessionId: `server:${params.id}`,
+        eventType: 'document_accessed',
+        metadata: {
+          grievanceId: params.id,
+          governedCount: governedDocuments.length,
+          legacyCount: legacyDocuments.length,
+        },
+      });
+    }
 
     const collaborators = await db
       .select()

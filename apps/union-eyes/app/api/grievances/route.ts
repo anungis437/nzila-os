@@ -24,6 +24,8 @@ import { eq, desc } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { trackPilotEvent } from '@/lib/services/pilot-tracking';
+import { recordUsage } from '@/services/platform-economics';
 import { randomBytes } from 'crypto';
 
 // ── Validation ──────────────────────────────────────────────────────────────
@@ -239,6 +241,40 @@ export const POST = withOrganizationAuth(async (request, context) => {
       actorId: userId,
       artifacts: [{ type: 'grievance', data: { grievanceId: grievance.id, grievanceNumber: grievance.grievanceNumber, type: data.type } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: isOfficialCase ? 'GRIEVANCE_FILED' : 'INTAKE_SUBMITTED' }))
+
+    if (isOfficialCase) {
+      await trackPilotEvent({
+        userId,
+        organizationId,
+        sessionId: `server:${grievance.id}`,
+        eventType: 'case_created',
+        metadata: {
+          grievanceId: grievance.id,
+          grievanceNumber: grievance.grievanceNumber,
+          source: 'grievances_api',
+        },
+      });
+
+      await trackPilotEvent({
+        userId,
+        organizationId,
+        sessionId: `server:${grievance.id}`,
+        eventType: 'active_user',
+        metadata: {
+          action: 'case_created',
+          source: 'grievances_api',
+        },
+      });
+
+      await recordUsage({
+        meterCode: 'case_created',
+        organizationId,
+        userId,
+        quantity: 1,
+        idempotencyKey: `usage:case_created:${grievance.id}`,
+        metadata: { grievanceId: grievance.id, source: 'grievances_api' },
+      }).catch((err) => logger.warn('Usage meter write skipped', { error: String(err), meterCode: 'case_created' }));
+    }
 
     return standardSuccessResponse(grievance);
   } catch (_error) {
