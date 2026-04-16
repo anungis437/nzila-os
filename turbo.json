@@ -1,6 +1,22 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalPassThroughEnv": [
+    "USERNAME",
+    "COMPUTERNAME",
+    "OS",
+    "USERPROFILE",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "TEMP",
+    "TMP",
+    "HOMEPATH",
+    "HOME",
+    "USER",
+    "LOGNAME",
+    "SHELL",
+    "TERM"
+  ],
   "ui": "stream",
   "concurrency": "50%",
   "remoteCache": {

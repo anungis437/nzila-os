@@ -54,6 +54,10 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_CONSOLE_URL=${NEXT_PUBLIC_CONSOLE_URL:-http://localhost:3001}
       - NEXT_PUBLIC_PARTNERS_URL=${NEXT_PUBLIC_PARTNERS_URL:-http://localhost:3002}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # Console app (production)
@@ -74,6 +78,10 @@ services:
       - NEXT_PUBLIC_PARTNERS_URL=${NEXT_PUBLIC_PARTNERS_URL:-http://localhost:3002}
       - NEXT_PUBLIC_UNION_EYES_URL=${NEXT_PUBLIC_UNION_EYES_URL:-http://localhost:3003}
       - NEXT_PUBLIC_ABR_URL=${NEXT_PUBLIC_ABR_URL:-http://localhost:3004}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # Partner Portal (production)
@@ -90,6 +98,10 @@ services:
       - AZURE_AD_CLIENT_ID=${AZURE_AD_CLIENT_ID:-}
       - AZURE_AD_CLIENT_SECRET=${AZURE_AD_CLIENT_SECRET:-}
       - AZURE_AD_TENANT_ID=${AZURE_AD_TENANT_ID:-}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # UnionEyes app (production)
@@ -110,6 +122,10 @@ services:
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3003}
       - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3000}
       - NEXT_PUBLIC_CONSOLE_URL=${NEXT_PUBLIC_CONSOLE_URL:-http://localhost:3001}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # ABR app (production)
@@ -129,6 +145,10 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-http://localhost:3000}
       - NEXT_PUBLIC_CONSOLE_URL=${NEXT_PUBLIC_CONSOLE_URL:-http://localhost:3001}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # Build-only service (for CI/CD)
@@ -158,6 +178,10 @@ services:
       - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME:-}
       - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY:-}
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_ZONGA_URL:-http://localhost:3006}
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # ── Zonga Infrastructure Services ──────────────────────────────────────────
@@ -175,6 +199,10 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
   # Media Worker — audio transcoding + queue processing
@@ -198,6 +226,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    security_opt:
+      - seccomp:security/runtime/seccomp-default.json
+    cap_drop:
+      - ALL
     restart: unless-stopped
 
 volumes:

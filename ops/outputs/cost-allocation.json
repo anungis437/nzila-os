@@ -1,0 +1,320 @@
+{
+  "_schema": "1.0",
+  "collected_at": "2026-04-16T23:27:26.365Z",
+  "currency": "USD",
+  "period": "monthly",
+  "total_monthly_cost_usd": null,
+  "apps": [
+    {
+      "app_id": "union-eyes",
+      "tier": "PRODUCTION",
+      "domain": "union",
+      "owner": "union",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "flow",
+      "tier": "PRODUCTION",
+      "domain": "commerce",
+      "owner": "commerce",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "web",
+      "tier": "PRODUCTION",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "partners",
+      "tier": "PILOT",
+      "domain": "commerce",
+      "owner": "commerce",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "cfo",
+      "tier": "PILOT",
+      "domain": "finance",
+      "owner": "finance",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "console",
+      "tier": "PILOT",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "control-plane",
+      "tier": "PILOT",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "zonga",
+      "tier": "INCUBATING",
+      "domain": "media",
+      "owner": "media",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "abr",
+      "tier": "INCUBATING",
+      "domain": "audit",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "cora",
+      "tier": "INCUBATING",
+      "domain": "compliance",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "trade",
+      "tier": "INCUBATING",
+      "domain": "trade",
+      "owner": "commerce",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "agrimo",
+      "tier": "INCUBATING",
+      "domain": "analytics",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "platform-admin",
+      "tier": "INCUBATING",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "orchestrator-api",
+      "tier": "INCUBATING",
+      "domain": "platform",
+      "owner": "platform",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "nacp-exams",
+      "tier": "EXPERIMENTAL",
+      "domain": "education",
+      "owner": "education",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "mobility",
+      "tier": "EXPERIMENTAL",
+      "domain": "mobility",
+      "owner": "mobility",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    },
+    {
+      "app_id": "mobility-client-portal",
+      "tier": "EXPERIMENTAL",
+      "domain": "mobility",
+      "owner": "mobility",
+      "monthly_cost_usd": null,
+      "breakdown": {
+        "compute_usd": null,
+        "database_usd": null,
+        "storage_usd": null,
+        "networking_usd": null,
+        "ai_inference_usd": null,
+        "other_usd": null
+      },
+      "azure_resource_group": null,
+      "azure_container_app_name": null,
+      "note": "Stub — run with Azure Cost Management API credentials to populate"
+    }
+  ],
+  "_instructions": [
+    "Set AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, and run `az login` before extending",
+    "Populate azure_resource_group and azure_container_app_name per app for tag-based filtering",
+    "Monthly totals are summed automatically when all app costs are populated"
+  ]
+}

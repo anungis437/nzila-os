@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-16T22:57:51.031Z",
-  "total": 14,
-  "passed": 14,
+  "timestamp": "2026-04-16T23:30:16.219Z",
+  "total": 20,
+  "passed": 20,
   "failed": 0,
   "checks": [
     {
@@ -73,6 +73,36 @@
       "name": "GOV-GATE-014: Strategic telemetry and command catalog exist",
       "status": "pass",
       "detail": "4 telemetry/catalog artifacts verified"
+    },
+    {
+      "name": "GOV-GATE-015: Onboarding guide exists",
+      "status": "pass",
+      "detail": "Onboarding guide present with required sections"
+    },
+    {
+      "name": "GOV-GATE-016: SLO policy, data residency, and alerting runbook exist",
+      "status": "pass",
+      "detail": "3 operational docs verified"
+    },
+    {
+      "name": "GOV-GATE-017: DORA and cost attribution outputs exist",
+      "status": "pass",
+      "detail": "DORA + cost attribution pipeline verified"
+    },
+    {
+      "name": "GOV-GATE-018: Container seccomp profile exists",
+      "status": "pass",
+      "detail": "Seccomp profile verified (deny-by-default, 7 allowlist entries, 8 services)"
+    },
+    {
+      "name": "GOV-GATE-019: Third-party risk register exists",
+      "status": "pass",
+      "detail": "Third-party risk register present with required sections"
+    },
+    {
+      "name": "GOV-GATE-020: Domain expertise map and turbo cache strategy exist",
+      "status": "pass",
+      "detail": "Knowledge docs + turbo cache hardening verified (14 pass-through vars)"
     }
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "_schema": "1.0",
+  "collected_at": "2026-04-16T23:27:26.173Z",
+  "window_days": 30,
+  "metrics": {
+    "deployment_frequency": {
+      "value": 10.47,
+      "unit": "deploys_per_week",
+      "raw_count_30d": 45,
+      "tier": "elite"
+    },
+    "lead_time_for_change": {
+      "value": 1349.3,
+      "unit": "hours",
+      "tier": "low"
+    },
+    "change_failure_rate": {
+      "value": 0,
+      "unit": "percent",
+      "revert_count_30d": 0,
+      "tier": "elite"
+    },
+    "mttr": {
+      "value": null,
+      "unit": "hours",
+      "tier": "unknown",
+      "note": "Requires incident tracker integration (e.g. PagerDuty API)"
+    }
+  }
+}

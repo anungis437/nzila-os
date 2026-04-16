@@ -251,6 +251,9 @@ jobs:
       - name: Evidence lifecycle policy gate
         run: pnpm validate:evidence:lifecycle
 
+      - name: Collect DORA metrics
+        run: pnpm collect:dora
+
       - name: Truth authority validation
         run: pnpm validate:truth-authority
 
@@ -289,6 +292,8 @@ jobs:
           name: governance-gate-report
           path: |
             ops/outputs/governance-gate-report.json
+            ops/outputs/dora-metrics.json
+            ops/outputs/cost-allocation.json
             ops/outputs/control-manifest-report.json
             proof-artifacts/**
           retention-days: 90

@@ -231,6 +231,92 @@ check('GOV-GATE-014: Strategic telemetry and command catalog exist', () => {
   return `${required.length} telemetry/catalog artifacts verified`
 })
 
+check('GOV-GATE-015: Onboarding guide exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'ONBOARDING.md')
+  if (!existsSync(path)) throw new Error('docs/platform/ONBOARDING.md not found')
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Prerequisites', '## Making Your First PR', '## Common First-Week Pitfalls']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) throw new Error(`Onboarding guide missing sections: ${missing.join(', ')}`)
+  return 'Onboarding guide present with required sections'
+})
+
+check('GOV-GATE-016: SLO policy, data residency, and alerting runbook exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'SLO_ERROR_BUDGET_POLICY.md'),
+    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
+    join(ROOT, 'docs', 'platform', 'ALERTING_RUNBOOK.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing operational docs: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  // Validate alerting runbook has alert IDs
+  const runbook = readFileSync(required[2], 'utf-8')
+  if (!runbook.includes('ALERT-SLO-001')) throw new Error('ALERTING_RUNBOOK.md missing ALERT-SLO-001')
+  return `${required.length} operational docs verified`
+})
+
+check('GOV-GATE-017: DORA and cost attribution outputs exist', () => {
+  const required = [
+    join(ROOT, 'ops', 'outputs', 'dora-metrics.json'),
+    join(ROOT, 'ops', 'outputs', 'cost-allocation.json'),
+    join(ROOT, 'tooling', 'scripts', 'collect-dora-metrics.mjs'),
+    join(ROOT, 'tooling', 'scripts', 'collect-cost-attribution.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing DORA/cost artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const dora = JSON.parse(readFileSync(required[0], 'utf-8'))
+  if (!dora.metrics?.deployment_frequency) throw new Error('dora-metrics.json missing deployment_frequency')
+  return 'DORA + cost attribution pipeline verified'
+})
+
+check('GOV-GATE-018: Container seccomp profile exists', () => {
+  const path = join(ROOT, 'security', 'runtime', 'seccomp-default.json')
+  if (!existsSync(path)) throw new Error('security/runtime/seccomp-default.json not found')
+  const profile = JSON.parse(readFileSync(path, 'utf-8'))
+  if (profile.defaultAction !== 'SCMP_ACT_ERRNO') {
+    throw new Error('Seccomp profile defaultAction must be SCMP_ACT_ERRNO (deny-by-default)')
+  }
+  if (!Array.isArray(profile.syscalls) || profile.syscalls.length === 0) {
+    throw new Error('Seccomp profile has no syscall allowlist')
+  }
+  // Verify docker-compose applies it
+  const compose = readFileSync(join(ROOT, 'docker-compose.yml'), 'utf-8')
+  const seccompCount = (compose.match(/seccomp:security\/runtime\/seccomp-default\.json/g) ?? []).length
+  if (seccompCount < 5) throw new Error(`Expected seccomp on ≥5 services, found ${seccompCount}`)
+  return `Seccomp profile verified (deny-by-default, ${profile.syscalls.length} allowlist entries, ${seccompCount} services)`
+})
+
+check('GOV-GATE-019: Third-party risk register exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'THIRD_PARTY_RISK_REGISTER.md')
+  if (!existsSync(path)) throw new Error('docs/platform/THIRD_PARTY_RISK_REGISTER.md not found')
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Cloud Infrastructure', '## Supply Chain Controls', '## Vendor Incident Notification']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) throw new Error(`Risk register missing sections: ${missing.join(', ')}`)
+  return 'Third-party risk register present with required sections'
+})
+
+check('GOV-GATE-020: Domain expertise map and turbo cache strategy exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'DOMAIN_EXPERTISE_MAP.md'),
+    join(ROOT, 'docs', 'platform', 'TURBO_CACHE_STRATEGY.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing knowledge docs: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  // Validate turbo.json has globalPassThroughEnv
+  const turbo = JSON.parse(readFileSync(join(ROOT, 'turbo.json'), 'utf-8'))
+  if (!Array.isArray(turbo.globalPassThroughEnv) || turbo.globalPassThroughEnv.length < 5) {
+    throw new Error('turbo.json globalPassThroughEnv must list ≥5 platform-specific env vars')
+  }
+  return `Knowledge docs + turbo cache hardening verified (${turbo.globalPassThroughEnv.length} pass-through vars)`
+})
+
 // ── Helper ──────────────────────────────────────────────────────────────────
 
 function findTestFiles(dir: string): string[] {
