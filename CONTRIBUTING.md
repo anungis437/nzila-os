@@ -58,3 +58,10 @@ Use conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test
 ## Security
 
 See [SECURITY.md](SECURITY.md). Never commit secrets. Use `.env.local` for local dev.
+
+## Platform Operations Docs
+
+- [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
+- [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
+- [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
+- [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
