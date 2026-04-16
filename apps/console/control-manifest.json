@@ -1,9 +1,13 @@
 {
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "console",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "role": "operator-interface",
   "riskLevel": "critical",
-  "policyProfile": null,
+  "operatorFacing": true,
+  "businessLogic": false,
+  "policyDecisions": false,
+  "routesMutationsThroughControlPlane": true,
   "controls": {
     "enforcement": false,
     "governance": true,
@@ -12,7 +16,15 @@
     "security": true,
     "aiControl": true,
     "contracts": true,
-    "events": true
+    "events": true,
+    "correlationPropagation": true
   },
+  "nonNegotiableRules": [
+    "Console contains zero business or policy logic",
+    "All workflow triggers must be authorized by Control Plane before execution",
+    "Console never calls the orchestrator directly — all actions go through Control Plane",
+    "Operator actions are surfaced only — no policy evaluation in Console",
+    "All mutations propagate x-correlation-id for end-to-end traceability"
+  ],
   "exceptions": []
 }

@@ -169,32 +169,27 @@ export default auth((request: any) => {
   // OpenSSL 3 OperationError on Azure Container Apps; server components
   // use Node.js native crypto which works correctly.
 
-  // ── Request-ID propagation ────────────────────────────────────────────
-  const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
+  // ── Request-ID + Correlation-ID propagation ───────────────────────────
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const correlationId = request.headers.get('x-correlation-id') ?? requestId
 
-  // ── i18n locale detection (cookie / Accept-Language) ──────────────────
-  // For non-API routes, run intl middleware for locale detection.
-  // localePrefix: 'never' — we use the intl middleware only to negotiate
-  // the locale and set the NEXT_LOCALE cookie. The internal rewrite to
-  // /<locale>/ is stripped because this app has no [locale] route segment.
+  // ── i18n locale detection (cookie / Accept-Language) ─────────────────
   if (!request.nextUrl.pathname.startsWith('/api')) {
     const intlResponse = intlMiddleware(request)
-
-    // Build a pass-through response and copy cookies (locale) from intl
     const response = NextResponse.next({
       request: { headers: new Headers(request.headers) },
     })
     intlResponse.cookies.getAll().forEach((c) => response.cookies.set(c))
     response.headers.set('x-request-id', requestId)
+    response.headers.set('x-correlation-id', correlationId)
     return response
   }
 
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
+  response.headers.set('x-correlation-id', correlationId)
   return response
 })
-
 export const config = {
   matcher: [
     // Skip Next.js internals and static files

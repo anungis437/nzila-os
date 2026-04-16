@@ -56,19 +56,21 @@ export default authMiddleware(async (auth, request) => {
     await auth.protect()
   }
 
+  // ── Request-ID + Correlation-ID propagation ───────────────────────────
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const correlationId = request.headers.get('x-correlation-id') ?? requestId
+
   // ── Internationalisation ──────────────────────────────────────────────
   if (!request.nextUrl.pathname.startsWith('/api')) {
     const intlResponse = intlMiddleware(request)
-    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
     intlResponse.headers.set('x-request-id', requestId)
+    intlResponse.headers.set('x-correlation-id', correlationId)
     return intlResponse
   }
 
-  // ── Request-ID propagation ────────────────────────────────────────────
-  const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
+  response.headers.set('x-correlation-id', correlationId)
   return response
 })
 

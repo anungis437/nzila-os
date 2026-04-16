@@ -9,6 +9,7 @@ import { jobRoutes } from './routes/jobs.js'
 import { runRoutes } from './routes/runs.js'
 import { metricsRoutes } from './routes/metrics.js'
 import { statusRoutes } from './routes/status.js'
+import { executeRoutes } from './routes/execute.js'
 import { createLogger } from '@nzila/os-core'
 import { getEventBus } from './platform.js'
 import { telemetryHooks } from './telemetry-hooks.js'
@@ -151,6 +152,7 @@ app.register(jobRoutes, { prefix: '/jobs' })
 app.register(runRoutes, { prefix: '/runs' })
 app.register(statusRoutes, { prefix: '/status' })
 app.register(proofCenterRoutes, { prefix: '/api/proof-center' })
+app.register(executeRoutes, { prefix: '/execute' })
 
 // ── Start ──
 async function main() {

@@ -228,8 +228,40 @@ The following invariants are checked in CI by `tests/system/control-plane-bounda
 
 Each app declares its control posture in `control-manifest.json`:
 
-- `console`: `enforcement: false` (delegates to control-plane), `governance: true` (visualizes)
-- `orchestrator-api`: `enforcement: false`, `governance: false` (pure execution)
-- `control-plane`: `enforcement: true`, `governance: true` (authoritative)
-- `platform-admin`: `enforcement: true` (org-scoped only), `governance: true`
+
+### Authority Services (Control Plane)
+
+All authorization decisions are made in `apps/control-plane/server/authority/`:
+
+| Service | File | Purpose |
+|---------|------|---------|
+| `resolveEntitlements` | `entitlements.ts` | Resolve feature entitlements for an org/actor |
+| `authorizeWorkflowTrigger` | `workflow-authorizer.ts` | Entitlement + policy check → authorization token |
+| `recordDecisionEvent` | `decision.ts` | Hash-chained immutable audit decision log |
+| `getDecisionsForOrg` | `decision.ts` | Retrieve decision history for an org |
+
+**Consumers** (Console, Platform Admin) MUST use `@nzila/platform-contracts/control-plane-client`
+(`createControlPlaneClient` / `getControlPlaneClient`) — never call CP authority APIs directly.
+
+### Execution Engine (Orchestrator)
+
+The canonical execution entry point is `apps/orchestrator-api/src/execution-engine.ts`:
+
+- `executeWorkflow(input)` — idempotent, deduplicates by `requestId` + `idempotencyKey`
+- `cancelWorkflowRun(runId, cancelledBy)` — cancels in-flight runs
+- `getWorkflowRun(runId)` / `listWorkflowRuns(filter?)` — read access
+
+Non-dry-run executions require an `authorizationDecisionId` from the Control Plane. Requests
+missing it are rejected with `auth_failure` status. This enforces the invariant: **the
+Orchestrator never executes unapproved workflows**.
+
+### Observability: Correlation IDs
+
+All three Next.js apps (`control-plane`, `console`, `platform-admin`) propagate:
+
+- `x-correlation-id` — stable ID for a logical operation spanning services (echoed from inbound or generated)
+- `x-request-id` — unique per HTTP request
+
+Set in each app's `middleware.ts`. The Orchestrator reads/forwards `x-correlation-id` on all
+emitted events via `ExecutionRunSchema.correlationId`.
 
