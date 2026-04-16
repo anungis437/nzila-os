@@ -33,7 +33,6 @@ Copy `.env` and fill required values (`ORCHESTRATOR_API_KEY`, `DATABASE_URL`).
 ## Key Packages
 
 - `@nzila/platform-event-fabric` — event bus integration
-- `@nzila/platform-governed-ai` — AI policy evaluation
 - `@nzila/platform-procurement-proof` — evidence & proof artifacts
 - `@nzila/platform-observability` — OpenTelemetry tracing
 

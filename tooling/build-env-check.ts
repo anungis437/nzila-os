@@ -21,7 +21,6 @@
  *
  * @module tooling/build-env-check
  */
-import { execSync } from 'node:child_process'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createHash } from 'node:crypto'
@@ -30,9 +29,17 @@ import { createHash } from 'node:crypto'
 
 const ROOT = resolve(import.meta.dirname ?? __dirname, '..')
 const EXPECTED_NODE_MAJOR_MIN = 22
-const EXPECTED_PNPM_VERSION = '10.11.0'
 const LOCKFILE_PATH = resolve(ROOT, 'pnpm-lock.yaml')
 const PACKAGE_JSON_PATH = resolve(ROOT, 'package.json')
+
+function getExpectedPnpmVersion(): string | null {
+  const pkgJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf-8')) as {
+    packageManager?: string
+  }
+  const declared = pkgJson.packageManager ?? ''
+  const match = /^pnpm@([^+]+)(?:\+.*)?$/.exec(declared)
+  return match?.[1] ?? null
+}
 
 /**
  * Non-secret env vars that must be set for production builds.
@@ -57,12 +64,10 @@ function fail(msg: string): void {
   process.stderr.write(`  \u2718 ${msg}\n`)
 }
 
-function getCommandOutput(cmd: string): string {
-  try {
-    return execSync(cmd, { encoding: 'utf-8' }).trim()
-  } catch {
-    return ''
-  }
+function getPnpmVersion(): string {
+  const userAgent = process.env.npm_config_user_agent ?? ''
+  const match = /pnpm\/(\d+\.\d+\.\d+)/.exec(userAgent)
+  return match?.[1] ?? ''
 }
 
 // ── Checks ──────────────────────────────────────────────────────────────────
@@ -78,11 +83,18 @@ function checkNodeVersion(): void {
 }
 
 function checkPnpmVersion(): void {
-  const raw = getCommandOutput('pnpm --version')
-  if (raw === EXPECTED_PNPM_VERSION) {
+  const expected = getExpectedPnpmVersion()
+  const raw = getPnpmVersion()
+
+  if (!expected) {
+    fail('packageManager field missing or invalid for pnpm version check')
+    return
+  }
+
+  if (raw === expected) {
     ok(`pnpm version valid (${raw})`)
   } else if (raw) {
-    fail(`pnpm version mismatch: expected ${EXPECTED_PNPM_VERSION}, got ${raw}`)
+    fail(`pnpm version mismatch: expected ${expected}, got ${raw}`)
   } else {
     fail('pnpm not found on PATH')
   }
