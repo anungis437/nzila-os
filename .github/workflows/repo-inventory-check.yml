@@ -41,5 +41,9 @@ jobs:
       - name: Generate inventory
         run: npx tsx tooling/repo-inventory/src/generate.ts
 
+      - name: Enforce committed inventory is canonical
+        run: |
+          git diff --exit-code -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md
+
       - name: Run drift check
         run: npx tsx tooling/repo-inventory/src/check-drift.ts

@@ -87,6 +87,11 @@ jobs:
 
       - name: Save artifact manifest
         run: |
+          DEPLOY_TARGETS_JSON='[]'
+          if [ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]; then
+            DEPLOY_TARGETS_JSON='${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}'
+          fi
+
           cat > artifact-manifest.json <<EOF
           {
             "artifact_digest": "${{ steps.digest.outputs.digest }}",
@@ -94,7 +99,8 @@ jobs:
             "attestation_ref": "release-attestation.json",
             "commit_sha": "${{ github.sha }}",
             "built_at": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
-            "source_workflow": "deploy-staging"
+            "source_workflow": "deploy-staging",
+            "deployTargets": ${DEPLOY_TARGETS_JSON}
           }
           EOF
 

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "state": "PENDING_RED_TEAM",
+  "lastUpdated": "2026-02-20",
+  "requirements": {
+    "hardGatesPassed": true,
+    "redTeamExecuted": false,
+    "certificationSigned": false
+  },
+  "evidence": {
+    "gateDoc": "docs/ga/GA_READINESS_GATE.md",
+    "certificationReport": "docs/ga/GA_CERTIFICATION_REPORT.md"
+  }
+}

@@ -11,6 +11,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { RepoInventory } from './generate';
+import { validateInventorySchema } from './schema';
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..');
 const INVENTORY_PATH = join(ROOT, 'tooling', 'repo-inventory', 'output', 'inventory.json');
@@ -34,7 +35,7 @@ function loadInventory(): RepoInventory {
     console.error('ERROR: inventory.json not found. Run `pnpm --filter @nzila/repo-inventory generate` first.');
     process.exit(1);
   }
-  return JSON.parse(readFileSync(INVENTORY_PATH, 'utf-8'));
+  return validateInventorySchema(JSON.parse(readFileSync(INVENTORY_PATH, 'utf-8')));
 }
 
 // ── Check a single doc ──────────────────────────────────

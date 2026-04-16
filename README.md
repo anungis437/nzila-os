@@ -22,7 +22,7 @@ For a deeper overview, see [docs/platform/what-is-nzila.md](docs/platform/what-i
 
 ---
 
-## Flagship Products
+## Key Verticals
 
 ### UnionEyes
 
@@ -30,15 +30,15 @@ Union case management — grievance lifecycle, collective bargaining, elections,
 
 ### Zonga
 
-Music distribution and streaming — artist management, royalties, content distribution, creator payouts, platform fees. Dedicated monetization layer (`zonga-monetization`, `zonga-economics`, `zonga-payments`). Production-deployed.
+Music distribution and streaming — artist management, royalties, content distribution, creator payouts, platform fees. Dedicated monetization layer (`zonga-monetization`, `zonga-economics`, `zonga-payments`).
 
-> **Flow** (commerce engine) and **CFO** (finance dashboard) are also production-deployed revenue verticals. Full classification: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+> **Flow** is currently registry-tiered `PRODUCTION`; **CFO** and **Control Plane** are currently registry-tiered `PILOT`; **Zonga** is currently registry-tiered `INCUBATING`. Canonical classification: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 ---
 
 ## Control Plane
 
-The **Control Plane** (`apps/control-plane/`) is the system's governance hub — the default entry point for understanding and operating the platform.
+The **Control Plane** (`apps/control-plane/`) is the system's governance hub and is currently classified as `PILOT` in the canonical registry.
 
 | Capability | Description |
 |------------|-------------|
@@ -84,12 +84,12 @@ Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
 
 | Tier | Apps | Status |
 |------|------|--------|
-| **FLAGSHIP** | UnionEyes, Zonga, Flow, CFO | Production-deployed, revenue-generating |
-| **CORE** | Console, Control Plane, Web, Orchestrator API | Deployed infrastructure |
-| **Growth** | Partners, ABR, Agrimo, NACP Exams, Trade | Pilot or support stage |
-| **INCUBATION** | Cora, Mobility, Mobility Client Portal, Platform Admin | Early-stage — not yet revenue-ready |
+| **PRODUCTION** | UnionEyes, Flow, Console, Web | Canonical registry production tier |
+| **PILOT** | Control Plane, Partners, CFO | Canonical registry pilot tier |
+| **INCUBATING** | Zonga, Agrimo, Trade, Cora, NACP Exams, Mobility | Canonical registry incubating tier |
+| **EXPERIMENTAL** | Mobility Client Portal, ABR, Platform Admin, Orchestrator API | Canonical registry experimental tier |
 
-> All apps are governed by the same invariants. Incubation apps are structurally identical — same auth, same evidence, same contract enforcement. Canonical app count is generated in `tooling/repo-inventory/output/repo-inventory.md`. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+> All apps are governed by the same invariants. Canonical app count is generated in `tooling/repo-inventory/output/repo-inventory.md`. Tier authority is the app registry. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 ---
 

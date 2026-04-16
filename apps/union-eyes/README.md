@@ -1,6 +1,7 @@
 # Union-Eyes
 
 > Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.
+> Auth authority: `@nzila/platform-auth` is canonical. Clerk is legacy compatibility only and not the system of record for new authentication work.
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](apps/union-eyes/tsconfig.json)
@@ -72,7 +73,7 @@ Union members, stewards, labour relations officers, and union leadership use Uni
            │                        │
            ▼                        ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NEXT.JS 16 (port 3003)                       │
+│                    NEXT.JS 16 (port 3002)                       │
 │                                                                 │
 │  ┌─────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
 │  │ App Router  │  │ 120+ API     │  │ Server Actions         │  │
@@ -82,7 +83,7 @@ Union members, stewards, labour relations officers, and union leadership use Uni
 │                          │                                      │
 │  ┌───────────────────────┴──────────────────────────────────┐   │
 │  │  Middleware Stack                                        │   │
-│  │  Edge: Clerk JWT → i18n → route protection               │   │
+│  │  Edge: platform-auth session/JWT → i18n → route protection │   │
 │  │  DB:   RLS context (app.current_user_id per txn)         │   │
 │  │  App:  RBAC (hasRole / isSystemAdmin)                    │   │
 │  └──────────────────────────────────────────────────────────┘   │
@@ -197,7 +198,7 @@ Django is the **authoritative** data layer. The Next.js frontend may read via Dr
 | **Chart.js + Recharts** | Data visualisation |
 | **Framer Motion** | Animations |
 | **next-intl** | i18n (English + French) |
-| **Clerk** | Authentication + organisation management |
+| **@nzila/platform-auth + Entra (optional)** | Canonical authentication and SSO federation |
 
 ### Backend
 
@@ -253,7 +254,7 @@ Django is the **authoritative** data layer. The Next.js frontend may read via Dr
 - **Python** ≥ 3.11 (for Django backend)
 - **PostgreSQL** 15+
 - **Redis** 7+
-- **Clerk account** — [clerk.com](https://clerk.com)
+- **Platform auth credentials** — `AUTH_SECRET`; optional Entra values for SSO (`AZURE_AD_CLIENT_ID`, `AZURE_AD_CLIENT_SECRET`, `AZURE_AD_TENANT_ID`)
 
 ### 1. Install dependencies
 
@@ -282,8 +283,8 @@ Key variables to set:
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes | Clerk auth |
-| `CLERK_SECRET_KEY` | Yes | Clerk server-side auth |
+| `AUTH_SECRET` | Yes | Platform session/JWT signing authority |
+| `AZURE_AD_CLIENT_ID` / `AZURE_AD_CLIENT_SECRET` / `AZURE_AD_TENANT_ID` | Optional | Microsoft Entra SSO federation |
 | `PGHOST` / `PGDATABASE` / `PGUSER` / `PGPASSWORD` | Yes | PostgreSQL connection |
 | `REDIS_URL` | Yes | Redis for rate limiting + queues |
 | `DJANGO_SECRET_KEY` | Yes | Django security |
@@ -310,7 +311,7 @@ python manage.py migrate
 ### 4. Run
 
 ```bash
-# Next.js frontend (port 3003)
+# Next.js frontend (port 3002)
 pnpm --filter @nzila/union-eyes dev
 
 # Django backend (port 8000)
@@ -322,7 +323,7 @@ cd apps/union-eyes/backend
 docker compose up
 ```
 
-Open [http://localhost:3003](http://localhost:3003).
+Open [http://localhost:3002](http://localhost:3002).
 
 ### 5. Explore the database
 
@@ -418,7 +419,7 @@ apps/union-eyes/
 
 Union-Eyes exposes **120+ API route groups** under `/api/`. All routes enforce:
 
-1. **Authentication** — Clerk JWT validation (edge middleware)
+1. **Authentication** — platform-auth session/JWT validation (edge middleware + server auth)
 2. **Organisation scoping** — every query/mutation scoped to `orgId`
 3. **RBAC** — role checks via `authorize()` from `@nzila/os-core/policy`
 4. **Audit logging** — material actions emit hash-chained audit events
@@ -540,10 +541,10 @@ On boot, Union-Eyes validates:
 
 | Layer | Mechanism |
 |-------|-----------|
-| **Edge** | Clerk JWT verification on every request |
+| **Edge** | platform-auth token/session verification on every request |
 | **Database** | PostgreSQL RLS with `app.current_user_id` session variable per transaction |
 | **Application** | RBAC — `hasRole()`, `isSystemAdmin()`, `hasRoleInOrganization()` |
-| **Webhook** | Signature verification (Clerk, Stripe, cron) |
+| **Webhook** | Signature verification (auth webhooks compatibility, Stripe, cron) |
 
 ### Security Headers (12)
 
@@ -622,7 +623,7 @@ Starts: PostgreSQL 15, Redis 7, Django (Gunicorn, 4 workers), Celery (4 workers 
 
 The `deploy-union-eyes.yml` GitHub Actions workflow deploys on push to `main`. Requires:
 - `AZURE_SWA_TOKEN_UE`
-- `CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY`
+- `AUTH_SECRET` (+ optional Entra federation variables)
 
 ### Evidence Pipeline
 
@@ -637,9 +638,9 @@ pnpm --filter @nzila/union-eyes evidence:all       # Full pipeline
 
 | Environment | Database | Key Vault | Auth | Monitoring |
 |-------------|----------|-----------|------|------------|
-| **Development** | Local PostgreSQL | Optional (fallback key) | Clerk dev | Console logs |
-| **Staging** | Azure PostgreSQL | Required | Clerk staging | Sentry (staging) |
-| **Production** | Azure PostgreSQL + RLS | Required | Clerk prod | OTel + Sentry + Azure Monitor |
+| **Development** | Local PostgreSQL | Optional (fallback key) | platform-auth local | Console logs |
+| **Staging** | Azure PostgreSQL | Required | platform-auth + Entra optional | Sentry (staging) |
+| **Production** | Azure PostgreSQL + RLS | Required | platform-auth + Entra optional | OTel + Sentry + Azure Monitor |
 
 ### Deployment Checklist
 
@@ -657,7 +658,7 @@ pnpm --filter @nzila/union-eyes evidence:all       # Full pipeline
 
 - [ ] `/api/health` returns OK
 - [ ] `/api/ready` returns OK (DB + Redis)
-- [ ] Clerk auth flow verified
+- [ ] Platform-auth flow verified (and Entra SSO path if enabled)
 - [ ] Sentry error tracking active
 - [ ] OTel traces flowing
 - [ ] Evidence pack seal + verify round-trip
@@ -671,7 +672,7 @@ See [`.env.example`](.env.example) for the complete reference. Grouped by concer
 
 | Group | Variables | Required |
 |-------|-----------|----------|
-| **Auth** | `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes |
+| **Auth** | `AUTH_SECRET` (+ optional `AZURE_AD_CLIENT_ID`, `AZURE_AD_CLIENT_SECRET`, `AZURE_AD_TENANT_ID`) | Yes |
 | **Database** | `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGPORT`, `PGSSLMODE` | Yes |
 | **Redis** | `REDIS_URL` | Yes |
 | **Django** | `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` | Yes |

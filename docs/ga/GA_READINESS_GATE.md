@@ -204,9 +204,9 @@ This simulation must be run before the GA Certification Report (`docs/ga/GA_CERT
 | 4 — Branch protection | Configured; CODEOWNERS enforcement active | ✅ PASS | — |
 | 5 — Red team simulation | Not executed | ❌ Pending | Pending sign-off |
 
-### Overall: ✅ ALL HARD GATES PASS AS OF 2026-02-20
+### Overall: 🟡 HARD GATES PASS, FINAL CERTIFICATION PENDING RED TEAM EXECUTION
 
-> All Section 1 and Section 2 gate items are ✅ PASS. REM-12 (branch protection) closed. Red team simulation is the final step before CTO sign-off.
+> All Section 1 and Section 2 gate items are ✅ PASS as of 2026-02-20. Final GA certification remains pending until Section 5 red team simulation is executed and recorded in `GA_CERTIFICATION_REPORT.md`.
 
 ---
 

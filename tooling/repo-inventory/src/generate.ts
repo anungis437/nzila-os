@@ -10,8 +10,8 @@
  */
 
 import { readdirSync, readFileSync, existsSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
-import { join, resolve, relative, extname } from 'node:path';
-import { execSync } from 'node:child_process';
+import { join, resolve } from 'node:path';
+import { validateInventorySchema } from './schema';
 
 // ── Types ───────────────────────────────────────────────
 
@@ -149,7 +149,7 @@ function scanPackages(): number {
   const pkgsDir = join(ROOT, 'packages');
   if (!existsSync(pkgsDir)) return 0;
   return readdirSync(pkgsDir, { withFileTypes: true })
-    .filter(d => d.isDirectory() && d.name !== 'node_modules' && d.name !== 'packages')
+    .filter(d => d.isDirectory() && d.name !== 'node_modules' && d.name !== 'packages' && existsSync(join(pkgsDir, d.name, 'package.json')))
     .length;
 }
 
@@ -251,7 +251,7 @@ function toMarkdown(inv: RepoInventory): string {
 const outDir = join(ROOT, 'tooling', 'repo-inventory', 'output');
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
-const inventory = generate();
+const inventory = validateInventorySchema(generate());
 
 writeFileSync(join(outDir, 'inventory.json'), JSON.stringify(inventory, null, 2) + '\n');
 writeFileSync(join(outDir, 'inventory.md'), toMarkdown(inventory));
