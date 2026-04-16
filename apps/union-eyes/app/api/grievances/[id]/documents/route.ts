@@ -12,11 +12,18 @@ import {
   grievanceDocuments,
   grievanceEvents,
 } from "@/db/schema/domains/claims/grievance-lifecycle";
+import {
+  documents,
+  documentVersions,
+  documentLinks,
+} from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -27,11 +34,30 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 
 const docSchema = z.object({
   fileUrl: z.string().url(),
+  title: z.string().min(1).max(300),
+  filename: z.string().min(1).max(500),
+  mimeType: z.string().min(1).max(150),
+  fileSize: z.number().int().nonnegative().optional(),
   documentType: z.enum([
     "intake_form", "evidence", "witness_statement", "employer_response",
     "union_brief", "arbitration_submission", "settlement_agreement",
     "correspondence", "photo", "other",
   ]),
+  privacyLabel: z.enum([
+    'public_internal',
+    'team_confidential',
+    'lro_confidential',
+    'privileged',
+    'case_restricted',
+    'highly_sensitive',
+  ]),
+  containsPii: z.boolean().optional(),
+  containsMedicalSensitive: z.boolean().optional(),
+  containsLegalPrivilege: z.boolean().optional(),
+  memberPii: z.boolean().optional(),
+  medicalSensitive: z.boolean().optional(),
+  disciplinarySensitive: z.boolean().optional(),
+  contentHash: z.string().min(8).optional(),
 });
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
@@ -40,8 +66,8 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const canUpload = await hasMinRole("member");
-    if (!canUpload) {
+    const canAccess = await hasMinRole("member");
+    if (!canAccess) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "Unauthorized");
     }
 
@@ -66,8 +92,25 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const [doc] = await withRLSContext(async () => {
-      const [d] = await db
+    const isStewardPlus = await hasMinRole('steward');
+    const effectiveAccess = await getEffectiveCaseAccess({
+      organizationId,
+      grievanceId: params.id,
+      userId,
+    });
+
+    const canUpload =
+      isStewardPlus ||
+      grievance.createdBy === userId ||
+      effectiveAccess.isPrimaryOwner ||
+      effectiveAccess.canUploadDocuments;
+
+    if (!canUpload) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to upload documents to this case');
+    }
+
+    const result = await withRLSContext(async () => {
+      const [legacyDoc] = await db
         .insert(grievanceDocuments)
         .values({
           grievanceId: params.id,
@@ -77,6 +120,46 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         })
         .returning();
 
+      const [governedDoc] = await db
+        .insert(documents)
+        .values({
+          organizationId,
+          title: parsed.data.title,
+          filename: parsed.data.filename,
+          name: parsed.data.title,
+          fileUrl: parsed.data.fileUrl,
+          fileType: parsed.data.documentType,
+          documentType: parsed.data.documentType,
+          mimeType: parsed.data.mimeType,
+          fileSize: parsed.data.fileSize,
+          uploadedBy: userId,
+          privacyLabel: parsed.data.privacyLabel,
+          containsPii: parsed.data.containsPii ?? false,
+          containsMedicalSensitive: parsed.data.containsMedicalSensitive ?? false,
+          containsLegalPrivilege: parsed.data.containsLegalPrivilege ?? false,
+          memberPii: parsed.data.memberPii ?? false,
+          medicalSensitive: parsed.data.medicalSensitive ?? false,
+          disciplinarySensitive: parsed.data.disciplinarySensitive ?? false,
+        })
+        .returning();
+
+      await db.insert(documentVersions).values({
+        organizationId,
+        documentId: governedDoc.id,
+        versionNo: 1,
+        storageKey: parsed.data.fileUrl,
+        contentHash: parsed.data.contentHash ?? `unverified:${governedDoc.id}`,
+        uploadedBy: userId,
+      });
+
+      await db.insert(documentLinks).values({
+        organizationId,
+        documentId: governedDoc.id,
+        linkedEntityType: 'grievance',
+        linkedEntityId: params.id,
+        linkedBy: userId,
+      });
+
       // Emit event
       await db.insert(grievanceEvents).values({
         grievanceId: params.id,
@@ -85,7 +168,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         notes: `Document uploaded: ${parsed.data.documentType}`,
       });
 
-      return [d];
+      return { legacyDoc, governedDoc };
     });
 
     // Audit
@@ -94,18 +177,40 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       organizationId,
       resource: "grievance_documents",
       action: "create",
-      resourceId: doc.id,
-      newState: doc,
+      resourceId: result.governedDoc.id,
+      newState: {
+        id: result.governedDoc.id,
+        privacyLabel: result.governedDoc.privacyLabel,
+        documentType: result.governedDoc.documentType,
+      },
+    });
+
+    await auditCaseMutation({
+      event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
+      userId,
+      organizationId,
+      caseId: params.id,
+      action: 'create',
+      newState: {
+        documentId: result.governedDoc.id,
+      },
+      details: {
+        privacyLabel: result.governedDoc.privacyLabel,
+        documentType: parsed.data.documentType,
+      },
     });
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_DOCUMENT_UPLOADED',
       orgId: organizationId,
       actorId: userId,
-      artifacts: [{ type: 'grievance_document', data: { grievanceId: params.id, documentId: doc.id, documentType: parsed.data.documentType } }],
+      artifacts: [{ type: 'grievance_document', data: { grievanceId: params.id, documentId: result.governedDoc.id, documentType: parsed.data.documentType, privacyLabel: parsed.data.privacyLabel } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_DOCUMENT_UPLOADED' }));
 
-    return standardSuccessResponse(doc);
+    return standardSuccessResponse({
+      ...result.governedDoc,
+      legacyDocumentId: result.legacyDoc.id,
+    });
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to upload document");
   }

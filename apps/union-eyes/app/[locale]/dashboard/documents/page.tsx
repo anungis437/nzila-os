@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic';
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Shield } from "lucide-react";
 import { DocumentLibraryBrowser } from "@/components/documents/document-library-browser";
 import { DocumentVersionControl } from "@/components/documents/document-version-control";
 import { DocumentApprovalWorkflow } from "@/components/documents/document-approval-workflow";
@@ -30,7 +30,95 @@ import { DocumentRetentionPolicy } from "@/components/documents/document-retenti
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = React.useState("library");
-  const [selectedDocumentId, _setSelectedDocumentId] = React.useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = React.useState<string | null>(null);
+  const [repoDocs, setRepoDocs] = React.useState<Array<Record<string, unknown>>>([]);
+  const [query, setQuery] = React.useState('');
+  const [label, setLabel] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [versioning, setVersioning] = React.useState(false);
+  const [uploadPayload, setUploadPayload] = React.useState({
+    title: '',
+    filename: '',
+    fileUrl: '',
+    mimeType: 'application/pdf',
+    documentType: 'evidence',
+    privacyLabel: 'team_confidential',
+    contentHash: '',
+    linkedEntityType: 'grievance',
+    linkedEntityId: '',
+  });
+
+  const loadRepository = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (query) params.set('keyword', query);
+      if (label) params.set('label', label);
+      const res = await fetch(`/api/documents/repository?${params.toString()}`);
+      const json = await res.json();
+      setRepoDocs(Array.isArray(json?.data) ? json.data : []);
+    } finally {
+      setLoading(false);
+    }
+  }, [query, label]);
+
+  React.useEffect(() => {
+    void loadRepository();
+  }, [loadRepository]);
+
+  const uploadDocument = async () => {
+    setUploading(true);
+    try {
+      const payload = {
+        ...uploadPayload,
+        contentHash: uploadPayload.contentHash || `manual:${Date.now()}`,
+        linkedEntityType: uploadPayload.linkedEntityId ? uploadPayload.linkedEntityType : undefined,
+        linkedEntityId: uploadPayload.linkedEntityId || undefined,
+      };
+
+      await fetch('/api/documents/repository', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      setUploadPayload({
+        title: '',
+        filename: '',
+        fileUrl: '',
+        mimeType: 'application/pdf',
+        documentType: 'evidence',
+        privacyLabel: 'team_confidential',
+        contentHash: '',
+        linkedEntityType: 'grievance',
+        linkedEntityId: '',
+      });
+      await loadRepository();
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const appendVersion = async (documentId: string) => {
+    const fileUrl = window.prompt('Version file URL');
+    const contentHash = window.prompt('Version content hash (required for integrity)');
+    if (!fileUrl || !contentHash) {
+      return;
+    }
+
+    setVersioning(true);
+    try {
+      await fetch(`/api/documents/repository/${documentId}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileUrl, contentHash }),
+      });
+      await loadRepository();
+    } finally {
+      setVersioning(false);
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -47,7 +135,7 @@ export default function DocumentsPage() {
             <Upload className="h-4 w-4 mr-2" />
             Bulk Upload
           </Button>
-          <Button>
+          <Button onClick={() => setActiveTab('repository')}>
             <Plus className="h-4 w-4 mr-2" />
             Upload Document
           </Button>
@@ -56,6 +144,7 @@ export default function DocumentsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
+          <TabsTrigger value="repository">Governed Repository</TabsTrigger>
           <TabsTrigger value="library">Document Library</TabsTrigger>
           <TabsTrigger value="search">Advanced Search</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
@@ -63,6 +152,74 @@ export default function DocumentsPage() {
           <TabsTrigger value="retention">Retention</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Operations</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="repository" className="space-y-4">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+            <Shield className="mr-1 inline h-4 w-4" />
+            Privacy label is mandatory for every upload. Visibility is enforced by case access, role, and explicit grants.
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by title, filename, type"
+              className="rounded border px-3 py-2 text-sm md:col-span-2"
+            />
+            <select value={label} onChange={(e) => setLabel(e.target.value)} className="rounded border px-3 py-2 text-sm">
+              <option value="">All labels</option>
+              <option value="public_internal">public_internal</option>
+              <option value="team_confidential">team_confidential</option>
+              <option value="lro_confidential">lro_confidential</option>
+              <option value="privileged">privileged</option>
+              <option value="case_restricted">case_restricted</option>
+              <option value="highly_sensitive">highly_sensitive</option>
+            </select>
+            <Button variant="outline" onClick={() => void loadRepository()} disabled={loading}>
+              {loading ? 'Searching…' : 'Search'}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 rounded-lg border p-3 md:grid-cols-3">
+            <input value={uploadPayload.title} onChange={(e) => setUploadPayload((prev) => ({ ...prev, title: e.target.value }))} placeholder="Title" className="rounded border px-3 py-2 text-sm" />
+            <input value={uploadPayload.filename} onChange={(e) => setUploadPayload((prev) => ({ ...prev, filename: e.target.value }))} placeholder="Filename" className="rounded border px-3 py-2 text-sm" />
+            <input value={uploadPayload.fileUrl} onChange={(e) => setUploadPayload((prev) => ({ ...prev, fileUrl: e.target.value }))} placeholder="File URL" className="rounded border px-3 py-2 text-sm" />
+            <input value={uploadPayload.mimeType} onChange={(e) => setUploadPayload((prev) => ({ ...prev, mimeType: e.target.value }))} placeholder="MIME type" className="rounded border px-3 py-2 text-sm" />
+            <input value={uploadPayload.documentType} onChange={(e) => setUploadPayload((prev) => ({ ...prev, documentType: e.target.value }))} placeholder="Document type" className="rounded border px-3 py-2 text-sm" />
+            <select value={uploadPayload.privacyLabel} onChange={(e) => setUploadPayload((prev) => ({ ...prev, privacyLabel: e.target.value }))} className="rounded border px-3 py-2 text-sm" required>
+              <option value="public_internal">public_internal</option>
+              <option value="team_confidential">team_confidential</option>
+              <option value="lro_confidential">lro_confidential</option>
+              <option value="privileged">privileged</option>
+              <option value="case_restricted">case_restricted</option>
+              <option value="highly_sensitive">highly_sensitive</option>
+            </select>
+            <input value={uploadPayload.contentHash} onChange={(e) => setUploadPayload((prev) => ({ ...prev, contentHash: e.target.value }))} placeholder="Content hash" className="rounded border px-3 py-2 text-sm" />
+            <input value={uploadPayload.linkedEntityId} onChange={(e) => setUploadPayload((prev) => ({ ...prev, linkedEntityId: e.target.value }))} placeholder="Linked grievance/case ID (optional)" className="rounded border px-3 py-2 text-sm md:col-span-2" />
+            <Button onClick={() => void uploadDocument()} disabled={uploading || !uploadPayload.title || !uploadPayload.filename || !uploadPayload.fileUrl || !uploadPayload.privacyLabel}>
+              {uploading ? 'Uploading…' : 'Upload Governed Document'}
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            {repoDocs.map((doc) => (
+              <div key={String(doc.id)} className="flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-sm">
+                <button type="button" onClick={() => setSelectedDocumentId(String(doc.id))} className="font-medium text-left text-blue-700 hover:underline">
+                  {String(doc.title ?? doc.name ?? doc.filename ?? doc.id)}
+                </button>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{String(doc.documentType ?? 'document')}</span>
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">{String(doc.privacyLabel ?? 'team_confidential')}</span>
+                <span className="text-xs text-gray-500">{String(doc.linkedEntityType ?? 'unlinked')}:{String(doc.linkedEntityId ?? '-')}</span>
+                <Button variant="outline" size="sm" disabled={versioning} onClick={() => void appendVersion(String(doc.id))} className="ml-auto">
+                  Add Version
+                </Button>
+              </div>
+            ))}
+            {repoDocs.length === 0 && !loading && (
+              <p className="text-sm text-gray-500">No repository documents found.</p>
+            )}
+          </div>
+        </TabsContent>
 
         <TabsContent value="library">
           <DocumentLibraryBrowser
