@@ -78,7 +78,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Audit (fail on critical)
-        run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical
+        run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical --output=audit-report.json || true
+
+      - name: Enforce vulnerability waiver policy
+        run: |
+          REPORT=audit-report.json
+          [ -f "$REPORT" ] || REPORT=audit-report-high.json
+          pnpm tsx tooling/security/supply-chain-policy.ts check-vulns "$REPORT"
 
   # ── Container Scan ───────────────────────────────────────────────────────
   trivy:
