@@ -5,6 +5,6 @@ import { redirect } from 'next/navigation'
  * In production this will be a separate SWA domain.
  */
 export default function PartnersSignInRedirect() {
-  const partnersUrl = process.env.NEXT_PUBLIC_PARTNERS_URL || 'http://localhost:3002'
+  const partnersUrl = process.env.NEXT_PUBLIC_PARTNERS_URL || 'http://localhost:3004'
   redirect(`${partnersUrl}/sign-in`)
 }

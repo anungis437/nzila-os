@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Platform',
-  description: 'The Nzila Backbone — unified infrastructure powering all 15 AI platforms across 10+ verticals with shared auth, CI/CD, and observability.',
+  description: `The Nzila Backbone - unified infrastructure for ${platformCoverageLabel()}, ${governedCoverageLabel()}.`,
   openGraph: {
     title: 'Nzila Ventures Platform',
-    description: 'The Nzila Backbone — unified infrastructure powering all verticals.',
+    description: `The Nzila Backbone - unified infrastructure for ${MARKETING_FACTS.productPlatforms} platforms and ${MARKETING_FACTS.governedApplications} governed applications.`,
     images: [{ url: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Server room with blue lighting representing Nzila Backbone infrastructure' }],
   },
   alternates: { canonical: '/platform' },
@@ -22,7 +23,7 @@ const capabilities = [
     photo: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600',
     name: 'Backbone Infrastructure',
     alt: 'Network cables and fiber optic connections in a modern data center',
-    description: 'Shared authentication, databases, CI/CD, and observability across all 15 platforms.',
+    description: 'Shared authentication, databases, CI/CD, and observability across 15 product platforms and 17 governed applications.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
@@ -46,7 +47,7 @@ const capabilities = [
     photo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600',
     name: 'Azure Native',
     alt: 'Global cloud infrastructure map showing Azure region connectivity',
-    description: 'Container Apps, Static Web Apps, PostgreSQL, and Azure AI for production workloads.',
+    description: 'Container Apps, PostgreSQL, and Azure AI services for production workloads.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=600',
@@ -98,12 +99,14 @@ export default function PlatformPage() {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
-            <Link
+            <TrackedLink
               href="/portfolio"
+              eventName="cta_portfolio"
+              eventProps={{ source: 'platform_hero' }}
               className="inline-flex items-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"
             >
               View Full Portfolio →
-            </Link>
+            </TrackedLink>
           </ScrollReveal>
         </div>
       </section>

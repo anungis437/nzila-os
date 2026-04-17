@@ -24,7 +24,11 @@ const ExecuteBodySchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    const contentType = req.headers.get('content-type') ?? ''
+    const body = contentType.includes('application/json')
+      ? await req.json()
+      : Object.fromEntries((await req.formData()).entries())
+
     const parsed = ExecuteBodySchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })

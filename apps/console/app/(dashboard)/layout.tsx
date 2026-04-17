@@ -21,7 +21,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'Governance & Compliance',
+    label: 'GRC',
     items: [
       { name: 'Governance', href: '/governance', icon: 'EyeIcon' },
       { name: 'Compliance', href: '/compliance-snapshots', icon: 'ShieldCheckIcon' },

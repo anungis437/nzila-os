@@ -1,0 +1,374 @@
+Inventory Drift Check	Set up job	∩╗┐2026-04-17T00:17:53.0534605Z Current runner version: '2.333.1'
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0560074Z ##[group]Runner Image Provisioner
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0560863Z Hosted Compute Agent
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0561536Z Version: 20260213.493
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0562134Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0562825Z Build Date: 2026-02-13T00:28:41Z
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0563471Z Worker ID: {62e43076-a639-4255-accd-ce1ed952ec13}
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0564170Z Azure Region: westus2
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0564772Z ##[endgroup]
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0566586Z ##[group]Operating System
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0567336Z Ubuntu
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0567783Z 24.04.4
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0568625Z LTS
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0569119Z ##[endgroup]
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0569605Z ##[group]Runner Image
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0570093Z Image: ubuntu-24.04
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0570699Z Version: 20260406.80.1
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0571689Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0573464Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0574367Z ##[endgroup]
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0575445Z ##[group]GITHUB_TOKEN Permissions
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0577966Z Contents: read
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0578816Z Metadata: read
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0579404Z ##[endgroup]
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0581557Z Secret source: Actions
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0582248Z Prepare workflow directory
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0913946Z Prepare all required actions
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.0954845Z Getting action download info
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.5815738Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Inventory Drift Check	Set up job	2026-04-17T00:17:53.7244637Z Download action repository 'pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320' (SHA:fc06bc1257f339d1d5d8b3a19a8cae5388b55320)
+Inventory Drift Check	Set up job	2026-04-17T00:17:54.1461984Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Inventory Drift Check	Set up job	2026-04-17T00:17:54.3378952Z Complete job name: Inventory Drift Check
+Inventory Drift Check	Run actions/checkout@v4	∩╗┐2026-04-17T00:17:54.4128491Z ##[group]Run actions/checkout@v4
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4129635Z with:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4130096Z   repository: anungis437/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4130780Z   token: ***
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4131185Z   ssh-strict: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4131596Z   ssh-user: git
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4132005Z   persist-credentials: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4132475Z   clean: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4132884Z   sparse-checkout-cone-mode: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4133390Z   fetch-depth: 1
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4133798Z   fetch-tags: false
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4134236Z   show-progress: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4134655Z   lfs: false
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4135041Z   submodules: false
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4135469Z   set-safe-directory: true
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.4136149Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5207195Z Syncing repository: anungis437/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5209476Z ##[group]Getting Git version info
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5210292Z Working directory is '/home/runner/work/nzila-os/nzila-os'
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5211377Z [command]/usr/bin/git version
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5262500Z git version 2.53.0
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5288034Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5302307Z Temporarily overriding HOME='/home/runner/work/_temp/11b8255c-9689-45bc-8625-c06d9d977987' before making global git config changes
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5307114Z Adding repository directory to the temporary git global config as a safe directory
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5308815Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/nzila-os/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5338799Z Deleting the contents of '/home/runner/work/nzila-os/nzila-os'
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5342842Z ##[group]Initializing the repository
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5346472Z [command]/usr/bin/git init /home/runner/work/nzila-os/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5447213Z hint: Using 'master' as the name for the initial branch. This default branch name
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5449313Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5450640Z hint: to use in all of your new repositories, which will suppress this warning,
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5451378Z hint: call:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5451756Z hint:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5452262Z hint: 	git config --global init.defaultBranch <name>
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5452861Z hint:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5453430Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5454945Z hint: 'development'. The just-created branch can be renamed via this command:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5456032Z hint:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5456455Z hint: 	git branch -m <name>
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5456921Z hint:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5457543Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5458842Z Initialized empty Git repository in /home/runner/work/nzila-os/nzila-os/.git/
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5461230Z [command]/usr/bin/git remote add origin https://github.com/anungis437/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5490170Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5490975Z ##[group]Disabling automatic garbage collection
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5493811Z [command]/usr/bin/git config --local gc.auto 0
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5521834Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5522975Z ##[group]Setting up auth
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5528071Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5557842Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5856925Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.5887510Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6104257Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6135596Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6357836Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6392265Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6393699Z ##[group]Fetching the repository
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:54.6403144Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +921a36123662fa64002175ae29750618f53a1361:refs/remotes/pull/367/merge
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7605500Z From https://github.com/anungis437/nzila-os
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7612190Z  * [new ref]         921a36123662fa64002175ae29750618f53a1361 -> pull/367/merge
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7636562Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7637622Z ##[group]Determining the checkout info
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7639378Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7644941Z [command]/usr/bin/git sparse-checkout disable
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7681869Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7706789Z ##[group]Checking out the ref
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:57.7711632Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/367/merge
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6277218Z Note: switching to 'refs/remotes/pull/367/merge'.
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6278007Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6278677Z You are in 'detached HEAD' state. You can look around, make experimental
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6279657Z changes and commit them, and you can discard any commits you make in this
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6280771Z state without impacting any branches by switching back to a branch.
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6281354Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6281841Z If you want to create a new branch to retain commits you create, you may
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6282761Z do so (now or later) by using -c with the switch command. Example:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6283289Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6283646Z   git switch -c <new-branch-name>
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6284464Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6284706Z Or undo this operation with:
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6285134Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6285337Z   git switch -
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6285632Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6286161Z Turn off this advice by setting config variable advice.detachedHead to false
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6286807Z 
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6287453Z HEAD is now at 921a361 Merge b9370cef14ace70214811b13b486e91cb1cebf1c into aa4c6e105f22197ad69c84cda717352d44d9f566
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6319033Z ##[endgroup]
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6355219Z [command]/usr/bin/git log -1 --format=%H
+Inventory Drift Check	Run actions/checkout@v4	2026-04-17T00:17:58.6376926Z 921a36123662fa64002175ae29750618f53a1361
+Inventory Drift Check	Setup pnpm	∩╗┐2026-04-17T00:17:58.6587909Z ##[group]Run pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6588764Z with:
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6589036Z   dest: ~/setup-pnpm
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6589450Z   run_install: null
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6589736Z   cache: false
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6590000Z   cache_dependency_path: pnpm-lock.yaml
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6590448Z   package_json_file: package.json
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6590772Z   standalone: false
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.6591061Z ##[endgroup]
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:58.7992888Z ##[group]Running self-installer...
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.1890630Z (node:2238) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.1892703Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.3055733Z Progress: resolved 1, reused 0, downloaded 0, added 0
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6510952Z 
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6511709Z dependencies:
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6513107Z + pnpm 10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6514300Z 
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6619261Z Packages: +1
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.6655100Z +
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.7247940Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.7545105Z Done in 797ms
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.7701406Z ##[endgroup]
+Inventory Drift Check	Setup pnpm	2026-04-17T00:17:59.7701916Z Installation Completed!
+Inventory Drift Check	Setup Node.js	∩╗┐2026-04-17T00:17:59.7952706Z ##[group]Run actions/setup-node@v4
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7952989Z with:
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7953165Z   node-version: 22
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7953358Z   cache: pnpm
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7953536Z   always-auth: false
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7953740Z   check-latest: false
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7954064Z   token: ***
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7954239Z env:
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7954483Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.7954780Z ##[endgroup]
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.9719960Z Found in cache @ /opt/hostedtoolcache/node/22.22.2/x64
+Inventory Drift Check	Setup Node.js	2026-04-17T00:17:59.9727213Z ##[group]Environment details
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.2617312Z node: v22.22.2
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.2617773Z npm: 10.9.7
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.2618146Z yarn: 1.22.22
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.2619993Z ##[endgroup]
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.2646048Z [command]/home/runner/setup-pnpm/node_modules/.bin/pnpm store path --silent
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.6696681Z /home/runner/setup-pnpm/node_modules/.bin/store/v10
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:03.9602715Z Cache hit for: node-cache-Linux-x64-pnpm-1196f41ae76e758f943e3840cc8c145e7eca94e1571065cf1e085c8e903f7671
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:05.2867097Z Received 0 of 542445564 (0.0%), 0.0 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:06.2864938Z Received 104857600 of 542445564 (19.3%), 50.0 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:07.2877065Z Received 239075328 of 542445564 (44.1%), 76.0 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:08.2893685Z Received 364904448 of 542445564 (67.3%), 86.9 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:09.2902906Z Received 515899392 of 542445564 (95.1%), 98.3 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:09.7500560Z Received 542445564 of 542445564 (100.0%), 94.7 MBs/sec
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:09.7502641Z Cache Size: ~517 MB (542445564 B)
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:09.7563475Z [command]/usr/bin/tar -xf /home/runner/work/_temp/17a3dbec-0046-4cfb-9292-6f5c8c137e89/cache.tzst -P -C /home/runner/work/nzila-os/nzila-os --use-compress-program unzstd
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:18.2281504Z Cache restored successfully
+Inventory Drift Check	Setup Node.js	2026-04-17T00:18:18.2553935Z Cache restored from key: node-cache-Linux-x64-pnpm-1196f41ae76e758f943e3840cc8c145e7eca94e1571065cf1e085c8e903f7671
+Inventory Drift Check	Install dependencies	∩╗┐2026-04-17T00:18:18.2706502Z ##[group]Run pnpm install --frozen-lockfile
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.2706935Z [36;1mpnpm install --frozen-lockfile[0m
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.2795728Z shell: /usr/bin/bash -e {0}
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.2795992Z env:
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.2796238Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.2796543Z ##[endgroup]
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.6890371Z Scope: all 188 workspace projects
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:18.8621291Z Lockfile is up to date, resolution step is skipped
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:19.3595960Z Packages: +2917
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:19.3596765Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:19.3686155Z Progress: resolved 0, reused 1, downloaded 0, added 0
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:20.3698665Z Progress: resolved 0, reused 1157, downloaded 0, added 0
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:21.3702633Z Progress: resolved 0, reused 2343, downloaded 0, added 119
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:22.3704483Z Progress: resolved 0, reused 2343, downloaded 0, added 370
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:23.3705233Z Progress: resolved 0, reused 2343, downloaded 0, added 912
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:24.3714590Z Progress: resolved 0, reused 2343, downloaded 0, added 1691
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:25.3703779Z Progress: resolved 0, reused 2343, downloaded 0, added 2210
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:26.3707923Z Progress: resolved 0, reused 2343, downloaded 0, added 2527
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:27.4365583Z Progress: resolved 0, reused 2343, downloaded 0, added 2917
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:27.6650722Z Progress: resolved 0, reused 2343, downloaded 0, added 2917, done
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5271708Z 
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5272745Z devDependencies:
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5273524Z + @nzila/platform-assurance 0.1.0 <- packages/platform-assurance
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5274635Z + @nzila/platform-change-management 0.1.0 <- packages/platform-change-management
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5275961Z + @nzila/platform-compliance-snapshots 0.1.0 <- packages/platform-compliance-snapshots
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5277152Z + @nzila/platform-evidence-pack 0.1.0 <- packages/platform-evidence-pack
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5278553Z + @nzila/platform-observability 0.1.0 <- packages/platform-observability
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5279511Z + @nzila/platform-ops 0.1.0 <- packages/platform-ops
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5280386Z + @nzila/platform-performance 0.1.0 <- packages/platform-performance
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5281437Z + @nzila/platform-procurement-proof 0.1.0 <- packages/platform-procurement-proof
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5282513Z + @nzila/platform-rfp-generator 0.1.0 <- packages/platform-rfp-generator
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5283442Z + @nzila/platform-utils 0.1.0 <- packages/platform-utils
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.5283850Z 
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.8969436Z . prepare$ lefthook install
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.9697293Z . prepare: sync hooks: Γ£ö∩╕Å (pre-commit, pre-push)
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:28.9716520Z . prepare: Done
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0060232Z Γò¡ Warning ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓò«
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0065630Z Γöé                                                                              Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0067040Z Γöé   Ignored build scripts: @firebase/util@1.13.0, @parcel/watcher@2.5.6,       Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0068791Z Γöé   @scarf/scarf@1.4.0, @sentry/cli@2.58.5, @swc/core@1.15.11,                 Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0070175Z Γöé   @tensorflow/tfjs-node@4.22.0,                                              Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0071551Z Γöé   @tree-sitter-grammars/tree-sitter-yaml@0.7.1, argon2@0.41.1,               Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0072936Z Γöé   core-js-pure@3.48.0, core-js@3.29.1, core-js@3.48.0, esbuild@0.25.12,      Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0074298Z Γöé   esbuild@0.27.3, esbuild@0.28.0, lefthook@2.1.4, msgpackr-extract@3.0.3,    Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0075683Z Γöé   protobufjs@7.5.4, protobufjs@8.0.0, sharp@0.34.5, tesseract.js@7.0.0,      Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0077066Z Γöé   tree-sitter-json@0.24.8, tree-sitter@0.21.1, tree-sitter@0.22.4,           Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0079019Z Γöé   unrs-resolver@1.11.1.                                                      Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0080430Z Γöé   Run "pnpm approve-builds" to pick which dependencies should be allowed     Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0082245Z Γöé   to run scripts.                                                            Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0083387Z Γöé                                                                              Γöé
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0084651Z Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓò»
+Inventory Drift Check	Install dependencies	2026-04-17T00:18:29.0450640Z Done in 10.7s using pnpm v10.33.0
+Inventory Drift Check	Generate inventory	∩╗┐2026-04-17T00:18:29.0999289Z ##[group]Run npx tsx tooling/repo-inventory/src/generate.ts
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:29.0999775Z [36;1mnpx tsx tooling/repo-inventory/src/generate.ts[0m
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:29.1022410Z shell: /usr/bin/bash -e {0}
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:29.1022654Z env:
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:29.1022900Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:29.1023228Z ##[endgroup]
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1376267Z Γ£ô Repo inventory generated at 2026-04-17
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1377253Z   Apps: 17
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1377569Z   Packages: 166
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1379882Z   Workflows: 36
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1380279Z   Contract tests: 211
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1380671Z   TS/JS test files: 1162
+Inventory Drift Check	Generate inventory	2026-04-17T00:18:31.1381043Z   Python test files: 31
+Inventory Drift Check	Enforce committed inventory is canonical	∩╗┐2026-04-17T00:18:31.1921875Z ##[group]Run # Ignore timestamp-only differences in generatedAt field (which changes per run)
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1922592Z [36;1m# Ignore timestamp-only differences in generatedAt field (which changes per run)[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1923131Z [36;1m# Only fail if there are meaningful changes beyond the timestamp[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1923796Z [36;1mMEANINGFUL_CHANGES=$(git diff -- tooling/repo-inventory/output/ | grep -E '^[+-]' | grep -v '^[+-]\s*"generatedAt"' | wc -l)[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1924376Z [36;1mif [ "$MEANINGFUL_CHANGES" -gt 0 ]; then[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1924744Z [36;1m  echo "Inventory drift detected (meaningful changes)"[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1925135Z [36;1m  git diff -- tooling/repo-inventory/output/[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1925422Z [36;1m  exit 1[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1925601Z [36;1melse[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1925895Z [36;1m  echo "Γ£ô Inventory is in sync (timestamp differences ignored)"[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1926250Z [36;1mfi[0m
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1947605Z shell: /usr/bin/bash -e {0}
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1947881Z env:
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1948122Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.1948718Z ##[endgroup]
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2105602Z Inventory drift detected (meaningful changes)
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2155681Z diff --git a/tooling/repo-inventory/output/inventory.json b/tooling/repo-inventory/output/inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2156696Z index 23ee3c4..cec9b69 100644
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2157355Z --- a/tooling/repo-inventory/output/inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2158102Z +++ b/tooling/repo-inventory/output/inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2158849Z @@ -1,5 +1,5 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2159173Z  {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2159605Z -  "generatedAt": "2026-04-17T00:13:03.349Z",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2159980Z +  "generatedAt": "2026-04-17T00:18:31.000Z",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2160258Z    "appCount": 17,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2160475Z    "packageCount": 166,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2160700Z    "workflowCount": 36,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2160953Z @@ -33,7 +33,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2161163Z          "ui"
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2161334Z        ],
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2162968Z        "purpose": "Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed AI services for agri-business operations.",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2163731Z -      "codeFileCount": 202
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2163993Z +      "codeFileCount": 203
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2164210Z      },
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2164373Z      {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2164559Z        "name": "agrimo",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2164786Z @@ -517,7 +517,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2165063Z          "ui"
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2165446Z        ],
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2166055Z        "purpose": "Public marketing site for the Nzila platform ΓÇö landing pages, resource library, and public content.",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2166591Z -      "codeFileCount": 60
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2166834Z +      "codeFileCount": 59
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2167068Z      },
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2167239Z      {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2167419Z        "name": "zonga",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2167970Z diff --git a/tooling/repo-inventory/output/inventory.md b/tooling/repo-inventory/output/inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2168800Z index 9bd66f6..ec26dcd 100644
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2169155Z --- a/tooling/repo-inventory/output/inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2169543Z +++ b/tooling/repo-inventory/output/inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2169828Z @@ -17,7 +17,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2170009Z  
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2170452Z  | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2171109Z  |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2172047Z -| abr | Next.js + Django | 3014 | Γ£à | Γ£à | Γ£à | Γ£à | 202 | Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed A |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2173072Z +| abr | Next.js + Django | 3014 | Γ£à | Γ£à | Γ£à | Γ£à | 203 | Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed A |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2174290Z  | agrimo | Next.js + Django | 3007 | Γ£à | Γ£à | Γ£à | Γ£à | 100 | Agricultural field operations ΓÇö harvest tracking, production management, logisti |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2175228Z  | cfo | Next.js | 3005 | Γ£à | Γ£à | Γ£à | Γ£à | 234 | CFO finance dashboard ΓÇö ledger management, tax tools, AI advisory, document inte |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2176133Z  | console | Next.js | 3001 | Γ£à | Γ£à | Γ£à | Γ£à | 206 | Internal operations console ΓÇö platform governance, compliance, analytics, integr |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2176721Z @@ -32,7 +32,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2177390Z  | platform-admin | Next.js | 3015 | Γ£à | Γ£à | Γ£à | Γ£à | 29 | Internal admin console for managing platform services ΓÇö events, knowledge, ontol |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2178688Z  | trade | Next.js | 3008 | Γ£à | Γ£à | Γ£à | Γ£à | 51 | Cross-border trade management ΓÇö deals, listings, shipments, and commission track |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2179722Z  | union-eyes | Next.js + Django | 3002 | Γ£à | Γ£à | Γ£à | Γ£à | 3140 | Full-stack union case management platform ΓÇö grievance lifecycle, collective barg |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2180763Z -| web | Next.js | 3000 | Γ£à | Γ£à | Γ¥î | Γ£à | 60 | Public marketing site for the Nzila platform ΓÇö landing pages, resource library,  |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2181699Z +| web | Next.js | 3000 | Γ£à | Γ£à | Γ¥î | Γ£à | 59 | Public marketing site for the Nzila platform ΓÇö landing pages, resource library,  |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2182614Z  | zonga | Next.js + Django | 3006 | Γ£à | Γ£à | Γ£à | Γ£à | 402 | Africa-first music distribution, streaming, and royalty management platform. |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2183135Z  
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2183304Z  ## Workflows
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2183889Z diff --git a/tooling/repo-inventory/output/repo-inventory.json b/tooling/repo-inventory/output/repo-inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2184440Z index 23ee3c4..cec9b69 100644
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2184791Z --- a/tooling/repo-inventory/output/repo-inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2185211Z +++ b/tooling/repo-inventory/output/repo-inventory.json
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2185503Z @@ -1,5 +1,5 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2185694Z  {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2185956Z -  "generatedAt": "2026-04-17T00:13:03.349Z",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2186292Z +  "generatedAt": "2026-04-17T00:18:31.000Z",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2186556Z    "appCount": 17,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2186758Z    "packageCount": 166,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2186978Z    "workflowCount": 36,
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2187195Z @@ -33,7 +33,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2187384Z          "ui"
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2187557Z        ],
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2188463Z        "purpose": "Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed AI services for agri-business operations.",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2189280Z -      "codeFileCount": 202
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2189542Z +      "codeFileCount": 203
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2189751Z      },
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2189922Z      {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2190106Z        "name": "agrimo",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2190333Z @@ -517,7 +517,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2190517Z          "ui"
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2190696Z        ],
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2191299Z        "purpose": "Public marketing site for the Nzila platform ΓÇö landing pages, resource library, and public content.",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2191831Z -      "codeFileCount": 60
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2192072Z +      "codeFileCount": 59
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2192286Z      },
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2192454Z      {
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2192635Z        "name": "zonga",
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2193209Z diff --git a/tooling/repo-inventory/output/repo-inventory.md b/tooling/repo-inventory/output/repo-inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2193742Z index 9bd66f6..ec26dcd 100644
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2194082Z --- a/tooling/repo-inventory/output/repo-inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2194496Z +++ b/tooling/repo-inventory/output/repo-inventory.md
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2194791Z @@ -17,7 +17,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2194965Z  
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2195399Z  | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2196051Z  |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2197095Z -| abr | Next.js + Django | 3014 | Γ£à | Γ£à | Γ£à | Γ£à | 202 | Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed A |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2198132Z +| abr | Next.js + Django | 3014 | Γ£à | Γ£à | Γ£à | Γ£à | 203 | Agricultural Business Review ΓÇö compliance audits, analytics, and Django-backed A |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2199408Z  | agrimo | Next.js + Django | 3007 | Γ£à | Γ£à | Γ£à | Γ£à | 100 | Agricultural field operations ΓÇö harvest tracking, production management, logisti |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2200344Z  | cfo | Next.js | 3005 | Γ£à | Γ£à | Γ£à | Γ£à | 234 | CFO finance dashboard ΓÇö ledger management, tax tools, AI advisory, document inte |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2201265Z  | console | Next.js | 3001 | Γ£à | Γ£à | Γ£à | Γ£à | 206 | Internal operations console ΓÇö platform governance, compliance, analytics, integr |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2201781Z @@ -32,7 +32,7 @@
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2202418Z  | platform-admin | Next.js | 3015 | Γ£à | Γ£à | Γ£à | Γ£à | 29 | Internal admin console for managing platform services ΓÇö events, knowledge, ontol |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2203360Z  | trade | Next.js | 3008 | Γ£à | Γ£à | Γ£à | Γ£à | 51 | Cross-border trade management ΓÇö deals, listings, shipments, and commission track |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2204329Z  | union-eyes | Next.js + Django | 3002 | Γ£à | Γ£à | Γ£à | Γ£à | 3140 | Full-stack union case management platform ΓÇö grievance lifecycle, collective barg |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2205333Z -| web | Next.js | 3000 | Γ£à | Γ£à | Γ¥î | Γ£à | 60 | Public marketing site for the Nzila platform ΓÇö landing pages, resource library,  |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2206281Z +| web | Next.js | 3000 | Γ£à | Γ£à | Γ¥î | Γ£à | 59 | Public marketing site for the Nzila platform ΓÇö landing pages, resource library,  |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2207195Z  | zonga | Next.js + Django | 3006 | Γ£à | Γ£à | Γ£à | Γ£à | 402 | Africa-first music distribution, streaming, and royalty management platform. |
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2207710Z  
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2207871Z  ## Workflows
+Inventory Drift Check	Enforce committed inventory is canonical	2026-04-17T00:18:31.2218047Z ##[error]Process completed with exit code 1.
+Inventory Drift Check	Post Setup pnpm	∩╗┐2026-04-17T00:18:31.2295037Z Post job cleanup.
+Inventory Drift Check	Post Setup pnpm	2026-04-17T00:18:31.3716520Z Pruning is unnecessary.
+Inventory Drift Check	Post Run actions/checkout@v4	∩╗┐2026-04-17T00:18:31.3850443Z Post job cleanup.
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4794750Z [command]/usr/bin/git version
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4836646Z git version 2.53.0
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4883724Z Temporarily overriding HOME='/home/runner/work/_temp/bbddc614-7bef-4d52-b1c1-31477dc7b450' before making global git config changes
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4885346Z Adding repository directory to the temporary git global config as a safe directory
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4890264Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/nzila-os/nzila-os
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4925016Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.4961251Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5224417Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5246926Z http.https://github.com/.extraheader
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5260354Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5294549Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5554971Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Inventory Drift Check	Post Run actions/checkout@v4	2026-04-17T00:18:31.5590514Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Inventory Drift Check	Complete job	∩╗┐2026-04-17T00:18:31.5998818Z Cleaning up orphan processes
+Inventory Drift Check	Complete job	2026-04-17T00:18:31.6269801Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

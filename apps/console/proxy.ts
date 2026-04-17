@@ -1,5 +1,6 @@
 import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
@@ -12,27 +13,25 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 })
 
-const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/api/auth']
-
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth((request: any) => {
+export const proxy = auth((request: any) => {
   // ── Legacy route redirects (entity → org migration) ──────────────────
   const pathname = request.nextUrl.pathname
   if (pathname.startsWith('/business/orgs')) {
     const newPath = pathname.replace(/^\/business\/orgs/, '/orgs')
-    const url = request.nextUrl.clone()
-    url.pathname = newPath
-    return NextResponse.redirect(url, 308)
+    if (newPath.startsWith('/')) {
+      return NextResponse.rewrite(new URL(newPath, request.url))
+    }
   }
   // Legacy /api/entities → /api/orgs redirect
   if (pathname.startsWith('/api/entities')) {
     const newPath = pathname.replace(/^\/api\/entities/, '/api/orgs')
-    const url = request.nextUrl.clone()
-    url.pathname = newPath
-    return NextResponse.redirect(url, 308)
+    if (newPath.startsWith('/')) {
+      return NextResponse.rewrite(new URL(newPath, request.url))
+    }
   }
 
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
@@ -60,11 +59,7 @@ export default auth((request: any) => {
   if (process.env.NODE_ENV !== 'development') {
     const orgId = request.headers.get('x-org-id')
     if (orgId && request.nextUrl.pathname.startsWith('/api')) {
-      const orgRl = checkOrgRateLimit(
-        orgId,
-        request.nextUrl.pathname,
-        request.method,
-      )
+      const orgRl = checkOrgRateLimit(orgId, request.nextUrl.pathname, request.method)
       if (!orgRl.allowed) {
         return NextResponse.json(
           {
@@ -106,12 +101,7 @@ export default auth((request: any) => {
   }
 
   // ── Cost budget enforcement (denial-of-wallet) ────────────────────────
-  // In pilot/prod: check org budget before allowing non-exempt routes.
-  // Edge-safe: uses in-memory budget cache with periodic refresh.
-  if (
-    process.env.NODE_ENV !== 'development' &&
-    request.nextUrl.pathname.startsWith('/api')
-  ) {
+  if (process.env.NODE_ENV !== 'development' && request.nextUrl.pathname.startsWith('/api')) {
     const orgId = request.headers.get('x-org-id')
     if (orgId) {
       const budgetExemptRoutes = ['/api/admin/', '/api/export/', '/api/proof/', '/api/health']
@@ -122,7 +112,8 @@ export default auth((request: any) => {
           return NextResponse.json(
             {
               error: 'Budget Exceeded',
-              message: 'Org has exceeded its cost budget. Admin, export, and proof endpoints remain accessible.',
+              message:
+                'Org has exceeded its cost budget. Admin, export, and proof endpoints remain accessible.',
               code: 'COST_BUDGET_EXCEEDED',
             },
             { status: 402 },
@@ -133,9 +124,6 @@ export default auth((request: any) => {
   }
 
   // ── Sovereign egress enforcement (block unapproved outbound hosts) ──
-  // When SOVEREIGN_EGRESS_ENFORCED=true, integration/webhook API routes
-  // must declare a target host via x-egress-host header, which is checked
-  // against the allowlist.
   if (
     process.env.SOVEREIGN_EGRESS_ENFORCED === 'true' &&
     request.nextUrl.pathname.startsWith('/api') &&
@@ -150,7 +138,14 @@ export default auth((request: any) => {
         .map((h) => h.trim().toLowerCase())
         .filter(Boolean)
       const normalised = targetHost.toLowerCase().trim()
-      if (!allowed.includes(normalised) && !allowed.some((a) => a.startsWith('*.') && (normalised === a.slice(2) || normalised.endsWith(`.${a.slice(2)}`)))) {
+      if (
+        !allowed.includes(normalised) &&
+        !allowed.some(
+          (a) =>
+            a.startsWith('*.') &&
+            (normalised === a.slice(2) || normalised.endsWith(`.${a.slice(2)}`)),
+        )
+      ) {
         return NextResponse.json(
           {
             error: 'Egress Blocked',
@@ -162,12 +157,6 @@ export default auth((request: any) => {
       }
     }
   }
-
-  // ── Authentication ────────────────────────────────────────────────────
-  // Auth enforcement moved to server-side layouts ((dashboard)/layout.tsx)
-  // which run on Node.js. Edge middleware's crypto.subtle fails with
-  // OpenSSL 3 OperationError on Azure Container Apps; server components
-  // use Node.js native crypto which works correctly.
 
   // ── Request-ID + Correlation-ID propagation ───────────────────────────
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
@@ -189,7 +178,8 @@ export default auth((request: any) => {
   response.headers.set('x-request-id', requestId)
   response.headers.set('x-correlation-id', correlationId)
   return response
-})
+}) as (request: NextRequest) => Promise<NextResponse>
+
 export const config = {
   matcher: [
     // Skip Next.js internals and static files

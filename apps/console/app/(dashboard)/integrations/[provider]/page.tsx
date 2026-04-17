@@ -103,6 +103,28 @@ const providerMeta: Record<string, ProviderMeta> = {
       'Rate-limit backoff (429) handled automatically.',
     ],
   },
+  m365: {
+    name: 'Microsoft 365',
+    type: 'productivity',
+    typeLabel: 'Productivity',
+    color: 'bg-blue-700',
+    secrets: ['tenantId', 'clientId', 'clientSecret'],
+    configHints: [
+      'Register an app in Microsoft Entra ID with Microsoft Graph scopes.',
+      'Use delegated scopes for user workflows and application scopes for background jobs.',
+    ],
+  },
+  'google-workspace': {
+    name: 'Google Workspace',
+    type: 'productivity',
+    typeLabel: 'Productivity',
+    color: 'bg-emerald-600',
+    secrets: ['clientId', 'clientSecret', 'refreshToken'],
+    configHints: [
+      'Create OAuth credentials in Google Cloud Console and enable required Workspace APIs.',
+      'Use domain-wide delegation for admin-level automation where applicable.',
+    ],
+  },
   webhooks: {
     name: 'Webhooks',
     type: 'webhooks',
@@ -138,9 +160,14 @@ export default async function ProviderDetailPage(props: Props) {
   const meta = providerMeta[provider]
   if (!meta) notFound()
 
-  // In a real deployment this would read from integrations-db.
-  // For now we render a static configuration + health UI.
-  const healthStatus = 'unknown' as const
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const healthResponse = await fetch(`${baseUrl}/api/integrations/health/${encodeURIComponent(provider)}`, {
+    cache: 'no-store',
+  })
+  const healthJson = healthResponse.ok
+    ? (await healthResponse.json()) as { health?: { status?: 'ok' | 'degraded' | 'down' } }
+    : null
+  const healthStatus = healthJson?.health?.status ?? 'unknown'
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -208,9 +235,9 @@ export default async function ProviderDetailPage(props: Props) {
           )}
 
           <div className="mt-6 border-t border-gray-100 pt-4">
-            <p className="text-sm text-gray-400 italic">
-              Configuration management coming in next release. Use the orchestrator API to configure
-              integrations programmatically.
+            <p className="text-sm text-gray-500">
+              Configure this provider using <code className="bg-gray-100 px-1 rounded text-xs">POST /api/integrations/connect</code> or{' '}
+              <code className="bg-gray-100 px-1 rounded text-xs">POST /api/marketplace/install</code> with your org ID and provider credentials.
             </p>
           </div>
         </Card.Body>
@@ -221,13 +248,13 @@ export default async function ProviderDetailPage(props: Props) {
         <Card.Body>
           <h2 className="font-semibold text-gray-900 mb-2">Health Check</h2>
           <p className="text-sm text-gray-500 mb-4">
-            Run a live health probe against this provider. Results are audited.
+            Live probe is executed during connect/install and reflected in this status.
           </p>
           <button
             disabled
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Run Health Check (coming soon)
+            Use /api/integrations/connect to re-validate
           </button>
         </Card.Body>
       </Card>

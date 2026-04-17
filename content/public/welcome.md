@@ -10,6 +10,8 @@ date: 2026-02-01
 
 Nzila is a digital-venture studio building a portfolio of interconnected platforms across multiple verticals — from legal-tech and fintech to cybersecurity education and cultural media.
 
+Today, the portfolio is organized as **15 product platforms delivered through 17 governed applications** across 10+ verticals.
+
 We operate at the intersection of **AI, social impact, and enterprise software**, building tools that create real economic participation for communities that have historically been underserved by technology.
 
 > "Nzila" means *path* or *way* in several Bantu languages. It reflects our mission: building the infrastructure pathways that connect communities to economic opportunity.
@@ -34,7 +36,7 @@ We operate as a **multi-vertical platform company**, sharing a common technology
 | **UnionEyes** | Labour / Fintech | Live |
 | **ABR Insights** | Compliance / Legal-tech | Live |
 | **Cora** | AI Automation | Beta |
-| And 12 more | Various | Roadmap |
+| And 12 more | Various | Active roadmap |
 
 ---
 
@@ -53,6 +55,9 @@ Use the category filters above to find what you need, or browse below to start e
 ## Explore Further
 
 - [Platform Architecture](/resources/platform-architecture) — How our Backbone connects every vertical.
+- [Command Catalog](/resources/command-catalog) — High-value operator commands grouped by workflow.
+- [Strategic Telemetry](/resources/strategic-telemetry) — Quarterly metrics and scorecard model.
+- [AI Incident Playbooks](/resources/ai-incident-playbooks) — Incident response guidance for AI threat scenarios.
 - [Security Overview](/resources/security-overview) — How we protect your data.
 - [Developer Guide](/resources/developer-guide) — Build on the Nzila platform.
 - [Partner Integration](/resources/partner-integration) — Connect your product to ours.

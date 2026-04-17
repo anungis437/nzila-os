@@ -43,7 +43,7 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth(async (request: any) => {
+export const proxy = auth(async (request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -92,8 +92,7 @@ export default auth(async (request: any) => {
   }
 
   /* ── Request-ID propagation for observability ── */
-  const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
 
   // Locale detection — set cookie so getRequestConfig can read it (no URL rewrite)
   if (!request.nextUrl.pathname.startsWith('/api')) {

@@ -1,17 +1,24 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDocs } from '@/lib/docs';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionDivider from '@/components/public/SectionDivider';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Resources',
   description: 'Public documentation, guides, and technical resources from Nzila Ventures — the APEX of AI in social impact.',
   openGraph: {
     title: 'Nzila Ventures Resources',
-    description: 'Documentation, guides, and technical resources for our AI platform ecosystem.',
+    description: `Documentation, guides, and technical resources for ${platformCoverageLabel()} and ${governedCoverageLabel()}.`,
     images: [{ url: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Grand library with natural light representing knowledge resources' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nzila Ventures Resources',
+    description: `Documentation, guides, and technical resources for ${platformCoverageLabel()} and ${governedCoverageLabel()}.`,
+    images: ['https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&h=630&fit=crop&q=80'],
   },
   alternates: { canonical: '/resources' },
 };
@@ -28,6 +35,20 @@ const CATEGORY_META: Record<string, { icon: string; color: string }> = {
 
 function categoryMeta(cat: string) {
   return CATEGORY_META[cat] ?? { icon: '📄', color: 'from-gray-100 to-gray-50' };
+}
+
+function formatDocDate(date?: string): string | undefined {
+  if (!date) return undefined;
+  const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
+  const source = isoDateOnly.test(date) ? `${date}T00:00:00Z` : date;
+  const parsed = new Date(source);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsed);
 }
 
 export default function ResourcesPage() {
@@ -47,12 +68,33 @@ export default function ResourcesPage() {
   const quickLinks = [
     { label: 'Platform Architecture', href: '/platform', icon: '🏗️', description: 'Our unified Backbone infrastructure' },
     { label: 'Investment Thesis', href: '/investors', icon: '📈', description: 'Series A opportunity & market analysis' },
-    { label: 'Portfolio Overview', href: '/portfolio', icon: '📊', description: '15 platforms across 10+ verticals' },
+    { label: 'Portfolio Overview', href: '/portfolio', icon: '📊', description: `${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications` },
     { label: 'Contact Us', href: '/contact', icon: '✉️', description: 'Get in touch with our team' },
   ];
 
+  const resourcesItemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Nzila Ventures Resources',
+    description: 'Public documentation, guides, and technical resources from Nzila Ventures.',
+    numberOfItems: docs.length,
+    itemListElement: docs
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+      .map((doc, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `https://nzilaventures.com/resources/${doc.slug}`,
+        name: doc.title,
+      })),
+  };
+
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(resourcesItemListSchema) }}
+      />
+
       {/* ─── Hero ─── */}
       <section className="relative min-h-[60vh] flex items-center overflow-hidden">
         <Image
@@ -111,7 +153,11 @@ export default function ResourcesPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickLinks.map((link, i) => (
               <ScrollReveal key={link.label} delay={i * 0.08}>
-                <Link href={link.href}>
+                <TrackedLink
+                  href={link.href}
+                  eventName="resources_quick_link"
+                  eventProps={{ destination: link.href, label: link.label }}
+                >
                   <div className="glass-card rounded-2xl p-5 hover-lift cursor-pointer group transition-all duration-300">
                     <span className="text-3xl mb-3 block">{link.icon}</span>
                     <h3 className="font-semibold text-white text-sm mb-1 group-hover:text-electric-light transition-colors">
@@ -119,7 +165,7 @@ export default function ResourcesPage() {
                     </h3>
                     <p className="text-xs text-gray-400">{link.description}</p>
                   </div>
-                </Link>
+                </TrackedLink>
               </ScrollReveal>
             ))}
           </div>
@@ -163,7 +209,11 @@ export default function ResourcesPage() {
                         .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
                         .map((doc, i) => (
                           <ScrollReveal key={doc.slug} delay={i * 0.08}>
-                            <Link href={`/resources/${doc.slug}`}>
+                            <TrackedLink
+                              href={`/resources/${doc.slug}`}
+                              eventName="resource_open"
+                              eventProps={{ slug: doc.slug, category }}
+                            >
                               <div className="group relative bg-white rounded-2xl border border-gray-200/80 p-6 hover:border-electric/30 hover:shadow-xl hover:shadow-electric/5 transition-all duration-300 hover-lift h-full flex flex-col">
                                 {/* Icon */}
                                 <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${meta.color} flex items-center justify-center shrink-0 mb-4 group-hover:scale-110 transition-transform`}>
@@ -181,7 +231,7 @@ export default function ResourcesPage() {
                                 {/* Meta row */}
                                 <div className="flex items-center gap-3 mt-auto">
                                   {doc.date && (
-                                    <span className="text-xs text-gray-400">{doc.date}</span>
+                                    <span className="text-xs text-gray-400">{formatDocDate(doc.date)}</span>
                                   )}
                                   {doc.readingTime && (
                                     <span className="flex items-center gap-1 text-xs text-gray-400">
@@ -200,7 +250,7 @@ export default function ResourcesPage() {
                                   </svg>
                                 </div>
                               </div>
-                            </Link>
+                            </TrackedLink>
                           </ScrollReveal>
                         ))}
                     </div>
@@ -227,18 +277,22 @@ export default function ResourcesPage() {
               Get in touch with our team for detailed technical documentation, partnership materials, or investor decks.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
+              <TrackedLink
                 href="/contact"
+                eventName="cta_contact"
+                eventProps={{ source: 'resources_bottom' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press"
               >
                 Contact Us
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/investors"
+                eventName="cta_investors"
+                eventProps={{ source: 'resources_bottom' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-navy font-bold rounded-xl border border-gray-200 hover:border-electric/30 hover:shadow-lg transition-all text-lg btn-press"
               >
                 Investor Materials
-              </Link>
+              </TrackedLink>
             </div>
           </ScrollReveal>
         </div>

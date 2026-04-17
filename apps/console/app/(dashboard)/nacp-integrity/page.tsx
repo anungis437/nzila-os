@@ -13,6 +13,8 @@
  * @see @nzila/platform-proof/nacp
  */
 import { requireRole } from '@/lib/rbac'
+import { platformDb } from '@nzila/db/platform'
+import { orgs } from '@nzila/db/schema'
 import {
   generateNacpIntegrityProofSection,
   nacpIntegrityPorts,
@@ -31,6 +33,11 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
+
+function isUuid(value: string | undefined): value is string {
+  if (!value) return false
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
 
 // ── Verdict UI ──────────────────────────────────────────────────────────────
 
@@ -146,8 +153,32 @@ export default async function NacpIntegrityPage({
   await requireRole('platform_admin', 'studio_admin')
 
   const params = await searchParams
-  const orgId = params.orgId ?? 'default'
+  const requestedOrgId = params.orgId
+  const envDefaultOrgId = process.env.NZILA_DEFAULT_ENTITY_ID
+  const selectedOrgId = isUuid(requestedOrgId)
+    ? requestedOrgId
+    : isUuid(envDefaultOrgId)
+      ? envDefaultOrgId
+      : undefined
   const isExecutive = params.mode === 'executive'
+
+  const orgId = selectedOrgId
+    ?? (await platformDb
+      .select({ id: orgs.id })
+      .from(orgs)
+      .limit(1)
+      .then((rows) => rows[0]?.id))
+
+  if (!orgId) {
+    return (
+      <div className={isExecutive ? 'p-12 bg-gray-50 min-h-screen' : 'p-8'}>
+        <h1 className="text-3xl font-bold text-gray-900">NACP Integrity Verification</h1>
+        <p className="text-gray-500 mt-2">
+          No organization available for integrity verification. Create an org or set NZILA_DEFAULT_ENTITY_ID.
+        </p>
+      </div>
+    )
+  }
 
   const section = await generateNacpIntegrityProofSection(orgId, nacpIntegrityPorts)
 

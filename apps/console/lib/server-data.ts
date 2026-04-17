@@ -2,16 +2,30 @@
  * Console — Server-side Data Layer
  *
  * Centralised data access for all Console dashboard pages.
- * Every function tries the live platform package API first,
- * then falls back to deterministic seed data for dev / first-boot.
+ * Every function tries live platform data first.
+ * If data is unavailable, this file returns conservative no-data results.
  *
  * @module console/server-data
  */
 import 'server-only'
 
-import { providerRegistry, type ProviderManifest } from '@nzila/platform-marketplace'
 import type { ProviderHealth } from '@nzila/platform-integrations-control-plane'
 import type { CostRollup } from '@nzila/platform-cost'
+import { listProviderDefinitions } from './integrations-provider-catalog'
+
+const CONSERVATIVE_PROVIDERS = [
+  { id: 'resend', name: 'Resend', category: 'email' },
+  { id: 'sendgrid', name: 'SendGrid', category: 'email' },
+  { id: 'mailgun', name: 'Mailgun', category: 'email' },
+  { id: 'twilio', name: 'Twilio', category: 'sms' },
+  { id: 'firebase', name: 'Firebase Cloud Messaging', category: 'push' },
+  { id: 'slack', name: 'Slack', category: 'chatops' },
+  { id: 'teams', name: 'Microsoft Teams', category: 'chatops' },
+  { id: 'hubspot', name: 'HubSpot', category: 'crm' },
+  { id: 'm365', name: 'Microsoft 365', category: 'productivity' },
+  { id: 'google-workspace', name: 'Google Workspace', category: 'productivity' },
+  { id: 'webhooks', name: 'Webhooks', category: 'webhooks' },
+] as const
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Marketplace Providers
@@ -32,37 +46,22 @@ export interface MarketplaceProvider {
 }
 
 function seedMarketplaceProviders(): MarketplaceProvider[] {
-  return [
-    { id: 'slack', name: 'Slack', category: 'chatops', version: '1.0.0', description: 'Push audit, compliance, and alert notifications to Slack channels.', installed: true, status: 'active', scopes: ['chat:write', 'channels:read', 'users:read'], requiredSecrets: ['SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET'], retryAttempts: 3, lastHealthCheck: '2 minutes ago' },
-    { id: 'hubspot', name: 'HubSpot', category: 'crm', version: '1.0.0', description: 'Sync contacts, deals, and pipeline data with HubSpot CRM.', installed: true, status: 'active', scopes: ['crm.objects.contacts.read', 'crm.objects.contacts.write', 'crm.objects.deals.read', 'crm.objects.deals.write'], requiredSecrets: ['HUBSPOT_ACCESS_TOKEN', 'HUBSPOT_PORTAL_ID'], retryAttempts: 5, lastHealthCheck: '5 minutes ago' },
-    { id: 'azure-blob', name: 'Azure Blob Storage', category: 'storage', version: '1.0.0', description: 'Sovereign data storage with PIPEDA-compliant residency.', installed: false, status: 'inactive', scopes: ['blob.read', 'blob.write', 'container.list'], requiredSecrets: ['AZURE_STORAGE_CONNECTION_STRING'], retryAttempts: 3, lastHealthCheck: 'N/A' },
-    { id: 'stripe', name: 'Stripe Payments', category: 'payments', version: '1.0.0', description: 'Process payments with full audit trail and evidence capture.', installed: false, status: 'inactive', scopes: ['charges.read', 'charges.write', 'refunds.write'], requiredSecrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'], retryAttempts: 3, lastHealthCheck: 'N/A' },
-  ]
-}
-
-function manifestToProvider(m: ProviderManifest): MarketplaceProvider {
-  return {
-    id: m.providerKey,
-    name: m.name,
-    category: m.category,
-    version: m.version,
-    description: m.description,
-    installed: true,
-    status: 'active',
-    scopes: [...m.scopes],
-    requiredSecrets: m.requiredSecrets.map((s) => s.key),
-    retryAttempts: m.retryPolicy.maxAttempts,
-    lastHealthCheck: 'Live',
-  }
+  return listProviderDefinitions().map((provider) => ({
+    id: provider.key,
+    name: provider.displayName,
+    category: provider.channel,
+    version: '1.0.0',
+    description: 'Connection state is unknown until this provider is connected and validated for an org.',
+    installed: false,
+    status: 'inactive',
+    scopes: [],
+    requiredSecrets: [...provider.requiredSecrets],
+    retryAttempts: 0,
+    lastHealthCheck: 'Unavailable',
+  }))
 }
 
 export async function getMarketplaceProviders(): Promise<MarketplaceProvider[]> {
-  try {
-    const manifests = providerRegistry.list()
-    if (manifests.length > 0) {
-      return manifests.map(manifestToProvider)
-    }
-  } catch { /* fall through to seed */ }
   return seedMarketplaceProviders()
 }
 
@@ -81,13 +80,15 @@ export interface IntegrationProviderRow {
 }
 
 function seedIntegrationProviders(): IntegrationProviderRow[] {
-  return [
-    { providerId: 'stripe', orgId: 'org_acme', status: 'healthy', lastCheckedAt: '2026-03-04T12:00:00Z', webhookVerified: true, rateLimitUsage: 0.34, dlqDepth: 0 },
-    { providerId: 'hubspot', orgId: 'org_acme', status: 'degraded', lastCheckedAt: '2026-03-04T11:55:00Z', webhookVerified: true, rateLimitUsage: 0.72, dlqDepth: 3 },
-    { providerId: 'qbo', orgId: 'org_acme', status: 'healthy', lastCheckedAt: '2026-03-04T12:01:00Z', webhookVerified: true, rateLimitUsage: 0.18, dlqDepth: 0 },
-    { providerId: 'xero', orgId: 'org_beta', status: 'down', lastCheckedAt: '2026-03-04T10:30:00Z', webhookVerified: false, rateLimitUsage: 0.0, dlqDepth: 12 },
-    { providerId: 'stripe', orgId: 'org_beta', status: 'healthy', lastCheckedAt: '2026-03-04T12:02:00Z', webhookVerified: true, rateLimitUsage: 0.45, dlqDepth: 0 },
-  ]
+  return CONSERVATIVE_PROVIDERS.map((provider) => ({
+    providerId: provider.id,
+    orgId: 'org_unknown',
+    status: 'down' as const,
+    lastCheckedAt: new Date(0).toISOString(),
+    webhookVerified: false,
+    rateLimitUsage: 0,
+    dlqDepth: 0,
+  }))
 }
 
 export async function getIntegrationProviders(): Promise<IntegrationProviderRow[]> {
@@ -127,34 +128,62 @@ export interface DlqRow {
 }
 
 function seedDlqEntries(): DlqRow[] {
-  return [
-    { entryId: 'dlq_001', providerId: 'hubspot', orgId: 'org_acme', eventType: 'CONTACT_SYNC', failedAt: '2026-03-04T11:52:00Z', retryCount: 3, lastError: 'HTTP 429 — rate limited' },
-    { entryId: 'dlq_002', providerId: 'hubspot', orgId: 'org_acme', eventType: 'DEAL_UPDATE', failedAt: '2026-03-04T11:53:00Z', retryCount: 2, lastError: 'HTTP 429 — rate limited' },
-    { entryId: 'dlq_003', providerId: 'hubspot', orgId: 'org_acme', eventType: 'CONTACT_SYNC', failedAt: '2026-03-04T11:54:00Z', retryCount: 1, lastError: 'HTTP 500 — internal server error' },
-    { entryId: 'dlq_004', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:20:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_005', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:21:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_006', providerId: 'xero', orgId: 'org_beta', eventType: 'PAYMENT_SYNC', failedAt: '2026-03-04T10:22:00Z', retryCount: 4, lastError: 'Connection refused' },
-    { entryId: 'dlq_007', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:23:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_008', providerId: 'xero', orgId: 'org_beta', eventType: 'CONTACT_UPDATE', failedAt: '2026-03-04T10:24:00Z', retryCount: 3, lastError: 'Connection refused' },
-    { entryId: 'dlq_009', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:25:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_010', providerId: 'xero', orgId: 'org_beta', eventType: 'PAYMENT_SYNC', failedAt: '2026-03-04T10:26:00Z', retryCount: 4, lastError: 'Connection refused' },
-    { entryId: 'dlq_011', providerId: 'xero', orgId: 'org_beta', eventType: 'INVOICE_CREATE', failedAt: '2026-03-04T10:27:00Z', retryCount: 5, lastError: 'Connection refused' },
-    { entryId: 'dlq_012', providerId: 'xero', orgId: 'org_beta', eventType: 'CONTACT_UPDATE', failedAt: '2026-03-04T10:28:00Z', retryCount: 3, lastError: 'Connection refused' },
-  ]
+  return []
 }
 
-export async function getDlqEntries(): Promise<DlqRow[]> {
+export async function getDlqEntries(orgId?: string | null): Promise<DlqRow[]> {
+  if (!orgId) return seedDlqEntries()
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/integrations/dlq`, { cache: 'no-store' })
+    const res = await fetch(`${baseUrl}/api/integrations/dlq?orgId=${encodeURIComponent(orgId)}`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { entries?: DlqRow[] }
-      if (json.entries && json.entries.length > 0) {
-        return json.entries
-      }
+      return json.entries ?? []
     }
   } catch { /* fall through to seed */ }
   return seedDlqEntries()
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Integration Deliveries
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface IntegrationDeliveryRow {
+  id: string
+  provider: string
+  channel: string
+  recipient: string
+  status: 'queued' | 'sent' | 'failed' | 'dlq'
+  attempts: number
+  createdAt: string
+}
+
+function seedIntegrationDeliveries(): IntegrationDeliveryRow[] {
+  return []
+}
+
+export async function getIntegrationDeliveries(args?: {
+  orgId?: string | null
+  provider?: string | null
+  status?: string | null
+}): Promise<IntegrationDeliveryRow[]> {
+  if (!args?.orgId) return seedIntegrationDeliveries()
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const params = new URLSearchParams()
+    params.set('orgId', args.orgId)
+    if (args?.provider) params.set('provider', args.provider)
+    if (args?.status) params.set('status', args.status)
+    const query = params.toString()
+    const res = await fetch(`${baseUrl}/api/integrations/deliveries${query ? `?${query}` : ''}`, {
+      cache: 'no-store',
+    })
+    if (res.ok) {
+      const json = (await res.json()) as { entries?: IntegrationDeliveryRow[] }
+      return json.entries ?? []
+    }
+  } catch { /* fall through to seed */ }
+  return seedIntegrationDeliveries()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -180,16 +209,21 @@ export interface SloSummary {
 }
 
 function seedSloResults(): SloSummary[] {
-  return [
-    { provider: 'resend', displayName: 'Resend', availability: 0.998, availabilityTarget: 0.99, p95LatencyMs: 120, p95LatencyTarget: 5000, errorRate: 0.002, sentCount: 14200, failureCount: 28, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'sendgrid', displayName: 'SendGrid', availability: 0.995, availabilityTarget: 0.99, p95LatencyMs: 180, p95LatencyTarget: 5000, errorRate: 0.005, sentCount: 8500, failureCount: 42, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'mailgun', displayName: 'Mailgun', availability: 0.997, availabilityTarget: 0.99, p95LatencyMs: 150, p95LatencyTarget: 5000, errorRate: 0.003, sentCount: 6200, failureCount: 18, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'twilio', displayName: 'Twilio', availability: 0.999, availabilityTarget: 0.99, p95LatencyMs: 80, p95LatencyTarget: 5000, errorRate: 0.001, sentCount: 3100, failureCount: 3, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'firebase', displayName: 'Firebase', availability: 0.996, availabilityTarget: 0.99, p95LatencyMs: 200, p95LatencyTarget: 5000, errorRate: 0.004, sentCount: 22000, failureCount: 88, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'slack', displayName: 'Slack', availability: 0.993, availabilityTarget: 0.99, p95LatencyMs: 250, p95LatencyTarget: 5000, errorRate: 0.007, sentCount: 4800, failureCount: 33, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'teams', displayName: 'Microsoft Teams', availability: 0.991, availabilityTarget: 0.99, p95LatencyMs: 300, p95LatencyTarget: 5000, errorRate: 0.009, sentCount: 1500, failureCount: 13, availabilityMet: true, latencyMet: true, compliant: true, status: 'compliant' },
-    { provider: 'hubspot', displayName: 'HubSpot', availability: 0.988, availabilityTarget: 0.99, p95LatencyMs: 400, p95LatencyTarget: 5000, errorRate: 0.012, sentCount: 9400, failureCount: 112, availabilityMet: false, latencyMet: true, compliant: false, status: 'breached' },
-  ]
+  return CONSERVATIVE_PROVIDERS.map((provider) => ({
+    provider: provider.id,
+    displayName: provider.name,
+    availability: 0,
+    availabilityTarget: 0.99,
+    p95LatencyMs: 0,
+    p95LatencyTarget: 5000,
+    errorRate: 1,
+    sentCount: 0,
+    failureCount: 0,
+    availabilityMet: false,
+    latencyMet: false,
+    compliant: false,
+    status: 'no_data' as const,
+  }))
 }
 
 export async function getSloResults(): Promise<SloSummary[]> {
@@ -226,17 +260,17 @@ export interface ProviderHealthRow {
 }
 
 function seedProviderHealthList(): ProviderHealthRow[] {
-  const now = new Date().toISOString()
-  return [
-    { provider: 'resend', displayName: 'Resend', status: 'ok', successRate: 99.8, p95LatencyMs: 120, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'sendgrid', displayName: 'SendGrid', status: 'ok', successRate: 99.5, p95LatencyMs: 180, rateLimitedCount: 2, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'mailgun', displayName: 'Mailgun', status: 'ok', successRate: 99.7, p95LatencyMs: 150, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'twilio', displayName: 'Twilio', status: 'ok', successRate: 99.9, p95LatencyMs: 80, rateLimitedCount: 0, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'firebase', displayName: 'Firebase', status: 'ok', successRate: 99.6, p95LatencyMs: 200, rateLimitedCount: 1, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'slack', displayName: 'Slack', status: 'ok', successRate: 99.3, p95LatencyMs: 250, rateLimitedCount: 5, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'teams', displayName: 'Microsoft Teams', status: 'ok', successRate: 99.1, p95LatencyMs: 300, rateLimitedCount: 1, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-    { provider: 'hubspot', displayName: 'HubSpot', status: 'ok', successRate: 98.8, p95LatencyMs: 400, rateLimitedCount: 8, circuitState: 'closed', consecutiveFailures: 0, lastCheckedAt: now },
-  ]
+  return CONSERVATIVE_PROVIDERS.map((provider) => ({
+    provider: provider.id,
+    displayName: provider.name,
+    status: 'down' as const,
+    successRate: 0,
+    p95LatencyMs: 0,
+    rateLimitedCount: 0,
+    circuitState: 'open' as const,
+    consecutiveFailures: 0,
+    lastCheckedAt: null,
+  }))
 }
 
 export async function getProviderHealthList(): Promise<ProviderHealthRow[]> {
@@ -293,23 +327,23 @@ export interface ProviderHealthDetail {
 function seedProviderDetail(): ProviderHealthDetail {
   return {
     health: {
-      status: 'ok',
+      status: 'down',
       consecutiveFailures: 0,
-      circuitState: 'closed',
+      circuitState: 'open',
       circuitOpenedAt: null,
       circuitNextRetryAt: null,
       lastCheckedAt: new Date().toISOString(),
-      lastErrorCode: null,
-      lastErrorMessage: null,
+      lastErrorCode: 'no_data',
+      lastErrorMessage: 'Provider health details are unavailable.',
     },
     metrics: {
-      successRate: 99.5,
-      p50LatencyMs: 80,
-      p95LatencyMs: 180,
-      p99LatencyMs: 350,
-      sentCount: 1240,
-      failureCount: 6,
-      rateLimitedCount: 2,
+      successRate: 0,
+      p50LatencyMs: 0,
+      p95LatencyMs: 0,
+      p99LatencyMs: 0,
+      sentCount: 0,
+      failureCount: 0,
+      rateLimitedCount: 0,
       timeoutCount: 0,
     },
   }
@@ -424,7 +458,7 @@ export interface OpsScoreHistoryEntry {
   grade: string
 }
 
-function seedOpsScoreHistory(currentScore: number, currentGrade: string): OpsScoreHistoryEntry[] {
+function seedOpsScoreHistory(currentScore: number, _currentGrade: string): OpsScoreHistoryEntry[] {
   const entries: OpsScoreHistoryEntry[] = []
   const now = new Date()
   for (let i = 7; i >= 1; i--) {

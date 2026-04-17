@@ -205,6 +205,9 @@ export const ORG_SCOPED_TABLES = [
 
   // ── platform.ts ─────────────────────────────────────────
   'platformRequestMetrics',
+  'platformIntegrationConnections',
+  'platformIntegrationDeliveries',
+  'platformIntegrationDlqEntries',
   'platformCostEvents',
   'platformCostRollups',
   'platformCostBudgetBreaches',

@@ -1,8 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import ScrollReveal from './ScrollReveal';
+import TrackedLink from './TrackedLink';
+import { MARKETING_FACTS } from '@/lib/marketing-facts';
 
 interface InvestorCTAProps {
   className?: string;
@@ -29,14 +30,16 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
               Series A — Join the Future of AI Infrastructure
             </h2>
             <p className="text-gray-300 mb-6">
-              $100B+ TAM. 15 platforms. 4 flagships. One unified Backbone.
+              {MARKETING_FACTS.totalTamLabel} TAM. {MARKETING_FACTS.productPlatforms} platforms. {MARKETING_FACTS.flagshipPlatforms} flagships. One unified Backbone.
             </p>
-            <Link
+            <TrackedLink
               href="/investors"
+              eventName="cta_investor_thesis"
+              eventProps={{ source: 'investor_cta' }}
               className="inline-flex items-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-colors text-lg"
             >
               View Investment Thesis
-            </Link>
+            </TrackedLink>
           </ScrollReveal>
 
           <ScrollReveal direction="right">
@@ -49,12 +52,14 @@ export default function InvestorCTA({ className = '' }: InvestorCTAProps) {
             <p className="text-gray-300 mb-6">
               Deploy ethical AI solutions across healthcare, finance, agriculture, and beyond.
             </p>
-            <Link
+            <TrackedLink
               href="/contact"
+              eventName="cta_partner_contact"
+              eventProps={{ source: 'investor_cta' }}
               className="inline-flex items-center px-8 py-4 bg-white text-navy font-bold rounded-xl hover:bg-gray-100 transition-colors text-lg"
             >
               Partner With Us
-            </Link>
+            </TrackedLink>
           </ScrollReveal>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
@@ -8,13 +7,15 @@ import ImageCard from '@/components/public/ImageCard';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Home',
-  description: 'Nzila Ventures — venture studio building 15 AI-powered platforms across 10+ verticals. $100B+ TAM, 4 flagships, one unified Backbone. The APEX of AI in social impact.',
+  description: `Nzila Ventures — venture studio building ${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} TAM, ${MARKETING_FACTS.flagshipPlatforms} flagships, one unified Backbone.`,
   openGraph: {
     title: 'Nzila Ventures | The APEX of AI in Social Impact',
-    description: '15 AI-powered platforms across 10+ verticals. $100B+ TAM. Series A ready.',
+    description: `${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} TAM.`,
     images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing global AI connectivity — Nzila Ventures' }],
   },
   alternates: { canonical: '/' },
@@ -85,25 +86,29 @@ export default function Home() {
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              15 AI-powered platforms across 10+ verticals — healthcare, finance, 
-              agriculture, labor rights, and justice. One unified Backbone.
+              {MARKETING_FACTS.productPlatforms} product platforms across {MARKETING_FACTS.verticalsLabel} verticals - delivered through {MARKETING_FACTS.governedApplications} governed applications for
+              healthcare, finance, agriculture, labor rights, and justice.
             </p>
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link
+              <TrackedLink
                 href="/portfolio"
+                eventName="cta_portfolio"
+                eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
                 Explore Our Portfolio
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/investors"
+                eventName="cta_investors"
+                eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
               >
                 For Investors
-              </Link>
+              </TrackedLink>
             </div>
           </ScrollReveal>
         </div>
@@ -122,10 +127,10 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: 15, suffix: '', label: 'AI Platforms' },
+              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: 'Product Platforms' },
+              { target: MARKETING_FACTS.governedApplications, suffix: '', label: 'Governed Applications' },
               { target: 10, suffix: '+', label: 'Verticals' },
               { target: 100, prefix: '$', suffix: 'B+', label: 'Total TAM' },
-              { target: 12000, suffix: '+', label: 'Data Entities' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -240,12 +245,14 @@ export default function Home() {
           </div>
 
           <ScrollReveal className="text-center mt-12">
-            <Link
+            <TrackedLink
               href="/portfolio"
+              eventName="cta_portfolio"
+              eventProps={{ source: 'home_flagships' }}
               className="inline-flex items-center text-electric font-semibold hover:text-blue-700 text-lg"
             >
-              View All 15 Platforms →
-            </Link>
+              View {MARKETING_FACTS.productPlatforms} Product Platforms →
+            </TrackedLink>
           </ScrollReveal>
         </div>
       </section>
@@ -301,7 +308,11 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {verticals.map((vertical, i) => (
               <ScrollReveal key={vertical.name} delay={i * 0.05}>
-                <Link href={`/verticals/${vertical.name.toLowerCase().replace('/', '')}`}>
+                <TrackedLink
+                  href={`/verticals/${vertical.name.toLowerCase().replace('/', '')}`}
+                  eventName="vertical_open"
+                  eventProps={{ vertical: vertical.name, source: 'home_vertical_grid' }}
+                >
                   <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift cursor-pointer">
                     <Image
                       src={vertical.image}
@@ -319,7 +330,7 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
-                </Link>
+                </TrackedLink>
               </ScrollReveal>
             ))}
           </div>

@@ -29,7 +29,21 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
   transpilePackages: [
+    '@nzila/chatops-slack',
+    '@nzila/chatops-teams',
+    '@nzila/comms-email',
+    '@nzila/comms-push',
+    '@nzila/comms-sms',
+    '@nzila/crm-hubspot',
     '@nzila/ai-core',
     '@nzila/blob',
     '@nzila/commerce-observability',

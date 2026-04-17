@@ -9,6 +9,7 @@ import { aiRequests } from '@nzila/db/schema'
 import { eq, desc, and, count, sum, avg } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,20 +45,21 @@ async function getUsageData(orgId: string) {
     .groupBy(aiRequests.appKey, aiRequests.profileKey, aiRequests.feature)
     .orderBy(desc(count()))
 
-  // Refusal counts by appKey + profileKey
+  // Refusal counts by appKey + profileKey + feature (avoid double counting in totals)
   const refusals = await platformDb
     .select({
       appKey: aiRequests.appKey,
       profileKey: aiRequests.profileKey,
+      feature: aiRequests.feature,
       count: count(),
     })
     .from(aiRequests)
     .where(and(eq(aiRequests.orgId, orgId), eq(aiRequests.status, 'refused')))
-    .groupBy(aiRequests.appKey, aiRequests.profileKey)
+    .groupBy(aiRequests.appKey, aiRequests.profileKey, aiRequests.feature)
 
   const refusalMap = new Map<string, number>()
   for (const r of refusals) {
-    refusalMap.set(`${r.appKey}::${r.profileKey}`, r.count)
+    refusalMap.set(`${r.appKey}::${r.profileKey}::${r.feature}`, r.count)
   }
 
   const usage: UsageRow[] = rows.map((r) => ({
@@ -69,7 +71,7 @@ async function getUsageData(orgId: string) {
     tokensOut: Number(r.tokensOut ?? 0),
     costUsd: Number(r.costUsd ?? 0),
     avgLatencyMs: Math.round(Number(r.avgLatency ?? 0)),
-    refusedCount: refusalMap.get(`${r.appKey}::${r.profileKey}`) ?? 0,
+    refusedCount: refusalMap.get(`${r.appKey}::${r.profileKey}::${r.feature}`) ?? 0,
   }))
 
   // Recent requests (last 25)
@@ -115,31 +117,54 @@ export default async function AiUsagePage() {
   const totalCost = usage.reduce((s, u) => s + u.costUsd, 0)
   const totalTokens = usage.reduce((s, u) => s + u.tokensIn + u.tokensOut, 0)
   const totalRefused = usage.reduce((s, u) => s + u.refusedCount, 0)
+  const totalRequests = usage.reduce((s, u) => s + u.requestCount, 0)
+  const avgLatency = totalRequests > 0
+    ? Math.round(usage.reduce((s, u) => s + (u.avgLatencyMs * u.requestCount), 0) / totalRequests)
+    : 0
+  const refusalRate = totalRequests > 0 ? ((totalRefused / totalRequests) * 100) : 0
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">AI Usage Analytics</h1>
+    <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-card via-card to-muted/40 p-6 shadow-sm">
+        <div className="absolute -left-8 top-10 h-28 w-28 rounded-full bg-blue-500/10 blur-2xl" />
+        <div className="absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-amber-500/10 blur-2xl" />
 
-      {/* ── Totals ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Total Cost</div>
-          <div className="mt-1 text-2xl font-bold">${totalCost.toFixed(4)}</div>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Total Tokens</div>
-          <div className="mt-1 text-2xl font-bold">{totalTokens.toLocaleString()}</div>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Total Refusals</div>
-          <div className="mt-1 text-2xl font-bold text-amber-600">{totalRefused}</div>
-        </div>
-      </div>
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Console / AI</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">AI Usage Analytics</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Track request volume, token spend, refusal posture, and latency by app, profile, and feature.
+            </p>
+          </div>
 
-      {/* ── Usage by App / Profile / Feature ───────────────────── */}
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link href="/console/ai/overview" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Overview
+            </Link>
+            <Link href="/console/ai/models" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Models
+            </Link>
+            <Link href="/console/ai/actions" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Actions
+            </Link>
+            <Link href="/console/ai/knowledge" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Knowledge
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Requests" value={String(totalRequests)} tone="blue" />
+          <StatCard label="Total Cost" value={`$${totalCost.toFixed(4)}`} tone="emerald" />
+          <StatCard label="Refusal Rate" value={`${refusalRate.toFixed(1)}%`} tone="amber" />
+          <StatCard label="Avg Latency" value={`${avgLatency}ms`} tone="violet" />
+        </div>
+      </section>
+
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Usage Breakdown</h2>
-        <div className="rounded-lg border overflow-x-auto">
+        <h2 className="mb-3 text-base font-semibold tracking-tight">Usage Breakdown</h2>
+        <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -178,10 +203,9 @@ export default async function AiUsagePage() {
         </div>
       </section>
 
-      {/* ── Recent Requests ────────────────────────────────────── */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Recent Requests</h2>
-        <div className="rounded-lg border overflow-x-auto">
+        <h2 className="mb-3 text-base font-semibold tracking-tight">Recent Requests</h2>
+        <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -222,6 +246,48 @@ export default async function AiUsagePage() {
           </table>
         </div>
       </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold">Token Posture</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Combined tokens in/out across grouped features.</p>
+          <p className="mt-3 text-2xl font-bold">{totalTokens.toLocaleString()}</p>
+        </div>
+        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold">Refusals</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Safety and policy refusals in aggregate.</p>
+          <p className="mt-3 text-2xl font-bold text-amber-600">{totalRefused}</p>
+        </div>
+        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold">Average Latency</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Weighted by request volume per feature group.</p>
+          <p className="mt-3 text-2xl font-bold">{avgLatency}ms</p>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string
+  tone: 'amber' | 'blue' | 'emerald' | 'violet'
+}) {
+  const tones: Record<typeof tone, string> = {
+    amber: 'border-amber-500/20 bg-amber-500/5 text-amber-700 dark:text-amber-300',
+    blue: 'border-blue-500/20 bg-blue-500/5 text-blue-700 dark:text-blue-300',
+    emerald: 'border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300',
+    violet: 'border-violet-500/20 bg-violet-500/5 text-violet-700 dark:text-violet-300',
+  }
+
+  return (
+    <div className={`rounded-xl border px-4 py-4 ${tones[tone]}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">{value}</p>
     </div>
   )
 }

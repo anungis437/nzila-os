@@ -63,7 +63,8 @@ export async function initOtel(config: OtelConfig): Promise<void> {
     sdk.start()
     console.log(`[otel] Initialized for ${config.appName} → ${endpoint}`)
 
-    process.on('SIGTERM', () => {
+    const nodeProcess = (globalThis as { process?: { on?: (event: string, cb: () => void) => void } }).process
+    nodeProcess?.on?.('SIGTERM', () => {
       sdk.shutdown().catch(console.error)
     })
   } catch (err) {
