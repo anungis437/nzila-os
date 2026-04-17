@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-16 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-17 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -8,9 +8,9 @@
 |--------|-------|
 | Apps | 17 |
 | Packages | 166 |
-| GitHub Workflows | 35 |
-| Contract Test Files | 195 |
-| TS/JS Test Files | 1146 |
+| GitHub Workflows | 36 |
+| Contract Test Files | 211 |
+| TS/JS Test Files | 1162 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -31,7 +31,7 @@
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 100 | Partner portal for managing deals, commissions, certifications, and go-to-market |
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 29 | Internal admin console for managing platform services — events, knowledge, ontol |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 51 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3132 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3140 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 60 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 402 | Africa-first music distribution, streaming, and royalty management platform. |
 
@@ -59,6 +59,7 @@
 - game-day.yml
 - gitops-deploy.yml
 - lighthouse.yml
+- nzila-ga-gate.yml
 - nzila-governance.yml
 - nzila-playbook-runner.yml
 - ops-pack.yml

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-16T17:04:18.796Z",
+  "generatedAt": "2026-04-17T00:13:03.349Z",
   "appCount": 17,
   "packageCount": 166,
-  "workflowCount": 35,
-  "contractTestCount": 195,
-  "tsTestFileCount": 1146,
+  "workflowCount": 36,
+  "contractTestCount": 211,
+  "tsTestFileCount": 1162,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -493,7 +493,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3132
+      "codeFileCount": 3140
     },
     {
       "name": "web",
@@ -582,6 +582,7 @@
     "game-day.yml",
     "gitops-deploy.yml",
     "lighthouse.yml",
+    "nzila-ga-gate.yml",
     "nzila-governance.yml",
     "nzila-playbook-runner.yml",
     "ops-pack.yml",
