@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-16T23:54:56.939Z",
-  "total": 25,
-  "passed": 25,
+  "timestamp": "2026-04-17T00:05:27.823Z",
+  "total": 27,
+  "passed": 27,
   "failed": 0,
   "checks": [
     {
@@ -67,7 +67,7 @@
     {
       "name": "GOV-GATE-013: AI incident playbooks exist",
       "status": "pass",
-      "detail": "6 AI incident playbooks verified"
+      "detail": "9 AI incident playbooks verified"
     },
     {
       "name": "GOV-GATE-014: Strategic telemetry and command catalog exist",
@@ -128,6 +128,16 @@
       "name": "GOV-GATE-025: Regulatory monitoring artifacts exist",
       "status": "pass",
       "detail": "Regulatory monitoring verified across 5 tracked regulations"
+    },
+    {
+      "name": "GOV-GATE-026: Disaster recovery region-loss playbook exists",
+      "status": "pass",
+      "detail": "Region-loss disaster recovery playbook verified"
+    },
+    {
+      "name": "GOV-GATE-027: Governance runtime budget guardrail exists",
+      "status": "pass",
+      "detail": "Governance runtime budget guardrail script verified"
     }
   ]
 }

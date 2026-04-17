@@ -239,6 +239,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Start governance runtime timer
+        run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Contract tests
         run: pnpm contract-tests
 
@@ -307,6 +310,12 @@ jobs:
       - name: Verify proof artifacts
         run: pnpm proof:verify
 
+      - name: Enforce governance runtime budget
+        run: pnpm validate:governance:runtime-budget
+        env:
+          GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
+          GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
+
       - name: Upload governance gate report
         if: always()
         uses: actions/upload-artifact@v4
@@ -319,6 +328,7 @@ jobs:
             ops/outputs/onboarding-kpis.json
             ops/outputs/strategic-resilience-report.json
             ops/outputs/data-residency-runtime.json
+            ops/outputs/governance-runtime-budget.json
             ops/outputs/control-manifest-report.json
             proof-artifacts/**
           retention-days: 90

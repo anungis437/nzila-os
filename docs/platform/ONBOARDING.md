@@ -37,6 +37,10 @@ Automated KPI report generation:
 pnpm collect:onboarding:kpis
 ```
 
+GitHub API enrichment is automatically attempted (via `gh api`) using:
+- `ONBOARDING_GITHUB_REPO` (default: `anungis437/nzila-os`)
+- `ONBOARDING_GITHUB_WINDOW_DAYS` (default: `90`)
+
 Source input: `ops/inputs/onboarding-metrics.json`  
 Generated output: `ops/outputs/onboarding-kpis.json`
 

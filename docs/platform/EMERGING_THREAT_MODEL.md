@@ -46,6 +46,10 @@ This model tracks forward-looking threats that can bypass conventional controls 
 - Machine-readable register: governance/resilience/emerging-threat-register.json
 - Validation command: pnpm validate:strategic-resilience
 - Governance gate: GOV-GATE-022 ensures required threat families are tracked
+- Operational playbooks:
+  - docs/platform/AI_INCIDENT_PLAYBOOK_HALLUCINATION.md
+  - docs/platform/AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md
+  - docs/platform/AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md
 
 ---
 

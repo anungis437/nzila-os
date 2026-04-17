@@ -208,6 +208,9 @@ check('GOV-GATE-013: AI incident playbooks exist', () => {
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_HALLUCINATION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md'),
     join(ROOT, 'docs', 'platform', 'AI_INCIDENT_DRILL_RUNBOOK.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))
@@ -436,6 +439,32 @@ check('GOV-GATE-025: Regulatory monitoring artifacts exist', () => {
   const entries = Array.isArray(watchlist.watchlist) ? watchlist.watchlist : []
   if (entries.length < 5) throw new Error('regulatory-watchlist.json must include at least 5 tracked regulations')
   return `Regulatory monitoring verified across ${entries.length} tracked regulations`
+})
+
+check('GOV-GATE-026: Disaster recovery region-loss playbook exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md')
+  if (!existsSync(path)) {
+    throw new Error('docs/platform/DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md not found')
+  }
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Trigger Conditions', '## Containment and Failover', '## Recovery']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) {
+    throw new Error(`Region-loss DR playbook missing sections: ${missing.join(', ')}`)
+  }
+  return 'Region-loss disaster recovery playbook verified'
+})
+
+check('GOV-GATE-027: Governance runtime budget guardrail exists', () => {
+  const path = join(ROOT, 'tooling', 'scripts', 'check-governance-runtime-budget.mjs')
+  if (!existsSync(path)) {
+    throw new Error('tooling/scripts/check-governance-runtime-budget.mjs not found')
+  }
+  const content = readFileSync(path, 'utf-8')
+  if (!content.includes('GOVERNANCE_MAX_RUNTIME_MINUTES') || !content.includes('--enforce')) {
+    throw new Error('Runtime budget script must support max-runtime env and enforce mode')
+  }
+  return 'Governance runtime budget guardrail script verified'
 })
 
 // ── Helper ──────────────────────────────────────────────────────────────────

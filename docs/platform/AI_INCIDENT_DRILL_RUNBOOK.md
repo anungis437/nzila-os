@@ -9,6 +9,9 @@ Run quarterly incident simulations for AI-specific threats and verify operationa
 1. Prompt injection on a high-value route.
 2. Data poisoning detected during ingestion.
 3. Model drift causing policy compliance failures.
+4. Production hallucination on regulated workflow output.
+5. Dependency confusion in a critical package path.
+6. Post-quantum migration readiness failure for long-retention data.
 
 ## Cadence
 
