@@ -23,11 +23,26 @@ interface CatalogProduct {
   external_dependencies: string[]
   kpi_owner: string
   public_claim_permissions: Record<string, boolean>
+  proof_status: 'no-proof' | 'internal-proof' | 'pilot-proof' | 'paid-proof' | 'scaled-proof'
+  focus_classification: 'DOUBLE DOWN' | 'MAINTAIN' | 'HOLD' | 'CUT' | 'INTERNAL ONLY'
+  score: number
+  score_rationale: string
+  last_reviewed: string
+  active_customers: number
+  active_pilots: number
+  active_proposals: number
+  revenue_range_usd: string
+  implementation_speed_days: string
+  service_reliability: 'live' | 'daily sync' | 'weekly sync' | 'manual' | 'stale'
+  measurable_roi: string
+  testimonials: string
 }
 
 interface ProductCatalog {
   schema_version: string
   authority: Record<string, string>
+  canonical_truth_version?: string
+  canonical_score_source?: string
   products: CatalogProduct[]
 }
 
@@ -109,6 +124,19 @@ function main() {
     'external_dependencies',
     'kpi_owner',
     'public_claim_permissions',
+    'proof_status',
+    'focus_classification',
+    'score',
+    'score_rationale',
+    'last_reviewed',
+    'active_customers',
+    'active_pilots',
+    'active_proposals',
+    'revenue_range_usd',
+    'implementation_speed_days',
+    'service_reliability',
+    'measurable_roi',
+    'testimonials',
   ]
 
   const names = new Set<string>()
@@ -139,12 +167,61 @@ function main() {
       issues.push(`${product.name}: invalid evidence_status '${product.evidence_status}' — must be one of ${validEvidenceStatus.join(', ')}`)
     }
 
+    const validProofStatus = ['no-proof', 'internal-proof', 'pilot-proof', 'paid-proof', 'scaled-proof']
+    if (!validProofStatus.includes(product.proof_status)) {
+      issues.push(`${product.name}: invalid proof_status '${product.proof_status}' — must be one of ${validProofStatus.join(', ')}`)
+    }
+
+    const validFocusClassifications = ['DOUBLE DOWN', 'MAINTAIN', 'HOLD', 'CUT', 'INTERNAL ONLY']
+    if (!validFocusClassifications.includes(product.focus_classification)) {
+      issues.push(`${product.name}: invalid focus_classification '${product.focus_classification}' — must be one of ${validFocusClassifications.join(', ')}`)
+    }
+
+    const validServiceReliability = ['live', 'daily sync', 'weekly sync', 'manual', 'stale']
+    if (!validServiceReliability.includes(product.service_reliability)) {
+      issues.push(`${product.name}: invalid service_reliability '${product.service_reliability}' — must be one of ${validServiceReliability.join(', ')}`)
+    }
+
     if (typeof product.commercial_priority !== 'number' || product.commercial_priority < 1 || product.commercial_priority > 5) {
       issues.push(`${product.name}: commercial_priority must be a number between 1 and 5`)
     }
 
+    if (typeof product.score !== 'number' || product.score < 0 || product.score > 10) {
+      issues.push(`${product.name}: score must be a number between 0 and 10`)
+    }
+
+    if (!product.score_rationale || product.score_rationale.trim().length < 10) {
+      issues.push(`${product.name}: score_rationale must be a meaningful non-empty string`)
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(product.last_reviewed)) {
+      issues.push(`${product.name}: last_reviewed must be in YYYY-MM-DD format`)
+    }
+
+    for (const key of ['active_customers', 'active_pilots', 'active_proposals'] as const) {
+      if (typeof product[key] !== 'number' || product[key] < 0) {
+        issues.push(`${product.name}: ${key} must be a non-negative number`)
+      }
+    }
+
     if (!product.value_prop || product.value_prop.trim().length < 10) {
       issues.push(`${product.name}: value_prop must be a non-empty meaningful string`)
+    }
+
+    if (!product.revenue_range_usd || product.revenue_range_usd.trim().length === 0) {
+      issues.push(`${product.name}: revenue_range_usd must be a non-empty string`)
+    }
+
+    if (!product.implementation_speed_days || product.implementation_speed_days.trim().length === 0) {
+      issues.push(`${product.name}: implementation_speed_days must be a non-empty string`)
+    }
+
+    if (!product.measurable_roi || product.measurable_roi.trim().length === 0) {
+      issues.push(`${product.name}: measurable_roi must be a non-empty string`)
+    }
+
+    if (!product.testimonials || product.testimonials.trim().length === 0) {
+      issues.push(`${product.name}: testimonials must be a non-empty string`)
     }
 
     if (!product.docs_entrypoint || product.docs_entrypoint.trim().length === 0) {

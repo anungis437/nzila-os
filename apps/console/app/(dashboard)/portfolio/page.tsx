@@ -130,6 +130,7 @@ export default async function PortfolioPage() {
   if (!userId) redirect('/sign-in')
 
   const { products, version } = loadCatalog()
+  const freshnessStatus = products.length > 0 ? 'daily sync' : 'stale'
   const capitalRows = await getCapitalPriorityRows()
   const capitalByVenture = new Map(capitalRows.map((row) => [row.ventureId, row]))
 
@@ -137,7 +138,7 @@ export default async function PortfolioPage() {
     const capital = capitalByVenture.get(product.id ?? product.name)
     product.capitalPriorityScore = capital?.score ?? 0
     product.capitalAction = capital?.action ?? 'Hold'
-    product.capitalRationale = capital?.rationale ?? null
+    product.capitalRationale = capital?.rationale ?? undefined
   }
 
   products.sort((left, right) => {
@@ -186,6 +187,9 @@ export default async function PortfolioPage() {
         </div>
         <div className="text-xs text-gray-400 font-mono">
           catalog {version}
+        </div>
+        <div className="text-xs font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full ml-2">
+          freshness: {freshnessStatus}
         </div>
       </div>
 

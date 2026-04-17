@@ -189,6 +189,11 @@ export default async function RevenuePage() {
 
   const data = await loadRevenueData()
   const totalPipelineValue = data.openQuotesValue + data.sentQuotesValue
+  const freshnessStatus = !data.quotesAvailable || !data.pilotsAvailable
+    ? 'manual'
+    : data.revenueAvailable
+      ? 'live'
+      : 'daily sync'
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -207,6 +212,9 @@ export default async function RevenuePage() {
         <Link href="/pilot/export" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
           Export pilot data <ArrowRightIcon className="h-3 w-3" />
         </Link>
+        <span className="text-xs font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+          freshness: {freshnessStatus}
+        </span>
       </div>
 
       {/* Revenue Metrics Strip */}

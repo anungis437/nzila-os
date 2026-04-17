@@ -1,10 +1,12 @@
 {
-  "schema_version": "2026-04-17.2",
+  "schema_version": "2026-04-17.3",
   "authority": {
     "catalog_source": "governance/portfolio/product-catalog.json",
     "product_tier_source": "packages/platform-contracts/src/registry.ts",
     "deployment_status_source": "nzila-truth-manifest.json",
-    "exposure_source": "apps/*/maturity.json"
+    "exposure_source": "apps/*/maturity.json",
+    "proof_source": "docs/proof-center/portfolio-proof-index.md",
+    "focus_source": "reports/final-focus-matrix.md"
   },
   "products": [
     {
@@ -23,15 +25,38 @@
       "code_presence": "full",
       "evidence_status": "complete",
       "docs_entrypoint": "docs/union-eyes/README.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-observability", "db", "os-core"],
-      "external_dependencies": ["azure", "postgresql", "entra"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-observability",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "azure",
+        "postgresql",
+        "entra"
+      ],
       "kpi_owner": "union-eyes-gm",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": true,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "pilot-proof",
+      "focus_classification": "DOUBLE DOWN",
+      "score": 8.6,
+      "score_rationale": "Pilot evidence exists, governance is strong, and commercial narrative is clear.",
+      "active_customers": 0,
+      "active_pilots": 1,
+      "active_proposals": 2,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "14-30",
+      "service_reliability": "daily sync",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "flow",
@@ -49,15 +74,39 @@
       "code_presence": "full",
       "evidence_status": "partial",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-revenue", "db", "os-core"],
-      "external_dependencies": ["postgresql", "shopify", "zoho", "stripe"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-revenue",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "shopify",
+        "zoho",
+        "stripe"
+      ],
       "kpi_owner": "flow-gm",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": true,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "internal-proof",
+      "focus_classification": "DOUBLE DOWN",
+      "score": 7.9,
+      "score_rationale": "Strong implementation with pipeline and billing paths, external pilot proof still limited.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 3,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "7-21",
+      "service_reliability": "daily sync",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "web",
@@ -75,15 +124,33 @@
       "code_presence": "full",
       "evidence_status": "none",
       "docs_entrypoint": "README.md",
-      "internal_dependencies": ["platform-auth", "os-core"],
-      "external_dependencies": ["hubspot"],
+      "internal_dependencies": [
+        "platform-auth",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "hubspot"
+      ],
       "kpi_owner": "growth-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": true,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "internal-proof",
+      "focus_classification": "MAINTAIN",
+      "score": 7,
+      "score_rationale": "Clear commercial front door and documentation authority, not a direct revenue SKU.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "live",
+      "measurable_roi": "lead funnel quality",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "console",
@@ -101,15 +168,37 @@
       "code_presence": "full",
       "evidence_status": "partial",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-observability", "db", "os-core"],
-      "external_dependencies": ["postgresql", "entra"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-observability",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "entra"
+      ],
       "kpi_owner": "platform-ops-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "internal-proof",
+      "focus_classification": "INTERNAL ONLY",
+      "score": 8.2,
+      "score_rationale": "High operational leverage internally with growing decision-execution loops.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "live",
+      "measurable_roi": "decision cycle acceleration",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "control-plane",
@@ -127,15 +216,37 @@
       "code_presence": "full",
       "evidence_status": "partial",
       "docs_entrypoint": "docs/architecture/CONTROL_PLANE_ARCHITECTURE.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-observability", "db", "os-core"],
-      "external_dependencies": ["postgresql", "entra"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-observability",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "entra"
+      ],
       "kpi_owner": "platform-core-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "internal-proof",
+      "focus_classification": "INTERNAL ONLY",
+      "score": 7.4,
+      "score_rationale": "Critical governance substrate with internal-only operational value.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "live",
+      "measurable_roi": "platform governance integrity",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "partners",
@@ -153,15 +264,37 @@
       "code_presence": "full",
       "evidence_status": "partial",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-revenue", "db", "os-core"],
-      "external_dependencies": ["postgresql", "entra"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-revenue",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "entra"
+      ],
       "kpi_owner": "partners-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": true,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "MAINTAIN",
+      "score": 6.8,
+      "score_rationale": "Viable partner surface with low external evidence density.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 1,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "14-45",
+      "service_reliability": "weekly sync",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "cfo",
@@ -179,15 +312,40 @@
       "code_presence": "full",
       "evidence_status": "partial",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-revenue", "platform-billing", "db", "os-core"],
-      "external_dependencies": ["postgresql", "xero", "quickbooks", "plaid"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-revenue",
+        "platform-billing",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "xero",
+        "quickbooks",
+        "plaid"
+      ],
       "kpi_owner": "cfo-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": true,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "internal-proof",
+      "focus_classification": "MAINTAIN",
+      "score": 7.2,
+      "score_rationale": "Pilot-tier product with meaningful integrations but insufficient external proof.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 1,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "14-30",
+      "service_reliability": "daily sync",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "zonga",
@@ -205,15 +363,37 @@
       "code_presence": "full",
       "evidence_status": "none",
       "docs_entrypoint": "docs/zonga/monetization-model.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "platform-revenue", "db", "os-core"],
-      "external_dependencies": ["postgresql", "stripe"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "platform-revenue",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql",
+        "stripe"
+      ],
       "kpi_owner": "zonga-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 5.8,
+      "score_rationale": "Large technical surface with limited near-term external validation.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "agrimo",
@@ -231,15 +411,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/agri/00-overview.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "agri-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 5.3,
+      "score_rationale": "Incubating domain stack with low external commercial proof.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "cora",
@@ -257,15 +457,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/agri/07-ml-and-intelligence.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "cora-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 4.9,
+      "score_rationale": "Early intelligence product with limited proof and utilization signals.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "trade",
@@ -283,15 +503,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/migration/trade/canonical-domain-map.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "trade-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 5.1,
+      "score_rationale": "Promising domain concept but current ROI path is unproven.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "nacp-exams",
@@ -309,15 +549,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "nacp-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 5,
+      "score_rationale": "Niche incubation domain with limited active external momentum.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "mobility",
@@ -335,15 +595,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "mobility-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 5,
+      "score_rationale": "Complex domain potential with low evidence density in current cycle.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "mobility-client-portal",
@@ -361,15 +641,34 @@
       "code_presence": "scaffold",
       "evidence_status": "none",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "mobility-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "CUT",
+      "score": 3.8,
+      "score_rationale": "Experimental companion surface with no independent ROI path.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "stale",
+      "measurable_roi": "not-applicable",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "abr",
@@ -387,15 +686,35 @@
       "code_presence": "partial",
       "evidence_status": "none",
       "docs_entrypoint": "docs/backlog/abr-backend.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "abr-product-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "HOLD",
+      "score": 4.4,
+      "score_rationale": "Experimental app with internal value but low external commercial readiness.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "awaiting live data",
+      "implementation_speed_days": "awaiting live data",
+      "service_reliability": "manual",
+      "measurable_roi": "awaiting live data",
+      "testimonials": "awaiting live data",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "platform-admin",
@@ -413,15 +732,35 @@
       "code_presence": "scaffold",
       "evidence_status": "none",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-auth", "platform-shell", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-auth",
+        "platform-shell",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "platform-ops-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": true
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "CUT",
+      "score": 3.5,
+      "score_rationale": "Internal scaffold with weak ROI and high maintenance drag.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "stale",
+      "measurable_roi": "not-applicable",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     },
     {
       "id": "orchestrator-api",
@@ -439,15 +778,36 @@
       "code_presence": "scaffold",
       "evidence_status": "none",
       "docs_entrypoint": "docs/platform/portfolio-matrix.md",
-      "internal_dependencies": ["platform-observability", "db", "os-core"],
-      "external_dependencies": ["postgresql"],
+      "internal_dependencies": [
+        "platform-observability",
+        "db",
+        "os-core"
+      ],
+      "external_dependencies": [
+        "postgresql"
+      ],
       "kpi_owner": "platform-core-lead",
       "public_claim_permissions": {
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
         "can_claim_audit_hardened": false
-      }
+      },
+      "proof_status": "no-proof",
+      "focus_classification": "CUT",
+      "score": 3.2,
+      "score_rationale": "Scaffold-only API with unresolved external or internal ROI at current maturity.",
+      "active_customers": 0,
+      "active_pilots": 0,
+      "active_proposals": 0,
+      "revenue_range_usd": "not-applicable",
+      "implementation_speed_days": "not-applicable",
+      "service_reliability": "stale",
+      "measurable_roi": "not-applicable",
+      "testimonials": "not-applicable",
+      "last_reviewed": "2026-04-17"
     }
-  ]
+  ],
+  "canonical_truth_version": "final-10-pass-2026-04-17",
+  "canonical_score_source": "reports/final-repo-scorecard.md"
 }

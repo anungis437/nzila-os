@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { executionInitiatives, executiveDecisions, orgs } from '@nzila/db/schema'
-import { and, asc, eq, inArray, lt, or } from 'drizzle-orm'
+import { and, asc, eq, lt, or } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ async function getExecutiveOrgId(): Promise<string | null> {
   const rows = await platformDb
     .select({ id: orgs.id })
     .from(orgs)
-    .where(inArray(orgs.slug, ['nzila', 'platform', 'main']))
+    .where(eq(orgs.status, 'active'))
     .limit(1)
   return rows[0]?.id ?? null
 }

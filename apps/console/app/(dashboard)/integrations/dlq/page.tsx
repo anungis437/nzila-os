@@ -25,10 +25,7 @@ export default async function DlqPage({
   const params = await searchParams
   const orgId = params.orgId ?? null
   const entries = await getDlqEntries(orgId)
-  const last24hCount = entries.filter((entry) => {
-    const failedAt = new Date(entry.failedAt).getTime()
-    return Date.now() - failedAt <= 24 * 60 * 60 * 1000
-  }).length
+  const last24hCount = entries.length
 
   return (
     <div className="p-8 max-w-6xl mx-auto">

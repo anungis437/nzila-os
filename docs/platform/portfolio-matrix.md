@@ -1,78 +1,82 @@
-# Nzila OS — Portfolio Matrix
+# Nzila OS Portfolio Matrix (Canonical)
 
-> Canonical product-tier classification of every app in the Nzila OS monorepo.
+Last reviewed: 2026-04-17
+Canonical source: ../../governance/portfolio/product-catalog.json
 
-_Product-tier source of truth: [platform-contracts registry](../../packages/platform-contracts/src/registry.ts). Deployment/readiness source: [nzila-truth-manifest.json](../../nzila-truth-manifest.json). Last reconciled: April 2026._
+## Segmentation
 
----
+### SELL NOW
+- union-eyes
+- flow
 
-## Legend
+### USE INTERNALLY
+- console
+- control-plane
+- web (commercial front door, non-product SKU)
 
-| Product Tier | Meaning |
-|------|---------|
-| **PRODUCTION** | Production tier in canonical app registry |
-| **PILOT** | Pilot tier in canonical app registry |
-| **INCUBATING** | Incubating tier in canonical app registry |
-| **EXPERIMENTAL** | Experimental tier in canonical app registry |
+### INCUBATE
+- cfo
+- partners
+- zonga
+- agrimo
+- trade
+- cora
+- nacp-exams
+- mobility
+- abr
 
----
+### ARCHIVE / CUT PRIORITY
+- mobility-client-portal
+- platform-admin
+- orchestrator-api
 
-## App Classification
+## Product Truth Table
 
-| App | Framework | Code Files | Deps | Product Tier | Revenue Ready | Strategic Role |
-|-----|-----------|------------|------|------|--------------|----------------|
-| **union-eyes** | Next.js + Django | 3 028 | 15 | PRODUCTION | Yes | Union case management — grievance lifecycle, bargaining, evidence-sealed audit trails |
-| **flow** | Next.js | 316 | 24 | PRODUCTION | Yes | Commerce vertical — orders, invoicing, inventory, supplier management |
-| **console** | Next.js | 205 | 30 | PRODUCTION | — | Internal operations — governance, compliance, analytics, proof-center |
-| **web** | Next.js | 60 | 10 | PRODUCTION | — | Public marketing site — landing pages, resources |
-| **control-plane** | Next.js | 154 | 26 | PILOT | Planned | Platform governance — multi-tenant, anomaly detection, workflow orchestration |
-| **partners** | Next.js | 100 | 14 | PILOT | Planned | Partner portal — deals, commissions, certifications |
-| **cfo** | Next.js | 233 | 21 | PILOT | Planned | Finance dashboard — ledger, tax, AI advisory, QuickBooks/Plaid integrations |
-| **zonga** | Next.js + Django | 393 | 22 | INCUBATING | Planned | Music distribution, streaming, royalty management — Africa-first |
-| **agrimo** | Next.js + Django | 97 | 23 | INCUBATING | Planned | Field operations — harvest tracking, production, logistics, warehousing |
-| **trade** | Next.js | 51 | 14 | INCUBATING | Planned | Cross-border trade — deals, shipments, commissions |
-| **cora** | Next.js | 37 | 17 | INCUBATING | Planned | Agricultural intelligence — yield forecasting, price signals, risk analysis |
-| **nacp-exams** | Next.js | 59 | 15 | INCUBATING | Planned | Anti-corruption examination and assessment platform |
-| **mobility** | Next.js | 36 | 14 | INCUBATING | Planned | Investment migration advisory — case management, KYC/AML |
-| **mobility-client-portal** | Next.js | 32 | 8 | EXPERIMENTAL | No | Client portal for migration applicants |
-| **abr** | Next.js + Django | 202 | 14 | EXPERIMENTAL | No | Agricultural compliance audits, analytics, AI services |
-| **platform-admin** | Next.js | 27 | 22 | EXPERIMENTAL | No | Internal admin — intelligence services management |
-| **orchestrator-api** | Fastify | 26 | 7 | EXPERIMENTAL | No | Workflow orchestration API — job dispatch, proof-center |
-
----
-
-## Summary by Tier
-
-| Tier | Count | Total Code Files |
-|------|-------|-----------------|
-| PRODUCTION | 4 | 3 609 |
-| PILOT | 3 | 487 |
-| INCUBATING | 6 | 673 |
-| EXPERIMENTAL | 4 | 287 |
-| **Total** | **17** | **5 022** |
-
----
+| Product | Tier | Deployment | Readiness | Proof Status | Focus Classification | Score (/10) |
+|---|---|---|---|---|---|---:|
+| union-eyes | PRODUCTION | pilot | pilot-safe | pilot-proof | DOUBLE DOWN | 8.6 |
+| flow | PRODUCTION | pilot | pilot-safe | internal-proof | DOUBLE DOWN | 7.9 |
+| cfo | PILOT | pilot | pilot-safe | internal-proof | MAINTAIN | 7.2 |
+| partners | PILOT | pilot | pilot-safe | no-proof | MAINTAIN | 6.8 |
+| web | PRODUCTION | pilot | pilot-safe | internal-proof | MAINTAIN | 7.0 |
+| console | PRODUCTION | internal | internal-only | internal-proof | INTERNAL ONLY | 8.2 |
+| control-plane | PILOT | internal | internal-only | internal-proof | INTERNAL ONLY | 7.4 |
+| zonga | INCUBATING | internal | internal-only | no-proof | HOLD | 5.8 |
+| agrimo | INCUBATING | internal | internal-only | no-proof | HOLD | 5.3 |
+| trade | INCUBATING | internal | internal-only | no-proof | HOLD | 5.1 |
+| cora | INCUBATING | internal | internal-only | no-proof | HOLD | 4.9 |
+| nacp-exams | INCUBATING | internal | internal-only | no-proof | HOLD | 5.0 |
+| mobility | INCUBATING | internal | internal-only | no-proof | HOLD | 5.0 |
+| abr | EXPERIMENTAL | internal | internal-only | no-proof | HOLD | 4.4 |
+| mobility-client-portal | EXPERIMENTAL | internal | internal-only | no-proof | CUT | 3.8 |
+| platform-admin | EXPERIMENTAL | internal | internal-only | no-proof | CUT | 3.5 |
+| orchestrator-api | EXPERIMENTAL | scaffold | scaffold-only | no-proof | CUT | 3.2 |
 
 ## Notes
 
-### Classification authority
+- Product tier authority: `packages/platform-contracts/src/registry.ts`
+- Deployment/readiness authority: `../../nzila-truth-manifest.json`
+- Proof authority: `../proof-center/portfolio-proof-index.md`
+- Final score authority: `../../reports/final-repo-scorecard.md`
 
-- Product-tier values are derived from the canonical app registry in `packages/platform-contracts/src/registry.ts`.
-- Deployment/readiness values are derived from app maturity declarations in `apps/*/maturity.json` and aggregated in `nzila-truth-manifest.json`.
-- Revenue readiness is shown as operational planning state, not as a legal or audit certification.
+## Canonical Tier Matrix (Validator Surface)
 
-### Portfolio communication rule
-
-- External investor/sales collateral must not override canonical tiering without an explicit dated exception record.
-
----
-
-## Platform Adoption
-
-All 17 apps use `@nzila/platform-auth`. 13 of 17 use `@nzila/platform-shell`.
-
-Exceptions (documented in [platform-exceptions.yaml](../../governance/platform-exceptions.yaml)):
-
-- **orchestrator-api**: Fastify server, not Next.js — no shell or auth needed
-- **web**: Public marketing site — shell not applicable
-- **mobility-client-portal**: Standalone client portal — shell not applicable
+| App | Surface | Exposure | Deployment State | Registry Tier | Notes |
+|---|---|---|---|---|---|
+| **union-eyes** | Revenue product | public | pilot | PRODUCTION | SELL NOW |
+| **flow** | Revenue product | public | pilot | PRODUCTION | SELL NOW |
+| **console** | Internal control surface | internal | internal | PRODUCTION | INTERNAL ONLY |
+| **web** | Commercial front door | public | pilot | PRODUCTION | Platform surface |
+| **control-plane** | Platform orchestration | internal | internal | PILOT | INTERNAL ONLY |
+| **partners** | Partner workflows | public | pilot | PILOT | BUILD NEXT |
+| **cfo** | Finance workflows | public | pilot | PILOT | BUILD NEXT |
+| **zonga** | Venture app | internal | internal | INCUBATING | HOLD |
+| **agrimo** | Venture app | internal | internal | INCUBATING | HOLD |
+| **trade** | Venture app | internal | internal | INCUBATING | HOLD |
+| **cora** | Venture app | internal | internal | INCUBATING | HOLD |
+| **nacp-exams** | Venture app | internal | internal | INCUBATING | HOLD |
+| **mobility** | Venture app | internal | internal | INCUBATING | HOLD |
+| **mobility-client-portal** | Legacy surface | internal | internal | EXPERIMENTAL | CUT PRIORITY |
+| **abr** | Venture app | internal | internal | EXPERIMENTAL | HOLD |
+| **platform-admin** | Legacy admin surface | internal | internal | EXPERIMENTAL | CUT PRIORITY |
+| **orchestrator-api** | Legacy orchestrator surface | internal | scaffold | EXPERIMENTAL | CUT PRIORITY |
