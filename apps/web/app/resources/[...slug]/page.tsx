@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { getDocBySlug, getAllDocSlugs } from '@/lib/docs';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import { sanitizeHtml } from '@/lib/sanitize';
@@ -17,10 +18,44 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const doc = await getDocBySlug(slug.join('/'), 'public');
   if (!doc) return { title: 'Not Found' };
+
+  const docPath = slug.join('/');
+  const canonical = `/resources/${docPath}`;
+  const ogImage = 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&h=630&fit=crop&q=80';
+
   return {
     title: doc.title,
     description: doc.description,
-  };
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title: doc.title,
+      description: doc.description,
+      url: canonical,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: doc.title }],
+      publishedTime: doc.date,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: doc.title,
+      description: doc.description,
+      images: [ogImage],
+    },
+  } satisfies Metadata;
+}
+
+function formatDocDate(date?: string): string | undefined {
+  if (!date) return undefined;
+  const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
+  const source = isoDateOnly.test(date) ? `${date}T00:00:00Z` : date;
+  const parsed = new Date(source);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsed);
 }
 
 export default async function ResourceDocPage({ params }: PageProps) {
@@ -29,8 +64,61 @@ export default async function ResourceDocPage({ params }: PageProps) {
 
   if (!doc) notFound();
 
+  const docPath = slug.join('/');
+  const docUrl = `https://nzilaventures.com/resources/${docPath}`;
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: doc.title,
+    description: doc.description,
+    datePublished: doc.date,
+    dateModified: doc.date,
+    mainEntityOfPage: docUrl,
+    url: docUrl,
+    inLanguage: 'en-CA',
+    timeRequired: doc.readingTime ? `PT${doc.readingTime}M` : undefined,
+    author: {
+      '@type': 'Organization',
+      name: 'Nzila Ventures',
+      url: 'https://nzilaventures.com',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Nzila Ventures',
+      url: 'https://nzilaventures.com',
+    },
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Resources',
+        item: 'https://nzilaventures.com/resources',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: doc.title,
+        item: docUrl,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* ─── Hero Header ─── */}
       <section className="relative overflow-hidden bg-navy pt-32 pb-16">
         <div className="absolute inset-0 bg-mesh opacity-30" />
@@ -73,7 +161,7 @@ export default async function ResourceDocPage({ params }: PageProps) {
                 </span>
               )}
               {doc.date && (
-                <span className="text-sm text-gray-400">{doc.date}</span>
+                <span className="text-sm text-gray-400">{formatDocDate(doc.date)}</span>
               )}
               {doc.readingTime && (
                 <span className="flex items-center gap-1.5 text-sm text-gray-400">

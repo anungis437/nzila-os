@@ -1,8 +1,9 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-04-16T23:44:58.992Z",
+  "collected_at": "2026-04-17T01:23:11.458Z",
   "window_days": 30,
   "source": {
+    "requested_branch": "main",
     "branch": "main",
     "lookback_weeks_for_trend": 12
   },

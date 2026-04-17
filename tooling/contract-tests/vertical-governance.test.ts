@@ -159,6 +159,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/zoho/webhook',                   // Zoho webhook (token-verified)
     '/api/control-plane/architecture',     // Internal diagnostics (GET-only)
     '/api/contact',                        // Public contact/demo-request form (marketing)
+    '/api/telemetry',                      // Public marketing telemetry (anonymous page events)
   ]
 
   for (const appDir of appDirs) {

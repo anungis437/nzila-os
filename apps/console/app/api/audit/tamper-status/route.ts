@@ -11,16 +11,13 @@ import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { asc, sql } from 'drizzle-orm'
 import { verifyChain } from '@nzila/os-core/hash'
-import { requireRole } from '@/lib/rbac'
+import { requirePlatformRole } from '@/lib/api-guards'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(_req: NextRequest) {
-  try {
-    await requireRole('platform_admin', 'studio_admin', 'ops', 'analyst')
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const authResult = await requirePlatformRole('platform_admin', 'studio_admin', 'ops', 'analyst')
+  if (!authResult.ok) return authResult.response
   const verifiedAt = new Date().toISOString()
 
   try {

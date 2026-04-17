@@ -62,6 +62,7 @@ const EXEMPT_ROUTES = new Set([
   'whop/unauthenticated', // Payment-first checkout (no auth by design)
   'proof-center/public-key', // System-wide public key (not org-specific)
   'contact',        // Public contact/demo-request form (marketing)
+  'telemetry',      // Public marketing telemetry (anonymous page events)
   'metrics',        // Telemetry scrape endpoint (token-gated)
 ])
 

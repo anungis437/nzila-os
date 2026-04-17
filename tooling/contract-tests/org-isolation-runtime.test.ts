@@ -103,6 +103,7 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/zoho/webhook',        // Zoho webhook (token-verified)
   '/api/control-plane/architecture', // Internal diagnostics (GET-only)
   '/api/contact',                    // Public contact/demo-request form (marketing)
+  '/api/telemetry',                  // Public marketing telemetry (anonymous page events)
   '/api/metrics',                    // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
 ]
 

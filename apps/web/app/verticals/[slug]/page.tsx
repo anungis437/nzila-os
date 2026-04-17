@@ -34,8 +34,8 @@ const verticalData: Record<string, {
     heroAlt: 'Financial trading screens displaying market data and candlestick charts',
     tam: '$100B+',
     orgs: '617',
-    platforms: ['DiasporaCore V2', 'STSA / Lexora', 'Insight CFO'],
-    status: '3 Platforms',
+    platforms: ['DiasporaCore V2', 'Insight CFO'],
+    status: '2 Platforms',
     color: 'from-electric to-violet',
     overview:
       'Our Fintech vertical is built on the insight that legacy banking systems exclude millions of diaspora and underbanked individuals. Nzila\'s stack closes that gap through compliant, multi-currency, community-led financial infrastructure.',
@@ -91,12 +91,12 @@ const verticalData: Record<string, {
     hero: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1920',
     heroAlt: 'Aerial view of organised agricultural farmland rows stretching to the horizon',
     tam: '$8.6B',
-    orgs: '300',
-    platforms: ['CORA', 'AgrimoOps'],
-    status: '2 Platforms',
+    orgs: '300+',
+    platforms: ['Agrimo', 'CORA'],
+    status: 'Flagship + Production Ready',
     color: 'from-emerald to-cyan-400',
     overview:
-      'Nzila\'s Agrotech vertical spans two distinct geographies and supply-chain realities: Canadian farm management (CORA) and the agri-logistics challenges of the DRC and Central African corridor (AgrimoOps). Each platform is data-rich where it matters most.',
+      'Nzila\'s Agrotech vertical spans two distinct geographies and supply-chain realities: Canadian farm management (CORA) and the agri-logistics challenges of the DRC and Central African corridor (Agrimo). Each platform is data-rich where it matters most.',
     capabilities: [
       {
         title: 'Farm Planning & Season Management',
@@ -114,7 +114,7 @@ const verticalData: Record<string, {
         title: 'Supply-Chain & Logistics Intelligence',
         icon: '🚜',
         description:
-          'End-to-end produce traceability, cold-chain monitoring, and logistics coordination — critical for DRC/CA export corridors (AgrimoOps).',
+          'End-to-end produce traceability, cold-chain monitoring, and logistics coordination — critical for DRC/CA export corridors (Agrimo).',
       },
       {
         title: 'Market Price Intelligence',
@@ -131,23 +131,23 @@ const verticalData: Record<string, {
     ],
     useCases: [
       { scenario: 'A Canadian grain farmer managing multiple fields and contractors', outcome: 'Centralised CORA dashboard with season-over-season benchmarking' },
-      { scenario: 'A DRC cooperative exporting produce to regional markets', outcome: 'AgrimoOps supply-chain visibility and buyer-seller matching' },
+      { scenario: 'A DRC cooperative exporting produce to regional markets', outcome: 'Agrimo supply-chain visibility and buyer-seller matching' },
       { scenario: 'An agri-investor evaluating farm portfolio performance', outcome: 'Cross-farm analytics with risk-adjusted yield projections' },
     ],
     differentiators: [
       'CORA built on verified Canadian agricultural data and government datasets',
-      'AgrimoOps purpose-built for DRC and Central African logistics realities',
+      'Agrimo purpose-built for DRC and Central African logistics realities',
       'IoT-ready architecture for sensor-equipped operations',
       'Aligned with B Corp environmental impact measurement frameworks',
     ],
-    note: 'CORA is trained on Canadian agricultural data. AgrimoOps is purpose-built for the DRC / Central African market.',
+    note: 'CORA is trained on Canadian agricultural data. Agrimo is purpose-built for the DRC / Central African market.',
   },
 
   uniontech: {
     name: 'Uniontech',
     tagline: 'Modernising Labour Rights Through Intelligent Infrastructure',
     description: 'Union management, pension forecasting, grievance tracking, and CBA intelligence.',
-    hero: 'https://images.unsplash.com/photo-1529070538774-1795d8de2dff?w=1920',
+    hero: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920',
     heroAlt: 'Labour union workers raising hands together in solidarity',
     tam: '$50B',
     orgs: '4,773',
@@ -317,16 +317,22 @@ const verticalData: Record<string, {
     description: 'Order-centric trade operations, AI-powered quoting, logistics intelligence, and cross-border export compliance.',
     hero: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920',
     heroAlt: 'Customer completing a digital payment at a modern retail checkout counter',
-    tam: '$25B',
-    orgs: '508',
-    platforms: ['Shop Quoter', 'Trade OS', 'eExports'],
-    status: '3 Platforms — Trade OS in Beta',
+    tam: '$100B+',
+    orgs: '700+',
+    platforms: ['Flow', 'Trade OS'],
+    status: 'Flagship + In Development',
     color: 'from-gold to-coral',
     overview:
-      'Nzila\'s Commerce vertical is the most complete trade-operations platform for SMEs and enterprise operators — covering the entire lifecycle from AI-assisted quoting through order management, production gating, shipment tracking, and cross-border export documentation. Trade OS, its flagship engine, enforces every state transition through auditable workflows, ensuring no order ships without payment clearance and no production starts without deposit confirmation.',
+      'Nzila\'s Commerce vertical is the most complete trade-operations platform for SMEs and enterprise operators. Flow is the flagship — covering the full order-to-cash and procure-to-pay lifecycle with auditable workflows, inventory management, and multi-channel integrations. Trade OS extends the stack with cross-border trade management.',
     capabilities: [
       {
-        title: 'Instant Quote Generation (Shop Quoter)',
+        title: 'Order-to-Cash & Procure-to-Pay (Flow)',
+        icon: '🔄',
+        description:
+          'Full commerce lifecycle management — order creation, payment gating, inventory control, supplier management, and delivery confirmation. Flow integrates with Shopify, Zoho, WhatsApp, and ERP systems.',
+      },
+      {
+        title: 'Instant Quote Generation (Flow)',
         icon: '💰',
         description:
           'AI-assisted product and service quoting with margin controls, PDF generation, e-signature, and CRM integration — quotes convert to orders in one click.',
@@ -338,16 +344,10 @@ const verticalData: Record<string, {
           'State-machine-enforced order lifecycle from creation through confirmation, production, shipment, and delivery — with payment deposit gating that blocks fulfilment until financial prerequisites are met.',
       },
       {
-        title: 'Export Documentation (eExports)',
-        icon: '📦',
+        title: 'Inventory & Warehouse Management',
+        icon: '🏢',
         description:
-          'Generation and management of export certificates, customs declarations, HS code classification, and trade-compliance checks for cross-border operations.',
-      },
-      {
-        title: 'Logistics & Supplier Intelligence',
-        icon: '🚢',
-        description:
-          'Route optimisation, carrier benchmarking, lead-time analytics, and supplier risk scoring — integrated with real-time shipment state tracking.',
+          'Real-time stock tracking, multi-location warehousing, reorder automation, and lot-level traceability for physical goods operations.',
       },
       {
         title: 'Order Intelligence & Analytics',
@@ -357,32 +357,32 @@ const verticalData: Record<string, {
       },
     ],
     useCases: [
-      { scenario: 'A service business creating custom quotes for clients', outcome: 'Professional branded quotes in under 2 minutes via Shop Quoter — converting to tracked orders instantly' },
-      { scenario: 'An importer managing 50+ active purchase orders', outcome: 'Trade OS unified dashboard with state-machine-enforced workflows, payment gating, and real-time shipment visibility' },
-      { scenario: 'An exporter navigating customs for new markets', outcome: 'eExports auto-generates correct documentation per destination country with HS code intelligence' },
+      { scenario: 'A business managing end-to-end order fulfilment', outcome: 'Flow unified dashboard with payment gating, inventory sync, and real-time delivery tracking' },
+      { scenario: 'A service business creating custom quotes for clients', outcome: 'Professional branded quotes in under 2 minutes via Flow — converting to tracked orders instantly' },
+      { scenario: 'An importer managing 50+ active purchase orders', outcome: 'Trade OS state-machine-enforced workflows, payment gating, and real-time shipment visibility' },
     ],
     differentiators: [
-      'Three complementary platforms covering the full trade lifecycle — quote to delivery',
+      'Flow is the flagship commerce platform — order-to-cash, procure-to-pay, inventory, and multi-channel integrations in one product',
+      'Three complementary platforms covering the full trade lifecycle — order creation to delivery',
       'State-machine-enforced workflows prevent illegal transitions and ensure audit compliance',
       'Payment deposit gating blocks production and shipment until financial prerequisites are met',
-      'Domain event audit trail captures every state change for full operational transparency',
-      'SME-friendly UX with enterprise-grade data architecture and cross-border intelligence',
+      'SME-friendly UX with enterprise-grade data architecture',
     ],
   },
 
   entertainment: {
-    name: 'Entertainment',
+    name: 'Music & Entertainment',
     tagline: 'Amplifying African & Diaspora Creative Economies',
-    description: 'Music streaming, royalty management, event ticketing, and content distribution.',
+    description: 'Africa-first music distribution, artist onboarding, streaming analytics, event ticketing, and royalty management.',
     hero: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1920',
     heroAlt: 'DJ performing live with vibrant stage lights illuminating a crowd',
-    tam: '$50B',
-    orgs: '83',
-    platforms: ['CongoWave'],
-    status: 'Production Ready',
+    tam: '$70B',
+    orgs: '1000+',
+    platforms: ['Zonga'],
+    status: 'Flagship + Production Ready',
     color: 'from-coral to-gold',
     overview:
-      'CongoWave is Nzila\'s entertainment platform celebrating and monetising African and diaspora creative talent. From streaming to royalty distribution, it gives artists the infrastructure to own their economic future.',
+      'Nzila\'s Music & Entertainment vertical celebrates and monetises African and diaspora creative talent. Zonga is the flagship — an Africa-first music distribution and streaming platform for artists, with royalty calculation, transparent payouts, event ticketing, and broader content distribution for the African and diaspora creative economy.',
     capabilities: [
       {
         title: 'Artist & Label Dashboard',
@@ -431,7 +431,7 @@ const verticalData: Record<string, {
     tam: '$20B',
     orgs: '150',
     platforms: ['Memora'],
-    status: 'Legacy',
+    status: 'Modernizing',
     color: 'from-emerald to-cyan-400',
     overview:
       'Memora addresses the silent crisis of cognitive decline — building AI-assisted tools that support individuals with dementia, their caregivers, and the care networks around them. A deeply human-centered platform undergoing modernisation.',
@@ -619,6 +619,11 @@ export default async function VerticalPage({
   const v = verticalData[slug];
   if (!v) notFound();
 
+  const strategicStory = {
+    now: `${v.platforms.join(', ')} is actively shaping our ${v.name} footprint today through production-grade capabilities and measurable market execution.`,
+    next: `Over the next execution cycle, we are deepening cross-vertical Backbone integrations for ${v.name} to accelerate delivery speed, governance quality, and customer outcomes.`,
+  };
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -684,6 +689,17 @@ export default async function VerticalPage({
                   Our Approach to {v.name}
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed mb-6">{v.overview}</p>
+                <div className="rounded-2xl border border-electric/20 bg-electric/5 p-5 mb-6">
+                  <div className="text-xs font-semibold uppercase tracking-widest text-electric mb-3">Current Story</div>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <p>
+                      <span className="font-semibold text-navy">Now:</span> {strategicStory.now}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-navy">Next:</span> {strategicStory.next}
+                    </p>
+                  </div>
+                </div>
                 {v.note && (
                   <div className="flex gap-3 bg-gold/5 border border-gold/20 rounded-xl p-4">
                     <span className="text-gold mt-0.5">📌</span>
