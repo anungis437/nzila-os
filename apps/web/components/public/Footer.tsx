@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import TrackedLink from './TrackedLink';
+import { MARKETING_FACTS, platformCoverageLabel } from '@/lib/marketing-facts';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3002';
+const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003';
 const ABR_URL = process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3004';
 
@@ -49,7 +51,7 @@ export default function Footer() {
             </div>
             <p className="text-gray-400 mb-6 max-w-sm">
               The APEX of AI — a venture studio building ethical, human-centered 
-              technology across 10+ verticals and 15 platforms.
+              technology across {platformCoverageLabel()}.
             </p>
             <div className="flex items-center gap-3">
               <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold">
@@ -88,15 +90,18 @@ export default function Footer() {
             <ul className="space-y-3">
               {appLinks.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <TrackedLink
                     href={link.href}
+                    eventName="app_switch"
+                    eventProps={{ app: link.name, source: 'footer' }}
+                    external
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-white transition-colors text-sm inline-flex items-center gap-1"
                   >
                     {link.name}
                     <span className="text-gray-600 text-xs">↗</span>
-                  </a>
+                  </TrackedLink>
                 </li>
               ))}
             </ul>
@@ -111,6 +116,9 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Nzila Ventures. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-sm text-gray-500">
+            <span className="hidden lg:inline text-gray-600">
+              {MARKETING_FACTS.productPlatforms} platforms / {MARKETING_FACTS.governedApplications} governed apps
+            </span>
             <Link href="/legal/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>
             <span>·</span>
             <Link href="/legal/terms" className="hover:text-gray-300 transition-colors">Terms</Link>

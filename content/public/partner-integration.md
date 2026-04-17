@@ -1,6 +1,6 @@
 ---
 title: Partner Integration Guide
-description: How technology and distribution partners can connect with the Nzila platform ecosystem — APIs, white-labelling, data sharing, and onboarding steps.
+description: How technology and distribution partners connect with the Nzila platform ecosystem through APIs, white-label deployments, and onboarding workflows.
 category: Integrations
 order: 1
 date: 2026-02-01
@@ -32,7 +32,7 @@ All endpoints are versioned. Breaking changes will only be introduced in new maj
 
 ### Authentication
 
-Partners authenticate using **OAuth 2.0 client credentials** flow:
+Partners authenticate using the **OAuth 2.0 client credentials** flow:
 
 ```bash
 # Exchange client credentials for a token
@@ -63,7 +63,7 @@ Accept: application/json
       "id": "evt_01J9XV...",
       "orgId": "org_01J9XX...",
       "action": "member.invite",
-      "orgId": "usr_01J9XY...",
+      "userId": "usr_01J9XY...",
       "createdAt": "2026-01-15T10:23:00Z",
       "hash": "sha256:abc123..."
     }

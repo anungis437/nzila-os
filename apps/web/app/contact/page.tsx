@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ScrollReveal from '@/components/public/ScrollReveal';
+import { trackEvent } from '@/lib/telemetry';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -11,16 +12,35 @@ export default function Contact() {
     company: '',
     vertical: '',
     message: '',
+    source: 'contact_page',
+    utmSource: '',
+    utmMedium: '',
+    utmCampaign: '',
+    website: '',
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setFormData((prev) => ({
+      ...prev,
+      utmSource: params.get('utm_source') ?? '',
+      utmMedium: params.get('utm_medium') ?? '',
+      utmCampaign: params.get('utm_campaign') ?? '',
+    }));
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
+    trackEvent('contact_submit_attempt', {
+      vertical: formData.vertical || 'unspecified',
+      has_company: Boolean(formData.company),
+    });
 
     try {
       const res = await fetch('/api/contact', {
@@ -32,14 +52,30 @@ export default function Contact() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error ?? 'Something went wrong');
+        trackEvent('contact_submit_failed', {
+          vertical: formData.vertical || 'unspecified',
+          status: res.status,
+        });
         return;
       }
 
       setSubmitted(true);
-      setFormData({ name: '', email: '', company: '', vertical: '', message: '' });
+      trackEvent('contact_submit_success', {
+        vertical: formData.vertical || 'unspecified',
+      });
+      setFormData((prev) => ({
+        ...prev,
+        name: '',
+        email: '',
+        company: '',
+        vertical: '',
+        message: '',
+        website: '',
+      }));
       setTimeout(() => setSubmitted(false), 5000);
     } catch {
       setError('Network error — please try again');
+      trackEvent('contact_submit_network_error');
     } finally {
       setSubmitting(false);
     }
@@ -157,8 +193,13 @@ export default function Contact() {
                     <textarea id="message" name="message" required value={formData.message} onChange={handleChange} rows={5} className={inputClasses} placeholder="Tell us about your needs…" />
                   </div>
 
+                  {/* Honeypot field for basic bot filtering */}
+                  <div className="hidden" aria-hidden="true">
+                    <label htmlFor="website">Website</label>
+                    <input id="website" name="website" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+                  </div>
+
                   <button
-                    type="submit"
                     disabled={submitting}
                     className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press disabled:opacity-60"
                   >
@@ -179,7 +220,7 @@ export default function Contact() {
                 <div className="space-y-6">
                   {[
                     { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'We respond within 24-48 hours' },
-                    { icon: '📞', title: 'Phone', value: '+1 (234) 567-890', href: 'tel:+1234567890', sub: 'Mon – Fri, 9 AM – 5 PM EST' },
+                    { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
                     { icon: '🌍', title: 'Office', value: 'Remote-First · Global Operations', href: '', sub: 'Teams across multiple time zones' },
                   ].map((item) => (
                     <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover-lift cursor-default">
