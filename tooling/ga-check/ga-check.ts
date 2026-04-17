@@ -565,28 +565,41 @@ const checkCodeOwners = runGate('CODEOWNERS', 'CODEOWNERS: Governance files have
   }
 })
 
-const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth middleware: All apps have auth middleware', 'org-boundary', () => {
+const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth edge guard: All apps have auth proxy or middleware', 'org-boundary', () => {
   const violations: string[] = []
 
   for (const appDir of APP_DIRS) {
     const mwPath = join(ROOT, appDir, 'middleware.ts')
-    if (!existsSync(mwPath)) {
-      violations.push(`${appDir}: no middleware.ts`)
+    const proxyPath = join(ROOT, appDir, 'proxy.ts')
+
+    const guardPath = existsSync(proxyPath)
+      ? proxyPath
+      : existsSync(mwPath)
+        ? mwPath
+        : null
+
+    if (!guardPath) {
+      violations.push(`${appDir}: no proxy.ts or middleware.ts`)
       continue
     }
 
-    const content = readFileSync(mwPath, 'utf-8')
-    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('authMiddleware')
+    const content = readFileSync(guardPath, 'utf-8')
+    const hasAuth =
+      content.includes('@nzila/platform-auth') ||
+      content.includes('authMiddleware') ||
+      content.includes('auth(') ||
+      content.includes('createRouteMatcher')
+
     if (!hasAuth) {
-      violations.push(`${appDir}: middleware.ts missing auth middleware`)
+      violations.push(`${appDir}: ${relative(ROOT, guardPath)} missing auth guard wiring`)
     }
   }
 
   return {
     status: violations.length === 0 ? 'PASS' : 'FAIL',
     details: violations.length === 0
-      ? `All ${APP_DIRS.length} apps have auth middleware`
-      : `${violations.length} app(s) missing auth middleware`,
+      ? `All ${APP_DIRS.length} apps have auth edge guards (proxy.ts/middleware.ts)`
+      : `${violations.length} app(s) missing auth edge guards`,
     violations,
   }
 })

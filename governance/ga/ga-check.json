@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-16T20:19:20.481Z",
-  "commitSha": "f43529fa",
+  "timestamp": "2026-04-17T17:19:28.337Z",
+  "commitSha": "59484045",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,7 +14,7 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 3507
+      "durationMs": 6280
     },
     {
       "id": "ORG-REGISTRY",
@@ -35,15 +35,15 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 2
+      "durationMs": 0
     },
     {
       "id": "AUTH-MIDDLEWARE",
-      "name": "Auth middleware: All apps have auth middleware",
+      "name": "Auth edge guard: All apps have auth proxy or middleware",
       "status": "PASS",
-      "details": "All 4 apps have auth middleware",
+      "details": "All 4 apps have auth edge guards (proxy.ts/middleware.ts)",
       "violations": [],
-      "durationMs": 2
+      "durationMs": 3
     },
     {
       "id": "AUDITED-WRITES",
@@ -51,7 +51,7 @@
       "status": "PASS",
       "details": "All apps use withAudit in API guards",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 3
     },
     {
       "id": "AUDIT-MANDATORY",
@@ -65,7 +65,7 @@
       "name": "Evidence: verifySeal exported from seal module",
       "status": "PASS",
       "details": "generateSeal + verifySeal both exported",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-WORKFLOW-SEAL",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 2
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -88,7 +88,7 @@
       "status": "PASS",
       "details": "UE and ABR evidence jobs both present, wired into governance-gate, and have blocking verify steps",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "CI-GATES",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 33
+      "durationMs": 25
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 3
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 9
+      "durationMs": 17
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -127,14 +127,14 @@
       "status": "PASS",
       "details": "All 4 apps enforce 3 boundary rules",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 2
     },
     {
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "205 contract test files (require ≥20)",
-      "durationMs": 7
+      "details": "211 contract test files (require ≥20)",
+      "durationMs": 13
     },
     {
       "id": "CODEOWNERS",
@@ -164,7 +164,7 @@
       "status": "PASS",
       "details": "All 17 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 15
+      "durationMs": 21
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -172,7 +172,7 @@
       "status": "PASS",
       "details": "All apps with AI claims have runtime ai-sdk wiring",
       "violations": [],
-      "durationMs": 24
+      "durationMs": 18
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -180,7 +180,7 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 4471
+      "durationMs": 7711
     }
   ],
   "environment": {
@@ -189,5 +189,5 @@
     "ci": false,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 8228
+  "totalDurationMs": 14387
 }

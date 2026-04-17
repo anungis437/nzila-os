@@ -9,6 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { HubSpotClient } from '@nzila/crm-hubspot';
 import { createLogger } from '@nzila/os-core/telemetry';
+import { checkRateLimit } from '@nzila/os-core/rateLimit';
 import { withRequestContext } from '@/lib/api-guards';
 
 const _logger = createLogger('api:contact');
@@ -16,7 +17,6 @@ const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
-const rateLimitStore = new Map<string, number[]>();
 
 const contactSchema = z.object({
   name: z.string().min(1),
@@ -34,14 +34,14 @@ const contactSchema = z.object({
 export async function POST(request: NextRequest) {
   return withRequestContext(request, async () => {
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-    const now = Date.now();
-    const history = rateLimitStore.get(clientIp) ?? [];
-    const recent = history.filter((ts) => now - ts <= RATE_LIMIT_WINDOW_MS);
-    if (recent.length >= RATE_LIMIT_MAX_REQUESTS) {
+    const rl = checkRateLimit(`web:contact:${clientIp}`, {
+      max: RATE_LIMIT_MAX_REQUESTS,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    });
+
+    if (!rl.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
-    recent.push(now);
-    rateLimitStore.set(clientIp, recent);
 
     let body: z.infer<typeof contactSchema>;
     try {
