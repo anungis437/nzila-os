@@ -4,8 +4,7 @@
  * Provides per-request correlation IDs (requestId, traceId).
  * Must be attached by middleware before any handler executes.
  */
-import { randomUUID } from 'node:crypto'
-import { AsyncLocalStorage } from 'node:async_hooks'
+
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -32,21 +31,54 @@ export interface RequestContext {
 
 // ── Storage ───────────────────────────────────────────────────────────────
 
-const contextStore = new AsyncLocalStorage<RequestContext>()
+let currentContext: RequestContext | undefined
+
+function hasThen<T>(value: unknown): value is Promise<T> {
+  return !!value && typeof (value as { then?: unknown }).then === 'function'
+}
+
+function createUuid(): string {
+  const cryptoObj = globalThis.crypto as { randomUUID?: () => string } | undefined
+  if (cryptoObj?.randomUUID) {
+    return cryptoObj.randomUUID()
+  }
+
+  // RFC4122-ish fallback for environments where randomUUID is unavailable.
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.floor(Math.random() * 16)
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
 
 /**
  * Get the current request context.
  * Returns undefined if called outside a request lifecycle.
  */
 export function getRequestContext(): RequestContext | undefined {
-  return contextStore.getStore()
+  return currentContext
 }
 
 /**
  * Run a function within a request context.
  */
 export function runWithContext<T>(ctx: RequestContext, fn: () => T): T {
-  return contextStore.run(ctx, fn)
+  const previous = currentContext
+  currentContext = ctx
+
+  try {
+    const result = fn()
+    if (hasThen(result)) {
+      return result.finally(() => {
+        currentContext = previous
+      }) as T
+    }
+    currentContext = previous
+    return result
+  } catch (error) {
+    currentContext = previous
+    throw error
+  }
 }
 
 // ── Context creation ──────────────────────────────────────────────────────
@@ -76,7 +108,7 @@ export function createRequestContext(
     }
   }
 
-  const requestId = getHeader('x-request-id') ?? randomUUID()
+  const requestId = getHeader('x-request-id') ?? createUuid()
 
   return {
     requestId,

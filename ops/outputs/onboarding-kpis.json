@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-17T07:36:07.980Z",
+  "period": "quarterly",
+  "population_size": 1,
+  "metrics": {
+    "avg_days_to_first_merged_pr": 0,
+    "avg_days_to_oncall_ready": 0,
+    "setup_success_pct": null
+  },
+  "targets": {
+    "max_days_to_first_merged_pr": 5,
+    "max_days_to_oncall_ready": 42,
+    "min_setup_success_pct": 90
+  },
+  "source_file": "ops/inputs/onboarding-metrics.json",
+  "github_enrichment": {
+    "repo": "anungis437/nzila-os",
+    "window_days": 30,
+    "window_start": "2026-03-18",
+    "records_with_api_data": 1,
+    "records": [
+      {
+        "engineer": "example-user",
+        "github_login": "example-user",
+        "merged_pr_count_window": 0,
+        "first_merged_days_from_start": null
+      }
+    ]
+  }
+}

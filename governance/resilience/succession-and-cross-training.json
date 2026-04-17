@@ -1,0 +1,46 @@
+{
+  "schema": "1.0",
+  "last_reviewed": "2026-04-16",
+  "domains": [
+    {
+      "domain": "commerce",
+      "bus_factor": 2,
+      "mandatory_cross_training_hours_per_quarter": 8,
+      "succession_backup_count": 2
+    },
+    {
+      "domain": "union",
+      "bus_factor": 1,
+      "mandatory_cross_training_hours_per_quarter": 12,
+      "succession_backup_count": 2
+    },
+    {
+      "domain": "finance",
+      "bus_factor": 1,
+      "mandatory_cross_training_hours_per_quarter": 12,
+      "succession_backup_count": 2
+    },
+    {
+      "domain": "identity_platform",
+      "bus_factor": 2,
+      "mandatory_cross_training_hours_per_quarter": 8,
+      "succession_backup_count": 2
+    },
+    {
+      "domain": "ai_intelligence",
+      "bus_factor": 1,
+      "mandatory_cross_training_hours_per_quarter": 12,
+      "succession_backup_count": 2
+    },
+    {
+      "domain": "mobility_exams",
+      "bus_factor": 1,
+      "mandatory_cross_training_hours_per_quarter": 10,
+      "succession_backup_count": 2
+    }
+  ],
+  "diversity_metrics": {
+    "target_multi_region_reviewer_share_pct": 35,
+    "target_cross_domain_review_share_pct": 30
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "1.0",
+  "last_reviewed": "2026-04-16",
+  "capabilities": [
+    {
+      "name": "llm_inference",
+      "criticality": "high",
+      "primary_provider": "azure_openai",
+      "secondary_provider": "openai_or_self_hosted_gateway",
+      "adapter": "packages/platform-ai-query",
+      "max_disruption_hours": 4
+    },
+    {
+      "name": "observability",
+      "criticality": "high",
+      "primary_provider": "azure_monitor",
+      "secondary_provider": "otel_prometheus_compatible_stack",
+      "adapter": "packages/platform-observability",
+      "max_disruption_hours": 8
+    },
+    {
+      "name": "secrets_management",
+      "criticality": "high",
+      "primary_provider": "azure_key_vault",
+      "secondary_provider": "vault_or_alt_kms",
+      "adapter": "packages/platform-auth",
+      "max_disruption_hours": 8
+    },
+    {
+      "name": "object_storage",
+      "criticality": "medium",
+      "primary_provider": "azure_blob",
+      "secondary_provider": "s3_compatible_storage",
+      "adapter": "packages/blob",
+      "max_disruption_hours": 24
+    }
+  ]
+}

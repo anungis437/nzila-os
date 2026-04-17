@@ -1,0 +1,13 @@
+{
+  "period": "quarterly",
+  "records": [
+    {
+      "engineer": "example-user",
+      "github_login": "example-user",
+      "start_date": null,
+      "days_to_first_merged_pr": null,
+      "days_to_oncall_ready": null,
+      "setup_success_without_manual_help": null
+    }
+  ]
+}

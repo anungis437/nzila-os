@@ -182,6 +182,291 @@ check('GOV-GATE-011: Vitest config includes governance packages', () => {
   return `${GOVERNANCE_PACKAGES.length} packages in vitest workspace`
 })
 
+check('GOV-GATE-012: Evidence lifecycle policy exists and is structured', () => {
+  const policyPath = join(ROOT, 'docs', 'platform', 'EVIDENCE_LIFECYCLE_POLICY.md')
+  if (!existsSync(policyPath)) {
+    throw new Error('docs/platform/EVIDENCE_LIFECYCLE_POLICY.md not found')
+  }
+  const content = readFileSync(policyPath, 'utf-8')
+  const required = [
+    '## Evidence Classes',
+    '## Legal Hold',
+    '## Chain of Custody Requirements',
+    '## Minimum CI Expectations',
+  ]
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) {
+    throw new Error(`Evidence lifecycle policy missing sections: ${missing.join(', ')}`)
+  }
+  return 'Evidence lifecycle policy present with required sections'
+})
+
+check('GOV-GATE-013: AI incident playbooks exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DATA_POISONING.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_HALLUCINATION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md'),
+    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_DRILL_RUNBOOK.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing AI incident playbooks: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  return `${required.length} AI incident playbooks verified`
+})
+
+check('GOV-GATE-014: Strategic telemetry and command catalog exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'STRATEGIC_TELEMETRY.md'),
+    join(ROOT, 'docs', 'platform', 'COMMAND_CATALOG.md'),
+    join(ROOT, 'tooling', 'scripts', 'generate-quarterly-strategic-scorecard.mjs'),
+    join(ROOT, 'tooling', 'scripts', 'show-command-catalog.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing telemetry/catalog artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  return `${required.length} telemetry/catalog artifacts verified`
+})
+
+check('GOV-GATE-015: Onboarding guide exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'ONBOARDING.md')
+  if (!existsSync(path)) throw new Error('docs/platform/ONBOARDING.md not found')
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Prerequisites', '## Making Your First PR', '## Common First-Week Pitfalls']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) throw new Error(`Onboarding guide missing sections: ${missing.join(', ')}`)
+  return 'Onboarding guide present with required sections'
+})
+
+check('GOV-GATE-016: SLO policy, data residency, and alerting runbook exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'SLO_ERROR_BUDGET_POLICY.md'),
+    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
+    join(ROOT, 'docs', 'platform', 'ALERTING_RUNBOOK.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing operational docs: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  // Validate alerting runbook has alert IDs
+  const runbook = readFileSync(required[2], 'utf-8')
+  if (!runbook.includes('ALERT-SLO-001')) throw new Error('ALERTING_RUNBOOK.md missing ALERT-SLO-001')
+  return `${required.length} operational docs verified`
+})
+
+check('GOV-GATE-017: DORA and cost attribution outputs exist', () => {
+  const required = [
+    join(ROOT, 'ops', 'outputs', 'dora-metrics.json'),
+    join(ROOT, 'ops', 'outputs', 'cost-allocation.json'),
+    join(ROOT, 'tooling', 'scripts', 'collect-dora-metrics.mjs'),
+    join(ROOT, 'tooling', 'scripts', 'collect-cost-attribution.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing DORA/cost artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const dora = JSON.parse(readFileSync(required[0], 'utf-8'))
+  if (!dora.metrics?.deployment_frequency) throw new Error('dora-metrics.json missing deployment_frequency')
+  if (!dora.metrics?.predictive_signal) throw new Error('dora-metrics.json missing predictive_signal')
+
+  const cost = JSON.parse(readFileSync(required[1], 'utf-8'))
+  if (typeof cost.data_source !== 'string') throw new Error('cost-allocation.json missing data_source')
+  if (typeof cost.unresolved_app_count !== 'number') {
+    throw new Error('cost-allocation.json missing unresolved_app_count')
+  }
+
+  const doraCollector = readFileSync(required[2], 'utf-8')
+  if (!doraCollector.includes('DORA_ENFORCE_THRESHOLDS') || !doraCollector.includes('--enforce')) {
+    throw new Error('collect-dora-metrics.mjs missing threshold enforcement controls')
+  }
+  const costCollector = readFileSync(required[3], 'utf-8')
+  if (!costCollector.includes('COST_ENFORCE_REAL_DATA') || !costCollector.includes('--enforce-real-data')) {
+    throw new Error('collect-cost-attribution.mjs missing real-data enforcement controls')
+  }
+
+  return 'DORA + cost attribution pipeline verified with enforcement controls'
+})
+
+check('GOV-GATE-018: Container seccomp profile exists', () => {
+  const path = join(ROOT, 'security', 'runtime', 'seccomp-default.json')
+  if (!existsSync(path)) throw new Error('security/runtime/seccomp-default.json not found')
+  const profile = JSON.parse(readFileSync(path, 'utf-8'))
+  if (profile.defaultAction !== 'SCMP_ACT_ERRNO') {
+    throw new Error('Seccomp profile defaultAction must be SCMP_ACT_ERRNO (deny-by-default)')
+  }
+  if (!Array.isArray(profile.syscalls) || profile.syscalls.length === 0) {
+    throw new Error('Seccomp profile has no syscall allowlist')
+  }
+  // Verify docker-compose applies it
+  const compose = readFileSync(join(ROOT, 'docker-compose.yml'), 'utf-8')
+  const seccompCount = (compose.match(/seccomp:security\/runtime\/seccomp-default\.json/g) ?? []).length
+  if (seccompCount < 5) throw new Error(`Expected seccomp on ≥5 services, found ${seccompCount}`)
+  return `Seccomp profile verified (deny-by-default, ${profile.syscalls.length} allowlist entries, ${seccompCount} services)`
+})
+
+check('GOV-GATE-019: Third-party risk register exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'THIRD_PARTY_RISK_REGISTER.md')
+  if (!existsSync(path)) throw new Error('docs/platform/THIRD_PARTY_RISK_REGISTER.md not found')
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Cloud Infrastructure', '## Supply Chain Controls', '## Vendor Incident Notification']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) throw new Error(`Risk register missing sections: ${missing.join(', ')}`)
+  return 'Third-party risk register present with required sections'
+})
+
+check('GOV-GATE-020: Domain expertise map and turbo cache strategy exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'DOMAIN_EXPERTISE_MAP.md'),
+    join(ROOT, 'docs', 'platform', 'TURBO_CACHE_STRATEGY.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing knowledge docs: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  // Validate turbo.json has globalPassThroughEnv
+  const turbo = JSON.parse(readFileSync(join(ROOT, 'turbo.json'), 'utf-8'))
+  if (!Array.isArray(turbo.globalPassThroughEnv) || turbo.globalPassThroughEnv.length < 5) {
+    throw new Error('turbo.json globalPassThroughEnv must list ≥5 platform-specific env vars')
+  }
+  return `Knowledge docs + turbo cache hardening verified (${turbo.globalPassThroughEnv.length} pass-through vars)`
+})
+
+check('GOV-GATE-021: Vendor diversification strategy and registry exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'VENDOR_DIVERSIFICATION_STRATEGY.md'),
+    join(ROOT, 'governance', 'resilience', 'vendor-diversification-registry.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing vendor diversification artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const registry = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    capabilities?: Array<{ name?: string; secondary_provider?: string }>
+  }
+  const capabilities = Array.isArray(registry.capabilities) ? registry.capabilities : []
+  if (capabilities.length < 3) throw new Error('Vendor diversification registry must list at least 3 capabilities')
+  const missingSecondary = capabilities
+    .filter((c) => !c.secondary_provider)
+    .map((c) => c.name ?? 'unknown')
+  if (missingSecondary.length > 0) {
+    throw new Error(`Capabilities missing secondary_provider: ${missingSecondary.join(', ')}`)
+  }
+  return `Vendor diversification verified across ${capabilities.length} capabilities`
+})
+
+check('GOV-GATE-022: Emerging threat model covers hallucination, quantum, and dependency confusion', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'EMERGING_THREAT_MODEL.md'),
+    join(ROOT, 'governance', 'resilience', 'emerging-threat-register.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing emerging threat artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const register = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    threats?: Array<{ id?: string }>
+  }
+  const ids = new Set((register.threats ?? []).map((t) => t.id))
+  const expected = ['THREAT-AI-HALLUCINATION', 'THREAT-QUANTUM-CRYPTO', 'THREAT-DEPENDENCY-CONFUSION']
+  const missingIds = expected.filter((id) => !ids.has(id))
+  if (missingIds.length > 0) {
+    throw new Error(`Emerging threat register missing: ${missingIds.join(', ')}`)
+  }
+  return 'Emerging threat model includes required future-risk categories'
+})
+
+check('GOV-GATE-023: Runtime data residency verifier exists', () => {
+  const required = [
+    join(ROOT, 'tooling', 'scripts', 'verify-data-residency-runtime.mjs'),
+    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing residency enforcement artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const script = readFileSync(required[0], 'utf-8')
+  if (!script.includes('--enforce') || !script.includes('RESIDENCY_ALLOWED_REGIONS')) {
+    throw new Error('verify-data-residency-runtime.mjs must support enforce mode and allowed-region controls')
+  }
+  return 'Runtime data residency verifier is present and configurable'
+})
+
+check('GOV-GATE-024: Human-factor resilience automation exists', () => {
+  const required = [
+    join(ROOT, 'tooling', 'scripts', 'collect-onboarding-kpis.mjs'),
+    join(ROOT, 'governance', 'resilience', 'succession-and-cross-training.json'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing human-factor resilience artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const succession = JSON.parse(readFileSync(required[1], 'utf-8')) as {
+    domains?: Array<{
+      domain?: string
+      mandatory_cross_training_hours_per_quarter?: number
+      succession_backup_count?: number
+    }>
+  }
+  if (!Array.isArray(succession.domains) || succession.domains.length < 5) {
+    throw new Error('succession-and-cross-training.json must include at least 5 domains')
+  }
+  const missingTargets = succession.domains
+    .filter((d) => d.mandatory_cross_training_hours_per_quarter == null || d.succession_backup_count == null)
+    .map((d) => d.domain ?? 'unknown')
+  if (missingTargets.length > 0) {
+    throw new Error(`Domains missing cross-training/succession targets: ${missingTargets.join(', ')}`)
+  }
+  return `Human-factor resilience targets verified for ${succession.domains.length} domains`
+})
+
+check('GOV-GATE-025: Regulatory monitoring artifacts exist', () => {
+  const required = [
+    join(ROOT, 'docs', 'platform', 'REGULATORY_CHANGE_MONITORING.md'),
+    join(ROOT, 'governance', 'resilience', 'regulatory-watchlist.json'),
+    join(ROOT, 'tooling', 'scripts', 'validate-strategic-resilience.mjs'),
+  ]
+  const missing = required.filter((p) => !existsSync(p))
+  if (missing.length > 0) {
+    throw new Error(`Missing regulatory monitoring artifacts: ${missing.map((p) => p.replace(ROOT + '/', '')).join(', ')}`)
+  }
+  const watchlist = JSON.parse(readFileSync(required[1], 'utf-8'))
+  const entries = Array.isArray(watchlist.watchlist) ? watchlist.watchlist : []
+  if (entries.length < 5) throw new Error('regulatory-watchlist.json must include at least 5 tracked regulations')
+  return `Regulatory monitoring verified across ${entries.length} tracked regulations`
+})
+
+check('GOV-GATE-026: Disaster recovery region-loss playbook exists', () => {
+  const path = join(ROOT, 'docs', 'platform', 'DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md')
+  if (!existsSync(path)) {
+    throw new Error('docs/platform/DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md not found')
+  }
+  const content = readFileSync(path, 'utf-8')
+  const required = ['## Trigger Conditions', '## Containment and Failover', '## Recovery']
+  const missing = required.filter((h) => !content.includes(h))
+  if (missing.length > 0) {
+    throw new Error(`Region-loss DR playbook missing sections: ${missing.join(', ')}`)
+  }
+  return 'Region-loss disaster recovery playbook verified'
+})
+
+check('GOV-GATE-027: Governance runtime budget guardrail exists', () => {
+  const path = join(ROOT, 'tooling', 'scripts', 'check-governance-runtime-budget.mjs')
+  if (!existsSync(path)) {
+    throw new Error('tooling/scripts/check-governance-runtime-budget.mjs not found')
+  }
+  const content = readFileSync(path, 'utf-8')
+  if (!content.includes('GOVERNANCE_MAX_RUNTIME_MINUTES') || !content.includes('--enforce')) {
+    throw new Error('Runtime budget script must support max-runtime env and enforce mode')
+  }
+  return 'Governance runtime budget guardrail script verified'
+})
+
 // ── Helper ──────────────────────────────────────────────────────────────────
 
 function findTestFiles(dir: string): string[] {

@@ -30,26 +30,33 @@ const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.cana
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 
 const profiles = {
+  ci: { vus: 5, duration: '1m', rampUp: '20s' },
   baseline: { vus: 100, duration: '5m', rampUp: '1m' },
   scale100k: { vus: 500, duration: '10m', rampUp: '2m' },
   scale1m: { vus: 2000, duration: '15m', rampUp: '3m' },
 };
 
 const profile = profiles[__ENV.PROFILE || 'baseline'];
+const hasAuthToken = Boolean(AUTH_TOKEN);
+
+const thresholds = {
+  http_req_duration: ['p(95)<500', 'p(99)<1500'],
+  errors: ['rate<0.02'],
+};
+
+if (hasAuthToken) {
+  thresholds.claim_list_latency = ['p(95)<400'];
+  thresholds.member_search_latency = ['p(95)<300'];
+  thresholds.dashboard_latency = ['p(95)<600'];
+}
 
 export const options = {
   stages: [
     { duration: profile.rampUp, target: profile.vus },
     { duration: profile.duration, target: profile.vus },
-    { duration: '1m', target: 0 }, // ramp-down
+    { duration: '1m', target: 0 },
   ],
-  thresholds: {
-    http_req_duration: ['p(95)<500', 'p(99)<1500'],
-    errors: ['rate<0.02'],       // < 2% error rate
-    claim_list_latency: ['p(95)<400'],
-    member_search_latency: ['p(95)<300'],
-    dashboard_latency: ['p(95)<600'],
-  },
+  thresholds,
 };
 
 // ---------------------------------------------------------------------------
@@ -74,23 +81,24 @@ function get(path, latencyMetric) {
 // ---------------------------------------------------------------------------
 
 export default function () {
-  // 1. Health check (warm-up / synthetic monitor)
+  // Always test public health path and root path.
   get('/api/health', null);
+  get('/', null);
+  sleep(0.4);
 
-  // 2. Dashboard load (heaviest aggregation query)
-  get('/api/analytics/dashboard', dashboardLatency);
-  sleep(0.5);
+  // Protected pilot/prod API paths are tested when AUTH_TOKEN is provided.
+  if (hasAuthToken) {
+    get('/api/analytics/dashboard', dashboardLatency);
+    sleep(0.5);
 
-  // 3. Claims list with pagination
-  get('/api/claims?page=1&limit=25', claimLatency);
-  sleep(0.3);
+    get('/api/claims?page=1&limit=25', claimLatency);
+    sleep(0.3);
 
-  // 4. Member search (exercises FTS GIN index)
-  const query = `member_${__VU}_${__ITER}`;
-  get(`/api/members/search?q=${query}`, memberSearchLatency);
-  sleep(0.3);
+    const query = `member_${__VU}_${__ITER}`;
+    get(`/api/members/search?q=${query}`, memberSearchLatency);
+    sleep(0.3);
+  }
 
-  // 5. Static asset (tests CDN / image cache)
   get('/_next/static/chunks/main.js', null);
   sleep(0.5);
 }

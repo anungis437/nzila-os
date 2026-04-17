@@ -1,0 +1,56 @@
+{
+  "_schema": "1.0",
+  "collected_at": "2026-04-17T01:23:11.458Z",
+  "window_days": 30,
+  "source": {
+    "requested_branch": "main",
+    "branch": "main",
+    "lookback_weeks_for_trend": 12
+  },
+  "metrics": {
+    "deployment_frequency": {
+      "value": 10.47,
+      "unit": "deploys_per_week",
+      "raw_count_30d": 45,
+      "tier": "elite"
+    },
+    "lead_time_for_change": {
+      "value": 1349.3,
+      "unit": "hours",
+      "tier": "low"
+    },
+    "change_failure_rate": {
+      "value": 0,
+      "unit": "percent",
+      "revert_count_30d": 0,
+      "tier": "elite"
+    },
+    "mttr": {
+      "value": null,
+      "unit": "hours",
+      "tier": "unknown",
+      "note": "Requires incident tracker integration (e.g. PagerDuty API)"
+    },
+    "predictive_signal": {
+      "value": "normal",
+      "unit": "state",
+      "slope_per_week": 0.87,
+      "trailing_4_week_average": 7.75,
+      "projected_next_week_deploys": 21.87,
+      "weekly_deploy_series": [
+        0,
+        0,
+        0,
+        11,
+        18,
+        17,
+        19,
+        18,
+        2,
+        6,
+        2,
+        21
+      ]
+    }
+  }
+}

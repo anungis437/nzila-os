@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-04-17T07:35:58.367Z",
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "vendor strategy docs exist",
+      "status": "pass",
+      "detail": "vendor diversification artifacts present"
+    },
+    {
+      "name": "vendor registry has fallback providers",
+      "status": "pass",
+      "detail": "4 capabilities declare primary + secondary providers"
+    },
+    {
+      "name": "emerging threat register covers required risks",
+      "status": "pass",
+      "detail": "required emerging threat families are tracked"
+    },
+    {
+      "name": "regulatory watchlist is current",
+      "status": "pass",
+      "detail": "watchlist has 5 entries; reviewed 1 days ago"
+    },
+    {
+      "name": "succession and cross-training policy is measurable",
+      "status": "pass",
+      "detail": "6 domains include cross-training and succession targets"
+    }
+  ]
+}

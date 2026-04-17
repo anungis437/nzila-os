@@ -1,0 +1,53 @@
+{
+  "schema": "1.0",
+  "last_reviewed": "2026-04-16",
+  "threats": [
+    {
+      "id": "THREAT-AI-HALLUCINATION",
+      "name": "AI hallucination in production workflows",
+      "status": "active",
+      "owner": "security",
+      "detection": [
+        "response quality scoring",
+        "policy-based output validation",
+        "sampled human review"
+      ],
+      "mitigation": [
+        "retrieval grounding",
+        "high-impact action confirmation",
+        "deterministic fallback paths"
+      ]
+    },
+    {
+      "id": "THREAT-QUANTUM-CRYPTO",
+      "name": "post-quantum decryption risk for long-lived data",
+      "status": "active",
+      "owner": "security",
+      "detection": [
+        "crypto inventory scan",
+        "algorithm usage reporting"
+      ],
+      "mitigation": [
+        "crypto agility standards",
+        "hybrid key exchange pilots",
+        "migration playbook for long-retention datasets"
+      ]
+    },
+    {
+      "id": "THREAT-DEPENDENCY-CONFUSION",
+      "name": "dependency confusion and package supply-chain poisoning",
+      "status": "active",
+      "owner": "platform-security",
+      "detection": [
+        "lockfile integrity verification",
+        "private scope allowlist",
+        "advisory monitoring"
+      ],
+      "mitigation": [
+        "immutable lockfile in CI",
+        "signed provenance for critical packages",
+        "auto-block high severity dependency advisories"
+      ]
+    }
+  ]
+}

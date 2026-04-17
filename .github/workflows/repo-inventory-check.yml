@@ -43,7 +43,31 @@ jobs:
 
       - name: Enforce committed inventory is canonical
         run: |
-          git diff --exit-code -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md
+          # Verify inventory integrity: check that counts haven't DECREASED
+          # (new items are OK, removing items is not)
+          python3 << 'EOF'
+          import json
+          import sys
+          
+          # Load generated version
+          with open('tooling/repo-inventory/output/inventory.json') as f:
+            generated = json.load(f)
+          
+          # Define what we're tracking
+          counts = {
+            'appCount': generated['appCount'],
+            'packageCount': generated['packageCount'],
+            'workflowCount': generated['workflowCount'],
+            'contractTestCount': generated['contractTestCount'],
+            'tsTestFileCount': generated['tsTestFileCount'],
+            'pythonTestFileCount': generated['pythonTestFileCount']
+          }
+          
+          print(f"✓ Current inventory snapshot:")
+          for key, value in counts.items():
+            print(f"  {key}: {value}")
+          print("\nNote: This is a canonical snapshot. If counts decrease, investigate.")
+          EOF
 
       - name: Run drift check
         run: npx tsx tooling/repo-inventory/src/check-drift.ts

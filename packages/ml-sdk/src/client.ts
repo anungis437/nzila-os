@@ -35,6 +35,8 @@ export interface MlSdkConfig {
   baseUrl: string
   /** Auth session token or API key getter */
   getToken: () => string | Promise<string>
+  /** Optional request headers forwarded from caller context (e.g. cookie in RSC). */
+  getRequestHeaders?: () => Record<string, string> | Promise<Record<string, string>>
 }
 
 // ── Client factory ───────────────────────────────────────────────────────────
@@ -42,10 +44,16 @@ export interface MlSdkConfig {
 export function createMlClient(config: MlSdkConfig) {
   async function headers(): Promise<Record<string, string>> {
     const token = await config.getToken()
-    return {
+    const forwardedHeaders = (await config.getRequestHeaders?.()) ?? {}
+    const resolved: Record<string, string> = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      ...forwardedHeaders,
     }
+    // Only set Authorization when a non-empty token exists.
+    if (token && token.trim().length > 0) {
+      resolved.Authorization = `Bearer ${token}`
+    }
+    return resolved
   }
 
   async function get<T>(path: string, params?: Record<string, string | boolean | number | undefined>): Promise<T> {

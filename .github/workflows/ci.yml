@@ -239,6 +239,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Start governance runtime timer
+        run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Contract tests
         run: pnpm contract-tests
 
@@ -247,6 +250,34 @@ jobs:
 
       - name: Governance fail-closed gate
         run: pnpm validate:governance:gate
+
+      - name: Evidence lifecycle policy gate
+        run: pnpm validate:evidence:lifecycle
+
+      - name: Collect DORA metrics
+        run: pnpm collect:dora:enforce
+        env:
+          DORA_MIN_DEPLOYS_PER_WEEK: "1"
+          DORA_MAX_LEAD_TIME_HOURS: "720"
+          DORA_MAX_CHANGE_FAILURE_RATE_PCT: "15"
+
+      - name: Collect cost attribution
+        run: pnpm collect:cost
+        env:
+          COST_ENABLE_AZURE_API: "${{ vars.COST_ENABLE_AZURE_API || '0' }}"
+          AZURE_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+      - name: Collect onboarding KPIs
+        run: pnpm collect:onboarding:kpis
+
+      - name: Validate strategic resilience
+        run: pnpm validate:strategic-resilience
+
+      - name: Verify runtime data residency (report)
+        run: pnpm verify:data-residency:runtime
+        env:
+          AZURE_RESIDENCY_RESOURCE_GROUP: "${{ vars.AZURE_RESIDENCY_RESOURCE_GROUP || '' }}"
+          RESIDENCY_ALLOWED_REGIONS: "${{ vars.RESIDENCY_ALLOWED_REGIONS || 'canadacentral,canadaeast' }}"
 
       - name: Truth authority validation
         run: pnpm validate:truth-authority
@@ -279,6 +310,12 @@ jobs:
       - name: Verify proof artifacts
         run: pnpm proof:verify
 
+      - name: Enforce governance runtime budget
+        run: pnpm validate:governance:runtime-budget
+        env:
+          GOVERNANCE_JOB_START_TS: "${{ env.GOVERNANCE_JOB_START_TS }}"
+          GOVERNANCE_MAX_RUNTIME_MINUTES: "${{ vars.GOVERNANCE_MAX_RUNTIME_MINUTES || '55' }}"
+
       - name: Upload governance gate report
         if: always()
         uses: actions/upload-artifact@v4
@@ -286,6 +323,12 @@ jobs:
           name: governance-gate-report
           path: |
             ops/outputs/governance-gate-report.json
+            ops/outputs/dora-metrics.json
+            ops/outputs/cost-allocation.json
+            ops/outputs/onboarding-kpis.json
+            ops/outputs/strategic-resilience-report.json
+            ops/outputs/data-residency-runtime.json
+            ops/outputs/governance-runtime-budget.json
             ops/outputs/control-manifest-report.json
             proof-artifacts/**
           retention-days: 90
@@ -527,6 +570,9 @@ jobs:
       - name: Generate platform health report
         run: pnpm health:report
 
+      - name: Generate quarterly strategic scorecard
+        run: pnpm strategic:quarterly
+
       - name: Generate build attestation
         run: pnpm attest:build
 
@@ -540,6 +586,8 @@ jobs:
             ops/security/build-attestation.json
             ops/outputs/platform-health.json
             ops/outputs/procurement-pack-*.zip
+            reports/strategy/quarterly-scorecard.md
+            reports/strategy/quarterly-scorecard.json
           retention-days: 90
 
   # ─── Performance Regression Gate ──────────────────────────────────────────
@@ -560,9 +608,14 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update && sudo apt-get install -y k6
 
-      - name: Run k6 baseline smoke test
-        run: k6 run --env PROFILE=baseline --env BASE_URL=http://localhost:3000 tests/load/smoke.js --duration 10s --vus 1 --no-thresholds
-        continue-on-error: true
+      - name: Run k6 fail-closed performance gate
+        run: |
+          k6 run \
+            --env PROFILE=ci \
+            --env BASE_URL="${{ vars.PERF_BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io' }}" \
+            --env AUTH_TOKEN="${{ secrets.PERF_AUTH_TOKEN }}" \
+            --summary-export=tests/load/k6-summary.json \
+            tests/load/smoke.js
 
       - name: Upload k6 results
         if: always()
