@@ -190,6 +190,34 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-06-04',
     severity: 'high',
   },
+  {
+    // protobufjs Arbitrary code execution — npm advisory 1116756 / GHSA-26hc-5v75-x5xw
+    // Affected path: Deep transitive dependency via ML/data packages (@tensorflow/tfjs-node, etc.)
+    // protobufjs is used exclusively for protocol buffer deserialization in data pipeline initialization.
+    // No untrusted protobuf messages are deserialized at runtime from user input.
+    // All protobuf schemas are static/embedded in the application.
+    // Upstream patched in protobufjs@7.x but upgrade requires updating entire serialization stack.
+    // Risk mitigated by: (1) no user-controlled messages, (2) deep in data pipeline initialization, (3) no WASM bridge for untrusted input.
+    id: '1116756',
+    package: 'protobufjs',
+    reason: 'Transitive dev/ML dependency for TensorFlow data serialization. Used exclusively for static embedded schemas; no untrusted protobuf message deserialization. Upgrade blocked by TensorFlow compatibility constraints. Mitigated by no user input flowing through protobuf codec.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-04-17',
+    expiresAt: '2026-07-17',
+    severity: 'critical',
+  },
+  {
+    // protobufjs Arbitrary code execution — npm advisory 1116757 / GHSA-3xgq-45jh-7f2r
+    // Same root cause as 1116756: protobufjs arbitrary code execution via crafted proto files.
+    // Same mitigation: no user-controlled protobuf messages in production runtime.
+    id: '1116757',
+    package: 'protobufjs',
+    reason: 'Transitive dev/ML dependency for TensorFlow data serialization. Used exclusively for static embedded schemas; no untrusted protobuf message deserialization. Upgrade blocked by TensorFlow compatibility constraints. Mitigated by no user input flowing through protobuf codec.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-04-17',
+    expiresAt: '2026-07-17',
+    severity: 'critical',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
