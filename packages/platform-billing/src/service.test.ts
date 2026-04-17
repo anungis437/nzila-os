@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
+  createBillingService,
   createInMemoryBillingService,
   type BillingService,
 } from './service.js'
@@ -70,5 +71,44 @@ describe('InMemoryBillingService', () => {
   it('returns empty entitlements for unsubscribed org', async () => {
     const ents = await svc.listEntitlements('org-1')
     expect(ents).toEqual([])
+  })
+})
+
+describe('createBillingService', () => {
+  it('defaults to in-memory in non-production mode', async () => {
+    const service = createBillingService({ nodeEnv: 'development' })
+    const created = await service.upsertSubscription({ orgId: 'org-dev', plan: 'starter' })
+    expect(created.orgId).toBe('org-dev')
+  })
+
+  it('uses external service when provided', async () => {
+    const external = createInMemoryBillingService()
+    const service = createBillingService({ mode: 'external', externalService: external })
+
+    await service.upsertSubscription({ orgId: 'org-ext', plan: 'professional' })
+    const sub = await external.getSubscription('org-ext')
+    expect(sub?.plan).toBe('professional')
+  })
+
+  it('throws when external mode has no external service', () => {
+    expect(() => createBillingService({ mode: 'external' })).toThrow(
+      'Billing mode "external" requires options.externalService',
+    )
+  })
+
+  it('blocks in-memory fallback in production by default', () => {
+    expect(() => createBillingService({ nodeEnv: 'production' })).toThrow(
+      'In-memory billing service is blocked in production. Provide an external billing service implementation.',
+    )
+  })
+
+  it('allows in-memory in production only with explicit override', async () => {
+    const service = createBillingService({
+      nodeEnv: 'production',
+      allowInMemoryInProduction: true,
+    })
+
+    const created = await service.upsertSubscription({ orgId: 'org-override', plan: 'free' })
+    expect(created.orgId).toBe('org-override')
   })
 })

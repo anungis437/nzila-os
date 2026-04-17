@@ -26,13 +26,24 @@ For a deeper overview, see [docs/platform/what-is-nzila.md](docs/platform/what-i
 
 ### UnionEyes
 
-Union case management — grievance lifecycle, collective bargaining, elections, strike funds, evidence-sealed audit trails, federation management. Full-stack Next.js + Django. Production-deployed.
+Union case management — grievance lifecycle, collective bargaining, elections, strike funds, evidence-sealed audit trails, federation management. Full-stack Next.js + Django.
 
 ### Zonga
 
 Music distribution and streaming — artist management, royalties, content distribution, creator payouts, platform fees. Dedicated monetization layer (`zonga-monetization`, `zonga-economics`, `zonga-payments`).
 
 > **Flow** is currently registry-tiered `PRODUCTION`; **CFO** and **Control Plane** are currently registry-tiered `PILOT`; **Zonga** is currently registry-tiered `INCUBATING`. Canonical classification: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+
+## Status Authority Model
+
+Status authority model:
+
+Nzila OS uses a dual-axis model to avoid narrative drift:
+
+- **Product tier** (`PRODUCTION`, `PILOT`, `INCUBATING`, `EXPERIMENTAL`) is authoritative in the app registry: `packages/platform-contracts/src/registry.ts`
+- **Deployment status** (`production`, `pilot`, `internal`, `scaffold`, `deprecated`) is authoritative per app in `apps/*/maturity.json` and aggregated in `nzila-truth-manifest.json`
+
+`PRODUCTION` in portfolio tables means product tier, not automatic deployment certification. Deployment/readiness remains fail-closed in the truth manifest until evidence gates are satisfied.
 
 ---
 
@@ -84,12 +95,12 @@ Revenue apps: **Zonga** · **CFO** · **Flow** · **Partners** · **Trade**
 
 | Tier | Apps | Status |
 |------|------|--------|
-| **PRODUCTION** | UnionEyes, Flow, Console, Web | Canonical registry production tier |
-| **PILOT** | Control Plane, Partners, CFO | Canonical registry pilot tier |
-| **INCUBATING** | Zonga, Agrimo, Trade, Cora, NACP Exams, Mobility | Canonical registry incubating tier |
-| **EXPERIMENTAL** | Mobility Client Portal, ABR, Platform Admin, Orchestrator API | Canonical registry experimental tier |
+| **PRODUCTION** | UnionEyes, Flow, Console, Web | Product tier from canonical app registry |
+| **PILOT** | Control Plane, Partners, CFO | Product tier from canonical app registry |
+| **INCUBATING** | Zonga, Agrimo, Trade, Cora, NACP Exams, Mobility | Product tier from canonical app registry |
+| **EXPERIMENTAL** | Mobility Client Portal, ABR, Platform Admin, Orchestrator API | Product tier from canonical app registry |
 
-> All apps are governed by the same invariants. Canonical app count is generated in `tooling/repo-inventory/output/repo-inventory.md`. Tier authority is the app registry. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
+> All apps are governed by the same invariants. Canonical app count is generated in `tooling/repo-inventory/output/repo-inventory.md`. Product-tier authority is the app registry. Deployment/readiness authority is `nzila-truth-manifest.json`. Full breakdown: [portfolio-matrix.md](docs/platform/portfolio-matrix.md).
 
 ---
 
@@ -114,6 +125,7 @@ pnpm contract-tests    # Run invariant enforcement tests (canonical counts in to
 | [docs/platform/what-is-nzila.md](docs/platform/what-is-nzila.md) | 30-second platform overview |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full architectural overview |
 | [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | App portfolio tiers and strategic role (canonical counts in generated inventory) |
+| [docs/platform/STATUS_AUTHORITY_MODEL.md](docs/platform/STATUS_AUTHORITY_MODEL.md) | Canonical product-tier vs deployment/readiness model |
 | [docs/platform/revenue-architecture.md](docs/platform/revenue-architecture.md) | Revenue system design |
 | [README.business.md](README.business.md) | Non-technical business overview |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide + repo contract |

@@ -37,7 +37,7 @@ interface RevenueItem {
 interface AgingReportViewProps {
   /**
    * Aging buckets from the server action.
-   * If omitted, shows demo data (for marketing/demo mode).
+   * If omitted, shows demo data (for explicit marketing/demo mode surfaces only).
    */
   buckets?: AgingBucket[]
   revenueItems?: RevenueItem[]

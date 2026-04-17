@@ -3,6 +3,9 @@
  *
  * Creates demo org, users, workflow examples, and analytics data
  * for pilot demonstrations.
+ *
+ * GOVERNANCE: DEMO-ONLY MODULE.
+ * This script is not a production data authority.
  */
 
 export interface DemoOrg {

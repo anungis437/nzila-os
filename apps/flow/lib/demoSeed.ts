@@ -10,6 +10,9 @@
  * - Deposit-required flow (accepted → deposit → ready for PO)
  * - In-production flow (PO → production → shipped → delivered)
  * - Invoice-linked (closed with payment)
+ *
+ * GOVERNANCE: DEMO-ONLY MODULE.
+ * This seed script is for demo/pilot environments and not a production truth source.
  */
 import { logger } from '@/lib/logger'
 import {

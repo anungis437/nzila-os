@@ -3,6 +3,9 @@
  *
  * Rich, realistic seed data used when the database is empty (dev / demo mode).
  * Keeps marketing pages alive without requiring DB seeding.
+ *
+ * GOVERNANCE: DEMO-ONLY MODULE.
+ * This file must not be treated as production data authority.
  */
 import type { PublicArtist, PublicEvent, PublicRelease } from './public-data'
 

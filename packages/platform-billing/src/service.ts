@@ -49,6 +49,18 @@ export interface BillingService {
   canAccessModule(orgId: string, moduleId: string): Promise<boolean>;
 }
 
+export interface BillingServiceFactoryOptions {
+  /**
+   * Runtime mode selection:
+   * - external: use caller-provided external service implementation.
+   * - in-memory: use deterministic in-memory service for local/dev/test.
+   */
+  mode?: 'external' | 'in-memory';
+  externalService?: BillingService;
+  nodeEnv?: string;
+  allowInMemoryInProduction?: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Default entitlement definitions per tier
 // ---------------------------------------------------------------------------
@@ -154,4 +166,37 @@ export function createInMemoryBillingService(): BillingService {
       return ent.active;
     },
   };
+}
+
+/**
+ * Creates a billing service with explicit runtime safeguards.
+ *
+ * Production-like environments must not silently fall back to in-memory mode
+ * unless explicitly allowed by policy.
+ */
+export function createBillingService(options: BillingServiceFactoryOptions = {}): BillingService {
+  const {
+    mode,
+    externalService,
+    nodeEnv = process.env.NODE_ENV ?? 'development',
+    allowInMemoryInProduction = false,
+  } = options;
+
+  const selectedMode = mode ?? (externalService ? 'external' : 'in-memory');
+  const isProductionLike = nodeEnv === 'production';
+
+  if (selectedMode === 'external') {
+    if (!externalService) {
+      throw new Error('Billing mode "external" requires options.externalService')
+    }
+    return externalService;
+  }
+
+  if (isProductionLike && !allowInMemoryInProduction) {
+    throw new Error(
+      'In-memory billing service is blocked in production. Provide an external billing service implementation.',
+    );
+  }
+
+  return createInMemoryBillingService();
 }

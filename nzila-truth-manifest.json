@@ -1,6 +1,37 @@
 {
+  "status_model_version": "2026-04-17",
   "platform_status": "pilot-safe",
-  "last_audit": "2026-04-16",
+  "last_audit": "2026-04-17",
+  "authority": {
+    "product_tier_source": "packages/platform-contracts/src/registry.ts",
+    "deployment_status_source": "apps/*/maturity.json",
+    "public_summary_surfaces": [
+      "README.md",
+      "docs/platform/portfolio-matrix.md"
+    ]
+  },
+  "status_axes": {
+    "product_tier": [
+      "PRODUCTION",
+      "PILOT",
+      "INCUBATING",
+      "EXPERIMENTAL"
+    ],
+    "deployment_status": [
+      "production",
+      "pilot",
+      "internal",
+      "scaffold",
+      "deprecated"
+    ],
+    "readiness_tier": [
+      "production-ready",
+      "pilot-safe",
+      "internal-only",
+      "scaffold-only",
+      "deprecated"
+    ]
+  },
   "apps": {
     "union-eyes": "pilot",
     "flow": "pilot",
@@ -20,8 +51,112 @@
     "mobility": "internal",
     "mobility-client-portal": "internal"
   },
+  "app_status": {
+    "union-eyes": {
+      "registry_tier": "PRODUCTION",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal"
+    },
+    "flow": {
+      "registry_tier": "PRODUCTION",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal"
+    },
+    "console": {
+      "registry_tier": "PRODUCTION",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "web": {
+      "registry_tier": "PRODUCTION",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "public"
+    },
+    "control-plane": {
+      "registry_tier": "PILOT",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "partners": {
+      "registry_tier": "PILOT",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal"
+    },
+    "cfo": {
+      "registry_tier": "PILOT",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal"
+    },
+    "zonga": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "agrimo": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "trade": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "cora": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "nacp-exams": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "mobility": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "mobility-client-portal": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "abr": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "platform-admin": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal"
+    },
+    "orchestrator-api": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "scaffold",
+      "readiness_tier": "scaffold-only",
+      "exposure": "internal"
+    }
+  },
   "blocking_gaps": [
-    "production-grade maturity remains undeclared for all apps until contract and observability coverage are closed",
+    "deployment-ready status remains fail-closed until runtime and observability evidence is complete",
     "union-eyes break-glass requires secure runtime secrets to activate threshold recovery"
   ]
 }

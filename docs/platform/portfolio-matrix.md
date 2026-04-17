@@ -1,14 +1,14 @@
 # Nzila OS — Portfolio Matrix
 
-> Canonical classification of every app in the Nzila OS monorepo.
+> Canonical product-tier classification of every app in the Nzila OS monorepo.
 
-_Tier source of truth: [platform-contracts registry](../../packages/platform-contracts/src/registry.ts). Last reconciled: April 2026._
+_Product-tier source of truth: [platform-contracts registry](../../packages/platform-contracts/src/registry.ts). Deployment/readiness source: [nzila-truth-manifest.json](../../nzila-truth-manifest.json). Last reconciled: April 2026._
 
 ---
 
 ## Legend
 
-| Tier | Meaning |
+| Product Tier | Meaning |
 |------|---------|
 | **PRODUCTION** | Production tier in canonical app registry |
 | **PILOT** | Pilot tier in canonical app registry |
@@ -19,7 +19,7 @@ _Tier source of truth: [platform-contracts registry](../../packages/platform-con
 
 ## App Classification
 
-| App | Framework | Code Files | Deps | Tier | Revenue Ready | Strategic Role |
+| App | Framework | Code Files | Deps | Product Tier | Revenue Ready | Strategic Role |
 |-----|-----------|------------|------|------|--------------|----------------|
 | **union-eyes** | Next.js + Django | 3 028 | 15 | PRODUCTION | Yes | Union case management — grievance lifecycle, bargaining, evidence-sealed audit trails |
 | **flow** | Next.js | 316 | 24 | PRODUCTION | Yes | Commerce vertical — orders, invoicing, inventory, supplier management |
@@ -57,7 +57,8 @@ _Tier source of truth: [platform-contracts registry](../../packages/platform-con
 
 ### Classification authority
 
-- Tier values are derived from the canonical app registry in `packages/platform-contracts/src/registry.ts`.
+- Product-tier values are derived from the canonical app registry in `packages/platform-contracts/src/registry.ts`.
+- Deployment/readiness values are derived from app maturity declarations in `apps/*/maturity.json` and aggregated in `nzila-truth-manifest.json`.
 - Revenue readiness is shown as operational planning state, not as a legal or audit certification.
 
 ### Portfolio communication rule

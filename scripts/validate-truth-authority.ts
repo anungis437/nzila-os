@@ -20,6 +20,22 @@ type Finding = {
   message: string
 }
 
+type MaturityStatus = 'production' | 'pilot' | 'internal' | 'scaffold' | 'deprecated'
+
+type TruthManifest = {
+  status_model_version: string
+  platform_status: string
+  last_audit: string
+  apps: Record<string, MaturityStatus>
+  app_status: Record<string, {
+    registry_tier: string
+    deployment_status: MaturityStatus
+    readiness_tier: string
+    exposure: 'public' | 'internal'
+  }>
+  blocking_gaps: string[]
+}
+
 function findRepoRoot(): string {
   let dir = process.cwd()
   while (dir !== dirname(dir)) {
@@ -76,6 +92,32 @@ function loadRegistryDevPorts(root: string): Map<string, number> {
   let match: RegExpExecArray | null
   while ((match = appBlockRegex.exec(content)) !== null) {
     map.set(match[1], Number(match[2]))
+  }
+
+  return map
+}
+
+function loadTruthManifest(root: string): TruthManifest {
+  const truthPath = join(root, 'nzila-truth-manifest.json')
+  return JSON.parse(readFileSync(truthPath, 'utf8')) as TruthManifest
+}
+
+function loadAppMaturityStatuses(root: string): Map<string, MaturityStatus> {
+  const appsRoot = join(root, 'apps')
+  const map = new Map<string, MaturityStatus>()
+
+  if (!existsSync(appsRoot)) {
+    return map
+  }
+
+  for (const entry of readdirSync(appsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    const maturityPath = join(appsRoot, entry.name, 'maturity.json')
+    if (!existsSync(maturityPath)) continue
+    const maturity = JSON.parse(readFileSync(maturityPath, 'utf8')) as { status?: MaturityStatus }
+    if (maturity.status) {
+      map.set(entry.name, maturity.status)
+    }
   }
 
   return map
@@ -182,6 +224,8 @@ function main(): void {
 
   const registryTiers = loadRegistryTiers(root)
   const registryPorts = loadRegistryDevPorts(root)
+  const truthManifest = loadTruthManifest(root)
+  const maturityStatuses = loadAppMaturityStatuses(root)
   const portfolioTiers = parsePortfolioTiers(root)
   const readmeTiers = parseReadmeTiers(root)
   const appPorts = loadAppPackageDevPorts(root)
@@ -206,6 +250,62 @@ function main(): void {
         severity: 'error',
         scope: 'readme',
         message: `Tier mismatch for ${app}: registry=${tier}, README=${readmeTier}`,
+      })
+    }
+
+    const truthApp = truthManifest.app_status?.[app]
+    if (!truthApp) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: `Missing app_status entry for ${app}`,
+      })
+    } else if (truthApp.registry_tier !== tier) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: `Tier mismatch for ${app}: registry=${tier}, truth-manifest app_status.registry_tier=${truthApp.registry_tier}`,
+      })
+    }
+
+    const deploymentStatus = truthManifest.apps?.[app]
+    if (!deploymentStatus) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: `Missing deployment status in apps map for ${app}`,
+      })
+    } else if (truthApp && truthApp.deployment_status !== deploymentStatus) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: `Deployment status mismatch for ${app}: apps=${deploymentStatus}, app_status.deployment_status=${truthApp.deployment_status}`,
+      })
+    }
+
+    const maturityStatus = maturityStatuses.get(app)
+    if (!maturityStatus) {
+      findings.push({
+        severity: 'error',
+        scope: 'maturity',
+        message: `Missing maturity.json status for ${app}`,
+      })
+    } else if (deploymentStatus && maturityStatus !== deploymentStatus) {
+      findings.push({
+        severity: 'error',
+        scope: 'maturity',
+        message: `Deployment status mismatch for ${app}: maturity=${maturityStatus}, truth-manifest=${deploymentStatus}`,
+      })
+    }
+  }
+
+  const truthApps = Object.keys(truthManifest.apps ?? {})
+  for (const app of truthApps) {
+    if (!registryTiers.has(app)) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: `App ${app} exists in truth-manifest apps but not in registry`,
       })
     }
   }
@@ -242,6 +342,14 @@ function main(): void {
     })
   }
 
+  if (!rootReadme.includes('Status authority model')) {
+    findings.push({
+      severity: 'error',
+      scope: 'readme',
+      message: 'README.md must include status authority model section to distinguish product tier from deployment status',
+    })
+  }
+
   const ueReadme = readFileSync(join(root, 'apps', 'union-eyes', 'README.md'), 'utf8')
   if (!ueReadme.includes('Clerk is legacy compatibility only')) {
     findings.push({
@@ -274,6 +382,43 @@ function main(): void {
       scope: 'ga-state',
       message: 'GA readiness claims final hard-gate pass while red-team and certification report are still incomplete',
     })
+  }
+
+  const hasProductionDeployment = Object.values(truthManifest.apps).some((status) => status === 'production')
+  if (!hasProductionDeployment) {
+    if (truthManifest.platform_status === 'production-ready') {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: 'platform_status cannot be production-ready when no app has deployment_status=production',
+      })
+    }
+
+    if (!Array.isArray(truthManifest.blocking_gaps) || truthManifest.blocking_gaps.length === 0) {
+      findings.push({
+        severity: 'error',
+        scope: 'truth-manifest',
+        message: 'Fail-closed status requires non-empty blocking_gaps when no production deployments exist',
+      })
+    }
+  }
+
+  const canonicalRootDocs = [
+    'TENANT_INVENTORY.md',
+    'DEFERRED_ITEMS.md',
+    'ADVERSARIAL_CERTIFICATION_REPORT.md',
+    'AUDIT_LEDGER_2026-03-25.md',
+  ]
+
+  for (const doc of canonicalRootDocs) {
+    const docPath = join(root, doc)
+    if (!existsSync(docPath)) {
+      findings.push({
+        severity: 'error',
+        scope: 'docs',
+        message: `Missing canonical root document: ${doc}`,
+      })
+    }
   }
 
   console.log('\n=====================================')

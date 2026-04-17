@@ -141,6 +141,7 @@ AI decision engine capabilities, value models, and vertical implementations.
 | [App Adoption Guide](platform/APP_ADOPTION_GUIDE.md) | Platform onboarding |
 | [Acceptance Matrix](platform/acceptance-matrix.md) | Feature acceptance |
 | [Runtime Classification](platform/runtime-classification.md) | Runtime tiers |
+| [Status Authority Model](platform/STATUS_AUTHORITY_MODEL.md) | Product tier vs deployment/readiness authority |
 | [Platform Boundaries](platform/platform-boundaries.md) | Boundary rules |
 | [Proof Overview](platform/proof/README.md) | Proof system |
 
