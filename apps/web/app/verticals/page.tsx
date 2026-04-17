@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
 import SectionHeading from '@/components/public/SectionHeading';
 import InvestorCTA from '@/components/public/InvestorCTA';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Verticals',
@@ -34,7 +36,7 @@ const verticals = [
     photo: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
     alt: 'Aerial view of green agricultural farmland with organized crop rows',
     platforms: ['CORA', 'Agrimo'],
-    description: 'Farm management, supply chain, IoT integration, and agricultural market intelligence. CORA scales Canadian market data; Agrimo serves the DRC and Central Africa.',
+    description: 'Farm management, supply chain, IoT intégration, and agricultural market intelligence. CORA scales Canadian market data; Agrimo serves the DRC and Central Africa.',
     tam: '$8.6B', orgs: '300+', status: 'Flagship + Production Ready',
   },
   {
@@ -111,7 +113,63 @@ const verticals = [
   },
 ];
 
-export default function Verticals() {
+const verticalFr: Record<string, { name: string; description: string; status: string }> = {
+  Fintech: {
+    name: 'Fintech',
+    description: 'Banque, paiements, stress testing et services de CFO virtuel pour particuliers et entreprises.',
+    status: '2 plateformes',
+  },
+  Agrotech: {
+    name: 'Agrotech',
+    description: 'Gestion agricole, chaine logistique, intégration IoT et intelligence de marché. CORA developpe le marché canadien; Agrimo sert la RDC et l Afrique centrale.',
+    status: 'Phare + Pret pour production',
+  },
+  Uniontech: {
+    name: 'Uniontech',
+    description: 'Gestion syndicale, prevision des pensions, suivi des griefs et intelligence CBA.',
+    status: 'Phare',
+  },
+  Legaltech: {
+    name: 'Legaltech',
+    description: 'Gestion des dossiers, IA juridique, bases de decisions de tribunal et services eDiscovery.',
+    status: '2 plateformes',
+  },
+  EdTech: {
+    name: 'EdTech',
+    description: 'LMS, certification, formation cybersécurité et education gamifiee.',
+    status: '2 plateformes',
+  },
+  Commerce: {
+    name: 'Commerce',
+    description: 'Order-to-cash, procure-to-pay, gestion des stocks, devis IA et operations commerciales transfrontalieres.',
+    status: 'Phare + En developpement',
+  },
+  'Music & Entertainment': {
+    name: 'Musique et divertissement',
+    description: 'Distribution musicale africaine, onboarding artistes, analytics streaming, billetterie et gestion des redevances.',
+    status: 'Phare + Pret pour production',
+  },
+  Healthtech: {
+    name: 'Healthtech',
+    description: 'Bien-etre cognitif, soins dementia, soutien aidants et suivi de sante.',
+    status: 'Modernisation',
+  },
+  Insurtech: {
+    name: 'Insurtech',
+    description: 'Arbitrage assurance, IA de souscription, cycle de vie police et intelligence des sinistres.',
+    status: 'En developpement',
+  },
+  Justice: {
+    name: 'Justice',
+    description: 'Formation antiracisme, analytics DEI et mesure d impact equitable.',
+    status: 'Pret pour production',
+  },
+};
+
+export default async function Verticals() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -130,18 +188,19 @@ export default function Verticals() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              Market Coverage
+              {isFr ? 'Couverture de marché' : 'Market Coverage'}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              10+ Strategic Verticals
+              {isFr ? '10+ verticales stratégiques' : '10+ Strategic Verticals'}
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Diverse sectors united by a common mission: building ethical, B Corp-aligned AI technology that
-              serves real human needs across healthcare, finance, justice, and beyond.
+              {isFr
+                ? 'Des secteurs divers unis par une mission commune : construire une technologie IA éthique, alignee B Corp, qui sert de vrais besoins humains en sante, finance, justice et plus.'
+                : 'Diverse sectors united by a common mission: building ethical, B Corp-aligned AI technology that serves real human needs across healthcare, finance, justice, and beyond.'}
             </p>
           </ScrollReveal>
         </div>
@@ -151,10 +210,10 @@ export default function Verticals() {
       <section className="bg-navy py-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-10 text-center">
           {[
-            { value: 15, suffix: '', label: 'Platforms' },
-            { value: 10, suffix: '+', label: 'Verticals' },
+            { value: 15, suffix: '', label: isFr ? 'Plateformes' : 'Platforms' },
+            { value: 10, suffix: '+', label: isFr ? 'Verticales' : 'Verticals' },
             { value: 100, prefix: '$', suffix: 'B+', label: 'TAM' },
-            { value: 12000, suffix: '+', label: 'Entities' },
+            { value: 12000, suffix: '+', label: isFr ? 'Entités' : 'Entities' },
           ].map((s) => (
             <div key={s.label}>
               <span className="text-3xl font-bold gradient-text">
@@ -186,9 +245,9 @@ export default function Verticals() {
                     <div className="absolute inset-0 bg-linear-to-t from-navy/80 to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5">
                       <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-white">{v.name}</h2>
+                        <h2 className="text-2xl font-bold text-white">{isFr ? (verticalFr[v.name]?.name ?? v.name) : v.name}</h2>
                         <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/20 backdrop-blur text-white">
-                          {v.status}
+                          {isFr ? (verticalFr[v.name]?.status ?? v.status) : v.status}
                         </span>
                       </div>
                     </div>
@@ -196,16 +255,16 @@ export default function Verticals() {
 
                   {/* Content */}
                   <div className="p-6 flex-1 flex flex-col">
-                    <p className="text-gray-600 mb-4">{v.description}</p>
+                    <p className="text-gray-600 mb-4">{isFr ? (verticalFr[v.name]?.description ?? v.description) : v.description}</p>
 
                     <div className="grid grid-cols-3 gap-3 mb-4 text-center">
                       <div className="bg-gray-50 rounded-xl p-2">
                         <div className="text-lg font-bold text-electric">{v.platforms.length}</div>
-                        <div className="text-xs text-gray-500">Platforms</div>
+                        <div className="text-xs text-gray-500">{isFr ? 'Plateformes' : 'Platforms'}</div>
                       </div>
                       <div className="bg-gray-50 rounded-xl p-2">
                         <div className="text-lg font-bold text-navy">{v.orgs}</div>
-                        <div className="text-xs text-gray-500">Entities</div>
+                        <div className="text-xs text-gray-500">{isFr ? 'Entités' : 'Entities'}</div>
                       </div>
                       <div className="bg-gray-50 rounded-xl p-2">
                         <div className="text-sm font-bold text-gold">{v.tam}</div>
@@ -214,7 +273,7 @@ export default function Verticals() {
                     </div>
 
                     <div className="border-t border-gray-100 pt-4 mt-auto">
-                      <h3 className="font-semibold text-navy text-sm mb-2">Platforms</h3>
+                      <h3 className="font-semibold text-navy text-sm mb-2">{isFr ? 'Plateformes' : 'Platforms'}</h3>
                       <div className="flex flex-wrap gap-2">
                         {v.platforms.map((p) => (
                           <span key={p} className="text-xs px-3 py-1 bg-electric/5 text-electric rounded-full font-medium">
@@ -223,7 +282,7 @@ export default function Verticals() {
                         ))}
                       </div>
                       <span className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-electric">
-                        Explore capabilities →
+                        {isFr ? 'Explorer les capacites ->' : 'Explore capabilities ->'}
                       </span>
                     </div>
                   </div>
@@ -239,17 +298,17 @@ export default function Verticals() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Synergies"
-            title="Cross-Vertical Impact"
-            subtitle="Our unified Backbone infrastructure enables powerful synergies across every vertical"
+            badge={isFr ? 'Synergies' : 'Synergies'}
+            title={isFr ? 'Impact inter-verticales' : 'Cross-Vertical Impact'}
+            subtitle={isFr ? 'Notre infrastructure Backbone unifiee active des synergies puissantes dans chaque verticale' : 'Our unified Backbone infrastructure enables powerful synergies across every vertical'}
           />
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { value: 80, suffix: '%+', label: 'Code Reuse', sub: 'Shared services across verticals' },
-              { value: 56, suffix: '%', label: 'Time Savings', sub: 'Through Backbone migration' },
-              { value: 5.7, prefix: '$', suffix: 'M', label: 'IP Value', sub: 'Trade secrets & patents' },
-              { value: 200, suffix: '+', label: 'AI Prompts', sub: 'Companion Engine library' },
+              { value: 80, suffix: '%+', label: isFr ? 'Reutilisation code' : 'Code Reuse', sub: isFr ? 'Services partages entre verticales' : 'Shared services across verticals' },
+              { value: 56, suffix: '%', label: isFr ? 'Gain de temps' : 'Time Savings', sub: isFr ? 'Grace a la migration Backbone' : 'Through Backbone migration' },
+              { value: 5.7, prefix: '$', suffix: 'M', label: isFr ? 'Valeur PI' : 'IP Value', sub: isFr ? 'Secrets commerciaux et brevets' : 'Trade secrets & patents' },
+              { value: 200, suffix: '+', label: isFr ? 'Prompts IA' : 'AI Prompts', sub: isFr ? 'Bibliotheque Companion Engine' : 'Companion Engine library' },
             ].map((stat, i) => (
               <ScrollReveal key={stat.label} delay={i * 0.1}>
                 <div className="bg-gray-50 rounded-2xl p-6 text-center border border-gray-100">
@@ -270,3 +329,10 @@ export default function Verticals() {
     </main>
   );
 }
+
+
+
+
+
+
+

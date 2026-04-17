@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
 import SectionHeading from '@/components/public/SectionHeading';
@@ -9,6 +10,7 @@ import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
 import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -35,20 +37,66 @@ const verticals = [
 ];
 
 const flagships = [
-  { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform for 4,773 orgs', orgs: '4,773', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
-  { name: 'ABR Insights', vertical: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'ABR Insights — anti-racism learning management and coaching platform', orgs: '132', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, guided coaching' },
-  { name: 'CORA', vertical: 'Agrotech', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'CORA — Canadian agricultural data platform with farm management and supply chain intelligence', orgs: '80+', tam: '$8.6B', description: 'Farm management and supply-chain intelligence built on Canadian agricultural data — crop management, IoT integration, and market intelligence.' },
-  { name: '3CUO / DiasporaCore', vertical: 'Fintech', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800', alt: 'DiasporaCore — diaspora banking and international transfer infrastructure', orgs: '485', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
+  { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
+  { name: 'Zonga', vertical: 'Music & Creator Economy', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800', alt: 'Zonga — African music platform for artists, streaming, and creator royalties', tam: '$20B+', description: 'Africa-first music distribution and streaming platform for artists and creator payouts' },
+  { name: 'Flow', vertical: 'Commerce & Operations', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', alt: 'Flow — enterprise order-to-cash and supply chain management platform', tam: '$100B+', description: 'Commerce operations platform covering order-to-cash, inventory, and multi-channel workflows' },
+  { name: 'Agrimo', vertical: 'Agriculture & Supply Chain', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'Agrimo — agricultural field operations and supply chain management', tam: '$8B', description: 'Agricultural operations and supply-chain platform for tracking, quality, and traceability' },
 ];
 
 const intelligenceCapabilities = [
   { name: 'Natural Language Processing', metric: 'Domain-specific', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Digital language processing with connected data nodes', description: 'Context-aware assistance across legal, healthcare, and education' },
   { name: 'Predictive Analytics', metric: 'Purpose-built', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Predictive analytics dashboard with colorful data visualizations', description: 'Pension forecasting, crop yields, insurance risk scoring' },
-  { name: 'Anomaly Detection', metric: 'Real-time', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Real-time network monitoring console detecting anomalies', description: 'Fraud prevention, compliance monitoring, threat intelligence' },
+  { name: 'Anomaly Détéction', metric: 'Real-time', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Real-time network monitoring console détécting anomalies', description: 'Fraud prevention, compliance monitoring, threat intelligence' },
   { name: 'Computer Vision', metric: 'Multi-modal', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Computer vision system analyzing visual data with recognition overlays', description: 'Document processing, agricultural imaging, identity verification' },
 ];
 
-export default function Home() {
+const verticalDescriptionFr: Record<string, string> = {
+  Fintech: 'Banque, paiements, assurance',
+  Agrotech: 'Gestion agricole, chaine logistique',
+  Uniontech: 'Droits du travail, gestion syndicale',
+  Legaltech: 'Gestion des dossiers et outils juridiques',
+  EdTech: 'Apprentissage, formation, certification',
+  Entertainment: 'Streaming et plateformes de contenu',
+  Commerce: 'Opérations commerciales, devis et logistique',
+  Healthtech: 'Soins, bien-etre, cognition',
+  Insurtech: 'Arbitrage et soutien a la souscription',
+  Justice: 'Plaidoyer et formation DEI',
+};
+
+const flagshipDescriptionFr: Record<string, string> = {
+  UnionEyes: 'Gestion syndicale, prevision des pensions, suivi des griefs',
+  Zonga: 'Plateforme africaine de distribution et de streaming musical pour artistes et paiements de redevances.',
+  Flow: 'Plateforme d operations commerciales couvrant order-to-cash, inventaire et flux multicanaux.',
+  Agrimo: 'Plateforme agricole pour les operations terrain, la qualite et la tracabilite de la chaine logistique.',
+};
+
+const intelligenceFr: Record<string, { name: string; metric: string; description: string }> = {
+  'Natural Language Processing': {
+    name: 'Traitement du langage naturel',
+    metric: 'Specifique au domaine',
+    description: 'Assistance contextuelle en droit, sante et education',
+  },
+  'Predictive Analytics': {
+    name: 'Analytique predictive',
+    metric: 'Concu pour usage réel',
+    description: 'Prevision des pensions, rendements agricoles et notation du risque',
+  },
+  'Anomaly Détéction': {
+    name: 'Détéction des anomalies',
+    metric: 'Temps réel',
+    description: 'Prevention de la fraude, suivi de conformite et intelligence de menace',
+  },
+  'Computer Vision': {
+    name: 'Vision par ordinateur',
+    metric: 'Multimodale',
+    description: 'Traitement documentaire, imagerie agricole et verification d identite',
+  },
+};
+
+export default async function Home() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -67,27 +115,28 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              Trusted Technology for Social Impact
+              {isFr ? "Technologie de confiance pour l'impact social" : 'Trusted Technology for Social Impact'}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.05}>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-emerald/10 text-emerald mb-4 border border-emerald/20">
-              🌿 Pursuing B Corp Certification — People, Planet, Purpose
+              🌿 {isFr ? 'Démarché de certification B Corp - Personnes, Planète, Mission' : 'Pursuing B Corp Certification - People, Planet, Purpose'}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Building the Future<br />
-              <span className="gradient-text">One Vertical at a Time</span>
+              {isFr ? "Construire l'avenir" : 'Building the Future'}<br />
+              <span className="gradient-text">{isFr ? 'Un secteur à la fois' : 'One Vertical at a Time'}</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              {MARKETING_FACTS.productPlatforms} software products across {MARKETING_FACTS.verticalsLabel} industries - delivered through {MARKETING_FACTS.governedApplications} live tools for
-              healthcare, finance, agriculture, labor rights, and justice.
+              {isFr
+                ? `${MARKETING_FACTS.productPlatforms} produits logiciels dans ${MARKETING_FACTS.verticalsLabel} industries - livres via ${MARKETING_FACTS.governedApplications} outils en service pour la sante, la finance, l agriculture, les droits du travail et la justice.`
+                : `${MARKETING_FACTS.productPlatforms} software products across ${MARKETING_FACTS.verticalsLabel} industries - delivered through ${MARKETING_FACTS.governedApplications} live tools for healthcare, finance, agriculture, labor rights, and justice.`}
             </p>
           </ScrollReveal>
 
@@ -99,7 +148,7 @@ export default function Home() {
                 eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
-                Explore Our Portfolio
+                {isFr ? 'Explorer notre portefeuille' : 'Explore Our Portfolio'}
               </TrackedLink>
               <TrackedLink
                 href="/investors"
@@ -107,7 +156,7 @@ export default function Home() {
                 eventProps={{ source: 'home_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
               >
-                For Investors
+                {isFr ? 'Pour les investisseurs' : 'For Investors'}
               </TrackedLink>
             </div>
           </ScrollReveal>
@@ -127,10 +176,10 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: 'Products' },
-              { target: MARKETING_FACTS.governedApplications, suffix: '', label: 'Live Tools' },
-              { target: 10, suffix: '+', label: 'Industries' },
-              { target: 100, prefix: '$', suffix: 'B+', label: 'Total Market Size' },
+              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: isFr ? 'Produits' : 'Products' },
+              { target: MARKETING_FACTS.governedApplications, suffix: '', label: isFr ? 'Outils en service' : 'Live Tools' },
+              { target: 10, suffix: '+', label: isFr ? 'Industries' : 'Industries' },
+              { target: 100, prefix: '$', suffix: 'B+', label: isFr ? 'Marché total' : 'Total Market Size' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -155,19 +204,20 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <ScrollReveal direction="left">
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Our Mission
+                {isFr ? 'Notre mission' : 'Our Mission'}
               </span>
               <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                Infrastructure for <span className="text-electric">Social Impact</span> at Scale
+                {isFr ? 'Infrastructure pour ' : 'Infrastructure for '}<span className="text-electric">{isFr ? "l'impact social" : 'Social Impact'}</span>{isFr ? ' à grande échelle' : ' at Scale'}
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                We transform legacy platforms into modern, scalable software that serves 
-                communities across healthcare, legal systems, insurance, agriculture, and beyond. 
-                Our shared platform infrastructure powers innovation while maintaining ethical integrity 
-                — built to meet the rigorous social, environmental, and governance standards of B Corp certification.
+                {isFr
+                  ? "Nous transformons des systèmes existants en logiciels modernes et évolutifs, au service des communautés en santé, en droit, en assurance, en agriculture et au-delà. Notre infrastructure partagée accélère l'innovation tout en préservant une forte intégrité éthique, conformément aux normes sociales, environnementales et de gouvernance de la certification B Corp."
+                  : 'We transform legacy platforms into modern, scalable software that serves communities across healthcare, legal systems, insurance, agriculture, and beyond. Our shared platform infrastructure powers innovation while maintaining ethical integrity - built to meet the rigorous social, environmental, and governance standards of B Corp certification.'}
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {['Data-Driven', 'Human-Centered', 'Trusted Automation', 'B Corp Aligned'].map((item) => (
+                {(isFr
+                  ? ['Pilote par les données', "Centre sur l'humain", 'Automatisation de confiance', 'Aligne B Corp']
+                  : ['Data-Driven', 'Human-Centered', 'Trusted Automation', 'B Corp Aligned']).map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-electric" />
                     <span className="text-sm font-medium text-gray-700">{item}</span>
@@ -190,17 +240,17 @@ export default function Home() {
                   <div className="flex items-center gap-6 text-white">
                     <div>
                       <div className="text-2xl font-bold">$4M+</div>
-                      <div className="text-xs text-gray-300">Engineering Investment</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Investissement ingénierie' : 'Engineering Investment'}</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">56%</div>
-                      <div className="text-xs text-gray-300">Time Savings</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Gain de temps' : 'Time Savings'}</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">80%+</div>
-                      <div className="text-xs text-gray-300">Code Reuse</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Reutilisation de code' : 'Code Reuse'}</div>
                     </div>
                   </div>
                 </div>
@@ -216,9 +266,9 @@ export default function Home() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Flagship Products"
-            title="Production-Ready Platforms"
-            subtitle="Four flagship products solving critical problems with practical automation across diverse sectors"
+            badge={isFr ? 'Produits phares' : 'Flagship Products'}
+            title={isFr ? 'Plateformes prêtes pour la production' : 'Production-Ready Platforms'}
+            subtitle={isFr ? 'Quatre produits phares qui resolvent des problemes critiques avec une automatisation pragmatique' : 'Four flagship products solving critical problems with practical automation across diverse sectors'}
           />
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -227,17 +277,16 @@ export default function Home() {
                 <ImageCard src={platform.image} alt={platform.alt} aspect="video">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-electric/80 text-white">
-                      Flagship
+                      {isFr ? 'Phare' : 'Flagship'}
                     </span>
                     <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-white/20 text-white backdrop-blur-sm">
                       {platform.vertical}
                     </span>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-1">{platform.name}</h3>
-                  <p className="text-gray-300 text-sm mb-3">{platform.description}</p>
+                  <p className="text-gray-300 text-sm mb-3">{isFr ? (flagshipDescriptionFr[platform.name] ?? platform.description) : platform.description}</p>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-white font-semibold">{platform.orgs} orgs</span>
-                    <span className="text-gold font-semibold">{platform.tam} market size</span>
+                    <span className="text-gold font-semibold">{platform.tam} {isFr ? 'taille du marché' : 'market size'}</span>
                   </div>
                 </ImageCard>
               </ScrollReveal>
@@ -251,7 +300,7 @@ export default function Home() {
               eventProps={{ source: 'home_flagships' }}
               className="inline-flex items-center text-electric font-semibold hover:text-blue-700 text-lg"
             >
-              View {MARKETING_FACTS.productPlatforms} Product Platforms →
+              {isFr ? `Voir ${MARKETING_FACTS.productPlatforms} plateformes produit ->` : `View ${MARKETING_FACTS.productPlatforms} Product Platforms ->`}
             </TrackedLink>
           </ScrollReveal>
         </div>
@@ -262,9 +311,9 @@ export default function Home() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Intelligence Engine"
-            title="The Insights Behind Every Vertical"
-            subtitle="Purpose-built models and automation powering actionable insights across all platforms"
+            badge={isFr ? 'Moteur d intelligence' : 'Intelligence Engine'}
+            title={isFr ? 'Des insights pour chaque verticale' : 'The Insights Behind Every Vertical'}
+            subtitle={isFr ? 'Modeles et automatisations concus pour produire des actions utiles sur toutes les plateformes' : 'Purpose-built models and automation powering actionable insights across all platforms'}
             light
           />
 
@@ -282,10 +331,10 @@ export default function Home() {
                   <div className="absolute inset-0 bg-linear-to-t from-navy via-navy/60 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
                     <span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold mb-3">
-                      {cap.metric}
+                      {isFr ? (intelligenceFr[cap.name]?.metric ?? cap.metric) : cap.metric}
                     </span>
-                    <h3 className="text-lg font-bold text-white mb-1">{cap.name}</h3>
-                    <p className="text-sm text-gray-400">{cap.description}</p>
+                    <h3 className="text-lg font-bold text-white mb-1">{isFr ? (intelligenceFr[cap.name]?.name ?? cap.name) : cap.name}</h3>
+                    <p className="text-sm text-gray-400">{isFr ? (intelligenceFr[cap.name]?.description ?? cap.description) : cap.description}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -300,9 +349,9 @@ export default function Home() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Market Reach"
-            title="10+ Strategic Industries"
-            subtitle="Our portfolio spans diverse sectors, each powered by purpose-built technology"
+            badge={isFr ? 'Couverture de marché' : 'Market Reach'}
+            title={isFr ? '10+ industries stratégiques' : '10+ Strategic Industries'}
+            subtitle={isFr ? 'Notre portefeuille couvre des secteurs divers, chacun alimente par une technologie concue pour son domaine' : 'Our portfolio spans diverse sectors, each powered by purpose-built technology'}
           />
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -324,7 +373,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-4">
                       <h3 className="font-bold text-white text-lg mb-0.5">{vertical.name}</h3>
-                      <p className="text-xs text-gray-300">{vertical.description}</p>
+                      <p className="text-xs text-gray-300">{isFr ? (verticalDescriptionFr[vertical.name] ?? vertical.description) : vertical.description}</p>
                       <span className="inline-block mt-2 text-xs font-semibold text-gold">
                         {vertical.tam} TAM
                       </span>
@@ -344,17 +393,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-mesh opacity-40" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Intellectual Property"
-            title="Long-Term Advantage"
-            subtitle="Years of domain expertise encoded into proprietary models, data systems, and trade secrets"
+            badge={isFr ? 'Propriété intellectuelle' : 'Intellectual Property'}
+            title={isFr ? 'Avantage a long terme' : 'Long-Term Advantage'}
+            subtitle={isFr ? 'Des années d expertise metier encodees dans des modèles, systemes de données et secrets commerciaux proprietaires' : 'Years of domain expertise encoded into proprietary models, data systems, and trade secrets'}
             light
           />
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { value: '$5.7M–$7.5M', label: 'IP Portfolio Value', color: 'from-electric to-violet' },
-              { value: 'Proprietary', label: 'Decision Prompt Library', color: 'from-gold to-gold-light' },
-              { value: '12,000+', label: 'Database Entities', color: 'from-emerald to-cyan-400' },
+              { value: '$5.7M-$7.5M', label: isFr ? 'Valeur du portefeuille PI' : 'IP Portfolio Value', color: 'from-electric to-violet' },
+              { value: isFr ? 'Proprietaire' : 'Proprietary', label: isFr ? 'Bibliotheque de prompts de decision' : 'Decision Prompt Library', color: 'from-gold to-gold-light' },
+              { value: '12,000+', label: isFr ? 'Entités de base de données' : 'Database Entities', color: 'from-emerald to-cyan-400' },
             ].map((item, i) => (
               <ScrollReveal key={item.label} delay={i * 0.15}>
                 <div className="relative rounded-2xl p-8 text-center bg-white/5 border border-white/10 hover-lift">
@@ -379,3 +428,11 @@ export default function Home() {
     </main>
   );
 }
+
+
+
+
+
+
+
+

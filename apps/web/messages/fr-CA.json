@@ -5,7 +5,7 @@
     "learnMore": "En savoir plus",
     "getStarted": "Commencer",
     "contactUs": "Nous contacter",
-    "backToHome": "Retour à l'accueil"
+    "backToHome": "Retour à l\\'accueil"
   },
   "nav": {
     "home": "Accueil",
@@ -19,16 +19,21 @@
     "resources": "Ressources",
     "portfolio": "Portefeuille",
     "legal": "Juridique",
-    "signIn": "Connexion"
+    "signIn": "Connexion",
+    "requestDemo": "Demander une démo",
+    "apps": "Applications",
+    "console": "Console",
+    "partnerPortal": "Portail partenaires",
+    "language": "Langue"
   },
   "hero": {
-    "title": "L'apogée de l'IA dans l'impact social",
-    "subtitle": "Studio de capital-risque construisant 15 plateformes alimentées par l'IA dans plus de 10 secteurs — santé, finance, agriculture, droits du travail et justice.",
+    "title": "L'apogée de l\\'IA dans l\\'impact social",
+    "subtitle": "Studio de capital-risque construisant 15 plateformes alimentées par l\\'IA dans plus de 10 secteurs — santé, finance, agriculture, droits du travail et justice.",
     "cta": "Explorez notre plateforme"
   },
   "legal": {
     "privacy": "Politique de confidentialité",
-    "terms": "Conditions d'utilisation",
+    "terms": "Conditions d\\'utilisation",
     "ipGovernance": "Gouvernance de la PI",
     "cookiePolicy": "Politique de témoins",
     "dataProtection": "Protection des données"
@@ -38,3 +43,8 @@
     "madeIn": "Fabriqué au Canada"
   }
 }
+
+
+
+
+

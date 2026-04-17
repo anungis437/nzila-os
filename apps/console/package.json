@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "demo:seed": "tsx lib/demoSeed.ts",
     "clean": "rm -rf .next .turbo node_modules",
     "test:coverage": "vitest run --coverage"
   },

@@ -1,62 +1,109 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
 import SectionHeading from '@/components/public/SectionHeading';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
-  title: 'About Us',
-  description: 'Nzila Ventures is a company building ethical, human-centered technology across 10+ industries — powering social impact at scale.',
+  title: 'About Us — Nzila Ventures',
+  description: 'Technology with soul. We build generational AI-powered ventures across care, learning, and decision-making — rooted in Congolese heritage and Pan-African values.',
   openGraph: {
     title: 'About Nzila Ventures',
-    description: 'Company building ethical technology across healthcare, finance, agriculture, and justice.',
-    images: [{ url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Diverse team collaborating around laptops in a modern workspace — Nzila Ventures' }],
+    description: 'A venture studio building ethical, human-centered technology for generational impact across healthcare, education, and justice.',
+    images: [{ url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Nzila Ventures — Technology with soul' }],
   },
   alternates: { canonical: '/about' },
 };
 
 const values = [
   {
-    title: 'Human-Centered',
+    title: 'Intelligence with Memory',
     color: 'from-electric to-violet',
     description:
-      'Every solution we build prioritizes the people it serves — accessibility, dignity, and real-world impact above all.',
+      'AI that earns trust through comprehension, not just automation. Our systems learn and remember in service of care, learning, and decision-making.',
   },
   {
-    title: 'Ethical Integrity',
+    title: 'Consent by Design',
     color: 'from-gold to-gold-light',
     description:
-      'Unwavering ethical standards in IP management, data handling, automation governance, and platform stewardship.',
+      'Privacy is not a patch — it\'s a foundation. Users control their data, their story, and how systems remember them.',
   },
   {
-    title: 'Innovation-Driven',
+    title: 'Generational Span',
     color: 'from-violet to-coral',
     description:
-      'Continuous innovation through our shared platform — powering transformation across all 10+ industries.',
+      'We design for both the dementia patient and the child discovering how to think. Our ventures span the full arc of life.',
   },
   {
-    title: 'Impact-Focused',
+    title: 'Multilingual Equity',
     color: 'from-emerald to-cyan-400',
     description:
-      'Measurable outcomes: 56% time savings, 80%+ code reuse, and $4M+ in engineering investment across the portfolio.',
+      'Care doesn\'t pause for language. Built for Canada\'s clinics and for those without Wi-Fi. Prompts speak to volunteers, elders, and the forgotten.',
   },
   {
-    title: 'B Corp Committed',
+    title: 'Shared Ethical Core',
     color: 'from-emerald to-electric',
     description:
-      'We hold ourselves to B Corp standards — balancing purpose and profit, measuring social and environmental impact, and using business as a force for good.',
+      'Every venture draws from one foundation: CareAI systems, consent architecture, transparency layers, and studio-aligned orchestration.',
   },
 ];
 
 const timeline = [
-  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, engineered 12,000+ data orgs, created 200+ guided decision playbooks, and pioneered union and diaspora banking technology.' },
-  { year: '2023', title: 'Portfolio Consolidation', description: 'Analyzed $2M+ in legacy investments. Designed shared platform architecture. Expanded to 15 products across 10 industries.' },
-  { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure. Django + Next.js stack.' },
-  { year: '2025', title: 'Revenue Activation', description: 'Series A readiness. Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
+  { year: '2019–2024', title: 'Building Toward a Question', description: 'From early ventures to decision libraries, we built the pieces. But we saw fragmentation. Single products couldn\'t hold the whole story — care needs memory, learning needs consent, decisions need wisdom.' },
+  { year: 'January 2025', title: 'Nzila is Born', description: 'From the Kikongo concept of Nzila — "path" — we consolidate into a studio model. Eight ventures unified. One ethical core. A new name. A chosen way forward.' },
+  { year: '2025–2026', title: 'Walking the Path', description: 'Memora, NeuroBridge, MyLearning Companion, OptivaCare, and more. Each venture speaks with the others. Each voice carries memory, consent, and care for users across all ages.' },
+  { year: '2025+', title: 'Generational Impact', description: 'From Congo to Cloud — our dream: an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Not just an app. A new operating system for dignity.' },
 ];
 
-export default function About() {
+const valuesFr: Record<string, { title: string; description: string }> = {
+  'Intelligence with Memory': {
+    title: 'L\'intelligence avec mémoire',
+    description: 'L\'IA gagne la confiance par la compréhension, pas seulement par l\'automatisation. Nos systèmes apprennent et mémorisent au service des soins, de l\'apprentissage et de la prise de décision.',
+  },
+  'Consent by Design': {
+    title: 'Consentement par conception',
+    description: 'La confidentialité n\'est pas un correctif — c\'est une fondation. Les utilisateurs contrôlent leurs données, leur histoire et comment les systèmes les mémorisent.',
+  },
+  'Generational Span': {
+    title: 'Portée générationnelle',
+    description: 'Nous concevons pour le patient atteint de démence et pour l\'enfant qui découvre comment penser. Nos projets couvrent tout l\'arc de la vie.',
+  },
+  'Multilingual Equity': {
+    title: 'Équité multilingue',
+    description: 'Les soins ne s\'arrêtent pas pour la langue. Conçu pour les cliniques du Canada et pour ceux sans Wi-Fi. Les invites parlent aux bénévoles, aux aînés et aux oubliés.',
+  },
+  'Shared Ethical Core': {
+    title: 'Noyau éthique partagé',
+    description: 'Chaque projet puise dans une fondation : systèmes CareAI, architecture de consentement, couches de transparence et orchestration alignée sur le studio.',
+  },
+};
+
+const timelineFr: Record<string, { title: string; description: string }> = {
+  'Building Toward a Question': {
+    title: 'Construire vers une question',
+    description: 'Des premiers projets aux bibliothèques de décisions, nous avons construit les pièces. Mais nous avons vu la fragmentation. Les produits seuls ne pouvaient pas tenir toute l\'histoire — les soins ont besoin de mémoire, l\'apprentissage a besoin de consentement, les décisions ont besoin de sagesse.',
+  },
+  'Nzila is Born': {
+    title: 'Nzila naît',
+    description: 'Du concept kikongo de Nzila — « chemin » — nous consolidons en un modèle de studio. Huit projets unifiés. Un noyau éthique. Un nouveau nom. Une manière choisie d\'avancer.',
+  },
+  'Walking the Path': {
+    title: 'Marcher le chemin',
+    description: 'Memora, NeuroBridge, MyLearning Companion, OptivaCare, et plus. Chaque projet parle avec les autres. Chaque voix porte la mémoire, le consentement et le soin pour les utilisateurs de tous âges.',
+  },
+  'Generational Impact': {
+    title: 'Impact générationnel',
+    description: 'Du Congo au cloud — notre rêve : un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Pas seulement une application. Un nouveau système d\'exploitation pour la dignité.',
+  },
+};
+
+export default async function About() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -75,20 +122,20 @@ export default function About() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              About Nzila Ventures
+              {isFr ? 'Nzila — Le chemin' : 'Nzila — The Path'}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Building Trusted Software<br />
-              <span className="gradient-text">For Social Impact</span>
+              {isFr ? 'Technologie avec' : 'Technology with'}<br />
+              <span className="gradient-text">{isFr ? 'l\'âme' : 'Soul'}</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl">
-              A company transforming legacy platforms into
-              modern, scalable software solutions that serve communities worldwide — guided by
-              B Corp values of people, planet, and purpose.
+              {isFr
+                ? 'Du concept kikongo de Nzila — « chemin » — nous construisons une génération de technologie IA éthique et profondément humaine. Un studio qui avance du soin à la cognition, de l\'apprentissage à la prise de décision, en écoutant les générations.'
+                : 'From the Kikongo concept of Nzila — "path" — we build a generation of ethical, deeply human AI-powered technology. A studio advancing from care to cognition, from learning to decision-making, across all ages.'}
             </p>
           </ScrollReveal>
         </div>
@@ -103,16 +150,15 @@ export default function About() {
                 <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-electric to-violet" />
                 <div className="pl-8">
                   <span className="inline-block px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                    Mission
+                    {isFr ? 'Mission' : 'Mission'}
                   </span>
                   <h2 className="text-3xl md:text-4xl font-bold text-navy mb-6">
-                    Advancing Human-Centered Solutions
+                    {isFr ? 'Générationnel par conception' : 'Generational by Design'}
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    To advance human-centered solutions in care, cognition, learning, and equity by
-                    building and maintaining ethical technology platforms that serve real-world needs. We
-                    transform fragmented legacy systems into unified, scalable infrastructure that
-                    amplifies impact while respecting user dignity and data sovereignty.
+                    {isFr
+                      ? 'Construire une technologie IA gouvernée éthiquement et profondément humaine qui habilite les vies à travers les soins, l\'apprentissage et la prise de décision. Nzila n\'est pas une startup — c\'est un studio qui pose une question plus grande : qu\'est-ce que nos systèmes devraient mémoriser de nous ? Et quel avenir construisons-nous dans chaque interaction, chaque donnée, chaque ligne de code ?'
+                      : 'To build generational technology — AI-powered, ethically governed, deeply human — that empowers lives across care, learning, and decision-making. Nzila isn\'t a startup. It\'s a venture studio grounded in a higher question: What should our systems remember about us? And what future are we embedding into every interaction, dataset, and line of code?'}
                   </p>
                 </div>
               </div>
@@ -123,16 +169,15 @@ export default function About() {
                 <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-gold to-gold-light" />
                 <div className="pl-8">
                   <span className="inline-block px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/10 text-gold mb-4">
-                    Vision
+                    {isFr ? 'Vision' : 'Vision'}
                   </span>
                   <h2 className="text-3xl md:text-4xl font-bold text-navy mb-6">
-                    Technology for Human Flourishing
+                    {isFr ? 'Un écosystème de dignité' : 'An Ecosystem of Dignity'}
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
-                    A world where technology seamlessly supports human flourishing across healthcare,
-                    justice, commerce, and culture. Through our shared platform infrastructure, we envision
-                    interconnected platforms that reduce operational burden, increase accessibility, and
-                    create measurable improvements in people&apos;s lives.
+                    {isFr
+                      ? 'Du Congo au cloud — un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Weaving a new operating system for dignity — in health, learning, and human systems — with memory, care, and the soul of Nzila.'
+                      : 'From Congo to Cloud — an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Weaving a new operating system for dignity in health, learning, and human systems, with memory, care, and the soul of Nzila.'}
                   </p>
                 </div>
               </div>
@@ -145,9 +190,9 @@ export default function About() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Principles"
-            title="Our Core Values"
-            subtitle="The principles that guide every decision, every line of code, and every partnership"
+            badge={isFr ? 'Éthique' : 'Ethics'}
+            title={isFr ? 'Les fondations de Nzila' : 'The Foundations of Nzila'}
+            subtitle={isFr ? 'Comment nous rejetons la technologie extractive et construisons avec l\'âme' : 'How we reject extractive tech and build with soul'}
           />
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -155,8 +200,8 @@ export default function About() {
               <ScrollReveal key={value.title} delay={i * 0.1}>
                 <div className="bg-white rounded-2xl p-8 border border-gray-100 hover-lift">
                   <div className={`w-12 h-1.5 rounded-full bg-linear-to-r ${value.color} mb-6`} />
-                  <h3 className="text-xl font-bold text-navy mb-3">{value.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{value.description}</p>
+                  <h3 className="text-xl font-bold text-navy mb-3">{isFr ? (valuesFr[value.title]?.title ?? value.title) : value.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{isFr ? (valuesFr[value.title]?.description ?? value.description) : value.description}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -169,9 +214,9 @@ export default function About() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Journey"
-            title="From Vision to Execution"
-            subtitle="Five years of building, data curation, and practical innovation"
+            badge={isFr ? 'Chemin' : 'Journey'}
+            title={isFr ? 'Du Congo au cloud' : 'From Congo to Cloud'}
+            subtitle={isFr ? 'Comment Nzila a marché le sentier depuis une question jusqu\'à un studio d\'impact intégré' : 'How Nzila has walked the path from a question to an integrated studio of impact'}
             light
           />
 
@@ -187,9 +232,9 @@ export default function About() {
                     </div>
                     <div className="bg-white/5 rounded-2xl p-6 border border-white/10 flex-1 hover-lift">
                       <h3 className="text-xl font-bold text-white mb-2">
-                        {milestone.title} <span className="text-sm font-normal text-gray-400">• {milestone.year}</span>
+                        {isFr ? (timelineFr[milestone.title]?.title ?? milestone.title) : milestone.title} <span className="text-sm font-normal text-gray-400">• {milestone.year}</span>
                       </h3>
-                      <p className="text-gray-400">{milestone.description}</p>
+                      <p className="text-gray-400">{isFr ? (timelineFr[milestone.title]?.description ?? milestone.description) : milestone.description}</p>
                     </div>
                   </div>
                 </ScrollReveal>
@@ -205,14 +250,14 @@ export default function About() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: 15, label: 'Product Platforms' },
-              { target: 10, suffix: '+', label: 'Industries' },
-              { target: 4, prefix: '$', suffix: 'M+', label: 'Engineering Investment' },
-              { target: 12000, suffix: '+', label: 'Data Entities' },
+              { target: 8, label: isFr ? 'Ventures connectés' : 'Interconnected Ventures' },
+              { target: 3, label: isFr ? 'Domaines d\'impact' : 'Impact Domains' },
+              { target: 1, prefix: '∞', label: isFr ? 'Générations servies' : 'Generations Served' },
+              { target: 100, suffix: '%', label: isFr ? 'Noyau éthique partagé' : 'Shared Ethical Core' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  <AnimatedCounter target={stat.target} prefix={stat.prefix} suffix={stat.suffix} />
+                  {stat.prefix || ''}{stat.target !== 100 && stat.target !== 1 ? <AnimatedCounter target={stat.target} /> : stat.target === 1 ? '♾️' : '100'}{stat.suffix || ''}
                 </div>
                 <div className="text-gray-400 font-medium text-sm tracking-wider uppercase">{stat.label}</div>
               </div>
@@ -226,17 +271,18 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-bold text-navy mb-6">
-              Built with Intentionality, Ethics, and Impact
+              {isFr ? 'Nzila n\'est pas une startup' : 'Nzila is Not a Startup'}
             </h2>
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-              Every platform we build, every line of code we write, and every partnership we form is
-              guided by our commitment to ethical technology that truly serves humanity.
+              {isFr
+                ? 'C\'est un système. Nous tissons un nouveau système d\'exploitation pour la dignité — dans la santé, l\'apprentissage et les systèmes humains. Avec mémoire. Avec soin. Comme Nzila.'
+                : 'It\'s a system. We are weaving a new operating system for dignity — in health, learning, and human systems. With memory. With care. As Nzila.'}
             </p>
             <div className="inline-flex items-center gap-3 bg-emerald/5 border border-emerald/20 rounded-xl px-6 py-4 mb-10">
-              <span className="text-2xl">🌿</span>
+              <span className="text-2xl">🛤️</span>
               <div className="text-left">
-                <div className="text-sm font-bold text-navy">Pursuing B Corp Certification</div>
-                <div className="text-xs text-gray-500">Using business as a force for good — people, planet, and purpose.</div>
+                <div className="text-sm font-bold text-navy">{isFr ? 'Nzila signifie « chemin »' : 'Nzila Means "Path"'}</div>
+                <div className="text-xs text-gray-500">{isFr ? 'Une manière choisie d\'avancer. Avec intention, rythme et générations.' : 'A chosen way forward. With intention, rhythm, and generations.'}</div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -244,13 +290,13 @@ export default function About() {
                 href="/investors"
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg"
               >
-                For Investors
+                {isFr ? 'Notre thèse' : 'Our Thesis'}
               </Link>
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 bg-navy text-white font-bold rounded-xl hover:bg-navy-light transition-all text-lg"
               >
-                Get In Touch
+                {isFr ? 'Parlons' : 'Let\'s Talk'}
               </Link>
             </div>
           </ScrollReveal>
@@ -259,3 +305,11 @@ export default function About() {
     </main>
   );
 }
+
+
+
+
+
+
+
+

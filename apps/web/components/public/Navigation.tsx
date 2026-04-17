@@ -1,31 +1,41 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
 import TrackedLink from './TrackedLink';
+import { locales, type Locale } from '@/lib/locales';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
 const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 
 const navigation = [
-  { name: 'About', href: '/about' },
-  { name: 'Platform', href: '/platform' },
-  { name: 'Products', href: '/products' },
-  { name: 'Verticals', href: '/verticals' },
-  { name: 'Investors', href: '/investors' },
-  { name: 'Resources', href: '/resources' },
-];
+  { key: 'about', href: '/about' },
+  { key: 'platform', href: '/platform' },
+  { key: 'products', href: '/products' },
+  { key: 'verticals', href: '/verticals' },
+  { key: 'investors', href: '/investors' },
+  { key: 'resources', href: '/resources' },
+] as const;
 
 const appLinks = [
-  { name: 'Console', href: CONSOLE_URL },
-  { name: 'Partner Portal', href: PARTNERS_URL },
-];
+  { key: 'console', href: CONSOLE_URL },
+  { key: 'partnerPortal', href: PARTNERS_URL },
+] as const;
+
+const localeLabels: Record<Locale, string> = {
+  'en-CA': 'EN',
+  'fr-CA': 'FR',
+};
 
 export default function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
+  const locale = useLocale() as Locale;
+  const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
@@ -40,6 +50,15 @@ export default function Navigation() {
   if (isConsole) {
     return null;
   }
+
+  const setLocale = (nextLocale: Locale) => {
+    if (nextLocale === locale) {
+      return;
+    }
+
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+    router.refresh();
+  };
 
   return (
     <nav
@@ -72,7 +91,7 @@ export default function Navigation() {
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.name}
+                  key={item.key}
                   href={item.href}
                   className={`text-sm font-medium transition-colors relative ${
                     isActive
@@ -82,7 +101,7 @@ export default function Navigation() {
                       : 'text-white/80 hover:text-white'
                   }`}
                 >
-                  {item.name}
+                  {t(item.key)}
                   {isActive && (
                     <motion.div
                       layoutId="nav-indicator"
@@ -98,16 +117,16 @@ export default function Navigation() {
               eventProps={{ source: 'navigation_desktop' }}
               className="px-5 py-2.5 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-electric/25"
             >
-              Request Demo
+              {t('requestDemo')}
             </TrackedLink>
             {/* App-switcher divider */}
             <div className="w-px h-6 bg-gray-200" />
             {appLinks.map((app) => (
               <TrackedLink
-                key={app.name}
+                key={app.key}
                 href={app.href}
                 eventName="app_switch"
-                eventProps={{ app: app.name, source: 'navigation_desktop' }}
+                eventProps={{ app: app.key, source: 'navigation_desktop' }}
                 external
                 target="_blank"
                 rel="noopener noreferrer"
@@ -115,10 +134,39 @@ export default function Navigation() {
                   scrolled ? 'text-gray-500 hover:text-navy' : 'text-white/60 hover:text-white'
                 }`}
               >
-                {app.name}
+                {t(app.key)}
                 <ArrowTopRightOnSquareIcon className="h-3 w-3" />
               </TrackedLink>
             ))}
+            <div className="w-px h-6 bg-gray-200" />
+            <div
+              role="group"
+              aria-label="Language selector"
+              className={`inline-flex rounded-xl border p-0.5 ${
+                scrolled ? 'border-gray-200 bg-white' : 'border-white/40 bg-white/10'
+              }`}
+            >
+              {locales.map((option) => {
+                const selected = option === locale;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setLocale(option)}
+                    aria-pressed={selected}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                      selected
+                        ? 'bg-electric text-white'
+                        : scrolled
+                        ? 'text-gray-600 hover:text-navy'
+                        : 'text-white/80 hover:text-white'
+                    }`}
+                  >
+                    {localeLabels[option]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -157,7 +205,7 @@ export default function Navigation() {
                 const isActive = pathname === item.href;
                 return (
                   <Link
-                    key={item.name}
+                    key={item.key}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`block px-4 py-3 rounded-xl text-base font-medium ${
@@ -166,7 +214,7 @@ export default function Navigation() {
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    {item.name}
+                    {t(item.key)}
                   </Link>
                 );
               })}
@@ -177,26 +225,52 @@ export default function Navigation() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 bg-electric text-white rounded-xl text-base font-semibold text-center mt-2"
               >
-                Request Demo
+                {t('requestDemo')}
               </TrackedLink>
               <div className="pt-2 border-t border-gray-100 mt-2">
-                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Apps</p>
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('apps')}</p>
                 {appLinks.map((app) => (
                   <TrackedLink
-                    key={app.name}
+                    key={app.key}
                     href={app.href}
                     eventName="app_switch"
-                    eventProps={{ app: app.name, source: 'navigation_mobile' }}
+                    eventProps={{ app: app.key, source: 'navigation_mobile' }}
                     external
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50"
                   >
-                    {app.name}
+                    {t(app.key)}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </TrackedLink>
                 ))}
+              </div>
+              <div className="pt-2 border-t border-gray-100 mt-2">
+                <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('language')}</p>
+                <div className="px-4 grid grid-cols-2 gap-2">
+                  {locales.map((option) => {
+                    const selected = option === locale;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          setLocale(option);
+                          setMobileMenuOpen(false);
+                        }}
+                        aria-pressed={selected}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold border transition-colors ${
+                          selected
+                            ? 'bg-electric text-white border-electric'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {localeLabels[option]}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -205,3 +279,10 @@ export default function Navigation() {
     </nav>
   );
 }
+
+
+
+
+
+
+

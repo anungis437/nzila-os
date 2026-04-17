@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import TrackedLink from '@/components/public/TrackedLink';
 import { MARKETING_FACTS, platformCoverageLabel, portfolioHeadlineLabel } from '@/lib/marketing-facts';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Investors',
@@ -24,14 +26,14 @@ const keyMetrics = [
   { label: 'Live Tools', value: String(MARKETING_FACTS.governedApplications), color: 'text-violet' },
   { label: 'Industries', value: MARKETING_FACTS.verticalsLabel, color: 'text-violet' },
   { label: 'IP Portfolio Value', value: '$5.7M–$7.5M', color: 'text-emerald' },
-  { label: 'Database Entities', value: '12,000+', color: 'text-electric' },
+
 ];
 
 const flagships = [
-  { name: 'UnionEyes', vertical: 'Uniontech', tam: '$50B', orgs: '4,773', stage: 'Revenue-Ready', description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, analytics for 4,773 orgs.' },
-  { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', orgs: '485', stage: 'Revenue-Ready', description: 'Diaspora banking infrastructure — KYC/AML, international transfers, community lending across 485 financial orgs.' },
-  { name: 'ABR Insights', vertical: 'EdTech', tam: '$1.5B', orgs: '132', stage: 'Production', description: 'Anti-racism LMS, tribunal case database, and guided coaching — transforming DEI education with proprietary content.' },
-  { name: 'CORA', vertical: 'Agrotech', tam: '$8.6B', orgs: '80+', stage: 'Beta', description: 'Farm management, supply-chain tracking, and data-driven market intelligence built on Canadian agricultural data.' },
+  { name: 'UnionEyes', vertical: 'Uniontech', tam: '$50B', stage: 'Production', description: 'Comprehensive union operations platform — pension forecasting, grievance tracking, and analytics at enterprise scale.' },
+  { name: 'Zonga', vertical: 'Music & Creator Economy', tam: '$20B+', stage: 'Production', description: 'Africa-first music distribution and streaming platform with catalog workflows and transparent creator royalty payouts.' },
+  { name: 'Flow', vertical: 'Commerce & Operations', tam: '$100B+', stage: 'Production', description: 'Order-to-cash and commerce operations platform with inventory, production, and multi-channel execution flows.' },
+  { name: 'Agrimo', vertical: 'Agriculture & Supply Chain', tam: '$8B', stage: 'Production', description: 'Agricultural supply-chain and field operations platform with harvest tracking, quality workflows, and traceability.' },
 ];
 
 const useOfFunds = [
@@ -43,20 +45,32 @@ const useOfFunds = [
 ];
 
 const timeline = [
-  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, 12,000+ data orgs, proprietary decision library, pioneered union and diaspora banking tech.' },
+  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, a proprietary decision library, and pioneered union and diaspora banking technology.' },
   { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 products across 10 industries and 17 live tools. Shared platform architecture.' },
   { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure.' },
   { year: '2025', title: 'Series A Ready', description: 'Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
 
 const moats = [
-  { title: 'Proprietary Data', description: '12,000+ meticulously curated orgs across labor, finance, agriculture, and legal domains — impossible to replicate.' },
+  { title: 'Proprietary Data', description: 'A deeply curated proprietary data foundation across labor, finance, agriculture, and legal domains — difficult to replicate.' },
   { title: 'Proprietary Decision Systems', description: 'Purpose-built prompts and predictive models for social-impact verticals — proprietary and not available in off-the-shelf tools.' },
   { title: 'Multi-Vertical Network', description: 'Cross-pollination between 10+ verticals creates compounding defensibility and data flywheel effects.' },
   { title: 'First-Mover Advantage', description: 'Only platform company operating simultaneously across uniontech, diaspora banking, and agrotech.' },
 ];
 
-export default function InvestorsPage() {
+const keyMetricFr: Record<string, string> = {
+  'Total Market Size': 'Marché total',
+  Products: 'Produits',
+  'Live Tools': 'Outils en service',
+  Industries: 'Industries',
+  'IP Portfolio Value': 'Valeur portefeuille PI',
+
+};
+
+export default async function InvestorsPage() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -75,21 +89,22 @@ export default function InvestorsPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              Investment Opportunity
+              {isFr ? "Occasion d'investissement" : 'Investment Opportunity'}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              The Platform Powering<br />
-              <span className="gradient-text">$100B+ in Markets</span>
+              {isFr ? 'La plateforme qui alimente' : 'The Platform Powering'}<br />
+              <span className="gradient-text">{isFr ? '100B+ de marchés' : '$100B+ in Markets'}</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
-              {MARKETING_FACTS.productPlatforms} products. {MARKETING_FACTS.governedApplications} live tools. One shared platform. Nzila Ventures is the infrastructure 
-              layer for social-impact technology — healthcare, finance, labor, agriculture, and justice.
+              {isFr
+                ? `${MARKETING_FACTS.productPlatforms} produits. ${MARKETING_FACTS.governedApplications} outils en service. Une plateforme partagée. Nzila Ventures est la couche d infrastructure pour la technologie à impact social en sante, finance, travail, agriculture et justice.`
+                : `${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.governedApplications} live tools. One shared platform. Nzila Ventures is the infrastructure layer for social-impact technology - healthcare, finance, labor, agriculture, and justice.`}
             </p>
           </ScrollReveal>
 
@@ -101,7 +116,7 @@ export default function InvestorsPage() {
                 eventProps={{ source: 'investors_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30"
               >
-                Request Investment Deck
+                {isFr ? 'Demander le deck investisseur' : 'Request Investment Deck'}
               </TrackedLink>
               <TrackedLink
                 href="/portfolio"
@@ -109,7 +124,7 @@ export default function InvestorsPage() {
                 eventProps={{ source: 'investors_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg"
               >
-                View Full Portfolio
+                {isFr ? 'Voir le portefeuille complet' : 'View Full Portfolio'}
               </TrackedLink>
             </div>
           </ScrollReveal>
@@ -127,7 +142,7 @@ export default function InvestorsPage() {
                   {metric.value}
                 </div>
                 <div className="text-xs text-gray-400 font-medium tracking-wider uppercase">
-                  {metric.label}
+                  {isFr ? (keyMetricFr[metric.label] ?? metric.label) : metric.label}
                 </div>
               </div>
             ))}
@@ -141,9 +156,9 @@ export default function InvestorsPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <ScrollReveal direction="left">
               <SectionHeading
-                badge="Investment Thesis"
-                title="Why Nzila Ventures?"
-                subtitle="A unique, defensible position in the most underserved and highest-growth markets of the next decade."
+                badge={isFr ? "Thèse d'investissement" : 'Investment Thesis'}
+                title={isFr ? 'Pourquoi Nzila Ventures ?' : 'Why Nzila Ventures?'}
+                subtitle={isFr ? 'Une position unique et defensable dans les marchés les plus sous-desservis et a plus forte croissance de la prochaine decennie.' : 'A unique, defensible position in the most underserved and highest-growth markets of the next decade.'}
                 align="left"
               />
               <div className="space-y-6 mt-8">
@@ -173,17 +188,17 @@ export default function InvestorsPage() {
                   <div className="flex items-center gap-6 text-white">
                     <div>
                       <div className="text-2xl font-bold">$100B+</div>
-                      <div className="text-xs text-gray-300">Total Market Size</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Marché total' : 'Total Market Size'}</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">{portfolioHeadlineLabel()}</div>
-                      <div className="text-xs text-gray-300">Platforms / Apps</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Plateformes / Applications' : 'Platforms / Apps'}</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
                       <div className="text-2xl font-bold">4</div>
-                      <div className="text-xs text-gray-300">Flagships</div>
+                      <div className="text-xs text-gray-300">{isFr ? 'Produits phares' : 'Flagships'}</div>
                     </div>
                   </div>
                 </div>
@@ -197,9 +212,9 @@ export default function InvestorsPage() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Flagship Portfolio"
-            title="Four Revenue-Ready Platforms"
-            subtitle="Each flagship addresses a massive, underserved market with proprietary technology and data"
+            badge={isFr ? 'Portefeuille phare' : 'Flagship Portfolio'}
+            title={isFr ? 'Quatre plateformes prêtes pour les revenus' : 'Four Revenue-Ready Platforms'}
+            subtitle={isFr ? 'Chaque produit phare cible un marché majeur sous-desservi avec technologie et données proprietaires' : 'Each flagship addresses a massive, underserved market with proprietary technology and data'}
           />
 
           <div className="space-y-6">
@@ -222,11 +237,7 @@ export default function InvestorsPage() {
                     <div className="flex gap-6 md:gap-8 text-center shrink-0">
                       <div>
                         <div className="text-2xl font-bold text-gold">{platform.tam}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider">Market</div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-electric">{platform.orgs}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider">Entities</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wider">{isFr ? 'Marche' : 'Market'}</div>
                       </div>
                     </div>
                   </div>
@@ -242,9 +253,9 @@ export default function InvestorsPage() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Journey"
-            title="From Vision to Execution"
-            subtitle="Five years of relentless building, data curation, and product innovation"
+            badge={isFr ? 'Parcours' : 'Journey'}
+            title={isFr ? "De la vision a l'exécution" : 'From Vision to Execution'}
+            subtitle={isFr ? 'Cinq années de construction, curation de données et innovation produit' : 'Five years of relentless building, data curation, and product innovation'}
             light
           />
 
@@ -278,9 +289,9 @@ export default function InvestorsPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Capital Allocation"
-            title="Proposed Use of Funds"
-            subtitle="Strategic deployment focused on engineering leverage and go-to-market execution"
+            badge={isFr ? 'Allocation du capital' : 'Capital Allocation'}
+            title={isFr ? 'Utilisation proposee des fonds' : 'Proposed Use of Funds'}
+            subtitle={isFr ? "Deploiement stratégique axe sur le levier ingénierie et l'exécution go-to-market" : 'Strategic deployment focused on engineering leverage and go-to-market execution'}
           />
 
           <div className="max-w-2xl mx-auto">
@@ -324,27 +335,28 @@ export default function InvestorsPage() {
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              Series A Ready
+              {isFr ? 'Prêt pour la Série A' : 'Series A Ready'}
             </span>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Join the Next Wave of<br />Social-Impact Technology
+              {isFr ? 'Rejoignez la prochaine vague de' : 'Join the Next Wave of'}<br />{isFr ? 'technologie à impact social' : 'Social-Impact Technology'}
             </h2>
             <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-              We are actively seeking strategic investors and partners who share our vision 
-              of building ethical, impactful technology that serves billions.
+              {isFr
+                ? 'Nous recherchons activement des investisseurs et partenaires stratégiques qui partagent notre vision de construire une technologie éthique et impactante au service de milliards de personnes.'
+                : 'We are actively seeking strategic investors and partners who share our vision of building ethical, impactful technology that serves billions.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30"
               >
-                Request Investment Deck
+                {isFr ? 'Demander le deck investisseur' : 'Request Investment Deck'}
               </Link>
               <Link
                 href="/about"
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg"
               >
-                Learn About Our Team
+                {isFr ? 'Decouvrir notre équipe' : 'Learn About Our Team'}
               </Link>
             </div>
           </ScrollReveal>
@@ -353,3 +365,12 @@ export default function InvestorsPage() {
     </main>
   );
 }
+
+
+
+
+
+
+
+
+

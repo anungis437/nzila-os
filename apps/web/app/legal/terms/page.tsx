@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
@@ -7,7 +9,67 @@ export const metadata: Metadata = {
   alternates: { canonical: '/legal/terms' },
 };
 
-export default function TermsOfService() {
+export default async function TermsOfService() {
+  const copyByLocale: Record<Locale, {
+    legal: string
+    title: string
+    lastUpdatedLabel: string
+    sections: Array<{ title: string; body?: string; bullets?: string[] }>
+    contactLabel: string
+    privacy: string
+    ipGovernance: string
+    backHome: string
+  }> = {
+    'en-CA': {
+      legal: 'Legal',
+      title: 'Terms of Service',
+      lastUpdatedLabel: 'Last updated',
+      sections: [
+        { title: '1. Acceptance of Terms', body: 'By accessing or using any website, platform, or service operated by Nzila Ventures Inc. ("Nzila," "we," "our," or "us"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.' },
+        { title: '2. Description of Services', body: 'Nzila Ventures operates a multi-vertical venture studio platform providing AI-powered SaaS products across healthcare, finance, agriculture, legal, labor, cybersecurity, education, and social justice sectors. Services include, but are not limited to, the Nzila OS console, partner portals, and public-facing information and investor resources.' },
+        { title: '3. Eligibility', body: 'You must be at least 16 years of age to use our services. By using the platform, you represent that you have the legal capacity to enter into a binding agreement. If you are using the platform on behalf of an organization, you represent that you have authority to bind that organization to these terms.' },
+        { title: '4. User Accounts', bullets: ['You are responsible for maintaining the confidentiality of your account credentials', 'You are responsible for all activity that occurs under your account', 'You must notify us immediately of any unauthorized use of your account', 'We reserve the right to suspend or terminate accounts that violate these terms'] },
+        { title: '5. Acceptable Use', bullets: ['Use the platform for any unlawful, harmful, or fraudulent purpose', 'Reverse-engineer, decompile, or attempt to extract source code from our services', 'Interfere with or disrupt the integrity or performance of our systems', 'Transmit malware, viruses, or any other malicious code', 'Scrape, crawl, or harvest data from our platforms without explicit written consent', 'Use our branding, trademarks, or intellectual property without authorization', 'Impersonate any person or entity, or falsely represent your affiliation with any person or entity'] },
+        { title: '6. Intellectual Property', body: 'All content, software, technology, designs, trademarks, and other materials on our platforms are the exclusive property of Nzila Ventures Inc. or its licensors. Nothing in these Terms grants you any right to use Nzila intellectual property without prior written permission.' },
+        { title: '7. Third-Party Services', body: 'Our platform may integrate with or link to third-party services. We are not responsible for the content, privacy practices, or terms of such third parties. Your use of third-party services is at your own risk and subject to their respective terms.' },
+        { title: '8. Disclaimers', body: 'Our services are provided "as is" and "as available" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.' },
+        { title: '9. Limitation of Liability', body: 'To the fullest extent permitted by applicable law, Nzila Ventures shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use our services.' },
+        { title: '10. Governing Law', body: 'These Terms shall be governed by and construed in accordance with the laws of the Province of Ontario, Canada. Any disputes shall be resolved in the courts of Ontario.' },
+        { title: '11. Changes to Terms', body: 'We reserve the right to modify these Terms at any time. Material changes will be communicated via email or prominent notice on our platform. Continued use after the effective date constitutes acceptance of the revised Terms.' },
+        { title: '12. Contact', body: 'For questions about these Terms, please contact:' },
+      ],
+      contactLabel: 'Legal Department',
+      privacy: 'Privacy Policy',
+      ipGovernance: 'IP Governance',
+      backHome: 'Back to Home',
+    },
+    'fr-CA': {
+      legal: 'Juridique',
+      title: "Conditions d'utilisation",
+      lastUpdatedLabel: 'Dernière mise à jour',
+      sections: [
+        { title: '1. Acceptation des conditions', body: "En accedant a un site, une plateforme ou un service exploite par Nzila Ventures Inc., vous acceptez d etre lie par les presentes conditions d'utilisation." },
+        { title: '2. Description des services', body: 'Nzila Ventures exploite une plateforme multi-verticale proposant des produits SaaS alimentes par l IA dans les secteurs de la sante, de la finance, de l agriculture, du juridique, du travail, de la cybers sécurité, de l education et de la justice sociale.' },
+        { title: '3. Admissibilite', body: 'Vous devez avoir au moins 16 ans pour utiliser nos services et disposer de la capacite legale de conclure un accord contraignant.' },
+        { title: '4. Comptes utilisateur', bullets: ['Vous étés responsable de la confidentialité de vos identifiants', 'Vous étés responsable de toute activite sur votre compte', 'Vous devez nous signaler immediatement toute utilisation non autorisee', 'Nous pouvons suspendre ou resilier les comptes qui violent ces conditions'] },
+        { title: '5. Utilisation acceptable', bullets: ['Utiliser la plateforme a des fins illicites, nuisibles ou frauduleuses', 'Retro-ingénierie ou tentative d extraction du code source', 'Perturber l integrite ou la performance de nos systemes', 'Transmettre des logiciels malveillants ou des virus', 'Aspirer ou collecter des données sans consentement ecrit', 'Utiliser notre marque ou notre propriété intellectuelle sans autorisation', 'Usurper l identite d une personne ou d une entite'] },
+        { title: '6. Propriété intellectuelle', body: 'Tout contenu, logiciel, technologie, design et marque de nos plateformes est la propriété exclusive de Nzila Ventures Inc. ou de ses conc edants.' },
+        { title: '7. Services tiers', body: 'Notre plateforme peut integrer des services tiers. Nous ne sommes pas responsables de leur contenu, politique de confidentialité ou conditions.' },
+        { title: '8. Exclusions de garantie', body: 'Nos services sont fournis tels quels et selon disponibilité, sans garantie expresse ou implicite.' },
+        { title: '9. Limitation de responsabilite', body: 'Dans les limites permises par la loi, Nzila Ventures ne pourra etre tenue responsable des dommages indirects ou consequents lies a l utilisation des services.' },
+        { title: '10. Droit applicable', body: 'Ces conditions sont regies par les lois de la province de l Ontario, Canada, et tout litige releve des tribunaux de l Ontario.' },
+        { title: '11. Modifications', body: 'Nous pouvons modifier ces conditions a tout moment. Les changements importants seront communiques par courriel ou avis visible sur la plateforme.' },
+        { title: '12. Contact', body: 'Pour toute question sur ces conditions, veuillez contacter :' },
+      ],
+      contactLabel: 'Service juridique',
+      privacy: 'Politique de confidentialité',
+      ipGovernance: 'Gouvernance PI',
+      backHome: "Retour à l'accueil",
+    },
+  };
+
+  const locale = (await getLocale()) as Locale;
+  const copy = copyByLocale[locale] ?? copyByLocale['en-CA'];
   const lastUpdated = 'February 19, 2026';
 
   return (
@@ -15,121 +77,56 @@ export default function TermsOfService() {
       {/* Header */}
       <div className="bg-navy text-white py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-3">Legal</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
-          <p className="text-gray-400 text-sm">Last updated: {lastUpdated}</p>
+          <p className="text-electric text-sm font-semibold tracking-widest uppercase mb-3">{copy.legal}</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{copy.title}</h1>
+          <p className="text-gray-400 text-sm">{copy.lastUpdatedLabel}: {lastUpdated}</p>
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
-          <p className="text-gray-600 leading-relaxed">
-            By accessing or using any website, platform, or service operated by Nzila Ventures Inc. (&ldquo;Nzila,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Description of Services</h2>
-          <p className="text-gray-600 leading-relaxed">
-            Nzila Ventures operates a multi-vertical venture studio platform providing AI-powered SaaS products across healthcare, finance, agriculture, legal, labor, cybersecurity, education, and social justice sectors. Services include, but are not limited to, the Nzila OS console, partner portals, and public-facing information and investor resources.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Eligibility</h2>
-          <p className="text-gray-600 leading-relaxed">
-            You must be at least 16 years of age to use our services. By using the platform, you represent that you have the legal capacity to enter into a binding agreement. If you are using the platform on behalf of an organization, you represent that you have authority to bind that organization to these terms.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. User Accounts</h2>
-          <ul className="list-disc pl-6 text-gray-600 space-y-2">
-            <li>You are responsible for maintaining the confidentiality of your account credentials</li>
-            <li>You are responsible for all activity that occurs under your account</li>
-            <li>You must notify us immediately of any unauthorized use of your account</li>
-            <li>We reserve the right to suspend or terminate accounts that violate these terms</li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Acceptable Use</h2>
-          <p className="text-gray-600 leading-relaxed mb-4">You agree not to:</p>
-          <ul className="list-disc pl-6 text-gray-600 space-y-2">
-            <li>Use the platform for any unlawful, harmful, or fraudulent purpose</li>
-            <li>Reverse-engineer, decompile, or attempt to extract source code from our services</li>
-            <li>Interfere with or disrupt the integrity or performance of our systems</li>
-            <li>Transmit malware, viruses, or any other malicious code</li>
-            <li>Scrape, crawl, or harvest data from our platforms without explicit written consent</li>
-            <li>Use our branding, trademarks, or intellectual property without authorization</li>
-            <li>Impersonate any person or entity, or falsely represent your affiliation with any person or entity</li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Intellectual Property</h2>
-          <p className="text-gray-600 leading-relaxed">
-            All content, software, technology, designs, trademarks, and other materials on our platforms are the exclusive property of Nzila Ventures Inc. or its licensors. Nothing in these Terms grants you any right to use Nzila&apos;s intellectual property without prior written permission. See our{' '}
-            <Link href="/legal/ip-governance" className="text-electric underline">IP Governance Policy</Link>{' '}
-            for full details.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Third-Party Services</h2>
-          <p className="text-gray-600 leading-relaxed">
-            Our platform may integrate with or link to third-party services. We are not responsible for the content, privacy practices, or terms of such third parties. Your use of third-party services is at your own risk and subject to their respective terms.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Disclaimers</h2>
-          <p className="text-gray-600 leading-relaxed">
-            Our services are provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that our services will be uninterrupted, error-free, or secure.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Limitation of Liability</h2>
-          <p className="text-gray-600 leading-relaxed">
-            To the fullest extent permitted by applicable law, Nzila Ventures shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use our services, even if advised of the possibility of such damages. Our total liability to you shall not exceed the amount you paid to us in the twelve months preceding the claim.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Governing Law</h2>
-          <p className="text-gray-600 leading-relaxed">
-            These Terms shall be governed by and construed in accordance with the laws of the Province of Ontario, Canada, without regard to its conflict of law principles. Any disputes shall be resolved in the courts of Ontario, and you consent to the exclusive jurisdiction of those courts.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Changes to Terms</h2>
-          <p className="text-gray-600 leading-relaxed">
-            We reserve the right to modify these Terms at any time. Material changes will be communicated via email or prominent notice on our platform. Continued use after the effective date constitutes acceptance of the revised Terms.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Contact</h2>
-          <p className="text-gray-600 leading-relaxed">For questions about these Terms, please contact:</p>
-          <div className="mt-4 p-6 bg-gray-50 rounded-xl text-gray-700">
-            <p className="font-semibold">Nzila Ventures Inc.</p>
-            <p>Legal Department</p>
-            <p>Email: <a href="mailto:legal@nzilaventures.com" className="text-electric underline">legal@nzilaventures.com</a></p>
-          </div>
-        </section>
+        {copy.sections.map((section) => (
+          <section key={section.title} className="mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{section.title}</h2>
+            {section.body ? <p className="text-gray-600 leading-relaxed">{section.body}</p> : null}
+            {section.bullets ? (
+              <ul className="list-disc pl-6 text-gray-600 space-y-2">
+                {section.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
+              </ul>
+            ) : null}
+            {section.title.startsWith('12.') ? (
+              <div className="mt-4 p-6 bg-gray-50 rounded-xl text-gray-700">
+                <p className="font-semibold">Nzila Ventures Inc.</p>
+                <p>{copy.contactLabel}</p>
+                <p>Email: <a href="mailto:legal@nzilaventures.com" className="text-electric underline">legal@nzilaventures.com</a></p>
+              </div>
+            ) : null}
+            {section.title.startsWith('6.') ? (
+              <p className="text-gray-600 leading-relaxed mt-3">
+                <Link href="/legal/ip-governance" className="text-electric underline">{copy.ipGovernance}</Link>
+              </p>
+            ) : null}
+          </section>
+        ))}
 
         <div className="pt-8 border-t border-gray-200 flex flex-wrap gap-4 text-sm text-gray-500">
-          <Link href="/legal/privacy" className="hover:text-electric transition-colors">Privacy Policy</Link>
+          <Link href="/legal/privacy" className="hover:text-electric transition-colors">{copy.privacy}</Link>
           <span>·</span>
-          <Link href="/legal/ip-governance" className="hover:text-electric transition-colors">IP Governance</Link>
+          <Link href="/legal/ip-governance" className="hover:text-electric transition-colors">{copy.ipGovernance}</Link>
           <span>·</span>
-          <Link href="/" className="hover:text-electric transition-colors">Back to Home</Link>
+          <Link href="/" className="hover:text-electric transition-colors">{copy.backHome}</Link>
         </div>
       </div>
     </main>
   );
 }
+
+
+
+
+
+
+
+

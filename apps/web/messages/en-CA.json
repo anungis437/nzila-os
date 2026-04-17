@@ -19,7 +19,12 @@
     "resources": "Resources",
     "portfolio": "Portfolio",
     "legal": "Legal",
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "requestDemo": "Request Demo",
+    "apps": "Apps",
+    "console": "Console",
+    "partnerPortal": "Partner Portal",
+    "language": "Language"
   },
   "hero": {
     "title": "The APEX of AI in Social Impact",

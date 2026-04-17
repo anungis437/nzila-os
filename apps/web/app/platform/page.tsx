@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import TrackedLink from '@/components/public/TrackedLink';
 import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Platform',
@@ -65,7 +67,45 @@ const layers = [
   { name: 'Infrastructure', tech: 'Azure · Docker · Terraform · GitHub Actions', color: 'bg-coral' },
 ];
 
-export default function PlatformPage() {
+const capabilityFr: Record<string, { name: string; description: string }> = {
+  'Shared Platform Infrastructure': {
+    name: 'Infrastructure de plateforme partagée',
+    description: 'Authentification, bases de données, CI/CD et observabilite partagées sur 15 produits et 17 outils en service.',
+  },
+  'Multi-Org Architecture': {
+    name: 'Architecture multi-organisation',
+    description: 'Isolee mais unifiee - chaque verticale fonctionne sur des primitives partagées avec separation par organisation.',
+  },
+  'Security & Compliance': {
+    name: 'Securite et conformite',
+    description: 'Patterns alignes SOC 2, identite basee Entra ID et contrôle d accès par roles sur toutes les applications.',
+  },
+  'Analytics Pipeline': {
+    name: 'Pipeline analytique',
+    description: 'Analytique automatisee du portefeuille, suivi de migration et tableaux executifs.',
+  },
+  'Azure Native': {
+    name: 'Natif Azure',
+    description: 'Container Apps, PostgreSQL et services Azure pour des charges de production securisees.',
+  },
+  'Automation Engine': {
+    name: 'Moteur d automatisation',
+    description: 'Validation Python, orchestration de migration et automatisation de l intelligence d affaires.',
+  },
+};
+
+const layerFr: Record<string, string> = {
+  Frontend: 'Interface',
+  'API Layer': 'Couche API',
+  'Intelligence Layer': 'Couche intelligence',
+  Data: 'Données',
+  Infrastructure: 'Infrastructure',
+};
+
+export default async function PlatformPage() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -84,18 +124,19 @@ export default function PlatformPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-blue-300 mb-6">
-              Infrastructure
+              {isFr ? 'Infrastructure' : 'Infrastructure'}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              The Nzila <span className="gradient-text">Shared Platform</span>
+              {isFr ? 'La ' : 'The Nzila '}<span className="gradient-text">{isFr ? 'plateforme partagée Nzila' : 'Shared Platform'}</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              A unified infrastructure layer that powers social impact technology across
-              healthcare, finance, agriculture, labor rights, and justice.
+              {isFr
+                ? 'Une couche d infrastructure unifiee qui alimente la technologie à impact social en sante, finance, agriculture, droits du travail et justice.'
+                : 'A unified infrastructure layer that powers social impact technology across healthcare, finance, agriculture, labor rights, and justice.'}
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
@@ -105,7 +146,7 @@ export default function PlatformPage() {
               eventProps={{ source: 'platform_hero' }}
               className="inline-flex items-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"
             >
-              View Full Portfolio →
+              {isFr ? 'Voir le portefeuille complet ->' : 'View Full Portfolio ->'}
             </TrackedLink>
           </ScrollReveal>
         </div>
@@ -115,9 +156,9 @@ export default function PlatformPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Capabilities"
-            title="Platform Capabilities"
-            subtitle="Enterprise-grade building blocks powering every industry"
+            badge={isFr ? 'Capacites' : 'Capabilities'}
+            title={isFr ? 'Capacites de la plateforme' : 'Platform Capabilities'}
+            subtitle={isFr ? 'Blocs de niveau entreprise qui alimentent chaque industrie' : 'Enterprise-grade building blocks powering every industry'}
           />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -133,10 +174,10 @@ export default function PlatformPage() {
                       sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-navy/60 to-transparent" />
-                    <h3 className="absolute bottom-3 left-4 text-lg font-bold text-white">{cap.name}</h3>
+                    <h3 className="absolute bottom-3 left-4 text-lg font-bold text-white">{isFr ? (capabilityFr[cap.name]?.name ?? cap.name) : cap.name}</h3>
                   </div>
                   <div className="p-5 flex-1">
-                    <p className="text-sm text-gray-600">{cap.description}</p>
+                    <p className="text-sm text-gray-600">{isFr ? (capabilityFr[cap.name]?.description ?? cap.description) : cap.description}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -150,9 +191,9 @@ export default function PlatformPage() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Architecture"
-            title="Full-Stack Layers"
-            subtitle="Every layer purpose-built for multi-vertical workloads"
+            badge={isFr ? 'Architecture' : 'Architecture'}
+            title={isFr ? 'Couches full-stack' : 'Full-Stack Layers'}
+            subtitle={isFr ? 'Chaque couche est concue pour des charges multi-verticales' : 'Every layer purpose-built for multi-vertical workloads'}
             light
           />
 
@@ -162,7 +203,7 @@ export default function PlatformPage() {
                 <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-5 backdrop-blur">
                   <div className={`w-2 h-12 ${layer.color} rounded-full shrink-0`} />
                   <div className="flex-1">
-                    <h3 className="text-white font-bold">{layer.name}</h3>
+                    <h3 className="text-white font-bold">{isFr ? (layerFr[layer.name] ?? layer.name) : layer.name}</h3>
                     <p className="text-gray-400 text-sm">{layer.tech}</p>
                   </div>
                 </div>
@@ -176,9 +217,9 @@ export default function PlatformPage() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Stack"
-            title="Technology Partners"
-            subtitle="Battle-tested tools powering production workloads"
+            badge={isFr ? 'Stack' : 'Stack'}
+            title={isFr ? 'Partenaires technologiques' : 'Technology Partners'}
+            subtitle={isFr ? 'Outils eprouves qui alimentent des charges de production' : 'Battle-tested tools powering production workloads'}
           />
           <TechStackBar />
         </div>
@@ -189,3 +230,10 @@ export default function PlatformPage() {
     </main>
   );
 }
+
+
+
+
+
+
+

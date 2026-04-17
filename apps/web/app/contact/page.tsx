@@ -2,10 +2,156 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import { trackEvent } from '@/lib/telemetry';
+import type { Locale } from '@/lib/locales';
+
+const contactCopy: Record<Locale, {
+  connect: string
+  heroTitle: string
+  heroSubtitle: string
+  sendMessage: string
+  responseTime: string
+  success: string
+  fullName: string
+  fullNamePlaceholder: string
+  emailAddress: string
+  emailPlaceholder: string
+  company: string
+  companyPlaceholder: string
+  industry: string
+  selectVertical: string
+  message: string
+  messagePlaceholder: string
+  website: string
+  sending: string
+  send: string
+  contactInfo: string
+  contactBlurb: string
+  inquiries: string
+  inquiriesBlurb: string
+  partnerPortal: string
+  buildingWithUs: string
+  buildingSubtitle: string
+  teamPortalLogin: string
+  requestPartnerAccess: string
+  notPartnerYet: string
+  applyProgram: string
+  onboarding: string
+  genericError: string
+  networkError: string
+  verticals: string[]
+  sidebarItems: Array<{ icon: string; title: string; value: string; href: string; sub: string }>
+  inquiriesList: string[]
+  features: Array<{ icon: string; title: string; description: string }>
+}> = {
+  'en-CA': {
+    connect: 'Connect',
+    heroTitle: 'Get In Touch',
+    heroSubtitle: "Let\'s discuss how Nzila Ventures can accelerate your organization\'s AI transformation.",
+    sendMessage: 'Send Us a Message',
+    responseTime: "We\'ll get back to you within 24-48 hours.",
+    success: 'Thank you! Your message has been sent successfully.',
+    fullName: 'Full Name *',
+    fullNamePlaceholder: 'John Doe',
+    emailAddress: 'Email Address *',
+    emailPlaceholder: 'john@example.com',
+    company: 'Company / Organization',
+    companyPlaceholder: 'Acme Inc.',
+    industry: 'Industry / Vertical',
+    selectVertical: 'Select a vertical...',
+    message: 'Message *',
+    messagePlaceholder: 'Tell us about your needs...',
+    website: 'Website',
+    sending: 'Sending...',
+    send: 'Send Message',
+    contactInfo: 'Contact Information',
+    contactBlurb: "Reach out through any channel — we\'re here to help transform your vision.",
+    inquiries: 'Business Inquiries',
+    inquiriesBlurb: 'For partnerships, investment discussions, or platform collaborations:',
+    partnerPortal: 'Partner Portal',
+    buildingWithUs: 'Already Building With Us?',
+    buildingSubtitle: 'Access your dedicated dashboard, manage deployments, and collaborate with the Nzila Ventures engineering team — all in one place.',
+    teamPortalLogin: 'Team Portal Login ->',
+    requestPartnerAccess: 'Request Partner Access',
+    notPartnerYet: 'Not a partner yet?',
+    applyProgram: 'Apply to our partnership program',
+    onboarding: '— we onboard qualified teams within 48 hours.',
+    genericError: 'Something went wrong',
+    networkError: 'Network error - please try again',
+    verticals: ['Healthtech', 'Uniontech', 'Insurtech', 'Legaltech', 'Fintech', 'Trade & Commerce', 'Justice & Equity', 'Entertainment', 'Agrotech', 'EdTech', 'Other'],
+    sidebarItems: [
+      { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'We respond within 24-48 hours' },
+      { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
+      { icon: '🌍', title: 'Office', value: 'Remote-First · Global Opérations', href: '', sub: 'Teams across multiple time zones' },
+    ],
+    inquiriesList: ['Platform intégration opportunities', 'Vertical-specific solutions', 'Strategic partnerships', 'Investment discussions'],
+    features: [
+      { icon: '📊', title: 'Performance Dashboard', description: 'Real-time metrics across all your deployed verticals - uptime, API calls, revenue attribution, and AI model accuracy.' },
+      { icon: '🔧', title: 'Deployment Management', description: 'One-click staging -> production promotion, rollback controls, and environment configuration for every platform.' },
+      { icon: '🤝', title: 'Shared Roadmap', description: 'Collaborative backlog with your dedicated Nzila engineering pod. Vote on features, track sprints, and review release notes.' },
+      { icon: '🔐', title: 'SSO & Team Access', description: 'Enterprise single sign-on with role-based permissions. Manage team members, API keys, and audit logs from one console.' },
+      { icon: '💬', title: 'Priority Support', description: 'Direct Slack channel with your engineering pod, 4-hour SLA for critical issues, and monthly architecture reviews.' },
+      { icon: '📈', title: 'AI & Analytics Lab', description: 'Experiment with custom AI models, run A/B tests on new features, and access detailed analytics on user engagement.' },
+    ],
+  },
+  'fr-CA': {
+    connect: 'Connexion',
+    heroTitle: 'Entrons en contact',
+    heroSubtitle: 'Discutons de la façon dont Nzila Ventures peut accélérer la transformation IA de votre organisation.',
+    sendMessage: 'Envoyez-nous un message',
+    responseTime: 'Nous vous répondrons sous 24 a 48 heures.',
+    success: 'Merci ! Votre message a été envoye avec succes.',
+    fullName: 'Nom complet *',
+    fullNamePlaceholder: 'Jean Dupont',
+    emailAddress: 'Adresse courriel *',
+    emailPlaceholder: 'jean@exemple.com',
+    company: 'Entreprise / Organisation',
+    companyPlaceholder: 'Acme Inc.',
+    industry: 'Secteur / Verticale',
+    selectVertical: 'Sélectionnez une verticale...',
+    message: 'Message *',
+    messagePlaceholder: 'Parlez-nous de vos besoins...',
+    website: 'Site Web',
+    sending: 'Envoi...',
+    send: 'Envoyer le message',
+    contactInfo: 'Coordonnées',
+    contactBlurb: 'Communiquez avec nous par le canal de votre choix - nous sommes la pour transformer votre vision.',
+    inquiries: 'Demandes commerciales',
+    inquiriesBlurb: "Pour les partenariats, discussions d'investissement ou collaborations plateforme :",
+    partnerPortal: 'Portail partenaires',
+    buildingWithUs: 'Vous construisez déjà avec nous ?',
+    buildingSubtitle: 'Accédez a votre tableau de bord, gérez vos déploiements et collaborez avec l équipe d ingénierie Nzila Ventures.',
+    teamPortalLogin: 'Connexion au portail équipe ->',
+    requestPartnerAccess: 'Demander un accès partenaire',
+    notPartnerYet: 'Pas encore partenaire ?',
+    applyProgram: 'Postulez a notre programme de partenariat',
+    onboarding: '- nous intégrons les équipes qualifiées sous 48 heures.',
+    genericError: 'Une erreur est survenue',
+    networkError: 'Erreur réseau - veuillez reessayer',
+    verticals: ['Santé', 'Travail syndical', 'Assurtech', 'Legaltech', 'Fintech', 'Commerce', 'Justice et équité', 'Divertissement', 'Agrotech', 'EdTech', 'Autre'],
+    sidebarItems: [
+      { icon: '✉️', title: 'Courriel', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'Reponse sous 24 a 48 heures' },
+      { icon: '📞', title: 'Téléphone', value: 'Planification sur demande', href: '', sub: 'Support téléphonique via appel de découverte' },
+      { icon: '🌍', title: 'Bureau', value: "Télétravail d'abord · Opérations mondiales", href: '', sub: 'Équipes sur plusieurs fuseaux horaires' },
+    ],
+    inquiriesList: ['Opportunités d intégration plateforme', 'Solutions par verticale', 'Partenariats stratégiques', "Discussions d'investissement"],
+    features: [
+      { icon: '📊', title: 'Tableau de performance', description: 'Métriques en temps réel sur vos verticales déployées : disponibilité, appels API, attribution de revenus et précision des modèles IA.' },
+      { icon: '🔧', title: 'Gestion des déploiements', description: 'Promotion en un clic de staging vers production, contrôle de rollback et configuration des environnements.' },
+      { icon: '🤝', title: 'Feuille de route partagée', description: 'Backlog collaboratif avec votre équipe d ingénierie Nzila. Votez les fonctionnalités, suivez les sprints et les notes de version.' },
+      { icon: '🔐', title: 'SSO et accès équipe', description: "SSO entreprise avec permissions par role. Gerer les membres, clés API et journaux d'audit depuis une seule console." },
+      { icon: '💬', title: 'Support prioritaire', description: 'Canal Slack direct avec votre équipe d ingénierie, SLA de 4 heures pour les incidents critiques et revues architecturales mensuelles.' },
+      { icon: '📈', title: 'Laboratoire IA et analytique', description: 'Testez des modèles IA personnalisés, exécutez des tests A/B et accedez a des analyses détaillées sur l engagement utilisateur.' },
+    ],
+  },
+};
 
 export default function Contact() {
+  const locale = useLocale() as Locale;
+  const copy = contactCopy[locale] ?? contactCopy['en-CA'];
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -51,7 +197,7 @@ export default function Contact() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? 'Something went wrong');
+        setError(data.error ?? copy.genericError);
         trackEvent('contact_submit_failed', {
           vertical: formData.vertical || 'unspecified',
           status: res.status,
@@ -74,7 +220,7 @@ export default function Contact() {
       }));
       setTimeout(() => setSubmitted(false), 5000);
     } catch {
-      setError('Network error — please try again');
+      setError(copy.networkError);
       trackEvent('contact_submit_network_error');
     } finally {
       setSubmitting(false);
@@ -87,11 +233,7 @@ export default function Contact() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const verticals = [
-    'Healthtech', 'Uniontech', 'Insurtech', 'Legaltech', 'Fintech',
-    'Trade & Commerce', 'Justice & Equity', 'Entertainment',
-    'Agrotech', 'EdTech', 'Other',
-  ];
+  const verticals = copy.verticals;
 
   const inputClasses =
     'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-electric/40 focus:border-electric transition text-gray-900 placeholder-gray-400';
@@ -114,15 +256,15 @@ export default function Contact() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              Connect
+              {copy.connect}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Get In Touch</h1>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{copy.heroTitle}</h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Let&apos;s discuss how Nzila Ventures can accelerate your organization&apos;s AI transformation.
+              {copy.heroSubtitle}
             </p>
           </ScrollReveal>
         </div>
@@ -135,13 +277,13 @@ export default function Contact() {
             {/* ── FORM ── */}
             <ScrollReveal direction="left">
               <div>
-                <h2 className="text-3xl font-bold text-navy mb-2">Send Us a Message</h2>
-                <p className="text-gray-500 mb-8">We&apos;ll get back to you within 24-48 hours.</p>
+                <h2 className="text-3xl font-bold text-navy mb-2">{copy.sendMessage}</h2>
+                <p className="text-gray-500 mb-8">{copy.responseTime}</p>
 
                 {submitted && (
                   <div className="mb-6 p-4 bg-emerald/5 border border-emerald/20 rounded-xl">
                     <p className="text-emerald font-medium">
-                      Thank you! Your message has been sent successfully.
+                      {copy.success}
                     </p>
                   </div>
                 )}
@@ -155,31 +297,31 @@ export default function Contact() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-navy mb-1.5">
-                      Full Name *
+                      {copy.fullName}
                     </label>
-                    <input type="text" id="name" name="name" required value={formData.name} onChange={handleChange} className={inputClasses} placeholder="John Doe" />
+                    <input type="text" id="name" name="name" required value={formData.name} onChange={handleChange} className={inputClasses} placeholder={copy.fullNamePlaceholder} />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-navy mb-1.5">
-                      Email Address *
+                      {copy.emailAddress}
                     </label>
-                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} className={inputClasses} placeholder="john@example.com" />
+                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} className={inputClasses} placeholder={copy.emailPlaceholder} />
                   </div>
 
                   <div>
                     <label htmlFor="company" className="block text-sm font-semibold text-navy mb-1.5">
-                      Company / Organization
+                      {copy.company}
                     </label>
-                    <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} className={inputClasses} placeholder="Acme Inc." />
+                    <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} className={inputClasses} placeholder={copy.companyPlaceholder} />
                   </div>
 
                   <div>
                     <label htmlFor="vertical" className="block text-sm font-semibold text-navy mb-1.5">
-                      Industry / Vertical
+                      {copy.industry}
                     </label>
                     <select id="vertical" name="vertical" value={formData.vertical} onChange={handleChange} className={inputClasses}>
-                      <option value="">Select a vertical…</option>
+                      <option value="">{copy.selectVertical}</option>
                       {verticals.map((v) => (
                         <option key={v} value={v}>{v}</option>
                       ))}
@@ -188,14 +330,14 @@ export default function Contact() {
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-semibold text-navy mb-1.5">
-                      Message *
+                      {copy.message}
                     </label>
-                    <textarea id="message" name="message" required value={formData.message} onChange={handleChange} rows={5} className={inputClasses} placeholder="Tell us about your needs…" />
+                    <textarea id="message" name="message" required value={formData.message} onChange={handleChange} rows={5} className={inputClasses} placeholder={copy.messagePlaceholder} />
                   </div>
 
                   {/* Honeypot field for basic bot filtering */}
                   <div className="hidden" aria-hidden="true">
-                    <label htmlFor="website">Website</label>
+                    <label htmlFor="website">{copy.website}</label>
                     <input id="website" name="website" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" />
                   </div>
 
@@ -203,7 +345,7 @@ export default function Contact() {
                     disabled={submitting}
                     className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press disabled:opacity-60"
                   >
-                    {submitting ? 'Sending…' : 'Send Message'}
+                    {submitting ? copy.sending : copy.send}
                   </button>
                 </form>
               </div>
@@ -212,17 +354,13 @@ export default function Contact() {
             {/* ── SIDEBAR ── */}
             <ScrollReveal direction="right">
               <div>
-                <h2 className="text-3xl font-bold text-navy mb-2">Contact Information</h2>
+                <h2 className="text-3xl font-bold text-navy mb-2">{copy.contactInfo}</h2>
                 <p className="text-gray-500 mb-8">
-                  Reach out through any channel — we&apos;re here to help transform your vision.
+                  {copy.contactBlurb}
                 </p>
 
                 <div className="space-y-6">
-                  {[
-                    { icon: '✉️', title: 'Email', value: 'contact@nzilaventures.com', href: 'mailto:contact@nzilaventures.com', sub: 'We respond within 24-48 hours' },
-                    { icon: '📞', title: 'Phone', value: 'Schedule on request', href: '', sub: 'Phone support by arranged discovery call' },
-                    { icon: '🌍', title: 'Office', value: 'Remote-First · Global Operations', href: '', sub: 'Teams across multiple time zones' },
-                  ].map((item) => (
+                  {copy.sidebarItems.map((item) => (
                     <div key={item.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover-lift cursor-default">
                       <span className="text-2xl mt-0.5">{item.icon}</span>
                       <div>
@@ -240,12 +378,12 @@ export default function Contact() {
 
                 {/* Business Inquiries */}
                 <div className="mt-10 bg-navy rounded-2xl p-6 text-white pulse-glow">
-                  <h3 className="font-bold text-lg mb-3">Business Inquiries</h3>
+                  <h3 className="font-bold text-lg mb-3">{copy.inquiries}</h3>
                   <p className="text-gray-300 text-sm mb-4">
-                    For partnerships, investment discussions, or platform collaborations:
+                    {copy.inquiriesBlurb}
                   </p>
                   <ul className="space-y-2 text-sm text-gray-300">
-                    {['Platform integration opportunities', 'Vertical-specific solutions', 'Strategic partnerships', 'Investment discussions'].map((item) => (
+                    {copy.inquiriesList.map((item) => (
                       <li key={item} className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-gold rounded-full shrink-0" />
                         {item}
@@ -276,52 +414,20 @@ export default function Contact() {
           <ScrollReveal>
             <div className="text-center mb-16">
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-                Partner Portal
+                {copy.partnerPortal}
               </span>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Already Building With Us?
+                {copy.buildingWithUs}
               </h2>
               <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                Access your dedicated dashboard, manage deployments, and collaborate with
-                the Nzila Ventures engineering team — all in one place.
+                {copy.buildingSubtitle}
               </p>
             </div>
           </ScrollReveal>
 
           {/* Feature Grid */}
           <div className="grid md:grid-cols-3 gap-6 mb-14">
-            {[
-              {
-                icon: '📊',
-                title: 'Performance Dashboard',
-                description: 'Real-time metrics across all your deployed verticals — uptime, API calls, revenue attribution, and AI model accuracy.',
-              },
-              {
-                icon: '🔧',
-                title: 'Deployment Management',
-                description: 'One-click staging → production promotion, rollback controls, and environment configuration for every platform.',
-              },
-              {
-                icon: '🤝',
-                title: 'Shared Roadmap',
-                description: 'Collaborative backlog with your dedicated Nzila engineering pod. Vote on features, track sprints, and review release notes.',
-              },
-              {
-                icon: '🔐',
-                title: 'SSO & Team Access',
-                description: 'Enterprise single sign-on with role-based permissions. Manage team members, API keys, and audit logs from one console.',
-              },
-              {
-                icon: '💬',
-                title: 'Priority Support',
-                description: 'Direct Slack channel with your engineering pod, 4-hour SLA for critical issues, and monthly architecture reviews.',
-              },
-              {
-                icon: '📈',
-                title: 'AI & Analytics Lab',
-                description: 'Experiment with custom AI models, run A/B tests on new features, and access detailed analytics on user engagement.',
-              },
-            ].map((feature, i) => (
+            {copy.features.map((feature, i) => (
               <ScrollReveal key={feature.title} delay={i * 0.08}>
                 <div className="glass-card p-6 rounded-2xl border border-white/10 hover-lift h-full">
                   <span className="text-3xl block mb-4">{feature.icon}</span>
@@ -339,21 +445,21 @@ export default function Contact() {
                 href="/partners"
                 className="inline-flex items-center justify-center px-10 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold/90 transition-all text-lg shadow-lg shadow-gold/25 btn-press"
               >
-                Team Portal Login →
+                {copy.teamPortalLogin}
               </a>
               <a
                 href="mailto:partners@nzilaventures.com"
                 className="inline-flex items-center justify-center px-10 py-4 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all text-lg"
               >
-                Request Partner Access
+                {copy.requestPartnerAccess}
               </a>
             </div>
             <p className="text-center text-gray-500 text-sm mt-6">
-              Not a partner yet?{' '}
+              {copy.notPartnerYet}{' '}
               <a href="/contact" className="text-gold hover:underline">
-                Apply to our partnership program
+                {copy.applyProgram}
               </a>{' '}
-              — we onboard qualified teams within 48 hours.
+              {copy.onboarding}
             </p>
           </ScrollReveal>
         </div>
@@ -361,3 +467,11 @@ export default function Contact() {
     </main>
   );
 }
+
+
+
+
+
+
+
+

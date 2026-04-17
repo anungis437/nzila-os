@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { getLocale } from 'next-intl/server';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
+import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'Products',
@@ -22,10 +24,9 @@ const flagships = [
     vertical: 'Uniontech',
     status: 'Production Ready',
     tam: '$50B',
-    orgs: '4,773',
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     alt: 'UnionEyes — comprehensive union management platform for pension forecasting and labor analytics',
-    description: 'Full-stack union case management platform — pension forecasting, grievance lifecycle, collective bargaining analysis, CBA intelligence, and evidence-sealed audit trails for 4,773+ organizations.',
+    description: 'Full-stack union case management platform — pension forecasting, grievance lifecycle, collective bargaining analysis, CBA intelligence, and evidence-sealed audit trails.',
     features: ['Pension Forecasting', 'Grievance Lifecycle', 'CBA Intelligence', 'Evidence-Sealed Audit Trails'],
   },
   {
@@ -33,7 +34,6 @@ const flagships = [
     vertical: 'Music & Creator Economy',
     status: 'Production Ready',
     tam: '$20B+',
-    orgs: '1000+',
     image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
     alt: 'Zonga — African music platform for artists, streaming, and creator royalties',
     description: 'Africa-first music distribution and streaming platform — artist onboarding, catalog management, playlist curation, royalty calculation, and transparent payouts for thousands of creators.',
@@ -41,13 +41,12 @@ const flagships = [
   },
   {
     name: 'Flow',
-    vertical: 'Commerce & Operations',
+    vertical: 'Commerce & Opérations',
     status: 'Production Ready',
     tam: '$100B+',
-    orgs: '500+',
     image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
     alt: 'Flow — enterprise order-to-cash and supply chain management platform',
-    description: 'Complete commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and integrations with Shopify, Zoho, WhatsApp, and ERP systems.',
+    description: 'Complété commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and intégrations with Shopify, Zoho, WhatsApp, and ERP systems.',
     features: ['Order Management', 'Inventory & Warehouse', 'Production Tracking', 'Multi-Channel Integrations'],
   },
   {
@@ -55,26 +54,25 @@ const flagships = [
     vertical: 'Agriculture & Supply Chain',
     status: 'Production Ready',
     tam: '$8B',
-    orgs: '220+',
     image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
     alt: 'Agrimo — agricultural field operations and supply chain management',
     description: 'Agricultural supply chain and operations platform — harvest tracking, lot management, quality grading, warehousing, cold-chain logistics, traceability, and farmer payouts for DRC and Central African producers.',
-    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Operations', 'Supply Chain Traceability'],
+    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Opérations', 'Supply Chain Traceability'],
   },
 ];
 
 const pipeline = [
-  { name: 'CORA', vertical: 'Agricultural Intelligence', tam: '$8.6B', orgs: '80+', status: 'Production Ready' },
-  { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', orgs: '485', status: 'Production Ready' },
-  { name: 'ABR Insights', vertical: 'Compliance & Audit', tam: '$1.5B', orgs: '132', status: 'Production Ready' },
-  { name: 'Zonga', vertical: 'Entertainment', tam: '$50B', orgs: '83+', status: 'Production Ready' },
-  { name: 'SentryIQ360', vertical: 'Insurtech', tam: '$30B', orgs: '79+', status: 'In Development' },
-  { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', orgs: '682', status: 'In Development' },
-  { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', orgs: '337', status: 'Beta' },
-  { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', orgs: '37', status: 'In Development' },
-  { name: 'Flow', vertical: 'Commerce', tam: '$100B+', orgs: '500+', status: 'Production Ready' },
-  { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', orgs: '30+', status: 'In Development' },
-  { name: 'Memora', vertical: 'Healthtech', tam: '$20B', orgs: '150', status: 'Legacy' },
+  { name: 'CORA', vertical: 'Agricultural Intelligence', tam: '$8.6B', status: 'Production Ready' },
+  { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', status: 'Production Ready' },
+  { name: 'ABR Insights', vertical: 'Compliance & Audit', tam: '$1.5B', status: 'Production Ready' },
+  { name: 'Zonga', vertical: 'Entertainment', tam: '$50B', status: 'Production Ready' },
+  { name: 'SentryIQ360', vertical: 'Insurtech', tam: '$30B', status: 'In Development' },
+  { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', status: 'In Development' },
+  { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', status: 'Beta' },
+  { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', status: 'In Development' },
+  { name: 'Flow', vertical: 'Commerce', tam: '$100B+', status: 'Production Ready' },
+  { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', status: 'In Development' },
+  { name: 'Memora', vertical: 'Healthtech', tam: '$20B', status: 'Legacy' },
 ];
 
 function getStatusStyle(status: string) {
@@ -86,7 +84,39 @@ function getStatusStyle(status: string) {
   return 'bg-gray-100 text-gray-600';
 }
 
-export default function ProductsPage() {
+const statusFr: Record<string, string> = {
+  'Production Ready': 'Pret pour production',
+  'In Development': 'En developpement',
+  Beta: 'Beta',
+};
+
+const flagshipFr: Record<string, { vertical: string; description: string; features: string[] }> = {
+  UnionEyes: {
+    vertical: 'Uniontech',
+    description: 'Plateforme complété de gestion syndicale - prevision des pensions, cycle de vie des griefs, analyse de conventions collectives et audit scelle par preuve.',
+    features: ['Prevision des pensions', 'Cycle des griefs', 'Intelligence CBA', 'Audit scelle par preuve'],
+  },
+  Zonga: {
+    vertical: 'Musique et économie des createurs',
+    description: 'Plateforme africaine de distribution et streaming musical - onboarding artistes, gestion du catalogue, curation de playlists et calcul transparent des redevances.',
+    features: ['Onboarding artistes', 'Gestion des sorties', 'Moteur de redevances', 'Analytique streaming'],
+  },
+  Flow: {
+    vertical: 'Commerce et operations',
+    description: 'Plateforme complété d operations commerciales - order-to-cash, procure-to-pay, inventaire, suivi de production et intégrations Shopify, Zoho, WhatsApp et ERP.',
+    features: ['Gestion des commandes', 'Inventaire et entrepot', 'Suivi production', 'Integrations multicanal'],
+  },
+  Agrimo: {
+    vertical: 'Agriculture et chaine logistique',
+    description: 'Plateforme d operations et chaine d approvisionnement agricole - suivi des recoltes, gestion de lots, qualite, entreposage, logistique et traceabilite.',
+    features: ['Suivi des recoltes', 'Gestion des lots', 'Opérations entrepot', 'Traceabilite logistique'],
+  },
+};
+
+export default async function ProductsPage() {
+  const locale = (await getLocale()) as Locale;
+  const isFr = locale === 'fr-CA';
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -105,15 +135,17 @@ export default function ProductsPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-electric mb-6">
-              Product Portfolio
+              {isFr ? 'Portefeuille produits' : 'Product Portfolio'}
             </span>
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Our Products</h1>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{isFr ? 'Nos produits' : 'Our Products'}</h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              {MARKETING_FACTS.productPlatforms} products across {MARKETING_FACTS.verticalsLabel} industries - delivered through {MARKETING_FACTS.governedApplications} live tools on the Nzila shared platform.
+              {isFr
+                ? `${MARKETING_FACTS.productPlatforms} produits dans ${MARKETING_FACTS.verticalsLabel} industries - livres via ${MARKETING_FACTS.governedApplications} outils en service sur la plateforme partagée Nzila.`
+                : `${MARKETING_FACTS.productPlatforms} products across ${MARKETING_FACTS.verticalsLabel} industries - delivered through ${MARKETING_FACTS.governedApplications} live tools on the Nzila shared platform.`}
             </p>
           </ScrollReveal>
         </div>
@@ -123,9 +155,9 @@ export default function ProductsPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Four Core Platforms"
-            title="Our Main Product Suite"
-            subtitle="Production-grade platforms across uniontech, music, commerce, and agriculture — serving thousands of organizations globally"
+            badge={isFr ? 'Quatre plateformes coeur' : 'Four Core Platforms'}
+            title={isFr ? 'Notre suite principale' : 'Our Main Product Suite'}
+            subtitle={isFr ? 'Plateformes prêtes pour la production en uniontech, musique, commerce et agriculture' : 'Production-grade platforms across uniontech, music, commerce, and agriculture'}
           />
 
           <div className="space-y-8">
@@ -145,24 +177,23 @@ export default function ProductsPage() {
                   <div className="lg:col-span-3 p-6 lg:p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-electric/10 text-electric">
-                        {product.status}
+                        {isFr ? (statusFr[product.status] ?? product.status) : product.status}
                       </span>
                       <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-                        {product.vertical}
+                        {isFr ? (flagshipFr[product.name]?.vertical ?? product.vertical) : product.vertical}
                       </span>
                     </div>
                     <h3 className="text-2xl font-bold text-navy mb-2">{product.name}</h3>
-                    <p className="text-gray-600 mb-4">{product.description}</p>
+                    <p className="text-gray-600 mb-4">{isFr ? (flagshipFr[product.name]?.description ?? product.description) : product.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {product.features.map((f) => (
+                      {(isFr ? (flagshipFr[product.name]?.features ?? product.features) : product.features).map((f) => (
                         <span key={f} className="px-3 py-1 text-xs font-medium bg-white rounded-full border border-gray-200 text-gray-700">
                           {f}
                         </span>
                       ))}
                     </div>
                     <div className="flex items-center gap-6 text-sm">
-                      <span className="font-bold text-gold">{product.tam} market size</span>
-                      <span className="font-semibold text-electric">{product.orgs} orgs</span>
+                      <span className="font-bold text-gold">{product.tam} {isFr ? 'taille du marché' : 'market size'}</span>
                     </div>
                   </div>
                 </div>
@@ -177,9 +208,9 @@ export default function ProductsPage() {
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Extended Portfolio"
-            title="Growing Ecosystem"
-            subtitle="11 complementary products — production-ready, in development, and specialized solutions that extend the Nzila shared platform"
+            badge={isFr ? 'Portefeuille éténdu' : 'Extended Portfolio'}
+            title={isFr ? 'Écosystème en croissance' : 'Growing Ecosystem'}
+            subtitle={isFr ? '11 produits complementaires - en production, en developpement et solutions specialisees qui éténdent la plateforme partagée Nzila' : '11 complementary products - production-ready, in development, and specialized solutions that extend the Nzila shared platform'}
             light
           />
 
@@ -190,13 +221,12 @@ export default function ProductsPage() {
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-bold text-white">{product.name}</h3>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusStyle(product.status)}`}>
-                      {product.status}
+                      {isFr ? (statusFr[product.status] ?? product.status) : product.status}
                     </span>
                   </div>
                   <p className="text-sm text-gray-400 mb-3">{product.vertical}</p>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="text-gold font-semibold">{product.tam}</span>
-                    <span className="text-gray-400">{product.orgs} orgs</span>
                   </div>
                 </div>
               </ScrollReveal>
@@ -210,3 +240,12 @@ export default function ProductsPage() {
     </main>
   );
 }
+
+
+
+
+
+
+
+
+

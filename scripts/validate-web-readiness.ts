@@ -23,7 +23,7 @@ const checks: Array<{ file: string; mustInclude: string[]; mustExclude?: string[
   },
   {
     file: 'apps/web/app/api/telemetry/events/route.ts',
-    mustInclude: ['validateEventPayload', 'payload_too_large'],
+    mustInclude: ['eventPayloadSchema', 'payload_too_large'],
   },
   {
     file: 'apps/web/app/contact/page.tsx',

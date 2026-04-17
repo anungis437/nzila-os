@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 import ScrollReveal from './ScrollReveal';
+import type { Locale } from '@/lib/locales';
 
 const techStack = [
   { name: 'Azure', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg' },
@@ -20,10 +22,15 @@ interface TechStackBarProps {
 }
 
 export default function TechStackBar({ className = '', label = 'Built With' }: TechStackBarProps) {
+  const locale = useLocale() as Locale;
+  const resolvedLabel = label === 'Built With'
+    ? (locale === 'fr-CA' ? 'Construit avec' : 'Built With')
+    : label;
+
   return (
     <ScrollReveal className={className}>
       <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 text-center mb-6">
-        {label}
+        {resolvedLabel}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
         {techStack.map((tech) => (
@@ -45,3 +52,10 @@ export default function TechStackBar({ className = '', label = 'Built With' }: T
     </ScrollReveal>
   );
 }
+
+
+
+
+
+
+
