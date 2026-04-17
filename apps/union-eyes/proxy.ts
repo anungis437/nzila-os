@@ -372,7 +372,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
 }
 
 // Export the auth middleware directly
-export default async function middleware(req: NextRequest): Promise<NextResponse> {
+export async function proxy(req: NextRequest): Promise<NextResponse> {
   try {
     return await authMiddleware(req);
   } catch (outerError) {

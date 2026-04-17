@@ -1,61 +1,32 @@
 import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
-import { locales, defaultLocale, type Locale } from './lib/locales'
+import createIntlMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './lib/locales'
 
-/**
- * Detect locale from NEXT_LOCALE cookie or Accept-Language header.
- * Sets NEXT_LOCALE cookie on the response so next-intl's getRequestConfig
- * can resolve the locale without URL-based routing (no [locale] segment).
- */
-function detectLocale(request: Request): Locale {
-  // 1. Explicit cookie
-  const cookieHeader = request.headers.get('cookie') ?? ''
-  const match = cookieHeader.match(/NEXT_LOCALE=([^;]+)/)
-  if (match) {
-    const fromCookie = match[1] as Locale
-    if (locales.includes(fromCookie)) return fromCookie
-  }
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'never',
+})
 
-  // 2. Accept-Language negotiation (first match wins)
-  const acceptLang = request.headers.get('accept-language') ?? ''
-  for (const part of acceptLang.split(',')) {
-    const tag = part.split(';')[0].trim().toLowerCase()
-    // Exact match (en-ca → en-CA)
-    const exact = locales.find((l) => l.toLowerCase() === tag)
-    if (exact) return exact
-    // Prefix match (fr → fr-CA)
-    const prefix = locales.find((l) => l.toLowerCase().startsWith(tag))
-    if (prefix) return prefix
-  }
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/api/auth']
 
-  return defaultLocale
-}
-
-/**
- * Public web site — all routes are public.
- * Auth provider is present for optional sign-in state in the layout.
- * Rate limiting is enforced at the edge for every request.
- */
-
-const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth(async (request: any) => {
+export const proxy = auth((request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       request.headers.get('x-real-ip') ??
       'unknown'
-
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
       windowMs: RATE_LIMIT_WINDOW_MS,
     })
-
     if (!rl.allowed) {
       return NextResponse.json(
         { error: 'Too Many Requests' },
@@ -72,10 +43,10 @@ export default auth(async (request: any) => {
     if (
       ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
       request.nextUrl.pathname.startsWith('/api') &&
+      !request.nextUrl.pathname.startsWith('/api/auth') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks') &&
       !request.nextUrl.pathname.startsWith('/api/health') &&
-      !request.nextUrl.pathname.startsWith('/api/cron') &&
-      !request.nextUrl.pathname.startsWith('/api/auth')
+      !request.nextUrl.pathname.startsWith('/api/cron')
     ) {
       if (!request.headers.get('idempotency-key')) {
         return NextResponse.json(
@@ -91,23 +62,27 @@ export default auth(async (request: any) => {
     }
   }
 
-  /* ── Request-ID propagation for observability ── */
-  const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
-
-  // Locale detection — set cookie so getRequestConfig can read it (no URL rewrite)
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const locale = detectLocale(request)
-    const response = NextResponse.next()
-    response.headers.set('x-request-id', requestId)
-    response.cookies.set('NEXT_LOCALE', locale, { path: '/', sameSite: 'lax' })
-    return response
+  // ── Authentication ────────────────────────────────────────────────────────────────────
+  const isPublic = publicPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  if (!isPublic && !request.auth) {
+    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
+  // ── Internationalisation ──────────────────────────────────────────────
+  if (!request.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(request)
+    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+    intlResponse.headers.set('x-request-id', requestId)
+    return intlResponse
+  }
+
+  // ── Request-ID propagation ────────────────────────────────────────────
+  const requestId =
+    request.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
-}) as (request: NextRequest) => Promise<NextResponse>
+})
 
 export const config = {
   matcher: [

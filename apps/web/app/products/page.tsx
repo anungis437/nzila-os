@@ -7,11 +7,11 @@ import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@
 
 export const metadata: Metadata = {
   title: 'Products',
-  description: `Our portfolio of ${platformCoverageLabel()} - ${governedCoverageLabel()} across UnionEyes, Zonga, Flow, and Agrimo.`,
+  description: `Our portfolio of ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools across UnionEyes, Zonga, Flow, and Agrimo.`,
   openGraph: {
     title: 'Nzila Ventures Products',
-    description: `${MARKETING_FACTS.productPlatforms} product platforms. ${MARKETING_FACTS.flagshipPlatforms} flagships. ${MARKETING_FACTS.governedApplications} governed applications. One unified Backbone.`,
-    images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'AI neural network visualization representing Nzila Ventures product suite' }],
+    description: `${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.flagshipPlatforms} flagships. ${MARKETING_FACTS.governedApplications} live tools. One shared platform.`,
+    images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Digital network visualization representing Nzila Ventures product suite' }],
   },
   alternates: { canonical: '/products' },
 };
@@ -93,7 +93,7 @@ export default function ProductsPage() {
       <section className="relative min-h-[60vh] flex items-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920"
-          alt="AI neural network with glowing nodes and connections representing advanced machine learning"
+          alt="Digital network with glowing nodes and connections representing modern software systems"
           fill
           priority
           className="object-cover"
@@ -113,7 +113,7 @@ export default function ProductsPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              {MARKETING_FACTS.productPlatforms} product platforms across {MARKETING_FACTS.verticalsLabel} verticals - delivered through {MARKETING_FACTS.governedApplications} governed applications on the Nzila Backbone.
+              {MARKETING_FACTS.productPlatforms} products across {MARKETING_FACTS.verticalsLabel} industries - delivered through {MARKETING_FACTS.governedApplications} live tools on the Nzila shared platform.
             </p>
           </ScrollReveal>
         </div>
@@ -161,7 +161,7 @@ export default function ProductsPage() {
                       ))}
                     </div>
                     <div className="flex items-center gap-6 text-sm">
-                      <span className="font-bold text-gold">{product.tam} TAM</span>
+                      <span className="font-bold text-gold">{product.tam} market size</span>
                       <span className="font-semibold text-electric">{product.orgs} orgs</span>
                     </div>
                   </div>
@@ -179,7 +179,7 @@ export default function ProductsPage() {
           <SectionHeading
             badge="Extended Portfolio"
             title="Growing Ecosystem"
-            subtitle="11 complementary platforms — production-ready, in development, and specialized solutions that extend the Nzila Backbone"
+            subtitle="11 complementary products — production-ready, in development, and specialized solutions that extend the Nzila shared platform"
             light
           />
 

@@ -5,7 +5,7 @@ import { SummaryCard } from "@/components/ui/summary-card";
 import { Calendar, Shield, AlertTriangle } from "lucide-react";
 import { CalendarView } from "@/components/changes/calendar-view";
 import { PIRSummaryCard } from "@/components/changes/pir-summary-card";
-import { getChangeCalendarData } from "@/server/data";
+import { getChangeCalendarData } from "@/server/change-data";
 
 export const dynamic = "force-dynamic";
 

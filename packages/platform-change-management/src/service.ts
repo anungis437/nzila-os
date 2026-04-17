@@ -21,17 +21,20 @@ const DEFAULT_CHANGE_RECORDS_DIR = 'ops/change-records'
 /** Resolve the change records directory, allowing override for tests. */
 export function getChangeRecordsDir(baseDir?: string): string {
   if (baseDir) return resolve(baseDir)
-  // Walk up from this file to find the repo root (contains package.json with "nzila-os")
-  let dir = resolve(import.meta.dirname ?? __dirname, '..', '..', '..')
-  // Fallback: if we're deep in node_modules, walk up further
-  for (let i = 0; i < 5; i++) {
-    const candidate = join(dir, DEFAULT_CHANGE_RECORDS_DIR)
-    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) {
-      return candidate
-    }
-    dir = resolve(dir, '..')
+
+  // Prefer statically-scoped paths to avoid broad tracing in app bundles.
+  const cwd = process.cwd()
+  const scopedCandidates = [
+    resolve(cwd, DEFAULT_CHANGE_RECORDS_DIR),
+    resolve(cwd, '..', DEFAULT_CHANGE_RECORDS_DIR),
+    resolve(cwd, '..', '..', DEFAULT_CHANGE_RECORDS_DIR),
+    resolve(cwd, '..', '..', '..', DEFAULT_CHANGE_RECORDS_DIR),
+  ]
+  for (const candidate of scopedCandidates) {
+    if (existsSync(candidate)) return candidate
   }
-  return resolve(DEFAULT_CHANGE_RECORDS_DIR)
+
+  return resolve(cwd, DEFAULT_CHANGE_RECORDS_DIR)
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

@@ -27,7 +27,7 @@ const RATE_LIMIT_WINDOW_MS = Number(
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth((req: any) => {
+export const proxy = auth((req: any) => {
   const { pathname } = req.nextUrl
 
   /* ── Layer 2 — Rate limiting (skip in dev — HMR triggers too many requests) ── */

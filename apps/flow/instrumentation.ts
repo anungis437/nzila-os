@@ -5,9 +5,13 @@
  * env validation, and boot invariant assertions.
  */
 import { createAppBoot } from '@nzila/os-core/telemetry'
-import { bootstrapFlowControlLayer } from '@/lib/control/bootstrap'
 
 export async function register() {
   await createAppBoot('flow')()
+
+  // Keep edge instrumentation free of Node-only dependencies.
+  if (process.env.NEXT_RUNTIME !== 'nodejs') return
+
+  const { bootstrapFlowControlLayer } = await import('@/lib/control/bootstrap')
   await bootstrapFlowControlLayer()
 }

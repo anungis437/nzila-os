@@ -12,7 +12,7 @@ const intlMiddleware = createIntlMiddleware({
 const publicPaths = ['/', '/sign-in', '/sign-up', '/api/health', '/api/auth']
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth((req: any) => {
+export const proxy = auth((req: any) => {
   const { pathname } = req.nextUrl
 
   // -- Idempotency-Key enforcement (fail-closed in pilot/prod) --

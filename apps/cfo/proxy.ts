@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 
 /**
- * ABR Edge Middleware — Four-layer protection aligned with console reference.
+ * CFO Edge Middleware — Three-layer protection aligned with console reference.
  *
  * Layer 1: Rate limiting (skip in dev — HMR triggers too many requests)
  * Layer 2: Authentication (skip in dev — prevents handshake loops)
@@ -22,14 +22,12 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth(.*)',
   '/api/health(.*)',
   '/api/webhooks(.*)',
-  '/legal(.*)',
-  '/resources(.*)',
 ])
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default authMiddleware(async (auth, request: NextRequest) => {
+export const proxy = authMiddleware(async (auth, request: NextRequest) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =

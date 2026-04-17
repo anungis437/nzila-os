@@ -9,20 +9,20 @@ import { MARKETING_FACTS, platformCoverageLabel, portfolioHeadlineLabel } from '
 
 export const metadata: Metadata = {
   title: 'Investors',
-  description: `Series A investment opportunity - ${MARKETING_FACTS.totalTamLabel} TAM, ${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications, and one unified Backbone.`,
+  description: `Series A investment opportunity - ${MARKETING_FACTS.totalTamLabel} market size, ${MARKETING_FACTS.productPlatforms} products, ${MARKETING_FACTS.governedApplications} live tools, and one shared platform.`,
   openGraph: {
     title: 'Invest in Nzila Ventures',
-    description: `${MARKETING_FACTS.totalTamLabel} TAM. ${MARKETING_FACTS.productPlatforms} product platforms. ${MARKETING_FACTS.governedApplications} governed applications.`,
+    description: `${MARKETING_FACTS.totalTamLabel} market size. ${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.governedApplications} live tools.`,
     images: [{ url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Modern glass skyscraper reaching skyward — representing growth and investment ambition' }],
   },
   alternates: { canonical: '/investors' },
 };
 
 const keyMetrics = [
-  { label: 'Total Addressable Market', value: '$100B+', color: 'text-gold' },
-  { label: 'Product Platforms', value: String(MARKETING_FACTS.productPlatforms), color: 'text-electric' },
-  { label: 'Governed Applications', value: String(MARKETING_FACTS.governedApplications), color: 'text-violet' },
-  { label: 'Verticals', value: MARKETING_FACTS.verticalsLabel, color: 'text-violet' },
+  { label: 'Total Market Size', value: '$100B+', color: 'text-gold' },
+  { label: 'Products', value: String(MARKETING_FACTS.productPlatforms), color: 'text-electric' },
+  { label: 'Live Tools', value: String(MARKETING_FACTS.governedApplications), color: 'text-violet' },
+  { label: 'Industries', value: MARKETING_FACTS.verticalsLabel, color: 'text-violet' },
   { label: 'IP Portfolio Value', value: '$5.7M–$7.5M', color: 'text-emerald' },
   { label: 'Database Entities', value: '12,000+', color: 'text-electric' },
 ];
@@ -30,30 +30,30 @@ const keyMetrics = [
 const flagships = [
   { name: 'UnionEyes', vertical: 'Uniontech', tam: '$50B', orgs: '4,773', stage: 'Revenue-Ready', description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, analytics for 4,773 orgs.' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', orgs: '485', stage: 'Revenue-Ready', description: 'Diaspora banking infrastructure — KYC/AML, international transfers, community lending across 485 financial orgs.' },
-  { name: 'ABR Insights', vertical: 'EdTech', tam: '$1.5B', orgs: '132', stage: 'Production', description: 'Anti-racism LMS, tribunal case database, and AI coaching — transforming DEI education with proprietary content.' },
-  { name: 'CORA', vertical: 'Agrotech', tam: '$8.6B', orgs: '80+', stage: 'Beta', description: 'Farm management, supply-chain tracking, and AI-driven market intelligence built on Canadian agricultural data.' },
+  { name: 'ABR Insights', vertical: 'EdTech', tam: '$1.5B', orgs: '132', stage: 'Production', description: 'Anti-racism LMS, tribunal case database, and guided coaching — transforming DEI education with proprietary content.' },
+  { name: 'CORA', vertical: 'Agrotech', tam: '$8.6B', orgs: '80+', stage: 'Beta', description: 'Farm management, supply-chain tracking, and data-driven market intelligence built on Canadian agricultural data.' },
 ];
 
 const useOfFunds = [
-  { category: 'Engineering & AI R&D', percent: 40, color: 'bg-electric' },
+  { category: 'Engineering & Product R&D', percent: 40, color: 'bg-electric' },
   { category: 'Go-to-Market & Sales', percent: 25, color: 'bg-violet' },
-  { category: 'AI Infrastructure & Cloud', percent: 15, color: 'bg-emerald' },
+  { category: 'Platform Infrastructure & Cloud', percent: 15, color: 'bg-emerald' },
   { category: 'Compliance & Legal', percent: 10, color: 'bg-gold' },
   { category: 'Working Capital', percent: 10, color: 'bg-coral' },
 ];
 
 const timeline = [
-  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, 12,000+ data orgs, proprietary AI prompt library, pioneered union and diaspora banking tech.' },
-  { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 product platforms across 10 verticals and 17 governed applications. Unified Backbone architecture.' },
+  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, 12,000+ data orgs, proprietary decision library, pioneered union and diaspora banking tech.' },
+  { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 products across 10 industries and 17 live tools. Shared platform architecture.' },
   { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure.' },
   { year: '2025', title: 'Series A Ready', description: 'Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
 
 const moats = [
   { title: 'Proprietary Data', description: '12,000+ meticulously curated orgs across labor, finance, agriculture, and legal domains — impossible to replicate.' },
-  { title: 'AI Trade Secrets', description: 'Purpose-built AI prompts and predictive models exclusively for social-impact verticals — proprietary and not available in general-purpose AI platforms.' },
+  { title: 'Proprietary Decision Systems', description: 'Purpose-built prompts and predictive models for social-impact verticals — proprietary and not available in off-the-shelf tools.' },
   { title: 'Multi-Vertical Network', description: 'Cross-pollination between 10+ verticals creates compounding defensibility and data flywheel effects.' },
-  { title: 'First-Mover Advantage', description: 'Only AI platform company operating simultaneously across uniontech, diaspora banking, and agrotech.' },
+  { title: 'First-Mover Advantage', description: 'Only platform company operating simultaneously across uniontech, diaspora banking, and agrotech.' },
 ];
 
 export default function InvestorsPage() {
@@ -81,14 +81,14 @@ export default function InvestorsPage() {
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              The AI Platform Powering<br />
+              The Platform Powering<br />
               <span className="gradient-text">$100B+ in Markets</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
-              {platformCoverageLabel()}. {MARKETING_FACTS.governedApplications} governed applications. One unified Backbone. Nzila Ventures is the infrastructure 
+              {MARKETING_FACTS.productPlatforms} products. {MARKETING_FACTS.governedApplications} live tools. One shared platform. Nzila Ventures is the infrastructure 
               layer for social-impact technology — healthcare, finance, labor, agriculture, and justice.
             </p>
           </ScrollReveal>
@@ -173,7 +173,7 @@ export default function InvestorsPage() {
                   <div className="flex items-center gap-6 text-white">
                     <div>
                       <div className="text-2xl font-bold">$100B+</div>
-                      <div className="text-xs text-gray-300">Total TAM</div>
+                      <div className="text-xs text-gray-300">Total Market Size</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
@@ -199,7 +199,7 @@ export default function InvestorsPage() {
           <SectionHeading
             badge="Flagship Portfolio"
             title="Four Revenue-Ready Platforms"
-            subtitle="Each flagship addresses a massive, underserved market with proprietary AI and data"
+            subtitle="Each flagship addresses a massive, underserved market with proprietary technology and data"
           />
 
           <div className="space-y-6">
@@ -222,7 +222,7 @@ export default function InvestorsPage() {
                     <div className="flex gap-6 md:gap-8 text-center shrink-0">
                       <div>
                         <div className="text-2xl font-bold text-gold">{platform.tam}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wider">TAM</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wider">Market</div>
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-electric">{platform.orgs}</div>
@@ -244,7 +244,7 @@ export default function InvestorsPage() {
           <SectionHeading
             badge="Journey"
             title="From Vision to Execution"
-            subtitle="Five years of relentless building, data curation, and AI innovation"
+            subtitle="Five years of relentless building, data curation, and product innovation"
             light
           />
 
@@ -327,11 +327,11 @@ export default function InvestorsPage() {
               Series A Ready
             </span>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Join the Next Wave of<br />Social-Impact AI
+              Join the Next Wave of<br />Social-Impact Technology
             </h2>
             <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
               We are actively seeking strategic investors and partners who share our vision 
-              of building ethical, impactful AI that serves billions.
+              of building ethical, impactful technology that serves billions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

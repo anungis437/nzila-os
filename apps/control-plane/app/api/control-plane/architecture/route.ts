@@ -43,7 +43,7 @@ export async function GET(request: Request) {
   try {
     await requireApiAuth(request);
 
-    const root = path.resolve(process.cwd(), "../..");
+    const root = path.resolve(/* turbopackIgnore: true */ process.cwd(), "../..");
     const packagesDir = path.join(root, "packages");
 
   // ── Load registries ───────────────────────────
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
   // ── App compliance (gold standard checks) ────
 
   const apps = registeredApps.map((regApp) => {
-    const appDir = path.join(root, "apps", regApp.name);
+    const appDir = path.join(/* turbopackIgnore: true */ root, "apps", regApp.name);
     if (!fs.existsSync(appDir)) {
       return {
         app: regApp.name,

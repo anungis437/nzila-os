@@ -261,79 +261,14 @@ export async function getOverviewSummary(): Promise<OverviewSummary> {
   return overviewSummarySchema.parse(summary) as OverviewSummary;
 }
 
-// ── Change Management ───────────────────────────────────
-
-import {
-  loadAllChanges,
-  loadChangeRecord,
-  listUpcomingChanges,
-  listChangesForEnvironment,
-  listChangesPendingPIR,
-  changeRecordSchema,
-} from "@nzila/platform-change-management";
-import type { ChangeRecord } from "@nzila/platform-change-management/types";
-
-export async function getChangeRecords(): Promise<ChangeRecord[]> {
-  try {
-    const records = loadAllChanges();
-    return z
-      .array(changeRecordSchema)
-      .parse(records) as ChangeRecord[];
-  } catch {
-    return [];
-  }
-}
-
-export async function getChangeRecordById(
-  id: string,
-): Promise<ChangeRecord | null> {
-  try {
-    const record = loadChangeRecord(id);
-    if (!record) return null;
-    return changeRecordSchema.parse(record) as ChangeRecord;
-  } catch {
-    return null;
-  }
-}
-
-export async function getUpcomingChanges(): Promise<ChangeRecord[]> {
-  try {
-    return listUpcomingChanges() as ChangeRecord[];
-  } catch {
-    return [];
-  }
-}
-
-export async function getChangeCalendarData(): Promise<{
-  staging: ChangeRecord[];
-  production: ChangeRecord[];
-  pendingPIR: ChangeRecord[];
-}> {
-  try {
-    const staging = listChangesForEnvironment("STAGING") as ChangeRecord[];
-    const production = listChangesForEnvironment("PROD") as ChangeRecord[];
-    const pendingPIR = listChangesPendingPIR() as ChangeRecord[];
-    return { staging, production, pendingPIR };
-  } catch {
-    return { staging: [], production: [], pendingPIR: [] };
-  }
-}
-
 // ── Environment Management ──────────────────────────────
 
-import {
-  getEnvironmentConfig,
-  loadLatestArtifact,
-  loadGovernanceSnapshots,
-  ALL_ENVIRONMENTS,
-} from "@nzila/platform-environment";
 import type {
   EnvironmentName,
   EnvironmentConfig,
   DeploymentArtifact,
   GovernanceSnapshot,
 } from "@nzila/platform-environment";
-import { getEnabledFlags } from "@nzila/platform-feature-flags";
 import type { FeatureFlag } from "@nzila/platform-feature-flags";
 
 export interface EnvironmentDashboardData {
@@ -348,6 +283,14 @@ export async function getEnvironmentDashboard(): Promise<
   EnvironmentDashboardData[]
 > {
   try {
+    const {
+      getEnvironmentConfig,
+      loadLatestArtifact,
+      loadGovernanceSnapshots,
+      ALL_ENVIRONMENTS,
+    } = await import("@nzila/platform-environment");
+    const { getEnabledFlags } = await import("@nzila/platform-feature-flags");
+
     return ALL_ENVIRONMENTS.map((env) => {
       const config = getEnvironmentConfig("platform", env);
       const latestArtifact = env === "STAGING" || env === "PRODUCTION"
@@ -367,6 +310,13 @@ export async function getEnvironmentDetail(
   env: EnvironmentName,
 ): Promise<EnvironmentDashboardData | null> {
   try {
+    const {
+      getEnvironmentConfig,
+      loadLatestArtifact,
+      loadGovernanceSnapshots,
+    } = await import("@nzila/platform-environment");
+    const { getEnabledFlags } = await import("@nzila/platform-feature-flags");
+
     const config = getEnvironmentConfig("platform", env);
     const latestArtifact = loadLatestArtifact();
     const snapshots = loadGovernanceSnapshots(env);
@@ -380,14 +330,6 @@ export async function getEnvironmentDetail(
 
 // ── Decision Engine ─────────────────────────────────────
 
-import {
-  loadAllDecisions,
-  loadDecisionRecord,
-  listOpenDecisions,
-  summariseDecisions,
-  decisionRecordSchema,
-  decisionSummarySchema,
-} from "@nzila/platform-decision-engine";
 import type {
   DecisionRecord,
   DecisionSummary,
@@ -395,6 +337,7 @@ import type {
 
 export async function getDecisions(): Promise<DecisionRecord[]> {
   try {
+    const { loadAllDecisions, decisionRecordSchema } = await import("@nzila/platform-decision-engine");
     const records = loadAllDecisions();
     return z
       .array(decisionRecordSchema)
@@ -408,6 +351,7 @@ export async function getDecisionById(
   id: string,
 ): Promise<DecisionRecord | null> {
   try {
+    const { loadDecisionRecord, decisionRecordSchema } = await import("@nzila/platform-decision-engine");
     const record = loadDecisionRecord(id);
     if (!record) return null;
     return decisionRecordSchema.parse(record) as DecisionRecord;
@@ -418,6 +362,7 @@ export async function getDecisionById(
 
 export async function getOpenDecisions(): Promise<DecisionRecord[]> {
   try {
+    const { listOpenDecisions } = await import("@nzila/platform-decision-engine");
     return listOpenDecisions() as DecisionRecord[];
   } catch {
     return [];
@@ -426,6 +371,11 @@ export async function getOpenDecisions(): Promise<DecisionRecord[]> {
 
 export async function getDecisionSummary(): Promise<DecisionSummary> {
   try {
+    const {
+      loadAllDecisions,
+      summariseDecisions,
+      decisionSummarySchema,
+    } = await import("@nzila/platform-decision-engine");
     const records = loadAllDecisions();
     const summary = summariseDecisions(records);
     return decisionSummarySchema.parse(summary) as DecisionSummary;

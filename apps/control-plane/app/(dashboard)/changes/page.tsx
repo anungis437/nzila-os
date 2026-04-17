@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { ChangeRecordTable } from "@/components/changes/change-record-table";
 import { PIRSummaryCard } from "@/components/changes/pir-summary-card";
-import { getChangeRecords } from "@/server/data";
+import { getChangeRecords } from "@/server/change-data";
 
 export const dynamic = "force-dynamic";
 

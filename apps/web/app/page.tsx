@@ -12,11 +12,11 @@ import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@
 
 export const metadata: Metadata = {
   title: 'Home',
-  description: `Nzila Ventures — venture studio building ${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} TAM, ${MARKETING_FACTS.flagshipPlatforms} flagships, one unified Backbone.`,
+  description: `Nzila Ventures builds ${MARKETING_FACTS.productPlatforms} software products and ${MARKETING_FACTS.governedApplications} live tools across healthcare, finance, agriculture, labor rights, and justice.`,
   openGraph: {
-    title: 'Nzila Ventures | The APEX of AI in Social Impact',
-    description: `${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} TAM.`,
-    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing global AI connectivity — Nzila Ventures' }],
+    title: 'Nzila Ventures | Trusted Technology for Social Impact',
+    description: `${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools for essential industries.`,
+    images: [{ url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Earth at night showing global digital connectivity — Nzila Ventures' }],
   },
   alternates: { canonical: '/' },
 };
@@ -25,24 +25,24 @@ const verticals = [
   { name: 'Fintech', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800', alt: 'Financial trading charts with candlestick patterns on dark screens', description: 'Banking, payments, insurance', tam: '$100B+' },
   { name: 'Agrotech', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'Aerial view of lush green agricultural farmland rows', description: 'Farm management, supply chain', tam: '$8.6B' },
   { name: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'Workers gathered in a professional labor meeting', description: 'Labor rights, union management', tam: '$50B' },
-  { name: 'Legaltech', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'Scales of justice on a desk with legal documents', description: 'Case management, legal AI', tam: '$13B+' },
+  { name: 'Legaltech', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'Scales of justice on a desk with legal documents', description: 'Case management, legal support tools', tam: '$13B+' },
   { name: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'Students collaborating around laptops in a modern classroom', description: 'Learning, training, certification', tam: '$13B+' },
   { name: 'Entertainment', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800', alt: 'Musician performing live on stage under spotlight', description: 'Streaming, content platforms', tam: '$50B' },
   { name: 'Commerce', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800', alt: 'Customer completing a digital payment at retail checkout', description: 'Order-centric trade ops, quoting, logistics', tam: '$25B' },
   { name: 'Healthtech', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800', alt: 'Doctor using digital tablet for patient health records', description: 'Care, wellness, cognitive', tam: '$20B' },
-  { name: 'Insurtech', image: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=800', alt: 'Business analyst reviewing insurance risk data on screens', description: 'Arbitrage, underwriting AI', tam: '$30B' },
+  { name: 'Insurtech', image: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=800', alt: 'Business analyst reviewing insurance risk data on screens', description: 'Arbitrage, underwriting support', tam: '$30B' },
   { name: 'Justice', image: 'https://images.unsplash.com/photo-1591291621164-2c6367723315?w=800', alt: 'Raised fist silhouette against sunset representing social justice advocacy', description: 'Advocacy, DEI training', tam: '$1.5B' },
 ];
 
 const flagships = [
   { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform for 4,773 orgs', orgs: '4,773', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
-  { name: 'ABR Insights', vertical: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'ABR Insights — anti-racism learning management and AI coaching platform', orgs: '132', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, AI coach' },
+  { name: 'ABR Insights', vertical: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'ABR Insights — anti-racism learning management and coaching platform', orgs: '132', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, guided coaching' },
   { name: 'CORA', vertical: 'Agrotech', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'CORA — Canadian agricultural data platform with farm management and supply chain intelligence', orgs: '80+', tam: '$8.6B', description: 'Farm management and supply-chain intelligence built on Canadian agricultural data — crop management, IoT integration, and market intelligence.' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800', alt: 'DiasporaCore — diaspora banking and international transfer infrastructure', orgs: '485', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
 ];
 
-const aiCapabilities = [
-  { name: 'Natural Language Processing', metric: 'Domain-specific', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'AI neural network processing natural language with glowing data nodes', description: 'Context-aware AI across legal, healthcare, and education' },
+const intelligenceCapabilities = [
+  { name: 'Natural Language Processing', metric: 'Domain-specific', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'Digital language processing with connected data nodes', description: 'Context-aware assistance across legal, healthcare, and education' },
   { name: 'Predictive Analytics', metric: 'Purpose-built', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Predictive analytics dashboard with colorful data visualizations', description: 'Pension forecasting, crop yields, insurance risk scoring' },
   { name: 'Anomaly Detection', metric: 'Real-time', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Real-time network monitoring console detecting anomalies', description: 'Fraud prevention, compliance monitoring, threat intelligence' },
   { name: 'Computer Vision', metric: 'Multi-modal', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Computer vision system analyzing visual data with recognition overlays', description: 'Document processing, agricultural imaging, identity verification' },
@@ -55,7 +55,7 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920"
-          alt="Earth at night showing illuminated cities and global AI connectivity networks"
+          alt="Earth at night showing illuminated cities and global digital connectivity networks"
           fill
           priority
           className="object-cover"
@@ -67,7 +67,7 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
-              The APEX of AI in Social Impact
+              Trusted Technology for Social Impact
             </span>
           </ScrollReveal>
 
@@ -86,7 +86,7 @@ export default function Home() {
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              {MARKETING_FACTS.productPlatforms} product platforms across {MARKETING_FACTS.verticalsLabel} verticals - delivered through {MARKETING_FACTS.governedApplications} governed applications for
+              {MARKETING_FACTS.productPlatforms} software products across {MARKETING_FACTS.verticalsLabel} industries - delivered through {MARKETING_FACTS.governedApplications} live tools for
               healthcare, finance, agriculture, labor rights, and justice.
             </p>
           </ScrollReveal>
@@ -127,10 +127,10 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: 'Product Platforms' },
-              { target: MARKETING_FACTS.governedApplications, suffix: '', label: 'Governed Applications' },
-              { target: 10, suffix: '+', label: 'Verticals' },
-              { target: 100, prefix: '$', suffix: 'B+', label: 'Total TAM' },
+              { target: MARKETING_FACTS.productPlatforms, suffix: '', label: 'Products' },
+              { target: MARKETING_FACTS.governedApplications, suffix: '', label: 'Live Tools' },
+              { target: 10, suffix: '+', label: 'Industries' },
+              { target: 100, prefix: '$', suffix: 'B+', label: 'Total Market Size' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -161,13 +161,13 @@ export default function Home() {
                 Infrastructure for <span className="text-electric">Social Impact</span> at Scale
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                We transform legacy platforms into modern, scalable AI solutions that serve 
+                We transform legacy platforms into modern, scalable software that serves 
                 communities across healthcare, legal systems, insurance, agriculture, and beyond. 
-                Our unified Backbone infrastructure powers innovation while maintaining ethical integrity 
+                Our shared platform infrastructure powers innovation while maintaining ethical integrity 
                 — built to meet the rigorous social, environmental, and governance standards of B Corp certification.
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {['Data-Driven', 'Human-Centered', 'Ethical AI', 'B Corp Aligned'].map((item) => (
+                {['Data-Driven', 'Human-Centered', 'Trusted Automation', 'B Corp Aligned'].map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-electric" />
                     <span className="text-sm font-medium text-gray-700">{item}</span>
@@ -217,8 +217,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="Flagship Products"
-            title="Production-Ready AI Platforms"
-            subtitle="Four flagship products solving critical problems with artificial intelligence across diverse sectors"
+            title="Production-Ready Platforms"
+            subtitle="Four flagship products solving critical problems with practical automation across diverse sectors"
           />
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -237,7 +237,7 @@ export default function Home() {
                   <p className="text-gray-300 text-sm mb-3">{platform.description}</p>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="text-white font-semibold">{platform.orgs} orgs</span>
-                    <span className="text-gold font-semibold">{platform.tam} TAM</span>
+                    <span className="text-gold font-semibold">{platform.tam} market size</span>
                   </div>
                 </ImageCard>
               </ScrollReveal>
@@ -257,19 +257,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════ AI DIFFERENTIATOR ═══════════════════════ */}
+      {/* ═══════════════════════ INTELLIGENCE DIFFERENTIATOR ═══════════════════════ */}
       <section className="py-24 bg-navy relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="AI Engine"
-            title="The Intelligence Behind Every Vertical"
-            subtitle="Purpose-built AI models powering actionable insights across all platforms"
+            badge="Intelligence Engine"
+            title="The Insights Behind Every Vertical"
+            subtitle="Purpose-built models and automation powering actionable insights across all platforms"
             light
           />
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {aiCapabilities.map((cap, i) => (
+            {intelligenceCapabilities.map((cap, i) => (
               <ScrollReveal key={cap.name} delay={i * 0.1}>
                 <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift">
                   <Image
@@ -301,8 +301,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="Market Reach"
-            title="10+ Strategic Verticals"
-            subtitle="Our portfolio spans diverse sectors, each powered by purpose-built AI"
+            title="10+ Strategic Industries"
+            subtitle="Our portfolio spans diverse sectors, each powered by purpose-built technology"
           />
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -345,15 +345,15 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="Intellectual Property"
-            title="Defensible Moat"
-            subtitle="Years of domain expertise encoded into proprietary AI, data models, and trade secrets"
+            title="Long-Term Advantage"
+            subtitle="Years of domain expertise encoded into proprietary models, data systems, and trade secrets"
             light
           />
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { value: '$5.7M–$7.5M', label: 'IP Portfolio Value', color: 'from-electric to-violet' },
-              { value: 'Proprietary', label: 'AI Prompt Library', color: 'from-gold to-gold-light' },
+              { value: 'Proprietary', label: 'Decision Prompt Library', color: 'from-gold to-gold-light' },
               { value: '12,000+', label: 'Database Entities', color: 'from-emerald to-cyan-400' },
             ].map((item, i) => (
               <ScrollReveal key={item.label} delay={i * 0.15}>
