@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Portfolio',
-  description: '15 AI-powered platforms across 10+ verticals — from UnionEyes in labor rights to DiasporaCore in fintech. Explore the full Nzila Ventures portfolio.',
+  description: `${platformCoverageLabel()}, ${governedCoverageLabel()}. Explore the full Nzila Ventures portfolio.`,
   openGraph: {
     title: 'Nzila Ventures Portfolio',
-    description: '15 platforms, 12,000+ data orgs, $100B+ TAM.',
+    description: `${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications, 12,000+ data entities, ${MARKETING_FACTS.totalTamLabel} TAM.`,
     images: [{ url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Data analytics dashboard with glowing charts and metrics' }],
   },
   alternates: { canonical: '/portfolio' },
@@ -19,12 +20,12 @@ const platforms = [
   { name: 'UnionEyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
   { name: 'ABR Insights', vertical: 'EdTech/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.1, status: 'Production Ready', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, AI coach' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', orgs: '485', complexity: 'EXTREME', readiness: 6.5, status: 'Flagship', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
-  { name: 'CongoWave', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
+  { name: 'Zonga', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
   { name: 'SentryIQ360', vertical: 'Insurtech', orgs: '79+', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$30B', description: 'Insurance arbitrage, underwriting AI, policy lifecycle' },
   { name: 'Court Lens', vertical: 'Legaltech', orgs: '682', complexity: 'HIGH', readiness: 6.0, status: 'In Development', tam: '$12B', description: 'Legal AI, case management, eDiscovery' },
   { name: 'CORA', vertical: 'Agrotech', orgs: '80+', complexity: 'HIGH', readiness: 7.0, status: 'Flagship (Beta)', tam: '$8.6B', description: 'Farm management, supply chain, market intelligence' },
   { name: 'CyberLearn', vertical: 'EdTech', orgs: '30+', complexity: 'HIGH', readiness: 7.5, status: 'In Development', tam: '$8B', description: 'Cybersecurity training, Docker labs, CTF challenges' },
-  { name: 'Shop Quoter', vertical: 'Commerce', orgs: '93', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$5B', description: 'Corporate gift boxes, CRM integration, WhatsApp AI' },
+  { name: 'Flow', vertical: 'Commerce', orgs: '500+', complexity: 'HIGH-EXTREME', readiness: 9.0, status: 'Production Ready', tam: '$100B+', description: 'Order-to-cash, procure-to-pay, and AI-assisted quoting with enterprise integrations' },
   { name: 'Trade OS', vertical: 'Trade', orgs: '337', complexity: 'MEDIUM-HIGH', readiness: 6.5, status: 'In Development', tam: '$15B', description: 'Trade operations, multi-carrier logistics, customs' },
   { name: 'eExports', vertical: 'Trade', orgs: '78', complexity: 'MEDIUM-HIGH', readiness: 8.0, status: 'Django PoC', tam: '$3B', description: 'Export documentation, compliance, shipment tracking' },
   { name: 'AgrimoOps', vertical: 'Agrotech', orgs: '220', complexity: 'HIGH', readiness: 7.0, status: 'In Development', tam: '$8B', description: 'Supply chain ERP, crop planning, IoT integration' },
@@ -83,7 +84,7 @@ export default function Portfolio() {
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              15 AI platforms across 10+ verticals, unified into a single intelligent Backbone infrastructure
+              {MARKETING_FACTS.productPlatforms} product platforms across {MARKETING_FACTS.verticalsLabel} verticals, delivered through {MARKETING_FACTS.governedApplications} governed applications on one intelligent Backbone.
             </p>
           </ScrollReveal>
 
@@ -184,7 +185,7 @@ export default function Portfolio() {
           <SectionHeading
             badge="Roadmap"
             title="Migration Journey"
-            subtitle="Phased approach to unifying all 15 platforms onto the shared Backbone"
+            subtitle="Phased approach to unifying all 15 product platforms and 17 governed applications onto the shared Backbone"
             light
           />
 
@@ -223,12 +224,14 @@ export default function Portfolio() {
       {/* ═══════════════════════ CTA ═══════════════════════ */}
       <section className="py-16 bg-white text-center">
         <ScrollReveal>
-          <Link
+          <TrackedLink
             href="/verticals"
+            eventName="cta_verticals"
+            eventProps={{ source: 'portfolio_bottom' }}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg"
           >
             Explore Verticals →
-          </Link>
+          </TrackedLink>
         </ScrollReveal>
       </section>
     </main>

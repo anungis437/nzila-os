@@ -4,13 +4,15 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, platformCoverageLabel, portfolioHeadlineLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Investors',
-  description: 'Series A investment opportunity — $100B+ TAM, 15 AI platforms, 4 flagships, one unified Backbone. Join the future of AI infrastructure.',
+  description: `Series A investment opportunity - ${MARKETING_FACTS.totalTamLabel} TAM, ${MARKETING_FACTS.productPlatforms} product platforms, ${MARKETING_FACTS.governedApplications} governed applications, and one unified Backbone.`,
   openGraph: {
     title: 'Invest in Nzila Ventures',
-    description: '$100B+ TAM. 15 AI platforms. Series A ready.',
+    description: `${MARKETING_FACTS.totalTamLabel} TAM. ${MARKETING_FACTS.productPlatforms} product platforms. ${MARKETING_FACTS.governedApplications} governed applications.`,
     images: [{ url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Modern glass skyscraper reaching skyward — representing growth and investment ambition' }],
   },
   alternates: { canonical: '/investors' },
@@ -18,11 +20,11 @@ export const metadata: Metadata = {
 
 const keyMetrics = [
   { label: 'Total Addressable Market', value: '$100B+', color: 'text-gold' },
-  { label: 'AI Platforms', value: '15', color: 'text-electric' },
-  { label: 'Verticals', value: '10+', color: 'text-violet' },
+  { label: 'Product Platforms', value: String(MARKETING_FACTS.productPlatforms), color: 'text-electric' },
+  { label: 'Governed Applications', value: String(MARKETING_FACTS.governedApplications), color: 'text-violet' },
+  { label: 'Verticals', value: MARKETING_FACTS.verticalsLabel, color: 'text-violet' },
   { label: 'IP Portfolio Value', value: '$5.7M–$7.5M', color: 'text-emerald' },
   { label: 'Database Entities', value: '12,000+', color: 'text-electric' },
-  { label: 'Proprietary AI Prompts', value: 'Trade Secret', color: 'text-gold' },
 ];
 
 const flagships = [
@@ -42,7 +44,7 @@ const useOfFunds = [
 
 const timeline = [
   { year: '2019–2022', title: 'Foundation', description: 'Built core IP, 12,000+ data orgs, proprietary AI prompt library, pioneered union and diaspora banking tech.' },
-  { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 platforms across 10 verticals. Unified Backbone architecture. Django + Next.js stack.' },
+  { year: '2023', title: 'Platform Expansion', description: 'Expanded to 15 product platforms across 10 verticals and 17 governed applications. Unified Backbone architecture.' },
   { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure.' },
   { year: '2025', title: 'Series A Ready', description: 'Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
@@ -86,25 +88,29 @@ export default function InvestorsPage() {
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
-              15 AI platforms. 10+ verticals. One unified Backbone. Nzila Ventures is the infrastructure 
+              {platformCoverageLabel()}. {MARKETING_FACTS.governedApplications} governed applications. One unified Backbone. Nzila Ventures is the infrastructure 
               layer for social-impact technology — healthcare, finance, labor, agriculture, and justice.
             </p>
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link
+              <TrackedLink
                 href="/contact"
+                eventName="cta_investment_deck"
+                eventProps={{ source: 'investors_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-all text-lg shadow-lg shadow-gold/30"
               >
                 Request Investment Deck
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/portfolio"
+                eventName="cta_portfolio"
+                eventProps={{ source: 'investors_hero' }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg"
               >
                 View Full Portfolio
-              </Link>
+              </TrackedLink>
             </div>
           </ScrollReveal>
         </div>
@@ -171,8 +177,8 @@ export default function InvestorsPage() {
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>
-                      <div className="text-2xl font-bold">15</div>
-                      <div className="text-xs text-gray-300">AI Platforms</div>
+                      <div className="text-2xl font-bold">{portfolioHeadlineLabel()}</div>
+                      <div className="text-xs text-gray-300">Platforms / Apps</div>
                     </div>
                     <div className="w-px h-10 bg-white/20" />
                     <div>

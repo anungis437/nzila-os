@@ -5,9 +5,10 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import TrackedLink from './TrackedLink';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3002';
+const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 
 const navigation = [
   { name: 'About', href: '/about' },
@@ -91,18 +92,23 @@ export default function Navigation() {
                 </Link>
               );
             })}
-            <Link
+            <TrackedLink
               href="/contact"
+              eventName="cta_request_demo"
+              eventProps={{ source: 'navigation_desktop' }}
               className="px-5 py-2.5 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-electric/25"
             >
               Request Demo
-            </Link>
+            </TrackedLink>
             {/* App-switcher divider */}
             <div className="w-px h-6 bg-gray-200" />
             {appLinks.map((app) => (
-              <a
+              <TrackedLink
                 key={app.name}
                 href={app.href}
+                eventName="app_switch"
+                eventProps={{ app: app.name, source: 'navigation_desktop' }}
+                external
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`flex items-center gap-1 text-sm font-medium transition-colors ${
@@ -111,7 +117,7 @@ export default function Navigation() {
               >
                 {app.name}
                 <ArrowTopRightOnSquareIcon className="h-3 w-3" />
-              </a>
+              </TrackedLink>
             ))}
           </div>
 
@@ -119,6 +125,9 @@ export default function Navigation() {
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation-menu"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               className={`p-2 rounded-lg transition-colors ${
                 scrolled ? 'text-gray-700' : 'text-white'
               }`}
@@ -140,6 +149,7 @@ export default function Navigation() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
+            id="mobile-navigation-menu"
             className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100"
           >
             <div className="px-4 pt-2 pb-4 space-y-1">
@@ -160,19 +170,24 @@ export default function Navigation() {
                   </Link>
                 );
               })}
-              <Link
+              <TrackedLink
                 href="/contact"
+                eventName="cta_request_demo"
+                eventProps={{ source: 'navigation_mobile' }}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 bg-electric text-white rounded-xl text-base font-semibold text-center mt-2"
               >
                 Request Demo
-              </Link>
+              </TrackedLink>
               <div className="pt-2 border-t border-gray-100 mt-2">
                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Apps</p>
                 {appLinks.map((app) => (
-                  <a
+                  <TrackedLink
                     key={app.name}
                     href={app.href}
+                    eventName="app_switch"
+                    eventProps={{ app: app.name, source: 'navigation_mobile' }}
+                    external
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMobileMenuOpen(false)}
@@ -180,7 +195,7 @@ export default function Navigation() {
                   >
                     {app.name}
                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                  </a>
+                  </TrackedLink>
                 ))}
               </div>
             </div>

@@ -24,7 +24,7 @@ The Backbone philosophy: **build it once, secure it once, audit it once, and sha
 | Web Framework | Next.js 16 (App Router) | Server-rendered React applications |
 | Styling | Tailwind CSS v4 | Consistent design system |
 | ORM / DB | Drizzle ORM + PostgreSQL | Type-safe queries with RLS enforcement |
-| Deployment | Azure Static Web Apps | Global CDN, auto-scaling |
+| Deployment | Azure Container Apps | Containerized runtime with controlled rollout and gate-enforced deploys |
 | CI/CD | GitHub Actions + Turborepo | Monorepo-aware build pipelines |
 | Analytics | Custom Python pipeline | Portfolio-level reporting |
 | Evidence | `@nzila/os-core` seal library | Tamper-evident governance artefacts |
@@ -118,7 +118,7 @@ The `verifySeal()` function from `@nzila/os-core` is called as a blocking CI gat
 
 ## CI Governance Gates
 
-Every pull request must pass these eight gates before merge:
+Core pull requests are blocked on the baseline governance gates below:
 
 1. **Secret scan** — Gitleaks + TruffleHog, zero tolerance
 2. **Dependency audit** — CRITICAL CVEs block merge
@@ -127,9 +127,9 @@ Every pull request must pass these eight gates before merge:
 5. **Contract tests** — Cross-stack invariant enforcement
 6. **UE evidence** — UnionEyes collect → seal → verify
 7. **ABR evidence** — ABR collect → seal → verify
-8. **Red-team** — Adversarial test suite (daily + on PR)
+8. **Red-team** — Adversarial suite run on schedule and on-demand (`run-red-team`)
 
-A `governance-gate` job joins all eight and exits 1 if any fails.
+A `governance-gate` job joins the required baseline jobs and exits 1 if any fails.
 
 ---
 

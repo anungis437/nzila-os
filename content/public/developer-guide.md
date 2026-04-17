@@ -1,6 +1,6 @@
 ---
 title: Developer Guide
-description: How to build on top of the Nzila platform — authentication patterns, API conventions, shared packages, and local development setup.
+description: "How to build on the Nzila platform: auth patterns, API conventions, shared packages, and local development workflows."
 category: Developer Guide
 order: 1
 date: 2026-02-01
@@ -14,7 +14,7 @@ Before developing within the Nzila monorepo you will need:
 - **pnpm** ≥ 9
 - **Python** ≥ 3.12 (for Django-backed apps)
 - **Docker** (for local PostgreSQL + services)
-- A Microsoft Entra External ID tenant for authentication keys
+- Optional Microsoft Entra configuration if you plan to enable SSO in your environment
 
 ---
 
@@ -49,7 +49,12 @@ Key directories:
 
 ## Authentication
 
-All apps use **`@nzila/platform-auth`** with Microsoft Entra External ID. The middleware automatically protects server routes.
+All apps use **`@nzila/platform-auth`** with a dual model:
+
+- **Default:** email/password with session cookies
+- **Optional:** Microsoft Entra SSO fallback
+
+The middleware automatically protects server routes regardless of sign-in method.
 
 ### Protecting a route (Next.js App Router)
 
@@ -76,10 +81,13 @@ export default authMiddleware(async (auth, req) => {
 import { auth } from '@nzila/platform-auth/entra/server';
 
 export default async function DashboardPage() {
-  const { orgId, userId } = await auth();
+  const { userId } = await auth();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const orgId = await getOrganizationIdForUser(userId);
   if (!orgId) throw new Error('No org context');
 
-  // orgId is the authoritative identifier — never derive it from request params
+  // Resolve app org context from the authenticated user, never request input.
   const data = await db
     .select()
     .from(events)
@@ -89,7 +97,7 @@ export default async function DashboardPage() {
 }
 ```
 
-> **Org isolation rule:** `orgId` must always come from the authenticated session (auth JWT). Never accept it from query params, request bodies, or cookies.
+> **Org isolation rule:** use the authenticated `userId` to resolve the app org context server-side. Never accept org context from query params, request bodies, or cookies.
 
 ---
 
@@ -129,7 +137,7 @@ await withAudit(scopedDb, {
   orgId,
   userId,
   action: 'member.invite',
-  orgId: newMemberId,
+  entityId: newMemberId,
 }, async (db) => {
   await db.insert(orgMembers).values({ orgId, userId: newMemberId });
 });

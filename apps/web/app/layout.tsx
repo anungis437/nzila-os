@@ -9,6 +9,7 @@ import Footer from "@/components/public/Footer";
 import BackToTop from "@/components/public/BackToTop";
 import PageTransition from "@/components/public/PageTransition";
 import JsonLd from "@/components/public/JsonLd";
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from "@/lib/marketing-facts";
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     default: "Nzila Ventures | The APEX of AI in Social Impact",
     template: "%s | Nzila Ventures",
   },
-  description: "Venture studio building 15 AI-powered platforms across 10+ verticals — healthcare, finance, agriculture, labor rights, and justice. $100B+ Total Addressable Market.",
+  description: `Venture studio building ${platformCoverageLabel()}, ${governedCoverageLabel()}. ${MARKETING_FACTS.totalTamLabel} Total Addressable Market.`,
   keywords: ["AI", "venture studio", "social impact", "fintech", "healthtech", "agrotech", "legaltech", "edtech", "ethical AI", "machine learning", "Nzila Ventures"],
   authors: [{ name: "Nzila Ventures" }],
   creator: "Nzila Ventures",
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName: "Nzila Ventures",
     title: "Nzila Ventures | The APEX of AI in Social Impact",
-    description: "15 AI-powered platforms across 10+ verticals. One unified Backbone. Series A ready.",
+    description: `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals, delivered through ${MARKETING_FACTS.governedApplications} governed applications. One unified Backbone.`,
     images: [
       {
         url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80",
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nzila Ventures | The APEX of AI in Social Impact",
-    description: "15 AI-powered platforms across 10+ verticals. One unified Backbone.",
+    description: `${MARKETING_FACTS.productPlatforms} product platforms across ${MARKETING_FACTS.verticalsLabel} verticals, delivered through ${MARKETING_FACTS.governedApplications} governed applications. One unified Backbone.`,
     images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&q=80"],
   },
   robots: {
@@ -83,9 +84,17 @@ export default async function RootLayout({
         </head>
         <body className={`${poppins.className} custom-scrollbar`}>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-navy"
+            >
+              Skip to main content
+            </a>
             <Navigation />
             <PageTransition>
-              {children}
+              <div id="main-content">
+                {children}
+              </div>
             </PageTransition>
             <Footer />
             <BackToTop />
