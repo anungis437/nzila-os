@@ -12,6 +12,7 @@ import {
   DevicePhoneMobileIcon,
   BellAlertIcon,
   GlobeAltIcon,
+  BuildingOffice2Icon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
@@ -29,7 +30,7 @@ interface CatalogItem {
   description: string
   icon: React.ReactNode
   color: string
-  status: 'available' | 'coming-soon'
+  status: 'available'
 }
 
 const catalog: CatalogItem[] = [
@@ -118,6 +119,27 @@ const catalog: CatalogItem[] = [
     color: 'bg-orange-500',
     status: 'available',
   },
+  // Productivity Suites
+  {
+    provider: 'm365',
+    name: 'Microsoft 365',
+    type: 'productivity',
+    typeLabel: 'Productivity',
+    description: 'Outlook, Calendar, OneDrive, and Graph API workflows for enterprise operations.',
+    icon: <BuildingOffice2Icon className="h-5 w-5 text-white" />,
+    color: 'bg-blue-700',
+    status: 'available',
+  },
+  {
+    provider: 'google-workspace',
+    name: 'Google Workspace',
+    type: 'productivity',
+    typeLabel: 'Productivity',
+    description: 'Gmail, Calendar, Drive, and Admin SDK automations for cross-team coordination.',
+    icon: <GlobeAltIcon className="h-5 w-5 text-white" />,
+    color: 'bg-emerald-600',
+    status: 'available',
+  },
   // Webhooks
   {
     provider: 'webhooks',
@@ -132,16 +154,11 @@ const catalog: CatalogItem[] = [
 ]
 
 function StatusBadge({ status }: { status: CatalogItem['status'] }) {
-  if (status === 'available') {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-        Available
-      </span>
-    )
-  }
   return (
-    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded">Coming soon</span>
+    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+      Available
+    </span>
   )
 }
 
@@ -160,6 +177,7 @@ export default function IntegrationsCatalogPage() {
     push: catalog.filter((c) => c.type === 'push'),
     chatops: catalog.filter((c) => c.type === 'chatops'),
     crm: catalog.filter((c) => c.type === 'crm'),
+    productivity: catalog.filter((c) => c.type === 'productivity'),
     webhooks: catalog.filter((c) => c.type === 'webhooks'),
   }
 
@@ -169,6 +187,7 @@ export default function IntegrationsCatalogPage() {
     { key: 'push', label: 'Push Notifications', items: grouped.push },
     { key: 'chatops', label: 'ChatOps', items: grouped.chatops },
     { key: 'crm', label: 'CRM', items: grouped.crm },
+    { key: 'productivity', label: 'Productivity Suites', items: grouped.productivity },
     { key: 'webhooks', label: 'Webhooks', items: grouped.webhooks },
   ]
 

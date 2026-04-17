@@ -11,22 +11,15 @@ import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { asc, sql } from 'drizzle-orm'
 import { verifyChain } from '@nzila/os-core/hash'
-import { auth } from '@nzila/platform-auth/entra/server'
+import { requireRole } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { authorize } = await import('@nzila/os-core/policy')
+export async function GET(_req: NextRequest) {
   try {
-    await authorize(req, { requiredScope: 'governance:read' as const })
-  } catch (err: unknown) {
-    const e = err as { message?: string; statusCode?: number }
-    return NextResponse.json({ error: 'Forbidden' }, { status: e.statusCode ?? 403 })
+    await requireRole('platform_admin', 'studio_admin', 'ops', 'analyst')
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const verifiedAt = new Date().toISOString()
 

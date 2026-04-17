@@ -60,6 +60,13 @@ export default function IssueSharesPage() {
     setError('')
 
     try {
+      const mergedNotes = [
+        form.recipientName ? `Recipient: ${form.recipientName}` : '',
+        form.notes,
+      ]
+        .filter(Boolean)
+        .join('\n')
+
       const res = await fetch(`/api/orgs/${selectedEntity}/equity/ledger`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,7 +76,7 @@ export default function IssueSharesPage() {
           quantity: form.quantity,
           pricePerShare: form.pricePerShare || undefined,
           effectiveDate: new Date().toISOString().slice(0, 10),
-          notes: form.notes || undefined,
+          notes: mergedNotes || undefined,
         }),
       })
       if (!res.ok) {
@@ -168,6 +175,18 @@ export default function IssueSharesPage() {
             onChange={(e) => setForm({ ...form, pricePerShare: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             placeholder="0.00"
+          />
+        </div>
+
+        {/* Recipient */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Name (optional)</label>
+          <input
+            type="text"
+            value={form.recipientName}
+            onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            placeholder="Individual or entity receiving shares"
           />
         </div>
 

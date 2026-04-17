@@ -8,7 +8,9 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { createLogger } from '@nzila/os-core'
-import { installProvider } from '@nzila/platform-marketplace'
+import { parseProviderKey, providerCatalog } from '@/lib/integrations-provider-catalog'
+import { upsertIntegrationConnection } from '@/lib/integrations-connections'
+import { recordIntegrationDelivery, recordIntegrationDlqEntry } from '@/lib/integrations-runtime-store'
 
 const logger = createLogger('api:marketplace:install')
 
@@ -31,44 +33,57 @@ export async function POST(req: NextRequest) {
       }
 
       const { providerId, orgId, secrets } = parsed.data
+      const provider = parseProviderKey(providerId)
+      const definition = providerCatalog[provider]
 
-      const result = await installProvider(
-        {
+      const testResult = await definition.testConnection(secrets)
+      const status = testResult.ok ? 'connected' : 'error'
+
+      const delivery = await recordIntegrationDelivery({
+        orgId,
+        provider,
+        recipient: 'marketplace_install_probe',
+        status: testResult.ok ? 'sent' : 'failed',
+        attempts: 1,
+        maxAttempts: 1,
+        payloadJson: { provider, operation: 'marketplace_install' },
+        errorMessage: testResult.error ?? null,
+      })
+
+      if (!testResult.ok) {
+        await recordIntegrationDlqEntry({
           orgId,
-          providerKey: providerId,
-          installedBy: auth.userId,
-          secrets,
-        },
-        {
-          async loadManifest(key) {
-            return {
-              providerKey: key,
-              name: key,
-              version: '1.0.0',
-              description: `Provider ${key}`,
-              category: 'integration',
-              scopes: [],
-              webhookSigning: { algorithm: 'hmac-sha256' as const, headerName: 'x-signature' },
-              retryPolicy: { maxAttempts: 3, initialDelayMs: 1000, maxDelayMs: 30000, backoffMultiplier: 2 },
-              requiredSecrets: Object.keys(secrets).map((k) => ({ key: k, description: k, required: true })),
-              metadata: {},
-            }
-          },
-          async listManifests() { return [] },
-          async saveInstallation() {},
-          async loadInstallation() { return null },
-          async listInstallations() { return [] },
-          async validateSecrets(_key, provided) {
-            return Object.keys(provided).length > 0
-          },
-          async runTestCall() {
-            return { ok: true }
-          },
-        },
-      )
+          provider,
+          eventType: 'marketplace_install',
+          retryCount: 1,
+          lastError: testResult.error ?? 'Installation test failed',
+          deliveryId: delivery.id,
+          payloadJson: { provider },
+        })
+      }
 
-      if (!result.ok) {
-        return NextResponse.json({ error: result.error ?? 'Installation failed' }, { status: 422 })
+      const connection = await upsertIntegrationConnection({
+        orgId,
+        provider,
+        secrets,
+        status,
+        lastValidationOk: testResult.ok,
+        lastValidationError: testResult.error ?? null,
+        actorUserId: auth.userId,
+      })
+
+      if (!testResult.ok) {
+        return NextResponse.json(
+          {
+            ok: false,
+            provider,
+            requiredSecrets: definition.requiredSecrets,
+            connection,
+            delivery,
+            error: testResult.error ?? 'Installation failed',
+          },
+          { status: 422 },
+        )
       }
 
       await recordAuditEvent({
@@ -77,11 +92,20 @@ export async function POST(req: NextRequest) {
         targetId: orgId,
         action: 'provider_installed',
         actorClerkUserId: auth.userId,
-        afterJson: { providerId, secretCount: Object.keys(secrets).length },
+        afterJson: { providerId: provider, secretCount: Object.keys(secrets).length },
       })
 
-      logger.info('Provider installed', { providerId, orgId })
-      return NextResponse.json(result, { status: 201 })
+      logger.info('Provider installed', { providerId: provider, orgId })
+      return NextResponse.json(
+        {
+          ok: true,
+          provider,
+          requiredSecrets: definition.requiredSecrets,
+          connection,
+          delivery,
+        },
+        { status: 201 },
+      )
     }),
   )
 }

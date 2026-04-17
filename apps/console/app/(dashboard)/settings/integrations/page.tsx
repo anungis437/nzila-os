@@ -18,6 +18,8 @@ import { eq, and, desc } from 'drizzle-orm'
 import { PuzzlePieceIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { Card } from '@nzila/ui'
 import { QboConnectButton } from './QboConnectButton'
+import { listIntegrationConnections } from '@/lib/integrations-connections'
+import { type ProviderKey } from '@/lib/integrations-provider-catalog'
 
 export const dynamic = 'force-dynamic'
 
@@ -107,6 +109,13 @@ export default async function IntegrationsPage({
   const qboStatus = primaryEntityId
     ? await getQboStatus(primaryEntityId)
     : { connected: false }
+
+  const integrationConnections = primaryEntityId
+    ? await listIntegrationConnections(primaryEntityId)
+    : []
+  const integrationConnectionMap = new Map(
+    integrationConnections.map((connection) => [connection.provider, connection]),
+  )
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -199,28 +208,39 @@ export default async function IntegrationsPage({
           </Card.Body>
         </Card>
 
-        {/* ── Coming soon ─────────────────────────────────────────────────────── */}
-        {[
+        {/* ── Ready to configure ─────────────────────────────────────────────── */}
+        {([
           {
-            abbr: 'X',
-            color: 'bg-sky-600',
-            name: 'Xero',
-            desc: 'Alternative accounting software integration for non-QBO orgs.',
+            provider: 'm365',
+            abbr: 'M',
+            color: 'bg-blue-700',
+            name: 'Microsoft 365',
+            desc: 'Graph-powered Outlook, Calendar, and OneDrive workflows for enterprise ops.',
           },
           {
-            abbr: 'P',
-            color: 'bg-black',
-            name: 'Plaid',
-            desc: 'Bank account data aggregation for real-time cash flow visibility.',
+            provider: 'google-workspace',
+            abbr: 'G',
+            color: 'bg-emerald-600',
+            name: 'Google Workspace',
+            desc: 'Gmail, Drive, and Calendar automation for operational collaboration.',
           },
           {
+            provider: 'hubspot',
             abbr: 'HS',
             color: 'bg-orange-500',
             name: 'HubSpot',
             desc: 'CRM sync — match revenue to contacts and pipeline stages.',
           },
-        ].map((item) => (
-          <Card key={item.name} variant="bordered" className="opacity-60">
+          {
+            provider: 'webhooks',
+            abbr: 'WH',
+            color: 'bg-gray-700',
+            name: 'Webhooks',
+            desc: 'Outbound event delivery with HMAC signing and replay protection.',
+          },
+        ] satisfies Array<{ provider: ProviderKey; abbr: string; color: string; name: string; desc: string }>).map((item) => (
+          // Provider cards reflect persisted integration connection status for this org.
+          <Card key={item.name} variant="bordered">
             <Card.Body>
               <div className="flex items-start gap-4">
                 <div
@@ -231,9 +251,21 @@ export default async function IntegrationsPage({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded">
-                      Coming soon
-                    </span>
+                    {integrationConnectionMap.get(item.provider)?.status === 'connected' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                        Connected
+                      </span>
+                    ) : integrationConnectionMap.get(item.provider)?.status === 'error' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                        Error
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                        Connect via API
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-500">{item.desc}</p>
                 </div>

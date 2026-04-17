@@ -21,6 +21,15 @@ export default function RetentionAdminPage() {
   const [error, setError] = useState<string | null>(null)
 
   async function runRetention() {
+    if (!dryRun) {
+      const confirmed = window.confirm(
+        'This will run live retention enforcement and may archive/delete records. Continue?',
+      )
+      if (!confirmed) {
+        return
+      }
+    }
+
     setLoading(true)
     setError(null)
     setResult(null)

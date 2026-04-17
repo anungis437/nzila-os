@@ -7,7 +7,7 @@
  * @see @nzila/platform-integrations-control-plane/dlq
  */
 import { requireRole } from '@/lib/rbac'
-import { getDlqEntries, type DlqRow } from '@/lib/server-data'
+import { getDlqEntries } from '@/lib/server-data'
 import Link from 'next/link'
 import {
   BoltIcon,

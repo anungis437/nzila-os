@@ -75,13 +75,37 @@ export default async function AiModelsPage() {
   const { models, deployments, routes } = await getModelRegistryData(DEFAULT_ENTITY_ID)
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">AI Model Registry</h1>
+    <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-card via-card to-muted/40 p-6 shadow-sm">
+        <div className="absolute -left-8 top-8 h-24 w-24 rounded-full bg-cyan-500/10 blur-2xl" />
+        <div className="absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl" />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Console / AI</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">AI Model Registry</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Governance view of registered models, active deployments, and per-feature routing for this entity.
+            </p>
+          </div>
 
-      {/* ── Registered Models ────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Registered Models</h2>
-        <div className="rounded-lg border">
+          <div className="grid grid-cols-3 gap-3 sm:min-w-90">
+            <SummaryTile label="Models" value={String(models.length)} />
+            <SummaryTile label="Deployments" value={String(deployments.length)} />
+            <SummaryTile label="Routes" value={String(routes.length)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight">Registered Models</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Base registry of model families and modalities available to the platform.
+            </p>
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-xl border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -124,10 +148,14 @@ export default async function AiModelsPage() {
         </div>
       </section>
 
-      {/* ── Deployments ──────────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Deployments</h2>
-        <div className="rounded-lg border">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-4">
+          <h2 className="text-base font-semibold tracking-tight">Deployments</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Approved runtime configurations, token limits, environment targeting, and data-class constraints.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-xl border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -184,14 +212,15 @@ export default async function AiModelsPage() {
         </div>
       </section>
 
-      {/* ── Deployment Routes ────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Deployment Routes (this entity)</h2>
-        <p className="mb-3 text-sm text-muted-foreground">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-4">
+          <h2 className="text-base font-semibold tracking-tight">Deployment Routes</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
           Per-feature routing determines which deployment handles each AI feature.
           Changing a route here changes model routing without code changes.
         </p>
-        <div className="rounded-lg border">
+        </div>
+        <div className="overflow-hidden rounded-xl border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -227,6 +256,15 @@ export default async function AiModelsPage() {
           </table>
         </div>
       </section>
+    </div>
+  )
+}
+
+function SummaryTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
     </div>
   )
 }

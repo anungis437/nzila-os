@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export function IngestButton({
   orgId,
@@ -11,15 +12,20 @@ export function IngestButton({
   appKey?: string
   profileKey?: string
 }) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [dataClass, setDataClass] = useState<string>('internal')
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   async function handleIngest() {
+    setError(null)
+    setSuccess(null)
     if (!title.trim() || !text.trim()) {
-      alert('Title and text are required')
+      setError('Title and text are required.')
       return
     }
     setLoading(true)
@@ -54,78 +60,103 @@ export function IngestButton({
 
       const data = await res.json()
       if (!res.ok) {
-        alert(`Error: ${data.error ?? JSON.stringify(data)}`)
+        setError(typeof data?.error === 'string' ? data.error : 'Ingestion request failed.')
       } else {
-        alert(`Knowledge ingested! Action: ${data.actionId}, status: ${data.status}`)
-        window.location.reload()
+        const actionId = typeof data?.actionId === 'string' ? data.actionId : 'n/a'
+        const status = typeof data?.status === 'string' ? data.status : 'submitted'
+        setSuccess(`Knowledge ingestion submitted. Action ${actionId} is ${status}.`)
+        setTitle('')
+        setText('')
+        setShowForm(false)
+        router.refresh()
       }
+    } catch {
+      setError('Could not submit ingestion. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  if (!showForm) {
-    return (
-      <button
-        onClick={() => setShowForm(true)}
-        className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Ingest Source
-      </button>
-    )
-  }
-
   return (
-    <div className="w-full max-w-lg rounded-lg border p-4 space-y-3">
-      <h3 className="text-sm font-medium">Ingest Knowledge Source</h3>
-      <div>
-        <label className="block text-xs font-medium mb-1">Title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full border rounded px-3 py-1.5 text-sm"
-          placeholder="e.g., Company Policy v2"
-        />
-      </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Text Content</label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="w-full border rounded px-3 py-1.5 text-sm"
-          rows={6}
-          placeholder="Paste your text content here..."
-        />
-      </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Data Class</label>
-        <select
-          value={dataClass}
-          onChange={(e) => setDataClass(e.target.value)}
-          className="border rounded px-3 py-1.5 text-sm"
-        >
-          <option value="public">Public</option>
-          <option value="internal">Internal</option>
-          <option value="sensitive">Sensitive</option>
-          <option value="regulated">Regulated</option>
-        </select>
-      </div>
-      <div className="flex gap-2">
+    <div className="space-y-3">
+      {success ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          {success}
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+
+      {!showForm ? (
         <button
-          onClick={handleIngest}
-          disabled={loading}
-          className="px-4 py-1.5 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
+          onClick={() => setShowForm(true)}
+          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
         >
-          {loading ? 'Ingesting...' : 'Ingest'}
+          Ingest Source
         </button>
-        <button
-          onClick={() => setShowForm(false)}
-          className="px-4 py-1.5 text-sm border rounded hover:bg-muted"
-        >
-          Cancel
-        </button>
-      </div>
+      ) : (
+        <div className="w-full max-w-2xl rounded-xl border bg-card p-4 shadow-sm">
+          <h3 className="text-sm font-medium">Ingest Knowledge Source</h3>
+
+          <div className="mt-3 grid gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium">Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full rounded border px-3 py-1.5 text-sm"
+                placeholder="e.g., Company Policy v2"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium">Text Content</label>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="w-full rounded border px-3 py-1.5 text-sm"
+                rows={7}
+                placeholder="Paste your text content here..."
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium">Data Class</label>
+              <select
+                value={dataClass}
+                onChange={(e) => setDataClass(e.target.value)}
+                className="rounded border px-3 py-1.5 text-sm"
+              >
+                <option value="public">Public</option>
+                <option value="internal">Internal</option>
+                <option value="sensitive">Sensitive</option>
+                <option value="regulated">Regulated</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleIngest}
+              disabled={loading}
+              className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {loading ? 'Submitting...' : 'Submit Ingest Action'}
+            </button>
+            <button
+              onClick={() => setShowForm(false)}
+              className="rounded border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
