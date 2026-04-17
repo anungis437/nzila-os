@@ -13,8 +13,8 @@ describe('logger', () => {
   let stderrSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
-    stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+    stdoutSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    stderrSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.mocked(getRequestContext).mockReturnValue(undefined)
     delete process.env.LOG_LEVEL
   })

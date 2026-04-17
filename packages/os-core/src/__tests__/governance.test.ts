@@ -2,7 +2,7 @@
  * Governance Consistency Test
  *
  * Verifies that all Next.js apps in the monorepo meet the minimum platform
- * contract: middleware, os-core dependency, env schema coverage.
+ * contract: edge guard (proxy/middleware), os-core dependency, env schema coverage.
  *
  * This test is the programmatic enforcement of the platform golden path.
  */
@@ -19,18 +19,30 @@ const NEXTJS_APPS = [
   'trade', 'union-eyes', 'web', 'zonga',
 ]
 
+function getEdgeGuardPath(app: string): string | null {
+  const proxyPath = join(APPS_DIR, app, 'proxy.ts')
+  if (existsSync(proxyPath)) return proxyPath
+
+  const middlewarePath = join(APPS_DIR, app, 'middleware.ts')
+  if (existsSync(middlewarePath)) return middlewarePath
+
+  return null
+}
+
 describe('Platform governance contract', () => {
   const envFile = readFileSync(
     join(ROOT, 'packages', 'os-core', 'src', 'config', 'env.ts'), 'utf-8',
   )
 
-  it.each(NEXTJS_APPS)('%s has middleware.ts', (app) => {
-    expect(existsSync(join(APPS_DIR, app, 'middleware.ts'))).toBe(true)
+  it.each(NEXTJS_APPS)('%s has proxy.ts or middleware.ts', (app) => {
+    expect(getEdgeGuardPath(app)).not.toBeNull()
   })
 
-  it.each(NEXTJS_APPS)('%s middleware includes x-request-id', (app) => {
-    const mw = readFileSync(join(APPS_DIR, app, 'middleware.ts'), 'utf-8')
-    expect(mw).toContain('x-request-id')
+  it.each(NEXTJS_APPS)('%s edge guard includes x-request-id', (app) => {
+    const edgeGuardPath = getEdgeGuardPath(app)
+    expect(edgeGuardPath).not.toBeNull()
+    const edgeGuard = readFileSync(edgeGuardPath!, 'utf-8')
+    expect(edgeGuard).toContain('x-request-id')
   })
 
   it.each(NEXTJS_APPS)('%s has @nzila/os-core dependency', (app) => {
