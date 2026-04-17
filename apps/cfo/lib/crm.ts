@@ -2,32 +2,34 @@
  * CRM — HubSpot Integration
  *
  * Thin wrapper providing CRM contact, deal, and engagement management
- * for the CFO app. Self-contained stubs until @nzila/crm-hubspot is available.
+ * for the CFO app.
  *
  * @module cfo/crm
  */
 
 import { z } from 'zod'
+import {
+  HubSpotClient as BaseHubSpotClient,
+  HubSpotContactSchema as BaseHubSpotContactSchema,
+  HubSpotDealSchema as BaseHubSpotDealSchema,
+  HubSpotEngagementNoteSchema as BaseHubSpotEngagementNoteSchema,
+  type HubSpotClientOptions,
+  type HubSpotContact,
+  type HubSpotEngagementNote,
+} from '@nzila/crm-hubspot'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-export interface HubSpotClientOptions { apiKey: string }
-export interface HubSpotContact { email: string; firstName: string; lastName: string; company?: string; properties?: Record<string, string> }
 export interface HubSpotDeal { name: string; amount: number; stage: string; contactEmail?: string; properties?: Record<string, string> }
-export interface HubSpotEngagementNote { contactEmail: string; body: string; timestamp?: string }
+export interface FinancialHubSpotEngagementNote { contactEmail: string; body: string; timestamp?: string }
 
-export const HubSpotContactSchema = z.object({ email: z.string().email(), firstName: z.string(), lastName: z.string(), company: z.string().optional(), properties: z.record(z.string()).optional() })
+export const HubSpotContactSchema = BaseHubSpotContactSchema
 export const HubSpotDealSchema = z.object({ name: z.string(), amount: z.number(), stage: z.string(), contactEmail: z.string().optional(), properties: z.record(z.string()).optional() })
-export const HubSpotEngagementNoteSchema = z.object({ contactEmail: z.string(), body: z.string(), timestamp: z.string().optional() })
+export const HubSpotEngagementNoteSchema = z.object({ contactEmail: z.string().email(), body: z.string(), timestamp: z.string().optional() })
 
-// ── Stub Client ─────────────────────────────────────────────────────────────
+// ── Client ──────────────────────────────────────────────────────────────────
 
-export class HubSpotClient {
-  constructor(private readonly opts: HubSpotClientOptions) {}
-  async upsertContact(contact: HubSpotContact) { return { id: crypto.randomUUID(), ...contact } }
-  async createDeal(deal: HubSpotDeal) { return { id: crypto.randomUUID(), ...deal } }
-  async healthCheck() { return { ok: Boolean(this.opts.apiKey), provider: 'hubspot' as const } }
-}
+export class HubSpotClient extends BaseHubSpotClient {}
 
 export const hubspotAdapter = { name: 'hubspot' as const, createClient: (opts: HubSpotClientOptions) => new HubSpotClient(opts) }
 
@@ -48,9 +50,58 @@ export async function upsertFinancialContact(contact: HubSpotContact) {
 }
 
 export async function createFinancialDeal(deal: HubSpotDeal) {
-  return getClient().createDeal(deal)
+  const client = getClient()
+
+  let contactId: string | undefined
+  if (deal.contactEmail) {
+    const contactResult = await client.upsertContact({
+      email: deal.contactEmail,
+      firstName: 'Finance',
+      lastName: 'Contact',
+    })
+    if (contactResult.ok) {
+      contactId = contactResult.id
+    }
+  }
+
+  return client.createDeal({
+    name: deal.name,
+    amount: deal.amount,
+    stage: deal.stage,
+    contactId,
+    properties: deal.properties,
+  })
+}
+
+export async function logFinancialEngagement(note: FinancialHubSpotEngagementNote) {
+  const client = getClient()
+  const contactResult = await client.upsertContact({
+    email: note.contactEmail,
+    firstName: 'Finance',
+    lastName: 'Contact',
+  })
+
+  if (!contactResult.ok) {
+    return { ok: false as const, error: contactResult.error }
+  }
+
+  const engagement: HubSpotEngagementNote = {
+    contactId: contactResult.id,
+    body: note.body,
+  }
+
+  return client.logEngagementNote(engagement)
 }
 
 export async function checkCRMHealth() {
-  return getClient().healthCheck()
+  const health = await getClient().healthCheck()
+  return {
+    ok: health.ok,
+    provider: 'hubspot' as const,
+    latencyMs: health.latencyMs,
+    error: health.error,
+  }
 }
+
+export const HubSpotDealBaseSchema = BaseHubSpotDealSchema
+export const HubSpotEngagementBaseSchema = BaseHubSpotEngagementNoteSchema

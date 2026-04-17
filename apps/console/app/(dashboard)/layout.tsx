@@ -10,99 +10,94 @@ import { ExecutiveModeWrapper } from './executive-mode'
 import { SidebarNav, type NavGroup } from '@/components/sidebar-nav'
 
 const navGroups: NavGroup[] = [
+  // ── Zone 1: TODAY — CEO Daily Pulse ────────────────────────────────────────
   {
-    label: 'Overview',
+    label: 'Command',
     defaultOpen: true,
     items: [
-      { name: 'Dashboard', href: '/console', icon: 'HomeIcon' },
-      { name: 'Platform', href: '/platform', icon: 'GlobeAltIcon' },
-      { name: 'System Health', href: '/system-health', icon: 'ServerIcon' },
-      { name: 'Analytics', href: '/analytics', icon: 'ChartBarIcon' },
+      { name: 'CEO One-Screen', href: '/ceo', icon: 'EyeIcon' },
+      { name: 'Today', href: '/today', icon: 'HomeIcon' },
+      { name: 'Autopilot', href: '/autopilot', icon: 'BoltIcon' },
+      { name: 'Briefing', href: '/briefing', icon: 'ClipboardDocumentCheckIcon' },
+      { name: 'Focus', href: '/focus', icon: 'ClockIcon' },
+      { name: 'Portfolio', href: '/portfolio', icon: 'BuildingOffice2Icon' },
     ],
   },
+  // ── Zone 2: REVENUE — Sales Command Center ─────────────────────────────────
   {
-    label: 'GRC',
+    label: 'Revenue',
+    defaultOpen: true,
     items: [
-      { name: 'Governance', href: '/governance', icon: 'EyeIcon' },
-      { name: 'Compliance', href: '/compliance-snapshots', icon: 'ShieldCheckIcon' },
-      { name: 'Assurance', href: '/assurance', icon: 'ShieldCheckIcon' },
-      { name: 'Standards', href: '/standards', icon: 'BookOpenIcon' },
-      { name: 'Audit Insights', href: '/audit-insights', icon: 'ShieldCheckIcon' },
-      { name: 'Audit Graph', href: '/audit-graph', icon: 'LinkIcon' },
-      { name: 'NACP Integrity', href: '/nacp-integrity', icon: 'ClipboardDocumentCheckIcon' },
-    ],
-  },
-  {
-    label: 'Evidence & Proof',
-    items: [
-      { name: 'Evidence Packs', href: '/evidence-packs', icon: 'DocumentArrowDownIcon' },
-      { name: 'Proof Center', href: '/proof-center', icon: 'FingerPrintIcon' },
-      { name: 'Proof Pack', href: '/proof-pack', icon: 'FingerPrintIcon' },
-      { name: 'Isolation', href: '/isolation-certification', icon: 'LockClosedIcon' },
+      { name: 'Pipeline', href: '/revenue', icon: 'ArrowTrendingUpIcon' },
       { name: 'Pilot Export', href: '/pilot/export', icon: 'DocumentArrowDownIcon' },
     ],
   },
+  // ── Zone 3: CAPITAL — Cash · Burn · Runway ─────────────────────────────────
   {
-    label: 'Operations',
+    label: 'Capital',
+    defaultOpen: true,
     items: [
-      { name: 'Ops', href: '/ops', icon: 'ShieldExclamationIcon' },
+      { name: 'Burn & Runway', href: '/capital', icon: 'BanknotesIcon' },
+      { name: 'Runway', href: '/runway', icon: 'ArrowTrendingUpIcon' },
+      { name: 'Forecast', href: '/forecast', icon: 'ChartBarIcon' },
+      { name: 'Cost Dashboard', href: '/cost', icon: 'CurrencyDollarIcon' },
+      { name: 'Economics', href: '/platform-economics', icon: 'ChartBarIcon' },
+      { name: 'Finance Ops', href: '/business/finance', icon: 'DocumentTextIcon' },
+    ],
+  },
+  // ── Zone 4: EXECUTION — Initiatives · Owners · Blockers ───────────────────
+  {
+    label: 'Execution',
+    items: [
+      { name: 'Initiatives', href: '/execution', icon: 'BoltIcon' },
+      { name: 'Accountability', href: '/accountability', icon: 'CheckCircleIcon' },
+      { name: 'Operator Mode', href: '/operator', icon: 'WrenchScrewdriverIcon' },
+      { name: 'Decision Scoreback', href: '/decision-scoreback', icon: 'ChartBarSquareIcon' },
+      { name: 'Approvals', href: '/business/approvals', icon: 'ClipboardDocumentCheckIcon' },
+      { name: 'Queues', href: '/business/queues', icon: 'CircleStackIcon' },
+      { name: 'Signatures', href: '/business/signatures', icon: 'FingerPrintIcon' },
+    ],
+  },
+  // ── Zone 5: RISK — Business · Platform · Financial Threats ────────────────
+  {
+    label: 'Risk',
+    items: [
+      { name: 'Risk Register', href: '/risk', icon: 'ExclamationTriangleIcon' },
       { name: 'Ops Score', href: '/ops-score', icon: 'ShieldExclamationIcon' },
-      { name: 'Performance', href: '/performance', icon: 'BoltIcon' },
-      { name: 'Regressions', href: '/performance/regressions', icon: 'ArrowTrendingUpIcon' },
+      { name: 'Audit Insights', href: '/audit-insights', icon: 'EyeIcon' },
       { name: 'Trend Detection', href: '/trend-detection', icon: 'ChartBarSquareIcon' },
-      { name: 'Failure Sim', href: '/failure-simulation', icon: 'BeakerIcon' },
-      { name: 'Scale Sim', href: '/scale-simulation', icon: 'ArrowTrendingUpIcon' },
-      { name: 'Deploy Profile', href: '/deployment-profile', icon: 'CloudIcon' },
     ],
   },
+  // ── Zone 6: GOVERNANCE — GRC · Evidence · Corporate Gov ───────────────────
   {
-    label: 'Cost & Economics',
+    label: 'Governance',
     items: [
-      { name: 'Cost', href: '/cost', icon: 'CurrencyDollarIcon' },
-      { name: 'Economics', href: '/platform-economics', icon: 'BanknotesIcon' },
+      { name: 'Governance', href: '/governance', icon: 'ShieldCheckIcon' },
+      { name: 'Board Pack', href: '/board', icon: 'DocumentTextIcon' },
+      { name: 'Corporate Gov', href: '/business/governance', icon: 'EyeIcon' },
+      { name: 'Equity & Cap Table', href: '/business/equity', icon: 'DocumentDuplicateIcon' },
+      { name: 'Evidence Packs', href: '/evidence-packs', icon: 'DocumentArrowDownIcon' },
+      { name: 'Proof Center', href: '/proof-center', icon: 'FingerPrintIcon' },
+      { name: 'Compliance', href: '/compliance-snapshots', icon: 'ClipboardDocumentCheckIcon' },
     ],
   },
+  // ── Internal Tools (collapsed by default) ─────────────────────────────────
   {
-    label: 'Integrations',
+    label: 'Ops Toolkit',
     items: [
+      { name: 'System Health', href: '/system-health', icon: 'ServerIcon' },
+      { name: 'Ops', href: '/ops', icon: 'ShieldExclamationIcon' },
+      { name: 'Performance', href: '/performance', icon: 'BoltIcon' },
       { name: 'Integrations', href: '/integrations', icon: 'PuzzlePieceIcon' },
       { name: 'Control Plane', href: '/integrations-control-plane', icon: 'WrenchScrewdriverIcon' },
-      { name: 'Marketplace', href: '/marketplace', icon: 'PuzzlePieceIcon' },
     ],
   },
-  {
-    label: 'AI & ML',
-    items: [
-      { name: 'AI Overview', href: '/console/ai/overview', icon: 'CpuChipIcon' },
-      { name: 'AI Models', href: '/console/ai/models', icon: 'CpuChipIcon' },
-      { name: 'AI Actions', href: '/console/ai/actions', icon: 'CpuChipIcon' },
-      { name: 'AI Knowledge', href: '/console/ai/knowledge', icon: 'CircleStackIcon' },
-      { name: 'AI Usage', href: '/console/ai/usage', icon: 'ChartBarIcon' },
-      { name: 'ML Overview', href: '/console/ml/overview', icon: 'CpuChipIcon' },
-      { name: 'ML Models', href: '/console/ml/models', icon: 'CpuChipIcon' },
-      { name: 'ML Runs', href: '/console/ml/runs', icon: 'BoltIcon' },
-    ],
-  },
-  {
-    label: 'Business',
-    items: [
-      { name: 'Business OS', href: '/business', icon: 'BuildingOffice2Icon' },
-      { name: 'Finance', href: '/business/finance', icon: 'BanknotesIcon' },
-      { name: 'Equity', href: '/business/equity', icon: 'ChartBarIcon' },
-      { name: 'Corporate Gov', href: '/business/governance', icon: 'EyeIcon' },
-      { name: 'Approvals', href: '/business/approvals', icon: 'ClipboardDocumentCheckIcon' },
-      { name: 'Signatures', href: '/business/signatures', icon: 'FingerPrintIcon' },
-      { name: 'Queues', href: '/business/queues', icon: 'CircleStackIcon' },
-    ],
-  },
+  // ── Admin (minimal) ────────────────────────────────────────────────────────
   {
     label: 'Admin',
     items: [
       { name: 'Organizations', href: '/orgs', icon: 'UsersIcon' },
-      { name: 'Automation', href: '/automation', icon: 'CogIcon' },
       { name: 'Docs', href: '/docs', icon: 'DocumentTextIcon' },
-      { name: 'Data Retention', href: '/console/admin/retention', icon: 'CircleStackIcon' },
-      { name: 'Stripe', href: '/console/finance/stripe', icon: 'BanknotesIcon' },
       { name: 'Settings', href: '/settings', icon: 'Cog6ToothIcon' },
     ],
   },

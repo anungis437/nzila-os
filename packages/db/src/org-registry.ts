@@ -69,6 +69,13 @@ export const ORG_SCOPED_TABLES = [
   'qboSyncRuns',
   'qboReports',
   'financeGovernanceLinks',
+  'founderTimeLogs',
+  'weeklyFocusTargets',
+  'treasurySnapshots',
+  'runwayAssumptions',
+  'executionInitiatives',
+  'executiveDecisions',
+  'decisionScorebacks',
 
   // ── payments.ts ─────────────────────────────────────────
   'stripeConnections',

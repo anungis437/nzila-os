@@ -14,6 +14,9 @@ import {
 } from '@/lib/zoho'
 import { withSpan } from '@nzila/os-core/telemetry'
 import type { PurchaseOrder, Invoice } from '@/domain/entities'
+import { db } from '@nzila/db'
+import { commerceSuppliers } from '@nzila/db/schema'
+import { and, eq } from 'drizzle-orm'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -99,9 +102,58 @@ export function createZohoAdapter(config: ZohoAdapterConfig) {
      */
     async syncVendors(): Promise<SyncVendorsResult> {
       return withSpan('zoho.sync_vendors', {}, async () => {
-        const _vendors = await books.getVendors()
-        // TODO: upsert into internal vendor table via Drizzle
-        return { synced: 0, errors: 0 }
+        const vendors = (await books.getVendors()).data ?? []
+        let synced = 0
+        let errors = 0
+
+        for (const vendor of vendors) {
+          try {
+            const [existing] = await db
+              .select({ id: commerceSuppliers.id })
+              .from(commerceSuppliers)
+              .where(
+                and(
+                  eq(commerceSuppliers.orgId, config.orgId),
+                  eq(commerceSuppliers.zohoVendorId, vendor.vendor_id),
+                ),
+              )
+              .limit(1)
+
+            const values = {
+              orgId: config.orgId,
+              name: vendor.company_name || vendor.contact_name || `Vendor ${vendor.vendor_id}`,
+              contactName: vendor.contact_name || null,
+              email: vendor.email || null,
+              phone: vendor.phone || null,
+              paymentTerms: vendor.payment_terms_label || null,
+              leadTimeDays: 14,
+              status: 'active' as const,
+              zohoVendorId: vendor.vendor_id,
+              metadata: {
+                source: 'zoho-books',
+                currencyCode: vendor.currency_code,
+                paymentTermsDays: vendor.payment_terms,
+                lastModifiedTime: vendor.last_modified_time,
+              },
+              updatedAt: new Date(),
+            }
+
+            if (existing) {
+              await db
+                .update(commerceSuppliers)
+                .set(values)
+                .where(eq(commerceSuppliers.id, existing.id))
+            } else {
+              await db.insert(commerceSuppliers).values(values)
+            }
+
+            synced += 1
+          } catch {
+            errors += 1
+          }
+        }
+
+        return { synced, errors }
       })
     },
 

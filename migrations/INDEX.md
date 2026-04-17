@@ -2,7 +2,7 @@
 
 > Centralized catalog of all database migrations, schema changes, and data import scripts across the NzilaOS monorepo.
 
-**Last updated:** 2026-04-01
+**Last updated:** 2026-04-17
 
 ---
 
@@ -41,8 +41,12 @@ Shared SQL migrations that apply to the platform-level database schema. Not tied
 | `ai-control-plane-pgvector.sql` | AI | pgvector extension + vector column setup for AI control plane RAG |
 | `20260321080434_zonga-subscription-columns.sql` | Zonga | Subscription tier columns for Zonga commerce |
 | `0004_add_co2_estimate_grams.sql` | AI / ESG | Adds `co2_estimate_grams NUMERIC(12,4)` to `ai_usage_budgets` (NZ-RISK-027) |
+| `20260417_execution_initiatives.sql` | Console / Execution | Adds org-scoped execution initiatives table for weekly action tracking and Today top actions |
+| `20260417_executive_decisions.sql` | Console / Decisioning | Adds executive decision records and linkage to execution initiatives for closed-loop management |
+| `20260417_decision_scorebacks.sql` | Console / Learning Loop | Adds expected-vs-actual decision outcome tracking for quality scoring |
 
 **How to apply:**
+
 ```bash
 psql $DATABASE_URL -f migrations/platform/<file>.sql
 ```
@@ -86,6 +90,7 @@ Ad-hoc schema alignment patches: `corrective-active-tables.sql`, `corrective-col
 Reverse migrations for manual patches (0062–0065, 0080–0081).
 
 **Drizzle commands:**
+
 ```bash
 pnpm drizzle-kit generate   # generate from schema changes
 pnpm drizzle-kit push        # push to database
@@ -148,6 +153,7 @@ pnpm drizzle-kit migrate     # run pending migrations
 | `staging-sync-data.sql` | Cross-table sync data |
 
 **How to apply (native PostgreSQL):**
+
 ```powershell
 $env:PGPASSWORD = "nzila_dev"
 Get-Content migrations/staging/union-eyes/<file>.sql | & "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U nzila -d nzila_automation -p 5433 -h localhost

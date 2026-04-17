@@ -3,15 +3,24 @@
  *
  * Provides calendar scheduling for CFO tasks: filing deadlines,
  * audit appointments, month-end close reminders, and board meetings.
- * Self-contained stubs until @nzila/integrations-calendar is available.
  *
  * @module cfo/calendar
  */
 
+import {
+  createOutlookCalendarClient as createOutlookClient,
+  createGoogleCalendarClient as createGoogleClient,
+  type GraphCalendarTransport as BaseGraphCalendarTransport,
+  type GoogleCalendarTransport as BaseGoogleCalendarTransport,
+} from '@nzila/integrations-calendar'
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export interface GraphCalendarTransport { accessToken: string; baseUrl?: string }
-export interface GoogleCalendarTransport { credentials: Record<string, string> }
+export interface GoogleCalendarTransport {
+  accessToken: string
+  baseUrl?: string
+}
 
 interface CalendarEntry { externalId: string; name: string }
 interface CalendarEvent { externalId: string; title: string; start: string; end: string }
@@ -22,21 +31,147 @@ interface CalendarClient {
   healthCheck(): Promise<{ ok: boolean; provider: string }>
 }
 
-// ── Stub Factories ──────────────────────────────────────────────────────────
+function mapCalendar(cal: { externalId: string; calendarName: string }): CalendarEntry {
+  return { externalId: cal.externalId, name: cal.calendarName }
+}
 
-export function createOutlookCalendarClient(_transport: GraphCalendarTransport, _userId: string): CalendarClient {
+function mapEvent(event: { externalId: string; title: string; startTime: string; endTime: string }): CalendarEvent {
   return {
-    async fetchCalendars() { return [] },
-    async fetchEvents() { return [] },
-    async healthCheck() { return { ok: true, provider: 'outlook' } },
+    externalId: event.externalId,
+    title: event.title,
+    start: event.startTime,
+    end: event.endTime,
   }
 }
 
-export function createGoogleCalendarClient(_transport: GoogleCalendarTransport): CalendarClient {
+function createOutlookTransport(config: GraphCalendarTransport): BaseGraphCalendarTransport {
+  const baseUrl = config.baseUrl ?? 'https://graph.microsoft.com/v1.0'
+
   return {
-    async fetchCalendars() { return [] },
-    async fetchEvents() { return [] },
-    async healthCheck() { return { ok: true, provider: 'google' } },
+    async listCalendars(userId: string) {
+      const target = userId ? `users/${encodeURIComponent(userId)}` : 'me'
+      const response = await fetch(`${baseUrl}/${target}/calendars`, {
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Graph calendars fetch failed: ${response.status}`)
+      }
+
+      const json = (await response.json()) as { value?: unknown[] }
+      return Array.isArray(json.value) ? (json.value as any[]) : []
+    },
+    async listEvents(userId: string, calendarId: string, since?: string) {
+      const target = userId ? `users/${encodeURIComponent(userId)}` : 'me'
+      const params = new URLSearchParams()
+      if (since) params.set('startDateTime', since)
+      const query = params.toString()
+      const response = await fetch(
+        `${baseUrl}/${target}/calendars/${encodeURIComponent(calendarId)}/events${query ? `?${query}` : ''}`,
+        {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+          },
+          cache: 'no-store',
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Graph events fetch failed: ${response.status}`)
+      }
+
+      const json = (await response.json()) as { value?: unknown[] }
+      return Array.isArray(json.value) ? (json.value as any[]) : []
+    },
+  }
+}
+
+function createGoogleTransport(config: GoogleCalendarTransport): BaseGoogleCalendarTransport {
+  const baseUrl = config.baseUrl ?? 'https://www.googleapis.com/calendar/v3'
+
+  return {
+    async listCalendars() {
+      const response = await fetch(`${baseUrl}/users/me/calendarList`, {
+        headers: {
+          Authorization: `Bearer ${config.accessToken}`,
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Google calendars fetch failed: ${response.status}`)
+      }
+
+      const json = (await response.json()) as { items?: unknown[] }
+      return Array.isArray(json.items) ? (json.items as any[]) : []
+    },
+    async listEvents(calendarId: string, since?: string) {
+      const params = new URLSearchParams()
+      if (since) params.set('timeMin', since)
+      params.set('singleEvents', 'true')
+      params.set('orderBy', 'startTime')
+      const response = await fetch(
+        `${baseUrl}/calendars/${encodeURIComponent(calendarId)}/events?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+          },
+          cache: 'no-store',
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Google events fetch failed: ${response.status}`)
+      }
+
+      const json = (await response.json()) as { items?: unknown[] }
+      return Array.isArray(json.items) ? (json.items as any[]) : []
+    },
+  }
+}
+
+// ── Factories ───────────────────────────────────────────────────────────────
+
+export function createOutlookCalendarClient(transport: GraphCalendarTransport, userId: string): CalendarClient {
+  const client = createOutlookClient(createOutlookTransport(transport), userId)
+  return {
+    async fetchCalendars(_userId) {
+      const calendars = await client.fetchCalendars('')
+      return calendars.map(mapCalendar)
+    },
+    async fetchEvents(_user, calendarId, since) {
+      const events = await client.fetchEvents('', calendarId, since)
+      return events.map(mapEvent)
+    },
+    async healthCheck() {
+      const health = await client.healthCheck()
+      return { ok: health.ok, provider: 'outlook' }
+    },
+  }
+}
+
+export function createGoogleCalendarClient(transport: GoogleCalendarTransport): CalendarClient {
+  const client = createGoogleClient(createGoogleTransport(transport))
+  return {
+    async fetchCalendars(_userId) {
+      const calendars = await client.fetchCalendars('')
+      return calendars.map(mapCalendar)
+    },
+    async fetchEvents(_user, calendarId, since) {
+      const events = await client.fetchEvents('', calendarId, since)
+      return events.map(mapEvent)
+    },
+    async healthCheck() {
+      const health = await client.healthCheck()
+      return { ok: health.ok, provider: 'google' }
+    },
   }
 }
 

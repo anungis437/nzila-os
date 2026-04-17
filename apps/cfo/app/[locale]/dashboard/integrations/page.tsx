@@ -15,6 +15,7 @@ import {
   CreditCard,
   BookOpen,
   Calculator,
+  Users,
 } from 'lucide-react'
 import { getIntegrationStatuses, getTaxDeadlines, type IntegrationStatus } from '@/lib/actions/integration-actions'
 import { SyncButton, ConnectButton } from '@/components/action-buttons'
@@ -51,6 +52,12 @@ function providerIcon(p: IntegrationStatus['provider']) {
       return BookOpen
     case 'tax-engine':
       return Calculator
+    case 'hubspot':
+      return Users
+    case 'outlook-calendar':
+      return Calendar
+    case 'google-calendar':
+      return Calendar
   }
 }
 
