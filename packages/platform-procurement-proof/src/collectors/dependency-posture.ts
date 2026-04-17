@@ -34,10 +34,9 @@ const ciScanResultSchema = z.object({
 })
 
 /** Candidate paths for dependency scan results (most specific first) */
-const SCAN_PATHS = [
-  'ops/outputs/dependency-posture.json',
-  'ops/outputs/audit-result.json',
-  'coverage/dependency-posture.json',
+const SCAN_FILENAMES = [
+  'dependency-posture.json',
+  'audit-result.json',
 ] as const
 
 /**
@@ -49,20 +48,47 @@ export async function collectDependencyPosture(
 ): Promise<CollectorResult<DependencyPostureCollectorData>> {
   const now = nowISO()
   const source = 'ci:dependency-scan'
-  const baseDir = rootDir ?? process.cwd()
+
+  const candidates = rootDir
+    ? [
+        {
+          label: 'ops/outputs/dependency-posture.json',
+          fullPath: join(rootDir, 'ops', 'outputs', SCAN_FILENAMES[0]),
+        },
+        {
+          label: 'ops/outputs/audit-result.json',
+          fullPath: join(rootDir, 'ops', 'outputs', SCAN_FILENAMES[1]),
+        },
+        {
+          label: 'coverage/dependency-posture.json',
+          fullPath: join(rootDir, 'coverage', SCAN_FILENAMES[0]),
+        },
+      ]
+    : [
+        {
+          label: 'ops/outputs/dependency-posture.json',
+          fullPath: join(/* turbopackIgnore: true */ process.cwd(), 'ops', 'outputs', SCAN_FILENAMES[0]),
+        },
+        {
+          label: 'ops/outputs/audit-result.json',
+          fullPath: join(/* turbopackIgnore: true */ process.cwd(), 'ops', 'outputs', SCAN_FILENAMES[1]),
+        },
+        {
+          label: 'coverage/dependency-posture.json',
+          fullPath: join(/* turbopackIgnore: true */ process.cwd(), 'coverage', SCAN_FILENAMES[0]),
+        },
+      ]
 
   try {
-    // Try each candidate path
-    for (const relPath of SCAN_PATHS) {
-      const fullPath = join(baseDir, relPath)
-      if (!existsSync(fullPath)) continue
+    for (const candidate of candidates) {
+      if (!existsSync(candidate.fullPath)) continue
 
-      const raw = readFileSync(fullPath, 'utf-8')
+      const raw = readFileSync(candidate.fullPath, 'utf-8')
       const parsed = ciScanResultSchema.safeParse(JSON.parse(raw))
 
       if (!parsed.success) {
         logger.warn('Dependency scan file found but invalid', {
-          path: relPath,
+          path: candidate.label,
           errors: parsed.error.flatten(),
         })
         continue
@@ -89,14 +115,14 @@ export async function collectDependencyPosture(
 
       logger.info('Dependency posture collected', {
         orgId,
-        source: relPath,
+        source: candidate.label,
         criticalCount: data.criticalCount,
         highCount: data.highCount,
       })
 
       return {
         status: 'ok',
-        source: `file:${relPath}`,
+        source: `file:${candidate.label}`,
         collectedAt: now,
         data,
         integrityHash,
@@ -104,7 +130,7 @@ export async function collectDependencyPosture(
     }
 
     // No scan file found
-    logger.info('No dependency scan artifacts found', { orgId, baseDir })
+    logger.info('No dependency scan artifacts found', { orgId, candidateCount: candidates.length })
 
     return {
       status: 'not_available',

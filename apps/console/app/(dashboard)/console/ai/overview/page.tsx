@@ -196,45 +196,93 @@ export default async function AiOverviewPage() {
   const m = await getOverviewMetrics(DEFAULT_ENTITY_ID)
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">AI Engine Overview</h1>
-        <div className="flex gap-2 text-sm">
-          <Link href="/console/ai/models" className="rounded-md bg-muted px-3 py-1.5 hover:bg-muted/80">
-            Models
-          </Link>
-          <Link href="/console/ai/usage" className="rounded-md bg-muted px-3 py-1.5 hover:bg-muted/80">
-            Usage
-          </Link>
-          <Link href="/console/ai/actions" className="rounded-md bg-muted px-3 py-1.5 hover:bg-muted/80">
-            Actions
-          </Link>
-          <Link href="/console/ai/knowledge" className="rounded-md bg-muted px-3 py-1.5 hover:bg-muted/80">
-            Knowledge
-          </Link>
+    <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-card via-card to-muted/40 p-6 shadow-sm">
+        <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
+        <div className="absolute -bottom-12 left-24 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl" />
+
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Console / AI</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">AI Engine Overview</h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Live operational view of requests, costs, safety outcomes, model actions, and monthly budget controls.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link href="/console/ai/models" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Models
+            </Link>
+            <Link href="/console/ai/usage" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Usage
+            </Link>
+            <Link href="/console/ai/actions" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Actions
+            </Link>
+            <Link href="/console/ai/knowledge" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Knowledge
+            </Link>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── KPI Cards ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Total Requests" value={formatNumber(m.totalRequests)} />
-        <StatCard label="Tokens In / Out" value={`${formatNumber(m.totalTokensIn)} / ${formatNumber(m.totalTokensOut)}`} />
-        <StatCard label="Estimated Cost" value={formatCost(m.estimatedCostUsd)} />
-        <StatCard label="Avg Latency" value={`${m.avgLatencyMs}ms`} />
-      </div>
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold tracking-tight">Traffic and Cost</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Requests" value={formatNumber(m.totalRequests)} />
+          <StatCard label="Tokens In / Out" value={`${formatNumber(m.totalTokensIn)} / ${formatNumber(m.totalTokensOut)}`} />
+          <StatCard label="Estimated Cost" value={formatCost(m.estimatedCostUsd)} />
+          <StatCard label="Avg Latency" value={`${m.avgLatencyMs}ms`} />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Success" value={formatNumber(m.successCount)} color="text-green-600" />
-        <StatCard label="Refused / Policy" value={formatNumber(m.refusedCount)} color="text-amber-600" />
-        <StatCard label="Failed" value={formatNumber(m.failedCount)} color="text-red-600" />
-        <StatCard label="Deployment Routes" value={formatNumber(m.deploymentRouteCount)} />
-      </div>
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold tracking-tight">Reliability and Control</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Success" value={formatNumber(m.successCount)} color="text-emerald-600" />
+          <StatCard label="Refused / Policy" value={formatNumber(m.refusedCount)} color="text-amber-600" />
+          <StatCard label="Failed" value={formatNumber(m.failedCount)} color="text-red-600" />
+          <StatCard label="Deployment Routes" value={formatNumber(m.deploymentRouteCount)} />
+        </div>
+      </section>
 
-      {/* ── Requests by App ────────────────────────────────────── */}
+      <section className="grid gap-6 lg:grid-cols-3">
+        <div className="rounded-2xl border bg-card p-5 shadow-sm lg:col-span-2">
+          <h2 className="mb-3 text-base font-semibold tracking-tight">Action Pipeline</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatChip label="Total" value={formatNumber(m.actionSummary.total)} />
+            <StatChip label="Executed" value={formatNumber(m.actionSummary.executed)} tone="green" />
+            <StatChip label="Failed" value={formatNumber(m.actionSummary.failed)} tone="red" />
+            <StatChip label="Pending" value={formatNumber(m.actionSummary.pending)} tone="amber" />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h2 className="mb-3 text-base font-semibold tracking-tight">Operational Snapshot</h2>
+          <dl className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Knowledge sources</dt>
+              <dd className="font-semibold">{formatNumber(m.knowledgeSourceCount)}</dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Pending actions</dt>
+              <dd className="font-semibold">{formatNumber(m.actionSummary.pending)}</dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Failure ratio</dt>
+              <dd className="font-semibold">
+                {m.totalRequests > 0 ? `${((m.failedCount / m.totalRequests) * 100).toFixed(1)}%` : '0.0%'}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
       <div className="grid gap-6 md:grid-cols-2">
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Requests by App</h2>
-          <div className="rounded-lg border">
+        <section className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h2 className="mb-3 text-base font-semibold tracking-tight">Requests by App</h2>
+          <div className="overflow-hidden rounded-xl border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
@@ -257,9 +305,9 @@ export default async function AiOverviewPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Requests by Feature</h2>
-          <div className="rounded-lg border">
+        <section className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h2 className="mb-3 text-base font-semibold tracking-tight">Requests by Feature</h2>
+          <div className="overflow-hidden rounded-xl border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
@@ -283,21 +331,9 @@ export default async function AiOverviewPage() {
         </section>
       </div>
 
-      {/* ── Actions Summary ────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Actions</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Total Actions" value={formatNumber(m.actionSummary.total)} />
-          <StatCard label="Executed" value={formatNumber(m.actionSummary.executed)} color="text-green-600" />
-          <StatCard label="Failed" value={formatNumber(m.actionSummary.failed)} color="text-red-600" />
-          <StatCard label="Pending" value={formatNumber(m.actionSummary.pending)} color="text-amber-600" />
-        </div>
-      </section>
-
-      {/* ── Budget Status ──────────────────────────────────────── */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Budget Status</h2>
-        <div className="rounded-lg border">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <h2 className="mb-3 text-base font-semibold tracking-tight">Budget Status</h2>
+        <div className="overflow-hidden rounded-xl border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
@@ -319,7 +355,7 @@ export default async function AiOverviewPage() {
                     <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                       b.status === 'ok' ? 'bg-green-100 text-green-800'
                         : b.status === 'warning' ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                          : 'bg-red-100 text-red-800'
                     }`}>
                       {b.status}
                     </span>
@@ -333,23 +369,41 @@ export default async function AiOverviewPage() {
           </table>
         </div>
       </section>
-
-      {/* ── Knowledge Sources ──────────────────────────────────── */}
-      <section className="rounded-lg border bg-muted/20 p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Knowledge Sources</span>
-          <span className="text-2xl font-bold">{m.knowledgeSourceCount}</span>
-        </div>
-      </section>
     </div>
   )
 }
 
 function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div className="rounded-2xl border bg-card p-4 shadow-sm">
       <div className="text-sm text-muted-foreground">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${color ?? ''}`}>{value}</div>
+    </div>
+  )
+}
+
+function StatChip({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string
+  tone?: 'green' | 'amber' | 'red'
+}) {
+  const toneClasses =
+    tone === 'green'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : tone === 'amber'
+        ? 'border-amber-200 bg-amber-50 text-amber-700'
+        : tone === 'red'
+          ? 'border-red-200 bg-red-50 text-red-700'
+          : 'border-border bg-muted/30 text-foreground'
+
+  return (
+    <div className={`rounded-xl border px-3 py-2 ${toneClasses}`}>
+      <p className="text-xs font-medium uppercase tracking-wide">{label}</p>
+      <p className="mt-1 text-xl font-semibold">{value}</p>
     </div>
   )
 }

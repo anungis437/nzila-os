@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
+import { getIntegrationDeliveries } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,16 +54,20 @@ function _statusClass(status: string): string {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 interface Props {
-  searchParams: Promise<{ provider?: string; status?: string }>
+  searchParams: Promise<{ orgId?: string; provider?: string; status?: string }>
 }
 
 export default async function DeliveriesPage(props: Props) {
   const searchParams = await props.searchParams
+  const orgId = searchParams.orgId ?? null
   const filterProvider = searchParams.provider ?? null
   const filterStatus = searchParams.status ?? null
 
-  // In production this reads from integrations-db integration_deliveries table.
-  // For now, render the UI skeleton with filter controls.
+  const deliveries = await getIntegrationDeliveries({
+    orgId,
+    provider: filterProvider,
+    status: filterStatus,
+  })
 
   const providers = [
     'resend',
@@ -173,13 +178,33 @@ export default async function DeliveriesPage(props: Props) {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400 italic">
-                    {filterProvider || filterStatus
-                      ? `No deliveries matching filters${filterProvider ? ` provider=${filterProvider}` : ''}${filterStatus ? ` status=${filterStatus}` : ''}`
-                      : 'No deliveries recorded yet. Deliveries appear here once integrations are configured and active.'}
-                  </td>
-                </tr>
+                {deliveries.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-gray-400 italic">
+                      {!orgId
+                        ? 'Provide orgId in query string to view real delivery logs for that org.'
+                        : filterProvider || filterStatus
+                        ? `No deliveries matching filters${filterProvider ? ` provider=${filterProvider}` : ''}${filterStatus ? ` status=${filterStatus}` : ''}`
+                        : 'No deliveries recorded. Connect a provider to start generating delivery logs.'}
+                    </td>
+                  </tr>
+                ) : (
+                  deliveries.map((entry) => (
+                    <tr key={entry.id}>
+                      <td className="py-2 pr-4">
+                        <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ${_statusClass(entry.status)}`}>
+                          {_StatusIcon({ status: entry.status })}
+                          {entry.status}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-4 font-medium text-gray-900">{entry.provider}</td>
+                      <td className="py-2 pr-4 text-gray-600">{entry.channel}</td>
+                      <td className="py-2 pr-4 text-gray-600">{entry.recipient}</td>
+                      <td className="py-2 pr-4 text-gray-600">{entry.attempts}</td>
+                      <td className="py-2 text-gray-600">{new Date(entry.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -34,6 +34,9 @@ const providerMeta: Record<string, { displayName: string; channel: string }> = {
   slack: { displayName: 'Slack', channel: 'chatops' },
   teams: { displayName: 'Microsoft Teams', channel: 'chatops' },
   hubspot: { displayName: 'HubSpot', channel: 'crm' },
+  m365: { displayName: 'Microsoft 365', channel: 'productivity' },
+  'google-workspace': { displayName: 'Google Workspace', channel: 'productivity' },
+  webhooks: { displayName: 'Webhooks', channel: 'webhooks' },
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────

@@ -5,12 +5,15 @@
  * Shows action details, run status, and attestation links.
  */
 import { platformDb } from '@nzila/db/platform'
-import { aiActions, aiActionRuns } from '@nzila/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { aiActions, aiActionRuns, aiCapabilityProfiles, aiDeploymentRoutes } from '@nzila/db/schema'
+import { eq, desc, count } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+
+const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getActionsData(orgId: string) {
   const actions = await platformDb
@@ -27,7 +30,30 @@ async function getActionsData(orgId: string) {
     .orderBy(desc(aiActionRuns.startedAt))
     .limit(100)
 
-  return { actions, runs }
+  const [profileCount] = await platformDb
+    .select({ count: count() })
+    .from(aiCapabilityProfiles)
+    .where(eq(aiCapabilityProfiles.orgId, orgId))
+
+  const [routeCount] = await platformDb
+    .select({ count: count() })
+    .from(aiDeploymentRoutes)
+    .where(eq(aiDeploymentRoutes.orgId, orgId))
+
+  const actionSummary = {
+    total: actions.length,
+    approved: actions.filter((action) => action.status === 'approved').length,
+    pending: actions.filter((action) => ['proposed', 'policy_checked', 'awaiting_approval', 'executing'].includes(action.status)).length,
+    failed: actions.filter((action) => action.status === 'failed').length,
+  }
+
+  return {
+    actions,
+    runs,
+    actionSummary,
+    profileCount: profileCount?.count ?? 0,
+    routeCount: routeCount?.count ?? 0,
+  }
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -43,15 +69,14 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function AiActionsPage() {
-  const { userId, orgId } = await auth()
+  const { userId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!orgId) {
-    return <div className="p-8 text-red-600">No active organization selected. Please select an organization.</div>
+  if (!DEFAULT_ENTITY_ID) {
+    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
   }
 
-  const { actions, runs } = await getActionsData(orgId)
+  const { actions, runs, actionSummary, profileCount, routeCount } = await getActionsData(DEFAULT_ENTITY_ID)
 
-  // Group runs by actionId
   const runsByAction = new Map<string, typeof runs>()
   for (const run of runs) {
     const existing = runsByAction.get(run.actionId) ?? []
@@ -60,15 +85,51 @@ export default async function AiActionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">AI Actions</h1>
-        <div className="text-sm text-muted-foreground">
-          {actions.length} actions
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-8 px-2 pb-8 sm:px-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-card via-card to-muted/40 p-6 shadow-sm">
+        <div className="absolute -left-8 top-10 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl" />
+        <div className="absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-cyan-500/10 blur-2xl" />
 
-      <div className="rounded-lg border">
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Console / AI</p>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">AI Actions</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Review deterministic action proposals, approval state, execution attempts, and attestation readiness for local console workflows.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link href="/console/ai/overview" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Overview
+            </Link>
+            <Link href="/console/ai/models" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Models
+            </Link>
+            <Link href="/console/ai/knowledge" className="rounded-md border bg-background px-3 py-1.5 hover:bg-muted/80">
+              Knowledge
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Actions" value={String(actionSummary.total)} tone="amber" />
+          <StatCard label="Pending or Running" value={String(actionSummary.pending)} tone="blue" />
+          <StatCard label="Profiles Live" value={String(profileCount)} tone="emerald" />
+          <StatCard label="Routes Live" value={String(routeCount)} tone="violet" />
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.7fr_1fr]">
+        <div className="rounded-2xl border bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold">Recent Actions</h2>
+              <p className="text-sm text-muted-foreground">Latest proposals and execution history for the configured local entity.</p>
+            </div>
+            <div className="text-sm text-muted-foreground">{actions.length} actions</div>
+          </div>
+
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
@@ -133,13 +194,89 @@ export default async function AiActionsPage() {
             {actions.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                  No AI actions yet. Use the API or convenience routes to create one.
+                  No AI actions yet for this local entity.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </div>
+
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-2xl border bg-card p-5 shadow-sm">
+            <h2 className="text-base font-semibold">Action Readiness</h2>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-3">
+                <div>
+                  <p className="font-medium">Knowledge profile</p>
+                  <p className="text-muted-foreground">Supports `actions_propose` for knowledge ingestion.</p>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Ready</span>
+              </div>
+              <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-3">
+                <div>
+                  <p className="font-medium">Finance profile</p>
+                  <p className="text-muted-foreground">Supports Stripe monthly report generation proposals.</p>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Ready</span>
+              </div>
+              <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-3">
+                <div>
+                  <p className="font-medium">Execution state</p>
+                  <p className="text-muted-foreground">Approved actions can be executed directly from this table.</p>
+                </div>
+                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Enabled</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-5 shadow-sm">
+            <h2 className="text-base font-semibold">Next Actions</h2>
+            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+              <p>Use the knowledge page to create your first ingestion proposal, or finance Stripe to create a report-generation proposal.</p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/console/ai/knowledge" className="rounded-md border px-3 py-1.5 text-foreground hover:bg-muted/70">
+                  Open Knowledge
+                </Link>
+                <Link href="/console/finance/stripe" className="rounded-md border px-3 py-1.5 text-foreground hover:bg-muted/70">
+                  Open Finance Stripe
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {actions.length === 0 && (
+            <div className="rounded-2xl border border-dashed bg-muted/20 p-5 text-sm text-muted-foreground shadow-sm">
+              The local AI bootstrap is present, but there are no proposed actions yet. This page will populate after the first knowledge ingest or finance action proposal is created.
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string
+  tone: 'amber' | 'blue' | 'emerald' | 'violet'
+}) {
+  const tones: Record<typeof tone, string> = {
+    amber: 'border-amber-500/20 bg-amber-500/5 text-amber-700 dark:text-amber-300',
+    blue: 'border-blue-500/20 bg-blue-500/5 text-blue-700 dark:text-blue-300',
+    emerald: 'border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300',
+    violet: 'border-violet-500/20 bg-violet-500/5 text-violet-700 dark:text-violet-300',
+  }
+
+  return (
+    <div className={`rounded-xl border px-4 py-4 ${tones[tone]}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">{value}</p>
     </div>
   )
 }

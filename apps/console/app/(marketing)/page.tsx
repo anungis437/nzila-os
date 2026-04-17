@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ScrollReveal } from "@/components/public/scroll-reveal";
 
 const capabilities = [
@@ -47,15 +48,24 @@ export default function MarketingPage() {
     <>
       {/* Hero */}
       <section className="relative flex min-h-[80vh] items-center overflow-hidden bg-navy">
+        <Image
+          src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=2400&q=80&auto=format&fit=crop"
+          alt="Business analytics workspace with charts and KPI dashboards"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/92 via-navy/86 to-navy/94" />
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-35"
           style={{
             backgroundImage:
               "radial-gradient(circle at 25% 50%, rgba(148,163,184,0.3) 0%, transparent 50%), radial-gradient(circle at 75% 30%, rgba(100,116,139,0.2) 0%, transparent 50%)",
           }}
         />
         <div
-          className="absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
@@ -63,7 +73,7 @@ export default function MarketingPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-32">
           <ScrollReveal>
-            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-400 backdrop-blur-sm">
+            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-4 py-2 text-sm text-slate-100 backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
@@ -75,14 +85,14 @@ export default function MarketingPage() {
           <ScrollReveal delay={0.1}>
             <h1 className="max-w-3xl font-poppins text-5xl font-bold leading-tight text-white md:text-7xl">
               Nzila{" "}
-              <span className="bg-gradient-to-r from-slate-300 via-white to-slate-300 bg-[length:200%_auto] bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-slate-300 via-white to-slate-300 bg-size-[200%_auto] bg-clip-text text-transparent">
                 Console
               </span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-100 md:text-xl">
               The internal operations dashboard for Nzila Ventures. Portfolio
               management, financial operations, AI/ML tooling, and platform
               metrics — all in one place.
@@ -93,7 +103,7 @@ export default function MarketingPage() {
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/sign-in"
-                className="rounded-xl bg-white/10 px-8 py-4 font-poppins font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:shadow-xl"
+                className="rounded-xl border border-white/30 bg-white/20 px-8 py-4 font-poppins font-semibold text-white backdrop-blur-md transition-all hover:bg-white/30 hover:shadow-xl"
               >
                 Sign In to Console
               </Link>
@@ -175,7 +185,7 @@ export default function MarketingPage() {
             <ScrollReveal direction="right">
               <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
                 <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-500 to-slate-700 font-poppins text-sm font-bold text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-slate-500 to-slate-700 font-poppins text-sm font-bold text-white">
                     NC
                   </div>
                   <div>
@@ -233,8 +243,16 @@ export default function MarketingPage() {
 
       {/* CTA */}
       <section className="relative overflow-hidden bg-navy py-24">
+        <Image
+          src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=2400&q=80&auto=format&fit=crop"
+          alt="Team reviewing performance dashboards in a modern workspace"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-navy/92 via-navy/84 to-navy/92" />
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
             backgroundImage:
               "radial-gradient(circle at 30% 50%, rgba(148,163,184,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 50%, rgba(100,116,139,0.2) 0%, transparent 50%)",
@@ -245,14 +263,14 @@ export default function MarketingPage() {
             <h2 className="font-poppins text-3xl font-bold text-white md:text-5xl">
               Access the Console
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-100">
               Sign in with your Nzila Ventures account to access the internal
               operations dashboard.
             </p>
             <div className="mt-10">
               <Link
                 href="/sign-in"
-                className="rounded-xl bg-white/10 px-10 py-4 font-poppins text-lg font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:shadow-xl"
+                className="rounded-xl border border-white/30 bg-white/20 px-10 py-4 font-poppins text-lg font-semibold text-white backdrop-blur-md transition-all hover:bg-white/30 hover:shadow-xl"
               >
                 Sign In
               </Link>

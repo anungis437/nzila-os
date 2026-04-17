@@ -35,16 +35,19 @@ export async function GET() {
     blob: blob.status === 'fulfilled' ? blob.value : false,
   }
 
+  const coreHealthy = checks.db
   const allHealthy = Object.values(checks).every(Boolean)
+  const overallStatus = allHealthy ? 'ok' : coreHealthy ? 'degraded' : 'unhealthy'
 
   return NextResponse.json(
     {
-      status: allHealthy ? 'ok' : 'degraded',
+      status: overallStatus,
       app: APP,
       buildInfo: { version: VERSION, commit: COMMIT },
       checks,
       timestamp: new Date().toISOString(),
     },
-    { status: allHealthy ? 200 : 503 },
+    // 503 only when core dependency (DB) is down; degraded (e.g. blob) stays 200
+    { status: coreHealthy ? 200 : 503 },
   )
 }

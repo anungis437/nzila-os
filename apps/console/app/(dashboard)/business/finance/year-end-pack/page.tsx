@@ -110,40 +110,142 @@ export default function YearEndPackPage() {
   const [data, setData] = useState<PackData | null>(null)
   const [loading, setLoading] = useState(true)
   const [packLoading, setPackLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/orgs')
-      .then((r) => r.json())
-      .then((d: Entity[]) => {
-        setEntities(d)
-        if (d.length > 0) setSelectedEntityId(d[0]!.id)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    let mounted = true
+
+    const loadOrgs = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch('/api/orgs')
+        if (!res.ok) {
+          throw new Error(`Failed to load orgs (HTTP ${res.status})`)
+        }
+
+        const d = await res.json()
+        const entities = Array.isArray(d) ? (d as Entity[]) : []
+
+        if (mounted) {
+          setEntities(entities)
+          if (entities.length > 0) {
+            setSelectedEntityId(entities[0]!.id)
+          }
+        }
+      } catch (err: unknown) {
+        if (mounted) {
+          setEntities([])
+          setSelectedEntityId(null)
+          setError(err instanceof Error ? err.message : 'Failed to load orgs')
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadOrgs()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   useEffect(() => {
     if (!selectedEntityId) return
-    fetch(`/api/finance/tax/years?orgId=${selectedEntityId}`)
-      .then((r) => r.json())
-      .then((years: TaxYear[]) => {
-        setTaxYears(years)
-        if (years.length > 0) setSelectedFiscalYear(years[0]!.fiscalYearLabel)
-      })
-      .catch(() => {})
+    let mounted = true
+
+    const loadTaxYears = async () => {
+      try {
+        setError(null)
+        const res = await fetch(`/api/finance/tax/years?orgId=${selectedEntityId}`)
+        if (!res.ok) {
+          throw new Error(`Failed to load tax years (HTTP ${res.status})`)
+        }
+
+        const yearsData = await res.json()
+        const years = Array.isArray(yearsData) ? (yearsData as TaxYear[]) : []
+
+        if (mounted) {
+          setTaxYears(years)
+          if (years.length === 0) {
+            setSelectedFiscalYear(null)
+            setData(null)
+            return
+          }
+
+          setSelectedFiscalYear((current) => {
+            if (current && years.some((y) => y.fiscalYearLabel === current)) {
+              return current
+            }
+            return years[0]!.fiscalYearLabel
+          })
+        }
+      } catch (err: unknown) {
+        if (mounted) {
+          setTaxYears([])
+          setSelectedFiscalYear(null)
+          setData(null)
+          setError(err instanceof Error ? err.message : 'Failed to load tax years')
+        }
+      }
+    }
+
+    loadTaxYears()
+
+    return () => {
+      mounted = false
+    }
   }, [selectedEntityId])
 
   useEffect(() => {
     if (!selectedEntityId || !selectedFiscalYear) return
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: show spinner immediately before async fetch
-    setPackLoading(true)
-    fetch(
-      `/api/finance/year-end-pack?orgId=${selectedEntityId}&fiscalYear=${encodeURIComponent(selectedFiscalYear)}`,
-    )
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setPackLoading(false))
+    let mounted = true
+
+    const loadPack = async () => {
+      setPackLoading(true)
+      try {
+        setError(null)
+        const res = await fetch(
+          `/api/finance/year-end-pack?orgId=${selectedEntityId}&fiscalYear=${encodeURIComponent(selectedFiscalYear)}`,
+        )
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          const message =
+            body && typeof body === 'object' && 'error' in body && typeof body.error === 'string'
+              ? body.error
+              : `Failed to load year-end pack (HTTP ${res.status})`
+          throw new Error(message)
+        }
+
+        const packData = await res.json()
+        if (!packData || typeof packData !== 'object' || !('completeness' in packData)) {
+          throw new Error('Unexpected year-end pack response shape')
+        }
+
+        if (mounted) {
+          setData(packData as PackData)
+        }
+      } catch (err: unknown) {
+        if (mounted) {
+          setData(null)
+          setError(err instanceof Error ? err.message : 'Failed to load year-end pack')
+        }
+      } finally {
+        if (mounted) {
+          setPackLoading(false)
+        }
+      }
+    }
+
+    loadPack()
+
+    return () => {
+      mounted = false
+    }
   }, [selectedEntityId, selectedFiscalYear])
 
   return (
@@ -190,13 +292,21 @@ export default function YearEndPackPage() {
             onChange={(e) => setSelectedFiscalYear(e.target.value)}
             className="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
             aria-label="Select fiscal year"
+            disabled={taxYears.length === 0}
           >
+            {taxYears.length === 0 && <option value="">No fiscal years</option>}
             {taxYears.map((y) => (
               <option key={y.id} value={y.fiscalYearLabel}>{y.fiscalYearLabel}</option>
             ))}
           </select>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+          {error}
+        </div>
+      )}
 
       {loading || packLoading ? (
         <div className="text-gray-400 text-sm flex items-center gap-2">

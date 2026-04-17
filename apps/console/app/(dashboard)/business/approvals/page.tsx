@@ -22,14 +22,50 @@ interface Approval {
 export default function ApprovalsHubPage() {
   const [approvals, setApprovals] = useState<Approval[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Fetch approvals across all user's orgs
-    fetch('/api/approvals')
-      .then((r) => r.json())
-      .then(setApprovals)
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    let mounted = true
+
+    const loadApprovals = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch('/api/approvals')
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          const message =
+            body && typeof body === 'object' && 'error' in body && typeof body.error === 'string'
+              ? body.error
+              : `Failed to load approvals (HTTP ${res.status})`
+          throw new Error(message)
+        }
+
+        const data = await res.json()
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected approvals response shape')
+        }
+
+        if (mounted) {
+          setApprovals(data as Approval[])
+        }
+      } catch (err: unknown) {
+        if (mounted) {
+          setApprovals([])
+          setError(err instanceof Error ? err.message : 'Failed to load approvals')
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadApprovals()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const pending = approvals.filter((a) => a.status === 'pending')
@@ -67,6 +103,12 @@ export default function ApprovalsHubPage() {
           <div className="text-xs text-red-600 mt-1">Rejected</div>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-gray-400 text-sm">Loading approvals...</p>

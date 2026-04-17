@@ -11,11 +11,13 @@
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { createMlClient, type MlClient } from '@nzila/ml-sdk'
+import { headers } from 'next/headers'
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_CONSOLE_URL ??
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-  'http://localhost:3001'
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3001')
 
 /**
  * Create an MlClient backed by this Console's own API routes.
@@ -28,6 +30,15 @@ export function mlClient(): MlClient {
       const session = await auth()
       const token = await session.getToken()
       return token ?? ''
+    },
+    getRequestHeaders: async () => {
+      const requestHeaders = await headers()
+      const cookie = requestHeaders.get('cookie')
+      const forwardedHeaders: Record<string, string> = {}
+      if (cookie) {
+        forwardedHeaders.cookie = cookie
+      }
+      return forwardedHeaders
     },
   })
 }

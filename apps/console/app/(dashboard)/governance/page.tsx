@@ -9,6 +9,9 @@
  * Platform role only — no secrets exposed.
  */
 import { requireRole } from '@/lib/rbac'
+import { platformDb } from '@nzila/db/platform'
+import { governanceActions, auditEvents, resolutions, meetings } from '@nzila/db/schema'
+import { count, desc } from 'drizzle-orm'
 import {
   ShieldCheckIcon,
   BeakerIcon,
@@ -28,6 +31,44 @@ interface GovernanceItem {
   status: 'pass' | 'warn' | 'fail' | 'unknown'
   lastRun: string | null
   icon: React.ComponentType<{ className?: string }>
+}
+
+interface LiveGovernanceSnapshot {
+  governanceActionsCount: number
+  auditEventsCount: number
+  resolutionsCount: number
+  meetingsCount: number
+  latestAuditEventAt: string | null
+  latestGovernanceActionAt: string | null
+}
+
+async function getLiveGovernanceSnapshot(): Promise<LiveGovernanceSnapshot> {
+  const [actions, audits, resolutionsTotal, meetingsTotal, latestAudit, latestAction] =
+    await Promise.all([
+      platformDb.select({ total: count() }).from(governanceActions),
+      platformDb.select({ total: count() }).from(auditEvents),
+      platformDb.select({ total: count() }).from(resolutions),
+      platformDb.select({ total: count() }).from(meetings),
+      platformDb
+        .select({ createdAt: auditEvents.createdAt })
+        .from(auditEvents)
+        .orderBy(desc(auditEvents.createdAt))
+        .limit(1),
+      platformDb
+        .select({ createdAt: governanceActions.createdAt })
+        .from(governanceActions)
+        .orderBy(desc(governanceActions.createdAt))
+        .limit(1),
+    ])
+
+  return {
+    governanceActionsCount: Number(actions[0]?.total ?? 0),
+    auditEventsCount: Number(audits[0]?.total ?? 0),
+    resolutionsCount: Number(resolutionsTotal[0]?.total ?? 0),
+    meetingsCount: Number(meetingsTotal[0]?.total ?? 0),
+    latestAuditEventAt: latestAudit[0]?.createdAt?.toISOString?.() ?? null,
+    latestGovernanceActionAt: latestAction[0]?.createdAt?.toISOString?.() ?? null,
+  }
 }
 
 function getGovernanceItems(): GovernanceItem[] {
@@ -112,6 +153,7 @@ export default async function GovernancePage({
   const params = await searchParams
   const isExecutive = params.mode === 'executive'
   const items = getGovernanceItems()
+  const live = await getLiveGovernanceSnapshot()
 
   const passCount = items.filter((i) => i.status === 'pass').length
   const totalCount = items.length
@@ -166,16 +208,49 @@ export default async function GovernancePage({
         })}
       </div>
 
+      <div className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Live GRC Data Sources</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Real-time values from platform database tables.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 p-6">
+          <div className="rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500">governance_actions</p>
+            <p className="text-2xl font-bold text-gray-900">{live.governanceActionsCount}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500">audit_events</p>
+            <p className="text-2xl font-bold text-gray-900">{live.auditEventsCount}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500">resolutions</p>
+            <p className="text-2xl font-bold text-gray-900">{live.resolutionsCount}</p>
+          </div>
+          <div className="rounded-lg border border-gray-200 p-4">
+            <p className="text-xs text-gray-500">meetings</p>
+            <p className="text-2xl font-bold text-gray-900">{live.meetingsCount}</p>
+          </div>
+        </div>
+        <div className="px-6 pb-6 text-xs text-gray-500 space-y-1">
+          <p>Latest audit_events.created_at: {live.latestAuditEventAt ?? 'none'}</p>
+          <p>Latest governance_actions.created_at: {live.latestGovernanceActionAt ?? 'none'}</p>
+        </div>
+      </div>
+
       <div className="mt-8 p-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-500">
         <p className="font-medium text-gray-700 mb-1">About Governance Checks</p>
         <p>
-          Values are injected from CI/CD environment variables at deploy time.
+          Cards above combine two source types: CI/CD environment metadata and live DB signals.
+          CI values are injected at deploy time.
           Set <code className="text-xs bg-gray-100 px-1 rounded">CONTRACT_TEST_VERSION</code>,{' '}
           <code className="text-xs bg-gray-100 px-1 rounded">CI_STATUS</code>,{' '}
           <code className="text-xs bg-gray-100 px-1 rounded">REDTEAM_STATUS</code>,{' '}
           <code className="text-xs bg-gray-100 px-1 rounded">SCHEMA_DRIFT_STATUS</code>,{' '}
           and <code className="text-xs bg-gray-100 px-1 rounded">SECRET_SCAN_STATUS</code>{' '}
-          in your deployment pipeline.
+          in your deployment pipeline; live metrics are read from governance_actions,
+          audit_events, resolutions, and meetings.
         </p>
       </div>
     </div>

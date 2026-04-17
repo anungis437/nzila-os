@@ -8,7 +8,6 @@
  * @module @nzila/platform-procurement-proof/real-ports
  */
 import { createHash, randomUUID } from 'node:crypto'
-import { resolve } from 'node:path'
 import { createLogger } from '@nzila/os-core/telemetry'
 import { nowISO } from '@nzila/platform-utils/time'
 import { getSigningKeyPair } from './zip-exporter'
@@ -58,10 +57,9 @@ export interface RealPortsDeps {
  */
 export function createRealPorts(deps?: Partial<RealPortsDeps>): ProcurementProofPorts {
   const resolved = deps ?? {}
-  const rootDir = resolved.rootDir ?? resolve(import.meta.dirname ?? __dirname, '..')
   return {
     async getSecurityPosture(orgId: string): Promise<SecurityPosture> {
-      const depPosture = await collectDependencyPosture(orgId, rootDir)
+      const depPosture = await collectDependencyPosture(orgId, resolved.rootDir)
       const now = nowISO()
 
       if (depPosture.status === 'not_available' || !depPosture.data) {
