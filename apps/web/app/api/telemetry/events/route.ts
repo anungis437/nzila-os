@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
-import { validateEventPayload, type EventPayload } from '@/lib/telemetry-events'
+import { eventPayloadSchema, type EventPayload } from '@/lib/telemetry-events'
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const raw = await req.json()
-    const payload = validateEventPayload(raw) as EventPayload
+    const payload = eventPayloadSchema.parse(raw) as EventPayload
 
     logger.info('marketing.event', {
       event: payload.event,
