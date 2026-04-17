@@ -39,7 +39,7 @@ console.log('\n═════════════════════�
 console.log('  NzilaOS Strict Release Gate')
 console.log('══════════════════════════════════════════════════════════════\n')
 
-// ── Gate 1: All apps must have middleware.ts with rate limiting ──────────
+// ── Gate 1: All apps must have proxy.ts (or legacy middleware.ts) with request-id propagation ──────────
 const NEXTJS_APPS = [
   'abr', 'cfo', 'console', 'cora', 'mobility', 'mobility-client-portal',
   'nacp-exams', 'partners', 'platform-admin', 'agrimo',
@@ -48,19 +48,22 @@ const NEXTJS_APPS = [
 
 for (const app of NEXTJS_APPS) {
   const mwPath = join(root, 'apps', app, 'middleware.ts')
-  if (!existsSync(mwPath)) {
+  const proxyPath = join(root, 'apps', app, 'proxy.ts')
+  const edgePath = existsSync(proxyPath) ? proxyPath : existsSync(mwPath) ? mwPath : null
+
+  if (!edgePath) {
     findings.push({
-      gate: 'middleware',
+      gate: 'edge-guard',
       severity: 'blocker',
-      message: `${app}: Missing middleware.ts — rate limiting and request-ID not enforced`,
+      message: `${app}: Missing proxy.ts/middleware.ts — request-ID edge propagation not enforced`,
     })
   } else {
-    const mw = readFileSync(mwPath, 'utf-8')
-    if (!mw.includes('x-request-id')) {
+    const edgeFile = readFileSync(edgePath, 'utf-8')
+    if (!edgeFile.includes('x-request-id')) {
       findings.push({
         gate: 'request-id',
         severity: 'blocker',
-        message: `${app}: middleware.ts does not propagate x-request-id`,
+        message: `${app}: ${edgePath.endsWith('proxy.ts') ? 'proxy.ts' : 'middleware.ts'} does not propagate x-request-id`,
       })
     }
   }

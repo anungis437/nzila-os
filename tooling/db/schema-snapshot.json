@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-04-17T12:16:58.384Z",
+  "capturedAt": "2026-04-17T22:46:15.852Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -33,6 +33,10 @@
     "packages/db/src/schema/equity.ts": {
       "hash": "0fd6a70ac3ffbd6857b9edd13a145a3abfbc8333dac18e802078fcb16b5e5f7b",
       "size": 4803
+    },
+    "packages/db/src/schema/executive.ts": {
+      "hash": "ff2ce73e329ff214ec3e751d4e57feff767b7239ce2dced0702cfd4c0c2ce021",
+      "size": 6978
     },
     "packages/db/src/schema/finance.ts": {
       "hash": "29436abc580bf1d71b1ee6ae6cc2e55cd39b656a82b47ee6d4a47e3b72f28118",
@@ -103,8 +107,8 @@
       "size": 4293
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "f115112406ef15c26c8e7a0c77018ce8efd67954719ff6f464bedea0c6da5817",
-      "size": 1444
+      "hash": "2d22b183c58b47dd8e54fc681718d1891785dc72dcc9067fa8616b8e68d0d8c9",
+      "size": 1472
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
@@ -163,5 +167,5 @@
       "size": 37995
     }
   },
-  "compositeHash": "bda6351d3705659ae110f9e8ccb43a99924baa21b0257592b298e0c6e0ebd314"
+  "compositeHash": "bce0f538631258ab4c1f3d390294ee456f2df16db3873453370015aa588c1189"
 }
