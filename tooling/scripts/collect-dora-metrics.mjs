@@ -58,6 +58,75 @@ function safeGit(args, fallback = '') {
   }
 }
 
+function gitRefExists(ref) {
+  const out = safeGit(`rev-parse --verify --quiet "${ref}^{commit}"`, '');
+  return out.length > 0;
+}
+
+function resolveTargetRef(requestedBranch) {
+  const candidates = [];
+  const addCandidate = (ref) => {
+    if (!ref || candidates.includes(ref)) return;
+    candidates.push(ref);
+  };
+
+  const normalizedRequested = String(requestedBranch || '').trim();
+  const githubBaseRef = String(process.env.GITHUB_BASE_REF ?? '').trim();
+
+  // Prefer explicit config first.
+  addCandidate(normalizedRequested);
+  addCandidate(`origin/${normalizedRequested}`);
+  addCandidate(`refs/remotes/origin/${normalizedRequested}`);
+
+  // On PR workflows, base ref is usually the canonical branch to evaluate.
+  addCandidate(githubBaseRef);
+  addCandidate(`origin/${githubBaseRef}`);
+  addCandidate(`refs/remotes/origin/${githubBaseRef}`);
+
+  // Common defaults.
+  for (const branch of ['main', 'master']) {
+    addCandidate(branch);
+    addCandidate(`origin/${branch}`);
+    addCandidate(`refs/remotes/origin/${branch}`);
+  }
+
+  const remoteHead = safeGit('symbolic-ref --quiet refs/remotes/origin/HEAD', '');
+  if (remoteHead) {
+    addCandidate(remoteHead);
+    const shortRemoteHead = remoteHead.replace(/^refs\/remotes\//, '');
+    addCandidate(shortRemoteHead);
+  }
+
+  for (const candidate of candidates) {
+    if (gitRefExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Try fetching likely branches in shallow CI clones, then retry.
+  for (const branch of [normalizedRequested, githubBaseRef, 'main', 'master']) {
+    if (!branch) continue;
+    safeGit(`fetch --depth=200 origin "${branch}:refs/remotes/origin/${branch}"`, '');
+  }
+
+  for (const candidate of candidates) {
+    if (gitRefExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Final fallback: current commit. This avoids hard failure from ambiguous refs.
+  const head = safeGit('rev-parse --verify --quiet HEAD', '');
+  if (head) {
+    console.warn(
+      `WARN: could not resolve target branch '${requestedBranch}', falling back to HEAD for DORA calculation`,
+    );
+    return 'HEAD';
+  }
+
+  return requestedBranch;
+}
+
 function ensureOutputDir(filePath) {
   mkdirSync(dirname(filePath), { recursive: true });
 }
@@ -90,6 +159,8 @@ function linearRegressionSlope(series) {
   return den === 0 ? 0 : num / den;
 }
 
+const TARGET_REF = resolveTargetRef(TARGET_BRANCH);
+
 // ── Deployment Frequency ─────────────────────────────────────────────────────
 // Count merges to main in the last 30 days
 const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -98,7 +169,7 @@ const sinceDate = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000)
   .split('T')[0];
 
 const mergeCommits = safeGit(
-  `log ${TARGET_BRANCH} --merges --since="${sinceDate}" --format="%H %ai %s"`,
+  `log "${TARGET_REF}" --merges --since="${sinceDate}" --format="%H %ai %s"`,
   '',
 )
   .split('\n')
@@ -113,7 +184,7 @@ const trendSinceDate = new Date(Date.now() - LOOKBACK_WEEKS * 7 * 24 * 60 * 60 *
   .toISOString()
   .split('T')[0];
 const trendMergeCommits = safeGit(
-  `log ${TARGET_BRANCH} --merges --since="${trendSinceDate}" --format="%ct %s"`,
+  `log "${TARGET_REF}" --merges --since="${trendSinceDate}" --format="%ct %s"`,
   '',
 )
   .split('\n')
@@ -227,7 +298,8 @@ const output = {
   collected_at: new Date().toISOString(),
   window_days: WINDOW_DAYS,
   source: {
-    branch: TARGET_BRANCH,
+    requested_branch: TARGET_BRANCH,
+    branch: TARGET_REF,
     lookback_weeks_for_trend: LOOKBACK_WEEKS,
   },
   metrics: {

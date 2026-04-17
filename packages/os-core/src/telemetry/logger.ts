@@ -70,9 +70,9 @@ function buildEntry(
 function writeEntry(entry: LogEntry): void {
   const output = JSON.stringify(entry)
   if (entry.level === 'error' || entry.level === 'warn') {
-    process.stderr.write(output + '\n')
+    console.error(output)
   } else {
-    process.stdout.write(output + '\n')
+    console.log(output)
   }
 }
 

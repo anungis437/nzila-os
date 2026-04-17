@@ -92,6 +92,8 @@
     "validate:truth-authority": "tsx scripts/validate-truth-authority.ts",
     "validate:auth-authority": "tsx scripts/validate-auth-authority.ts",
     "validate:ga-state": "tsx scripts/validate-ga-state.ts",
+    "validate:integrations:readiness": "tsx scripts/validate-integrations-readiness.ts",
+    "validate:web:readiness": "tsx scripts/validate-web-readiness.ts",
     "validate:workspace-links": "tsx scripts/validate-workspace-links.ts",
     "inventory:generate": "pnpm --filter @nzila/repo-inventory generate",
     "inventory:check": "pnpm --filter @nzila/repo-inventory check",
