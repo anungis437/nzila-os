@@ -1,0 +1,44 @@
+name: Console Weekly Digest
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  weekly-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Send weekly digest
+        run: pnpm console:digest:weekly:send
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          WEEKLY_DIGEST_EMAIL_PROVIDER: ${{ vars.WEEKLY_DIGEST_EMAIL_PROVIDER }}
+          WEEKLY_DIGEST_EMAIL_TO: ${{ vars.WEEKLY_DIGEST_EMAIL_TO }}
+          WEEKLY_DIGEST_EMAIL_FROM: ${{ vars.WEEKLY_DIGEST_EMAIL_FROM }}
+          WEEKLY_DIGEST_RESEND_API_KEY: ${{ secrets.WEEKLY_DIGEST_RESEND_API_KEY }}
+          WEEKLY_DIGEST_SENDGRID_API_KEY: ${{ secrets.WEEKLY_DIGEST_SENDGRID_API_KEY }}
+          WEEKLY_DIGEST_MAILGUN_API_KEY: ${{ secrets.WEEKLY_DIGEST_MAILGUN_API_KEY }}
+          WEEKLY_DIGEST_MAILGUN_DOMAIN: ${{ vars.WEEKLY_DIGEST_MAILGUN_DOMAIN }}
+          WEEKLY_DIGEST_MAILGUN_REGION: ${{ vars.WEEKLY_DIGEST_MAILGUN_REGION }}
+          WEEKLY_DIGEST_SLACK_WEBHOOK_URL: ${{ secrets.WEEKLY_DIGEST_SLACK_WEBHOOK_URL }}
+          WEEKLY_DIGEST_SLACK_BOT_TOKEN: ${{ secrets.WEEKLY_DIGEST_SLACK_BOT_TOKEN }}
+          WEEKLY_DIGEST_SLACK_CHANNEL: ${{ vars.WEEKLY_DIGEST_SLACK_CHANNEL }}

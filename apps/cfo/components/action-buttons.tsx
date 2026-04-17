@@ -9,7 +9,11 @@
 import { useState, useTransition } from 'react'
 import { RefreshCw, Loader2, Plug } from 'lucide-react'
 import { runReconciliation } from '@/lib/actions/ledger-actions'
-import { triggerSync } from '@/lib/actions/integration-actions'
+import {
+  connectIntegration,
+  triggerSync,
+  type IntegrationProvider,
+} from '@/lib/actions/integration-actions'
 
 /* ─── Reconciliation Button ─── */
 
@@ -46,7 +50,7 @@ export function SyncButton({ provider }: { provider: string }) {
 
   function handleClick() {
     startTransition(async () => {
-      await triggerSync(provider as 'stripe' | 'quickbooks' | 'tax-engine')
+      await triggerSync(provider as IntegrationProvider)
     })
   }
 
@@ -69,15 +73,20 @@ export function SyncButton({ provider }: { provider: string }) {
 
 /* ─── Connect Button ─── */
 
-export function ConnectButton({ provider: _provider }: { provider: string }) {
+export function ConnectButton({ provider }: { provider: string }) {
   const [isPending, startTransition] = useTransition()
   const [connected, setConnected] = useState(false)
 
   function handleClick() {
     startTransition(async () => {
-      // Simulate OAuth handshake — will be replaced by real OAuth flow
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setConnected(true)
+      const result = await connectIntegration(provider as IntegrationProvider)
+      if (result.success) {
+        setConnected(true)
+      }
+
+      if (result.redirectUrl && typeof window !== 'undefined') {
+        window.location.href = result.redirectUrl
+      }
     })
   }
 

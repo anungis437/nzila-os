@@ -2,7 +2,9 @@
 
 ## What do you need?
 
-- **I'm evaluating Nzila OS for procurement** → [Buyer's Guide](personas/01-buyer.md)
+- **I'm a buyer or investor evaluating Nzila** → [Investor Brief](platform/investor-brief.md) · [Revenue Products](platform/revenue-products.md)
+- **I want details on a specific product** → [UnionEyes Profile](union-eyes/revenue-profile.md) · [Flow Profile](flow/revenue-profile.md)
+- **I'm evaluating Nzila OS for procurement** → [Buyer's Guide](personas/01-buyer.md) · [Procurement Pack](governance/procurement-pack.md)
 - **I'm running or deploying the platform** → [Operator's Guide](personas/02-operator.md)
 - **I'm performing a compliance or security audit** → [Auditor's Guide](personas/03-auditor.md)
 - **I want to use UnionEyes** → [Quick Start](union-eyes/quick-start.md) · [User Guide](union-eyes/user-guide.md)
