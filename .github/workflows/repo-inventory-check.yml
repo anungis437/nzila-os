@@ -44,20 +44,33 @@ jobs:
       - name: Enforce committed inventory is canonical
         run: |
           # Check for meaningful differences (exclude timestamp-only changes in generatedAt)
+          # Note: On PR, GITHUB_BASE_REF is main, GITHUB_HEAD_REF is the branch name
           python3 << 'EOF'
           import json
           import sys
+          import subprocess
+          import os
           
-          # Load both versions
+          # Load generated version
           with open('tooling/repo-inventory/output/inventory.json') as f:
             generated = json.load(f)
           
-          # Get the committed version
-          import subprocess
-          committed_str = subprocess.check_output(
-            ['git', 'show', 'HEAD:tooling/repo-inventory/output/inventory.json'],
-            text=True
-          )
+          # Get the committed version from the actual PR branch
+          # Use GITHUB_BASE_REF (main branch in PR) as the source of truth
+          base_branch = os.getenv('GITHUB_BASE_REF', 'main')
+          try:
+            committed_str = subprocess.check_output(
+              ['git', 'show', f'origin/{base_branch}:tooling/repo-inventory/output/inventory.json'],
+              text=True,
+              stderr=subprocess.DEVNULL
+            )
+          except subprocess.CalledProcessError:
+            # Fallback to main if origin/main not available
+            committed_str = subprocess.check_output(
+              ['git', 'show', 'main:tooling/repo-inventory/output/inventory.json'],
+              text=True
+            )
+          
           committed = json.loads(committed_str)
           
           # Compare, ignoring generatedAt
