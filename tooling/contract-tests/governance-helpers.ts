@@ -20,9 +20,14 @@ function normalizePath(p: string): string {
   return p.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
 }
 
+function canonicalPath(p: string): string {
+  const normalized = normalizePath(p)
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
 function isPathWithin(base: string, candidate: string): boolean {
-  const normalizedBase = normalizePath(base)
-  const normalizedCandidate = normalizePath(candidate)
+  const normalizedBase = canonicalPath(base)
+  const normalizedCandidate = canonicalPath(candidate)
   return normalizedCandidate === normalizedBase || normalizedCandidate.startsWith(`${normalizedBase}/`)
 }
 

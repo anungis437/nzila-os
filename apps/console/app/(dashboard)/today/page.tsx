@@ -268,6 +268,12 @@ export default async function TodayPage() {
     getTopExecutionActions(5),
   ])
 
+  const freshnessStatus = !data.burnDataAvailable || !data.pipelineAvailable || !data.pilotsAvailable
+    ? 'manual'
+    : data.lastAuditEventAt
+      ? 'live'
+      : 'weekly sync'
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
 
@@ -283,6 +289,9 @@ export default async function TodayPage() {
         </div>
         <span className="text-xs font-mono bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
           Nzila Ventures · CEO View
+        </span>
+        <span className="text-xs font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full ml-2">
+          freshness: {freshnessStatus}
         </span>
       </div>
 

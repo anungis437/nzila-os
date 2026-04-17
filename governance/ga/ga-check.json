@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-17T18:50:58.848Z",
-  "commitSha": "93dce868",
+  "timestamp": "2026-04-17T21:38:36.090Z",
+  "commitSha": "60e63977",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,7 +14,7 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 1823
+      "durationMs": 1463
     },
     {
       "id": "ORG-REGISTRY",
@@ -58,7 +58,7 @@
       "name": "Audited writes: Audit module blocks on failure",
       "status": "PASS",
       "details": "Audit emission is mandatory (blocks on failure)",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-SEALING",
@@ -72,7 +72,7 @@
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 8
+      "durationMs": 7
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -134,7 +134,7 @@
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
       "details": "211 contract test files (require ≥20)",
-      "durationMs": 6
+      "durationMs": 7
     },
     {
       "id": "CODEOWNERS",
@@ -142,14 +142,14 @@
       "status": "PASS",
       "details": "All governance paths have code ownership",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "RED-TEAM-WORKFLOW",
       "name": "Red-team: Nightly red-team workflow exists",
       "status": "PASS",
       "details": "Red-team nightly workflow with schedule trigger present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "RED-TEAM-EVIDENCE",
@@ -164,7 +164,7 @@
       "status": "PASS",
       "details": "All 17 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 13
+      "durationMs": 12
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -180,14 +180,14 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 2686
+      "durationMs": 2135
     }
   ],
   "environment": {
     "nodeVersion": "v24.13.1",
     "platform": "win32",
-    "ci": false,
+    "ci": true,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 4722
+  "totalDurationMs": 3741
 }

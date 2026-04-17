@@ -193,6 +193,11 @@ export default async function CapitalPage() {
   const data = await loadCapitalData()
   const maxAppSpend = data.byApp[0]?.totalEstCostUsd ?? 0
   const maxCatSpend = data.byCategory[0]?.totalEstCostUsd ?? 0
+  const freshnessStatus = !data.dataAvailable
+    ? 'manual'
+    : data.breachesAvailable
+      ? 'live'
+      : 'daily sync'
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -215,6 +220,9 @@ export default async function CapitalPage() {
           <Link href="/platform-economics" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
             Economics <ArrowRightIcon className="h-3 w-3" />
           </Link>
+          <span className="text-xs font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+            freshness: {freshnessStatus}
+          </span>
         </div>
       </div>
 

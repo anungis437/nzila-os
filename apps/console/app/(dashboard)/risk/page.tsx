@@ -273,6 +273,11 @@ export default async function RiskPage() {
   const data = await loadRiskData()
   const criticalCount = data.risks.filter((r) => r.severity === 'critical').length
   const highCount = data.risks.filter((r) => r.severity === 'high').length
+  const freshnessStatus = !data.approvalsAvailable && !data.breachesAvailable
+    ? 'manual'
+    : data.approvalsAvailable && data.breachesAvailable
+      ? 'live'
+      : 'daily sync'
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -295,6 +300,9 @@ export default async function RiskPage() {
           <Link href="/audit-insights" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
             Audit insights <ArrowRightIcon className="h-3 w-3" />
           </Link>
+          <span className="text-xs font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+            freshness: {freshnessStatus}
+          </span>
         </div>
       </div>
 

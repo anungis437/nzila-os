@@ -954,7 +954,8 @@ export async function getRunwayData(): Promise<RunwayData> {
   const receivablesAging = financeSpine.receivablesAging
 
   const baseScenario = scenarioRows.find((row) => row.mode === 'base') ?? scenarioRows[0] ?? { runwayMonths: 0, netBurnUsd: 1, mode: 'base' }
-  const safeSpendThresholdUsd = Math.max(0, netWorkingCapitalUsd / 12 - (monthlyBurnUsd - assumptions.find((row) => row.mode === baseScenario.mode)?.expectedMonthlyRevenue ?? 0))
+  const expectedRevenueForMode = assumptions.find((row) => row.mode === baseScenario.mode)?.expectedMonthlyRevenue ?? 0
+  const safeSpendThresholdUsd = Math.max(0, netWorkingCapitalUsd / 12 - (monthlyBurnUsd - expectedRevenueForMode))
   const hiringAffordability = Math.max(0, Math.floor((netWorkingCapitalUsd - monthlyBurnUsd * 6) / Math.max(costPerHire, 1)))
   const upcomingObligationsUsd = liabilitiesDue30dUsd + monthlyBurnUsd
   const decisions: RunwayDecision[] = []

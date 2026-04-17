@@ -112,8 +112,10 @@ export default async function BoardPage() {
           <div className="space-y-3">
             {actions.map((action) => (
               <div key={action.id} className="rounded-lg border border-gray-200 px-4 py-3 text-sm">
-                <p className="font-medium text-gray-900">{action.title}</p>
-                <p className="text-xs text-gray-500 mt-1">{action.owner || 'unassigned'} · due {action.dueDate || 'n/a'} · {action.status}</p>
+                <p className="font-medium text-gray-900">{action.action}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {action.zone || 'EXECUTION'} · due {action.dueDate ? action.dueDate.toISOString().slice(0, 10) : 'n/a'} · {action.urgent ? 'urgent' : 'normal'}
+                </p>
               </div>
             ))}
             {actions.length === 0 ? <p className="text-sm text-gray-400 italic">No active initiatives.</p> : null}

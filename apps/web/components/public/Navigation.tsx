@@ -56,6 +56,7 @@ export default function Navigation() {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
     router.refresh();
   };
