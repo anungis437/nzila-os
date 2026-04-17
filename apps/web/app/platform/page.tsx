@@ -1,18 +1,19 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
+import TrackedLink from '@/components/public/TrackedLink';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Platform',
-  description: 'The Nzila Backbone — unified infrastructure powering all 15 AI platforms across 10+ verticals with shared auth, CI/CD, and observability.',
+  description: `The Nzila shared platform - unified infrastructure for ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools.`,
   openGraph: {
     title: 'Nzila Ventures Platform',
-    description: 'The Nzila Backbone — unified infrastructure powering all verticals.',
-    images: [{ url: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Server room with blue lighting representing Nzila Backbone infrastructure' }],
+    description: `The Nzila shared platform - unified infrastructure for ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools.`,
+    images: [{ url: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Server room with blue lighting representing Nzila shared platform infrastructure' }],
   },
   alternates: { canonical: '/platform' },
 };
@@ -20,9 +21,9 @@ export const metadata: Metadata = {
 const capabilities = [
   {
     photo: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600',
-    name: 'Backbone Infrastructure',
+    name: 'Shared Platform Infrastructure',
     alt: 'Network cables and fiber optic connections in a modern data center',
-    description: 'Shared authentication, databases, CI/CD, and observability across all 15 platforms.',
+    description: 'Shared authentication, databases, CI/CD, and observability across 15 products and 17 live tools.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
@@ -46,7 +47,7 @@ const capabilities = [
     photo: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600',
     name: 'Azure Native',
     alt: 'Global cloud infrastructure map showing Azure region connectivity',
-    description: 'Container Apps, Static Web Apps, PostgreSQL, and Azure AI for production workloads.',
+    description: 'Container Apps, PostgreSQL, and Azure services for secure production workloads.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=600',
@@ -59,7 +60,7 @@ const capabilities = [
 const layers = [
   { name: 'Frontend', tech: 'Next.js · React 19 · Tailwind 4', color: 'bg-electric' },
   { name: 'API Layer', tech: 'Django 5 · REST · GraphQL', color: 'bg-violet' },
-  { name: 'AI / ML', tech: 'TensorFlow · OpenAI · Companion Engine', color: 'bg-gold' },
+  { name: 'Intelligence Layer', tech: 'TensorFlow · OpenAI · Companion Engine', color: 'bg-gold' },
   { name: 'Data', tech: 'PostgreSQL · Azure CosmosDB · Redis', color: 'bg-emerald' },
   { name: 'Infrastructure', tech: 'Azure · Docker · Terraform · GitHub Actions', color: 'bg-coral' },
 ];
@@ -71,7 +72,7 @@ export default function PlatformPage() {
       <section className="relative min-h-[60vh] flex items-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=1920"
-          alt="Server room corridor with rows of blue-lit server racks — Nzila Backbone infrastructure"
+          alt="Server room corridor with rows of blue-lit server racks — Nzila shared platform infrastructure"
           fill
           priority
           className="object-cover"
@@ -88,7 +89,7 @@ export default function PlatformPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              The Nzila <span className="gradient-text">Backbone</span>
+              The Nzila <span className="gradient-text">Shared Platform</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
@@ -98,12 +99,14 @@ export default function PlatformPage() {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
-            <Link
+            <TrackedLink
               href="/portfolio"
+              eventName="cta_portfolio"
+              eventProps={{ source: 'platform_hero' }}
               className="inline-flex items-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition text-lg"
             >
               View Full Portfolio →
-            </Link>
+            </TrackedLink>
           </ScrollReveal>
         </div>
       </section>
@@ -114,7 +117,7 @@ export default function PlatformPage() {
           <SectionHeading
             badge="Capabilities"
             title="Platform Capabilities"
-            subtitle="Enterprise-grade building blocks powering every vertical"
+            subtitle="Enterprise-grade building blocks powering every industry"
           />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -149,7 +152,7 @@ export default function PlatformPage() {
           <SectionHeading
             badge="Architecture"
             title="Full-Stack Layers"
-            subtitle="Every layer purpose-built for multi-vertical AI workloads"
+            subtitle="Every layer purpose-built for multi-vertical workloads"
             light
           />
 

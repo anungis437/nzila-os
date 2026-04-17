@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getChangeCalendarData } from "@/server/data";
+import { getChangeCalendarData } from "@/server/change-data";
 import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";

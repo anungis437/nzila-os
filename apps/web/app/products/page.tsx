@@ -3,14 +3,15 @@ import Image from 'next/image';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import InvestorCTA from '@/components/public/InvestorCTA';
+import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
 
 export const metadata: Metadata = {
   title: 'Products',
-  description: 'Our portfolio of 15 AI-powered platforms across 10+ verticals — from UnionEyes in labor rights to DiasporaCore in fintech.',
+  description: `Our portfolio of ${MARKETING_FACTS.productPlatforms} products and ${MARKETING_FACTS.governedApplications} live tools across UnionEyes, Zonga, Flow, and Agrimo.`,
   openGraph: {
     title: 'Nzila Ventures Products',
-    description: '15 AI-powered platforms. 4 flagships. One unified Backbone.',
-    images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'AI neural network visualization representing Nzila Ventures product suite' }],
+    description: `${MARKETING_FACTS.productPlatforms} products. ${MARKETING_FACTS.flagshipPlatforms} flagships. ${MARKETING_FACTS.governedApplications} live tools. One shared platform.`,
+    images: [{ url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Digital network visualization representing Nzila Ventures product suite' }],
   },
   alternates: { canonical: '/products' },
 };
@@ -19,60 +20,60 @@ const flagships = [
   {
     name: 'UnionEyes',
     vertical: 'Uniontech',
-    status: 'Flagship',
+    status: 'Production Ready',
     tam: '$50B',
     orgs: '4,773',
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     alt: 'UnionEyes — comprehensive union management platform for pension forecasting and labor analytics',
-    description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, CBA intelligence, and arbitration precedents for 4,773 orgs.',
-    features: ['Pension Forecasting', 'Grievance Tracking', 'CBA Intelligence (Unions & Federations)', 'Arbitration Precedents'],
+    description: 'Full-stack union case management platform — pension forecasting, grievance lifecycle, collective bargaining analysis, CBA intelligence, and evidence-sealed audit trails for 4,773+ organizations.',
+    features: ['Pension Forecasting', 'Grievance Lifecycle', 'CBA Intelligence', 'Evidence-Sealed Audit Trails'],
   },
   {
-    name: '3CUO / DiasporaCore',
-    vertical: 'Fintech',
-    status: 'Flagship',
-    tam: '$100B',
-    orgs: '485',
-    image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800',
-    alt: 'DiasporaCore — diaspora banking platform for multi-currency remittances and community lending',
-    description: 'Full-stack diaspora banking platform — KYC/AML compliance, multi-currency remittances, savings groups, and community lending across 485 financial orgs.',
-    features: ['KYC/AML Engine', 'Multi-Currency Transfers', 'Savings Groups', 'Community Lending'],
-  },
-  {
-    name: 'ABR Insights',
-    vertical: 'EdTech / Legaltech',
+    name: 'Zonga',
+    vertical: 'Music & Creator Economy',
     status: 'Production Ready',
-    tam: '$1.5B',
-    orgs: '132',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800',
-    alt: 'ABR Insights — anti-bias research platform with AI coaching and tribunal case database',
-    description: 'Anti-bias research and educational insights — LMS, tribunal case database, AI coaching, and DEI analytics powering 132 curated orgs.',
-    features: ['AI Coach', 'Tribunal Database', 'DEI Analytics', 'Custom LMS'],
+    tam: '$20B+',
+    orgs: '1000+',
+    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
+    alt: 'Zonga — African music platform for artists, streaming, and creator royalties',
+    description: 'Africa-first music distribution and streaming platform — artist onboarding, catalog management, playlist curation, royalty calculation, and transparent payouts for thousands of creators.',
+    features: ['Artist Onboarding', 'Release Management', 'Royalty Engine', 'Streaming Analytics'],
   },
   {
-    name: 'CORA',
-    vertical: 'Agrotech',
-    status: 'Beta',
-    tam: '$8.6B',
-    orgs: '80+',
+    name: 'Flow',
+    vertical: 'Commerce & Operations',
+    status: 'Production Ready',
+    tam: '$100B+',
+    orgs: '500+',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
+    alt: 'Flow — enterprise order-to-cash and supply chain management platform',
+    description: 'Complete commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and integrations with Shopify, Zoho, WhatsApp, and ERP systems.',
+    features: ['Order Management', 'Inventory & Warehouse', 'Production Tracking', 'Multi-Channel Integrations'],
+  },
+  {
+    name: 'Agrimo',
+    vertical: 'Agriculture & Supply Chain',
+    status: 'Production Ready',
+    tam: '$8B',
+    orgs: '220+',
     image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
-    alt: 'CORA — AI-powered agricultural management platform with farm planning and IoT integration',
-    description: 'Agricultural management and supply-chain intelligence built on verified Canadian agricultural data — farm planning, crop management, IoT integration, and market intelligence.',
-    features: ['Farm Planning (CA Data)', 'Supply Chain', 'IoT Integration', 'Market Intelligence'],
+    alt: 'Agrimo — agricultural field operations and supply chain management',
+    description: 'Agricultural supply chain and operations platform — harvest tracking, lot management, quality grading, warehousing, cold-chain logistics, traceability, and farmer payouts for DRC and Central African producers.',
+    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Operations', 'Supply Chain Traceability'],
   },
 ];
 
 const pipeline = [
-  { name: 'CongoWave', vertical: 'Entertainment', tam: '$50B', orgs: '83+', status: 'Production Ready' },
+  { name: 'CORA', vertical: 'Agricultural Intelligence', tam: '$8.6B', orgs: '80+', status: 'Production Ready' },
+  { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', orgs: '485', status: 'Production Ready' },
+  { name: 'ABR Insights', vertical: 'Compliance & Audit', tam: '$1.5B', orgs: '132', status: 'Production Ready' },
+  { name: 'Zonga', vertical: 'Entertainment', tam: '$50B', orgs: '83+', status: 'Production Ready' },
   { name: 'SentryIQ360', vertical: 'Insurtech', tam: '$30B', orgs: '79+', status: 'In Development' },
   { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', orgs: '682', status: 'In Development' },
-  { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', orgs: '30+', status: 'In Development' },
-  { name: 'Shop Quoter', vertical: 'Commerce', tam: '$5B', orgs: '93', status: 'In Development' },
   { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', orgs: '337', status: 'Beta' },
-  { name: 'eExports', vertical: 'Trade', tam: '$3B', orgs: '78', status: 'Django PoC' },
-  { name: 'AgrimoOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', orgs: '220', status: 'In Development' },
   { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', orgs: '37', status: 'In Development' },
-  { name: 'STSA / Lexora', vertical: 'Fintech', tam: '$5B', orgs: '95', status: 'In Development' },
+  { name: 'Flow', vertical: 'Commerce', tam: '$100B+', orgs: '500+', status: 'Production Ready' },
+  { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', orgs: '30+', status: 'In Development' },
   { name: 'Memora', vertical: 'Healthtech', tam: '$20B', orgs: '150', status: 'Legacy' },
 ];
 
@@ -92,7 +93,7 @@ export default function ProductsPage() {
       <section className="relative min-h-[60vh] flex items-center overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920"
-          alt="AI neural network with glowing nodes and connections representing advanced machine learning"
+          alt="Digital network with glowing nodes and connections representing modern software systems"
           fill
           priority
           className="object-cover"
@@ -112,7 +113,7 @@ export default function ProductsPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              15 AI-powered platforms across 10+ verticals — each built on the Nzila Backbone.
+              {MARKETING_FACTS.productPlatforms} products across {MARKETING_FACTS.verticalsLabel} industries - delivered through {MARKETING_FACTS.governedApplications} live tools on the Nzila shared platform.
             </p>
           </ScrollReveal>
         </div>
@@ -122,9 +123,9 @@ export default function ProductsPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Flagships"
-            title="Revenue-Ready Platforms"
-            subtitle="Our four flagship products are production-grade AI platforms addressing massive market opportunities"
+            badge="Four Core Platforms"
+            title="Our Main Product Suite"
+            subtitle="Production-grade platforms across uniontech, music, commerce, and agriculture — serving thousands of organizations globally"
           />
 
           <div className="space-y-8">
@@ -160,7 +161,7 @@ export default function ProductsPage() {
                       ))}
                     </div>
                     <div className="flex items-center gap-6 text-sm">
-                      <span className="font-bold text-gold">{product.tam} TAM</span>
+                      <span className="font-bold text-gold">{product.tam} market size</span>
                       <span className="font-semibold text-electric">{product.orgs} orgs</span>
                     </div>
                   </div>
@@ -171,14 +172,14 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════ PIPELINE ═══════════════════════ */}
+      {/* ═══════════════════════ EXTENDED PORTFOLIO ═══════════════════════ */}
       <section className="py-24 bg-navy relative overflow-hidden">
         <div className="absolute inset-0 bg-mesh opacity-30" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Pipeline"
-            title="Growing Portfolio"
-            subtitle="11 additional platforms at various stages of development"
+            badge="Extended Portfolio"
+            title="Growing Ecosystem"
+            subtitle="11 complementary products — production-ready, in development, and specialized solutions that extend the Nzila shared platform"
             light
           />
 

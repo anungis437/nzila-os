@@ -57,7 +57,7 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 /* ── Main middleware ── */
-export default authMiddleware(async (auth, request: NextRequest) => {
+export const proxy = authMiddleware(async (auth, request: NextRequest) => {
   try {
     // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
     if (process.env.NODE_ENV !== 'development') {

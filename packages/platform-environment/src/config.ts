@@ -14,12 +14,12 @@ import type { EnvironmentName, DeploymentArtifact, GovernanceSnapshot } from './
 // ── Repo Root ───────────────────────────────────────────────────────────────
 
 function findRepoRoot(from?: string): string {
-  let dir = from ?? resolve(import.meta.dirname ?? __dirname, '..', '..', '..')
+  let dir = from ?? resolve(/* turbopackIgnore: true */ (import.meta.dirname ?? __dirname), '..', '..', '..')
   for (let i = 0; i < 5; i++) {
-    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) return dir
-    dir = resolve(dir, '..')
+    if (existsSync(join(/* turbopackIgnore: true */ dir, 'pnpm-workspace.yaml'))) return dir
+    dir = resolve(/* turbopackIgnore: true */ dir, '..')
   }
-  return resolve('.')
+  return resolve(/* turbopackIgnore: true */ '.')
 }
 
 // ── Env Files ───────────────────────────────────────────────────────────────

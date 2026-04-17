@@ -11,27 +11,16 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 /**
- * Public paths — everything else requires authentication.
- * Cora is read-only analytics — same auth enforcement as Agrimo.
+ * Public routes — everything else requires authentication.
+ * /api/health is intentionally public (probe endpoints must not require auth).
  */
-const publicPaths = [
-  '/sign-in',
-  '/sign-up',
-  '/api/auth',
-  '/api/webhooks',
-  '/api/health',
-]
-
-function isPublicPath(pathname: string): boolean {
-  if (pathname === '/') return true
-  return publicPaths.some(p => pathname.startsWith(p))
-}
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/api/auth']
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default auth((req: any) => {
+export const proxy = auth((req: any) => {
   const { pathname } = req.nextUrl
 
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
@@ -55,8 +44,9 @@ export default auth((req: any) => {
     }
   }
 
-  // ── Auth protection — redirect unauthenticated users ──────────────────
-  if (!isPublicPath(pathname) && !req.auth) {
+  // ── Authentication ────────────────────────────────────────────────────
+  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+  if (!isPublic && !req.auth) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
@@ -69,18 +59,12 @@ export default auth((req: any) => {
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────
-  const requestId =
-    req.headers.get('x-request-id') ?? crypto.randomUUID()
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
 })
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

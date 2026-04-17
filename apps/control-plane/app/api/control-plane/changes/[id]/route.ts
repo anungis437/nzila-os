@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getChangeRecordById } from "@/server/data";
+import { getChangeRecordById } from "@/server/change-data";
 import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";

@@ -7,10 +7,10 @@ import SectionHeading from '@/components/public/SectionHeading';
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Nzila Ventures is a venture studio building ethical, human-centered AI across 10+ verticals — powering social impact at scale.',
+  description: 'Nzila Ventures is a company building ethical, human-centered technology across 10+ industries — powering social impact at scale.',
   openGraph: {
     title: 'About Nzila Ventures',
-    description: 'Venture studio building ethical AI across healthcare, finance, agriculture, and justice.',
+    description: 'Company building ethical technology across healthcare, finance, agriculture, and justice.',
     images: [{ url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Diverse team collaborating around laptops in a modern workspace — Nzila Ventures' }],
   },
   alternates: { canonical: '/about' },
@@ -27,13 +27,13 @@ const values = [
     title: 'Ethical Integrity',
     color: 'from-gold to-gold-light',
     description:
-      'Unwavering ethical standards in IP management, data handling, AI governance, and platform stewardship.',
+      'Unwavering ethical standards in IP management, data handling, automation governance, and platform stewardship.',
   },
   {
     title: 'Innovation-Driven',
     color: 'from-violet to-coral',
     description:
-      'Continuous innovation through our unified Backbone — powering transformation across all 10+ verticals.',
+      'Continuous innovation through our shared platform — powering transformation across all 10+ industries.',
   },
   {
     title: 'Impact-Focused',
@@ -50,8 +50,8 @@ const values = [
 ];
 
 const timeline = [
-  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, engineered 12,000+ data orgs, created 200+ AI prompts, and pioneered union and diaspora banking technology.' },
-  { year: '2023', title: 'Portfolio Consolidation', description: 'Analyzed $2M+ in legacy investments. Designed unified Backbone architecture. Expanded to 15 platforms across 10 verticals.' },
+  { year: '2019–2022', title: 'Foundation', description: 'Built core IP, engineered 12,000+ data orgs, created 200+ guided decision playbooks, and pioneered union and diaspora banking technology.' },
+  { year: '2023', title: 'Portfolio Consolidation', description: 'Analyzed $2M+ in legacy investments. Designed shared platform architecture. Expanded to 15 products across 10 industries.' },
   { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure. Django + Next.js stack.' },
   { year: '2025', title: 'Revenue Activation', description: 'Series A readiness. Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
@@ -80,14 +80,14 @@ export default function About() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Building Ethical AI<br />
+              Building Trusted Software<br />
               <span className="gradient-text">For Social Impact</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <p className="text-xl text-gray-300 max-w-3xl">
-              A venture studio and IP-holding company transforming legacy platforms into
-              modern, scalable AI solutions that serve communities worldwide — guided by
+              A company transforming legacy platforms into
+              modern, scalable software solutions that serve communities worldwide — guided by
               B Corp values of people, planet, and purpose.
             </p>
           </ScrollReveal>
@@ -130,7 +130,7 @@ export default function About() {
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
                     A world where technology seamlessly supports human flourishing across healthcare,
-                    justice, commerce, and culture. Through our Backbone infrastructure, we envision
+                    justice, commerce, and culture. Through our shared platform infrastructure, we envision
                     interconnected platforms that reduce operational burden, increase accessibility, and
                     create measurable improvements in people&apos;s lives.
                   </p>
@@ -171,7 +171,7 @@ export default function About() {
           <SectionHeading
             badge="Journey"
             title="From Vision to Execution"
-            subtitle="Five years of building, data curation, and AI innovation"
+            subtitle="Five years of building, data curation, and practical innovation"
             light
           />
 
@@ -205,8 +205,8 @@ export default function About() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: 15, label: 'AI Platforms' },
-              { target: 10, suffix: '+', label: 'Verticals' },
+              { target: 15, label: 'Product Platforms' },
+              { target: 10, suffix: '+', label: 'Industries' },
               { target: 4, prefix: '$', suffix: 'M+', label: 'Engineering Investment' },
               { target: 12000, suffix: '+', label: 'Data Entities' },
             ].map((stat) => (
