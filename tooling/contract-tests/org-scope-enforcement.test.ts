@@ -159,14 +159,14 @@ describe('Org-scope enforcement patterns', () => {
     const productionOrgApps = orgScopeApps.filter(a => a.tier === 'PRODUCTION')
 
     for (const app of productionOrgApps) {
-      const mwPath = join(APPS_DIR, app.id, 'middleware.ts')
+      const mwPath = join(APPS_DIR, app.id, 'proxy.ts')
       if (!existsSync(mwPath)) {
-        violations.push(`${app.id}: missing middleware.ts`)
+        violations.push(`${app.id}: missing proxy.ts`)
         continue
       }
       const mw = readFileSync(mwPath, 'utf-8')
       if (!mw.includes('checkOrgRateLimit') && !mw.includes('orgRateLimit')) {
-        violations.push(`${app.id}: middleware.ts missing org-scoped rate limiting`)
+        violations.push(`${app.id}: proxy.ts missing org-scoped rate limiting`)
       }
     }
 

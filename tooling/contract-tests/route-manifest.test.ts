@@ -175,22 +175,22 @@ describe('INV-ROUTE-MANIFEST — Centralized Route Manifest', () => {
   });
 
   // ── Phase 6: Auth Guard Verification ───────────────────────────────────
-  it('deployed Next.js apps have auth middleware', () => {
-    // Auth is enforced at the middleware level via NextAuth auth(), not per-route
+  it('deployed Next.js apps have auth proxy', () => {
+    // Auth is enforced at the proxy level via platform-auth, not per-route
     const deployedNextApps = ['console', 'partners', 'union-eyes', 'cfo', 'zonga'];
-    const missingMiddleware: string[] = [];
+    const missingProxy: string[] = [];
 
     for (const app of deployedNextApps) {
-      const middlewarePath = join(APPS_DIR, app, 'middleware.ts');
-      if (!existsSync(middlewarePath)) {
-        missingMiddleware.push(app);
+      const proxyPath = join(APPS_DIR, app, 'proxy.ts');
+      if (!existsSync(proxyPath)) {
+        missingProxy.push(app);
         continue;
       }
-      const content = readFileSync(middlewarePath, 'utf-8');
+      const content = readFileSync(proxyPath, 'utf-8');
       if (!content.includes('@nzila/platform-auth') && !content.includes('authMiddleware')) {
-        missingMiddleware.push(app);
+        missingProxy.push(app);
       }
     }
-    expect(missingMiddleware).toEqual([]);
+    expect(missingProxy).toEqual([]);
   });
 });

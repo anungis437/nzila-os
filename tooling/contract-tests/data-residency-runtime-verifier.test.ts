@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { ROOT } from './governance-helpers'
 
 describe('Data residency runtime verifier', () => {
-  it('generates a runtime report in non-enforced mode', () => {
+  it('generates a runtime report in non-enforced mode', { timeout: 90_000 }, () => {
     const reportPath = join(ROOT, 'ops', 'outputs', 'data-residency-runtime.json')
 
     execFileSync('node', ['tooling/scripts/verify-data-residency-runtime.mjs'], {

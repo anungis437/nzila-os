@@ -214,8 +214,8 @@ describe('MUTATION_IDEMPOTENCY_REQUIRED_001 - Universal Idempotency Enforcement'
       const apiDir = join(ROOT, 'apps', app, 'app', 'api')
       if (!existsSync(apiDir)) continue
 
-      // Check middleware at the app level
-      const middlewarePath = join(ROOT, 'apps', app, 'middleware.ts')
+      // Check proxy at the app level (proxy.ts replaces middleware.ts)
+      const middlewarePath = join(ROOT, 'apps', app, 'proxy.ts')
       const middlewareContent = existsSync(middlewarePath)
         ? readFileSync(middlewarePath, 'utf-8')
         : ''
@@ -242,7 +242,7 @@ describe('MUTATION_IDEMPOTENCY_REQUIRED_001 - Universal Idempotency Enforcement'
         violations.push({
           route: rel,
           methods,
-          reason: `No idempotency enforcement found in middleware.ts or route file`,
+          reason: `No idempotency enforcement found in proxy.ts or route file`,
         })
       }
     }
@@ -253,7 +253,7 @@ describe('MUTATION_IDEMPOTENCY_REQUIRED_001 - Universal Idempotency Enforcement'
         violations
           .map((v) => `  ${v.route} [${v.methods.join(', ')}]\n    → ${v.reason}`)
           .join('\n') +
-        `\n\nFix: Add idempotency enforcement in the app's middleware.ts or the route handler.\n` +
+        `\n\nFix: Add idempotency enforcement in the app's proxy.ts or the route handler.\n` +
         `Exempt: Add to governance/exceptions/mutation-idempotency.json if legitimately exempt.`,
     ).toEqual([])
   })

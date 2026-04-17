@@ -69,10 +69,10 @@ describe('INV-10 — Vertical scaffolding CLI exists', () => {
     expect(content).toContain('authorize')
   })
 
-  it('scaffolded vertical template includes middleware.ts', () => {
+  it('scaffolded vertical template includes proxy.ts', () => {
     const cmdPath = join(ROOT, 'packages', 'cli', 'src', 'commands', 'create-vertical.ts')
     const content = readFileSync(cmdPath, 'utf-8')
-    expect(content).toContain('middleware.ts')
+    expect(content).toContain('proxy.ts')
     expect(content).toContain('authMiddleware')
   })
 

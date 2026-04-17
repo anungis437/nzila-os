@@ -153,27 +153,29 @@ describe('ORGP-003: Financial mutation routes have audit references', () => {
 
 // ── ORGP-004: Org-scoped apps enforce context at middleware level ────────────
 
-describe('ORGP-004: Org-scoped apps have middleware with auth enforcement', () => {
+describe('ORGP-004: Org-scoped apps have proxy with auth enforcement', () => {
   const ORG_SCOPED_APPS = [
     'union-eyes', 'flow', 'zonga', 'console', 'partners',
     'cfo', 'abr', 'nacp-exams',
   ]
 
   for (const app of ORG_SCOPED_APPS) {
-    it(`${app} has middleware.ts with auth/org enforcement`, () => {
-      const mwPath = join(APPS_DIR, app, 'middleware.ts')
-      expect(existsSync(mwPath), `${app}/middleware.ts must exist`).toBe(true)
+    it(`${app} has proxy.ts with auth/org enforcement`, () => {
+      const mwPath = join(APPS_DIR, app, 'proxy.ts')
+      expect(existsSync(mwPath), `${app}/proxy.ts must exist`).toBe(true)
 
       const src = readSafe(mwPath)
       const hasAuthEnforcement =
         src.includes('authMiddleware') ||
         src.includes('NextResponse.redirect') ||
         src.includes('auth()') ||
-        src.includes('getAuth')
+        src.includes('getAuth') ||
+        src.includes('@nzila/platform-auth') ||
+        src.includes('export const proxy = auth(')
 
       expect(
         hasAuthEnforcement,
-        `${app}/middleware.ts must enforce authentication`,
+        `${app}/proxy.ts must enforce authentication`,
       ).toBe(true)
     })
   }

@@ -150,8 +150,8 @@ describe('ZNG-E2E-03 — Public marketing routes exist', () => {
     expect(content).not.toContain('resolveOrgContext')
   })
 
-  it('middleware allows /events as public route', () => {
-    const content = readFileSync(join(ZONGA, 'middleware.ts'), 'utf-8')
+it('proxy allows /events as public route', () => {
+    const content = readFileSync(join(ZONGA, 'proxy.ts'), 'utf-8')
     expect(content).toContain("'/events(.*)'")
   })
 

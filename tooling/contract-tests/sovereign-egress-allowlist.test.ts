@@ -53,8 +53,8 @@ describe('SOVEREIGN_EGRESS_ALLOWLIST_005 — Sovereign egress controls', () => {
     expect(pkg.exports['./sovereign']).toBeDefined()
   })
 
-  it('Console middleware enforces sovereign egress (403 on blocked)', () => {
-    const mwPath = join(ROOT, 'apps', 'console', 'middleware.ts')
+  it('Console proxy enforces sovereign egress (403 on blocked)', () => {
+    const mwPath = join(ROOT, 'apps', 'console', 'proxy.ts')
     const content = readFileSync(mwPath, 'utf-8')
 
     expect(content).toContain('SOVEREIGN_EGRESS_ENFORCED')

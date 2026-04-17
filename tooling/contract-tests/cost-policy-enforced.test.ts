@@ -43,9 +43,9 @@ describe('COST_POLICY_ENFORCED_001 — Cost budget denial-of-wallet', () => {
     expect(content).toContain('CostStorePorts')
   })
 
-  it('Console middleware enforces budget (402 on exceeded)', () => {
-    const mwPath = join(ROOT, 'apps', 'console', 'middleware.ts')
-    expect(existsSync(mwPath), 'apps/console/middleware.ts must exist').toBe(true)
+  it('Console proxy enforces budget (402 on exceeded)', () => {
+    const mwPath = join(ROOT, 'apps', 'console', 'proxy.ts')
+    expect(existsSync(mwPath), 'apps/console/proxy.ts must exist').toBe(true)
 
     const content = readFileSync(mwPath, 'utf-8')
     expect(content).toContain('COST_BUDGET_EXCEEDED')
@@ -54,7 +54,7 @@ describe('COST_POLICY_ENFORCED_001 — Cost budget denial-of-wallet', () => {
   })
 
   it('cost-policy declares exempt routes for admin/export/proof', () => {
-    const mwPath = join(ROOT, 'apps', 'console', 'middleware.ts')
+    const mwPath = join(ROOT, 'apps', 'console', 'proxy.ts')
     const content = readFileSync(mwPath, 'utf-8')
 
     expect(content).toContain('/api/admin/')

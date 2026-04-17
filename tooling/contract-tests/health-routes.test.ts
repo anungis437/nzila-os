@@ -26,7 +26,7 @@ function read(rel: string): string {
 
 /**
  * All Next.js apps that MUST have production-grade health routes.
- * Each entry maps to apps/<name>/app/api/health/route.ts and apps/<name>/middleware.ts.
+ * Each entry maps to apps/<name>/app/api/health/route.ts and apps/<name>/proxy.ts.
  */
 const HEALTH_APPS = [
   'console',
@@ -41,7 +41,7 @@ function healthRoutePath(app: string) {
   return `apps/${app}/app/api/health/route.ts`
 }
 function middlewarePath(app: string) {
-  return `apps/${app}/middleware.ts`
+  return `apps/${app}/proxy.ts`
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ describe('Health & Readiness Routes — REM-05 contract', () => {
       })
 
       // ── Auth bypass ───────────────────────────────────────────────────────
-      it('/api/health bypasses auth in middleware (public route)', () => {
+      it('/api/health bypasses auth in proxy (public route)', () => {
         const mw = read(middlewarePath(app))
         expect(mw).toContain('/api/health')
       })

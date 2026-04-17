@@ -212,17 +212,18 @@ export default eslintConfig
 `,
     },
 
-    // ── middleware.ts ────────────────────────────────────────────────
+    // ── proxy.ts ─────────────────────────────────────────────────────
     {
-      path: 'middleware.ts',
+      path: 'proxy.ts',
       content: `/**
- * ${pascalName} — Next.js middleware
+ * ${pascalName} — Next.js proxy (edge request handler)
  *
  * Entra External ID authentication + rate limiting.
  * All API routes must also call authorize() from @nzila/os-core/policy.
  */
-import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
+import { auth, createRouteMatcher } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 
 const isPublicRoute = createRouteMatcher([
@@ -236,7 +237,8 @@ const isPublicRoute = createRouteMatcher([
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default authMiddleware(async (auth, request) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const proxy = auth(async (request: any) => {
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     request.headers.get('x-real-ip') ??
@@ -251,7 +253,7 @@ export default authMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     await auth.protect()
   }
-})
+}) as (request: NextRequest) => Promise<NextResponse>
 
 export const config = {
   matcher: [
@@ -522,8 +524,8 @@ import { join } from 'node:path'
 const APP_DIR = join(__dirname, '..')
 
 describe('${pascalName} — governance compliance', () => {
-  it('has middleware.ts with platform auth', () => {
-    const mw = join(APP_DIR, 'middleware.ts')
+  it('has proxy.ts with platform auth', () => {
+    const mw = join(APP_DIR, 'proxy.ts')
     expect(existsSync(mw)).toBe(true)
     const content = readFileSync(mw, 'utf-8')
     expect(content).toContain('authMiddleware')

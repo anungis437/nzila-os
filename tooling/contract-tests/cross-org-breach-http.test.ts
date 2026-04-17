@@ -261,8 +261,8 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
 
   describe('middleware enforces org-scoped rate limiting', () => {
     for (const app of ['console', 'partners']) {
-      it(`${app}/middleware.ts imports and calls checkOrgRateLimit`, () => {
-        const mwPath = resolve(ROOT, `apps/${app}/middleware.ts`)
+      it(`${app}/proxy.ts imports and calls checkOrgRateLimit`, () => {
+        const mwPath = resolve(ROOT, `apps/${app}/proxy.ts`)
         const content = read(mwPath)
         expect(content).toContain('checkOrgRateLimit')
         expect(content).toContain('orgRateLimitHeaders')

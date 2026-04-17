@@ -41,8 +41,8 @@ describe('RATE_LIMITING_REQUIRED_002 — Rate limiting on public routes', () => 
     expect(pkg.exports['./orgRateLimit']).toBeDefined()
   })
 
-  it('Console middleware applies rate limiting', () => {
-    const mwPath = join(ROOT, 'apps', 'console', 'middleware.ts')
+  it('Console proxy applies rate limiting', () => {
+    const mwPath = join(ROOT, 'apps', 'console', 'proxy.ts')
     const content = readFileSync(mwPath, 'utf-8')
 
     expect(content).toContain('checkRateLimit')
@@ -52,7 +52,7 @@ describe('RATE_LIMITING_REQUIRED_002 — Rate limiting on public routes', () => 
   })
 
   it('rate limit is IP-based with configurable max and window', () => {
-    const mwPath = join(ROOT, 'apps', 'console', 'middleware.ts')
+    const mwPath = join(ROOT, 'apps', 'console', 'proxy.ts')
     const content = readFileSync(mwPath, 'utf-8')
 
     expect(content).toContain('RATE_LIMIT_MAX')

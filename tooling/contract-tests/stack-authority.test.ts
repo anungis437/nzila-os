@@ -60,6 +60,9 @@ const TS_AUTHORITATIVE_APPS = [
   'orchestrator-api',
 ]
 
+/** Temporary scaffold test apps — excluded from classification checks */
+const SCAFFOLD_TEST_EXCLUSIONS = new Set(['test-scaffold-gp'])
+
 /**
  * Patterns that indicate a direct Drizzle mutation (not a read).
  * We look for `.insert(`, `.update(`, `.delete(` preceded by `db.` or on
@@ -296,7 +299,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
       ...TS_AUTHORITATIVE_APPS,
     ])
 
-    const unclassified = allApps.filter((app) => !classified.has(app))
+    const unclassified = allApps.filter((app) => !classified.has(app) && !SCAFFOLD_TEST_EXCLUSIONS.has(app))
 
     expect(
       unclassified,

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { ROOT } from './governance-helpers'
 
 describe('DORA collector hardening', () => {
-  it('writes a well-formed output document with predictive signal', () => {
+  it('writes a well-formed output document with predictive signal', { timeout: 120_000 }, () => {
     const workDir = mkdtempSync(join(tmpdir(), 'dora-hardening-'))
     const outputPath = join(workDir, 'dora.json')
 

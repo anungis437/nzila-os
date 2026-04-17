@@ -17,20 +17,20 @@ function readContent(path: string): string {
   try { return readFileSync(path, 'utf-8') } catch { return '' }
 }
 
-// ── 1. Every protected app must have a middleware.ts ─────────────────────
+// ── 1. Every protected app must have a proxy.ts ─────────────────────
 
 const PROTECTED_APPS = ['console', 'partners', 'union-eyes', 'flow', 'cfo', 'zonga']
 
 describe('PR8: AuthZ — middleware presence', () => {
   for (const app of PROTECTED_APPS) {
-    it(`${app} must have a middleware.ts that uses Clerk`, () => {
-      const middlewarePath = resolve(ROOT, `apps/${app}/middleware.ts`)
-      expect(existsSync(middlewarePath), `apps/${app}/middleware.ts missing`).toBe(true)
-      const content = readContent(middlewarePath)
+    it(`${app} must have a proxy.ts that uses platform-auth`, () => {
+      const proxyPath = resolve(ROOT, `apps/${app}/proxy.ts`)
+      expect(existsSync(proxyPath), `apps/${app}/proxy.ts missing`).toBe(true)
+      const content = readContent(proxyPath)
       // Must import from @nzila/platform-auth or authMiddleware
       expect(
         content.includes('authMiddleware') || content.includes('@nzila/platform-auth'),
-        `${app}/middleware.ts must use platform-auth middleware`
+        `${app}/proxy.ts must use platform-auth middleware`
       ).toBe(true)
     })
   }

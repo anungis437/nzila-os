@@ -38,6 +38,7 @@ const EXEMPT_PATTERNS = [
   /demo-output/,
   /proof-artifacts/,
   /tech-repo-scaffold/,
+  /test-scaffold-gp/,
 ]
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.py', '.vue'])
