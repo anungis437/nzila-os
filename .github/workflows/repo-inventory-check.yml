@@ -45,7 +45,14 @@ jobs:
         run: |
           # Ignore timestamp-only differences in generatedAt field (which changes per run)
           # Only fail if there are meaningful changes beyond the timestamp
-          git diff -- tooling/repo-inventory/output/ | grep -E '^[+-]' | grep -v '^[+-]\s*"generatedAt"' | grep -E '^[-+]\s*"' && { echo "Inventory drift detected (meaningful changes)"; exit 1; } || echo "✓ Inventory is in sync (timestamp differences ignored)"
+          MEANINGFUL_CHANGES=$(git diff -- tooling/repo-inventory/output/ | grep -E '^[+-]' | grep -v '^[+-]\s*"generatedAt"' | wc -l)
+          if [ "$MEANINGFUL_CHANGES" -gt 0 ]; then
+            echo "Inventory drift detected (meaningful changes)"
+            git diff -- tooling/repo-inventory/output/
+            exit 1
+          else
+            echo "✓ Inventory is in sync (timestamp differences ignored)"
+          fi
 
       - name: Run drift check
         run: npx tsx tooling/repo-inventory/src/check-drift.ts
