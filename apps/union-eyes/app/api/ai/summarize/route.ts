@@ -11,6 +11,7 @@ import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
+import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -110,15 +111,34 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       params: { temperature: 0.3, maxTokens: Math.min(max_length, 2000) },
     });
 
-    return NextResponse.json({
-      summary: result.content,
-      type,
-      ...(documentTitle ? { document_title: documentTitle } : {}),
-      ...(document_id ? { document_id } : {}),
-      tokens_used: result.tokensIn + result.tokensOut,
-      model: result.model,
-      latency_ms: result.latencyMs,
-    });
+    return NextResponse.json(buildCanonicalAiOutput({
+      payload: {
+        summary: result.content,
+        type,
+        ...(documentTitle ? { document_title: documentTitle } : {}),
+        ...(document_id ? { document_id } : {}),
+        tokens_used: result.tokensIn + result.tokensOut,
+        model: result.model,
+        latency_ms: result.latencyMs,
+      },
+      appKey: UE_APP_KEY,
+      orgId,
+      execution: {
+        requestId: result.requestId,
+        traceId: result.requestId,
+        modelUsed: result.model,
+        provider: result.provider,
+        engineVersion: `${result.provider}:${result.model}`,
+        latencyMs: result.latencyMs,
+        tokenCostUsd: result.costUsd,
+        tokensIn: result.tokensIn,
+        tokensOut: result.tokensOut,
+      },
+      confidenceScore: type === 'detailed' ? 0.76 : 0.72,
+      evidenceRefs: document_id ? [`knowledge_base:${document_id}`] : ['input:raw-content'],
+      reviewRequired: true,
+      domain: 'labour',
+    }));
   } catch (error) {
     logger.error('Summarization failed', { error });
     return NextResponse.json({ error: 'Summarization failed' }, { status: 500 });

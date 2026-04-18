@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { recordAiReviewDecision } from '@nzila/ai-sdk'
 import { createLogger } from '@nzila/os-core'
 import {
   validateActionProposal,
@@ -133,6 +134,19 @@ export async function POST(req: NextRequest) {
         updatedAt: new Date(),
       })
       .where(eq(aiActions.id, action.id))
+
+    if (finalStatus === 'approved') {
+      recordAiReviewDecision({
+        appKey,
+        orgId,
+        modelUsed: actionType,
+        engineVersion: `policy:${profileKey}`,
+        approved: true,
+        overridden: false,
+        requestId: action.id,
+        traceId: action.id,
+      })
+    }
 
     return NextResponse.json({
       actionId: action.id,

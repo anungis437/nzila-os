@@ -9,8 +9,8 @@
 | Apps | 17 |
 | Packages | 166 |
 | GitHub Workflows | 37 |
-| Contract Test Files | 213 |
-| TS/JS Test Files | 1171 |
+| Contract Test Files | 214 |
+| TS/JS Test Files | 1177 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -21,7 +21,7 @@
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 100 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 234 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 252 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 207 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 211 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 37 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 330 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 36 | Investment migration advisory platform — case management, program intelligence,  |
@@ -33,7 +33,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 51 | Cross-border trade management — deals, listings, shipments, and commission track |
 | union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3142 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 70 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 406 | Africa-first music distribution, streaming, and royalty management platform. |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 416 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 

@@ -12,6 +12,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
 import {
   ReleaseStatus,
   type Release,
@@ -20,7 +21,7 @@ import {
   ZongaEntityType,
 } from '@/lib/zonga-services'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
-import { runPrediction } from '@/lib/ml-client'
+import { runPredictionDetailed } from '@/lib/ml-client'
 import { executeCommand } from '@/lib/control'
 import { getCreatorPlan } from '@/lib/guards/plan-queries'
 import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
@@ -297,7 +298,7 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
 
 /* ─── Content Integrity ─── */
 
-export interface IntegrityCheck {
+export type IntegrityCheck = CanonicalAiOutput<{
   id: string
   type: 'duplicate' | 'metadata-mismatch' | 'rights-conflict' | 'ai-flagged'
   assetId: string
@@ -310,7 +311,7 @@ export interface IntegrityCheck {
   description: string
   createdAt: Date
   resolved: boolean
-}
+}>
 
 export interface IntegritySummary {
   total: number
@@ -325,33 +326,47 @@ export interface IntegrityResult {
 }
 
 export async function getIntegrityChecks(): Promise<IntegrityResult> {
-  const _ctx = await resolveOrgContext()
+  const ctx = await resolveOrgContext()
 
   try {
     // Run ML-based content integrity check
-    const prediction = await runPrediction({
+    const prediction = await runPredictionDetailed({
       model: 'content-integrity-checker',
       features: { scope: 'platform' },
+      orgId: ctx.orgId,
     })
 
     const checks: IntegrityCheck[] = []
 
-    if (prediction?.issues && Array.isArray(prediction.issues)) {
-      for (const issue of prediction.issues) {
-        checks.push({
-          id: `integrity-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          type: issue.type ?? 'ai-flagged',
-          assetId: issue.assetId ?? '',
-          assetTitle: issue.assetTitle ?? 'Unknown Asset',
-          severity: issue.severity ?? 'info',
-          message: issue.description ?? 'AI-flagged content issue',
-          checkType: issue.type ?? 'ai-flagged',
-          confidence: issue.confidence ?? null,
-          checkedAt: new Date().toISOString(),
-          description: issue.description ?? 'AI-flagged content issue',
-          createdAt: new Date(),
-          resolved: false,
-        })
+    if (prediction.data?.issues && Array.isArray(prediction.data.issues)) {
+      for (const issue of prediction.data.issues) {
+        checks.push(buildCanonicalAiOutput({
+          payload: {
+            id: `integrity-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            type: issue.type ?? 'ai-flagged',
+            assetId: issue.assetId ?? '',
+            assetTitle: issue.assetTitle ?? 'Unknown Asset',
+            severity: issue.severity ?? 'info',
+            message: issue.description ?? 'AI-flagged content issue',
+            checkType: issue.type ?? 'ai-flagged',
+            confidence: issue.confidence ?? null,
+            checkedAt: new Date().toISOString(),
+            description: issue.description ?? 'AI-flagged content issue',
+            createdAt: new Date(),
+            resolved: false,
+          },
+          appKey: 'zonga',
+          orgId: ctx.orgId,
+          execution: prediction.execution ?? {
+            modelUsed: 'content-integrity-checker',
+            provider: 'ml',
+            engineVersion: 'ml:content-integrity-checker',
+          },
+          confidenceScore: typeof issue.confidence === 'number' ? issue.confidence : 0.7,
+          evidenceRefs: ['ml:model:content-integrity-checker'],
+          reviewRequired: true,
+          domain: 'media',
+        }))
       }
     }
 

@@ -224,3 +224,149 @@ export async function getRevenueByCreator(): Promise<
     return []
   }
 }
+
+export interface RevenueTelemetryDashboard {
+  creatorSignups: number
+  paidConversions: {
+    captured: number
+    totalIntents: number
+    ratePct: number
+  }
+  mpesaSuccess: {
+    captured: number
+    total: number
+    ratePct: number
+  }
+  stripeMrrUsd: number
+  churn: {
+    cancelledLast30d: number
+  }
+  cacBySource: Array<{
+    source: string
+    acquisitionCostUsd: number
+    paidConversions: number
+    cacUsd: number
+  }>
+}
+
+export async function getRevenueTelemetryDashboard(periodDays = 30): Promise<RevenueTelemetryDashboard> {
+  const ctx = await resolveOrgContext()
+  const since = new Date(Date.now() - periodDays * 86_400_000).toISOString()
+
+  const [
+    creatorSignupsRows,
+    conversionsRows,
+    mpesaRows,
+    stripeCreatorRows,
+    stripeListenerRows,
+    churnRows,
+    cacRows,
+  ] = await Promise.all([
+    platformDb.execute(sql`
+      SELECT COUNT(*)::int AS count
+      FROM zonga_creators
+      WHERE org_id = ${ctx.orgId}
+        AND created_at >= ${since}::timestamptz
+    `) as Promise<Array<{ count: number }>>,
+
+    platformDb.execute(sql`
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status = 'captured')::int AS captured
+      FROM zonga_payment_intents
+      WHERE org_id = ${ctx.orgId}
+        AND created_at >= ${since}::timestamptz
+    `) as Promise<Array<{ total: number; captured: number }>>,
+
+    platformDb.execute(sql`
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status = 'captured')::int AS captured
+      FROM zonga_payment_intents
+      WHERE org_id = ${ctx.orgId}
+        AND provider = 'vodacom_mpesa'
+        AND created_at >= ${since}::timestamptz
+    `) as Promise<Array<{ total: number; captured: number }>>,
+
+    platformDb.execute(sql`
+      SELECT COALESCE(SUM(CASE plan
+        WHEN 'pro' THEN 29
+        WHEN 'business' THEN 149
+        WHEN 'label' THEN 499
+        WHEN 'enterprise' THEN 999
+        ELSE 0
+      END), 0)::float AS mrr
+      FROM zonga_creators
+      WHERE org_id = ${ctx.orgId}
+        AND subscription_status = 'active'
+    `) as Promise<Array<{ mrr: number }>>,
+
+    platformDb.execute(sql`
+      SELECT (COUNT(*) FILTER (WHERE plan = 'premium') * 4.99)::float AS mrr
+      FROM zonga_listeners
+      WHERE subscription_status = 'active'
+    `) as Promise<Array<{ mrr: number }>>,
+
+    platformDb.execute(sql`
+      SELECT COUNT(*)::int AS count
+      FROM zonga_payment_intents
+      WHERE org_id = ${ctx.orgId}
+        AND status = 'cancelled'
+        AND updated_at >= ${since}::timestamptz
+    `) as Promise<Array<{ count: number }>>,
+
+    platformDb.execute(sql`
+      SELECT
+        COALESCE(metadata->>'source', 'unknown') AS source,
+        COALESCE(SUM(NULLIF(metadata->>'acquisitionCostUsd', '')::numeric), 0)::float AS spend,
+        COUNT(*) FILTER (WHERE status = 'captured')::int AS conversions
+      FROM zonga_payment_intents
+      WHERE org_id = ${ctx.orgId}
+        AND created_at >= ${since}::timestamptz
+      GROUP BY COALESCE(metadata->>'source', 'unknown')
+      ORDER BY spend DESC
+    `) as Promise<Array<{ source: string; spend: number; conversions: number }>>,
+  ])
+
+  const creatorSignups = Number(creatorSignupsRows[0]?.count ?? 0)
+  const conversions = conversionsRows[0] ?? { total: 0, captured: 0 }
+  const mpesa = mpesaRows[0] ?? { total: 0, captured: 0 }
+
+  const conversionRate = Number(conversions.total) > 0
+    ? (Number(conversions.captured) / Number(conversions.total)) * 100
+    : 0
+
+  const mpesaRate = Number(mpesa.total) > 0
+    ? (Number(mpesa.captured) / Number(mpesa.total)) * 100
+    : 0
+
+  const stripeMrrUsd = Number(stripeCreatorRows[0]?.mrr ?? 0) + Number(stripeListenerRows[0]?.mrr ?? 0)
+
+  return {
+    creatorSignups,
+    paidConversions: {
+      captured: Number(conversions.captured ?? 0),
+      totalIntents: Number(conversions.total ?? 0),
+      ratePct: Number(conversionRate.toFixed(2)),
+    },
+    mpesaSuccess: {
+      captured: Number(mpesa.captured ?? 0),
+      total: Number(mpesa.total ?? 0),
+      ratePct: Number(mpesaRate.toFixed(2)),
+    },
+    stripeMrrUsd: Number(stripeMrrUsd.toFixed(2)),
+    churn: {
+      cancelledLast30d: Number(churnRows[0]?.count ?? 0),
+    },
+    cacBySource: cacRows.map((row) => {
+      const spend = Number(row.spend ?? 0)
+      const conversionsCount = Number(row.conversions ?? 0)
+      return {
+        source: row.source,
+        acquisitionCostUsd: Number(spend.toFixed(2)),
+        paidConversions: conversionsCount,
+        cacUsd: conversionsCount > 0 ? Number((spend / conversionsCount).toFixed(2)) : 0,
+      }
+    }),
+  }
+}

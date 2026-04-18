@@ -11,13 +11,46 @@
  *   const result = await ai.generate({ ... })
  */
 
-import { createAiClient, type AiClient } from '@nzila/ai-sdk'
+import {
+  buildAiEngineVersion,
+  createAiClient,
+  type AiClient,
+  type AiExecutionTelemetry,
+  type EmbedResult,
+  type ExtractResult,
+  type GenerateResult,
+} from '@nzila/ai-sdk'
 import { auth } from '@nzila/platform-auth/entra/server'
 
-const AI_BASE_URL =
-  process.env.AI_SDK_BASE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  'http://localhost:3000'
+function resolveAiBaseUrl(): string {
+  const configured = process.env.AI_SDK_BASE_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (configured) return configured
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    return 'http://localhost:3000'
+  }
+  throw new Error('Missing required environment variable outside dev/test: AI_SDK_BASE_URL or NEXT_PUBLIC_APP_URL')
+}
+
+function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResult): AiExecutionTelemetry {
+  const provider = 'provider' in result ? result.provider : 'ai'
+  const modelUsed = 'model' in result ? result.model : 'unknown'
+  const tokensIn = 'tokensIn' in result ? result.tokensIn : 'tokensUsed' in result ? result.tokensUsed : null
+  const tokensOut = 'tokensOut' in result ? result.tokensOut : null
+  const tokenCostUsd = 'costUsd' in result ? result.costUsd : null
+  const latencyMs = 'latencyMs' in result ? result.latencyMs : null
+
+  return {
+    requestId: result.requestId,
+    traceId: result.requestId,
+    modelUsed,
+    provider,
+    engineVersion: buildAiEngineVersion(provider, modelUsed),
+    latencyMs,
+    tokenCostUsd,
+    tokensIn,
+    tokensOut,
+  }
+}
 
 /** Singleton AI client – lazily initialised per-request via getToken. */
 let _client: AiClient | null = null
@@ -26,7 +59,7 @@ export function getAiClient(): AiClient {
   if (!_client) {
     const serviceKey = process.env.AI_SERVICE_KEY
     _client = createAiClient({
-      baseUrl: AI_BASE_URL,
+      baseUrl: resolveAiBaseUrl(),
       getToken: async () => {
         // Prefer service key for cross-app auth (different Clerk instances)
         if (serviceKey) return serviceKey
@@ -81,3 +114,8 @@ export const UE_PROFILES = {
   // Financial intelligence profile
   FINANCIAL_ANALYSIS: 'ue-financial-analysis',
 } as const
+
+export async function runAICompletionDetailed(input: Parameters<AiClient['generate']>[0]): Promise<{ content: string; execution: AiExecutionTelemetry }> {
+  const result = await getAiClient().generate(input)
+  return { content: result.content, execution: toExecutionTelemetry(result) }
+}

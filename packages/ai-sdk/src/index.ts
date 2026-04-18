@@ -45,3 +45,15 @@ export type {
 } from './types'
 
 export { AiSdkError } from './types'
+
+export {
+  buildAiEngineVersion,
+  buildCanonicalAiOutput,
+  emitAiGovernanceMetric,
+  recordAiReviewDecision,
+  requiresHumanReview,
+  type AiBusinessDomain,
+  type AiExecutionTelemetry,
+  type CanonicalAiOutput,
+  type CanonicalAiOutputFields,
+} from './business-output'

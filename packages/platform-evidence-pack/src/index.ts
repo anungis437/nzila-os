@@ -38,3 +38,14 @@ export { verifyPack } from './verifier'
 
 // retention
 export { RetentionManager } from './retention'
+
+export {
+  generateMonthlyAIGovernanceEvidencePack,
+  buildAIGovernanceTrendSummary,
+  type MonthlyGovernanceInput,
+  type MonthlyGovernanceArtifact,
+  type MonthlyAIGovernanceEvidencePack,
+  type MonthlyGovernancePoint,
+  type AIGovernanceTrendSummary,
+  type AIGovernanceTrendView,
+} from './ai-governance-monthly'

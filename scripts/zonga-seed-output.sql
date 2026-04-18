@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════════════════
 -- Zonga Platform Seed Data (Delta Upgrade Edition)
--- Generated: 2026-03-21T01:35:29.923Z
+-- Generated: 2026-04-18T21:47:04.980Z
 -- Org: 22222222-2222-2222-2222-222222222222 (Clerk: org_3BEaESt8ZIC4XEdJ7hmmB6nu6pp)
 -- Covers: creators, assets, releases, events, tickets, listeners,
 -- economics (ledger, splits, payouts), rights, moderation, integrity

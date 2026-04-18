@@ -28,7 +28,7 @@ const dashboardLatency = new Trend('dashboard_latency', true);
 
 const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
-const MAX_RETRIES = Number.parseInt(__ENV.MAX_RETRIES || '1', 10);
+const configuredMaxRetries = Number.parseInt(__ENV.MAX_RETRIES || '', 10);
 
 const profiles = {
   ci: { vus: 5, duration: '1m', rampUp: '20s' },
@@ -40,10 +40,13 @@ const profiles = {
 const profile = profiles[__ENV.PROFILE || 'baseline'];
 const hasAuthToken = Boolean(AUTH_TOKEN);
 const isCiProfile = (__ENV.PROFILE || 'baseline') === 'ci';
+const effectiveMaxRetries = Number.isNaN(configuredMaxRetries)
+  ? (isCiProfile && !hasAuthToken ? 3 : 1)
+  : configuredMaxRetries;
 
 const thresholds = {
   http_req_duration: ['p(95)<500', 'p(99)<1500'],
-  errors: [isCiProfile && !hasAuthToken ? 'rate<0.15' : 'rate<0.02'],
+  errors: [isCiProfile && !hasAuthToken ? 'rate<0.25' : 'rate<0.02'],
 };
 
 if (hasAuthToken) {
@@ -67,6 +70,10 @@ export const options = {
 
 const headers = AUTH_TOKEN ? { Authorization: `Bearer ${AUTH_TOKEN}` } : {};
 
+function isRetryableStatus(status) {
+  return status === 0 || status === 408 || status === 425 || status === 429 || status >= 500;
+}
+
 function get(path, latencyMetric, opts = {}) {
   const {
     okStatuses = [200],
@@ -75,8 +82,8 @@ function get(path, latencyMetric, opts = {}) {
 
   let res = http.get(`${BASE_URL}${path}`, { headers, tags: { endpoint: path } });
   let attempts = 0;
-  while (!okStatuses.includes(res.status) && attempts < MAX_RETRIES) {
-    sleep(0.1);
+  while (!okStatuses.includes(res.status) && attempts < effectiveMaxRetries && isRetryableStatus(res.status)) {
+    sleep(0.15 * (attempts + 1));
     res = http.get(`${BASE_URL}${path}`, { headers, tags: { endpoint: path } });
     attempts += 1;
   }

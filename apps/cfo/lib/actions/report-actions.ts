@@ -11,7 +11,8 @@ import { requirePermission } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import { runAICompletion } from '@/lib/ai-client'
+import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
+import { runAICompletionDetailed } from '@/lib/ai-client'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 export interface Report {
@@ -80,7 +81,7 @@ export async function generateReport(input: {
   period: string
   orgId?: string
   includeNarrative?: boolean
-}): Promise<{ success: boolean; reportId?: string; narrative?: string }> {
+}): Promise<CanonicalAiOutput<{ success: boolean; reportId?: string; narrative?: string }>> {
   const { userId } = await auth()
   if (!userId) throw new Error('Unauthorized')
   await requirePermission('reports:create')
@@ -89,12 +90,21 @@ export async function generateReport(input: {
     logger.info('Generating financial report', { type: input.type, period: input.period, actorId: userId })
 
     let narrative: string | undefined
+    let execution = {
+      modelUsed: 'report-generator',
+      engineVersion: 'finance:report-generator',
+    }
     if (input.includeNarrative) {
       const prompt = `Generate a concise executive summary for a ${input.type} financial report
         covering the period ${input.period}. Focus on key trends, notable changes, and actionable insights.
         Keep it under 300 words. Professional tone suitable for CFO-level review.`
-      const result = await runAICompletion(prompt)
-      narrative = result ?? ''
+      const result = await runAICompletionDetailed(prompt, {
+        orgId: input.orgId ?? 'platform',
+        profile: 'cfo-default',
+        dataClass: 'sensitive',
+      })
+      execution = result.execution
+      narrative = result.content ?? ''
     }
 
     // Record in audit log as report generation
@@ -125,10 +135,26 @@ export async function generateReport(input: {
     await processEvidencePack(pack)
 
     logger.info('Report generated', { type: input.type, period: input.period })
-    return { success: true, narrative }
+    return buildCanonicalAiOutput({
+      payload: { success: true, narrative },
+      appKey: 'cfo',
+      orgId: input.orgId ?? 'platform',
+      execution,
+      confidenceScore: input.includeNarrative ? 0.72 : 1,
+      evidenceRefs: ['audit_log:report.generated'],
+      domain: 'finance',
+    })
   } catch (error) {
     logger.error('Report generation failed', { error })
-    return { success: false }
+    return buildCanonicalAiOutput({
+      payload: { success: false },
+      appKey: 'cfo',
+      orgId: input.orgId ?? 'platform',
+      execution: { modelUsed: 'report-generator', engineVersion: 'finance:report-generator' },
+      confidenceScore: 0,
+      evidenceRefs: [],
+      domain: 'finance',
+    })
   }
 }
 

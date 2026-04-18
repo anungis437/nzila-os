@@ -8,16 +8,55 @@
  * All AI calls are routed through the governed @nzila/ai-sdk layer
  * (profiles, budgets, redaction, auditing).
  */
-import { createAiClient, type AiClient, type DataClass } from '@nzila/ai-sdk'
+import {
+  buildAiEngineVersion,
+  createAiClient,
+  type AiClient,
+  type AiExecutionTelemetry,
+  type DataClass,
+  type EmbedResult,
+  type ExtractResult,
+  type GenerateResult,
+} from '@nzila/ai-sdk'
 
 const APP_KEY = 'abr'
 
 let _client: AiClient | null = null
 
+function resolveAiBaseUrl(): string {
+  const configured = process.env.AI_CORE_URL?.trim()
+  if (configured) return configured
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    return 'http://localhost:4100'
+  }
+  throw new Error('Missing required environment variable outside dev/test: AI_CORE_URL')
+}
+
+function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResult): AiExecutionTelemetry {
+  const provider = 'provider' in result ? result.provider : 'ai'
+  const modelUsed = 'model' in result ? result.model : 'unknown'
+  const tokensIn = 'tokensIn' in result ? result.tokensIn : 'tokensUsed' in result ? result.tokensUsed : null
+  const tokensOut = 'tokensOut' in result ? result.tokensOut : null
+  const tokenCostUsd = 'costUsd' in result ? result.costUsd : null
+  const latencyMs = 'latencyMs' in result ? result.latencyMs : null
+
+  return {
+    requestId: result.requestId,
+    traceId: result.requestId,
+    modelUsed,
+    provider,
+    engineVersion: buildAiEngineVersion(provider, modelUsed),
+    latencyMs,
+    tokenCostUsd,
+    tokensIn,
+    tokensOut,
+  }
+}
+
 export function getAiClient(): AiClient {
   if (!_client) {
     _client = createAiClient({
-      baseUrl: process.env.AI_CORE_URL ?? 'http://localhost:4100',
+      baseUrl: resolveAiBaseUrl(),
       getToken: () => process.env.AI_API_KEY ?? '',
     })
   }
@@ -31,6 +70,14 @@ export async function runAICompletion(
   prompt: string,
   opts?: { orgId?: string; profile?: string; dataClass?: DataClass },
 ): Promise<string> {
+  const result = await runAICompletionDetailed(prompt, opts)
+  return result.content
+}
+
+export async function runAICompletionDetailed(
+  prompt: string,
+  opts?: { orgId?: string; profile?: string; dataClass?: DataClass },
+): Promise<{ content: string; execution: AiExecutionTelemetry }> {
   const client = getAiClient()
   const result = await client.generate({
     orgId: opts?.orgId ?? 'platform',
@@ -39,7 +86,7 @@ export async function runAICompletion(
     input: prompt,
     dataClass: opts?.dataClass ?? 'internal',
   })
-  return result.content
+  return { content: result.content, execution: toExecutionTelemetry(result) }
 }
 
 /**
@@ -49,6 +96,14 @@ export async function runAIEmbed(
   input: string | string[],
   opts?: { orgId?: string; profile?: string },
 ): Promise<number[][]> {
+  const result = await runAIEmbedDetailed(input, opts)
+  return result.embeddings
+}
+
+export async function runAIEmbedDetailed(
+  input: string | string[],
+  opts?: { orgId?: string; profile?: string },
+): Promise<{ embeddings: number[][]; execution: AiExecutionTelemetry }> {
   const client = getAiClient()
   const result = await client.embed({
     orgId: opts?.orgId ?? 'platform',
@@ -57,7 +112,7 @@ export async function runAIEmbed(
     input,
     dataClass: 'internal',
   })
-  return result.embeddings
+  return { embeddings: result.embeddings, execution: toExecutionTelemetry(result) }
 }
 
 /**
@@ -68,6 +123,15 @@ export async function runAIExtraction(
   promptKey: string,
   opts?: { orgId?: string; profile?: string; variables?: Record<string, string> },
 ): Promise<Record<string, unknown>> {
+  const result = await runAIExtractionDetailed(input, promptKey, opts)
+  return result.data
+}
+
+export async function runAIExtractionDetailed(
+  input: string,
+  promptKey: string,
+  opts?: { orgId?: string; profile?: string; variables?: Record<string, string> },
+): Promise<{ data: Record<string, unknown>; execution: AiExecutionTelemetry }> {
   const client = getAiClient()
   const result = await client.extract({
     orgId: opts?.orgId ?? 'platform',
@@ -78,5 +142,5 @@ export async function runAIExtraction(
     variables: opts?.variables,
     dataClass: 'internal',
   })
-  return result.data
+  return { data: result.data, execution: toExecutionTelemetry(result) }
 }

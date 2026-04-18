@@ -16,6 +16,7 @@ import {
   emitSubscriptionCancelled,
 } from '@nzila/platform-events/commercial'
 import { PlatformEventBus } from '@nzila/platform-events'
+import { resolveCommercialOrgId, resolveSystemActorId } from '@/lib/commercial-context'
 
 const bus = new PlatformEventBus()
 
@@ -113,7 +114,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     ? session.customer
     : (session.customer as Stripe.Customer | null)?.id
 
-  const platformOrgId = process.env.PLATFORM_ORG_ID ?? 'system'
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
 
   // ── Listener premium ──
   if (metadata.plan_type === 'listener_premium' && metadata.listener_id) {
@@ -136,7 +137,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         mrrUsd: 4.99,
         stripeSubscriptionId: subscriptionId,
       },
-      { orgId: platformOrgId, actorId: metadata.listener_id },
+      { orgId: platformOrgId, actorId: metadata.listener_id ?? resolveSystemActorId('stripe-webhook-listener') },
     ))
     logger.info('Listener upgraded to premium', { listenerId: metadata.listener_id, subscriptionId })
   }
@@ -163,7 +164,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         mrrUsd: creatorPlanMrrUsd(creatorPlan),
         stripeSubscriptionId: subscriptionId,
       },
-      { orgId: platformOrgId, actorId: metadata.creator_id },
+      { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-creator') },
     ))
     logger.info('Creator upgraded to plan', { creatorId: metadata.creator_id, plan: creatorPlan, subscriptionId })
   }
@@ -176,7 +177,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const status = subscription.status
     const subscriptionId = subscription.id
   const mappedStatus = mapStripeStatus(status)
-  const platformOrgId = process.env.PLATFORM_ORG_ID ?? 'system'
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
 
   if (metadata.plan_type === 'listener_premium' && metadata.listener_id) {
     const firstItem = subscription.items.data[0]
@@ -220,7 +221,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           expansionMrrUsd: Math.max(0, creatorPlanMrrUsd(creatorPlan) - creatorPlanMrrUsd(prevPlan as CreatorPlanKey)),
           stripeSubscriptionId: subscriptionId,
         },
-        { orgId: platformOrgId, actorId: metadata.creator_id },
+        { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-upgrade') },
       ))
     }
   }
@@ -231,7 +232,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const subscriptionId = subscription.id
   const metadata = subscription.metadata ?? {}
-  const platformOrgId = process.env.PLATFORM_ORG_ID ?? 'system'
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
 
   if (metadata.plan_type === 'listener_premium') {
     await platformDb.execute(
@@ -252,7 +253,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         mrrLostUsd: 4.99,
         stripeSubscriptionId: subscriptionId,
       },
-      { orgId: platformOrgId, actorId: metadata.listener_id ?? 'system' },
+      { orgId: platformOrgId, actorId: metadata.listener_id ?? resolveSystemActorId('stripe-webhook-cancel-listener') },
     ))
     logger.info('Listener subscription canceled, reverted to free', { subscriptionId })
   }
@@ -276,7 +277,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         mrrLostUsd: creatorPlanMrrUsd(creatorPlan),
         stripeSubscriptionId: subscriptionId,
       },
-      { orgId: platformOrgId, actorId: metadata.creator_id },
+      { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-cancel-creator') },
     ))
     logger.info('Creator subscription canceled, reverted to starter', { subscriptionId, prevPlan: creatorPlan })
   }

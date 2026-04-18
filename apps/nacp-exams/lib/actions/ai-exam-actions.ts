@@ -12,42 +12,43 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import { runAICompletion, runAIEmbed, runAIExtraction } from '@/lib/ai-client'
-import { runPrediction } from '@/lib/ml-client'
+import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
+import { runAICompletionDetailed, runAIEmbedDetailed, runAIExtractionDetailed } from '@/lib/ai-client'
+import { runPredictionDetailed } from '@/lib/ml-client'
 import { buildExamEvidencePack } from '@/lib/evidence'
 import { resolveOrgContext } from '@/lib/resolve-org'
 
 /* ─── Types ─── */
 
-export interface SimilarityResult {
+export type SimilarityResult = CanonicalAiOutput<{
   submissionIdA: string
   submissionIdB: string
   similarity: number
   flagged: boolean
   explanation: string
-}
+}>
 
-export interface GeneratedQuestion {
+export type GeneratedQuestion = CanonicalAiOutput<{
   text: string
   type: 'multiple-choice' | 'short-answer' | 'essay'
   difficulty: 'basic' | 'intermediate' | 'advanced'
   suggestedMark: number
   modelAnswer: string
   options?: string[]
-}
+}>
 
-export interface PaperExtraction {
+export type PaperExtraction = CanonicalAiOutput<{
   candidateId: string | null
   answers: Array<{ questionNumber: number; answerText: string; confidence: number }>
   handwritingQuality: 'clear' | 'fair' | 'poor'
-}
+}>
 
-export interface IntegrityRisk {
+export type IntegrityRisk = CanonicalAiOutput<{
   candidateId: string
   riskScore: number
   factors: Array<{ type: string; description: string; severity: 'low' | 'medium' | 'high' }>
   recommendation: 'proceed' | 'review' | 'flag'
-}
+}>
 
 /* ─── Plagiarism Detection ─── */
 
@@ -76,7 +77,11 @@ export async function checkSubmissionSimilarity(
 
     // Generate embeddings for all submissions
     const texts = submissions.map((s) => s.text ?? '')
-    const embeddings = await runAIEmbed(texts, { profile: 'nacp-exams-embed' })
+    const embeddingResult = await runAIEmbedDetailed(texts, {
+      orgId: ctx.orgId,
+      profile: 'nacp-exams-embed',
+    })
+    const embeddings = embeddingResult.embeddings
 
     // Compute pairwise cosine similarity
     const results: SimilarityResult[] = []
@@ -93,13 +98,22 @@ export async function checkSubmissionSimilarity(
             explanation += ' — exceeds threshold, manual review recommended.'
           }
 
-          results.push({
-            submissionIdA: submissions[i].id,
-            submissionIdB: submissions[j].id,
-            similarity,
-            flagged,
-            explanation,
-          })
+          results.push(buildCanonicalAiOutput({
+            payload: {
+              submissionIdA: submissions[i].id,
+              submissionIdB: submissions[j].id,
+              similarity,
+              flagged,
+              explanation,
+            },
+            appKey: 'nacp-exams',
+            orgId: ctx.orgId,
+            execution: embeddingResult.execution,
+            confidenceScore: similarity,
+            evidenceRefs: ['embedding:nacp-exams-embed', 'audit_log:submission.recorded'],
+            reviewRequired: flagged,
+            domain: 'education',
+          }))
         }
       }
     }
@@ -152,7 +166,8 @@ Return a JSON array. Each object must have:
 
 Ensure questions test understanding, not just recall. Vary difficulty levels.`
 
-    const raw = await runAICompletion(prompt, {
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, {
+      orgId: _ctx.orgId,
       profile: 'nacp-exams-generate',
       dataClass: 'sensitive',
     })
@@ -160,7 +175,23 @@ Ensure questions test understanding, not just recall. Vary difficulty levels.`
     try {
       const questions = JSON.parse(raw)
       if (!Array.isArray(questions)) return []
-      return questions.slice(0, opts.count)
+      return questions.slice(0, opts.count).map((question) => buildCanonicalAiOutput({
+        payload: {
+          text: typeof question?.text === 'string' ? question.text : '',
+          type: (question?.type as GeneratedQuestion['type']) ?? 'short-answer',
+          difficulty: (question?.difficulty as GeneratedQuestion['difficulty']) ?? 'intermediate',
+          suggestedMark: typeof question?.suggestedMark === 'number' ? question.suggestedMark : 0,
+          modelAnswer: typeof question?.modelAnswer === 'string' ? question.modelAnswer : '',
+          options: Array.isArray(question?.options) ? question.options as string[] : undefined,
+        },
+        appKey: 'nacp-exams',
+        orgId: _ctx.orgId,
+        execution,
+        confidenceScore: 0.72,
+        evidenceRefs: ['ai-profile:nacp-exams-generate', 'input:subject-level'],
+        reviewRequired: true,
+        domain: 'education',
+      }))
     } catch {
       logger.warn('AI question generation returned non-JSON', { raw: raw.slice(0, 200) })
       return []
@@ -182,7 +213,8 @@ export async function extractPaperSubmission(
   try {
     logger.info('Extracting paper submission', { actorId: ctx.actorId, candidateId })
 
-    const data = await runAIExtraction(imageBase64, 'paper-exam-ocr', {
+    const { data, execution } = await runAIExtractionDetailed(imageBase64, 'paper-exam-ocr', {
+      orgId: ctx.orgId,
       profile: 'nacp-exams-extract',
       variables: { candidateId, format: 'exam-answers' },
     })
@@ -195,11 +227,20 @@ export async function extractPaperSubmission(
       payload: { inputLength: imageBase64.length },
     })
 
-    return {
-      candidateId: (data.candidateId as string) ?? candidateId,
-      answers: Array.isArray(data.answers) ? data.answers as PaperExtraction['answers'] : [],
-      handwritingQuality: (data.handwritingQuality as PaperExtraction['handwritingQuality']) ?? 'fair',
-    }
+    return buildCanonicalAiOutput({
+      payload: {
+        candidateId: (data.candidateId as string) ?? candidateId,
+        answers: Array.isArray(data.answers) ? data.answers as PaperExtraction['answers'] : [],
+        handwritingQuality: (data.handwritingQuality as PaperExtraction['handwritingQuality']) ?? 'fair',
+      },
+      appKey: 'nacp-exams',
+      orgId: ctx.orgId,
+      execution,
+      confidenceScore: 0.8,
+      evidenceRefs: ['prompt:paper-exam-ocr', 'evidence_pack:PAPER_EXTRACTION'],
+      reviewRequired: true,
+      domain: 'education',
+    })
   } catch (error) {
     logger.error('Paper extraction failed', { error, candidateId })
     return null
@@ -216,13 +257,34 @@ export async function assessIntegrityRisk(
 
   try {
     // Try ML model first
-    const mlResult = await runPrediction({
+    const mlResult = await runPredictionDetailed({
       model: 'exam-integrity-scorer',
       features: { sessionId, candidateId },
+      orgId: ctx.orgId,
     })
 
-    if (mlResult && typeof mlResult.riskScore === 'number') {
-      return mlResult as unknown as IntegrityRisk
+    if (mlResult.data && typeof mlResult.data.riskScore === 'number') {
+      const mlPayload = mlResult.data as Record<string, unknown>
+      const mlRiskScore = typeof mlPayload.riskScore === 'number' ? mlPayload.riskScore : 0.5
+      return buildCanonicalAiOutput({
+        payload: {
+          candidateId: typeof mlPayload.candidateId === 'string' ? mlPayload.candidateId : candidateId,
+          riskScore: mlRiskScore,
+          factors: Array.isArray(mlPayload.factors) ? mlPayload.factors as IntegrityRisk['factors'] : [],
+          recommendation: (mlPayload.recommendation as IntegrityRisk['recommendation']) ?? 'review',
+        },
+        appKey: 'nacp-exams',
+        orgId: ctx.orgId,
+        execution: mlResult.execution ?? {
+          modelUsed: 'exam-integrity-scorer',
+          provider: 'ml',
+          engineVersion: 'ml:exam-integrity-scorer',
+        },
+        confidenceScore: mlRiskScore,
+        evidenceRefs: ['ml:model:exam-integrity-scorer'],
+        reviewRequired: true,
+        domain: 'education',
+      })
     }
 
     // Fallback: AI heuristic from submission metadata (org-scoped)
@@ -251,13 +313,30 @@ Return JSON: {
   "recommendation": "proceed"|"review"|"flag"
 }`
 
-    const raw = await runAICompletion(prompt, {
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, {
+      orgId: ctx.orgId,
       profile: 'nacp-exams-integrity',
       dataClass: 'sensitive',
     })
 
     try {
-      return JSON.parse(raw) as IntegrityRisk
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      const riskScore = typeof parsed.riskScore === 'number' ? parsed.riskScore : 0
+      return buildCanonicalAiOutput({
+        payload: {
+          candidateId: typeof parsed.candidateId === 'string' ? parsed.candidateId : candidateId,
+          riskScore,
+          factors: Array.isArray(parsed.factors) ? parsed.factors as IntegrityRisk['factors'] : [],
+          recommendation: (parsed.recommendation as IntegrityRisk['recommendation']) ?? 'review',
+        },
+        appKey: 'nacp-exams',
+        orgId: ctx.orgId,
+        execution,
+        confidenceScore: riskScore,
+        evidenceRefs: ['audit_log:submission.recorded', 'ai-profile:nacp-exams-integrity'],
+        reviewRequired: true,
+        domain: 'education',
+      })
     } catch {
       return null
     }

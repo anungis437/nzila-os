@@ -38,6 +38,7 @@ const navItems = [
   { href: "/changes", label: "Changes", icon: GitPullRequest },
   { href: "/change-calendar", label: "Change Calendar", icon: Calendar },
   { href: "/intelligence", label: "Intelligence", icon: Brain },
+  { href: "/ai", label: "AI Ops", icon: Bot },
   { href: "/anomalies", label: "Anomalies", icon: AlertTriangle },
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/modules", label: "Modules", icon: Boxes },

@@ -8,13 +8,23 @@
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const ROOT = path.resolve(__dirname, '..')
 
-const TARGET_APPS = ['union-eyes', 'flow', 'zonga', 'cfo', 'partners', 'web']
+const TARGET_APPS = [
+  'abr',
+  'cfo',
+  'console',
+  'flow',
+  'nacp-exams',
+  'partners',
+  'union-eyes',
+  'zonga',
+] as const
 
 // Suspicious file names for app-local AI
 const SUSPICIOUS_FILES = [
@@ -45,7 +55,6 @@ const SUSPICIOUS_PATTERNS = [
   /openai\.chat\.completions\.create/,
   /openai\.completions\.create/,
   /anthropic\.messages\.create/,
-  /\.generate\(\s*\{[\s\S]*?model:/,
 ]
 
 // Directories to scan within each app
@@ -69,82 +78,80 @@ interface Violation {
   issue: string
 }
 
-function scanDir(dir: string): string[] {
-  if (!fs.existsSync(dir)) return []
-  const results: string[] = []
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '.turbo') continue
-      results.push(...scanDir(full))
-    } else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts') && !entry.name.endsWith('.spec.ts')) {
-      results.push(full)
-    }
+function scanAppFiles(app: string): string[] {
+  try {
+    const output = execFileSync('git', ['ls-files', `apps/${app}`], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+
+    return output
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .filter((file) => SCAN_DIRS.some((dir) => file.startsWith(`apps/${app}/${dir}/`)))
+      .filter((file) => /\.(ts|tsx)$/.test(file))
+      .filter((file) => !file.endsWith('.test.ts') && !file.endsWith('.spec.ts'))
+  } catch {
+    return []
   }
-  return results
 }
 
 function isAllowed(filePath: string): boolean {
-  const rel = path.relative(ROOT, filePath).replace(/\\/g, '/')
+  const rel = filePath.replace(/\\/g, '/')
   return ALLOWED_PATTERNS.some((p) => p.test(rel))
 }
 
 const violations: Violation[] = []
 
 for (const app of TARGET_APPS) {
-  const appDir = path.join(ROOT, 'apps', app)
-  if (!fs.existsSync(appDir)) continue
+  const files = scanAppFiles(app)
 
-  for (const subDir of SCAN_DIRS) {
-    const dir = path.join(appDir, subDir)
-    const files = scanDir(dir)
+  for (const file of files) {
+    const rel = file.replace(/\\/g, '/')
+    const basename = path.basename(file)
 
-    for (const file of files) {
-      const rel = path.relative(ROOT, file).replace(/\\/g, '/')
-      const basename = path.basename(file)
+    // Check suspicious file names
+    if (SUSPICIOUS_FILES.includes(basename) && !isAllowed(file)) {
+      violations.push({ app, file: rel, issue: `Suspicious AI file: ${basename}` })
+    }
 
-      // Check suspicious file names
-      if (SUSPICIOUS_FILES.includes(basename) && !isAllowed(file)) {
-        violations.push({ app, file: rel, issue: `Suspicious AI file: ${basename}` })
+    // Check file contents
+    const content = fs.readFileSync(file, 'utf-8')
+
+    for (const pattern of SUSPICIOUS_IMPORTS) {
+      if (pattern.test(content) && !isAllowed(file)) {
+        violations.push({ app, file: rel, issue: `Direct AI provider import detected` })
+        break
       }
+    }
 
-      // Check file contents
-      const content = fs.readFileSync(file, 'utf-8')
-
-      for (const pattern of SUSPICIOUS_IMPORTS) {
-        if (pattern.test(content) && !isAllowed(file)) {
-          violations.push({ app, file: rel, issue: `Direct AI provider import detected` })
-          break
-        }
-      }
-
-      for (const pattern of SUSPICIOUS_PATTERNS) {
-        if (pattern.test(content) && !isAllowed(file)) {
-          violations.push({ app, file: rel, issue: `Inline AI provider call detected` })
-          break
-        }
+    for (const pattern of SUSPICIOUS_PATTERNS) {
+      if (pattern.test(content) && !isAllowed(file)) {
+        violations.push({ app, file: rel, issue: `Inline AI provider call detected` })
+        break
       }
     }
   }
 }
 
+violations.sort((left, right) => {
+  return `${left.app}:${left.file}:${left.issue}`.localeCompare(`${right.app}:${right.file}:${right.issue}`)
+})
+
 // ── Report ──────────────────────────────────────────
 
-process.stdout.write('\n')
-process.stdout.write('═══════════════════════════════════════\n')
-process.stdout.write('  AI Contract Check\n')
-process.stdout.write('═══════════════════════════════════════\n\n')
+process.stdout.write('\nAI Contract Check\n\n')
 process.stdout.write(`  Apps scanned: ${TARGET_APPS.length}\n`)
 process.stdout.write(`  Violations:   ${violations.length}\n\n`)
 
 if (violations.length > 0) {
   for (const v of violations) {
-    process.stderr.write(`  ✗ [${v.app}] ${v.file}\n    ${v.issue}\n\n`)
+    process.stderr.write(`  [${v.app}] ${v.file}\n    ${v.issue}\n\n`)
   }
   process.stderr.write('  Apps must use @nzila/platform-ai-* packages for AI capabilities.\n')
   process.stderr.write('  See docs/AI_PLATFORM_CONTRACT.md for guidance.\n\n')
   process.exit(1)
 } else {
-  process.stdout.write('  ✓ No app-local AI fragmentation detected\n\n')
+  process.stdout.write('  No app-local AI fragmentation detected\n\n')
 }

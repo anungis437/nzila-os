@@ -3,8 +3,8 @@
   "appCount": 17,
   "packageCount": 166,
   "workflowCount": 37,
-  "contractTestCount": 213,
-  "tsTestFileCount": 1171,
+  "contractTestCount": 214,
+  "tsTestFileCount": 1177,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -203,7 +203,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 207
+      "codeFileCount": 211
     },
     {
       "name": "cora",
@@ -565,7 +565,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 406
+      "codeFileCount": 416
     }
   ],
   "workflows": [

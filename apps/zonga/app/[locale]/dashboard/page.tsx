@@ -154,6 +154,7 @@ async function PlatformHome({ locale }: { locale: string }) {
     { label: 'Integrity & Rights', desc: 'Duplicate detection & rights', icon: '🔒', href: `${p}/integrity` },
     { label: 'Compliance', desc: 'Audit trails & exports', icon: '📋', href: `${p}/compliance` },
     { label: 'Analytics', desc: 'Platform-wide metrics', icon: '📊', href: `${p}/analytics` },
+    { label: 'Revenue Telemetry', desc: 'Conversion, MRR, CAC, churn', icon: '📈', href: `${p}/revenue/telemetry` },
     { label: 'Settings', desc: 'Platform configuration', icon: '⚡', href: `${p}/settings` },
   ]
 
