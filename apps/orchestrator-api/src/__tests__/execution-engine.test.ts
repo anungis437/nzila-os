@@ -47,6 +47,7 @@ function makeInput(overrides: Partial<Parameters<typeof executeWorkflow>[0]> = {
 
 describe('execution-engine', () => {
   beforeEach(() => {
+    ;(process.env as Record<string, string>).NODE_ENV = 'development'
     delete process.env.DATABASE_URL
   })
 

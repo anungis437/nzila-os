@@ -17,6 +17,11 @@ import {
 } from '@nzila/payments-stripe'
 import { getStripePriceId, type ListenerPlan, type CreatorPlan } from '@/lib/plans'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
+import { requireEnvVarOutsideDevTest } from '@/lib/runtime-env'
+
+function resolveAppBaseUrl(): string {
+  return requireEnvVarOutsideDevTest('NEXT_PUBLIC_APP_URL', 'http://localhost:3011')
+}
 
 /* ─── Types ─── */
 
@@ -163,7 +168,7 @@ export async function createListenerPremiumCheckout(): Promise<{
     }
 
     const priceId = getStripePriceId('premium')
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3011'
+    const baseUrl = resolveAppBaseUrl()
 
     const { url } = await createSubscriptionCheckoutSession({
       priceId,
@@ -232,7 +237,7 @@ export async function createLabelPlanCheckout(creatorId: string): Promise<{
     }
 
     const priceId = getStripePriceId('label')
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3011'
+    const baseUrl = resolveAppBaseUrl()
 
     const { url } = await createSubscriptionCheckoutSession({
       priceId,
@@ -280,7 +285,7 @@ export async function createListenerPortalSession(): Promise<{
       return { url: null, error: 'No active subscription found' }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3011'
+    const baseUrl = resolveAppBaseUrl()
 
     const session = await createPortalSession({
       customerId: listener.stripeCustomerId,
@@ -323,7 +328,7 @@ export async function createCreatorPortalSession(creatorId: string): Promise<{
       return { url: null, error: 'No active subscription found' }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3011'
+    const baseUrl = resolveAppBaseUrl()
 
     const session = await createPortalSession({
       customerId: creator.stripeCustomerId,

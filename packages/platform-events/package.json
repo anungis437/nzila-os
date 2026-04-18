@@ -11,7 +11,8 @@
     "./schema": "./src/schema.ts",
     "./bus": "./src/bus.ts",
     "./store": "./src/store.ts",
-    "./dispatcher": "./src/dispatcher.ts"
+    "./dispatcher": "./src/dispatcher.ts",
+    "./commercial": "./src/commercial.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

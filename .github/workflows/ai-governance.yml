@@ -15,21 +15,41 @@ name: AI Governance
 on:
   pull_request:
     paths:
+      - 'packages/ai-control/**'
       - 'packages/ai-core/**'
       - 'packages/ai-sdk/**'
       - 'packages/ai-registry/**'
       - 'packages/ml-core/**'
       - 'packages/ml-sdk/**'
       - 'governance/ai/**'
+      - 'apps/*/lib/ai-client.ts'
+      - 'apps/*/lib/ml-client.ts'
       - 'apps/*/lib/ai/**'
+      - 'apps/*/lib/**/*prompt*.ts'
+      - 'apps/*/lib/**/*score*.ts'
+      - 'apps/*/lib/**/*ml*.ts'
+      - 'apps/*/lib/**/*ai*.ts'
+      - 'apps/*/lib/actions/**/*.ts'
       - 'apps/*/app/api/ai/**'
   push:
     branches: [main]
     paths:
+      - 'packages/ai-control/**'
       - 'packages/ai-core/**'
+      - 'packages/ai-sdk/**'
       - 'packages/ai-registry/**'
       - 'packages/ml-core/**'
+      - 'packages/ml-sdk/**'
       - 'governance/ai/**'
+      - 'apps/*/lib/ai-client.ts'
+      - 'apps/*/lib/ml-client.ts'
+      - 'apps/*/lib/ai/**'
+      - 'apps/*/lib/**/*prompt*.ts'
+      - 'apps/*/lib/**/*score*.ts'
+      - 'apps/*/lib/**/*ml*.ts'
+      - 'apps/*/lib/**/*ai*.ts'
+      - 'apps/*/lib/actions/**/*.ts'
+      - 'apps/*/app/api/ai/**'
   schedule:
     # Weekly AI governance audit — Tuesdays 07:00 UTC
     - cron: '0 7 * * 2'
@@ -71,6 +91,9 @@ jobs:
         run: |
           pnpm --filter @nzila/ai-core test
           pnpm --filter @nzila/ai-registry test
+
+      - name: Run AI contract checker
+        run: pnpm ai:contract:check
 
   # ── SDK Boundary Enforcement ──────────────────────────────────────────────
   sdk-boundary:

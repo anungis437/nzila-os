@@ -8,19 +8,12 @@
  * that we generated — used as the correlation key.
  */
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { isVodacomMpesaEnabled } from '@/lib/vodacom-mpesa'
-
-const MpesaCallbackSchema = z.object({
-  output_ResponseCode: z.string(),
-  output_ResponseDesc: z.string(),
-  output_TransactionID: z.string(),
-  output_ConversationID: z.string(),
-  output_ThirdPartyConversationID: z.string(),
-  output_ResultCode: z.string().optional(),
-  output_ResultDesc: z.string().optional(),
-})
+import {
+  MpesaCallbackSchema,
+  reconcileMpesaCallback,
+} from '@/lib/payments/mpesa-callback-service'
 
 export async function POST(request: Request) {
   if (!isVodacomMpesaEnabled()) {
@@ -44,27 +37,23 @@ export async function POST(request: Request) {
 
   const payload = parsed.data
 
-  logger.info('M-Pesa callback received', {
+  const reconciliation = await reconcileMpesaCallback(payload)
+
+  logger.info('M-Pesa callback reconciled', {
     conversationId: payload.output_ConversationID,
     thirdPartyConversationId: payload.output_ThirdPartyConversationID,
     transactionId: payload.output_TransactionID,
     responseCode: payload.output_ResponseCode,
+    reconciled: reconciliation.reconciled,
+    idempotent: reconciliation.idempotent,
+    status: reconciliation.status,
   })
 
-  // Persistence reconciliation is intentionally deferred until the payment
-  // intent store is wired to Vodacom callback correlation identifiers.
-  //
-  // const intent = await paymentIntentRepo.findByIdempotencyKey(
-  //   payload.output_ThirdPartyConversationID
-  // )
-  // if (intent) {
-  //   const newStatus = payload.output_ResponseCode === 'INS-0'
-  //     ? PaymentIntentStatus.CAPTURED
-  //     : PaymentIntentStatus.FAILED
-  //   await paymentIntentRepo.updateStatus(intent.id, newStatus)
-  //   await auditLogger.log({ ... })
-  // }
-
   // Always ACK to prevent Vodacom retries
-  return NextResponse.json({ received: true })
+  return NextResponse.json({
+    received: true,
+    reconciled: reconciliation.reconciled,
+    idempotent: reconciliation.idempotent,
+    status: reconciliation.status,
+  })
 }

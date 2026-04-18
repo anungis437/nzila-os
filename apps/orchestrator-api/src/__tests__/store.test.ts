@@ -8,7 +8,8 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { createCommand, getCommand, updateCommandStatus, listCommands } from '../store.js'
 import type { CommandRecord } from '../contract.js'
 
-// Ensure in-memory fallback by not setting DATABASE_URL
+// Ensure in-memory fallback: dev env without DATABASE_URL activates memory store
+;(process.env as Record<string, string>).NODE_ENV = 'development'
 delete process.env.DATABASE_URL
 
 function makeCommand(

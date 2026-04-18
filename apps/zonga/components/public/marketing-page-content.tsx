@@ -111,6 +111,31 @@ export default function MarketingPageContent({ flags, client, partner }: Marketi
         </div>
       </section>
 
+      {/* ═══════════════════════ CREATOR PROOF BAR ═══════════════════════ */}
+      <section className="py-12 bg-white border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs font-semibold tracking-widest uppercase text-gray-400 mb-8">
+            What creators achieve on Zonga
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { metric: '3.2×', label: 'Earnings vs. prior platform', sub: 'avg. first 90 days' },
+              { metric: '48hr', label: 'First payout', sub: 'after first stream revenue' },
+              { metric: '68%', label: 'Fan conversion uplift', sub: 'with Pro Creator tools' },
+              { metric: '100%', label: 'Ticket sellout rate', sub: 'launch events on-platform' },
+            ].map((item) => (
+              <ScrollReveal key={item.metric}>
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="text-3xl font-extrabold text-electric mb-1">{item.metric}</div>
+                  <div className="text-sm font-semibold text-navy mb-0.5">{item.label}</div>
+                  <div className="text-xs text-gray-400">{item.sub}</div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════════════ STAKEHOLDER PATHS ═══════════════════════ */}
       <section className="py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">

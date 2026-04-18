@@ -18,6 +18,9 @@ export type OrchestratorEnv = z.infer<typeof OrchestratorEnvSchema>
 
 export function getOrchestratorEnv(env: NodeJS.ProcessEnv = process.env): OrchestratorEnv {
   const parsed = OrchestratorEnvSchema.parse(env)
+  if (parsed.NODE_ENV !== 'development' && !parsed.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required outside development mode')
+  }
   if (parsed.NODE_ENV === 'production' && !parsed.ORCHESTRATOR_API_KEY) {
     throw new Error('ORCHESTRATOR_API_KEY is required in production')
   }

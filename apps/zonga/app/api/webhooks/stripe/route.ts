@@ -10,6 +10,43 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import type Stripe from 'stripe'
+import {
+  emitSubscriptionStarted,
+  emitSubscriptionUpgraded,
+  emitSubscriptionCancelled,
+} from '@nzila/platform-events/commercial'
+import { PlatformEventBus } from '@nzila/platform-events'
+import { resolveCommercialOrgId, resolveSystemActorId } from '@/lib/commercial-context'
+
+const bus = new PlatformEventBus()
+
+/** Canonical creator plan keys — must match zonga_creator_plan DB enum */
+type CreatorPlanKey = 'starter' | 'pro' | 'business' | 'label' | 'enterprise'
+
+/** Map Stripe metadata plan_type → canonical DB plan column value */
+function mapCreatorPlanType(planType: string): CreatorPlanKey | null {
+  const map: Record<string, CreatorPlanKey> = {
+    starter: 'starter',
+    pro: 'pro',
+    pro_creator: 'pro', // backward compat alias
+    business: 'business',
+    label: 'label',
+    enterprise: 'enterprise',
+  }
+  return map[planType] ?? null
+}
+
+/** Monthly value in USD for a creator plan (for revenue event) */
+function creatorPlanMrrUsd(planKey: CreatorPlanKey): number {
+  const mrr: Record<CreatorPlanKey, number> = {
+    starter: 0,
+    pro: 29,
+    business: 149,
+    label: 499,
+    enterprise: 999, // conservative default for custom plans
+  }
+  return mrr[planKey] ?? 0
+}
 
 export async function POST(request: Request) {
   const signature = request.headers.get('stripe-signature')
@@ -77,6 +114,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     ? session.customer
     : (session.customer as Stripe.Customer | null)?.id
 
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
+
+  // ── Listener premium ──
   if (metadata.plan_type === 'listener_premium' && metadata.listener_id) {
     await platformDb.execute(
       sql`UPDATE zonga_listeners SET
@@ -87,26 +127,46 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         updated_at = NOW()
       WHERE user_id = ${metadata.listener_id}`,
     )
-    logger.info('Listener upgraded to premium', {
-      listenerId: metadata.listener_id,
-      subscriptionId,
-    })
+    void bus.emit(emitSubscriptionStarted(
+      {
+        userId: metadata.listener_id,
+        orgId: platformOrgId,
+        appId: 'zonga',
+        planId: 'listener_premium',
+        billingCycle: 'monthly',
+        mrrUsd: 4.99,
+        stripeSubscriptionId: subscriptionId,
+      },
+      { orgId: platformOrgId, actorId: metadata.listener_id ?? resolveSystemActorId('stripe-webhook-listener') },
+    ))
+    logger.info('Listener upgraded to premium', { listenerId: metadata.listener_id, subscriptionId })
   }
 
-  if (metadata.plan_type === 'label' && metadata.creator_id) {
+  // ── Creator plans (starter / pro / business / label / enterprise) ──
+  const creatorPlan = mapCreatorPlanType(metadata.plan_type ?? '')
+  if (creatorPlan && metadata.creator_id) {
     await platformDb.execute(
       sql`UPDATE zonga_creators SET
-        plan = 'label',
+        plan = ${creatorPlan},
         subscription_status = 'active',
         stripe_customer_id = ${customerId},
         stripe_subscription_id = ${subscriptionId},
         updated_at = NOW()
       WHERE id = ${metadata.creator_id}`,
     )
-    logger.info('Creator upgraded to label plan', {
-      creatorId: metadata.creator_id,
-      subscriptionId,
-    })
+    void bus.emit(emitSubscriptionStarted(
+      {
+        userId: metadata.creator_id,
+        orgId: platformOrgId,
+        appId: 'zonga',
+        planId: creatorPlan,
+        billingCycle: 'monthly',
+        mrrUsd: creatorPlanMrrUsd(creatorPlan),
+        stripeSubscriptionId: subscriptionId,
+      },
+      { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-creator') },
+    ))
+    logger.info('Creator upgraded to plan', { creatorId: metadata.creator_id, plan: creatorPlan, subscriptionId })
   }
 }
 
@@ -115,33 +175,55 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const metadata = subscription.metadata ?? {}
   const status = subscription.status
-  const subscriptionId = subscription.id
-
-  // Map Stripe status → our enum
+    const subscriptionId = subscription.id
   const mappedStatus = mapStripeStatus(status)
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
 
   if (metadata.plan_type === 'listener_premium' && metadata.listener_id) {
     const firstItem = subscription.items.data[0]
     const periodEnd = firstItem?.current_period_end
-      ? new Date(firstItem.current_period_end * 1000)
+      ? new Date(firstItem.current_period_end * 1000).toISOString()
       : null
 
     await platformDb.execute(
       sql`UPDATE zonga_listeners SET
         subscription_status = ${mappedStatus},
-        current_period_end = ${periodEnd},
+        current_period_end = ${periodEnd}::timestamptz,
         updated_at = NOW()
       WHERE stripe_subscription_id = ${subscriptionId}`,
     )
   }
 
-  if (metadata.plan_type === 'label' && metadata.creator_id) {
+  const creatorPlan = mapCreatorPlanType(metadata.plan_type ?? '')
+    if (creatorPlan && metadata.creator_id) {
+    // Fetch previous plan for upgrade event delta
+    const rows = await platformDb.execute(
+      sql`SELECT plan FROM zonga_creators WHERE id = ${metadata.creator_id} LIMIT 1`,
+    )
+    const prevPlan = (rows[0] as { plan?: string } | undefined)?.plan ?? creatorPlan
+
     await platformDb.execute(
       sql`UPDATE zonga_creators SET
+        plan = ${creatorPlan},
         subscription_status = ${mappedStatus},
         updated_at = NOW()
       WHERE stripe_subscription_id = ${subscriptionId}`,
     )
+
+    if (prevPlan !== creatorPlan) {
+      void bus.emit(emitSubscriptionUpgraded(
+        {
+          userId: metadata.creator_id,
+          orgId: platformOrgId,
+          appId: 'zonga',
+          fromPlanId: prevPlan,
+          toPlanId: creatorPlan,
+          expansionMrrUsd: Math.max(0, creatorPlanMrrUsd(creatorPlan) - creatorPlanMrrUsd(prevPlan as CreatorPlanKey)),
+          stripeSubscriptionId: subscriptionId,
+        },
+        { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-upgrade') },
+      ))
+    }
   }
 }
 
@@ -150,6 +232,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const subscriptionId = subscription.id
   const metadata = subscription.metadata ?? {}
+  const platformOrgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
 
   if (metadata.plan_type === 'listener_premium') {
     await platformDb.execute(
@@ -161,26 +244,48 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         updated_at = NOW()
       WHERE stripe_subscription_id = ${subscriptionId}`,
     )
+    void bus.emit(emitSubscriptionCancelled(
+      {
+        userId: metadata.listener_id,
+        orgId: platformOrgId,
+        appId: 'zonga',
+        planId: 'listener_premium',
+        mrrLostUsd: 4.99,
+        stripeSubscriptionId: subscriptionId,
+      },
+      { orgId: platformOrgId, actorId: metadata.listener_id ?? resolveSystemActorId('stripe-webhook-cancel-listener') },
+    ))
     logger.info('Listener subscription canceled, reverted to free', { subscriptionId })
   }
 
-  if (metadata.plan_type === 'label') {
+  const creatorPlan = mapCreatorPlanType(metadata.plan_type ?? '')
+    if (creatorPlan) {
     await platformDb.execute(
       sql`UPDATE zonga_creators SET
-        plan = 'artist',
+        plan = 'starter',
         subscription_status = 'canceled',
         stripe_subscription_id = NULL,
         updated_at = NOW()
       WHERE stripe_subscription_id = ${subscriptionId}`,
     )
-    logger.info('Creator label subscription canceled, reverted to artist', { subscriptionId })
+    void bus.emit(emitSubscriptionCancelled(
+      {
+        userId: metadata.creator_id,
+        orgId: platformOrgId,
+        appId: 'zonga',
+        planId: creatorPlan,
+        mrrLostUsd: creatorPlanMrrUsd(creatorPlan),
+        stripeSubscriptionId: subscriptionId,
+      },
+      { orgId: platformOrgId, actorId: metadata.creator_id ?? resolveSystemActorId('stripe-webhook-cancel-creator') },
+    ))
+    logger.info('Creator subscription canceled, reverted to starter', { subscriptionId, prevPlan: creatorPlan })
   }
 }
 
 /* ─── Invoice Paid (Renewal) ─── */
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  // In newer Stripe API versions, subscription may be on the lines or metadata
   const obj = invoice as unknown as Record<string, unknown>
   const sub = obj.subscription
   const subscriptionId = typeof sub === 'string'
@@ -220,3 +325,4 @@ function mapStripeStatus(status: string): string {
   }
   return map[status] ?? 'incomplete'
 }
+

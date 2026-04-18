@@ -193,9 +193,11 @@ function scanPythonTests(): number {
 function generate(): RepoInventory {
   const apps = scanApps();
   const workflows = scanWorkflows();
+  const dayStamp = new Date().toISOString().split('T')[0];
 
   return {
-    generatedAt: new Date().toISOString(),
+    // Use a day-stable timestamp to prevent non-functional CI drift on reruns.
+    generatedAt: `${dayStamp}T00:00:00.000Z`,
     appCount: apps.length,
     packageCount: scanPackages(),
     workflowCount: workflows.length,

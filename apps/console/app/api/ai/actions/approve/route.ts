@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { recordAiReviewDecision } from '@nzila/ai-sdk'
 import {
   AiActionApproveRequestSchema,
   appendAiAuditEvent,
@@ -80,6 +81,17 @@ export async function POST(req: NextRequest) {
         status: newStatus,
         notes,
       },
+    })
+
+    recordAiReviewDecision({
+      appKey: action.appKey,
+      orgId: action.orgId,
+      modelUsed: action.actionType,
+      engineVersion: `policy:${action.profileKey}`,
+      approved,
+      overridden: !approved,
+      requestId: actionId,
+      traceId: actionId,
     })
 
     return NextResponse.json({

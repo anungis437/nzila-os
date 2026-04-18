@@ -37,3 +37,16 @@ export {
   type CarbonFootprint,
   type ESGRating,
 } from './esg-impact'
+
+export {
+  aggregateAiOperatingMetrics,
+  type AiTelemetryRecord,
+  type AiOperatingMetrics,
+  type AiAppOperatingMetrics,
+  type AiCostMetrics,
+  type AiPerformanceMetrics,
+  type AiQualityMetrics,
+  type AiOperationsMetrics,
+  type AiConfidenceDistribution,
+  type AiPeakLoadWindow,
+} from './ai-governance-metrics'

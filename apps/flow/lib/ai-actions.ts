@@ -16,40 +16,41 @@ import { resolveOrgContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import { runAICompletion, runAIEmbed, runAIExtraction } from '@/lib/ai-client'
-import { runPrediction } from '@/lib/ml-client'
+import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
+import { runAICompletionDetailed, runAIEmbedDetailed, runAIExtractionDetailed } from '@/lib/ai-client'
+import { runPredictionDetailed } from '@/lib/ml-client'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
-export interface PricingSuggestion {
+export type PricingSuggestion = CanonicalAiOutput<{
   sku: string
   description: string
   suggestedPrice: number
   confidence: number
   reasoning: string
-}
+}>
 
-export interface SimilarProduct {
+export type SimilarProduct = CanonicalAiOutput<{
   sku: string
   name: string
   similarity: number
-}
+}>
 
-export interface RfpExtraction {
+export type RfpExtraction = CanonicalAiOutput<{
   clientName: string | null
   clientEmail: string | null
   items: Array<{ description: string; quantity: number }>
   budget: number | null
   deadline: string | null
   notes: string | null
-}
+}>
 
-export interface ConversionPrediction {
+export type ConversionPrediction = CanonicalAiOutput<{
   probability: number
   factors: Array<{ name: string; impact: 'positive' | 'negative'; weight: number }>
   recommendation: string
-}
+}>
 
 /* ─── Smart Pricing ─── */
 
@@ -59,7 +60,7 @@ export async function getSmartPricing(opts: {
   theme: string
   clientHistory?: string
 }): Promise<PricingSuggestion[]> {
-  const _ctx = await resolveOrgContext()
+  const ctx = await resolveOrgContext()
 
   try {
     // Pull recent quote history for context
@@ -87,11 +88,33 @@ Suggest optimal pricing for each line item. Return a JSON array with objects:
 
 Consider: tier multipliers, volume discounts, seasonal trends, and client loyalty.`
 
-    const raw = await runAICompletion(prompt, { profile: 'Flow-pricing' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, {
+      orgId: ctx.orgId,
+      profile: 'Flow-pricing',
+    })
 
     try {
       const suggestions = JSON.parse(raw)
-      return Array.isArray(suggestions) ? suggestions : []
+      if (!Array.isArray(suggestions)) return []
+
+      return suggestions.map((suggestion) => {
+        const confidence = typeof suggestion?.confidence === 'number' ? suggestion.confidence : 0.65
+        return buildCanonicalAiOutput({
+          payload: {
+            sku: typeof suggestion?.sku === 'string' ? suggestion.sku : 'unknown',
+            description: typeof suggestion?.description === 'string' ? suggestion.description : '',
+            suggestedPrice: typeof suggestion?.suggestedPrice === 'number' ? suggestion.suggestedPrice : 0,
+            confidence,
+            reasoning: typeof suggestion?.reasoning === 'string' ? suggestion.reasoning : '',
+          },
+          appKey: 'flow',
+          orgId: ctx.orgId,
+          execution,
+          confidenceScore: confidence,
+          evidenceRefs: ['audit_log:quote.created', 'audit_log:quote.approved', 'ai-profile:Flow-pricing'],
+          domain: 'commerce',
+        })
+      })
     } catch {
       logger.warn('AI pricing returned non-JSON', { raw: raw.slice(0, 200) })
       return []
@@ -108,10 +131,14 @@ export async function findSimilarProducts(
   description: string,
   limit: number = 5,
 ): Promise<SimilarProduct[]> {
-  const _ctx = await resolveOrgContext()
+  const ctx = await resolveOrgContext()
 
   try {
-    const embeddings = await runAIEmbed(description, { profile: 'Flow-embed' })
+    const embeddingResult = await runAIEmbedDetailed(description, {
+      orgId: ctx.orgId,
+      profile: 'Flow-embed',
+    })
+    const embeddings = embeddingResult.embeddings
 
     if (!embeddings?.length) return []
 
@@ -121,11 +148,31 @@ export async function findSimilarProducts(
 List the ${limit} most similar gift-box products from a luxury gift catalog.
 Return JSON array: [{ "sku": string, "name": string, "similarity": number (0-1) }]`
 
-    const raw = await runAICompletion(prompt, { profile: 'Flow-recommend' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, {
+      orgId: ctx.orgId,
+      profile: 'Flow-recommend',
+    })
 
     try {
       const products = JSON.parse(raw)
-      return Array.isArray(products) ? products.slice(0, limit) : []
+      if (!Array.isArray(products)) return []
+
+      return products.slice(0, limit).map((product) => {
+        const similarity = typeof product?.similarity === 'number' ? product.similarity : 0.5
+        return buildCanonicalAiOutput({
+          payload: {
+            sku: typeof product?.sku === 'string' ? product.sku : 'unknown',
+            name: typeof product?.name === 'string' ? product.name : '',
+            similarity,
+          },
+          appKey: 'flow',
+          orgId: ctx.orgId,
+          execution,
+          confidenceScore: similarity,
+          evidenceRefs: ['embedding:Flow-embed', 'ai-profile:Flow-recommend'],
+          domain: 'commerce',
+        })
+      })
     } catch {
       return []
     }
@@ -145,7 +192,8 @@ export async function extractFromRfp(
   try {
     logger.info('Extracting from RFP', { actorId: ctx.actorId, textLength: rfpText.length })
 
-    const data = await runAIExtraction(rfpText, 'rfp-extraction', {
+    const { data, execution } = await runAIExtractionDetailed(rfpText, 'rfp-extraction', {
+      orgId: ctx.orgId,
       profile: 'Flow-extract',
       variables: { format: 'quote-fields' },
     })
@@ -158,14 +206,22 @@ export async function extractFromRfp(
     })
     await processEvidencePack(pack)
 
-    return {
-      clientName: (data.clientName as string) ?? null,
-      clientEmail: (data.clientEmail as string) ?? null,
-      items: Array.isArray(data.items) ? data.items as RfpExtraction['items'] : [],
-      budget: typeof data.budget === 'number' ? data.budget : null,
-      deadline: (data.deadline as string) ?? null,
-      notes: (data.notes as string) ?? null,
-    }
+    return buildCanonicalAiOutput({
+      payload: {
+        clientName: (data.clientName as string) ?? null,
+        clientEmail: (data.clientEmail as string) ?? null,
+        items: Array.isArray(data.items) ? data.items as RfpExtraction['items'] : [],
+        budget: typeof data.budget === 'number' ? data.budget : null,
+        deadline: (data.deadline as string) ?? null,
+        notes: (data.notes as string) ?? null,
+      },
+      appKey: 'flow',
+      orgId: ctx.orgId,
+      execution,
+      confidenceScore: 0.78,
+      evidenceRefs: ['prompt:rfp-extraction', 'evidence_pack:RFP_EXTRACTION'],
+      domain: 'commerce',
+    })
   } catch (error) {
     logger.error('RFP extraction failed', { error })
     return null
@@ -175,13 +231,15 @@ export async function extractFromRfp(
 /* ─── Quote Conversion Prediction ─── */
 
 export async function predictConversion(quoteId: string): Promise<ConversionPrediction | null> {
-  const _ctx = await resolveOrgContext()
+  const ctx = await resolveOrgContext()
 
   try {
-    const prediction = await runPrediction({
+    const predictionResult = await runPredictionDetailed({
       model: 'quote-conversion-predictor',
       features: { quoteId, scope: 'platform' },
+      orgId: ctx.orgId,
     })
+    const prediction = predictionResult.data
 
     if (!prediction) {
       // Fallback to AI-based heuristic
@@ -197,16 +255,48 @@ export async function predictConversion(quoteId: string): Promise<ConversionPred
 ${JSON.stringify(quoteRow.metadata)}
 Return JSON: { "probability": number (0-1), "factors": [{ "name": string, "impact": "positive"|"negative", "weight": number }], "recommendation": string }`
 
-      const raw = await runAICompletion(prompt, { profile: 'Flow-predict' })
+      const { content: raw, execution } = await runAICompletionDetailed(prompt, {
+        orgId: ctx.orgId,
+        profile: 'Flow-predict',
+      })
 
       try {
-        return JSON.parse(raw) as ConversionPrediction
+        const parsed = JSON.parse(raw) as Record<string, unknown>
+        return buildCanonicalAiOutput({
+          payload: {
+            probability: typeof parsed.probability === 'number' ? parsed.probability : 0,
+            factors: Array.isArray(parsed.factors) ? parsed.factors as ConversionPrediction['factors'] : [],
+            recommendation: typeof parsed.recommendation === 'string' ? parsed.recommendation : '',
+          },
+          appKey: 'flow',
+          orgId: ctx.orgId,
+          execution,
+          confidenceScore: typeof parsed.probability === 'number' ? parsed.probability : 0.5,
+          evidenceRefs: ['audit_log:quote.created', 'ai-profile:Flow-predict'],
+          domain: 'commerce',
+        })
       } catch {
         return null
       }
     }
 
-    return prediction as unknown as ConversionPrediction
+    return buildCanonicalAiOutput({
+      payload: {
+        probability: typeof prediction.probability === 'number' ? prediction.probability : 0,
+        factors: Array.isArray(prediction.factors) ? prediction.factors as ConversionPrediction['factors'] : [],
+        recommendation: typeof prediction.recommendation === 'string' ? prediction.recommendation : '',
+      },
+      appKey: 'flow',
+      orgId: ctx.orgId,
+      execution: predictionResult.execution ?? {
+        modelUsed: 'quote-conversion-predictor',
+        provider: 'ml',
+        engineVersion: 'ml:quote-conversion-predictor',
+      },
+      confidenceScore: typeof prediction.probability === 'number' ? prediction.probability : 0.5,
+      evidenceRefs: ['ml:model:quote-conversion-predictor'],
+      domain: 'commerce',
+    })
   } catch (error) {
     logger.error('Conversion prediction failed', { error, quoteId })
     return null

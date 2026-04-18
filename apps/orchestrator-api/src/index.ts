@@ -15,6 +15,7 @@ import { createLogger } from '@nzila/os-core'
 import { getEventBus } from './platform.js'
 import { telemetryHooks } from './telemetry-hooks.js'
 import { requireApiKey, requireIdempotencyKey } from './api-guards.js'
+import { getOrchestratorEnv } from './env.js'
 
 const logger = createLogger('orchestrator-api')
 
@@ -50,9 +51,10 @@ try {
   logger.warn('Boot invariants check skipped in dev', { error: err })
 }
 
-const PORT = Number(process.env.PORT ?? 4000)
-const HOST = process.env.HOST ?? '0.0.0.0'
-const API_KEY = process.env.ORCHESTRATOR_API_KEY ?? ''
+const env = getOrchestratorEnv()
+const PORT = env.PORT
+const HOST = env.HOST
+const API_KEY = env.ORCHESTRATOR_API_KEY ?? ''
 
 // ── Platform Integration (event-fabric) ────────────────────────────────────
 try {

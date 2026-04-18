@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { upsertFlowLead, createFlowDeal } from '@/lib/services/crm-service'
+import { emitLeadCreated } from '@nzila/platform-events/commercial'
+import { PlatformEventBus } from '@nzila/platform-events'
+
+const bus = new PlatformEventBus()
 
 const bodySchema = z.object({
   firstName: z.string().min(1),
@@ -40,6 +44,19 @@ export async function POST(request: NextRequest) {
         },
       })
     }
+
+    void bus.emit(emitLeadCreated(
+      {
+        leadId: contactId ?? crypto.randomUUID(),
+        email: body.email,
+        firstName: body.firstName,
+        company: body.company,
+        source: body.source ?? 'flow-contact-form',
+        appId: 'flow',
+        inquiryType: body.inquiryType,
+      },
+      { orgId: process.env.PLATFORM_ORG_ID ?? 'system', actorId: 'system' },
+    ))
 
     return NextResponse.json({ ok: true })
   } catch (error) {

@@ -15,44 +15,45 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import { runAICompletion, runAIExtraction } from '@/lib/ai-client'
-import { runPrediction } from '@/lib/ml-client'
+import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
+import { runAICompletionDetailed, runAIExtractionDetailed } from '@/lib/ai-client'
+import { runPredictionDetailed } from '@/lib/ml-client'
 import { buildPartnerEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
-export interface DealScore {
+export type DealScore = CanonicalAiOutput<{
   dealId: string
   score: number
   tier: 'high' | 'medium' | 'low'
   factors: Array<{ name: string; impact: number; description: string }>
   suggestedActions: string[]
-}
+}>
 
-export interface CommissionForecast {
+export type CommissionForecast = CanonicalAiOutput<{
   partnerId: string
   period: string
   forecasted: number
   confidence: number
   breakdown: Array<{ dealId: string; expected: number; probability: number }>
-}
+}>
 
-export interface CertificationRecommendation {
+export type CertificationRecommendation = CanonicalAiOutput<{
   partnerId: string
   currentTier: string
   recommendedPath: string
   requiredActions: Array<{ action: string; deadline: string; priority: 'high' | 'medium' | 'low' }>
   projectedTierDate: string | null
-}
+}>
 
-export interface DealExtraction {
+export type DealExtraction = CanonicalAiOutput<{
   accountName: string | null
   contactName: string | null
   contactEmail: string | null
   vertical: string | null
   estimatedArr: number | null
   notes: string | null
-}
+}>
 
 /* ─── Deal Scoring ─── */
 
@@ -62,13 +63,33 @@ export async function scoreDeal(dealId: string): Promise<DealScore | null> {
 
   try {
     // Try ML model first
-    const mlResult = await runPrediction({
+    const mlResult = await runPredictionDetailed({
       model: 'deal-conversion-scorer',
       features: { dealId },
     })
 
-    if (mlResult && typeof mlResult.score === 'number') {
-      return mlResult as unknown as DealScore
+    if (mlResult.data && typeof mlResult.data.score === 'number') {
+      const mlPayload = mlResult.data as Record<string, unknown>
+      const mlScore = typeof mlPayload.score === 'number' ? mlPayload.score : 0
+      return buildCanonicalAiOutput({
+        payload: {
+          dealId: typeof mlPayload.dealId === 'string' ? mlPayload.dealId : dealId,
+          score: mlScore,
+          tier: (mlPayload.tier as DealScore['tier']) ?? 'medium',
+          factors: Array.isArray(mlPayload.factors) ? mlPayload.factors as DealScore['factors'] : [],
+          suggestedActions: Array.isArray(mlPayload.suggestedActions) ? mlPayload.suggestedActions as string[] : [],
+        },
+        appKey: 'partners',
+        orgId: 'platform',
+        execution: mlResult.execution ?? {
+          modelUsed: 'deal-conversion-scorer',
+          provider: 'ml',
+          engineVersion: 'ml:deal-conversion-scorer',
+        },
+        confidenceScore: Math.min(1, Math.max(0, mlScore / 100)),
+        evidenceRefs: ['ml:model:deal-conversion-scorer'],
+        domain: 'commerce',
+      })
     }
 
     // Fallback: AI heuristic from deal data
@@ -104,10 +125,26 @@ Return JSON: {
   "suggestedActions": [string, ...]
 }`
 
-    const raw = await runAICompletion(prompt, { profile: 'partners-deal-score' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-deal-score' })
 
     try {
-      return JSON.parse(raw) as DealScore
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      const score = typeof parsed.score === 'number' ? parsed.score : 0
+      return buildCanonicalAiOutput({
+        payload: {
+          dealId: typeof parsed.dealId === 'string' ? parsed.dealId : dealId,
+          score,
+          tier: (parsed.tier as DealScore['tier']) ?? 'medium',
+          factors: Array.isArray(parsed.factors) ? parsed.factors as DealScore['factors'] : [],
+          suggestedActions: Array.isArray(parsed.suggestedActions) ? parsed.suggestedActions as string[] : [],
+        },
+        appKey: 'partners',
+        orgId: 'platform',
+        execution,
+        confidenceScore: Math.min(1, Math.max(0, score / 100)),
+        evidenceRefs: ['audit_log:deal.registered', 'audit_log:deal.submitted', 'ai-profile:partners-deal-score'],
+        domain: 'commerce',
+      })
     } catch {
       return null
     }
@@ -127,13 +164,35 @@ export async function forecastCommissions(
   if (!userId) throw new Error('Unauthorized')
 
   try {
-    const mlResult = await runPrediction({
+    const mlResult = await runPredictionDetailed({
       model: 'commission-forecaster',
       features: { partnerId, months },
     })
 
-    if (mlResult && typeof mlResult.forecasted === 'number') {
-      return mlResult as unknown as CommissionForecast
+    if (mlResult.data && typeof mlResult.data.forecasted === 'number') {
+      const mlPayload = mlResult.data as Record<string, unknown>
+      const mlConfidence = typeof mlPayload.confidence === 'number' ? mlPayload.confidence : 0.5
+      return buildCanonicalAiOutput({
+        payload: {
+          partnerId: typeof mlPayload.partnerId === 'string' ? mlPayload.partnerId : partnerId,
+          period: typeof mlPayload.period === 'string' ? mlPayload.period : `${months} months`,
+          forecasted: typeof mlPayload.forecasted === 'number' ? mlPayload.forecasted : 0,
+          confidence: mlConfidence,
+          breakdown: Array.isArray(mlPayload.breakdown)
+            ? mlPayload.breakdown as CommissionForecast['breakdown']
+            : [],
+        },
+        appKey: 'partners',
+        orgId: 'platform',
+        execution: mlResult.execution ?? {
+          modelUsed: 'commission-forecaster',
+          provider: 'ml',
+          engineVersion: 'ml:commission-forecaster',
+        },
+        confidenceScore: mlConfidence,
+        evidenceRefs: ['ml:model:commission-forecaster'],
+        domain: 'commerce',
+      })
     }
 
     // Fallback: AI based on historical commission data
@@ -161,10 +220,25 @@ Return JSON: {
   "breakdown": [{ "dealId": string, "expected": number, "probability": number }]
 }`
 
-    const raw = await runAICompletion(prompt, { profile: 'partners-forecast' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-forecast' })
 
     try {
-      return JSON.parse(raw) as CommissionForecast
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      return buildCanonicalAiOutput({
+        payload: {
+          partnerId: typeof parsed.partnerId === 'string' ? parsed.partnerId : partnerId,
+          period: typeof parsed.period === 'string' ? parsed.period : `${months} months`,
+          forecasted: typeof parsed.forecasted === 'number' ? parsed.forecasted : 0,
+          confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
+          breakdown: Array.isArray(parsed.breakdown) ? parsed.breakdown as CommissionForecast['breakdown'] : [],
+        },
+        appKey: 'partners',
+        orgId: 'platform',
+        execution,
+        confidenceScore: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
+        evidenceRefs: ['audit_log:commission.paid', 'ai-profile:partners-forecast'],
+        domain: 'commerce',
+      })
     } catch {
       return null
     }
@@ -215,10 +289,27 @@ Return JSON: {
   "projectedTierDate": string|null (ISO date)
 }`
 
-    const raw = await runAICompletion(prompt, { profile: 'partners-certification' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-certification' })
 
     try {
-      return JSON.parse(raw) as CertificationRecommendation
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      return buildCanonicalAiOutput({
+        payload: {
+          partnerId: typeof parsed.partnerId === 'string' ? parsed.partnerId : partnerId,
+          currentTier: typeof parsed.currentTier === 'string' ? parsed.currentTier : 'Registered',
+          recommendedPath: typeof parsed.recommendedPath === 'string' ? parsed.recommendedPath : '',
+          requiredActions: Array.isArray(parsed.requiredActions)
+            ? parsed.requiredActions as CertificationRecommendation['requiredActions']
+            : [],
+          projectedTierDate: typeof parsed.projectedTierDate === 'string' ? parsed.projectedTierDate : null,
+        },
+        appKey: 'partners',
+        orgId: 'platform',
+        execution,
+        confidenceScore: 0.7,
+        evidenceRefs: ['audit_log:partner.registered', 'audit_log:deal.won', 'ai-profile:partners-certification'],
+        domain: 'commerce',
+      })
     } catch {
       return null
     }
@@ -239,7 +330,7 @@ export async function extractDealFromEmail(
   try {
     logger.info('Extracting deal from email', { actorId: userId, textLength: emailBody.length })
 
-    const data = await runAIExtraction(emailBody, 'deal-extraction', {
+    const { data, execution } = await runAIExtractionDetailed(emailBody, 'deal-extraction', {
       profile: 'partners-extract',
       variables: { format: 'deal-registration' },
     })
@@ -252,14 +343,22 @@ export async function extractDealFromEmail(
     })
     // Evidence pack is already processed by buildPartnerEvidencePack
 
-    return {
-      accountName: (data.accountName as string) ?? null,
-      contactName: (data.contactName as string) ?? null,
-      contactEmail: (data.contactEmail as string) ?? null,
-      vertical: (data.vertical as string) ?? null,
-      estimatedArr: typeof data.estimatedArr === 'number' ? data.estimatedArr : null,
-      notes: (data.notes as string) ?? null,
-    }
+    return buildCanonicalAiOutput({
+      payload: {
+        accountName: (data.accountName as string) ?? null,
+        contactName: (data.contactName as string) ?? null,
+        contactEmail: (data.contactEmail as string) ?? null,
+        vertical: (data.vertical as string) ?? null,
+        estimatedArr: typeof data.estimatedArr === 'number' ? data.estimatedArr : null,
+        notes: (data.notes as string) ?? null,
+      },
+      appKey: 'partners',
+      orgId: 'platform',
+      execution,
+      confidenceScore: 0.76,
+      evidenceRefs: ['prompt:deal-extraction', 'evidence_pack:DEAL_EXTRACTION'],
+      domain: 'commerce',
+    })
   } catch (error) {
     logger.error('Deal extraction failed', { error })
     return null

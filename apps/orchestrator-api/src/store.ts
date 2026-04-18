@@ -33,7 +33,13 @@ function memIdempotencyKey(orgId: string, idempotencyKey: string): string {
 }
 
 function useDb(): boolean {
-  return !!process.env.DATABASE_URL
+  return process.env.NODE_ENV !== 'development'
+    ? true
+    : !!process.env.DATABASE_URL
+}
+
+function canUseMemoryStore(): boolean {
+  return process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL
 }
 
 function dateToIso(value: unknown): string | null {
@@ -158,6 +164,10 @@ export async function createCommand(
     return full
   }
 
+  if (!canUseMemoryStore()) {
+    throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
+  }
+
   const existingId = memStore.byOrgIdempotency.get(memIdempotencyKey(full.org_id, full.idempotency_key))
   if (existingId) {
     const existing = getMemById(existingId)
@@ -179,6 +189,9 @@ export async function getCommand(correlationId: string): Promise<CommandRecord |
     if (rows.length === 0) return undefined
     return dbRowToRecord(rows[0])
   }
+  if (!canUseMemoryStore()) {
+    throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
+  }
   return getMemByCorrelation(correlationId)
 }
 
@@ -192,6 +205,9 @@ export async function getCommandById(id: string): Promise<CommandRecord | undefi
       .limit(1)
     if (rows.length === 0) return undefined
     return dbRowToRecord(rows[0])
+  }
+  if (!canUseMemoryStore()) {
+    throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
   }
   return getMemById(id)
 }
@@ -214,6 +230,10 @@ export async function getCommandByOrgAndIdempotency(
       .limit(1)
     if (rows.length === 0) return undefined
     return dbRowToRecord(rows[0])
+  }
+
+  if (!canUseMemoryStore()) {
+    throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
   }
 
   const id = memStore.byOrgIdempotency.get(memIdempotencyKey(orgId, idempotencyKey))

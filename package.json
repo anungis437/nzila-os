@@ -30,6 +30,7 @@
     "test:fast": "vitest run --project=!contract-tests",
     "test:changed": "turbo test --filter=...[HEAD~1] --output-logs=new-only",
     "test:platform": "vitest run --project @nzila/platform-contracts --project @nzila/platform-auth --project @nzila/platform-shell --project @nzila/platform-notifications --project @nzila/platform-billing --project @nzila/org",
+    "test:operating-layer": "vitest run --config tooling/contract-tests/vitest.config.ts tooling/contract-tests/operating-layer-e2e-hardening.test.ts tooling/contract-tests/operating-layer-multiservice-harness.test.ts",
     "test:coverage": "turbo test:coverage",
     "contract-tests": "vitest run --project contract-tests",
     "contract:test": "vitest run --project contract-tests",
@@ -192,7 +193,10 @@
       "lodash": ">=4.18.0",
       "vite": ">=7.3.2",
       "drizzle-orm": ">=0.45.2",
-      "follow-redirects": ">=1.16.0"
+      "follow-redirects": ">=1.16.0",
+      "@grpc/proto-loader>protobufjs": "7.5.5",
+      "@opentelemetry/otlp-transformer>protobufjs": "8.0.1",
+      "proto3-json-serializer>protobufjs": "8.0.1"
     }
   },
   "dependencies": {}

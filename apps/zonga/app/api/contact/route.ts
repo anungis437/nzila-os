@@ -1,6 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { upsertZongaLead, createZongaDeal } from '@/lib/services/crm-service'
+import {
+  upsertZongaLead,
+  createZongaDeal,
+  enqueueCrmRetryJob,
+} from '@/lib/services/crm-service'
+import { emitLeadCreated } from '@nzila/platform-events/commercial'
+import { PlatformEventBus } from '@nzila/platform-events'
+import { resolveCommercialOrgId, resolveSystemActorId } from '@/lib/commercial-context'
+
+const bus = new PlatformEventBus()
 
 const bodySchema = z.object({
   firstName: z.string().min(1),
@@ -16,8 +25,10 @@ const bodySchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = bodySchema.parse(await request.json())
+    const orgId = resolveCommercialOrgId(process.env.PLATFORM_ORG_ID)
+    const actorId = resolveSystemActorId('contact-lead')
 
-    const contactId = await upsertZongaLead({
+    const contactPayload = {
       email: body.email,
       firstName: body.firstName,
       lastName: body.lastName,
@@ -27,22 +38,74 @@ export async function POST(request: NextRequest) {
         ...(body.inquiryType ? { zonga_inquiry_type: body.inquiryType } : {}),
         zonga_source: body.source ?? 'zonga-contact-form',
       },
-    })
+    }
 
-    if (contactId) {
-      await createZongaDeal({
+    const contactResult = await upsertZongaLead(contactPayload)
+    let contactId: string | null = contactResult.ok ? contactResult.id : null
+    let queued = false
+
+    if (!contactResult.ok) {
+      await enqueueCrmRetryJob(
+        { op: 'lead_upsert', contact: contactPayload },
+        `crm:lead:${body.email.toLowerCase()}`,
+      )
+      queued = true
+    }
+
+    const dealPayload = {
         name: `Zonga lead - ${body.organization || body.email}`,
         stage: 'inquiry',
-        contactId,
+        contactId: contactId ?? 'pending-contact',
         properties: {
           ...(body.message ? { zonga_message: body.message.slice(0, 500) } : {}),
           zonga_source: body.source ?? 'zonga-contact-form',
           zonga_close_probability: '0.20',
         },
-      })
+      }
+
+    if (contactId) {
+      const dealResult = await createZongaDeal(dealPayload)
+      if (!dealResult.ok) {
+        await enqueueCrmRetryJob(
+          { op: 'deal_create', deal: dealPayload },
+          `crm:deal:${body.email.toLowerCase()}:${body.inquiryType ?? 'general'}`,
+        )
+        queued = true
+      }
+    } else {
+      await enqueueCrmRetryJob(
+        { op: 'deal_create', deal: dealPayload },
+        `crm:deal:${body.email.toLowerCase()}:${body.inquiryType ?? 'general'}`,
+      )
+      queued = true
     }
 
-    return NextResponse.json({ ok: true })
+    void bus.emit(emitLeadCreated(
+      {
+        leadId: contactId ?? crypto.randomUUID(),
+        email: body.email,
+        firstName: body.firstName,
+        company: body.organization,
+        source: body.source ?? 'zonga-contact-form',
+        appId: 'zonga',
+        inquiryType: body.inquiryType,
+      },
+      { orgId, actorId },
+    ))
+
+    if (queued) {
+      return NextResponse.json(
+        {
+          ok: false,
+          queued: true,
+          error: 'CRM temporarily unavailable; lead queued for retry worker',
+          contactId,
+        },
+        { status: 202 },
+      )
+    }
+
+    return NextResponse.json({ ok: true, queued: false, contactId })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ ok: false, error: 'Invalid input', details: error.flatten().fieldErrors }, { status: 400 })

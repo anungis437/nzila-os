@@ -13,8 +13,7 @@ import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
 
-const EU_BASE_URL =
-  process.env.UNION_EYES_URL || 'http://localhost:3003'
+const EU_BASE_URL = process.env.UNION_EYES_URL
 
 // Shared when calling union-eyes internal endpoints (s2s auth)
 const EU_SERVICE_KEY = process.env.AI_SERVICE_KEY ?? ''
@@ -61,6 +60,19 @@ interface QueuePayload {
 export async function GET(request: Request) {
   try {
     await requireApiAuth(request)
+
+    if (!EU_BASE_URL) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: 'UNION_EYES_URL_NOT_CONFIGURED',
+            message: 'UNION_EYES_URL is required to collect union-eyes telemetry',
+          },
+        },
+        { status: 500 },
+      )
+    }
 
     const [health, metrics, queue] = await Promise.all([
       fetchJson<HealthPayload>(`${EU_BASE_URL}/api/health`),

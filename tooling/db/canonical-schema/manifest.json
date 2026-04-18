@@ -38,7 +38,7 @@
     "audit_events": {
       "source": "packages/db/src/schema/operations.ts",
       "requiredColumns": [
-        "id", "org_id", "actor_clerk_user_id", "action",
+        "id", "org_id", "actor_user_id", "action",
         "target_type", "hash", "created_at"
       ]
     },

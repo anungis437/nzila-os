@@ -153,7 +153,9 @@ export const zongaSubscriptionStatusEnum = pgEnum('zonga_subscription_status', [
 ])
 
 export const zongaCreatorPlanEnum = pgEnum('zonga_creator_plan', [
-  'artist',
+  'starter',
+  'pro',
+  'business',
   'label',
   'enterprise',
 ])
@@ -194,7 +196,7 @@ export const zongaCreators = pgTable('zonga_creators', {
   bio: text('bio'),
   avatarUrl: text('avatar_url'),
   status: zongaCreatorStatusEnum('status').notNull().default('pending'),
-  plan: zongaCreatorPlanEnum('plan').notNull().default('artist'),
+  plan: zongaCreatorPlanEnum('plan').notNull().default('starter'),
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
   stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
   subscriptionStatus: zongaSubscriptionStatusEnum('subscription_status'),

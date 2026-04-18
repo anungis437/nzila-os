@@ -12,6 +12,7 @@ import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
+import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
@@ -148,11 +149,33 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       }
     }
 
+    if (answer) {
+      return NextResponse.json(buildCanonicalAiOutput({
+        payload: {
+          query,
+          results: hits,
+          count: hits.length,
+          answer,
+        },
+        appKey: UE_APP_KEY,
+        orgId,
+        execution: {
+          requestId: 'search-answer',
+          traceId: 'search-answer',
+          modelUsed: 'ue-chatbot',
+          engineVersion: 'ai:ue-chatbot',
+        },
+        confidenceScore: hits.length > 0 ? Math.min(0.95, 0.5 + (hits[0]?.similarity ?? 0) / 2) : 0.5,
+        evidenceRefs: hits.map((hit) => `knowledge_base:${hit.id}`),
+        reviewRequired: true,
+        domain: 'labour',
+      }));
+    }
+
     return NextResponse.json({
       query,
       results: hits,
       count: hits.length,
-      ...(answer ? { answer } : {}),
     });
   } catch (error) {
     logger.error('Knowledge base search failed', { error });

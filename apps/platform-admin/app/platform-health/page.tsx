@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   PLATFORM_SLOS,
   meetsSlo,
@@ -31,8 +31,49 @@ function _budgetStatusColor(remaining: number): string {
   return 'text-red-600'
 }
 
+type DependencyStatus = 'up' | 'degraded' | 'down'
+type DependencyItem = {
+  name: 'control-plane' | 'orchestrator' | 'db' | 'queues' | 'metrics'
+  status: DependencyStatus
+  detail: string
+  latencyMs?: number
+}
+
+function dependencyBadge(status: DependencyStatus): string {
+  if (status === 'up') return 'bg-green-100 text-green-700'
+  if (status === 'degraded') return 'bg-yellow-100 text-yellow-700'
+  return 'bg-red-100 text-red-700'
+}
+
 export default function PlatformHealthPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [deps, setDeps] = useState<DependencyItem[]>([])
+  const [depsError, setDepsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadDependencies() {
+      try {
+        const res = await fetch('/api/health/dependencies', { cache: 'no-store' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const json = await res.json() as { ok: boolean; data: { dependencies: DependencyItem[] } }
+        if (!cancelled) {
+          setDeps(json.data.dependencies)
+          setDepsError(null)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setDepsError(`Dependency check unavailable: ${String(error)}`)
+        }
+      }
+    }
+
+    void loadDependencies()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const sloEntries = Object.entries(PLATFORM_SLOS) as Array<[string, SloTarget]>
   const categories = [...new Set(sloEntries.map(([, slo]) => slo.category ?? 'uncategorized'))]
@@ -53,6 +94,37 @@ export default function PlatformHealthPage() {
         SLO catalog, error budgets, and platform health overview.{' '}
         {sloEntries.length} SLOs defined across {categories.length} categories.
       </p>
+
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="mb-3 text-sm font-semibold text-gray-700">Dependency Status</h2>
+
+        {depsError && (
+          <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            {depsError}
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {(['control-plane', 'orchestrator', 'db', 'queues', 'metrics'] as const).map((name) => {
+            const item = deps.find((d) => d.name === name)
+            const status = item?.status ?? 'down'
+            return (
+              <div key={name} className="rounded border border-gray-100 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{name}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${dependencyBadge(status)}`}>
+                    {status}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600">{item?.detail ?? 'no data'}</div>
+                {item?.latencyMs !== undefined && (
+                  <div className="mt-1 text-[11px] text-gray-400">{item.latencyMs}ms</div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Category filter */}
       <div className="mb-4 flex gap-2">

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const { orgId, priceId, customerId, ventureId, trialDays } = parsed.data
 
-  const origin = req.headers.get('origin') ?? 'http://localhost:3001'
+  const origin = req.nextUrl.origin
   const successUrl = `${origin}/settings/billing/success?session_id={CHECKOUT_SESSION_ID}`
   const cancelUrl = `${origin}/settings/billing`
 
