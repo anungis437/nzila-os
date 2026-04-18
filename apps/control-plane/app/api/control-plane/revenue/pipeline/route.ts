@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@nzila/db'
 import { sql } from 'drizzle-orm'
+import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
 
 interface PipelineSnapshot {
   generatedAt: string
@@ -134,7 +135,12 @@ async function buildSnapshot(): Promise<PipelineSnapshot> {
   }
 }
 
-export async function GET() {
-  const data = await buildSnapshot()
-  return NextResponse.json({ ok: true, data })
+export async function GET(request: Request) {
+  try {
+    await requireApiAuth(request)
+    const data = await buildSnapshot()
+    return NextResponse.json({ ok: true, data })
+  } catch (error) {
+    return handleAuthError(error)
+  }
 }

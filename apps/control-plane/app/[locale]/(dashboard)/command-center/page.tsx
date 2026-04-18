@@ -8,7 +8,12 @@ async function loadCommandCenter(): Promise<CommandCenterSnapshot | null> {
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
     const res = await fetch(
       `${protocol}://${host}/api/control-plane/revenue/command-center`,
-      { cache: 'no-store' },
+      {
+        cache: 'no-store',
+        headers: {
+          'x-api-key': process.env.CONTROL_PLANE_API_KEY ?? '',
+        },
+      },
     )
     if (!res.ok) return null
     const json = await res.json()

@@ -67,6 +67,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/zoho\/webhook/,      // Zoho webhook (token-verified)
       /\/api\/contact/,             // Public contact/demo-request forms
       /\/api\/pilot\/apply/,        // Public pilot application form
+      /\/api\/trial(?:\/|$)/,       // Public Flow trial signup form
       /\/api\/telemetry/,            // Public marketing telemetry (anonymous page events)
     ]
 

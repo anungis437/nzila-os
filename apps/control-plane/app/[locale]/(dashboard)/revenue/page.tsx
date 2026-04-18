@@ -25,7 +25,12 @@ async function loadSnapshot(): Promise<RevenueSnapshot | null> {
     const h = await headers()
     const host = h.get('host')
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
-    const res = await fetch(`${protocol}://${host}/api/control-plane/revenue/pipeline`, { cache: 'no-store' })
+    const res = await fetch(`${protocol}://${host}/api/control-plane/revenue/pipeline`, {
+      cache: 'no-store',
+      headers: {
+        'x-api-key': process.env.CONTROL_PLANE_API_KEY ?? '',
+      },
+    })
     if (!res.ok) return null
     const json = await res.json()
     return json.data as RevenueSnapshot

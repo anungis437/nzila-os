@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@nzila/db'
 import { sql } from 'drizzle-orm'
+import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
 
 export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type AlertType =
@@ -201,7 +202,12 @@ async function buildCommandCenter(): Promise<CommandCenterSnapshot> {
   }
 }
 
-export async function GET() {
-  const data = await buildCommandCenter()
-  return NextResponse.json({ ok: true, data })
+export async function GET(request: Request) {
+  try {
+    await requireApiAuth(request)
+    const data = await buildCommandCenter()
+    return NextResponse.json({ ok: true, data })
+  } catch (error) {
+    return handleAuthError(error)
+  }
 }
