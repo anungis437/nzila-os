@@ -1,12 +1,12 @@
 {
-  "status": "hardened",
+  "status": "internal",
   "exposure": "internal",
-  "data_integrity": "strong",
+  "data_integrity": "enforced",
   "contracts_complete": true,
-  "observability": "moderate",
+  "observability": "partial",
   "portfolio_tier": "TIER 3",
   "playbooks": ["contract_guardian", "lint_check", "typecheck", "unit_tests", "full_ci", "evidence_seal", "sla_escalation", "reminder_dispatch", "onboarding_trigger"],
   "domain_consumers": ["union-eyes", "flow"],
   "score": 8.5,
-  "last_validated": "2026-04-17"
+  "last_validated": "2026-04-16"
 }

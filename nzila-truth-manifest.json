@@ -149,7 +149,7 @@
       "exposure": "internal"
     },
     "orchestrator-api": {
-      "registry_tier": "PRODUCTION",
+      "registry_tier": "EXPERIMENTAL",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",

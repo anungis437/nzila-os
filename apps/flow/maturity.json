@@ -7,5 +7,5 @@
   "orchestrator_integration": true,
   "orchestrator_playbooks": ["reminder_dispatch", "onboarding_trigger"],
   "portfolio_tier": "TIER 1",
-  "last_validated": "2026-04-17"
+  "last_validated": "2026-04-16"
 }
