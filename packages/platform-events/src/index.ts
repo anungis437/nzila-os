@@ -34,3 +34,30 @@ export type { DrizzleEventStoreOptions } from './store'
 
 export { PlatformEventDispatcher } from './dispatcher'
 export type { DispatchResult, HandlerRegistration } from './dispatcher'
+
+// Commercial GTM events
+export {
+  COMMERCIAL_EVENTS,
+  createCommercialEvent,
+  emitLeadCreated,
+  emitTrialStarted,
+  emitSubscriptionStarted,
+  emitSubscriptionUpgraded,
+  emitSubscriptionCancelled,
+  emitDealWon,
+} from './commercial'
+export type {
+  CommercialEventType,
+  LeadCreatedPayload,
+  DemoBookedPayload,
+  TrialStartedPayload,
+  TrialActivatedPayload,
+  PilotStartedPayload,
+  ProposalSentPayload,
+  DealWonPayload,
+  DealLostPayload,
+  SubscriptionStartedPayload,
+  SubscriptionUpgradedPayload,
+  SubscriptionCancelledPayload,
+  ExpansionClosedPayload,
+} from './commercial'

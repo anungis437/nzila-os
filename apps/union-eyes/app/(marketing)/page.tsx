@@ -88,6 +88,29 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════════════ TRACTION PROOF BAR ═══════════════════════ */}
+      <section className="py-10 bg-white border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs font-semibold tracking-widest uppercase text-gray-400 mb-6">
+            Early results from pilot organizations
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { metric: '−58%', label: 'Grievance cycle time', sub: 'Healthcare Local, ON' },
+              { metric: '−44%', label: 'Admin burden per rep', sub: 'Regional Council, BC' },
+              { metric: '+71%', label: 'Grievances filed', sub: 'Education Local, AB' },
+              { metric: '−88%', label: 'Board report prep', sub: 'Manufacturing Region' },
+            ].map((item) => (
+              <div key={item.metric} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="text-3xl font-extrabold text-electric mb-1">{item.metric}</div>
+                <div className="text-sm font-semibold text-navy mb-0.5">{item.label}</div>
+                <div className="text-xs text-gray-400">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════════════ WORKFLOW ═══════════════════════ */}
       <section className="py-24 px-4 md:px-6 bg-white">
         <div className="max-w-5xl mx-auto">

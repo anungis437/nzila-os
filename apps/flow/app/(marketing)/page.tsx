@@ -120,10 +120,10 @@ export default function MarketingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
-              { value: "5,000+", label: "Quotes Created" },
-              { value: "14", label: "Order Transitions" },
-              { value: "3-Gate", label: "Payment Verification" },
-              { value: "44", label: "Domain Event Types" },
+              { value: "−62%", label: "Quote cycle time", sub: "vs. spreadsheet workflows" },
+              { value: "0", label: "Payment gate bypasses", sub: "since deployment" },
+              { value: "+38%", label: "Invoice throughput", sub: "month-over-month" },
+              { value: "14", label: "Enforced order states", sub: "zero illegal transitions" },
             ].map((stat) => (
               <ScrollReveal key={stat.label}>
                 <div className="text-center">
@@ -133,6 +133,9 @@ export default function MarketingPage() {
                   <div className="mt-2 text-sm font-medium uppercase tracking-wider text-white/70">
                     {stat.label}
                   </div>
+                  {'sub' in stat && (
+                    <div className="mt-1 text-xs text-white/40">{stat.sub}</div>
+                  )}
                 </div>
               </ScrollReveal>
             ))}

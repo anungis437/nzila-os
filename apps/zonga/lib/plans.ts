@@ -89,7 +89,7 @@ export const PREMIUM_ONLY_FEATURES: readonly ListenerFeature[] = [
 
 // ── Creator Plans ───────────────────────────────────────────────────────────
 
-export type CreatorPlan = 'starter' | 'pro_creator' | 'business' | 'enterprise'
+export type CreatorPlan = 'starter' | 'pro' | 'business' | 'label' | 'enterprise'
 
 export interface CreatorPlanConfig {
   readonly name: string
@@ -132,7 +132,7 @@ export const CREATOR_PLANS: Record<CreatorPlan, CreatorPlanConfig> = {
       tipCommissionPercent: null,    // defaults to global rate (10%)
     },
   },
-  pro_creator: {
+  pro: {
     name: 'Pro Creator',
     priceMonthlyMinor: 2900,
     features: [
@@ -193,6 +193,43 @@ export const CREATOR_PLANS: Record<CreatorPlan, CreatorPlanConfig> = {
       streamCommissionPercent: 10, // reduced from 15%
       ticketCommissionPercent: 5,  // reduced from 7.5%
       tipCommissionPercent: 5,     // reduced from 10%
+    },
+  },
+  label: {
+    name: 'Label',
+    priceMonthlyMinor: 49900, // $499/month
+    features: [
+      'upload_content',
+      'basic_analytics',
+      'payouts',
+      'audio_fingerprinting',
+      'event_ticketing',
+      'community_support',
+      'advanced_analytics',
+      'priority_review',
+      'bulk_upload',
+      'automated_royalty_splits',
+      'promoted_placement',
+      'creator_assist_ai',
+      'roster_management',
+      'dedicated_manager',
+      'compliance_exports',
+      'api_access',
+      'rights_management',
+      'white_label',
+      'sla_guarantees',
+      'custom_payment_rails',
+    ],
+    limits: {
+      uploadLimitPerMonth: null,
+      teamMembers: 50,
+      splitParties: 999,
+      eventsPerMonth: null,
+    },
+    feeOverrides: {
+      streamCommissionPercent: 8,  // reduced from 15%
+      ticketCommissionPercent: 4,  // reduced from 7.5%
+      tipCommissionPercent: 4,     // reduced from 10%
     },
   },
   enterprise: {

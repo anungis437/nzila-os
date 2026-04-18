@@ -11,6 +11,12 @@ interface RevenueSnapshot {
   arr: number
   arpu: number
   forecastArr90d: number
+  funnelConversionPct?: number
+  trialToPaidPct?: number
+  pilotToPaidPct?: number
+  winRatePct?: number
+  avgSaleCycleDays?: number
+  expansionRevenue?: number
 }
 
 async function loadSnapshot(): Promise<RevenueSnapshot | null> {
@@ -75,6 +81,32 @@ export default async function RevenuePipelinePage() {
           </ul>
         </div>
       </div>
+
+      {(data.funnelConversionPct !== undefined || data.winRatePct !== undefined) && (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="font-semibold mb-3">Funnel Conversion Metrics</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            {data.funnelConversionPct !== undefined && (
+              <div><span className="text-muted-foreground">Lead → Close</span><div className="font-bold text-lg">{data.funnelConversionPct}%</div></div>
+            )}
+            {data.trialToPaidPct !== undefined && (
+              <div><span className="text-muted-foreground">Trial → Paid</span><div className="font-bold text-lg">{data.trialToPaidPct}%</div></div>
+            )}
+            {data.pilotToPaidPct !== undefined && (
+              <div><span className="text-muted-foreground">Pilot → Paid</span><div className="font-bold text-lg">{data.pilotToPaidPct}%</div></div>
+            )}
+            {data.winRatePct !== undefined && (
+              <div><span className="text-muted-foreground">Win Rate (demo → close)</span><div className="font-bold text-lg">{data.winRatePct}%</div></div>
+            )}
+            {data.avgSaleCycleDays !== undefined && (
+              <div><span className="text-muted-foreground">Avg. Sale Cycle</span><div className="font-bold text-lg">{data.avgSaleCycleDays}d</div></div>
+            )}
+            {data.expansionRevenue !== undefined && data.expansionRevenue > 0 && (
+              <div><span className="text-muted-foreground">Expansion MRR</span><div className="font-bold text-lg">{currency(data.expansionRevenue)}</div></div>
+            )}
+          </div>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">Snapshot generated: {new Date(data.generatedAt).toLocaleString()}</p>
     </div>

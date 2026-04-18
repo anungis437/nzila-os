@@ -107,9 +107,10 @@ export function guardSubscriptionActive(
 
 const PLAN_HIERARCHY: Record<CreatorPlan, number> = {
   starter: 0,
-  pro_creator: 1,
+  pro: 1,
   business: 2,
   enterprise: 3,
+  label: 4,
 }
 
 /** S2: Check if a creator has access to a specific feature */
@@ -178,3 +179,5 @@ export function isCreatorLabel(
 export function maxAudioQuality(plan: ListenerPlan): AudioQuality {
   return plan === 'premium' ? 'hifi' : 'high'
 }
+
+

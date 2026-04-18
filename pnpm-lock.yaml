@@ -2503,6 +2503,9 @@ importers:
       '@nzila/platform-auth':
         specifier: workspace:*
         version: link:../../packages/platform-auth
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../../packages/platform-events
       '@nzila/platform-pilot-metrics':
         specifier: workspace:*
         version: link:../../packages/platform-pilot-metrics

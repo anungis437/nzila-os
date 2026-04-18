@@ -43,8 +43,8 @@ describe('CREATOR_PLANS', () => {
     expect(CREATOR_PLANS.starter.priceMonthlyMinor).toBe(0)
   })
 
-  it('pro_creator costs $29 (2900 minor units)', () => {
-    expect(CREATOR_PLANS.pro_creator.priceMonthlyMinor).toBe(2900)
+  it('pro costs $29 (2900 minor units)', () => {
+    expect(CREATOR_PLANS.pro.priceMonthlyMinor).toBe(2900)
   })
 
   it('business costs $149 (14900 minor units)', () => {
@@ -63,10 +63,10 @@ describe('CREATOR_PLANS', () => {
     expect(CREATOR_PLANS.business.limits.uploadLimitPerMonth).toBeNull()
   })
 
-  it('pro_creator has fee overrides lower than defaults', () => {
-    expect(CREATOR_PLANS.pro_creator.feeOverrides.streamCommissionPercent).toBe(12)
-    expect(CREATOR_PLANS.pro_creator.feeOverrides.ticketCommissionPercent).toBe(6)
-    expect(CREATOR_PLANS.pro_creator.feeOverrides.tipCommissionPercent).toBe(8)
+  it('pro has fee overrides lower than defaults', () => {
+    expect(CREATOR_PLANS.pro.feeOverrides.streamCommissionPercent).toBe(12)
+    expect(CREATOR_PLANS.pro.feeOverrides.ticketCommissionPercent).toBe(6)
+    expect(CREATOR_PLANS.pro.feeOverrides.tipCommissionPercent).toBe(8)
   })
 
   it('starter has null fee overrides (uses defaults)', () => {
@@ -108,9 +108,9 @@ describe('hasCreatorFeature', () => {
     expect(hasCreatorFeature('starter', 'creator_assist_ai')).toBe(false)
   })
 
-  it('pro_creator has promoted_placement and creator_assist_ai', () => {
-    expect(hasCreatorFeature('pro_creator', 'promoted_placement')).toBe(true)
-    expect(hasCreatorFeature('pro_creator', 'creator_assist_ai')).toBe(true)
+  it('pro has promoted_placement and creator_assist_ai', () => {
+    expect(hasCreatorFeature('pro', 'promoted_placement')).toBe(true)
+    expect(hasCreatorFeature('pro', 'creator_assist_ai')).toBe(true)
   })
 
   it('enterprise has all features', () => {
@@ -133,7 +133,7 @@ describe('getCreatorLimit', () => {
 
   it('returns team members limit', () => {
     expect(getCreatorLimit('starter', 'teamMembers')).toBe(1)
-    expect(getCreatorLimit('pro_creator', 'teamMembers')).toBe(3)
+    expect(getCreatorLimit('pro', 'teamMembers')).toBe(3)
     expect(getCreatorLimit('business', 'teamMembers')).toBe(10)
   })
 })
@@ -145,8 +145,8 @@ describe('getEffectiveCommission', () => {
     expect(getEffectiveCommission('starter', 'streamCommissionPercent', 15)).toBe(15)
   })
 
-  it('returns override for pro_creator', () => {
-    expect(getEffectiveCommission('pro_creator', 'streamCommissionPercent', 15)).toBe(12)
+  it('returns override for pro', () => {
+    expect(getEffectiveCommission('pro', 'streamCommissionPercent', 15)).toBe(12)
   })
 
   it('returns override for business', () => {
@@ -159,3 +159,4 @@ describe('getEffectiveCommission', () => {
     expect(getEffectiveCommission('enterprise', 'streamCommissionPercent', 15)).toBe(15)
   })
 })
+
