@@ -18,7 +18,10 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const hasAccess = await hasMinRole("steward");
+  // Committees are readable for members (API readRole='member' and sidebar link
+  // is visible to union members). Keep write actions role-gated inside
+  // CommitteesPage via readOnly handling.
+  const hasAccess = await hasMinRole("member");
   if (!hasAccess) {
     redirect("/dashboard");
   }

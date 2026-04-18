@@ -8,6 +8,7 @@ import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
 import { eq, and, isNull, sql, inArray } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { hasMinRole } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,11 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const canAccess = await hasMinRole('platform_lead');
+  if (!canAccess) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const orgId = req.nextUrl.searchParams.get('organizationId');

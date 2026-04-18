@@ -27,6 +27,14 @@ export type Session = EntraSession
 /** Cookie name for PG-backed password auth sessions */
 const PG_SESSION_COOKIE = 'nzila_session'
 
+function isPgFallbackEnabled(): boolean {
+  const raw =
+    process.env.NZILA_AUTH_ENABLE_PG_FALLBACK
+    ?? process.env.NEXT_PUBLIC_NZILA_AUTH_ENABLE_PG_FALLBACK
+    ?? 'true'
+  return raw.toLowerCase() !== 'false'
+}
+
 // ── Server Auth ─────────────────────────────────────────────────────────────
 
 export interface AuthSessionResult {
@@ -50,6 +58,9 @@ export interface AuthSessionResult {
 export async function auth(): Promise<AuthSessionResult> {
   // ── 1. Try PG session-based auth ────────────────────────────────────────
   try {
+    if (!isPgFallbackEnabled()) {
+      throw new Error('PG fallback disabled')
+    }
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
@@ -139,6 +150,9 @@ export async function auth(): Promise<AuthSessionResult> {
 export async function currentUser() {
   // ── 1. Try PG session ───────────────────────────────────────────────────
   try {
+    if (!isPgFallbackEnabled()) {
+      throw new Error('PG fallback disabled')
+    }
     const { cookies } = await import('next/headers')
     const cookieStore = await cookies()
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value

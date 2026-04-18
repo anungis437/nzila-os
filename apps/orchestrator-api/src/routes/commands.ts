@@ -24,14 +24,24 @@ export async function commandRoutes(app: FastifyInstance) {
 
     const record = await createCommand({
       id,
+      org_id: '00000000-0000-0000-0000-000000000000',
       correlation_id: cmd.correlation_id,
+      idempotency_key: cmd.correlation_id,
       playbook: cmd.playbook,
       status: 'pending',
+      version: 1,
+      attempt_count: 0,
       dry_run: cmd.dry_run,
       requested_by: cmd.requested_by,
       args: cmd.args,
       run_id: null,
       run_url: null,
+      error_message: null,
+      execution_owner: null,
+      lease_expires_at: null,
+      last_heartbeat_at: null,
+      started_at: null,
+      completed_at: null,
     })
 
     app.log.info({ correlation_id: cmd.correlation_id, playbook: cmd.playbook }, 'Command accepted')

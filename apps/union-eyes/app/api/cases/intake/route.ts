@@ -24,19 +24,21 @@ import { createHash } from 'crypto';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { eq } from 'drizzle-orm';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     // 1. Auth check
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+    const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse body

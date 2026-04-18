@@ -4,5 +4,8 @@
   "data_integrity": "partial",
   "contracts_complete": false,
   "observability": "partial",
+  "orchestrator_integration": true,
+  "orchestrator_playbooks": ["evidence_seal", "sla_escalation"],
+  "portfolio_tier": "TIER 1",
   "last_validated": "2026-04-16"
 }

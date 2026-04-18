@@ -14,7 +14,7 @@ import { getAllowedTransitions } from '@/lib/case-fsm-enforcement';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims } from '@/db/schema/claims-schema';
 import { logger } from '@/lib/logger';
-import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organization-utils';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
@@ -26,13 +26,14 @@ export async function GET(
   try {
     const { caseId } = await params;
 
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+    const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     const claim = await withRLSContext(async (tx) => {

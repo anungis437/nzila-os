@@ -2,7 +2,7 @@
  * Agrimo — Platform Smoke Tests
  *
  * Validates the Agrimo app's platform integration:
- * middleware, health route, org resolution, instrumentation.
+ * proxy, health route, org resolution, instrumentation.
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
@@ -11,10 +11,11 @@ import { resolve } from 'node:path'
 const APP = resolve(__dirname, '../..')
 
 describe('Agrimo platform integration', () => {
-  it('has middleware with rate limiting and request-ID', () => {
-    const mw = readFileSync(resolve(APP, 'middleware.ts'), 'utf-8')
-    expect(mw).toContain('rateLimit')
-    expect(mw).toContain('x-request-id')
+  it('has proxy with rate limiting and request-ID', () => {
+    const proxy = readFileSync(resolve(APP, 'proxy.ts'), 'utf-8')
+    expect(proxy).toContain('export const proxy')
+    expect(proxy).toContain('checkRateLimit')
+    expect(proxy).toContain('x-request-id')
   })
 
   it('has health route', () => {

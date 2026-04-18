@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { createLogger } from '@nzila/os-core';
 import { db } from '@/db/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -31,6 +31,11 @@ const CUPE_PILOT_JSON = resolve(
 
 export const POST = withApiAuth(async (request: NextRequest) => {
   try {
+    const canAccess = await hasMinRole('platform_lead');
+    if (!canAccess) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const body: SeedRequest = await request.json();
     const { reset = false } = body;
 

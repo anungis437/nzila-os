@@ -15,15 +15,18 @@ import { z } from 'zod'
 import {
   executeWorkflow,
   cancelWorkflowRun,
+  retryWorkflowRun,
   getWorkflowRun,
   listWorkflowRuns,
 } from '../execution-engine.js'
 import { WorkflowTriggerRequestSchema, ExecutionStatusSchema } from '@nzila/platform-contracts/control-system'
 import { createLogger } from '@nzila/os-core'
+import { PlaybookName } from '../contract.js'
 
 const logger = createLogger('orchestrator:routes:execute')
 
 const ExecuteBodySchema = WorkflowTriggerRequestSchema.extend({
+  workflowId: PlaybookName,
   /** Decision ID from Control Plane authorization (required for live execution) */
   authorizationDecisionId: z.string().uuid().optional(),
 })
@@ -44,6 +47,18 @@ export async function executeRoutes(app: FastifyInstance) {
    * If dryRun=false, authorizationDecisionId is required.
    */
   app.post('/', async (req, reply) => {
+    const orgHeader = getHeader(req.headers['x-org-id'])
+    const actorHeader = getHeader(req.headers['x-actor-id'])
+    if (!orgHeader || !actorHeader) {
+      return reply.status(400).send({
+        ok: false,
+        error: {
+          code: 'MISSING_CONTEXT_HEADERS',
+          message: 'x-org-id and x-actor-id headers are required for execution requests',
+        },
+      })
+    }
+
     const parsed = ExecuteBodySchema.safeParse(req.body)
     if (!parsed.success) {
       return reply.status(400).send({
@@ -57,6 +72,46 @@ export async function executeRoutes(app: FastifyInstance) {
     }
 
     const body = parsed.data
+    if (orgHeader !== body.orgId) {
+      return reply.status(403).send({
+        ok: false,
+        error: {
+          code: 'ORG_SCOPE_MISMATCH',
+          message: 'x-org-id header must match body.orgId',
+        },
+      })
+    }
+    if (actorHeader !== body.initiatedBy.actorId) {
+      return reply.status(403).send({
+        ok: false,
+        error: {
+          code: 'ACTOR_SCOPE_MISMATCH',
+          message: 'x-actor-id header must match initiatedBy.actorId',
+        },
+      })
+    }
+
+    const decisionHeader = getHeader(req.headers['x-authorization-decision-id'])
+    if (decisionHeader && body.authorizationDecisionId && decisionHeader !== body.authorizationDecisionId) {
+      return reply.status(400).send({
+        ok: false,
+        error: {
+          code: 'DECISION_HEADER_MISMATCH',
+          message: 'x-authorization-decision-id must match body.authorizationDecisionId',
+        },
+      })
+    }
+
+    if (!(body.executionContext?.dryRun ?? false) && !body.authorizationDecisionId && !decisionHeader) {
+      return reply.status(400).send({
+        ok: false,
+        error: {
+          code: 'AUTHORIZATION_REQUIRED',
+          message: 'authorizationDecisionId is required for non-dry-run execution',
+        },
+      })
+    }
+
     const correlationId = (req.headers['x-correlation-id'] as string | undefined)
       ?? body.correlationEnvelope?.correlationId
       ?? randomUUID()
@@ -72,6 +127,7 @@ export async function executeRoutes(app: FastifyInstance) {
 
     const result = await executeWorkflow({
       ...body,
+      authorizationDecisionId: body.authorizationDecisionId ?? decisionHeader ?? undefined,
       correlationEnvelope: {
         ...(body.correlationEnvelope ?? {}),
         requestId: body.requestId,
@@ -88,7 +144,7 @@ export async function executeRoutes(app: FastifyInstance) {
    * GET /execute/:runId — Get a specific run's status and metadata.
    */
   app.get<{ Params: { runId: string } }>('/:runId', async (req, reply) => {
-    const run = getWorkflowRun(req.params.runId)
+    const run = await getWorkflowRun(req.params.runId)
     if (!run) {
       return reply.status(404).send({
         ok: false,
@@ -99,11 +155,68 @@ export async function executeRoutes(app: FastifyInstance) {
   })
 
   /**
+   * POST /execute/:runId/retry — Retry a failed workflow run.
+   */
+  app.post<{ Params: { runId: string }; Body: { requestedBy?: string } }>(
+    '/:runId/retry',
+    async (req, reply) => {
+      const run = await getWorkflowRun(req.params.runId)
+      if (!run) {
+        return reply.status(404).send({
+          ok: false,
+          error: { code: 'RUN_NOT_FOUND', message: `Run ${req.params.runId} not found` },
+        })
+      }
+
+      const orgHeader = getHeader(req.headers['x-org-id'])
+      if (!orgHeader || orgHeader !== run.orgId) {
+        return reply.status(403).send({
+          ok: false,
+          error: {
+            code: 'ORG_SCOPE_MISMATCH',
+            message: 'x-org-id header must match the run org scope for retry',
+          },
+        })
+      }
+
+      const requestedBy = req.body?.requestedBy ?? getHeader(req.headers['x-actor-id']) ?? 'operator'
+      const retried = await retryWorkflowRun(req.params.runId, requestedBy)
+      if (!retried.retried) {
+        return reply.status(409).send({
+          ok: false,
+          error: { code: 'CANNOT_RETRY', message: retried.reason ?? 'Cannot retry this run' },
+        })
+      }
+
+      return { ok: true, data: { retried: true, run: retried.run } }
+    },
+  )
+
+  /**
    * POST /execute/:runId/cancel — Cancel a workflow run.
    */
   app.post<{ Params: { runId: string }; Body: { cancelledBy?: string } }>(
     '/:runId/cancel',
     async (req, reply) => {
+      const run = await getWorkflowRun(req.params.runId)
+      if (!run) {
+        return reply.status(404).send({
+          ok: false,
+          error: { code: 'RUN_NOT_FOUND', message: `Run ${req.params.runId} not found` },
+        })
+      }
+
+      const orgHeader = getHeader(req.headers['x-org-id'])
+      if (!orgHeader || orgHeader !== run.orgId) {
+        return reply.status(403).send({
+          ok: false,
+          error: {
+            code: 'ORG_SCOPE_MISMATCH',
+            message: 'x-org-id header must match the run org scope for cancellation',
+          },
+        })
+      }
+
       const cancelledBy = req.body?.cancelledBy ?? 'operator'
       const result = await cancelWorkflowRun(req.params.runId, cancelledBy)
       if (!result.cancelled) {
@@ -129,7 +242,14 @@ export async function executeRoutes(app: FastifyInstance) {
     }
 
     const { orgId, workflowId, status, limit } = parsed.data
-    const runs = listWorkflowRuns({ orgId, workflowId, status, limit })
+    const runs = await listWorkflowRuns({ orgId, workflowId, status, limit })
     return { ok: true, data: runs, count: runs.length }
   })
+}
+
+function getHeader(value: string | string[] | undefined): string | null {
+  if (!value) return null
+  if (Array.isArray(value)) return value[0] ?? null
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
 }

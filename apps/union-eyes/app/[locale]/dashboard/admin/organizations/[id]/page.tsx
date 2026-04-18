@@ -35,6 +35,7 @@ import { Separator } from "@/components/ui/separator";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import { OrganizationAnalytics } from "@/components/organization/organization-analytics";
 import { OrganizationMembers } from "@/components/organization/organization-members";
+import { OrganizationTree } from "@/components/admin/organization-tree";
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -67,6 +68,22 @@ interface OrganizationWithDetails extends Organization {
   parentName?: string;
 }
 
+interface HierarchyNode {
+  id: string;
+  name: string;
+  slug: string;
+  type?: OrganizationType;
+  organization_type?: OrganizationType;
+  parentId?: string | null;
+  parent_id?: string | null;
+  hierarchy_path?: string[];
+  hierarchy_level?: number;
+  member_count?: number;
+  active_member_count?: number;
+  status?: string;
+  clc_affiliated?: boolean;
+}
+
 export default function OrganizationDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -96,10 +113,69 @@ export default function OrganizationDetailPage() {
     fetcher
   );
 
+  const { data: pathData } = useSWR(
+    organizationId ? `/api/organizations/${organizationId}/path` : null,
+    fetcher
+  );
+
+  const { data: descendantsData, isLoading: descendantsLoading } = useSWR(
+    organizationId ? `/api/organizations/${organizationId}/descendants` : null,
+    fetcher
+  );
+
   const organization: OrganizationWithDetails | null = orgData?.data || null;
   const children = childrenData?.data || [];
   const members = membersData?.data || [];
   const ancestors = ancestorsData?.data || [];
+  const pathNodes: HierarchyNode[] = pathData?.data || [];
+  const descendantNodes: HierarchyNode[] = descendantsData?.data || [];
+
+  const hierarchyNodes = React.useMemo(() => {
+    if (!organization) return [];
+
+    const currentNode: HierarchyNode = {
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+      organization_type: organization.organization_type,
+      parent_id: organization.parent_id,
+      hierarchy_path: organization.hierarchy_path,
+      hierarchy_level: organization.hierarchy_level,
+      member_count: organization.member_count,
+      active_member_count: organization.active_member_count,
+      status: organization.status,
+      clc_affiliated: organization.clc_affiliated,
+    };
+
+    const byId = new Map<string, HierarchyNode>();
+    for (const node of [...pathNodes, currentNode, ...descendantNodes]) {
+      byId.set(node.id, node);
+    }
+
+    return Array.from(byId.values()).map((node) => {
+      const rawType = (node.organization_type || node.type || 'union') as OrganizationType;
+      const organizationType = rawType === 'platform' ? 'union' : rawType;
+
+      return {
+        id: node.id,
+        name: node.name,
+        slug: node.slug,
+        displayName: null,
+        shortName: null,
+        organizationType,
+        parentId: node.parent_id ?? node.parentId ?? null,
+        hierarchyPath: node.hierarchy_path ?? [],
+        hierarchyLevel: node.hierarchy_level ?? 0,
+        memberCount: node.member_count ?? 0,
+        activeMemberCount: node.active_member_count ?? 0,
+        status: node.status ?? 'active',
+        clcAffiliated: node.clc_affiliated ?? false,
+        jurisdiction: null,
+        createdAt: undefined,
+        updatedAt: undefined,
+      };
+    });
+  }, [descendantNodes, organization, pathNodes]);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to archive this organization? This action can be reversed later.")) return;
@@ -464,10 +540,43 @@ alert("Failed to archive organization");
 
         {/* Hierarchy Tab */}
         <TabsContent value="hierarchy" className="space-y-4">
+          <OrganizationTree
+            organizations={hierarchyNodes}
+            selectedOrgId={organizationId}
+            expandLevel={-1}
+            showActions={false}
+            onSelectOrganization={(org) => router.push(`/dashboard/admin/organizations/${org.id}`)}
+          />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>CLC / CUPE Hierarchy View</CardTitle>
+              <CardDescription>
+                Full reporting chain for this organization, including ancestors and descendants.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {descendantsLoading && hierarchyNodes.length === 0 ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : hierarchyNodes.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Network className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>No hierarchy data available for this organization yet.</p>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  This view makes the CLC to CUPE lineage explicit so parent and child relationships are visible in one place.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Child Organizations</CardTitle>
-              <CardDescription>Organizations that report to this one</CardDescription>
+              <CardDescription>Organizations that report directly to this one</CardDescription>
             </CardHeader>
             <CardContent>
               {childrenLoading ? (

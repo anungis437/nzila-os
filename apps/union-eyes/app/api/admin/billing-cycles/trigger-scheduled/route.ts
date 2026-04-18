@@ -10,7 +10,7 @@
 
 import { NextRequest } from 'next/server';
 import { BillingScheduler } from '@/lib/jobs/billing-scheduler';
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -36,13 +36,13 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    // Require admin role (you can adjust this based on your RBAC)
-    // if (user.role !== 'admin') {
-    //   return standardErrorResponse(
-    //     ErrorCode.FORBIDDEN,
-    //     'Admin role required to trigger scheduled billing'
-    //   );
-    // }
+    const canAccess = await hasMinRole('platform_lead');
+    if (!canAccess) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Platform lead role required'
+      );
+    }
 
     const body = await request.json();
     const validation = triggerSchema.safeParse(body);

@@ -10,9 +10,8 @@ import { useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from 'next-intl';
-import { useUser } from '@nzila/platform-auth/entra/client';
 import { useRouter } from "next/navigation";
-import { useOrganizationId } from "@/lib/hooks/use-organization";
+import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   Users,
   Search,
@@ -50,10 +49,7 @@ type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
 type Department = "Manufacturing" | "Logistics" | "Administration" | "Maintenance" | "Customer Service" | "IT";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-  if (!res.ok) throw new Error(`Failed to load members (${res.status})`);
-  return res.json();
-});
+type LooseMembersResponse = Record<string, any>;
 
 interface Member {
   id: string;
@@ -73,10 +69,46 @@ interface Member {
   membershipNumber: string;
 }
 
+function looksLikeMemberRecord(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.name === 'string' ||
+    typeof obj.email === 'string' ||
+    typeof obj.membershipNumber === 'string' ||
+    typeof obj.membership_number === 'string'
+  );
+}
+
+function findMemberArrayInPayload(payload: unknown, depth = 0): unknown[] {
+  if (depth > 6 || payload == null) return [];
+
+  if (Array.isArray(payload)) {
+    if (payload.length > 0 && looksLikeMemberRecord(payload[0])) {
+      return payload;
+    }
+
+    for (const item of payload) {
+      const found = findMemberArrayInPayload(item, depth + 1);
+      if (found.length > 0) return found;
+    }
+    return [];
+  }
+
+  if (typeof payload !== 'object') return [];
+
+  for (const value of Object.values(payload as Record<string, unknown>)) {
+    const found = findMemberArrayInPayload(value, depth + 1);
+    if (found.length > 0) return found;
+  }
+
+  return [];
+}
+
 export default function MembersConsole() {
   const t = useTranslations();
-  const { user } = useUser();
-  const organizationId = useOrganizationId();
+  const { organizationId, userOrganizations, isLoading: orgLoading } = useOrganization();
+  const effectiveOrganizationId = organizationId ?? userOrganizations[0]?.id ?? null;
   const router = useRouter();
   const locale = useLocale();
   
@@ -98,8 +130,159 @@ export default function MembersConsole() {
   
   // Fetch members from API with organization-aware cache key
   const { data, error, isLoading } = useSWR(
-    user && organizationId ? `/api/organization/members?organization=${organizationId}` : null,
-    fetcher,
+    orgLoading ? null : ['members', effectiveOrganizationId ?? 'auto'] as const,
+    async ([, orgId]) => {
+      const extractMemberCount = (payload: unknown): number => {
+        const anyPayload = payload as Record<string, unknown>;
+        const totals = [
+          anyPayload?.total,
+          (anyPayload?.data as Record<string, unknown> | undefined)?.total,
+          ((anyPayload?.data as Record<string, unknown> | undefined)?.stats as Record<string, unknown> | undefined)?.total,
+          (((anyPayload?.data as Record<string, unknown> | undefined)?.data as Record<string, unknown> | undefined)?.total),
+        ];
+        for (const total of totals) {
+          if (typeof total === 'number' && Number.isFinite(total)) return total;
+        }
+        const discovered = findMemberArrayInPayload(payload);
+        return Array.isArray(discovered) ? discovered.length : 0;
+      };
+
+      const fetchByOrgId = async (candidateOrgId: string | null | undefined) => {
+        const query = candidateOrgId ? `?organizationId=${encodeURIComponent(candidateOrgId)}` : '';
+        const response = await fetch(`/api/members${query}`);
+        if (!response.ok) return null;
+        const payload = await response.json();
+        return {
+          payload,
+          count: extractMemberCount(payload),
+        };
+      };
+
+      let bestPayload: unknown = null;
+      let bestCount = -1;
+      const triedOrgIds = new Set<string>();
+
+      const tryCandidate = async (candidateOrgId: string | null | undefined) => {
+        const normalized = typeof candidateOrgId === 'string' ? candidateOrgId.trim() : '';
+        if (!normalized || triedOrgIds.has(normalized)) return false;
+        triedOrgIds.add(normalized);
+
+        const result = await fetchByOrgId(normalized);
+        if (!result) return false;
+
+        if (result.count > bestCount) {
+          bestCount = result.count;
+          bestPayload = result.payload;
+        }
+
+        return result.count > 0;
+      };
+
+      if (orgId !== 'auto') {
+        const found = await tryCandidate(orgId);
+        if (found && bestPayload) return bestPayload;
+      }
+
+      // If org context is stale or points to a parent org, try explicit memberships.
+      const orgsRes = await fetch('/api/users/me/organizations');
+      if (orgsRes.ok) {
+        const orgsJson = await orgsRes.json();
+        const orgPayload = typeof orgsJson?.data === 'object' && orgsJson?.data !== null
+          ? orgsJson.data
+          : orgsJson;
+        const memberships = Array.isArray(orgPayload?.memberships) ? orgPayload.memberships : [];
+        const organizations = Array.isArray(orgPayload?.organizations) ? orgPayload.organizations : [];
+
+        const primaryMembership = memberships.find((m: { isPrimary?: boolean }) => m?.isPrimary);
+        if (await tryCandidate(primaryMembership?.organizationId)) {
+          return bestPayload;
+        }
+
+        for (const membership of memberships) {
+          if (await tryCandidate(membership?.organizationId)) {
+            return bestPayload;
+          }
+        }
+
+        for (const organization of organizations) {
+          if (await tryCandidate(organization?.id)) {
+            return bestPayload;
+          }
+        }
+      }
+
+      // Last canonical source from profile organization.
+      const profileRes = await fetch('/api/users/me/profile');
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        const profileOrgId = profile?.organization?.id || profile?.organizationId || profile?.organization_id;
+        if (await tryCandidate(profileOrgId)) {
+          return bestPayload;
+        }
+      }
+
+      // Fallback to implicit org from server auth context.
+      const implicit = await fetchByOrgId(null);
+      if (implicit && implicit.count > bestCount) {
+        bestPayload = implicit.payload;
+        bestCount = implicit.count;
+      }
+
+      if (bestPayload) {
+        return bestPayload;
+      }
+
+      if (orgId !== 'auto') {
+        // Fallback 1: legacy org members endpoint
+        const legacyRes = await fetch(`/api/organization/members?organization=${encodeURIComponent(orgId)}`);
+        if (legacyRes.ok) {
+          const legacy = await legacyRes.json();
+          const legacyMembers = Array.isArray(legacy?.data?.members) ? legacy.data.members : [];
+          if (legacyMembers.length > 0) {
+            return {
+              success: true,
+              data: {
+                members: legacyMembers,
+                stats: legacy?.data?.stats,
+                total: legacyMembers.length,
+              },
+            };
+          }
+        }
+
+        // Fallback 2: org-scoped members endpoint
+        const scopedRes = await fetch(`/api/organizations/${encodeURIComponent(orgId)}/members`);
+        if (scopedRes.ok) {
+          const scoped = await scopedRes.json();
+          const scopedMembers = Array.isArray(scoped?.data) ? scoped.data : [];
+          if (scopedMembers.length > 0) {
+            return {
+              success: true,
+              data: {
+                members: scopedMembers,
+                total: scopedMembers.length,
+                stats: {
+                  total: scopedMembers.length,
+                  active: scopedMembers.filter((m: { status?: string }) => m.status === 'active').length,
+                },
+              },
+            };
+          }
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          members: [],
+          total: 0,
+          stats: {
+            total: 0,
+            active: 0,
+          },
+        },
+      };
+    },
     { 
       refreshInterval: 30000,
       revalidateOnFocus: true,
@@ -115,36 +298,75 @@ export default function MembersConsole() {
   const [selectedStatus, setSelectedStatus] = useState<MemberStatus | "all">("all");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
-  // Extract members from API response
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const members: Member[] = data?.success && Array.isArray(data.data?.members) ? data.data.members.map((m: any) => ({
-    id: m.id,
-    name: m.name,
-    email: m.email,
-    phone: m.phone || "",
-    role: m.role as MemberRole,
-    status: m.status as MemberStatus,
-    department: (m.department || "Administration") as Department,
-    position: m.position || "Union Member",
-    hireDate: m.hireDate || m.createdAt,
-    seniority: m.seniority || 0,
-    location: m.location || m.metadata?.location || "",
-    activeCases: m.metadata?.activeCases || 0,
-    joinDate: m.unionJoinDate || m.createdAt,
-    membershipNumber: m.membershipNumber || "",
-    steward: m.metadata?.steward,
-  })) : [];
+  const responseData = (data ?? null) as LooseMembersResponse | null;
 
-  const memberCount = data?.data?.stats?.total || 0;
-  const activeMemberCount = data?.data?.stats?.active || 0;
+  // Extract members from API response (supports multiple envelope shapes)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawMembers: any[] = (() => {
+    if (Array.isArray(responseData?.data?.members)) return responseData.data.members;
+    if (Array.isArray(responseData?.members)) return responseData.members;
+    if (Array.isArray(responseData?.data?.data?.members)) return responseData.data.data.members;
+    if (Array.isArray(responseData?.data?.result?.members)) return responseData.data.result.members;
+    if (Array.isArray(responseData?.result?.members)) return responseData.result.members;
+    if (Array.isArray(responseData?.payload?.members)) return responseData.payload.members;
+    if (Array.isArray(responseData?.data?.data)) return responseData.data.data;
+    if (Array.isArray(responseData?.data)) return responseData.data;
+    const discovered = findMemberArrayInPayload(responseData);
+    return Array.isArray(discovered) ? discovered : [];
+  })();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const members: Member[] = rawMembers.map((m: any) => {
+    const metadata = m?.metadata && typeof m.metadata === 'object' ? m.metadata : {};
+    return {
+      id: m.id,
+      name: m.name || m.full_name || 'Unknown Member',
+      email: m.email || '',
+      phone: m.phone || '',
+      role: (m.role || 'member') as MemberRole,
+      status: (m.status || 'active') as MemberStatus,
+      department: (m.department || 'Administration') as Department,
+      position: m.position || 'Union Member',
+      hireDate: m.hireDate || m.hire_date || m.createdAt || m.created_at || '',
+      seniority: Number(m.seniority || 0),
+      location: m.location || metadata.location || '',
+      activeCases: Number(metadata.activeCases || metadata.active_cases || 0),
+      joinDate: m.unionJoinDate || m.union_join_date || m.joinedAt || m.joined_at || m.createdAt || m.created_at || '',
+      membershipNumber: m.membershipNumber || m.membership_number || '',
+      steward: metadata.steward,
+    };
+  });
+
+  const memberCount =
+    responseData?.data?.stats?.total ??
+    responseData?.data?.data?.stats?.total ??
+    responseData?.data?.result?.stats?.total ??
+    responseData?.data?.total ??
+    responseData?.data?.data?.total ??
+    responseData?.total ??
+    members.length;
+
+  const activeMemberCount =
+    responseData?.data?.stats?.active ??
+    responseData?.data?.data?.stats?.active ??
+    responseData?.data?.result?.stats?.active ??
+    members.filter(m => m.status === 'active').length;
 
   // Filter members
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
   const filteredMembers = members.filter(member => {
-    const matchesSearch = 
-      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.membershipNumber.toLowerCase().includes(searchQuery.toLowerCase());
+    const name = String(member.name || '').toLowerCase();
+    const email = String(member.email || '').toLowerCase();
+    const position = String(member.position || '').toLowerCase();
+    const membershipNumber = String(member.membershipNumber || '').toLowerCase();
+
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      name.includes(normalizedSearch) ||
+      email.includes(normalizedSearch) ||
+      position.includes(normalizedSearch) ||
+      membershipNumber.includes(normalizedSearch);
     
     const matchesDepartment = selectedDepartment === "all" || member.department === selectedDepartment;
     const matchesRole = selectedRole === "all" || member.role === selectedRole;
@@ -152,6 +374,17 @@ export default function MembersConsole() {
     
     return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
   });
+
+  const hasDefaultFilters =
+    normalizedSearch.length === 0 &&
+    selectedDepartment === 'all' &&
+    selectedRole === 'all' &&
+    selectedStatus === 'all';
+
+  const visibleMembers =
+    filteredMembers.length === 0 && members.length > 0 && hasDefaultFilters
+      ? members
+      : filteredMembers;
 
   // Calculate stats
   const totalMembers = memberCount;
@@ -165,7 +398,7 @@ export default function MembersConsole() {
   const departments = Array.from(new Set(members.map(m => m.department))).sort();
 
   // Loading state
-  if (isLoading) {
+  if (orgLoading || isLoading) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center">
@@ -421,7 +654,7 @@ export default function MembersConsole() {
           </div>
 
           <AnimatePresence>
-            {filteredMembers.length === 0 ? (
+            {visibleMembers.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -451,7 +684,7 @@ export default function MembersConsole() {
                 </Card>
               </motion.div>
             ) : (
-              filteredMembers.map((member, index) => {
+              visibleMembers.map((member, index) => {
                 const isExpanded = expandedMember === member.id;
                 const roleInfo = roleConfig[member.role] || { label: member.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Users className="w-3 h-3" /> };
                 const statusInfo = statusConfig[member.status] || { label: member.status, color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" };

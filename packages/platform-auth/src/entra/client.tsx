@@ -24,6 +24,9 @@ import type { Session } from 'next-auth'
 import { type ReactNode, useState, useEffect, useRef } from 'react'
 import type { EntraSession } from './types'
 
+const ENABLE_PG_FALLBACK =
+  (process.env.NEXT_PUBLIC_NZILA_AUTH_ENABLE_PG_FALLBACK ?? 'true').toLowerCase() !== 'false'
+
 // ── PG-session fallback for password-based auth ─────────────────────────────
 
 interface PgAuthUser {
@@ -54,8 +57,10 @@ async function fetchPgUser(signal?: AbortSignal): Promise<PgAuthUser | null> {
 }
 
 /**
- * Hook that resolves the PG-session user when NextAuth has no session.
- * Only fires the fetch once per mount; caches the result.
+ * Hook that resolves the PG-session user once per mount.
+ *
+ * We intentionally do this even when NextAuth is authenticated so hooks can
+ * apply the same precedence as server auth(): PG session first, Entra second.
  */
 function usePgSession(nextAuthStatus: string) {
   const [pgUser, setPgUser] = useState<PgAuthUser | null>(null)
@@ -63,12 +68,11 @@ function usePgSession(nextAuthStatus: string) {
   const fetched = useRef(false)
 
   useEffect(() => {
-    // Only check PG session if NextAuth definitely has no session
-    if (nextAuthStatus === 'loading') return
-    if (nextAuthStatus === 'authenticated') {
+    if (!ENABLE_PG_FALLBACK) {
       setPgLoaded(true)
       return
     }
+    if (nextAuthStatus === 'loading') return
     if (fetched.current) return
     fetched.current = true
 
@@ -138,25 +142,7 @@ export function useAuth(): AuthState {
   const entra = session as EntraSession | null
   const { pgUser, pgLoaded } = usePgSession(status)
 
-  // NextAuth session takes priority
-  if (status === 'authenticated') {
-    return {
-      isLoaded: true,
-      isSignedIn: true,
-      userId: entra?.entraObjectId ?? session?.user?.id ?? null,
-      orgId: entra?.activeOrgId ?? null,
-      orgRole: entra?.orgRole ?? null,
-      roles: entra?.roles ?? [],
-      identityProvider: entra?.identityProvider ?? null,
-      isExternalUser: entra?.isExternalUser ?? false,
-      getToken: async () => entra?.accessToken ?? null,
-      signOut: async () => {
-        await nextAuthSignOut({ redirectTo: '/' })
-      },
-    }
-  }
-
-  // PG session fallback (password-based auth)
+  // PG session has priority (email/password default model).
   if (pgUser) {
     return {
       isLoaded: true,
@@ -174,6 +160,24 @@ export function useAuth(): AuthState {
           await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
         } catch { /* ignore */ }
         window.location.href = '/'
+      },
+    }
+  }
+
+  // NextAuth session fallback
+  if (status === 'authenticated') {
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      userId: entra?.entraObjectId ?? session?.user?.id ?? null,
+      orgId: entra?.activeOrgId ?? null,
+      orgRole: entra?.orgRole ?? null,
+      roles: entra?.roles ?? [],
+      identityProvider: entra?.identityProvider ?? null,
+      isExternalUser: entra?.isExternalUser ?? false,
+      getToken: async () => entra?.accessToken ?? null,
+      signOut: async () => {
+        await nextAuthSignOut({ redirectTo: '/' })
       },
     }
   }
@@ -231,7 +235,35 @@ export function useUser(): UserState {
   const entra = session as EntraSession | null
   const { pgUser, pgLoaded } = usePgSession(status)
 
-  // NextAuth session
+  // PG session has priority (email/password default model).
+  if (pgUser) {
+    const fullName = [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' ') || null
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      user: {
+        id: pgUser.id,
+        fullName,
+        primaryEmailAddress: pgUser.email ? { emailAddress: pgUser.email } : null,
+        primaryPhoneNumber: null,
+        emailAddresses: pgUser.email ? [{ emailAddress: pgUser.email }] : [],
+        username: fullName,
+        imageUrl: null,
+        firstName: pgUser.firstName,
+        lastName: pgUser.lastName,
+        createdAt: null,
+        publicMetadata: {},
+        privateMetadata: {
+          organizationId: pgUser.organizationId ?? undefined,
+        },
+        organizationMemberships: pgUser.organizationId
+          ? [{ organization: { id: pgUser.organizationId }, role: 'member' }]
+          : [],
+      },
+    }
+  }
+
+  // NextAuth session fallback
   if (status === 'authenticated' && session?.user) {
     const nameParts = session.user.name?.split(' ') ?? []
     return {
@@ -273,34 +305,6 @@ export function useUser(): UserState {
     }
   }
 
-  // PG session fallback
-  if (pgUser) {
-    const fullName = [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' ') || null
-    return {
-      isLoaded: true,
-      isSignedIn: true,
-      user: {
-        id: pgUser.id,
-        fullName,
-        primaryEmailAddress: pgUser.email ? { emailAddress: pgUser.email } : null,
-        primaryPhoneNumber: null,
-        emailAddresses: pgUser.email ? [{ emailAddress: pgUser.email }] : [],
-        username: fullName,
-        imageUrl: null,
-        firstName: pgUser.firstName,
-        lastName: pgUser.lastName,
-        createdAt: null,
-        publicMetadata: {},
-        privateMetadata: {
-          organizationId: pgUser.organizationId ?? undefined,
-        },
-        organizationMemberships: pgUser.organizationId
-          ? [{ organization: { id: pgUser.organizationId }, role: 'member' }]
-          : [],
-      },
-    }
-  }
-
   // Still loading
   return {
     isLoaded: status !== 'loading' && pgLoaded,
@@ -335,20 +339,7 @@ export function useOrganization(): OrgState {
   const entra = session as EntraSession | null
   const { pgUser, pgLoaded } = usePgSession(status)
 
-  // NextAuth/Entra session
-  if (status === 'authenticated' && entra?.activeOrgId) {
-    return {
-      isLoaded: true,
-      organization: {
-        id: entra.activeOrgId,
-        name: '', // Populated from DB lookup in org context provider
-        slug: '',
-      },
-      membership: entra.orgRole ? { role: entra.orgRole } : null,
-    }
-  }
-
-  // PG session fallback
+  // PG session has priority (email/password default model).
   if (pgUser?.organizationId) {
     return {
       isLoaded: true,
@@ -358,6 +349,19 @@ export function useOrganization(): OrgState {
         slug: '',
       },
       membership: null,
+    }
+  }
+
+  // NextAuth/Entra session fallback
+  if (status === 'authenticated' && entra?.activeOrgId) {
+    return {
+      isLoaded: true,
+      organization: {
+        id: entra.activeOrgId,
+        name: '', // Populated from DB lookup in org context provider
+        slug: '',
+      },
+      membership: entra.orgRole ? { role: entra.orgRole } : null,
     }
   }
 

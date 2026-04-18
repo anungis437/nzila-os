@@ -59,6 +59,41 @@ export interface OrganizationContextValue {
   loadOrganizationTree: () => Promise<void>;
 }
 
+function normalizeOrganization(raw: unknown): Organization | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+
+  const value = raw as Record<string, unknown>;
+  const id = typeof value.id === 'string' ? value.id : null;
+  const name = typeof value.name === 'string' ? value.name : null;
+  const slug = typeof value.slug === 'string' ? value.slug : null;
+
+  if (!id || !name || !slug) {
+    return null;
+  }
+
+  const type = value.type ?? value.organization_type;
+  const parentId = value.parentId ?? value.parent_id;
+  const createdAt = value.createdAt ?? value.created_at;
+  const updatedAt = value.updatedAt ?? value.updated_at;
+  const sector = value.sector ?? (Array.isArray(value.sectors) ? value.sectors[0] : undefined);
+  const jurisdiction = value.jurisdiction ?? value.province_territory;
+
+  return {
+    id,
+    name,
+    slug,
+    type: (typeof type === 'string' ? type : 'union') as Organization['type'],
+    parentId: typeof parentId === 'string' ? parentId : null,
+    sector: typeof sector === 'string' ? sector : undefined,
+    jurisdiction: typeof jurisdiction === 'string' ? jurisdiction : undefined,
+    description: typeof value.description === 'string' ? value.description : null,
+    createdAt: typeof createdAt === 'string' ? createdAt : new Date().toISOString(),
+    updatedAt: typeof updatedAt === 'string' ? updatedAt : new Date().toISOString(),
+  };
+}
+
 const OrganizationContext = createContext<OrganizationContextValue | undefined>(undefined);
 
 interface OrganizationProviderProps {
@@ -66,7 +101,7 @@ interface OrganizationProviderProps {
 }
 
 export function OrganizationProvider({ children }: OrganizationProviderProps) {
-  const { userId, isLoaded: authLoaded } = useAuth();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -78,6 +113,23 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
   const [error, setError] = useState<string | null>(null);
 
   /**
+   * Load organization hierarchy path (ancestors)
+   */
+  const loadOrganizationPath = useCallback(async (orgId: string) => {
+    try {
+      const response = await fetch(`/api/organizations/${orgId}/path`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setOrganizationPath(result.data || []);
+      }
+    } catch (err) {
+      void err;
+    }
+  }, []);
+
+  /**
    * Load user's organizations from API
    * This is extracted as a separate function for manual refresh
    */
@@ -87,7 +139,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       return;
     }
 
-    if (!userId) {
+    if (!isSignedIn) {
       setIsLoading(false);
       return;
     }
@@ -125,18 +177,93 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       }
 
       const data = await response.json();
-      setUserOrganizations(data.organizations || []);
-      setUserMemberships(data.memberships || []);
+      let organizations = (data.organizations || [])
+        .map((org: unknown) => normalizeOrganization(org))
+        .filter((org: Organization | null): org is Organization => org !== null);
+      const memberships = data.memberships || [];
+
+      // Fallback: if memberships exist but org objects are empty, resolve
+      // organizations directly by membership IDs.
+      if (organizations.length === 0 && memberships.length > 0) {
+        const resolvedOrgs: Organization[] = [];
+        for (const membership of memberships as OrganizationMember[]) {
+          try {
+            const orgResponse = await fetch(`/api/organizations/${membership.organizationId}`, {
+              credentials: 'include',
+              signal: abortSignal || controller.signal,
+            });
+            if (orgResponse.ok) {
+              const orgResult = await orgResponse.json();
+              const org = normalizeOrganization(orgResult.data);
+              if (org?.id && !resolvedOrgs.some((existing) => existing.id === org.id)) {
+                resolvedOrgs.push(org);
+              }
+            }
+          } catch {
+            // Keep trying remaining memberships.
+          }
+        }
+        organizations = resolvedOrgs;
+      }
+
+      // Canonical fallback: the server-backed profile summary already knows the
+      // active organization even when the org-membership list is temporarily out
+      // of sync on the client.
+      if (organizations.length === 0) {
+        try {
+          const profileResponse = await fetch('/api/users/me/profile', {
+            credentials: 'include',
+            signal: abortSignal || controller.signal,
+          });
+
+          if (profileResponse.ok) {
+            const profileResult = await profileResponse.json();
+            const profileOrg = normalizeOrganization(profileResult.organization);
+            if (profileOrg) {
+              organizations = [profileOrg];
+            }
+          }
+        } catch {
+          // Fall through to synthetic fallback below.
+        }
+      }
+
+      // Final safety net: never leave org list empty when memberships exist.
+      // This prevents UI dead-ends where users see "No organization" despite
+      // having a valid membership row.
+      if (organizations.length === 0 && memberships.length > 0) {
+        const syntheticOrgs: Organization[] = [];
+        for (const membership of memberships as OrganizationMember[]) {
+          if (!syntheticOrgs.some((existing) => existing.id === membership.organizationId)) {
+            syntheticOrgs.push({
+              id: membership.organizationId,
+              name: `Organization ${membership.organizationId.slice(0, 8)}`,
+              slug: membership.organizationId,
+              type: 'union',
+              parentId: null,
+              sector: undefined,
+              jurisdiction: undefined,
+              description: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+          }
+        }
+        organizations = syntheticOrgs;
+      }
+
+      setUserOrganizations(organizations);
+      setUserMemberships(memberships);
 
       // If user has organizations, select the primary one or first available
-      if (data.organizations && data.organizations.length > 0) {
+      if (organizations && organizations.length > 0) {
         // Check if there's a selected organization in cookie (stored as UUID)
         const cookies = document.cookie.split(';');
         const selectedOrgCookie = cookies.find(c => c.trim().startsWith('selected_organization_id='));
         let selectedOrgId = selectedOrgCookie?.split('=')[1];
 
         // Validate that user has access to the selected organization (by UUID)
-        const hasAccess = data.organizations.some((org: Organization) => org.id === selectedOrgId);
+        const hasAccess = organizations.some((org: Organization) => org.id === selectedOrgId);
         
         if (!selectedOrgId || !hasAccess) {
           // Find primary organization
@@ -144,13 +271,13 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
           
           if (primaryMembership) {
             // Membership organizationId is the UUID, matches organizations.id directly
-            const primaryOrg = data.organizations.find((o: Organization) => 
+            const primaryOrg = organizations.find((o: Organization) => 
               o.id === primaryMembership.organizationId
             );
-            selectedOrgId = primaryOrg?.id || data.organizations[0]?.id || null;
+            selectedOrgId = primaryOrg?.id || organizations[0]?.id || null;
           } else {
             // Default to first organization
-            selectedOrgId = data.organizations[0]?.id || null;
+            selectedOrgId = organizations[0]?.id || null;
           }
         }
 
@@ -165,7 +292,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         }
 
         // Load organization details (by UUID)
-        const org = data.organizations.find((o: Organization) => o.id === selectedOrgId);
+        const org = organizations.find((o: Organization) => o.id === selectedOrgId);
         if (org) {
           setOrganization(org);
           // Load organization path inline to avoid dependency issues
@@ -177,8 +304,10 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
             const pathResult = await pathResponse.json();
             setOrganizationPath(pathResult.data || []);
           }
+        } else if (selectedOrgId) {
+          await loadOrganizationPath(selectedOrgId);
         }
-      } else if (data.memberships && data.memberships.length > 0) {
+      } else if (memberships && memberships.length > 0) {
         // User has memberships but no organizations found
         // This can happen if organization records don't exist in DB
         void data;
@@ -194,24 +323,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, authLoaded]);
-
-  /**
-   * Load organization hierarchy path (ancestors)
-   */
-  const loadOrganizationPath = useCallback(async (orgId: string) => {
-    try {
-      const response = await fetch(`/api/organizations/${orgId}/path`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const result = await response.json();
-        setOrganizationPath(result.data || []);
-      }
-    } catch (err) {
-      void err;
-    }
-  }, []);
+  }, [authLoaded, isSignedIn, loadOrganizationPath]);
 
   /**
    * Load full organization tree for visualization
@@ -261,14 +373,16 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         throw new Error('Organization switch validation failed');
       }
 
+      const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+
       // Server validated the switch, now update cookies
-      document.cookie = `selected_org_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict; Secure`; // 1 year — primary
-      document.cookie = `selected_organization_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict; Secure`; // 1 year
+      document.cookie = `selected_org_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict${secureAttr}`; // 1 year — primary
+      document.cookie = `selected_organization_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict${secureAttr}`; // 1 year
       // Legacy cookie — deprecated, read-only fallback in middleware
-      document.cookie = `selected_tenant_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict; Secure`;
+      document.cookie = `selected_tenant_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict${secureAttr}`;
       // Server-side org resolution reads slug cookie
       if (data.organization?.slug) {
-        document.cookie = `active-organization=${data.organization.slug}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict; Secure`; // 30 days
+        document.cookie = `active-organization=${data.organization.slug}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict${secureAttr}`; // 30 days
       }
 
       // Update state
@@ -298,16 +412,16 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
   useEffect(() => {
     const controller = new AbortController();
 
-    if (authLoaded && userId) {
+    if (authLoaded && isSignedIn) {
       loadUserOrganizations(controller.signal);
-    } else if (authLoaded && !userId) {
+    } else if (authLoaded && !isSignedIn) {
       setIsLoading(false);
     }
 
     return () => {
       controller.abort();
     };
-  }, [authLoaded, userId, loadUserOrganizations]);
+  }, [authLoaded, isSignedIn, loadUserOrganizations]);
 
   // NOTE: Cookies are written only in switchOrganization() (explicit user action).
   // Previously this useEffect wrote cookies on every org change including initial

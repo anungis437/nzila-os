@@ -11,10 +11,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import {
   Vote,
-  DollarSign,
-  Briefcase,
   Receipt,
-  Gift,
   ArrowRight,
   CheckCircle2,
   TrendingUp,
@@ -24,7 +21,6 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useOrganization } from "@/contexts/organization-context";
 
 interface OutcomeLink {
   href: string;
@@ -33,14 +29,9 @@ interface OutcomeLink {
   description: string;
 }
 
-/** Link keys that congress-type orgs should not see. */
-const CONGRESS_HIDDEN_KEYS = new Set(["sidebar.duesDeductions", "sidebar.financialManagement"]);
-
 export function OutcomesConsole() {
   const t = useTranslations();
   const locale = useLocale();
-  const { organization } = useOrganization();
-  const isCongress = organization?.type === "congress";
 
   const outcomes: OutcomeLink[] = [
     {
@@ -50,35 +41,12 @@ export function OutcomesConsole() {
       description: "View active ballots, past results, and your voting record.",
     },
     {
-      href: `/${locale}/dashboard/dues`,
-      icon: <DollarSign size={20} className="text-green-600" />,
-      titleKey: "sidebar.duesDeductions",
-      description: "Dues statements, deduction history, and payment status.",
-    },
-    {
-      href: `/${locale}/dashboard/pension`,
-      icon: <Briefcase size={20} className="text-blue-600" />,
-      titleKey: "sidebar.pensionBenefits",
-      description: "Pension contributions, benefit projections, and statements.",
-    },
-    {
-      href: `/${locale}/dashboard/rewards`,
-      icon: <Gift size={20} className="text-amber-600" />,
-      titleKey: "sidebar.rewards",
-      description: "Loyalty rewards, recognition, and member benefits.",
-    },
-    {
       href: `/${locale}/dashboard/financial`,
       icon: <Receipt size={20} className="text-gray-600" />,
       titleKey: "sidebar.financialManagement",
       description: "Financial reports, budgets, and expense tracking.",
     },
   ];
-
-  // Congress orgs (CLC) should not see dues or financial links
-  const visibleOutcomes = isCongress
-    ? outcomes.filter((o) => !CONGRESS_HIDDEN_KEYS.has(o.titleKey))
-    : outcomes;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -171,7 +139,7 @@ export function OutcomesConsole() {
       <div>
         <h2 className="text-sm font-medium text-gray-600 mb-3">Explore &amp; Manage</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {visibleOutcomes.map((item) => (
+          {outcomes.map((item) => (
             <Link key={item.href} href={item.href} className="block group">
               <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 group-hover:bg-gray-50/50">
                 <CardContent className="py-4 px-4 flex items-start gap-3">

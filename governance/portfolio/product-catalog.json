@@ -1,5 +1,5 @@
 {
-  "schema_version": "2026-04-17.3",
+  "schema_version": "2026-04-17.5",
   "authority": {
     "catalog_source": "governance/portfolio/product-catalog.json",
     "product_tier_source": "packages/platform-contracts/src/registry.ts",
@@ -8,6 +8,42 @@
     "proof_source": "docs/proof-center/portfolio-proof-index.md",
     "focus_source": "reports/final-focus-matrix.md"
   },
+  "portfolio_execution_model": {
+    "version": "2026-04-17",
+    "objective": "Concentrate capital and operator attention on near-term revenue winners while preserving a high-leverage shared platform.",
+    "classifications": {
+      "immediate_revenue_products_0_6_months": [
+        "union-eyes",
+        "flow"
+      ],
+      "strategic_growth_products_6_18_months": [
+        "cfo",
+        "partners"
+      ],
+      "internal_platform_assets": [
+        "console",
+        "control-plane",
+        "orchestrator-api",
+        "web"
+      ],
+      "freeze_archive_or_merge_candidates": [
+        "platform-admin",
+        "mobility-client-portal",
+        "agrimo",
+        "cora",
+        "trade",
+        "nacp-exams",
+        "mobility",
+        "abr",
+        "zonga"
+      ]
+    },
+    "operating_rules": [
+      "No new net products until union-eyes and flow show repeatable paid pilot conversion.",
+      "Tier 4 and Tier 5 products remain in maintenance-only mode unless funded by named customer demand.",
+      "Shared platform investments must directly reduce time-to-value, implementation cost, or support burden for Tier 1 and Tier 2 products."
+    ]
+  },
   "products": [
     {
       "id": "union-eyes",
@@ -15,6 +51,7 @@
       "category": "labourtech",
       "owner": "platform-core",
       "product_tier": "PRODUCTION",
+      "portfolio_tier": "TIER 1",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "internal",
@@ -64,6 +101,7 @@
       "category": "smb-ops",
       "owner": "platform-core",
       "product_tier": "PRODUCTION",
+      "portfolio_tier": "TIER 1",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "internal",
@@ -114,6 +152,7 @@
       "category": "marketing",
       "owner": "platform-core",
       "product_tier": "PRODUCTION",
+      "portfolio_tier": "TIER 3",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "public",
@@ -158,6 +197,7 @@
       "category": "internal-ops",
       "owner": "platform-core",
       "product_tier": "PRODUCTION",
+      "portfolio_tier": "TIER 3",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -206,6 +246,7 @@
       "category": "internal-engine",
       "owner": "platform-core",
       "product_tier": "PILOT",
+      "portfolio_tier": "TIER 3",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -254,6 +295,7 @@
       "category": "partner-portal",
       "owner": "platform-core",
       "product_tier": "PILOT",
+      "portfolio_tier": "TIER 2",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "internal",
@@ -302,6 +344,7 @@
       "category": "finance-ops",
       "owner": "platform-core",
       "product_tier": "PILOT",
+      "portfolio_tier": "TIER 2",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "internal",
@@ -353,6 +396,7 @@
       "category": "creator-economy",
       "owner": "zonga-team",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -401,6 +445,7 @@
       "category": "agtech",
       "owner": "agri-team",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -447,6 +492,7 @@
       "category": "agtech-analytics",
       "owner": "agri-team",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -493,6 +539,7 @@
       "category": "trade-ops",
       "owner": "trade-team",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -539,6 +586,7 @@
       "category": "assessment",
       "owner": "platform-core",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -585,6 +633,7 @@
       "category": "migration-advisory",
       "owner": "platform-core",
       "product_tier": "INCUBATING",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -631,6 +680,7 @@
       "category": "migration-portal",
       "owner": "platform-core",
       "product_tier": "EXPERIMENTAL",
+      "portfolio_tier": "TIER 5",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -676,6 +726,7 @@
       "category": "agri-compliance",
       "owner": "platform-core",
       "product_tier": "EXPERIMENTAL",
+      "portfolio_tier": "TIER 4",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -722,6 +773,7 @@
       "category": "internal-admin",
       "owner": "platform-core",
       "product_tier": "EXPERIMENTAL",
+      "portfolio_tier": "TIER 5",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
@@ -767,17 +819,18 @@
       "name": "orchestrator-api",
       "category": "internal-engine",
       "owner": "platform-core",
-      "product_tier": "EXPERIMENTAL",
-      "deployment_status": "scaffold",
-      "readiness_tier": "scaffold-only",
+      "product_tier": "PRODUCTION",
+      "portfolio_tier": "TIER 3",
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
       "exposure": "internal",
       "monetization_status": "internal-cost-center",
-      "target_customer": "internal automation systems",
-      "value_prop": "Workflow orchestration API scaffold — job dispatch and proof-center integration.",
+      "target_customer": "all Nzila platform applications",
+      "value_prop": "Hardened workflow execution runtime — DB-native idempotency, FSM lifecycle guards, OCC, lease-based multi-instance coordination, and operator observability. The shared engine powering all platform automations.",
       "commercial_priority": 5,
-      "code_presence": "scaffold",
-      "evidence_status": "none",
-      "docs_entrypoint": "docs/platform/portfolio-matrix.md",
+      "code_presence": "full",
+      "evidence_status": "complete",
+      "docs_entrypoint": "apps/orchestrator-api/README.md",
       "internal_dependencies": [
         "platform-observability",
         "db",
@@ -791,23 +844,53 @@
         "can_claim_production_deployment": false,
         "can_claim_enterprise_ready": false,
         "can_claim_pilot_ready": false,
-        "can_claim_audit_hardened": false
+        "can_claim_audit_hardened": true
       },
-      "proof_status": "no-proof",
-      "focus_classification": "CUT",
-      "score": 3.2,
-      "score_rationale": "Scaffold-only API with unresolved external or internal ROI at current maturity.",
+      "proof_status": "internal-proof",
+      "focus_classification": "INTERNAL ONLY",
+      "score": 8.5,
+      "score_rationale": "Fully hardened runtime with DB-backed idempotency, FSM guards, OCC, lease coordination, 24/24 tests passing, operator console, and real metrics. Missing: external deployment evidence.",
       "active_customers": 0,
       "active_pilots": 0,
       "active_proposals": 0,
       "revenue_range_usd": "not-applicable",
       "implementation_speed_days": "not-applicable",
-      "service_reliability": "stale",
-      "measurable_roi": "not-applicable",
+      "service_reliability": "daily sync",
+      "measurable_roi": "platform reliability uplift, retry/failure automation",
       "testimonials": "not-applicable",
       "last_reviewed": "2026-04-17"
     }
   ],
   "canonical_truth_version": "final-10-pass-2026-04-17",
-  "canonical_score_source": "reports/final-repo-scorecard.md"
+  "canonical_score_source": "reports/final-repo-scorecard.md",
+  "portfolio_tier_model": {
+    "version": "2026-04-17",
+    "tiers": {
+      "TIER 1": {
+        "label": "Flagship Revenue Products",
+        "description": "Pilot-safe products with active commercial traction or credible pipeline. Double-down investments.",
+        "apps": ["union-eyes", "flow"]
+      },
+      "TIER 2": {
+        "label": "Strategic Growth Products",
+        "description": "Real products with functional domain coverage but not yet mature for enterprise buyers. Maintain and grow.",
+        "apps": ["cfo", "partners", "zonga"]
+      },
+      "TIER 3": {
+        "label": "Internal Platform Products",
+        "description": "Platform infrastructure, internal ops, and the marketing front door. Not sold directly.",
+        "apps": ["console", "control-plane", "orchestrator-api", "web"]
+      },
+      "TIER 4": {
+        "label": "Incubation",
+        "description": "Domain hypotheses under exploration. Maintained at low resource allocation. No pilot commitments.",
+        "apps": ["agrimo", "cora", "trade", "nacp-exams", "mobility", "abr"]
+      },
+      "TIER 5": {
+        "label": "Frozen",
+        "description": "No active investment. Scaffold-only surfaces with no near-term ROI path. Formal sunset decision pending.",
+        "apps": ["platform-admin", "mobility-client-portal"]
+      }
+    }
+  }
 }

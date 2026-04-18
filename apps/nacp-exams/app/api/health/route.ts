@@ -5,7 +5,7 @@
  * - DB connectivity check (SELECT 1 via @nzila/db)
  * - Blob storage connectivity check (Azure Storage)
  * - Returns 200 if all healthy, 503 if degraded
- * - Public route (no auth required — see middleware.ts allowlist)
+ * - Public route (no auth required — see proxy.ts allowlist)
  */
 import { NextResponse } from 'next/server'
 

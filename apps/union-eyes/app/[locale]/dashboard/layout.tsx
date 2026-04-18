@@ -22,7 +22,7 @@ import { getUserRole } from "@/lib/auth/rbac-server";
 import { db } from "@/db/db";
 import { profiles } from "@/db/schema";
 import { organizationMembers } from "@/db/schema-organizations";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 // Credits system disabled — platform does not require credits
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
@@ -40,30 +40,59 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   if (!profile) {
     const user = await currentUser();
     const userEmail = user?.emailAddresses?.[0]?.emailAddress || "";
+
+    // If this is a new Entra object ID for an existing person, link profile by email
+    // before creating a duplicate profile row.
+    if (userEmail) {
+      const existingByEmail = await db
+        .select()
+        .from(profiles)
+        .where(sql`lower(${profiles.email}) = lower(${userEmail})`)
+        .limit(1);
+
+      if (existingByEmail.length > 0) {
+        await db
+          .update(profiles)
+          .set({ userId })
+          .where(eq(profiles.id, existingByEmail[0].id));
+
+        profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
+
+        logger.info(`Linked existing profile by email for user ${userId}`, {
+          email: userEmail,
+          profileId: existingByEmail[0].id,
+        });
+      }
+    }
+
+    if (profile) {
+      // Profile was linked successfully; skip auto-create path.
+    } else {
     
-    logger.info(`Auto-creating profile for user ${userId} (${userEmail})`);
+      logger.info(`Auto-creating profile for user ${userId} (${userEmail})`);
     
-    try {
-      // Create the profile
-      const profileData = {
-        userId: userId,
-        email: userEmail,
-      };
-      
-      await db.insert(profiles).values(profileData);
-      
-      // Fetch the newly created profile
-      profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
-      
-      if (!profile) {
-        logger.error(`Failed to create profile for user ${userId}`);
+      try {
+        // Create the profile
+        const profileData = {
+          userId: userId,
+          email: userEmail,
+        };
+        
+        await db.insert(profiles).values(profileData);
+        
+        // Fetch the newly created profile
+        profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
+        
+        if (!profile) {
+          logger.error(`Failed to create profile for user ${userId}`);
+          return redirect("/sign-up");
+        }
+        
+        logger.info(`Successfully created profile ${profile.id} for user ${userId}`);
+      } catch (error) {
+        logger.error(`Error creating profile for user ${userId}:`, error);
         return redirect("/sign-up");
       }
-      
-      logger.info(`Successfully created profile ${profile.id} for user ${userId}`);
-    } catch (error) {
-      logger.error(`Error creating profile for user ${userId}:`, error);
-      return redirect("/sign-up");
     }
   }
 
@@ -82,11 +111,40 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // With Entra auth, new users get a profile but no organization_members row.
   // Without a membership, all org-scoped API routes reject with 403.
   try {
-    const localMemberships = await db
+    let localMemberships = await db
       .select({ id: organizationMembers.id })
       .from(organizationMembers)
       .where(eq(organizationMembers.userId, userId))
       .limit(1);
+
+    // If this Entra user has no membership yet, try linking seeded/demo rows
+    // by email so users like alice.johnson@city.toronto.ca resolve to Local 123
+    // instead of being auto-provisioned into the default org.
+    if (localMemberships.length === 0 && userEmail) {
+      const emailMemberships = await db
+        .select({ id: organizationMembers.id })
+        .from(organizationMembers)
+        .where(eq(organizationMembers.email, userEmail))
+        .limit(50);
+
+      if (emailMemberships.length > 0) {
+        await db
+          .update(organizationMembers)
+          .set({ userId })
+          .where(eq(organizationMembers.email, userEmail));
+
+        localMemberships = await db
+          .select({ id: organizationMembers.id })
+          .from(organizationMembers)
+          .where(eq(organizationMembers.userId, userId))
+          .limit(1);
+
+        logger.info(`Linked existing org membership(s) by email for user ${userId}`, {
+          email: userEmail,
+          linkedCount: emailMemberships.length,
+        });
+      }
+    }
 
     if (localMemberships.length === 0) {
       const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';

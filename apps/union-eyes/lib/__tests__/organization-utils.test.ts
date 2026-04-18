@@ -195,7 +195,9 @@ describe('organization-utils', () => {
 
     it('falls back to first user org when cookie slug not found', async () => {
       process.env.PLATFORM_ADMIN_USER_IDS = '';
-      mocks.mockCookiesGet.mockReturnValue({ value: 'nonexistent-slug' });
+      mocks.mockCookiesGet.mockImplementation((name: string) =>
+        name === 'active-organization' ? { value: 'nonexistent-slug' } : undefined,
+      );
       // Query 1: org by slug → not found  →  falls through to "first org"
       // Query 2: first user org → found
       setupLimitSequence(
@@ -245,7 +247,9 @@ describe('organization-utils', () => {
 
     it('falls through cookie path when no explicit membership', async () => {
       process.env.PLATFORM_ADMIN_USER_IDS = '';
-      mocks.mockCookiesGet.mockReturnValue({ value: 'slug-x' });
+      mocks.mockCookiesGet.mockImplementation((name: string) =>
+        name === 'active-organization' ? { value: 'slug-x' } : undefined,
+      );
       // Query 1: org by slug → found
       // Query 2: super admin check → not member of default org
       // Query 3: explicit membership → not found

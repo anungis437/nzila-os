@@ -46,7 +46,7 @@
     "cora": "internal",
     "agrimo": "internal",
     "platform-admin": "internal",
-    "orchestrator-api": "scaffold",
+    "orchestrator-api": "internal",
     "nacp-exams": "internal",
     "mobility": "internal",
     "mobility-client-portal": "internal"
@@ -150,13 +150,66 @@
     },
     "orchestrator-api": {
       "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "scaffold",
-      "readiness_tier": "scaffold-only",
-      "exposure": "internal"
+      "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "score": 8.5,
+      "hardening_date": "2026-04-17",
+      "hardening_notes": "DB-native idempotency, FSM lifecycle, OCC, lease/recovery, operator console, 24/24 tests"
     }
   },
   "blocking_gaps": [
     "deployment-ready status remains fail-closed until runtime and observability evidence is complete",
     "union-eyes break-glass requires secure runtime secrets to activate threshold recovery"
-  ]
+  ],
+  "portfolio_tier_model": {
+    "version": "2026-04-17",
+    "authority": "governance/portfolio/product-catalog.json#portfolio_tier_model",
+    "tier_assignments": {
+      "TIER 1 — Flagship Revenue": ["union-eyes", "flow"],
+      "TIER 2 — Strategic Growth": ["cfo", "partners", "zonga"],
+      "TIER 3 — Internal Platform": ["console", "control-plane", "orchestrator-api", "web"],
+      "TIER 4 — Incubation": ["agrimo", "cora", "trade", "nacp-exams", "mobility", "abr"],
+      "TIER 5 — Frozen": ["platform-admin", "mobility-client-portal"]
+    }
+  },
+  "portfolio_execution_model": {
+    "version": "2026-04-17",
+    "classifications": {
+      "immediate_revenue_products_0_6_months": [
+        "union-eyes",
+        "flow"
+      ],
+      "strategic_growth_products_6_18_months": [
+        "cfo",
+        "partners"
+      ],
+      "internal_platform_assets": [
+        "console",
+        "control-plane",
+        "orchestrator-api",
+        "web"
+      ],
+      "freeze_archive_or_merge_candidates": [
+        "platform-admin",
+        "mobility-client-portal",
+        "agrimo",
+        "cora",
+        "trade",
+        "nacp-exams",
+        "mobility",
+        "abr",
+        "zonga"
+      ]
+    }
+  },
+  "orchestrator_runtime": {
+    "status": "hardened",
+    "runtime_model": "DB-backed FSM with OCC and lease coordination",
+    "supports_apps": "all",
+    "deployment_target": "internal",
+    "hardened_date": "2026-04-17"
+  },
+  "schema_version": "2026-04-17.5",
+  "last_updated": "2026-04-17"
 }

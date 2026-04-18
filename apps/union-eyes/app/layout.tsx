@@ -38,15 +38,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={poppins.className} suppressHydrationWarning>
         <AuthProvider>
           <NzilaAppShell moduleId="union-eyes">
-            <Providers
-            attribute="class"
-            defaultTheme="light"
-            disableTransitionOnChange
-          >
+            <Providers>
             <OrganizationProvider>
               <LayoutWrapper>
                 <PaymentStatusAlert />

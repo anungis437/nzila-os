@@ -16,14 +16,24 @@ function makeCommand(
 ) {
   return {
     id: overrides.id ?? crypto.randomUUID(),
+    org_id: overrides.org_id ?? '00000000-0000-0000-0000-000000000000',
     correlation_id: overrides.correlation_id ?? crypto.randomUUID(),
+    idempotency_key: overrides.idempotency_key ?? overrides.correlation_id ?? crypto.randomUUID(),
     playbook: overrides.playbook ?? ('lint_check' as const),
     status: overrides.status ?? ('pending' as const),
+    version: overrides.version ?? 1,
+    attempt_count: overrides.attempt_count ?? 0,
     dry_run: overrides.dry_run ?? true,
     requested_by: overrides.requested_by ?? 'test-actor',
     args: overrides.args ?? {},
     run_id: overrides.run_id ?? null,
     run_url: overrides.run_url ?? null,
+    error_message: overrides.error_message ?? null,
+    execution_owner: overrides.execution_owner ?? null,
+    lease_expires_at: overrides.lease_expires_at ?? null,
+    last_heartbeat_at: overrides.last_heartbeat_at ?? null,
+    started_at: overrides.started_at ?? null,
+    completed_at: overrides.completed_at ?? null,
   }
 }
 

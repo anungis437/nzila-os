@@ -10,7 +10,7 @@
 
 import { NextRequest } from 'next/server';
 import { manualTriggerRetry } from '@/lib/jobs/failed-payment-retry';
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -28,6 +28,14 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.AUTH_REQUIRED,
         'Authentication required'
+      );
+    }
+
+    const canAccess = await hasMinRole('platform_lead');
+    if (!canAccess) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Platform lead role required'
       );
     }
 
