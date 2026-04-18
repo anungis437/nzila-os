@@ -174,7 +174,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const metadata = subscription.metadata ?? {}
   const status = subscription.status
-  const subscriptionId = subscription.id
+    const subscriptionId = subscription.id
   const mappedStatus = mapStripeStatus(status)
   const platformOrgId = process.env.PLATFORM_ORG_ID ?? 'system'
 
@@ -194,7 +194,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   const creatorPlan = mapCreatorPlanType(metadata.plan_type ?? '')
-  if (creatorPlan && metadata.creator_id) {
+    if (creatorPlan && metadata.creator_id) {
     // Fetch previous plan for upgrade event delta
     const rows = await platformDb.execute(
       sql`SELECT plan FROM zonga_creators WHERE id = ${metadata.creator_id} LIMIT 1`,
@@ -258,7 +258,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   const creatorPlan = mapCreatorPlanType(metadata.plan_type ?? '')
-  if (creatorPlan && metadata.creator_id) {
+    if (creatorPlan) {
     await platformDb.execute(
       sql`UPDATE zonga_creators SET
         plan = 'starter',
