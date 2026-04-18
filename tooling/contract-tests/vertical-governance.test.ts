@@ -149,6 +149,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/health',
     '/api/webhooks',
     '/api/public',
+    '/api/trial',               // Public product trial signup
     '/api/ready',               // Readiness/liveness probes
     '/api/docs',                // OpenAPI documentation
     '/api/status',              // Status page (public)
