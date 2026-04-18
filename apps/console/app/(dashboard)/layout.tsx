@@ -105,10 +105,10 @@ const navGroups: NavGroup[] = [
 
 // External app URLs — configurable via NEXT_PUBLIC_* env vars
 const appLinks = [
-  { name: 'Public Web', href: process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000', badge: '3000' },
-  { name: 'Partner Portal', href: process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3002', badge: '3002' },
-  { name: 'Union Eyes', href: process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003', badge: '3003' },
-  { name: 'ABR Insights', href: process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3004', badge: '3004' },
+  { name: 'Public Web', href: process.env.NEXT_PUBLIC_WEB_URL, badge: '3000' },
+  { name: 'Partner Portal', href: process.env.NEXT_PUBLIC_PARTNERS_URL, badge: '3002' },
+  { name: 'Union Eyes', href: process.env.NEXT_PUBLIC_UNION_EYES_URL, badge: '3003' },
+  { name: 'ABR Insights', href: process.env.NEXT_PUBLIC_ABR_URL, badge: '3004' },
 ]
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
@@ -130,19 +130,26 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       <div className="px-3 pb-2 border-t border-gray-100 pt-3">
         <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Launch App</p>
         {appLinks.map((app) => (
-          <a
-            key={app.name}
-            href={app.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition"
-          >
-            <span className="flex items-center gap-2">
-              <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
-              {app.name}
-            </span>
-            <span className="text-xs text-gray-400 font-mono">{app.badge}</span>
-          </a>
+          app.href ? (
+            <a
+              key={app.name}
+              href={app.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition"
+            >
+              <span className="flex items-center gap-2">
+                <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
+                {app.name}
+              </span>
+              <span className="text-xs text-gray-400 font-mono">{app.badge}</span>
+            </a>
+          ) : (
+            <div key={app.name} className="flex items-center justify-between px-3 py-2 text-sm text-amber-700 rounded-lg bg-amber-50">
+              <span>{app.name}</span>
+              <span className="text-xs">Not configured</span>
+            </div>
+          )
         ))}
       </div>
       <div className="p-4 border-t border-gray-100 flex items-center gap-3">

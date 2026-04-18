@@ -27,6 +27,14 @@ const CONSERVATIVE_PROVIDERS = [
   { id: 'webhooks', name: 'Webhooks', category: 'webhooks' },
 ] as const
 
+function getConsoleApiBaseUrl(): string | null {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl || baseUrl.trim().length === 0) {
+    return null
+  }
+  return baseUrl
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Marketplace Providers
 // ═══════════════════════════════════════════════════════════════════════════
@@ -92,8 +100,10 @@ function seedIntegrationProviders(): IntegrationProviderRow[] {
 }
 
 export async function getIntegrationProviders(): Promise<IntegrationProviderRow[]> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedIntegrationProviders()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/integrations/health`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { providers?: ProviderHealth[] }
@@ -133,8 +143,10 @@ function seedDlqEntries(): DlqRow[] {
 
 export async function getDlqEntries(orgId?: string | null): Promise<DlqRow[]> {
   if (!orgId) return seedDlqEntries()
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedDlqEntries()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/integrations/dlq?orgId=${encodeURIComponent(orgId)}`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { entries?: DlqRow[] }
@@ -168,8 +180,10 @@ export async function getIntegrationDeliveries(args?: {
   status?: string | null
 }): Promise<IntegrationDeliveryRow[]> {
   if (!args?.orgId) return seedIntegrationDeliveries()
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedIntegrationDeliveries()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const params = new URLSearchParams()
     params.set('orgId', args.orgId)
     if (args?.provider) params.set('provider', args.provider)
@@ -227,8 +241,10 @@ function seedSloResults(): SloSummary[] {
 }
 
 export async function getSloResults(): Promise<SloSummary[]> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedSloResults()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/integrations/sla`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { results?: SloSummary[] }
@@ -274,8 +290,10 @@ function seedProviderHealthList(): ProviderHealthRow[] {
 }
 
 export async function getProviderHealthList(): Promise<ProviderHealthRow[]> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedProviderHealthList()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/integrations/health`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { providers?: ProviderHealth[] }
@@ -350,8 +368,10 @@ function seedProviderDetail(): ProviderHealthDetail {
 }
 
 export async function getProviderHealthDetail(provider: string): Promise<ProviderHealthDetail> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedProviderDetail()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/integrations/health/${encodeURIComponent(provider)}`, {
       cache: 'no-store',
     })
@@ -406,8 +426,10 @@ function seedCostData(): CostDashboardData {
 }
 
 export async function getCostDashboardData(): Promise<CostDashboardData> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedCostData()
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/cost/rollup`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { rollups?: CostRollup[] }
@@ -473,8 +495,10 @@ function seedOpsScoreHistory(currentScore: number, _currentGrade: string): OpsSc
 }
 
 export async function getOpsScoreHistory(currentScore: number, currentGrade: string): Promise<OpsScoreHistoryEntry[]> {
+  const baseUrl = getConsoleApiBaseUrl()
+  if (!baseUrl) return seedOpsScoreHistory(currentScore, currentGrade)
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const res = await fetch(`${baseUrl}/api/ops-score/history`, { cache: 'no-store' })
     if (res.ok) {
       const json = (await res.json()) as { history?: OpsScoreHistoryEntry[] }

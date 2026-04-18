@@ -64,7 +64,7 @@ const tiles = [
 const externalApps = [
   {
     name: 'Public Website',
-    href: process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000',
+    href: process.env.NEXT_PUBLIC_WEB_URL,
     icon: GlobeAltIcon,
     description: 'Nzila Ventures public site — products, verticals, investors.',
     port: '3000',
@@ -74,7 +74,7 @@ const externalApps = [
   },
   {
     name: 'Partner Portal',
-    href: process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3002',
+    href: process.env.NEXT_PUBLIC_PARTNERS_URL,
     icon: BuildingStorefrontIcon,
     description: 'Partner onboarding, deal rooms, and portal access.',
     port: '3002',
@@ -84,7 +84,7 @@ const externalApps = [
   },
   {
     name: 'UnionEyes',
-    href: process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003',
+    href: process.env.NEXT_PUBLIC_UNION_EYES_URL,
     icon: UsersIcon,
     description: 'Union management — pension, grievances, member analytics.',
     port: '3003',
@@ -94,7 +94,7 @@ const externalApps = [
   },
   {
     name: 'ABR Insights',
-    href: process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3004',
+    href: process.env.NEXT_PUBLIC_ABR_URL,
     icon: AcademicCapIcon,
     description: 'Anti-racism LMS, tribunal database, DEI analytics.',
     port: '3004',
@@ -104,7 +104,7 @@ const externalApps = [
   },
   {
     name: 'Platform Admin',
-    href: process.env.NEXT_PUBLIC_PLATFORM_ADMIN_URL ?? 'http://localhost:3005',
+    href: process.env.NEXT_PUBLIC_PLATFORM_ADMIN_URL,
     icon: WrenchScrewdriverIcon,
     description: 'Platform ontology, entity graph, AI operations explorer.',
     port: '3005',
@@ -114,7 +114,7 @@ const externalApps = [
   },
   {
     name: 'Control Plane',
-    href: process.env.NEXT_PUBLIC_CONTROL_PLANE_URL ?? 'http://localhost:3010',
+    href: process.env.NEXT_PUBLIC_CONTROL_PLANE_URL,
     icon: CommandLineIcon,
     description: 'Executive visibility — platform health, governance, intelligence.',
     port: '3010',
@@ -160,11 +160,8 @@ export default async function ConsoleDashboard() {
         <p className="text-sm text-gray-400 mb-4">Open any platform in a new tab</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {externalApps.map((app) => (
-            <a
+            <div
               key={app.name}
-              href={app.href}
-              target="_blank"
-              rel="noopener noreferrer"
               className="group block bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition-all"
             >
               <div className="flex items-start justify-between mb-3">
@@ -177,8 +174,12 @@ export default async function ConsoleDashboard() {
               </div>
               <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{app.name}</h3>
               <p className="text-xs text-gray-500 mb-3 leading-relaxed">{app.description}</p>
-              <span className="text-xs text-gray-400 font-mono">:{app.port}</span>
-            </a>
+              {app.href ? (
+                <a href={app.href} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-medium">Open app</a>
+              ) : (
+                <span className="text-xs text-amber-700">Not configured</span>
+              )}
+            </div>
           ))}
         </div>
       </div>

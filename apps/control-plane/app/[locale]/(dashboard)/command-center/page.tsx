@@ -103,6 +103,12 @@ export default async function RevenueCommandCenterPage() {
         </p>
       </div>
 
+      {data.dataMode === 'demo' && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+          Demo mode: live commercial signal ingestion is unavailable for this environment.
+        </div>
+      )}
+
       {/* KPI Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[

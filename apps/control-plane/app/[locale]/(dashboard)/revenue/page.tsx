@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 
 interface RevenueSnapshot {
   generatedAt: string
+  dataMode?: 'live' | 'demo'
   leadsBySource: Array<{ source: string; count: number }>
   demosBooked: number
   proposalsSent: number
@@ -50,6 +51,12 @@ export default async function RevenuePipelinePage() {
         <h1 className="text-2xl font-bold text-foreground">Revenue Pipeline</h1>
         <p className="text-sm text-muted-foreground mt-1">Leads, demos, pilots, wins, and ARR forecast across Tier 1.</p>
       </div>
+
+      {data.dataMode === 'demo' && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
+          Demo mode: live commercial events are unavailable, so fallback values are shown.
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard label="MRR" value={currency(data.mrr)} />

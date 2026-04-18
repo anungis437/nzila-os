@@ -13,11 +13,20 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { createMlClient, type MlClient } from '@nzila/ml-sdk'
 import { headers } from 'next/headers'
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_CONSOLE_URL ??
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3001')
+function resolveBaseUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_CONSOLE_URL
+  if (configured) return configured
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_CONSOLE_URL is required in production for ML server routes')
+  }
+
+  throw new Error('NEXT_PUBLIC_CONSOLE_URL is required to use ML server routes')
+}
 
 /**
  * Create an MlClient backed by this Console's own API routes.
@@ -25,7 +34,7 @@ const BASE_URL =
  */
 export function mlClient(): MlClient {
   return createMlClient({
-    baseUrl: BASE_URL,
+    baseUrl: resolveBaseUrl(),
     getToken: async () => {
       const session = await auth()
       const token = await session.getToken()

@@ -39,12 +39,16 @@ export function clearPolicyCache(): void {
   // Console no longer caches or evaluates policy definitions locally.
 }
 
-const CONTROL_PLANE_URL = process.env.CONTROL_PLANE_URL ?? 'http://localhost:3010'
+const CONTROL_PLANE_URL = process.env.CONTROL_PLANE_URL
 const CONTROL_PLANE_API_KEY = process.env.CONTROL_PLANE_API_KEY ?? ''
 
 async function evaluateViaControlPlane(
   input: EnforcePoliciesInput,
 ): Promise<EnforcePoliciesResult | null> {
+  if (!CONTROL_PLANE_URL) {
+    return null
+  }
+
   try {
     const response = await fetch(`${CONTROL_PLANE_URL}/api/control-plane/policy/evaluate`, {
       method: 'POST',

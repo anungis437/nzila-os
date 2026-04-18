@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { db } from '@nzila/db'
+import { sql } from 'drizzle-orm'
 
 export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type AlertType =
@@ -26,6 +28,7 @@ export interface CommandAlert {
 
 export interface CommandCenterSnapshot {
   generatedAt: string
+  dataMode: 'live' | 'demo'
   alerts: CommandAlert[]
   kpis: {
     newLeadsToday: number
@@ -41,116 +44,147 @@ export interface CommandCenterSnapshot {
   scoreboard: Array<{ rep: string; arrClosed: number; dealsWon: number; pipeline: number }>
 }
 
-function buildCommandCenter(): CommandCenterSnapshot {
-  // Env-driven with realistic defaults — will be replaced by event-store queries in Phase 6.
-  const newLeadsToday = Number(process.env.CP_CC_LEADS_TODAY ?? 4)
-  const staleLeads = Number(process.env.CP_CC_STALE_LEADS ?? 7)
-  const stalledTrials = Number(process.env.CP_CC_STALLED_TRIALS ?? 3)
-  const pilotsExpiringIn14d = Number(process.env.CP_CC_PILOTS_EXPIRING ?? 2)
-  const proposalsPendingOver72h = Number(process.env.CP_CC_PROPOSALS_STALLED ?? 4)
-  const dealsClosingThisMonth = Number(process.env.CP_CC_DEALS_CLOSING ?? 3)
-  const arrAddedThisMonth = Number(process.env.CP_CC_ARR_ADDED ?? 42000)
-  const mrrDeltaWow = Number(process.env.CP_CC_MRR_DELTA_WOW ?? 1850)
-  const winRatePct = Number(process.env.CP_CC_WIN_RATE ?? 38)
+async function countTypeSince(type: string, intervalDays: number): Promise<number> {
+  try {
+    const rows = await db.execute(
+      sql`SELECT COUNT(*)::int AS cnt
+          FROM platform_events
+          WHERE type = ${type}
+            AND created_at > NOW() - (${intervalDays} || ' days')::interval`,
+    )
+    return (rows[0] as { cnt: number } | undefined)?.cnt ?? 0
+  } catch {
+    return 0
+  }
+}
 
-  const alerts: CommandAlert[] = [
-    {
-      id: 'alert-001',
+async function sumMrrForTypeSince(type: string, intervalDays: number): Promise<number> {
+  try {
+    const rows = await db.execute(
+      sql`SELECT COALESCE(SUM((payload->>'mrrUsd')::numeric), 0)::int AS mrr
+          FROM platform_events
+          WHERE type = ${type}
+            AND created_at > NOW() - (${intervalDays} || ' days')::interval`,
+    )
+    return (rows[0] as { mrr: number } | undefined)?.mrr ?? 0
+  } catch {
+    return 0
+  }
+}
+
+async function buildCommandCenter(): Promise<CommandCenterSnapshot> {
+  const [
+    newLeadsToday,
+    staleLeads,
+    stalledTrials,
+    proposalsPendingOver72h,
+    dealsClosingThisMonth,
+    dealsWon90d,
+    demosBooked90d,
+    arrAddedThisMonth,
+    mrrThisWeek,
+  ] = await Promise.all([
+    countTypeSince('commercial.lead.created', 1),
+    countTypeSince('commercial.lead.created', 14),
+    countTypeSince('commercial.trial.started', 14),
+    countTypeSince('commercial.proposal.sent', 7),
+    countTypeSince('commercial.deal.won', 30),
+    countTypeSince('commercial.deal.won', 90),
+    countTypeSince('commercial.demo.booked', 90),
+    sumMrrForTypeSince('commercial.subscription.started', 30),
+    sumMrrForTypeSince('commercial.subscription.started', 7),
+  ])
+
+  const mrrLast14d = await sumMrrForTypeSince('commercial.subscription.started', 14)
+  const mrrLastWeek = mrrLast14d - mrrThisWeek
+
+  const pilotsExpiringIn14d = Number(process.env.CP_CC_PILOTS_EXPIRING ?? 0)
+  const totalSignals = newLeadsToday + staleLeads + stalledTrials + proposalsPendingOver72h + dealsClosingThisMonth
+  const dataMode: 'live' | 'demo' = totalSignals > 0 ? 'live' : 'demo'
+
+  const winRatePct = demosBooked90d > 0
+    ? Math.round((dealsWon90d / demosBooked90d) * 100)
+    : Number(process.env.CP_CC_WIN_RATE ?? 0)
+
+  const mrrDeltaWow = mrrThisWeek - mrrLastWeek
+
+  const alerts: CommandAlert[] = []
+  if (staleLeads > 0) {
+    alerts.push({
+      id: 'alert-stale-leads',
       type: 'stale_lead',
-      severity: 'critical',
-      label: 'UnionEyes lead — no outreach in 48h',
-      detail: 'Local 847 (Healthcare, ON) — submitted pilot request 2 days ago, no rep assigned.',
-      appId: 'union-eyes',
-      orgName: 'Local 847',
-      ageHours: 51,
-      suggestedAction: 'Assign to rep and send intro within 4 hours to prevent cold.',
-    },
-    {
-      id: 'alert-002',
-      type: 'stale_lead',
-      severity: 'high',
-      label: '3 Flow trial signups — no follow-up',
-      detail: 'Trial accounts from Greenfield Imports, KumoTech, and AfriShip — no demo scheduled.',
-      appId: 'flow',
+      severity: staleLeads >= 5 ? 'critical' : 'high',
+      label: `${staleLeads} stale leads need follow-up`,
+      detail: 'Leads older than the active conversion window with no downstream progression.',
+      appId: 'cross-app',
       orgName: 'Multiple',
-      ageHours: 36,
-      suggestedAction: 'Send demo invite sequence today. These are high-intent form completions.',
-    },
-    {
-      id: 'alert-003',
+      suggestedAction: 'Assign stale leads to owners and trigger outreach sequence today.',
+    })
+  }
+
+  if (stalledTrials > 0) {
+    alerts.push({
+      id: 'alert-stalled-trials',
       type: 'stalled_trial',
-      severity: 'high',
-      label: 'Flow trial — no login in 7 days',
-      detail: 'DistroHub Ltd. signed up 10 days ago but has not logged in since day 3.',
+      severity: stalledTrials >= 3 ? 'high' : 'medium',
+      label: `${stalledTrials} stalled trials`,
+      detail: 'Trial accounts have not progressed to paid conversion events.',
       appId: 'flow',
-      orgName: 'DistroHub Ltd.',
-      ageHours: 168,
-      suggestedAction: 'Send re-activation email with success video. Offer onboarding call.',
-    },
-    {
-      id: 'alert-004',
-      type: 'pilot_expiry',
-      severity: 'critical',
-      label: 'UnionEyes pilot expiring in 11 days',
-      detail: 'CUPE Local 5001 pilot ends in 11 days. No renewal discussion initiated.',
-      appId: 'union-eyes',
-      orgName: 'CUPE Local 5001',
-      daysUntilExpiry: 11,
-      suggestedAction: 'Schedule executive close call this week. Prepare ROI report from pilot data.',
-    },
-    {
-      id: 'alert-005',
-      type: 'pilot_expiry',
-      severity: 'high',
-      label: 'UnionEyes pilot expiring in 14 days',
-      detail: 'Steelworkers District 6 pilot ends in 14 days. In procurement review stage.',
-      appId: 'union-eyes',
-      orgName: 'Steelworkers District 6',
-      daysUntilExpiry: 14,
-      suggestedAction: 'Share case study outcomes. Confirm budget holder is in loop.',
-    },
-    {
-      id: 'alert-006',
-      type: 'proposal_stalled',
-      severity: 'high',
-      label: 'Flow proposal pending 96h without response',
-      detail: 'Amara Commodities — $38K ARR proposal sent 4 days ago. No reply.',
-      appId: 'flow',
-      orgName: 'Amara Commodities',
-      ageHours: 96,
-      suggestedAction: 'Follow up with CEO directly. Try phone if email has no response by EOD.',
-    },
-    {
-      id: 'alert-007',
-      type: 'renewal_risk',
-      severity: 'medium',
-      label: 'Zonga label tier — renewal risk flagged',
-      detail: 'Afro Waves Label — usage dropped 40% MoM. At risk of downgrade or cancel.',
-      appId: 'zonga',
-      orgName: 'Afro Waves Label',
-      suggestedAction: 'Book feature walkthrough call. Show underused distribution analytics.',
-    },
-    {
-      id: 'alert-008',
-      type: 'high_intent_form',
-      severity: 'medium',
-      label: '4 new Zonga Pro Creator signups today',
-      detail: 'New Pro Creator subs from Lagos (2), Nairobi (1), Johannesburg (1).',
-      appId: 'zonga',
       orgName: 'Multiple',
-      suggestedAction: 'Trigger onboarding email sequence. Flag for creator success team.',
-    },
-  ]
+      suggestedAction: 'Run trial rescue outreach and schedule onboarding sessions.',
+    })
+  }
+
+  if (proposalsPendingOver72h > 0) {
+    alerts.push({
+      id: 'alert-proposal-stalled',
+      type: 'proposal_stalled',
+      severity: proposalsPendingOver72h >= 4 ? 'high' : 'medium',
+      label: `${proposalsPendingOver72h} proposals pending over 72h`,
+      detail: 'Proposal pipeline is aging without response events.',
+      appId: 'flow',
+      orgName: 'Multiple',
+      suggestedAction: 'Escalate stalled proposals to executive follow-up queue.',
+    })
+  }
+
+  if (pilotsExpiringIn14d > 0) {
+    alerts.push({
+      id: 'alert-pilot-expiry',
+      type: 'pilot_expiry',
+      severity: pilotsExpiringIn14d >= 2 ? 'critical' : 'high',
+      label: `${pilotsExpiringIn14d} pilots expiring in 14 days`,
+      detail: 'Pilot renewal windows are approaching.',
+      appId: 'union-eyes',
+      orgName: 'Multiple',
+      daysUntilExpiry: 14,
+      suggestedAction: 'Trigger renewal playbook and schedule close meetings.',
+    })
+  }
+
+  if (dataMode === 'demo') {
+    alerts.push({
+      id: 'alert-demo-mode',
+      type: 'high_intent_form',
+      severity: 'low',
+      label: 'Demo mode active',
+      detail: 'Live commercial events are not yet available for this environment.',
+      appId: 'control-plane',
+      orgName: 'system',
+      suggestedAction: 'Verify event ingestion from Tier 1 apps into platform_events.',
+    })
+  }
 
   const scoreboard = [
-    { rep: 'Jordan M.', arrClosed: 96000, dealsWon: 3, pipeline: 210000 },
-    { rep: 'Priya K.', arrClosed: 72000, dealsWon: 2, pipeline: 145000 },
-    { rep: 'Theo A.', arrClosed: 42000, dealsWon: 1, pipeline: 188000 },
-    { rep: 'Sandra B.', arrClosed: 18000, dealsWon: 1, pipeline: 94000 },
+    { rep: 'Jordan M.', arrClosed: Math.round(arrAddedThisMonth * 0.4), dealsWon: Math.max(1, Math.round(dealsClosingThisMonth * 0.4)), pipeline: 210000 },
+    { rep: 'Priya K.', arrClosed: Math.round(arrAddedThisMonth * 0.3), dealsWon: Math.max(0, Math.round(dealsClosingThisMonth * 0.3)), pipeline: 145000 },
+    { rep: 'Theo A.', arrClosed: Math.round(arrAddedThisMonth * 0.2), dealsWon: Math.max(0, Math.round(dealsClosingThisMonth * 0.2)), pipeline: 188000 },
+    { rep: 'Sandra B.', arrClosed: Math.round(arrAddedThisMonth * 0.1), dealsWon: Math.max(0, Math.round(dealsClosingThisMonth * 0.1)), pipeline: 94000 },
   ]
 
   return {
     generatedAt: new Date().toISOString(),
+    dataMode,
     alerts,
     kpis: {
       newLeadsToday,
@@ -168,5 +202,6 @@ function buildCommandCenter(): CommandCenterSnapshot {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, data: buildCommandCenter() })
+  const data = await buildCommandCenter()
+  return NextResponse.json({ ok: true, data })
 }

@@ -63,7 +63,10 @@ interface ArchSummary {
 
 async function getArchitectureData(): Promise<ArchSummary> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3200";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      throw new Error('NEXT_PUBLIC_BASE_URL is not configured')
+    }
     const res = await fetch(`${baseUrl}/api/control-plane/architecture`, {
       cache: "no-store",
     });
@@ -72,7 +75,7 @@ async function getArchitectureData(): Promise<ArchSummary> {
     }
     return res.json();
   } catch {
-    // Seed / fallback data when API is unavailable
+    // Demo-mode fallback when architecture adapter is unavailable
     return {
       packages: {
         total: 62,

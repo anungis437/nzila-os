@@ -25,10 +25,14 @@ const logger = createLogger('console:governance:state-machine')
 
 // ── Control Plane connection ──────────────────────────────────────────────
 
-const CP_URL = process.env.CONTROL_PLANE_URL ?? 'http://localhost:3010'
+const CP_URL = process.env.CONTROL_PLANE_URL
 const CP_KEY = process.env.CONTROL_PLANE_API_KEY ?? ''
 
 async function callControlPlane<T>(body: Record<string, unknown>): Promise<T> {
+  if (!CP_URL) {
+    throw Object.assign(new Error('CONTROL_PLANE_URL is not configured'), { code: 'CP_URL_MISSING' })
+  }
+
   const response = await fetch(
     `${CP_URL}/api/control-plane/governance/actions`,
     {
@@ -176,6 +180,8 @@ export async function getGovernanceActionWithApprovals(
   actionId: string,
   orgId: string,
 ) {
+  if (!CP_URL) return null
+
   try {
     const response = await fetch(
       `${CP_URL}/api/control-plane/governance/actions?orgId=${encodeURIComponent(orgId)}`,

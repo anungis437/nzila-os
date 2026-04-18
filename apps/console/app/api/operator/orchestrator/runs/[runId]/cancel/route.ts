@@ -11,6 +11,9 @@ export async function POST(
     if (!auth.ok) return auth.response
 
     const { runId } = await params
+    if (!/^[a-zA-Z0-9_-]{1,128}$/.test(runId)) {
+      return NextResponse.json({ error: 'invalid runId' }, { status: 400 })
+    }
     const form = await request.formData()
     const orgId = String(form.get('orgId') ?? '')
 
@@ -41,7 +44,7 @@ export async function POST(
       cache: 'no-store',
     })
 
-    const redirectTo = new URL(`/operator/orchestrator/${runId}`, request.url)
+    const redirectTo = new URL('/operator/orchestrator', request.nextUrl.origin)
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
       redirectTo.searchParams.set('error', String(body?.error?.message ?? 'Cancel failed'))

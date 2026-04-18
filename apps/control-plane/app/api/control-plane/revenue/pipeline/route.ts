@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm'
 
 interface PipelineSnapshot {
   generatedAt: string
+  dataMode: 'live' | 'demo'
   leadsBySource: Array<{ source: string; count: number }>
   demosBooked: number
   proposalsSent: number
@@ -110,8 +111,11 @@ async function buildSnapshot(): Promise<PipelineSnapshot> {
     : Number(process.env.CP_WIN_RATE_PCT ?? 38)
   const expansionRevenue = subscriptionsUpgraded * Number(process.env.CP_AVG_EXPANSION_MRR ?? 850)
 
+  const dataMode: 'live' | 'demo' = totalLeads > 0 || demosBooked > 0 || dealsWon > 0 ? 'live' : 'demo'
+
   return {
     generatedAt: new Date().toISOString(),
+    dataMode,
     leadsBySource: effectiveLeadsBySource,
     demosBooked: effectiveDemos,
     proposalsSent: effectiveProposals,

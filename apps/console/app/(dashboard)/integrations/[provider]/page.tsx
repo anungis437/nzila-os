@@ -160,14 +160,17 @@ export default async function ProviderDetailPage(props: Props) {
   const meta = providerMeta[provider]
   if (!meta) notFound()
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  const healthResponse = await fetch(`${baseUrl}/api/integrations/health/${encodeURIComponent(provider)}`, {
-    cache: 'no-store',
-  })
-  const healthJson = healthResponse.ok
-    ? (await healthResponse.json()) as { health?: { status?: 'ok' | 'degraded' | 'down' } }
-    : null
-  const healthStatus = healthJson?.health?.status ?? 'unknown'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  let healthStatus: 'ok' | 'degraded' | 'down' | 'unknown' = 'unknown'
+  if (baseUrl) {
+    const healthResponse = await fetch(`${baseUrl}/api/integrations/health/${encodeURIComponent(provider)}`, {
+      cache: 'no-store',
+    })
+    const healthJson = healthResponse.ok
+      ? (await healthResponse.json()) as { health?: { status?: 'ok' | 'degraded' | 'down' } }
+      : null
+    healthStatus = healthJson?.health?.status ?? 'unknown'
+  }
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
