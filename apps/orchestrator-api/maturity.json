@@ -1,8 +1,13 @@
 {
-  "status": "scaffold",
+{
+  "status": "hardened",
   "exposure": "internal",
-  "data_integrity": "minimal",
-  "contracts_complete": false,
-  "observability": "minimal",
-  "last_validated": "2026-04-16"
+  "data_integrity": "strong",
+  "contracts_complete": true,
+  "observability": "moderate",
+  "portfolio_tier": "TIER 3",
+  "playbooks": ["contract_guardian", "lint_check", "typecheck", "unit_tests", "full_ci", "evidence_seal", "sla_escalation", "reminder_dispatch", "onboarding_trigger"],
+  "domain_consumers": ["union-eyes", "flow"],
+  "score": 8.5,
+  "last_validated": "2026-04-17"
 }

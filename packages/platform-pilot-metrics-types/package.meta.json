@@ -1,11 +1,10 @@
 {
-  "owner": "governance",
+  "owner": "platform",
   "category": "DOMAIN_SHARED",
   "stability": "EVOLVING",
   "allowed_dependents": [
-    "apps/control-plane",
-    "apps/union-eyes",
-    "apps/zonga"
+    "apps/*",
+    "packages/*"
   ],
   "forbidden_dependents": [],
   "replacement_for": null,

@@ -10,9 +10,11 @@ import { runRoutes } from './routes/runs.js'
 import { metricsRoutes } from './routes/metrics.js'
 import { statusRoutes } from './routes/status.js'
 import { executeRoutes } from './routes/execute.js'
+import { startExecutionRecoveryLoop } from './execution-engine.js'
 import { createLogger } from '@nzila/os-core'
 import { getEventBus } from './platform.js'
 import { telemetryHooks } from './telemetry-hooks.js'
+import { requireApiKey, requireIdempotencyKey } from './api-guards.js'
 
 const logger = createLogger('orchestrator-api')
 
@@ -97,24 +99,12 @@ await app.register(rateLimit, {
 
 // ── API Key authentication hook (skip /health) ──────────────────────────────
 app.addHook('onRequest', async (req, reply) => {
-  // Health and metrics endpoints are always public (k8s probes, uptime monitors)
-  if (req.url === '/health' || req.url === '/metrics') return
-
-  if (!API_KEY) {
-    // No key configured — allow in dev, block in prod
-    if (process.env.NODE_ENV === 'production') {
+  const ok = requireApiKey(req, reply, API_KEY)
+  if (!ok) {
+    if (!API_KEY && process.env.NODE_ENV === 'production') {
       logger.error('ORCHESTRATOR_API_KEY is not set in production')
-      return reply.status(500).send({ error: 'Server misconfigured' })
     }
     return
-  }
-
-  const provided =
-    req.headers.authorization?.replace(/^Bearer\s+/i, '') ??
-    (req.headers['x-api-key'] as string)
-
-  if (provided !== API_KEY) {
-    return reply.status(401).send({ error: 'Unauthorized — invalid or missing API key' })
   }
 })
 
@@ -126,19 +116,13 @@ app.addHook('onRequest', async (req, reply) => {
 
 // ── Idempotency-Key enforcement (fail-closed in production) ─────────────────
 app.addHook('onRequest', async (req, reply) => {
-  if (req.url === '/health') return
-  const MUTATION = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
-  if (!MUTATION.has(req.method)) return
-  const idempotencyKey = req.headers['idempotency-key'] as string | undefined
-  if (!idempotencyKey) {
-    if (process.env.NODE_ENV === 'production') {
-      return reply.status(400).send({
-        error: 'Missing Idempotency-Key header',
-        message:
-          'All mutation requests (POST, PUT, PATCH, DELETE) must include an Idempotency-Key header.',
-        code: 'IDEMPOTENCY_KEY_REQUIRED',
-      })
-    }
+  const ok = requireIdempotencyKey(req, reply)
+  if (!ok) {
+    logger.warn('Idempotency key missing for mutation request', {
+      method: req.method,
+      path: req.url,
+    })
+    return
   }
 })
 
@@ -157,6 +141,7 @@ app.register(executeRoutes, { prefix: '/execute' })
 // ── Start ──
 async function main() {
   try {
+    startExecutionRecoveryLoop()
     await app.listen({ port: PORT, host: HOST })
     logger.info(`Orchestrator API listening on ${HOST}:${PORT}`)
   } catch (err) {

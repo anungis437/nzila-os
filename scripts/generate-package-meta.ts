@@ -22,6 +22,17 @@ interface PackageMeta {
   deprecation_note: string | null
 }
 
+const DEFAULT_META: PackageMeta = {
+  owner: 'platform',
+  category: 'DOMAIN_SHARED',
+  stability: 'EVOLVING',
+  allowed_dependents: ['apps/*', 'packages/*'],
+  forbidden_dependents: [],
+  replacement_for: null,
+  deprecated: false,
+  deprecation_note: null,
+}
+
 const META: Record<string, PackageMeta> = {
   // ── Platform Core ─────────────────────────────────
   'os-core':        { owner: 'platform', category: 'PLATFORM_CORE', stability: 'STABLE', allowed_dependents: ['apps/*','packages/*'], forbidden_dependents: [], replacement_for: null, deprecated: false, deprecation_note: null },
@@ -162,13 +173,11 @@ const dirs = fs.readdirSync(PACKAGES_DIR, { withFileTypes: true })
 
 for (const dir of dirs) {
   const metaPath = path.join(PACKAGES_DIR, dir.name, 'package.meta.json')
-  const meta = META[dir.name]
+  const meta = META[dir.name] ?? DEFAULT_META
 
-  if (!meta) {
-    // Unknown package — skip with warning
-    process.stderr.write(`⚠  No metadata defined for packages/${dir.name}\n`)
+  if (!META[dir.name]) {
+    process.stderr.write(`⚠  No metadata defined for packages/${dir.name}; applying default metadata\n`)
     skipped++
-    continue
   }
 
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n')

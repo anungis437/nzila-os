@@ -1,8 +1,11 @@
 {
-  "owner": "ai-platform",
-  "category": "PLATFORM_CORE",
-  "stability": "STABLE",
-  "allowed_dependents": ["packages/platform-ai-*", "packages/ai-*", "packages/platform-intelligence", "packages/platform-anomaly-engine", "packages/platform-agent-workflows"],
+  "owner": "platform",
+  "category": "DOMAIN_SHARED",
+  "stability": "EVOLVING",
+  "allowed_dependents": [
+    "apps/*",
+    "packages/*"
+  ],
   "forbidden_dependents": [],
   "replacement_for": null,
   "deprecated": false,

@@ -1,8 +1,12 @@
 {
+{
   "status": "pilot",
   "exposure": "internal",
   "data_integrity": "partial",
   "contracts_complete": false,
   "observability": "partial",
-  "last_validated": "2026-04-16"
+  "orchestrator_integration": true,
+  "orchestrator_playbooks": ["reminder_dispatch", "onboarding_trigger"],
+  "portfolio_tier": "TIER 1",
+  "last_validated": "2026-04-17"
 }
