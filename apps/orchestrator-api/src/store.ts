@@ -33,11 +33,13 @@ function memIdempotencyKey(orgId: string, idempotencyKey: string): string {
 }
 
 function useDb(): boolean {
-  return !!process.env.DATABASE_URL
+  return process.env.NODE_ENV !== 'development'
+    ? true
+    : !!process.env.DATABASE_URL
 }
 
 function canUseMemoryStore(): boolean {
-  return !process.env.DATABASE_URL
+  return process.env.NODE_ENV === 'development' && !process.env.DATABASE_URL
 }
 
 function dateToIso(value: unknown): string | null {
