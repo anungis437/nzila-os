@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockClerkCurrentUser: vi.fn(),
   mockOrgMembersFindFirst: vi.fn(),
+  mockGetOrganizationIdForUser: vi.fn(),
   mockSelect: vi.fn(),
   mockLogPermissionCheck: vi.fn(),
   mockGetMemberRoles: vi.fn(),
@@ -101,6 +102,10 @@ vi.mock('../auth/rbac-server', () => ({
 
 vi.mock('@/lib/auth/auth-service', () => ({
   getAuthUser: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock('../organization-utils', () => ({
+  getOrganizationIdForUser: mocks.mockGetOrganizationIdForUser,
 }));
 
 vi.mock('../auth/roles', async (importOriginal) => {
@@ -191,6 +196,7 @@ describe('ApiAuthGuard', () => {
     mocks.mockAuth.mockResolvedValue({ userId: 'user_123', orgId: null });
     mocks.mockClerkCurrentUser.mockResolvedValue(clerkUser);
     mocks.mockOrgMembersFindFirst.mockResolvedValue(baseMembership);
+    mocks.mockGetOrganizationIdForUser.mockResolvedValue('org-1');
     mocks.mockSelect.mockReturnValue(chain([]));
     mocks.mockIsPublicRoute.mockReturnValue(false);
     mocks.mockIsCronRoute.mockReturnValue(false);
@@ -334,10 +340,12 @@ describe('ApiAuthGuard', () => {
       expect(ctx!.memberId).toBe('mem-1');
     });
 
-    it('returns null when no membership', async () => {
+    it('falls back to member role when no membership', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
       mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
-      expect(await getUserContext()).toBeNull();
+      const ctx = await getUserContext();
+      expect(ctx).not.toBeNull();
+      expect(ctx!.roles).toContain('member');
     });
 
     it('falls back to platform admin when no membership', async () => {
@@ -399,10 +407,11 @@ describe('ApiAuthGuard', () => {
       await expect(requireUser()).rejects.toThrow('Unauthorized');
     });
 
-    it('throws Forbidden when no membership', async () => {
+    it('falls back to member context when no membership', async () => {
       mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
       mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
-      await expect(requireUser()).rejects.toThrow('Forbidden');
+      const ctx = await requireUser();
+      expect(ctx.roles).toContain('member');
     });
   });
 
