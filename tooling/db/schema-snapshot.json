@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-04-18T02:20:39.890Z",
+  "capturedAt": "2026-04-18T18:39:39.950Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -127,8 +127,8 @@
       "size": 9283
     },
     "packages/db/src/schema/operations.ts": {
-      "hash": "4f1c7ebecc49aff1b0cd57d13d2d8be65d3d511d369147500f9d21e6891ee067",
-      "size": 9523
+      "hash": "3c67520448dd24e6060b223a26954e1e467e126fbf54fb931816826f943c124c",
+      "size": 9517
     },
     "packages/db/src/schema/orgs.ts": {
       "hash": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570",
@@ -163,9 +163,9 @@
       "size": 2401
     },
     "packages/db/src/schema/zonga.ts": {
-      "hash": "bf0758ea87e7769ed414ed5b9d156d97c172850f1b948baed9f25b505eb54a35",
-      "size": 37995
+      "hash": "70ae97c61f4254e26a85138ee8e5adb557e5236ab324ef4914a0737a8784e910",
+      "size": 38020
     }
   },
-  "compositeHash": "a313ef9e3eae906a8f28849e19944714f7d96c6e34b589b36d3b43ad9d5e30b6"
+  "compositeHash": "f948af5597db9519f9cc123b68a02ca9d0c76cb8df116a8177fe14249e694d05"
 }
