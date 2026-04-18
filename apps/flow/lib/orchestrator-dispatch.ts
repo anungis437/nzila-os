@@ -125,7 +125,7 @@ export async function dispatchInvoiceReminder(opts: {
     idempotencyKey: `reminder:invoice:${opts.invoiceId}:${opts.reminderCycle}:${today}`,
     payload: {
       entityType: 'invoice',
-      entityId: opts.invoiceId,
+      invoiceId: opts.invoiceId,
       reminderCycle: opts.reminderCycle,
       recipientEmail: opts.recipientEmail,
     },

@@ -3,6 +3,8 @@
  *
  * CRM-ready sales follow-up signals from platform data.
  * Restricted to platform operators.
+ *
+ * Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
  */
 
 import { NextResponse } from 'next/server'

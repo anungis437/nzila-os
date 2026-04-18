@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextRequest, NextResponse } from 'next/server'
 import { requirePlatformRole, withRequestContext } from '@/lib/api-guards'
 
