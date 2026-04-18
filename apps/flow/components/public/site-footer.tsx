@@ -14,19 +14,19 @@ const footerSections = [
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "/resources" },
-      { label: "API Reference", href: "/resources" },
-      { label: "Changelog", href: "/resources" },
-      { label: "System Status", href: "/resources" },
+      { label: "Template Gallery", href: "/features" },
+      { label: "Start Trial", href: "/trial" },
+      { label: "Contact Sales", href: "/contact" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "/legal/privacy" },
-      { label: "Terms of Service", href: "/legal/terms" },
-      { label: "Security", href: "/legal/security" },
-      { label: "DPA", href: "/legal/dpa" },
+      { label: "Contact", href: "/contact" },
+      { label: "Status", href: "/" },
+      { label: "Trust & Security", href: "/about" },
+      { label: "Data Handling", href: "/about" },
     ],
   },
   {
@@ -54,17 +54,17 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
           <div>
             <h3 className="font-poppins text-lg font-semibold text-white">
-              Ready to streamline your quoting?
+              Ready to convert operations into revenue?
             </h3>
             <p className="text-sm text-slate-400">
-              Start creating professional proposals in minutes.
+              Launch a 14-day trial and deploy your first workflow in 5 minutes.
             </p>
           </div>
           <Link
-            href="/sign-up"
+            href="/trial"
             className="rounded-lg bg-electric px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-electric/90 hover:shadow-lg"
           >
-            Get Started Free
+            Start Trial
           </Link>
         </div>
       </div>

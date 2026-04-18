@@ -85,7 +85,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         stripe_customer_id = ${customerId},
         stripe_subscription_id = ${subscriptionId},
         updated_at = NOW()
-      WHERE id = ${metadata.listener_id}`,
+      WHERE user_id = ${metadata.listener_id}`,
     )
     logger.info('Listener upgraded to premium', {
       listenerId: metadata.listener_id,

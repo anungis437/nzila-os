@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import SiteNavigation from '@/components/public/site-navigation';
 import SiteFooter from '@/components/public/site-footer';
+import SupportWidgetShell from '@/components/public/support-widget-shell';
 
 async function loadMessages(locale: string) {
   try {
@@ -29,6 +30,7 @@ export default async function MarketingLayout({
       <SiteNavigation />
       <main className="pt-16 md:pt-20">{children}</main>
       <SiteFooter />
+      <SupportWidgetShell />
     </NextIntlClientProvider>
   );
 }

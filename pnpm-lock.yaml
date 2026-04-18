@@ -981,6 +981,9 @@ importers:
       '@nzila/commerce-state':
         specifier: workspace:*
         version: link:../../packages/commerce-state
+      '@nzila/crm-hubspot':
+        specifier: workspace:*
+        version: link:../../packages/crm-hubspot
       '@nzila/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -2479,6 +2482,9 @@ importers:
       '@nzila/commerce-state':
         specifier: workspace:*
         version: link:../../packages/commerce-state
+      '@nzila/crm-hubspot':
+        specifier: workspace:*
+        version: link:../../packages/crm-hubspot
       '@nzila/db':
         specifier: workspace:*
         version: link:../../packages/db

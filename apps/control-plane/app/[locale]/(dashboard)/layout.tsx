@@ -17,10 +17,12 @@ import {
   Scale,
   PieChart,
   Landmark,
+  TrendingUp,
 } from "lucide-react";
 
 const navItems = [
   { href: "/overview", label: "Overview", icon: LayoutDashboard },
+  { href: "/revenue", label: "Revenue", icon: TrendingUp },
   { href: "/governance", label: "Governance", icon: Shield },
   { href: "/decisions", label: "Decisions", icon: Scale },
   { href: "/decision-summary", label: "Decision Summary", icon: PieChart },

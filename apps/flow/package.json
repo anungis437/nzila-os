@@ -27,6 +27,7 @@
     "@nzila/commerce-observability": "workspace:*",
     "@nzila/commerce-services": "workspace:*",
     "@nzila/commerce-state": "workspace:*",
+    "@nzila/crm-hubspot": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

@@ -192,6 +192,22 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Revenue conversion strip */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-xl border border-electric/30 bg-electric/5 p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-electric">Trial Activation</p>
+          <h3 className="mt-2 text-lg font-bold text-navy">Launch a 14-day guided trial</h3>
+          <p className="mt-1 text-sm text-gray-600">Create org, load templates, and track time-to-value from day one.</p>
+          <Link href="/trial" className="mt-4 inline-flex text-sm font-semibold text-electric hover:underline">Start trial funnel →</Link>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Plan Upgrade</p>
+          <h3 className="mt-2 text-lg font-bold text-navy">Compare Team, Growth, Enterprise</h3>
+          <p className="mt-1 text-sm text-gray-600">Use pricing tiers to unlock analytics, governance, and API access.</p>
+          <Link href="/pricing" className="mt-4 inline-flex text-sm font-semibold text-navy hover:underline">Open pricing page →</Link>
+        </div>
+      </div>
     </div>
   )
 }

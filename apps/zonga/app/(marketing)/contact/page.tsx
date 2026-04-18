@@ -7,6 +7,7 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { PartnershipAttribution } from '@/components/branding';
 import { getClientBrand, getPartnerBrand } from '@/lib/branding/brand-config';
+import ContactForm from './contact-form';
 
 export const metadata: Metadata = {
   title: 'Contact — Zonga',
@@ -64,7 +65,7 @@ export default function ContactPage() {
       {/* Contact channels */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
             {channels.map((ch, i) => (
               <ScrollReveal key={ch.title} delay={i * 0.1}>
                 <div className="glass-card-light rounded-2xl p-8 hover-lift h-full">
@@ -80,6 +81,13 @@ export default function ContactPage() {
                 </div>
               </ScrollReveal>
             ))}
+            <div className="lg:col-span-3">
+              <ScrollReveal delay={0.2}>
+                <div className="max-w-3xl mx-auto mt-4">
+                  <ContactForm />
+                </div>
+              </ScrollReveal>
+            </div>
           </div>
         </div>
       </section>
