@@ -179,7 +179,7 @@ export const auditEvents = pgTable('audit_events', {
   orgId: uuid('org_id')
     .notNull()
     .references(() => orgs.id),
-  actorClerkUserId: text('actor_clerk_user_id').notNull(),
+  actorClerkUserId: text('actor_user_id').notNull(),
   actorRole: text('actor_role'),
   action: text('action').notNull(),
   targetType: text('target_type').notNull(),

@@ -37,8 +37,8 @@ const investorCtaCopy: Record<Locale, {
     investorsBody: `${MARKETING_FACTS.totalTamLabel} TAM. ${MARKETING_FACTS.productPlatforms} plateformes. ${MARKETING_FACTS.flagshipPlatforms} produits phares. Une seule Backbone unifiee.`,
     investorsCta: "Voir la thèse d'investissement",
     partnersBadge: 'Pour les partenaires',
-    partnersTitle: 'Construisez avec l APEX de l IA',
-    partnersBody: 'Deployez des solutions IA éthiques en sante, finance, agriculture et plus encore.',
+    partnersTitle: "Construisez avec l'APEX de l'IA",
+    partnersBody: "Déployez des solutions IA éthiques en santé, finance, agriculture et plus encore.",
     partnersCta: 'Devenir partenaire',
   },
 };

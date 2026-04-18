@@ -80,11 +80,14 @@ function mapAuthRoleToNacpRole(
     return metaRole as NacpRole
   }
 
-  // Map Clerk org roles
+  // Map auth org roles — handles both Clerk-style ('org:admin') and platform-auth style ('org_admin')
   switch (orgRole) {
     case 'org:admin':
+    case 'org_admin':
       return NacpRole.ADMIN
     case 'org:member':
+    case 'org_member':
+    case 'org_secretary':
       return NacpRole.INVIGILATOR
     default:
       return NacpRole.VIEWER

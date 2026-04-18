@@ -17,7 +17,7 @@ import { resolveInternalOrgId } from './org-resolver'
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 /**
- * Resolve org context from Clerk auth.
+ * Resolve org context from auth session.
  *
  * @throws Error('Unauthorized') if unauthenticated
  * @throws Error('No active organization') if no org selected
@@ -33,7 +33,7 @@ export async function resolveOrgContext(): Promise<OrgContext> {
     throw new Error('No active organization — select an org before using Flow.')
   }
 
-  let role = mapClerkRole(orgRole)
+  let role = mapOrgRole(orgRole)
   const internalOrgId = await resolveInternalOrgId(orgId)
 
   // Super-admin email override
@@ -72,13 +72,17 @@ export async function resolveOrgCommerceContext(): Promise<OrgCommerceContext> {
   return { ctx, config }
 }
 
-function mapClerkRole(clerkRole: string | undefined | null): OrgRole {
-  switch (clerkRole) {
+function mapOrgRole(orgRole: string | undefined | null): OrgRole {
+  switch (orgRole) {
     case 'org:admin':
+    case 'org_admin':
       return OrgRole.ADMIN
     case 'org:manager':
+    case 'org_manager':
       return OrgRole.MANAGER
     case 'org:member':
+    case 'org_member':
+    case 'org_secretary':
       return OrgRole.SALES
     default:
       return OrgRole.VIEWER

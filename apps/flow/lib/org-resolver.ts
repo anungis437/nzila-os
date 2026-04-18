@@ -17,25 +17,27 @@ const CACHE_TTL_MS = 5 * 60 * 1000 // 5 min
 
 /**
  * Resolve an auth organization ID to the internal UUID stored in `orgs.id`.
- * Reads from `orgs WHERE clerk_org_id = $1`.
+ * Handles both cases:
+ *  - PG session: `auth().orgId` is already the internal UUID (from `pgUser.organizationId`)
+ *  - Entra/Clerk session: `auth().orgId` is an external org ID stored in `orgs.clerk_org_id`
  */
 export async function resolveInternalOrgId(authOrgId: string): Promise<string> {
   const hit = cache.get(authOrgId)
   if (hit && Date.now() - hit.ts < CACHE_TTL_MS) return hit.uuid
 
   const { db, orgs } = await import('@nzila/db')
-  const { eq } = await import('drizzle-orm')
+  const { eq, or } = await import('drizzle-orm')
 
   const [row] = await db
     .select({ id: orgs.id })
     .from(orgs)
-    .where(eq(orgs.clerkOrgId, authOrgId))
+    .where(or(eq(orgs.id, authOrgId), eq(orgs.clerkOrgId, authOrgId)))
     .limit(1)
 
   if (!row) {
     throw new Error(
       `No internal org found for auth org "${authOrgId}". ` +
-      `Ensure the org is registered in the orgs table with a matching clerk_org_id.`,
+      `Ensure the org is registered in the orgs table.`,
     )
   }
 

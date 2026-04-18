@@ -245,6 +245,30 @@ jobs:
       - name: Contract tests
         run: pnpm contract-tests
 
+      - name: Tier 1 maturity gate
+        run: |
+          FAILED=0
+          echo "## Tier 1 App Maturity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| App | contracts_complete | data_integrity | observability |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------------------|---------------|---------------|" >> $GITHUB_STEP_SUMMARY
+          for app in union-eyes flow agrimo; do
+            maturity_file="apps/$app/maturity.json"
+            if [ ! -f "$maturity_file" ]; then
+              echo "| $app | ❌ MISSING | ❌ MISSING | ❌ MISSING |" >> $GITHUB_STEP_SUMMARY
+              echo "::error::Missing maturity.json for Tier 1 app: $app"
+              FAILED=1
+              continue
+            fi
+            contracts=$(python3 -c "import json; d=json.load(open('$maturity_file')); print(d.get('contracts_complete',''))")
+            integrity=$(python3 -c "import json; d=json.load(open('$maturity_file')); print(d.get('data_integrity',''))")
+            observability=$(python3 -c "import json; d=json.load(open('$maturity_file')); print(d.get('observability',''))")
+            c_icon=$([ "$contracts" = "True" ] && echo "✅" || echo "⚠️")
+            echo "| $app | $c_icon $contracts | $integrity | $observability |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Note:** \`contracts_complete: false\` in any Tier 1 app is a blocker for GA. This gate will hard-fail once contracts are complete." >> $GITHUB_STEP_SUMMARY
+
       - name: GA gate check
         run: pnpm ga-check
 

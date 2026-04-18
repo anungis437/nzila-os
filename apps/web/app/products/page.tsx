@@ -41,12 +41,12 @@ const flagships = [
   },
   {
     name: 'Flow',
-    vertical: 'Commerce & Opérations',
+    vertical: 'Commerce & Operations',
     status: 'Production Ready',
     tam: '$100B+',
     image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
     alt: 'Flow — enterprise order-to-cash and supply chain management platform',
-    description: 'Complété commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and intégrations with Shopify, Zoho, WhatsApp, and ERP systems.',
+    description: 'Complete commerce operations platform — order-to-cash, procure-to-pay, inventory management, production tracking, and integrations with Shopify, Zoho, WhatsApp, and ERP systems.',
     features: ['Order Management', 'Inventory & Warehouse', 'Production Tracking', 'Multi-Channel Integrations'],
   },
   {
@@ -57,7 +57,7 @@ const flagships = [
     image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
     alt: 'Agrimo — agricultural field operations and supply chain management',
     description: 'Agricultural supply chain and operations platform — harvest tracking, lot management, quality grading, warehousing, cold-chain logistics, traceability, and farmer payouts for DRC and Central African producers.',
-    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Opérations', 'Supply Chain Traceability'],
+    features: ['Harvest Tracking', 'Lot Management', 'Warehouse Operations', 'Supply Chain Traceability'],
   },
 ];
 

@@ -84,19 +84,19 @@ export async function requirePartnerEntityAccess(
   | { ok: false; error: string; status: number }
 > {
   const session = await auth()
-  if (!session.userId || !session.orgId) {
+  if (!session.userId) {
     return { ok: false, error: 'Unauthenticated', status: 401 }
   }
 
-  // Resolve partner from auth org
+  // Resolve partner via user membership (platform-auth no longer provides Clerk org IDs)
   const [partner] = await platformDb
     .select({ id: partners.id, tier: partners.tier })
     .from(partners)
-    .where(eq(partners.clerkOrgId, session.orgId))
+    .innerJoin(partnerUsers, and(eq(partnerUsers.partnerId, partners.id), eq(partnerUsers.userId, session.userId)))
     .limit(1)
 
   if (!partner) {
-    return { ok: false, error: 'No partner record for this org', status: 403 }
+    return { ok: false, error: 'No partner record for this user', status: 403 }
   }
 
   // Check entity entitlement
@@ -135,12 +135,13 @@ export async function resolvePartnerEntityIdForView(
   requiredView: string,
 ): Promise<string | null> {
   const session = await auth()
-  if (!session.userId || !session.orgId) return null
+  if (!session.userId) return null
 
+  // Resolve partner via user membership (platform-auth no longer provides Clerk org IDs)
   const [partner] = await platformDb
     .select({ id: partners.id })
     .from(partners)
-    .where(eq(partners.clerkOrgId, session.orgId))
+    .innerJoin(partnerUsers, and(eq(partnerUsers.partnerId, partners.id), eq(partnerUsers.userId, session.userId)))
     .limit(1)
 
   if (!partner) return null

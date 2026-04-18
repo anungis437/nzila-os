@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/locales';
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
 const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003';
-const ABR_URL = process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3004';
+const ABR_URL = process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3005';
 
 const appLinks = [
   { name: 'Console', href: CONSOLE_URL, external: true },
