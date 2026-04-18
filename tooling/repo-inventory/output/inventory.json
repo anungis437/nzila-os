@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-17T00:22:58.850Z",
+  "generatedAt": "2026-04-18T20:42:45.544Z",
   "appCount": 17,
   "packageCount": 166,
-  "workflowCount": 36,
-  "contractTestCount": 211,
-  "tsTestFileCount": 1162,
+  "workflowCount": 37,
+  "contractTestCount": 213,
+  "tsTestFileCount": 1171,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -121,8 +121,14 @@
         "ai-core",
         "ai-sdk",
         "blob",
+        "chatops-slack",
+        "chatops-teams",
         "commerce-observability",
+        "comms-email",
+        "comms-push",
+        "comms-sms",
         "config",
+        "crm-hubspot",
         "db",
         "governed-workflow",
         "ml-sdk",
@@ -151,7 +157,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 206
+      "codeFileCount": 252
     },
     {
       "name": "control-plane",
@@ -197,7 +203,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 200
+      "codeFileCount": 207
     },
     {
       "name": "cora",
@@ -252,6 +258,7 @@
         "commerce-services",
         "commerce-state",
         "config",
+        "crm-hubspot",
         "db",
         "governed-workflow",
         "ml-sdk",
@@ -268,7 +275,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 319
+      "codeFileCount": 330
     },
     {
       "name": "mobility",
@@ -369,7 +376,7 @@
         "platform-utils"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 26
+      "codeFileCount": 27
     },
     {
       "name": "partners",
@@ -398,7 +405,7 @@
         "ui"
       ],
       "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations.",
-      "codeFileCount": 100
+      "codeFileCount": 104
     },
     {
       "name": "platform-admin",
@@ -434,7 +441,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 29
+      "codeFileCount": 31
     },
     {
       "name": "trade",
@@ -493,7 +500,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3140
+      "codeFileCount": 3142
     },
     {
       "name": "web",
@@ -517,7 +524,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 60
+      "codeFileCount": 70
     },
     {
       "name": "zonga",
@@ -535,12 +542,14 @@
         "commerce-observability",
         "commerce-state",
         "config",
+        "crm-hubspot",
         "db",
         "governed-workflow",
         "ml-sdk",
         "os-core",
         "payments-stripe",
         "platform-auth",
+        "platform-events",
         "platform-pilot-metrics",
         "platform-revenue",
         "platform-shell",
@@ -556,7 +565,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 402
+      "codeFileCount": 406
     }
   ],
   "workflows": [
@@ -568,6 +577,7 @@
     "ci.yml",
     "compliance-drift.yml",
     "compliance.yml",
+    "console-weekly-digest.yml",
     "control-tests.yml",
     "cupe-pilot-readiness.yml",
     "dast.yml",
