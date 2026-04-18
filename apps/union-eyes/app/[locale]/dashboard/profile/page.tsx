@@ -2,7 +2,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser, useAuthActions } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/use-toast';
@@ -41,23 +41,69 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const { user } = useUser();
   const { signOut } = useAuthActions();
-  const { organization, userMemberships } = useOrganization();
+  const { organization, organizationId, userMemberships } = useOrganization();
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [serverSummary, setServerSummary] = useState<{
+    user?: { name?: string; email?: string; phone?: string };
+    organization?: { id?: string; name?: string } | null;
+    role?: string;
+  } | null>(null);
 
-  // Derive role display from org membership
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch('/api/users/me/profile', {
+          credentials: 'include',
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) {
+          setServerSummary(data);
+        }
+      } catch {
+        // Keep client-only fallbacks if summary fetch fails.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Derive role display from org membership.
+  // Use organizationId fallback because organization object can be temporarily null
+  // while context is still hydrating.
+  const activeOrgId = organization?.id ?? organizationId;
   const currentMembership = userMemberships.find(
-    m => m.organizationId === organization?.id
-  );
+    m => m.organizationId === activeOrgId
+  ) ?? userMemberships.find((m) => m.isPrimary) ?? userMemberships[0];
+
   const roleDisplay = currentMembership?.role
     ? currentMembership.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     : 'Member';
 
-  const userName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || '';
-  const userEmail = user?.primaryEmailAddress?.emailAddress || '';
-  const userPhone = user?.primaryPhoneNumber?.phoneNumber || '';
-  const orgName = organization?.name || '';
+  const serverRoleDisplay = serverSummary?.role
+    ? serverSummary.role.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+    : null;
+
+  const userEmail =
+    serverSummary?.user?.email
+    || user?.primaryEmailAddress?.emailAddress
+    || user?.emailAddresses?.[0]?.emailAddress
+    || '';
+
+  const userName =
+    serverSummary?.user?.name
+    || user?.fullName
+    || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+    || (userEmail ? userEmail.split('@')[0] : '');
+
+  const userPhone = serverSummary?.user?.phone || user?.primaryPhoneNumber?.phoneNumber || '';
+  const orgName = serverSummary?.organization?.name || organization?.name || '';
 
   const [profileDraft, setProfileDraft] = useState<{
     name?: string;
@@ -111,8 +157,8 @@ export default function ProfilePage() {
     phone: profileDraft.phone ?? userPhone,
     local: orgName,
     memberNumber: settings.profile.memberNumber,
-    role: roleDisplay,
-  }), [profileDraft.name, profileDraft.email, profileDraft.phone, userName, userEmail, userPhone, orgName, settings.profile.memberNumber, roleDisplay]);
+    role: serverRoleDisplay || roleDisplay,
+  }), [profileDraft.name, profileDraft.email, profileDraft.phone, userName, userEmail, userPhone, orgName, settings.profile.memberNumber, roleDisplay, serverRoleDisplay]);
 
   const settingsSections = [
     {

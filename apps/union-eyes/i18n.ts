@@ -2,7 +2,7 @@ import { getRequestConfig } from 'next-intl/server';
 import { locales, defaultLocale, type Locale } from './lib/locales';
 
 // Re-export locale constants from lib/locales.ts
-// This allows middleware.ts to import locales without pulling in async imports
+// This allows proxy.ts to import locales without pulling in async imports
 export { locales, defaultLocale, type Locale } from './lib/locales';
 
 // Map region locales to their base language for fallback

@@ -16,6 +16,7 @@ import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,13 +35,14 @@ export async function GET(
   try {
     const { caseId } = await params;
 
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+    const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     const notes = await withRLSContext(async (tx) => {
@@ -87,13 +89,14 @@ export async function POST(
   try {
     const { caseId } = await params;
 
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+    const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // Parse body

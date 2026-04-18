@@ -12,7 +12,7 @@ vi.mock('@nzila/platform-auth/entra/client', () => ({
     isSignedIn: true,
     orgId: 'org-1',
     orgRole: 'admin',
-    roles: ['admin'],
+    roles: ['platform_admin'],
   })),
   useUser: vi.fn(() => ({
     isLoaded: true,

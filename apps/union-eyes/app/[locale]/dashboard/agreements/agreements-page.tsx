@@ -96,7 +96,8 @@ const statusConfig: Record<AgreementStatus, { label: string; icon: React.ReactEl
 
 export default function AgreementsPage() {
   const t = useTranslations();
-  const { organizationId } = useOrganization();
+  const { organizationId, userOrganizations, isLoading: orgLoading } = useOrganization();
+  const effectiveOrganizationId = organizationId ?? userOrganizations[0]?.id ?? null;
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,12 +106,15 @@ export default function AgreementsPage() {
   const [expandedAgreement, setExpandedAgreement] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!organizationId) return;
     const fetchAgreements = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams({ organizationId });
-        const res = await fetch(`/api/agreements?${params}`);
+        const params = new URLSearchParams();
+        if (effectiveOrganizationId) {
+          params.set('organizationId', effectiveOrganizationId);
+        }
+        const queryString = params.toString();
+        const res = await fetch(queryString ? `/api/agreements?${queryString}` : '/api/agreements');
         if (res.ok) {
           const json = await res.json();
           // withApi envelope: { success, data: { data: rows, pagination } }
@@ -149,7 +153,7 @@ export default function AgreementsPage() {
       }
     };
     fetchAgreements();
-  }, [organizationId]);
+  }, [effectiveOrganizationId]);
 
   // Filter agreements
   const filteredAgreements = agreements.filter(agreement => {
@@ -169,10 +173,10 @@ export default function AgreementsPage() {
   const pendingCount = agreements.filter(a => a.status === "pending").length;
   const totalDocs = agreements.length;
 
-  if (!organizationId) {
+  if (orgLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
-        Select an organization to view agreements.
+        Loading organization context...
       </div>
     );
   }

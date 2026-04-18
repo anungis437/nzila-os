@@ -2,7 +2,7 @@
  * Locale Configuration Constants
  *
  * Edge-safe locale definitions — no dynamic imports.
- * Allows middleware.ts (Edge runtime) to access locale constants.
+ * Allows proxy.ts (Edge runtime) to access locale constants.
  *
  * @module lib/locales
  */

@@ -611,7 +611,7 @@ function getPermissionsForRole(role: string): string[] {
  * Get unified user context with organization membership from database
  */
 export async function getUserContext(): Promise<UnifiedUserContext | null> {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
     return null;
@@ -620,9 +620,12 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
   let membership: Awaited<ReturnType<typeof db.query.organizationMembers.findFirst>> = undefined;
 
   try {
-    if (orgId) {
+    const { getOrganizationIdForUser } = await import('./organization-utils');
+    const resolvedOrgId = await getOrganizationIdForUser(userId);
+
+    if (resolvedOrgId) {
       membership = await db.query.organizationMembers.findFirst({
-        where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, orgId)),
+        where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId)),
       });
     }
 
@@ -646,7 +649,7 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
       logger.info('[Auth] getUserContext: user matched PLATFORM_ADMIN_USER_IDS, granting app_owner', { userId });
       return {
         userId,
-        organizationId: orgId || 'platform',
+        organizationId: 'platform',
         roles: ['app_owner'],
         permissions: getPermissionsForRole('app_owner'),
       };
@@ -663,7 +666,7 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
         logger.info('[Auth] getUserContext: no DB membership, using auth metadata role', { userId, authRole, normalized });
         return {
           userId,
-          organizationId: orgId || 'platform',
+          organizationId: 'platform',
           roles: [normalized],
           permissions: getPermissionsForRole(normalized),
         };

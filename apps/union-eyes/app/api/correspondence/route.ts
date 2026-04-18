@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
+import { logger } from "@/lib/logger";
 import {
   createCorrespondence,
   listCorrespondence,
@@ -49,17 +50,32 @@ export const GET = withApi(
     const status = searchParams.get("status") ?? undefined;
     const draftedBy = searchParams.get("draftedBy") ?? undefined;
     const assignedSignerId = searchParams.get("assignedSignerId") ?? undefined;
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : undefined;
-    const offset = searchParams.get("offset") ? parseInt(searchParams.get("offset")!, 10) : undefined;
+    const limitRaw = searchParams.get("limit");
+    const offsetRaw = searchParams.get("offset");
+    const parsedLimit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
+    const parsedOffset = offsetRaw ? Number.parseInt(offsetRaw, 10) : undefined;
+    const limit = Number.isFinite(parsedLimit) ? parsedLimit : undefined;
+    const offset = Number.isFinite(parsedOffset) ? parsedOffset : undefined;
 
-    const items = await listCorrespondence({
-      organizationId: organizationId!,
-      status: status as Parameters<typeof listCorrespondence>[0]["status"],
-      draftedBy,
-      assignedSignerId,
-      limit,
-      offset,
-    });
+    let items: Awaited<ReturnType<typeof listCorrespondence>> = [];
+    try {
+      items = await listCorrespondence({
+        organizationId: organizationId!,
+        status: status as Parameters<typeof listCorrespondence>[0]["status"],
+        draftedBy,
+        assignedSignerId,
+        limit,
+        offset,
+      });
+    } catch (error) {
+      // Do not fail the correspondence dashboard if the backing schema is missing
+      // or temporarily unavailable in dev/staging.
+      logger.warn("[correspondence] listCorrespondence failed, returning empty list", {
+        error: error instanceof Error ? error.message : String(error),
+        organizationId,
+      });
+      items = [];
+    }
 
     return { data: items, count: items.length };
   },

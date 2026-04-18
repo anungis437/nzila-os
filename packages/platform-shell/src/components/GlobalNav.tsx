@@ -3,7 +3,17 @@
 import { useShell } from '../context/provider';
 
 export function GlobalNav() {
-  const { modules, activeModuleId, navigateToModule, org } = useShell();
+  const { modules, activeModuleId, navigateToModule, org, user } = useShell();
+
+  // Client-org users should not see cross-product module switching.
+  // Keep the rail visible only for platform-level operators.
+  const hasPlatformNavAccess = (user?.roles ?? []).some((role) =>
+    role === 'app_owner' || role === 'platform_admin' || role === 'service_account',
+  );
+
+  if (!hasPlatformNavAccess) {
+    return null;
+  }
 
   return (
     <nav className="flex w-16 flex-col items-center border-r border-gray-200 bg-white py-4">

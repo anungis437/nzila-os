@@ -8,7 +8,7 @@
 
 import { NextRequest } from 'next/server';
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser, hasMinRole } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -33,6 +33,14 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.AUTH_REQUIRED,
         'Authentication required'
+      );
+    }
+
+    const canAccess = await hasMinRole('platform_lead');
+    if (!canAccess) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Platform lead role required'
       );
     }
 

@@ -4,157 +4,274 @@ import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { db } from '@/db/db';
-import { stewards, stewardAssignments, grievances, organizationMembers } from '@/db/schema';
-import { sql, eq, and, gte } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { stewards, grievances } from '@/db/schema';
+import { organizationMembers } from '@/db/schema-organizations';
+import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Users, FileText, TrendingUp, AlertCircle, Calendar, Star } from "lucide-react";
-import Link from "next/link";
+import { Users, FileText, TrendingUp, AlertCircle, Calendar } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Chief Steward Dashboard | UnionEyes",
   description: "Steward supervision and case management tools",
 };
 
+function serializeUnknownError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      cause: error.cause ? String(error.cause) : undefined,
+      stack: error.stack,
+    };
+  }
+
+  if (error && typeof error === 'object') {
+    const record = error as Record<string, unknown>;
+    return {
+      raw: String(error),
+      name: typeof record.name === 'string' ? record.name : undefined,
+      message: typeof record.message === 'string' ? record.message : undefined,
+      code: typeof record.code === 'string' ? record.code : undefined,
+      severity: typeof record.severity === 'string' ? record.severity : undefined,
+      detail: typeof record.detail === 'string' ? record.detail : undefined,
+      hint: typeof record.hint === 'string' ? record.hint : undefined,
+      where: typeof record.where === 'string' ? record.where : undefined,
+      schema: typeof record.schema === 'string' ? record.schema : undefined,
+      table: typeof record.table === 'string' ? record.table : undefined,
+      column: typeof record.column === 'string' ? record.column : undefined,
+      constraint: typeof record.constraint === 'string' ? record.constraint : undefined,
+    };
+  }
+
+  return { raw: String(error) };
+}
+
 export default async function StewardsDashboardPage() {
-  const _user = await requireUser();
-  
+  const user = await requireUser();
+  const resolvedOrgId = await getOrganizationIdForUser(user.userId);
+  const orgId = resolvedOrgId || user.organizationId;
+  logger.info('[TEMP][StewardsDashboard] Page load start', {
+    userId: user.userId,
+    organizationId: orgId,
+    requireUserOrganizationId: user.organizationId,
+    resolvedOrganizationId: resolvedOrgId,
+    roles: user.roles,
+  });
+
+  if (resolvedOrgId && user.organizationId !== resolvedOrgId) {
+    logger.warn('[TEMP][StewardsDashboard] Organization mismatch detected', {
+      userId: user.userId,
+      requireUserOrganizationId: user.organizationId,
+      resolvedOrganizationId: resolvedOrgId,
+    });
+  }
+
   // Require chief_steward level (70) to access
   const hasAccess = await hasMinRole("chief_steward");
-  
+
   if (!hasAccess) {
     redirect("/dashboard");
   }
 
-  // Direct DB queries — avoids self-fetch auth issues
+  if (!orgId) {
+    logger.warn('[StewardsDashboard] Missing organization context for user', {
+      userId: user.userId,
+    });
+    return redirect('/dashboard');
+  }
+
+  // Direct DB queries — org-scoped to user's organization
   let stewardStats = { totalStewards: 0, activeCases: 0, pendingEscalations: 0, completedThisMonth: 0, successRate: 0, upcomingTraining: 0 };
   let stewardPerformance: { name: string; active: number; completed: number; successRate: number }[] = [];
   let pendingEscalationsList: { id: string; member: string; steward: string; reason: string }[] = [];
 
   try {
-  const result = await withSystemContext(async () => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStartIso = monthStart.toISOString();
+    // Use only statuses present in the live PostgreSQL grievance_status enum.
+    const terminalStatuses = `'closed', 'settled', 'withdrawn', 'denied'`;
 
     // --- Stats ---
     const [
       totalStewards,
-      activeCases,
+      activeCaseloadResult,
       pendingEscalations,
-      completedThisMonth,
-      totalCompleted,
-      totalAssignments,
+      completedThisMonthResult,
+      totalClosedResult,
+      totalGrievancesResult,
     ] = await Promise.all([
+      // Count active stewards for this org
       db.select({ count: sql<number>`count(*)::int` })
         .from(stewards)
-        .where(eq(stewards.active, true))
+        .where(sql`active = true AND org_id = ${orgId}::uuid`)
         .then(r => r[0]?.count ?? 0),
-      db.select({ count: sql<number>`count(*)::int` })
-        .from(stewardAssignments)
-        .where(eq(stewardAssignments.status, 'active'))
-        .then(r => r[0]?.count ?? 0),
+      // Sum current caseloads for this org's stewards
+      db.select({ total: sql<number>`coalesce(sum(current_caseload), 0)::int` })
+        .from(stewards)
+        .where(sql`active = true AND org_id = ${orgId}::uuid`)
+        .then(r => r[0]?.total ?? 0),
+      // Count escalated grievances (no org column — filter by org members' grievances)
       db.select({ count: sql<number>`count(*)::int` })
         .from(grievances)
-        .where(eq(grievances.status, 'escalated'))
+        .where(sql`${grievances.status} = 'escalated' AND ${grievances.organizationId} = ${orgId}::uuid`)
         .then(r => r[0]?.count ?? 0),
+      // Grievances closed/resolved this month
       db.select({ count: sql<number>`count(*)::int` })
-        .from(stewardAssignments)
-        .where(and(
-          eq(stewardAssignments.status, 'completed'),
-          gte(stewardAssignments.completedAt, monthStart),
-        ))
+        .from(grievances)
+        .where(sql`${grievances.organizationId} = ${orgId}::uuid AND ${grievances.status} IN (${sql.raw(terminalStatuses)}) AND coalesce(${grievances.closedAt}, ${grievances.resolvedAt}) >= ${monthStartIso}::timestamptz`)
         .then(r => r[0]?.count ?? 0),
+      // Total closed/resolved (for success rate)
       db.select({ count: sql<number>`count(*)::int` })
-        .from(stewardAssignments)
-        .where(eq(stewardAssignments.status, 'completed'))
+        .from(grievances)
+        .where(sql`${grievances.organizationId} = ${orgId}::uuid AND ${grievances.status} IN (${sql.raw(terminalStatuses)})`)
         .then(r => r[0]?.count ?? 0),
+      // Total grievances filed (excluding drafts)
       db.select({ count: sql<number>`count(*)::int` })
-        .from(stewardAssignments)
-        .where(sql`${stewardAssignments.status} NOT IN ('pending', 'declined')`)
+        .from(grievances)
+        .where(sql`${grievances.organizationId} = ${orgId}::uuid AND ${grievances.status} != 'draft'`)
         .then(r => r[0]?.count ?? 0),
     ]);
 
-    const successRate = totalAssignments > 0
-      ? Math.round((totalCompleted / totalAssignments) * 100)
+    const successRate = totalGrievancesResult > 0
+      ? Math.round((totalClosedResult / totalGrievancesResult) * 100)
       : 0;
 
-    const stats = { totalStewards, activeCases, pendingEscalations, completedThisMonth, successRate, upcomingTraining: 0 };
+    const stats = {
+      totalStewards,
+      activeCases: activeCaseloadResult,
+      pendingEscalations,
+      completedThisMonth: completedThisMonthResult,
+      successRate,
+      upcomingTraining: 0,
+    };
 
-    // --- Performance ---
-    const perfRows = await db
+    logger.info('[TEMP][StewardsDashboard] Stats query results', {
+      organizationId: orgId,
+      totalStewards,
+      activeCaseloadResult,
+      pendingEscalations,
+      completedThisMonthResult,
+      totalClosedResult,
+      totalGrievancesResult,
+      successRate,
+    });
+
+    // --- Per-steward workload ---
+    // stewards.userId is a UUID that may match organization_members.id or organization_members.userId
+    // Filter by org, then look up display names from organization_members by userId
+    logger.info('[TEMP][StewardsDashboard] Loading steward workload rows', {
+      organizationId: orgId,
+    });
+
+    const stewardRows = await db
       .select({
         stewardId: stewards.id,
         userId: stewards.userId,
-        active: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} = 'active')::int`,
-        completed: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} = 'completed')::int`,
-        total: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} NOT IN ('pending', 'declined'))::int`,
+        active: stewards.currentCaseload,
+        maxCaseload: stewards.maxCaseload,
       })
       .from(stewards)
-      .leftJoin(stewardAssignments, eq(stewardAssignments.stewardId, sql`${stewards.userId}::text`))
-      .where(eq(stewards.active, true))
-      .groupBy(stewards.id, stewards.userId);
+      .where(sql`active = true AND org_id = ${orgId}::uuid`)
+      .orderBy(sql`current_caseload DESC`);
+
+    logger.info('[TEMP][StewardsDashboard] Steward workload rows loaded', {
+      organizationId: orgId,
+      stewardRowCount: stewardRows.length,
+      stewardUserIds: stewardRows.map((row) => row.userId),
+    });
 
     let performance: { name: string; active: number; completed: number; successRate: number }[] = [];
-    if (perfRows.length > 0) {
-      const userIds = perfRows.map(r => r.userId);
-      const members = await db
-        .select({ userId: organizationMembers.userId, name: organizationMembers.name })
+    if (stewardRows.length > 0) {
+      logger.info('[TEMP][StewardsDashboard] Loading org members for steward name map', {
+        organizationId: orgId,
+      });
+
+      const orgMembers = await db
+        .select({ id: organizationMembers.id, userId: organizationMembers.userId, name: organizationMembers.name })
         .from(organizationMembers)
-        .where(sql`${organizationMembers.userId}::text IN (${sql.join(userIds.map(id => sql`${id}::text`), sql`, `)})`);
-      const nameMap = new Map(members.map(m => [m.userId, m.name ?? 'Unknown']));
-      performance = perfRows.map(r => ({
+        .where(sql`${organizationMembers.organizationId} = ${orgId}`);
+
+      logger.info('[TEMP][StewardsDashboard] Org members loaded for steward name map', {
+        organizationId: orgId,
+        orgMemberCount: orgMembers.length,
+      });
+
+      const nameMap = new Map<string, string>();
+      orgMembers.forEach((member) => {
+        if (member.id) {
+          nameMap.set(member.id, member.name ?? 'Unknown');
+        }
+        if (member.userId) {
+          nameMap.set(member.userId, member.name ?? 'Unknown');
+        }
+      });
+      performance = stewardRows.map(r => ({
         name: nameMap.get(r.userId) ?? 'Unknown',
         active: r.active,
-        completed: r.completed,
-        successRate: r.total > 0 ? Math.round((r.completed / r.total) * 100) : 0,
+        completed: 0,
+        successRate: r.maxCaseload > 0
+          ? Math.round(((r.maxCaseload - r.active) / r.maxCaseload) * 100)
+          : 0,
       }));
+
+      logger.info('[TEMP][StewardsDashboard] Steward workload mapping', {
+        organizationId: orgId,
+        stewardRowCount: stewardRows.length,
+        orgMemberCount: orgMembers.length,
+        unresolvedStewardUserIds: stewardRows
+          .map((row) => row.userId)
+          .filter((userId) => !nameMap.has(userId)),
+      });
     }
 
     // --- Escalations ---
+    logger.info('[TEMP][StewardsDashboard] Loading escalations list', {
+      organizationId: orgId,
+    });
+
     const escRows = await db
       .select({
         grievanceId: grievances.id,
         grievanceNumber: grievances.grievanceNumber,
         grievantName: grievances.grievantName,
         title: grievances.title,
-        stewardId: stewardAssignments.stewardId,
       })
       .from(grievances)
-      .leftJoin(stewardAssignments, eq(stewardAssignments.grievanceId, grievances.id))
-      .where(eq(grievances.status, 'escalated'))
+      .where(sql`${grievances.status} = 'escalated' AND ${grievances.organizationId} = ${orgId}::uuid`)
       .orderBy(grievances.escalatedAt)
       .limit(50);
 
-    let escalations: { id: string; member: string; steward: string; reason: string }[] = [];
-    if (escRows.length > 0) {
-      const stewardIds = [...new Set(escRows.map(r => r.stewardId).filter(Boolean))] as string[];
-      const stewardNameMap = new Map<string, string>();
-      if (stewardIds.length > 0) {
-        // stewardIds are user IDs (text) — look up names directly from organizationMembers
-        const sMembers = await db
-          .select({ userId: organizationMembers.userId, name: organizationMembers.name })
-          .from(organizationMembers)
-          .where(sql`${organizationMembers.userId}::text IN (${sql.join(stewardIds.map(id => sql`${id}`), sql`, `)})`);
-        sMembers.forEach(m => stewardNameMap.set(m.userId, m.name ?? 'Unknown'));
-      }
-      escalations = escRows.map(r => ({
-        id: r.grievanceNumber ?? r.grievanceId,
-        member: r.grievantName ?? 'Unknown',
-        steward: r.stewardId ? (stewardNameMap.get(r.stewardId) ?? 'Unassigned') : 'Unassigned',
-        reason: r.title ?? '',
-      }));
-    }
+    logger.info('[TEMP][StewardsDashboard] Escalations list loaded', {
+      organizationId: orgId,
+      escalationRowCount: escRows.length,
+    });
 
-    return { stewardStats: stats, stewardPerformance: performance, pendingEscalationsList: escalations };
-  });
-  stewardStats = result.stewardStats;
-  stewardPerformance = result.stewardPerformance;
-  pendingEscalationsList = result.pendingEscalationsList;
+    const escalations = escRows.map(r => ({
+      id: r.grievanceNumber ?? r.grievanceId,
+      member: r.grievantName ?? 'Unknown',
+      steward: 'Pending Assignment',
+      reason: r.title ?? '',
+    }));
+
+    stewardStats = stats;
+    stewardPerformance = performance;
+    pendingEscalationsList = escalations;
+
+    logger.info('[TEMP][StewardsDashboard] Render payload ready', {
+      organizationId: orgId,
+      stewardStats,
+      stewardPerformanceCount: stewardPerformance.length,
+      pendingEscalationsCount: pendingEscalationsList.length,
+    });
   } catch (error) {
-    logger.error('[StewardsDashboard] DB query failed:', { error });
+    logger.error('[StewardsDashboard] DB query failed:', {
+      organizationId: orgId,
+      error: serializeUnknownError(error),
+    });
     // Fall through with empty defaults
   }
 
@@ -239,33 +356,11 @@ export default async function StewardsDashboardPage() {
 
       {/* Content Sections */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* LRO Satisfaction Ratings Link */}
-        <div className="md:col-span-2">
-          <Card className="border-yellow-200 bg-yellow-50/50">
-            <CardContent className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-3">
-                <Star className="h-5 w-5 text-yellow-600" />
-                <div>
-                  <p className="font-medium">LRO Satisfaction Ratings</p>
-                  <p className="text-sm text-muted-foreground">
-                    View member feedback and performance rankings for all representatives
-                  </p>
-                </div>
-              </div>
-              <Link href="/dashboard/stewards/ratings">
-                <Button variant="outline" size="sm">
-                  View Ratings
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Steward Performance */}
+        {/* Steward Workload & Wellbeing */}
         <Card>
           <CardHeader>
-            <CardTitle>Steward Performance</CardTitle>
-            <CardDescription>Case handling statistics by steward</CardDescription>
+            <CardTitle>Steward Workload Overview</CardTitle>
+            <CardDescription>Caseload distribution and capacity check — ensuring no steward is overburdened</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -274,11 +369,11 @@ export default async function StewardsDashboardPage() {
                   <div>
                     <div className="font-medium">{steward.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {steward.active} active • {steward.completed} completed
+                      {steward.active} active cases
                     </div>
                   </div>
                   <Badge variant="outline" className="bg-green-500/10 text-green-700">
-                    {steward.successRate}% success
+                    {steward.successRate}% capacity free
                   </Badge>
                 </div>
               ))}

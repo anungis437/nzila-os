@@ -17,7 +17,7 @@ import { claims } from '@/db/schema/claims-schema';
 import { claimUpdates } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
-import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { getOrganizationIdForUser, getUserRoleInOrganization } from '@/lib/organization-utils';
 import { wrapSchemaQuery } from '@/lib/schema-error';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
@@ -37,13 +37,14 @@ export async function PATCH(
     const { caseId } = await params;
 
     // 1. Auth
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+    const orgId = await getOrganizationIdForUser(userId);
     await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse + validate body

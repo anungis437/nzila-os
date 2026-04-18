@@ -23,6 +23,11 @@ const PG_SESSION_COOKIE = 'nzila_session'
  * Full validation happens server-side in auth().
  */
 export function hasPgSessionCookie(request: NextRequest): boolean {
+  const enablePgFallback =
+    (process.env.NZILA_AUTH_ENABLE_PG_FALLBACK
+      ?? process.env.NEXT_PUBLIC_NZILA_AUTH_ENABLE_PG_FALLBACK
+      ?? 'true').toLowerCase() !== 'false'
+  if (!enablePgFallback) return false
   return !!request.cookies.get(PG_SESSION_COOKIE)?.value
 }
 

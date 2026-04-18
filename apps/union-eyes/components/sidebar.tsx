@@ -147,7 +147,7 @@ function NavSection({
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanId: _whopMonthlyPlanId, whopYearlyPlanId: _whopYearlyPlanId, userRole = "member", platformOrgId }: SidebarProps) {
+export default function Sidebar({ profile, userEmail, whopMonthlyPlanId: _whopMonthlyPlanId, whopYearlyPlanId: _whopYearlyPlanId, userRole = "member", platformOrgId }: SidebarProps) {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations();
@@ -176,6 +176,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   const isActive = (path: string) => pathname === path;
   const isNzila = (NZILA_ROLES as readonly string[]).includes(userRole);
   const hasSelectedOrg = !!organizationId;
+  const identityEmail = userEmail?.trim() || profile?.email?.trim() || "";
+  const identityLabel = identityEmail ? identityEmail.split("@")[0] : t("common.member");
   // Platform admin viewing a tenant org should see that tenant's navigation
   const isViewingPlatformOrg = !organizationId || organizationId === platformOrgId;
   const isViewingTenantOrg = isNzila && hasSelectedOrg && !isViewingPlatformOrg;
@@ -329,8 +331,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       items: [
         { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('sidebar.members'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/stewards`, icon: <Users size={16} />, label: t('sidebar.stewardManagement'), roles: ["chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/governance`, icon: <FileText size={16} />, label: t('sidebar.governance'), roles: [...execRoles, mgmt] },
-        { href: `/${locale}/dashboard/audits`, icon: <FileBarChart size={16} />, label: t('sidebar.auditsCompliance'), roles: [...execRoles, "admin", mgmt] },
         { href: `/${locale}/dashboard/structure`, icon: <Network size={16} />, label: t('sidebar.orgStructure'), roles: ["admin", "system_admin", "app_owner", mgmt] },
       ],
     },
@@ -597,7 +597,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
             </div>
             <div className="hidden md:block ml-3 flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {userEmail?.split("@")[0] || t("common.member")}
+                {identityLabel}
               </p>
               <p className="text-xs text-gray-600">{t("sidebar.viewProfile")}</p>
             </div>

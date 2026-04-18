@@ -29,6 +29,10 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  env: {
+    NZILA_AUTH_ENABLE_PG_FALLBACK: 'false',
+    NEXT_PUBLIC_NZILA_AUTH_ENABLE_PG_FALLBACK: 'false',
+  },
   images: {
     remotePatterns: [
       {

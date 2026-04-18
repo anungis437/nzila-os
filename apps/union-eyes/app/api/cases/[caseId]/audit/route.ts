@@ -15,15 +15,17 @@ import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { auditDataAccess } from '@/lib/audit-logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
+  const { userId } = await auth();
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  const orgId = await getOrganizationIdForUser(userId);
   await requireEntitlement(orgId, 'grievance_case_suite');
 
   const { caseId } = await params;

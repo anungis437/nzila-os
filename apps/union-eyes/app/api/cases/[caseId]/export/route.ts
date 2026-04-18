@@ -18,15 +18,17 @@ import { buildEvidencePack } from '@/lib/evidence-export';
 import { auditCaseExport } from '@/lib/audited-case-mutations';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { recordUnionEyesEvidenceExport } from '@/lib/pilot-metrics';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
+  const { userId } = await auth();
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  const orgId = await getOrganizationIdForUser(userId);
   await requireEntitlement(orgId, 'grievance_case_suite');
 
   const { caseId } = await params;

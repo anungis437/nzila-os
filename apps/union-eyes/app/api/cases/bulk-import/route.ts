@@ -20,6 +20,7 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { createHash } from 'crypto';
 import { eq } from 'drizzle-orm';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,13 +63,15 @@ const CLAIM_TYPE_MAP: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'AUTH_REQUIRED', message: 'Authentication required.' },
         { status: 401 },
       );
     }
+
+    const orgId = await getOrganizationIdForUser(userId);
 
     await requireEntitlement(orgId, 'grievance_case_suite');
 

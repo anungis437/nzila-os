@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { createLogger } from '@nzila/os-core';
 import { buildPilotStatus, type PilotConfiguration } from '@/lib/pilot-admin';
 import type { CaseRow } from '@/lib/dashboard-metrics';
@@ -17,6 +17,11 @@ const logger = createLogger('admin:pilot-status');
 
 export const GET = withApiAuth(async (_request: NextRequest) => {
   try {
+    const canAccess = await hasMinRole('platform_lead');
+    if (!canAccess) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     // In production these would come from the database.
     // For the pilot scaffold, we demonstrate the shape with defaults.
     const config: PilotConfiguration = {

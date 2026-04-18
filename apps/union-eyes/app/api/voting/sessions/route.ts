@@ -29,64 +29,90 @@ export const GET = withApi(
     const url = new URL(request.url);
     const status = url.searchParams.get('status')?.split(',') ?? undefined;
     const type = url.searchParams.get('type') ?? undefined;
-    const page = parseInt(url.searchParams.get('page') ?? '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') ?? '20', 10);
+    const pageRaw = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
+    const limitRaw = Number.parseInt(url.searchParams.get('limit') ?? '20', 10);
+    const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : 20;
 
-    const result = await listVotingSessions(
-      {
-        organizationId: organizationId ?? undefined,
+    let result: Awaited<ReturnType<typeof listVotingSessions>>;
+    try {
+      result = await listVotingSessions(
+        {
+          organizationId: organizationId ?? undefined,
+          status,
+          type,
+        },
+        { page, limit }
+      );
+    } catch (error) {
+      logger.warn('Voting sessions listing failed; returning empty list', {
+        error: error instanceof Error ? error.message : String(error),
+        organizationId,
         status,
         type,
-      },
-      { page, limit }
-    );
-
-    // Enrich sessions with options and vote counts
-    const sessionIds = result.sessions.map((s) => s.id);
-    if (sessionIds.length > 0) {
-      const [options, voteCounts] = await Promise.all([
-        db.select().from(votingOptions)
-          .where(inArray(votingOptions.sessionId, sessionIds))
-          .orderBy(votingOptions.orderIndex),
-        db.select({
-          optionId: votesTable.optionId,
-          count: count(),
-        }).from(votesTable)
-          .where(inArray(votesTable.sessionId, sessionIds))
-          .groupBy(votesTable.optionId),
-      ]);
-
-      const voteCountMap = Object.fromEntries(
-        voteCounts.map((vc) => [vc.optionId, Number(vc.count)])
-      );
-
-      const optionsBySession: Record<string, typeof options> = {};
-      for (const opt of options) {
-        if (!optionsBySession[opt.sessionId]) optionsBySession[opt.sessionId] = [];
-        optionsBySession[opt.sessionId].push(opt);
-      }
-
-      const enriched = result.sessions.map((s) => {
-        const opts = optionsBySession[s.id] || [];
-        const totalVotes = opts.reduce((sum, o) => sum + (voteCountMap[o.id] || 0), 0);
-        return {
-          ...s,
-          options: opts.map((o) => ({
-            id: o.id,
-            text: o.text,
-            description: o.description,
-            orderIndex: o.orderIndex,
-            votes: voteCountMap[o.id] || 0,
-            percentage: totalVotes > 0 ? Math.round(((voteCountMap[o.id] || 0) / totalVotes) * 100) : 0,
-          })),
-          totalVotes,
-        };
       });
-
-      return { ...result, sessions: enriched };
+      return { sessions: [], total: 0, page, limit };
     }
 
-    return result;
+    const normalizedResult = {
+      ...result,
+      total: typeof result.total === 'bigint' ? Number(result.total) : result.total,
+    };
+
+    // Enrich sessions with options and vote counts
+    const sessionIds = normalizedResult.sessions.map((s) => s.id);
+    if (sessionIds.length > 0) {
+      try {
+        const [options, voteCounts] = await Promise.all([
+          db.select().from(votingOptions)
+            .where(inArray(votingOptions.sessionId, sessionIds))
+            .orderBy(votingOptions.orderIndex),
+          db.select({
+            optionId: votesTable.optionId,
+            count: count(),
+          }).from(votesTable)
+            .where(inArray(votesTable.sessionId, sessionIds))
+            .groupBy(votesTable.optionId),
+        ]);
+
+        const voteCountMap = Object.fromEntries(
+          voteCounts.map((vc) => [vc.optionId, Number(vc.count)])
+        );
+
+        const optionsBySession: Record<string, typeof options> = {};
+        for (const opt of options) {
+          if (!optionsBySession[opt.sessionId]) optionsBySession[opt.sessionId] = [];
+          optionsBySession[opt.sessionId].push(opt);
+        }
+
+        const enriched = normalizedResult.sessions.map((s) => {
+          const opts = optionsBySession[s.id] || [];
+          const totalVotes = opts.reduce((sum, o) => sum + (voteCountMap[o.id] || 0), 0);
+          return {
+            ...s,
+            options: opts.map((o) => ({
+              id: o.id,
+              text: o.text,
+              description: o.description,
+              orderIndex: o.orderIndex,
+              votes: voteCountMap[o.id] || 0,
+              percentage: totalVotes > 0 ? Math.round(((voteCountMap[o.id] || 0) / totalVotes) * 100) : 0,
+            })),
+            totalVotes,
+          };
+        });
+
+        return { ...normalizedResult, sessions: enriched };
+      } catch (error) {
+        logger.warn('Voting sessions enrichment failed; returning base sessions', {
+          error: error instanceof Error ? error.message : String(error),
+          sessionCount: normalizedResult.sessions.length,
+        });
+        return normalizedResult;
+      }
+    }
+
+    return normalizedResult;
   }
 );
 

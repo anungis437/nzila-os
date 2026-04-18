@@ -27,7 +27,7 @@ const testUser: ShellUser = {
   firstName: 'Alice',
   lastName: 'Bob',
   imageUrl: null,
-  roles: ['org_admin'],
+  roles: ['platform_admin'],
 }
 
 const testOrgs: ShellOrg[] = [

@@ -191,11 +191,12 @@ export function CommitteeManagement({
   const fetchUnits = async () => {
     try {
       const response = await fetch(
-        `/api/bargaining-units?organizationId=${organizationId}`
+        `/api/units?organizationId=${organizationId}`
       );
       if (!response.ok) throw new Error("Failed to fetch bargaining units");
-      const data = await response.json();
-      setUnits(data.data || []);
+      const json = await response.json();
+      const items = json?.data?.data ?? json?.data ?? json ?? [];
+      setUnits(Array.isArray(items) ? items : []);
     } catch (error) {
       logger.error("Failed to fetch bargaining units", error);
     }

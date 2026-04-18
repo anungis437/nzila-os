@@ -31,8 +31,63 @@ export const DEFAULT_ORGANIZATION_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087"; /
  */
 export async function getOrganizationIdForUser(userId: string): Promise<string> {
   try {
-    // Check if user has selected a specific organization via cookie (uses slug)
+    // Check if user selected a specific organization UUID via cookie.
+    // This is the primary selector written by the client org switcher.
     const cookieStore = await cookies();
+    const selectedOrgId =
+      cookieStore.get("selected_org_id")?.value ||
+      cookieStore.get("selected_organization_id")?.value;
+
+    if (selectedOrgId) {
+      const orgById = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.id, selectedOrgId))
+        .limit(1);
+
+      if (orgById.length > 0) {
+        const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+          .split(',').map(s => s.trim()).filter(Boolean);
+        if (platformAdminIds.includes(userId)) {
+          return orgById[0].id;
+        }
+
+        const isSuperAdmin = await db
+          .select({ role: organizationMembers.role })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.userId, userId),
+              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID)
+            )
+          )
+          .limit(1);
+
+        const hasAdminAccess = isSuperAdmin.length > 0 &&
+          ['admin', 'super_admin', 'app_owner'].includes(isSuperAdmin[0].role);
+
+        if (hasAdminAccess) {
+          return orgById[0].id;
+        }
+
+        const userOrg = await db
+          .select({ organizationId: organizationMembers.organizationId })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.userId, userId),
+              eq(organizationMembers.organizationId, orgById[0].id)
+            )
+          )
+          .limit(1);
+
+        if (userOrg.length > 0) {
+          return orgById[0].id;
+        }
+      }
+    }
+
+    // Secondary selector: slug-based cookie.
     const selectedOrgSlug = cookieStore.get("active-organization")?.value;
     
     if (selectedOrgSlug) {
