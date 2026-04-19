@@ -7,7 +7,7 @@ export interface AbrAuditEvent {
   actorUserId: string;
   orgId: string;
   entityType: string;
-  entityId: string;
+  recordId?: string;
   details?: Record<string, unknown>;
 }
 

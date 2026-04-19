@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 import { logAuditEvent } from '@/lib/audit-log';
 import {
-  authenticateWithOrg,
+  requireOrgAccess,
   requirePermission,
   withRequestContext,
 } from '@/lib/api-guards';
@@ -14,7 +14,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'incident.transition');
@@ -45,8 +45,7 @@ export async function POST(
         actorUserId: authz.userId,
         orgId: authz.orgId,
         entityType: 'incident',
-        entityId: id,
-        details: { role: permission.role, to },
+        details: { role: permission.role, to, incidentId: id },
       });
 
       return NextResponse.json({ item: updated });

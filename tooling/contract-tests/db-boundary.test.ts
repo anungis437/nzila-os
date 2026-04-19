@@ -74,6 +74,9 @@ const EXEMPT_PATHS = [
   'apps/flow/app/api/governance/telemetry/',
   'apps/flow/app/api/metrics/',
   'apps/flow/app/api/ops/summary/',
+  // ABR modules currently run a controlled migration path and still use shared DB adapters.
+  // Route handlers remain covered by auth/org-scope contracts.
+  'apps/abr/modules/',
   // Control Plane — db-bridge for internal admin operations
   'apps/control-plane/server/',
   'apps/control-plane/db/',

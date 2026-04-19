@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 import {
-  authenticateWithOrg,
+  requireOrgAccess,
   requirePermission,
   withRequestContext,
 } from '@/lib/api-guards';
@@ -47,7 +47,7 @@ function parseCreateBody(payload: unknown): IncidentCreateInput | null {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'incident.read');
@@ -60,7 +60,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       actorUserId: authz.userId,
       orgId: authz.orgId,
       entityType: 'incident',
-      entityId: 'collection',
       details: { count: incidents.length, role: permission.role },
     });
 
@@ -75,7 +74,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'incident.create');
@@ -100,8 +99,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       actorUserId: authz.userId,
       orgId: authz.orgId,
       entityType: 'incident',
-      entityId: incident.id,
       details: {
+        incidentId: incident.id,
         status: incident.status,
         severity: incident.severity,
         role: permission.role,

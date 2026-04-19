@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-import { authenticateWithOrg, requirePermission, withRequestContext } from '@/lib/api-guards';
+import { requireOrgAccess, requirePermission, withRequestContext } from '@/lib/api-guards';
 import { getDashboardSummary } from '@/modules/incidents/service';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'dashboard.read');

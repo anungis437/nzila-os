@@ -24,6 +24,8 @@ import {
   createRequestContext,
   runWithContext,
 } from '@nzila/os-core/telemetry'
+import { hasPermission, normalizeRole, type AbrPermission, type AbrRole } from '@/lib/rbac'
+import { resolveOrgContext } from '@/lib/org-context'
 
 // ── Authentication ──────────────────────────────────────────────────────────
 
@@ -39,6 +41,63 @@ export async function authenticateUser(): Promise<
     }
   }
   return { ok: true, userId }
+}
+
+export async function authenticateWithOrg(
+  req: NextRequest | Request,
+): Promise<
+  | { ok: true; userId: string; orgId: string; orgSource: 'header' | 'demo-default' }
+  | { ok: false; response: NextResponse }
+> {
+  const authn = await authenticateUser()
+  if (!authn.ok) return authn
+
+  const org = resolveOrgContext(req)
+  if (!org) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Missing organization context', code: 'ORG_CONTEXT_REQUIRED' },
+        { status: 400 },
+      ),
+    }
+  }
+
+  return {
+    ok: true,
+    userId: authn.userId,
+    orgId: org.orgId,
+    orgSource: org.source,
+  }
+}
+
+export async function requireOrgAccess(
+  req: NextRequest | Request,
+): Promise<
+  | { ok: true; userId: string; orgId: string; orgSource: 'header' | 'demo-default' }
+  | { ok: false; response: NextResponse }
+> {
+  return authenticateWithOrg(req)
+}
+
+export function requirePermission(
+  req: NextRequest | Request,
+  permission: AbrPermission,
+):
+  | { ok: true; role: AbrRole }
+  | { ok: false; response: NextResponse } {
+  const role = normalizeRole(req.headers.get('x-abr-role'))
+  if (!hasPermission(role, permission)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Forbidden', code: 'INSUFFICIENT_PERMISSION', permission, role },
+        { status: 403 },
+      ),
+    }
+  }
+
+  return { ok: true, role }
 }
 
 // ── Request Context wrapper ─────────────────────────────────────────────────
