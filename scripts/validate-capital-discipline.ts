@@ -5,7 +5,8 @@ import { findRepoRoot } from './lib/portfolio-governance'
 
 function main(): void {
   const root = findRepoRoot()
-  const { validation, scores } = buildCapitalOutputs(root)
+  const outputs = buildCapitalOutputs(root)
+  const { validation, scores } = outputs
   const errors = [...validation.errors]
   const warnings = [...validation.warnings]
 
@@ -25,6 +26,30 @@ function main(): void {
         errors.push(`${score.product.id}: sunset product received new allocation`) 
       }
     }
+
+    if (score.data_confidence_pct <= 0 || score.data_confidence_pct > 100) {
+      errors.push(`${score.product.id}: invalid confidence percentage`) 
+    }
+
+    if (score.explainability.length < 4) {
+      errors.push(`${score.product.id}: explainability output incomplete`) 
+    }
+  }
+
+  if (outputs.cash_forecast.length !== 3) {
+    errors.push('cash forecast must include 30/60/90 day checkpoints')
+  }
+
+  if (outputs.override_log.overrides === undefined) {
+    errors.push('override log missing overrides array')
+  }
+
+  if (outputs.scenario_pack.scenarios.length < 6) {
+    errors.push('scenario pack missing required board-grade scenario set')
+  }
+
+  if (outputs.alerts.length === 0) {
+    warnings.push('no capital alerts triggered; verify trigger thresholds still reflect current operating posture')
   }
 
   if (errors.length > 0) {

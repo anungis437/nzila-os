@@ -1,0 +1,49 @@
+{
+  "as_of_date": "2026-04-19",
+  "activities": [
+    {
+      "id": "activity-001",
+      "lane": "enterprise_demos",
+      "activity": "Enterprise demos",
+      "hours": 12,
+      "pipeline_created": 170000,
+      "revenue_closed": 42000,
+      "owner": "Founder",
+      "source": "manual",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "activity-002",
+      "lane": "partner_calls",
+      "activity": "Partner calls",
+      "hours": 7,
+      "pipeline_created": 52000,
+      "revenue_closed": 6000,
+      "owner": "Founder",
+      "source": "manual",
+      "confidence": "LOW"
+    },
+    {
+      "id": "activity-003",
+      "lane": "cold_outreach",
+      "activity": "Cold outreach",
+      "hours": 9,
+      "pipeline_created": 38000,
+      "revenue_closed": 0,
+      "owner": "Founder",
+      "source": "manual",
+      "confidence": "LOW"
+    },
+    {
+      "id": "activity-004",
+      "lane": "warm_intros",
+      "activity": "Warm intros",
+      "hours": 5,
+      "pipeline_created": 94000,
+      "revenue_closed": 18000,
+      "owner": "Founder",
+      "source": "manual",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

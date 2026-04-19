@@ -1,0 +1,136 @@
+{
+  "as_of_date": "2026-04-19",
+  "assumptions_note": "Planning-mode cash calendar assumptions. Replace with live payroll, AP, tax, debt, and receivables systems before external board circulation.",
+  "sustainable_founder_hours_per_week": 45,
+  "dormant_budget_cap_monthly": 5000,
+  "obligations": [
+    {
+      "id": "payroll-2026-04-30",
+      "date": "2026-04-30",
+      "category": "payroll",
+      "amount": 60000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated semi-monthly payroll draw."
+    },
+    {
+      "id": "payroll-2026-05-15",
+      "date": "2026-05-15",
+      "category": "payroll",
+      "amount": 60000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated semi-monthly payroll draw."
+    },
+    {
+      "id": "payroll-2026-05-30",
+      "date": "2026-05-30",
+      "category": "payroll",
+      "amount": 60000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated semi-monthly payroll draw."
+    },
+    {
+      "id": "payroll-2026-06-15",
+      "date": "2026-06-15",
+      "category": "payroll",
+      "amount": 60000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated semi-monthly payroll draw."
+    },
+    {
+      "id": "vendor-2026-05-05",
+      "date": "2026-05-05",
+      "category": "vendor",
+      "amount": 18000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Core vendors and software subscriptions."
+    },
+    {
+      "id": "vendor-2026-06-05",
+      "date": "2026-06-05",
+      "category": "vendor",
+      "amount": 18000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Core vendors and software subscriptions."
+    },
+    {
+      "id": "cloud-2026-05-07",
+      "date": "2026-05-07",
+      "category": "cloud",
+      "amount": 14000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Estimated Azure and infrastructure invoices."
+    },
+    {
+      "id": "cloud-2026-06-07",
+      "date": "2026-06-07",
+      "category": "cloud",
+      "amount": 14000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Estimated Azure and infrastructure invoices."
+    },
+    {
+      "id": "tax-2026-05-21",
+      "date": "2026-05-21",
+      "category": "tax",
+      "amount": 12000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated remittance reserve."
+    },
+    {
+      "id": "tax-2026-06-21",
+      "date": "2026-06-21",
+      "category": "tax",
+      "amount": 12000,
+      "confidence": "MEDIUM",
+      "source": "planning-calendar",
+      "note": "Estimated remittance reserve."
+    },
+    {
+      "id": "debt-2026-05-25",
+      "date": "2026-05-25",
+      "category": "debt",
+      "amount": 8000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Estimated scheduled debt service."
+    },
+    {
+      "id": "debt-2026-06-25",
+      "date": "2026-06-25",
+      "category": "debt",
+      "amount": 8000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Estimated scheduled debt service."
+    }
+  ],
+  "receivables": [
+    {
+      "id": "grant-2026-05-28",
+      "date": "2026-05-28",
+      "category": "grant",
+      "amount": 30000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Expected reimbursement pending documentation."
+    },
+    {
+      "id": "grant-2026-06-28",
+      "date": "2026-06-28",
+      "category": "grant",
+      "amount": 30000,
+      "confidence": "LOW",
+      "source": "planning-calendar",
+      "note": "Expected reimbursement pending documentation."
+    }
+  ]
+}

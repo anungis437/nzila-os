@@ -35,4 +35,4 @@ jobs:
         run: pnpm generate:capital-allocation
 
       - name: Run capital allocation tests
-        run: pnpm exec vitest run --project contract-tests tooling/contract-tests/capital-allocation.test.ts
+        run: pnpm exec vitest run --project contract-tests tooling/contract-tests/capital-allocation.test.ts tooling/contract-tests/capital-engine-v2.test.ts
