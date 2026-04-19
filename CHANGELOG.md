@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### ABR Sprint 4 (Final-Delta)
+- **Intelligence Persistence**: Converted intelligence from seeded-only to persistent runtime storage (sources, cases, ingest_jobs, review_queue tables).
+- **Ingest Jobs**: CSV/JSON import wrapper with duplicate handling, confidence scoring, and review queue integration.
+- **Role-Based Redaction**: Fine-grained note scopes wired at service boundary with query-time filtering per user role.
+- **Export Endpoints**: Three REST endpoints for executive-summary, incidents, and remediation exports with role-aware redaction.
+- **Go-to-Market Pipeline**: CRM-linked pipeline service for tracking demo→proposal→procurement→close activities with operator visibility.
+- **Bilingual Dashboard**: Full English/French parity across all core operator surfaces (intelligence, governance, learning, ROI, trust, pipeline).
+- **Validation**: Workspace typecheck passing, 6/6 smoke tests, all async/await regressions resolved.
+
 ## [1.0.0] — 2026-03-08
 
 NzilaOS v1.0.0 — UnionEyes GA release. 100 merged PRs, 7,669+ tests, 0 TypeScript errors, all CI workflows green, Azure deployed.
