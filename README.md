@@ -27,6 +27,32 @@ Safe update flow:
 
 CI rejects drift if generated artifacts or downstream metadata fall out of sync with the catalog.
 
+## Capital Discipline System
+
+Nzila allocates capital, engineering hours, and founder attention from a single authority: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
+
+Capital model governance rules:
+
+- Product-level financial, resource, risk, and strategic fields are required for every product.
+- Allocation weights are governed by `capital_weights` in the catalog (no hardcoded score weights).
+- Scenario runway inputs are governed by `capital_model.scenarios` and explicitly marked as assumptions until live feeds are connected.
+
+Run the engine:
+
+1. Generate executive capital reports: `pnpm generate:capital-allocation`
+2. Validate discipline gates: `pnpm validate:capital-discipline`
+3. Compute runway scenarios: `pnpm runway:model`
+
+Generated executive outputs:
+
+- [reports/capital-allocation.md](reports/capital-allocation.md)
+- [reports/resource-allocation.md](reports/resource-allocation.md)
+- [reports/top-3-to-fund.md](reports/top-3-to-fund.md)
+- [reports/kill-list.md](reports/kill-list.md)
+- [reports/founder-time-map.md](reports/founder-time-map.md)
+- [reports/runway-scenarios.md](reports/runway-scenarios.md)
+- [reports/capital-signal-readiness.md](reports/capital-signal-readiness.md)
+
 ## Proof and Trust Surfaces
 
 - Proof center: [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md)
