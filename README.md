@@ -4,49 +4,28 @@ Nzila is a governed multi-product software group. This repository is the canonic
 
 All apps use `@nzila/platform-auth` as the canonical authentication layer.
 
-## Products at a Glance
+## Portfolio Governance
 
-| Tier | Apps |
-|---|---|
-| **PRODUCTION** | union-eyes, flow, console, web |
-| **PILOT** | control-plane, partners, cfo |
-| **INCUBATING** | zonga, agrimo, trade, cora, nacp-exams, mobility |
-| **EXPERIMENTAL** | mobility-client-portal, abr, platform-admin, orchestrator-api |
+Portfolio lifecycle truth has one editable authority: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
 
-## Status authority model
+The score engine is also governed there through `scoring.weights`, so recommendation rankings are policy-controlled at the source.
 
-- Product tier authority: [packages/platform-contracts/src/registry.ts](packages/platform-contracts/src/registry.ts)
-- Deployment/readiness authority: [nzila-truth-manifest.json](nzila-truth-manifest.json)
-- Canonical product evidence authority: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
+Everything else is generated or validated from that catalog:
 
-## Commercial Focus (Canonical)
+- Truth manifest: [nzila-truth-manifest.json](nzila-truth-manifest.json)
+- Executive portfolio report: [reports/portfolio-status.md](reports/portfolio-status.md)
+- Machine-readable portfolio status: [reports/portfolio-status.json](reports/portfolio-status.json)
+- Investor view: [reports/portfolio-investor-view.md](reports/portfolio-investor-view.md)
+- Ops dashboard feed: [reports/portfolio-ops-dashboard.json](reports/portfolio-ops-dashboard.json)
+- Portfolio matrix: [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md)
 
-### SELL NOW
-- Union Eyes
-- Flow
+Safe update flow:
 
-### USE INTERNALLY
-- Console
-- Control Plane
-- Shared platform packages
+1. Edit [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
+2. Run `pnpm generate:portfolio-artifacts`.
+3. Run `pnpm validate:portfolio-governance`.
 
-### INCUBATE
-- CFO
-- Partners
-- Zonga
-- Agrimo
-- Trade
-- Cora
-- NACP Exams
-- Mobility
-- ABR
-
-### ARCHIVE / CUT PRIORITY
-- Mobility Client Portal
-- Platform Admin
-- Orchestrator API
-
-Source of truth: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
+CI rejects drift if generated artifacts or downstream metadata fall out of sync with the catalog.
 
 ## Proof and Trust Surfaces
 
@@ -56,8 +35,8 @@ Source of truth: [governance/portfolio/product-catalog.json](governance/portfoli
 
 ## Governance and Validation
 
-- Product catalog validation: `pnpm validate:product-catalog`
-- Canonical truth anti-drift: `pnpm validate:canonical-truth`
+- Portfolio artifact generation: `pnpm generate:portfolio-artifacts`
+- Portfolio governance validation: `pnpm validate:portfolio-governance`
 - Full governance gate: `pnpm validate:governance`
 
 ## Additional References

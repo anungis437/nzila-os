@@ -1,215 +1,302 @@
 {
-  "status_model_version": "2026-04-17",
-  "platform_status": "pilot-safe",
-  "last_audit": "2026-04-17",
+  "status_model_version": "2026-04-18.0",
+  "platform_status": "operator-safe",
+  "last_audit": "2026-04-19",
   "authority": {
-    "product_tier_source": "packages/platform-contracts/src/registry.ts",
-    "deployment_status_source": "apps/*/maturity.json",
-    "public_summary_surfaces": [
-      "README.md",
-      "docs/platform/portfolio-matrix.md"
-    ]
-  },
-  "status_axes": {
-    "product_tier": [
-      "PRODUCTION",
-      "PILOT",
-      "INCUBATING",
-      "EXPERIMENTAL"
+    "editable_source": "governance/portfolio/product-catalog.json",
+    "generated_by": "scripts/generate-portfolio-artifacts.ts",
+    "generated_surfaces": [
+      "nzila-truth-manifest.json",
+      "reports/portfolio-status.json",
+      "reports/portfolio-status.md",
+      "reports/portfolio-investor-view.md",
+      "reports/portfolio-ops-dashboard.json",
+      "docs/platform/portfolio-matrix.md",
+      "apps/*/maturity.json",
+      "apps/*/catalog-info.yaml"
     ],
-    "deployment_status": [
-      "production",
-      "pilot",
-      "internal",
-      "scaffold",
-      "deprecated"
-    ],
-    "readiness_tier": [
-      "production-ready",
-      "pilot-safe",
-      "internal-only",
-      "scaffold-only",
-      "deprecated"
-    ]
+    "operational_registry_source": "packages/platform-contracts/src/registry.ts"
   },
   "apps": {
-    "union-eyes": "pilot",
     "flow": "pilot",
-    "web": "pilot",
-    "partners": "pilot",
+    "union-eyes": "pilot",
     "cfo": "pilot",
+    "partners": "pilot",
     "console": "internal",
     "control-plane": "internal",
-    "zonga": "internal",
-    "abr": "internal",
-    "trade": "internal",
-    "cora": "internal",
-    "agrimo": "internal",
-    "platform-admin": "internal",
     "orchestrator-api": "internal",
-    "nacp-exams": "internal",
-    "mobility": "internal",
-    "mobility-client-portal": "internal"
+    "web": "pilot",
+    "abr": "incubating",
+    "agrimo": "incubating",
+    "cora": "incubating",
+    "mobility": "incubating",
+    "nacp-exams": "incubating",
+    "trade": "incubating",
+    "zonga": "incubating",
+    "mobility-client-portal": "frozen",
+    "platform-admin": "frozen"
   },
   "app_status": {
-    "union-eyes": {
-      "registry_tier": "PRODUCTION",
-      "deployment_status": "pilot",
-      "readiness_tier": "pilot-safe",
-      "exposure": "internal"
-    },
     "flow": {
       "registry_tier": "PRODUCTION",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
-      "exposure": "internal"
+      "exposure": "internal",
+      "portfolio_tier": 1,
+      "gtm_posture": "sell-now",
+      "proof_level": "internal-proof",
+      "revenue_status": "pilot-contracting",
+      "priority": "high"
     },
-    "console": {
-      "registry_tier": "PRODUCTION",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "web": {
+    "union-eyes": {
       "registry_tier": "PRODUCTION",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
-      "exposure": "public"
-    },
-    "control-plane": {
-      "registry_tier": "PILOT",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "partners": {
-      "registry_tier": "PILOT",
-      "deployment_status": "pilot",
-      "readiness_tier": "pilot-safe",
-      "exposure": "internal"
+      "exposure": "internal",
+      "portfolio_tier": 1,
+      "gtm_posture": "sell-now",
+      "proof_level": "pilot-proof",
+      "revenue_status": "pilot-contracting",
+      "priority": "critical"
     },
     "cfo": {
       "registry_tier": "PILOT",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
-      "exposure": "internal"
+      "exposure": "internal",
+      "portfolio_tier": 2,
+      "gtm_posture": "maintain",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
     },
-    "zonga": {
-      "registry_tier": "INCUBATING",
+    "partners": {
+      "registry_tier": "PILOT",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal",
+      "portfolio_tier": 2,
+      "gtm_posture": "maintain",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
+    "console": {
+      "registry_tier": "PRODUCTION",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
-      "exposure": "internal"
+      "exposure": "internal",
+      "portfolio_tier": 3,
+      "gtm_posture": "internal-only",
+      "proof_level": "internal-proof",
+      "revenue_status": "internal-cost-center",
+      "priority": "high"
     },
-    "agrimo": {
-      "registry_tier": "INCUBATING",
+    "control-plane": {
+      "registry_tier": "PILOT",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "trade": {
-      "registry_tier": "INCUBATING",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "cora": {
-      "registry_tier": "INCUBATING",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "nacp-exams": {
-      "registry_tier": "INCUBATING",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "mobility": {
-      "registry_tier": "INCUBATING",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "mobility-client-portal": {
-      "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "abr": {
-      "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
-    },
-    "platform-admin": {
-      "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "internal",
-      "readiness_tier": "internal-only",
-      "exposure": "internal"
+      "exposure": "internal",
+      "portfolio_tier": 3,
+      "gtm_posture": "internal-only",
+      "proof_level": "internal-proof",
+      "revenue_status": "internal-cost-center",
+      "priority": "high"
     },
     "orchestrator-api": {
       "registry_tier": "EXPERIMENTAL",
       "deployment_status": "internal",
       "readiness_tier": "internal-only",
       "exposure": "internal",
-      "score": 8.5,
-      "hardening_date": "2026-04-17",
-      "hardening_notes": "DB-native idempotency, FSM lifecycle, OCC, lease/recovery, operator console, 24/24 tests"
+      "portfolio_tier": 3,
+      "gtm_posture": "internal-only",
+      "proof_level": "internal-proof",
+      "revenue_status": "internal-cost-center",
+      "priority": "medium"
+    },
+    "web": {
+      "registry_tier": "PRODUCTION",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "public",
+      "portfolio_tier": 3,
+      "gtm_posture": "maintain",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
+    "abr": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "agrimo": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "cora": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "mobility": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "nacp-exams": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "trade": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "zonga": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
+    },
+    "mobility-client-portal": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "frozen",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 5,
+      "gtm_posture": "sunset",
+      "proof_level": "none",
+      "revenue_status": "sunsetting",
+      "priority": "low"
+    },
+    "platform-admin": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "frozen",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 5,
+      "gtm_posture": "sunset",
+      "proof_level": "none",
+      "revenue_status": "sunsetting",
+      "priority": "low"
     }
   },
   "blocking_gaps": [
-    "deployment-ready status remains fail-closed until runtime and observability evidence is complete",
-    "union-eyes break-glass requires secure runtime secrets to activate threshold recovery"
+    "No Tier 1 product has market-proof status yet.",
+    "One or more sell-now products are still internal deployment only."
   ],
   "portfolio_tier_model": {
-    "version": "2026-04-17",
-    "authority": "governance/portfolio/product-catalog.json#portfolio_tier_model",
+    "version": "2026-04-18.0",
+    "authority": "governance/portfolio/product-catalog.json",
     "tier_assignments": {
-      "TIER 1 — Flagship Revenue": ["union-eyes", "flow"],
-      "TIER 2 — Strategic Growth": ["cfo", "partners", "zonga"],
-      "TIER 3 — Internal Platform": ["console", "control-plane", "orchestrator-api", "web"],
-      "TIER 4 — Incubation": ["agrimo", "cora", "trade", "nacp-exams", "mobility", "abr"],
-      "TIER 5 — Frozen": ["platform-admin", "mobility-client-portal"]
-    }
-  },
-  "portfolio_execution_model": {
-    "version": "2026-04-17",
-    "classifications": {
-      "immediate_revenue_products_0_6_months": [
-        "union-eyes",
-        "flow"
+      "TIER 1 — Sell Now": [
+        "flow",
+        "union-eyes"
       ],
-      "strategic_growth_products_6_18_months": [
+      "TIER 2 — Strategic Growth": [
         "cfo",
         "partners"
       ],
-      "internal_platform_assets": [
+      "TIER 3 — Maintain": [
         "console",
         "control-plane",
         "orchestrator-api",
         "web"
       ],
-      "freeze_archive_or_merge_candidates": [
-        "platform-admin",
-        "mobility-client-portal",
+      "TIER 4 — Incubate": [
+        "abr",
         "agrimo",
         "cora",
-        "trade",
-        "nacp-exams",
         "mobility",
-        "abr",
+        "nacp-exams",
+        "trade",
         "zonga"
+      ],
+      "TIER 5 — Sunset": [
+        "mobility-client-portal",
+        "platform-admin"
       ]
     }
   },
-  "orchestrator_runtime": {
-    "status": "hardened",
-    "runtime_model": "DB-backed FSM with OCC and lease coordination",
-    "supports_apps": "all",
-    "deployment_target": "internal",
-    "hardened_date": "2026-04-17"
-  },
-  "schema_version": "2026-04-17.5",
-  "last_updated": "2026-04-17"
+  "portfolio_execution_model": {
+    "version": "2026-04-18.0",
+    "classifications": {
+      "sell_now": [
+        "flow",
+        "union-eyes"
+      ],
+      "strategic_growth": [
+        "cfo",
+        "partners"
+      ],
+      "maintain": [
+        "console",
+        "control-plane",
+        "orchestrator-api",
+        "web"
+      ],
+      "incubate": [
+        "abr",
+        "agrimo",
+        "cora",
+        "mobility",
+        "nacp-exams",
+        "trade",
+        "zonga"
+      ],
+      "sunset": [
+        "mobility-client-portal",
+        "platform-admin"
+      ],
+      "internal_only": [
+        "console",
+        "control-plane",
+        "orchestrator-api"
+      ]
+    }
+  }
 }

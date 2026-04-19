@@ -10,13 +10,20 @@ metadata:
     nzila.app/stack: nextjs+django
     nzila.app/org-scoped: "true"
     nzila.app/stack-authority: django
+    nzila.app/generated-from: governance/portfolio/product-catalog.json
+    nzila.app/portfolio-tier: "4"
+    nzila.app/portfolio-status: incubating
+    nzila.app/deployment: internal
+    nzila.app/gtm-posture: hold
+    nzila.app/proof-level: none
+    nzila.app/revenue-status: pre-revenue
   tags:
     - nextjs
     - django
     - polyglot
 spec:
   type: service
-  lifecycle: production
+  lifecycle: incubating
   owner: platform-team
   system: nzila-os
   dependsOn:

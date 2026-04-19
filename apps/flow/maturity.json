@@ -1,11 +1,19 @@
 {
+  "generated_from": "governance/portfolio/product-catalog.json",
+  "generated_at": "2026-04-19",
   "status": "pilot",
   "exposure": "internal",
   "data_integrity": "partial",
   "contracts_complete": false,
   "observability": "partial",
-  "orchestrator_integration": true,
-  "orchestrator_playbooks": ["reminder_dispatch", "onboarding_trigger"],
   "portfolio_tier": "TIER 1",
-  "last_validated": "2026-04-16"
+  "gtm_posture": "sell-now",
+  "proof_level": "internal-proof",
+  "revenue_status": "pilot-contracting",
+  "last_validated": "2026-04-19",
+  "orchestrator_integration": true,
+  "orchestrator_playbooks": [
+    "reminder_dispatch",
+    "onboarding_trigger"
+  ]
 }

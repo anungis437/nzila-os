@@ -1,0 +1,44 @@
+name: Portfolio Governance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  portfolio-governance:
+    runs-on: ubuntu-latest
+    name: Portfolio Governance
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate canonical catalog schema
+        run: pnpm validate:product-catalog
+
+      - name: Check generated artifact freshness
+        run: pnpm generate:portfolio-artifacts -- --check
+
+      - name: Check portfolio drift
+        run: pnpm validate:portfolio
+
+      - name: Check canonical truth surfaces
+        run: pnpm validate:canonical-truth && pnpm validate:truth-authority
+
+      - name: Run portfolio governance tests
+        run: pnpm exec vitest run --project contract-tests tooling/contract-tests/portfolio-governance.test.ts

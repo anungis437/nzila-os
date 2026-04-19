@@ -1,12 +1,30 @@
 {
+  "generated_from": "governance/portfolio/product-catalog.json",
+  "generated_at": "2026-04-19",
   "status": "internal",
   "exposure": "internal",
   "data_integrity": "enforced",
   "contracts_complete": true,
   "observability": "partial",
   "portfolio_tier": "TIER 3",
-  "playbooks": ["contract_guardian", "lint_check", "typecheck", "unit_tests", "full_ci", "evidence_seal", "sla_escalation", "reminder_dispatch", "onboarding_trigger"],
-  "domain_consumers": ["union-eyes", "flow"],
-  "score": 8.5,
-  "last_validated": "2026-04-16"
+  "gtm_posture": "internal-only",
+  "proof_level": "internal-proof",
+  "revenue_status": "internal-cost-center",
+  "last_validated": "2026-04-19",
+  "playbooks": [
+    "contract_guardian",
+    "lint_check",
+    "typecheck",
+    "unit_tests",
+    "full_ci",
+    "evidence_seal",
+    "sla_escalation",
+    "reminder_dispatch",
+    "onboarding_trigger"
+  ],
+  "domain_consumers": [
+    "union-eyes",
+    "flow"
+  ],
+  "score": 8.5
 }

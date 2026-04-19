@@ -9,6 +9,13 @@ metadata:
     nzila.app/port: "3006"
     nzila.app/stack: nextjs
     nzila.app/org-scoped: "true"
+    nzila.app/generated-from: governance/portfolio/product-catalog.json
+    nzila.app/portfolio-tier: "4"
+    nzila.app/portfolio-status: incubating
+    nzila.app/deployment: internal
+    nzila.app/gtm-posture: hold
+    nzila.app/proof-level: none
+    nzila.app/revenue-status: pre-revenue
   tags:
     - nextjs
     - agri
@@ -16,7 +23,7 @@ metadata:
     - analytics
 spec:
   type: service
-  lifecycle: production
+  lifecycle: incubating
   owner: platform-team
   system: nzila-os
   dependsOn:

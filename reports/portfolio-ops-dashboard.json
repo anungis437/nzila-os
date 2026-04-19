@@ -1,0 +1,276 @@
+{
+  "generated_at": "2026-04-19",
+  "authority": "governance/portfolio/product-catalog.json",
+  "kpis": {
+    "total_products": 17,
+    "sell_now_count": 2,
+    "internal_only_count": 3,
+    "frozen_count": 2
+  },
+  "charts": {
+    "by_tier": [
+      {
+        "tier": 1,
+        "count": 2
+      },
+      {
+        "tier": 2,
+        "count": 2
+      },
+      {
+        "tier": 3,
+        "count": 4
+      },
+      {
+        "tier": 4,
+        "count": 7
+      },
+      {
+        "tier": 5,
+        "count": 2
+      }
+    ],
+    "by_status": [
+      {
+        "status": "production",
+        "count": 0
+      },
+      {
+        "status": "pilot",
+        "count": 5
+      },
+      {
+        "status": "incubating",
+        "count": 7
+      },
+      {
+        "status": "internal",
+        "count": 3
+      },
+      {
+        "status": "frozen",
+        "count": 2
+      },
+      {
+        "status": "sunset",
+        "count": 0
+      }
+    ]
+  },
+  "scoring": {
+    "weights": {
+      "revenue": 0.2,
+      "traction": 0.2,
+      "strategic_fit": 0.2,
+      "maintenance_burden": 0.1,
+      "readiness": 0.2,
+      "margin_potential": 0.1
+    }
+  },
+  "products": [
+    {
+      "id": "flow",
+      "name": "Flow",
+      "tier": 1,
+      "status": "pilot",
+      "gtm_posture": "sell-now",
+      "recommendation": "KEEP",
+      "weighted_score": 7,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PRODUCTION",
+      "dev_port": 3003
+    },
+    {
+      "id": "union-eyes",
+      "name": "Union Eyes",
+      "tier": 1,
+      "status": "pilot",
+      "gtm_posture": "sell-now",
+      "recommendation": "KEEP",
+      "weighted_score": 8,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PRODUCTION",
+      "dev_port": 3002
+    },
+    {
+      "id": "cfo",
+      "name": "CFO",
+      "tier": 2,
+      "status": "pilot",
+      "gtm_posture": "maintain",
+      "recommendation": "HOLD",
+      "weighted_score": 5.6,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PILOT",
+      "dev_port": 3005
+    },
+    {
+      "id": "partners",
+      "name": "Partners",
+      "tier": 2,
+      "status": "pilot",
+      "gtm_posture": "maintain",
+      "recommendation": "HOLD",
+      "weighted_score": 4.8,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PILOT",
+      "dev_port": 3004
+    },
+    {
+      "id": "console",
+      "name": "Console",
+      "tier": 3,
+      "status": "internal",
+      "gtm_posture": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 5,
+      "readiness_tier": "internal-only",
+      "registry_tier": "PRODUCTION",
+      "dev_port": 3001
+    },
+    {
+      "id": "control-plane",
+      "name": "Control Plane",
+      "tier": 3,
+      "status": "internal",
+      "gtm_posture": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 5,
+      "readiness_tier": "internal-only",
+      "registry_tier": "PILOT",
+      "dev_port": 3010
+    },
+    {
+      "id": "orchestrator-api",
+      "name": "Orchestrator API",
+      "tier": 3,
+      "status": "internal",
+      "gtm_posture": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 4.8,
+      "readiness_tier": "internal-only",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 4000
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "tier": 3,
+      "status": "pilot",
+      "gtm_posture": "maintain",
+      "recommendation": "HOLD",
+      "weighted_score": 5,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PRODUCTION",
+      "dev_port": 3000
+    },
+    {
+      "id": "abr",
+      "name": "ABR",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3014
+    },
+    {
+      "id": "agrimo",
+      "name": "Agrimo",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3007
+    },
+    {
+      "id": "cora",
+      "name": "Cora",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3009
+    },
+    {
+      "id": "mobility",
+      "name": "Mobility",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3012
+    },
+    {
+      "id": "nacp-exams",
+      "name": "NACP Exams",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3011
+    },
+    {
+      "id": "trade",
+      "name": "Trade",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 3.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3008
+    },
+    {
+      "id": "zonga",
+      "name": "Zonga",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 4.4,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3006
+    },
+    {
+      "id": "mobility-client-portal",
+      "name": "Mobility Client Portal",
+      "tier": 5,
+      "status": "frozen",
+      "gtm_posture": "sunset",
+      "recommendation": "SUNSET",
+      "weighted_score": 2,
+      "readiness_tier": "internal-only",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3013
+    },
+    {
+      "id": "platform-admin",
+      "name": "Platform Admin",
+      "tier": 5,
+      "status": "frozen",
+      "gtm_posture": "sunset",
+      "recommendation": "SUNSET",
+      "weighted_score": 2,
+      "readiness_tier": "internal-only",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3015
+    }
+  ]
+}

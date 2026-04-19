@@ -9,13 +9,20 @@ metadata:
     nzila.app/port: "3100"
     nzila.app/stack: fastify
     nzila.app/org-scoped: "true"
+    nzila.app/generated-from: governance/portfolio/product-catalog.json
+    nzila.app/portfolio-tier: "3"
+    nzila.app/portfolio-status: internal
+    nzila.app/deployment: internal
+    nzila.app/gtm-posture: internal-only
+    nzila.app/proof-level: internal-proof
+    nzila.app/revenue-status: internal-cost-center
   tags:
     - fastify
     - api
     - orchestrator
 spec:
   type: service
-  lifecycle: production
+  lifecycle: internal
   owner: platform-team
   system: nzila-os
   providesApis:
@@ -27,7 +34,8 @@ apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: orchestrator-api
-  description: Nzila orchestrator REST API — procurement packs, evidence, platform operations
+  description: Nzila orchestrator REST API — procurement packs, evidence, platform
+    operations
   annotations:
     github.com/project-slug: anungis437/nzila-os
 spec:

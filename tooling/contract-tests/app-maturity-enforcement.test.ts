@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { relPath } from './governance-helpers'
-import { listApps, loadAllMaturities, routeFilesForApp, runtimeFilesForApp } from './hardening-helpers'
+import { listApps, loadAllMaturities, runtimeFilesForApp } from './hardening-helpers'
 
-const ALLOWED_STATUS = new Set(['production', 'pilot', 'internal', 'scaffold', 'deprecated'])
+const ALLOWED_STATUS = new Set(['production', 'pilot', 'incubating', 'internal', 'frozen', 'sunset'])
 const ALLOWED_EXPOSURE = new Set(['public', 'internal'])
 const ALLOWED_DATA_INTEGRITY = new Set(['enforced', 'partial', 'minimal'])
 const ALLOWED_OBSERVABILITY = new Set(['complete', 'partial', 'minimal'])
@@ -21,7 +21,7 @@ describe('App maturity enforcement', () => {
       if (!ALLOWED_EXPOSURE.has(maturity.exposure)) violations.push(`${app}: invalid exposure ${maturity.exposure}`)
       if (!ALLOWED_DATA_INTEGRITY.has(maturity.data_integrity)) violations.push(`${app}: invalid data_integrity ${maturity.data_integrity}`)
       if (!ALLOWED_OBSERVABILITY.has(maturity.observability)) violations.push(`${app}: invalid observability ${maturity.observability}`)
-      if (!/^2026-04-16$/.test(maturity.last_validated)) violations.push(`${app}: unexpected last_validated ${maturity.last_validated}`)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(maturity.last_validated)) violations.push(`${app}: unexpected last_validated ${maturity.last_validated}`)
     }
 
     expect(violations).toEqual([])
@@ -64,17 +64,15 @@ describe('App maturity enforcement', () => {
     expect(violations).toEqual([])
   })
 
-  it('scaffold apps do not expose API routes beyond health checks', () => {
+  it('sunset apps do not claim public exposure', () => {
     const violations: string[] = []
 
     for (const [app, maturity] of Object.entries(maturities)) {
-      if (maturity.status !== 'scaffold') continue
-      const disallowedRoutes = routeFilesForApp(app)
-        .map((filePath) => relPath(filePath))
-        .filter((filePath) => !filePath.endsWith('/app/api/health/route.ts'))
-      violations.push(...disallowedRoutes)
+      if (maturity.status !== 'sunset') continue
+      if (maturity.exposure === 'public') violations.push(`${app}: sunset apps must not be public`)
     }
 
     expect(violations).toEqual([])
   })
 })
+

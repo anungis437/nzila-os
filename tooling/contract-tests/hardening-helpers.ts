@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { ROOT, readContent, safeJoin, walkSync } from './governance-helpers'
 
-export type MaturityStatus = 'production' | 'pilot' | 'internal' | 'scaffold' | 'deprecated'
+export type MaturityStatus = 'production' | 'pilot' | 'incubating' | 'internal' | 'frozen' | 'sunset'
 
 export interface AppMaturity {
   status: MaturityStatus

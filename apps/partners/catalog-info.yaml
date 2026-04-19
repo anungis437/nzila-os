@@ -9,13 +9,20 @@ metadata:
     nzila.app/port: "3002"
     nzila.app/stack: nextjs
     nzila.app/org-scoped: "true"
+    nzila.app/generated-from: governance/portfolio/product-catalog.json
+    nzila.app/portfolio-tier: "2"
+    nzila.app/portfolio-status: pilot
+    nzila.app/deployment: internal
+    nzila.app/gtm-posture: maintain
+    nzila.app/proof-level: none
+    nzila.app/revenue-status: pre-revenue
   tags:
     - nextjs
     - partners
     - entitlements
 spec:
   type: service
-  lifecycle: production
+  lifecycle: pilot
   owner: platform-team
   system: nzila-os
   dependsOn:
