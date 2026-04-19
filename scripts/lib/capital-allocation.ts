@@ -1022,11 +1022,21 @@ function combineScenarios(scenarios: CapitalScenario[]): CapitalScenario | null 
 }
 
 export function evaluateScenarioStack(root = findRepoRoot(), scenarioIds: string[]): ScenarioOutcome | null {
-  const outputs = buildCapitalOutputs(root)
+  const cacheKey = `${root}::${scenarioIds.slice().sort().join(',')}`
+  const cached = scenarioOutcomeCache.get(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const outputs = getCachedCapitalOutputs(root)
   const scenarios = outputs.scenario_pack.scenarios.filter((scenario) => scenarioIds.includes(scenario.id))
   const combined = combineScenarios(scenarios)
-  if (!combined) return null
-  return buildScenarioOutcomes(
+  if (!combined) {
+    scenarioOutcomeCache.set(cacheKey, null)
+    return null
+  }
+
+  const outcome = buildScenarioOutcomes(
     outputs.catalog,
     outputs.scores,
     outputs.live_signals,
@@ -1038,4 +1048,20 @@ export function evaluateScenarioStack(root = findRepoRoot(), scenarioIds: string
     },
     outputs.cash_calendar,
   )[0] ?? null
+
+  scenarioOutcomeCache.set(cacheKey, outcome)
+  return outcome
+}
+
+const capitalOutputsCache = new Map<string, ReturnType<typeof buildCapitalOutputs>>()
+const scenarioOutcomeCache = new Map<string, ScenarioOutcome | null>()
+
+function getCachedCapitalOutputs(root: string): ReturnType<typeof buildCapitalOutputs> {
+  const cached = capitalOutputsCache.get(root)
+  if (cached) {
+    return cached
+  }
+  const outputs = buildCapitalOutputs(root)
+  capitalOutputsCache.set(root, outputs)
+  return outputs
 }
