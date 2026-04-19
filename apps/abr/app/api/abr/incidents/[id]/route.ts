@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 import { logAuditEvent } from '@/lib/audit-log';
 import {
-  authenticateWithOrg,
+  requireOrgAccess,
   requirePermission,
   withRequestContext,
 } from '@/lib/api-guards';
@@ -61,7 +61,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'incident.read');
@@ -79,8 +79,7 @@ export async function GET(
       actorUserId: authz.userId,
       orgId: authz.orgId,
       entityType: 'incident',
-      entityId: id,
-      details: { role: permission.role },
+      details: { role: permission.role, incidentId: id },
     });
 
     return NextResponse.json({ item: detail });
@@ -92,7 +91,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   return withRequestContext(request, async () => {
-    const authz = await authenticateWithOrg(request);
+    const authz = await requireOrgAccess(request);
     if (!authz.ok) return authz.response;
 
     const permission = requirePermission(request, 'incident.update');
@@ -118,8 +117,7 @@ export async function PATCH(
       actorUserId: authz.userId,
       orgId: authz.orgId,
       entityType: 'incident',
-      entityId: id,
-      details: { role: permission.role },
+      details: { role: permission.role, incidentId: id },
     });
 
     return NextResponse.json({ item: updated });
