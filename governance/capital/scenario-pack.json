@@ -1,0 +1,116 @@
+{
+  "as_of_date": "2026-04-19",
+  "assumptions_note": "Scenario deltas are modeled operating assumptions, not forecasts or booked outcomes.",
+  "scenarios": [
+    {
+      "id": "union-eyes-major-pilot",
+      "title": "A — Union Eyes lands major pilot",
+      "description": "Union Eyes converts a major pilot similar to a CUPE-scale contract and improves conviction on near-term collections.",
+      "product_adjustments": {
+        "union-eyes": {
+          "monthly_revenue_actual_delta": 18000,
+          "pipeline_actual_delta": 260000,
+          "collections_outstanding_delta": 50000,
+          "probability_of_close_delta": 0.18
+        }
+      },
+      "global_adjustments": {
+        "current_cash_delta": 0,
+        "monthly_overhead_delta": 0,
+        "survival_probability_delta": 8,
+        "founder_capacity_multiplier": 1,
+        "hiring_bias": "accelerate"
+      }
+    },
+    {
+      "id": "flow-slips-90-days",
+      "title": "B — Flow slips 90 days",
+      "description": "Flow pipeline timing slips by a quarter, reducing conversion certainty and delaying receivables.",
+      "product_adjustments": {
+        "flow": {
+          "monthly_revenue_actual_delta": -9000,
+          "pipeline_actual_delta": -220000,
+          "collections_outstanding_delta": -12000,
+          "probability_of_close_delta": -0.2
+        }
+      },
+      "global_adjustments": {
+        "current_cash_delta": 0,
+        "monthly_overhead_delta": 0,
+        "survival_probability_delta": -9,
+        "founder_capacity_multiplier": 1,
+        "hiring_bias": "delay"
+      }
+    },
+    {
+      "id": "infra-cost-spike",
+      "title": "C — Unexpected infra cost spike",
+      "description": "Infrastructure invoices spike unexpectedly for the next quarter.",
+      "product_adjustments": {},
+      "global_adjustments": {
+        "current_cash_delta": 0,
+        "monthly_overhead_delta": 28000,
+        "survival_probability_delta": -6,
+        "founder_capacity_multiplier": 1,
+        "hiring_bias": "freeze"
+      }
+    },
+    {
+      "id": "founder-unavailable-30-days",
+      "title": "D — Founder unavailable 30 days",
+      "description": "Founder attention is materially constrained for one month, slowing commercial and operating loops.",
+      "product_adjustments": {
+        "union-eyes": {
+          "pipeline_actual_delta": -70000,
+          "probability_of_close_delta": -0.05
+        },
+        "flow": {
+          "pipeline_actual_delta": -50000,
+          "probability_of_close_delta": -0.05
+        }
+      },
+      "global_adjustments": {
+        "current_cash_delta": 0,
+        "monthly_overhead_delta": 0,
+        "survival_probability_delta": -7,
+        "founder_capacity_multiplier": 0.7,
+        "hiring_bias": "defer"
+      }
+    },
+    {
+      "id": "raise-500k",
+      "title": "E — Raise $500K",
+      "description": "Company closes a $500K financing event and expands available runway.",
+      "product_adjustments": {},
+      "global_adjustments": {
+        "current_cash_delta": 500000,
+        "monthly_overhead_delta": 0,
+        "survival_probability_delta": 12,
+        "founder_capacity_multiplier": 1,
+        "hiring_bias": "accelerate"
+      }
+    },
+    {
+      "id": "lose-largest-prospect",
+      "title": "F — Lose largest prospect",
+      "description": "Largest active prospect exits the pipeline, weakening near-term certainty.",
+      "product_adjustments": {
+        "union-eyes": {
+          "pipeline_actual_delta": -180000,
+          "probability_of_close_delta": -0.08
+        },
+        "flow": {
+          "pipeline_actual_delta": -120000,
+          "probability_of_close_delta": -0.06
+        }
+      },
+      "global_adjustments": {
+        "current_cash_delta": 0,
+        "monthly_overhead_delta": 0,
+        "survival_probability_delta": -10,
+        "founder_capacity_multiplier": 1,
+        "hiring_bias": "freeze"
+      }
+    }
+  ]
+}

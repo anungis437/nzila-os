@@ -58,6 +58,7 @@ import {
 } from '@/db/queries/enhanced-rbac-queries';
 import { logger } from '@/lib/logger';
 import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 // =============================================================================
 // AUTH RE-EXPORTS
@@ -890,15 +891,19 @@ export async function requireSystemAdmin(): Promise<void> {
  * Require API authentication with options
  */
 export async function requireApiAuth(options: RequireApiAuthOptions = {}) {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   
   if (!userId && !options.allowPublic) {
     throw new Error('Unauthorized: Authentication required');
   }
+
+  const organizationId = options.orgScoped && userId
+    ? await getOrganizationIdForUser(userId)
+    : null;
   
   const context = {
     userId: userId || null,
-    organizationId: options.orgScoped ? (orgId || null) : null,
+    organizationId,
     role: null as string | null,
   };
   

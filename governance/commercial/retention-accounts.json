@@ -1,0 +1,29 @@
+{
+  "as_of_date": "2026-04-19",
+  "accounts": [
+    {
+      "account": "Union Pilot B",
+      "product": "union-eyes",
+      "arr": 64000,
+      "usage_score": 78,
+      "sponsor_silence_days": 4,
+      "unpaid_invoices": 0,
+      "support_burden": 2,
+      "exec_engagement": true,
+      "source": "manual",
+      "confidence": "MEDIUM"
+    },
+    {
+      "account": "SMB Ops Group C",
+      "product": "flow",
+      "arr": 36000,
+      "usage_score": 52,
+      "sponsor_silence_days": 17,
+      "unpaid_invoices": 1,
+      "support_burden": 6,
+      "exec_engagement": false,
+      "source": "manual",
+      "confidence": "LOW"
+    }
+  ]
+}

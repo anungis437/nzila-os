@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-04-18T21:34:45.432Z",
+  "timestamp": "2026-04-19T13:57:27.530Z",
   "status": "violation",
   "allowed_regions": [
     "canadacentral",
     "canadaeast"
   ],
   "resource_group_scope": null,
-  "total_resources_seen": 21,
-  "violations_count": 10,
+  "total_resources_seen": 26,
+  "violations_count": 14,
   "violations": [
     {
       "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2",
@@ -66,6 +66,13 @@
       "resourceGroup": "nzila-staging-rg"
     },
     {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-db-connections-high",
+      "name": "zonga-db-connections-high",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
+      "resourceGroup": "nzila-staging-rg"
+    },
+    {
       "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.CognitiveServices/accounts/nzila-openai-eastus",
       "name": "nzila-openai-eastus",
       "type": "Microsoft.CognitiveServices/accounts",
@@ -77,6 +84,27 @@
       "name": "nzila-openai-eastus2",
       "type": "Microsoft.CognitiveServices/accounts",
       "location": "eastus2",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/actiongroups/zonga-ops-alerts",
+      "name": "zonga-ops-alerts",
+      "type": "Microsoft.Insights/actiongroups",
+      "location": "global",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-cpu-high",
+      "name": "zonga-cpu-high",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
+      "resourceGroup": "nzila-canada-staging-rg"
+    },
+    {
+      "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Insights/metricalerts/zonga-5xx-errors",
+      "name": "zonga-5xx-errors",
+      "type": "Microsoft.Insights/metricalerts",
+      "location": "global",
       "resourceGroup": "nzila-canada-staging-rg"
     }
   ],

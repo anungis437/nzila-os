@@ -1,0 +1,18 @@
+product_id,as_of_date,monthly_revenue_actual,pipeline_actual,collections_outstanding,active_users,engineering_velocity,source_name,source_type,confidence,note
+union-eyes,2026-04-19,26000,620000,0,0,0,carry-forward catalog baseline,estimate,LOW,Seeded from product catalog to create an editable manual signal surface; replace with verified Stripe CRM and collections actuals.
+flow,2026-04-19,21000,520000,0,0,0,carry-forward catalog baseline,estimate,LOW,Seeded from product catalog to create an editable manual signal surface; replace with verified Stripe CRM and collections actuals.
+cfo,2026-04-19,8000,290000,0,0,0,carry-forward catalog baseline,estimate,LOW,Seeded from product catalog to create an editable manual signal surface; replace with verified finance CRM and collections actuals.
+partners,2026-04-19,5000,210000,0,0,0,carry-forward catalog baseline,estimate,LOW,Seeded from product catalog to create an editable manual signal surface; replace with verified partner pipeline actuals.
+console,2026-04-19,0,20000,0,0,0,carry-forward catalog baseline,estimate,LOW,Internal product baseline seeded from catalog pending any measured user telemetry.
+control-plane,2026-04-19,0,15000,0,0,0,carry-forward catalog baseline,estimate,LOW,Internal product baseline seeded from catalog pending any measured user telemetry.
+web,2026-04-19,0,35000,0,0,0,carry-forward catalog baseline,estimate,LOW,Seeded from product catalog to create an editable manual signal surface; replace with verified web demand telemetry.
+orchestrator-api,2026-04-19,0,35000,0,0,0,carry-forward catalog baseline,estimate,LOW,Internal orchestration baseline seeded from catalog pending measured service demand.
+zonga,2026-04-19,0,65000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified creator-economy demand.
+agrimo,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+cora,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+trade,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+abr,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+mobility,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+nacp-exams,2026-04-19,0,30000,0,0,0,carry-forward catalog baseline,estimate,LOW,Incubation baseline seeded from catalog pending verified market demand.
+platform-admin,2026-04-19,0,0,0,0,0,carry-forward catalog baseline,estimate,LOW,Sunset baseline seeded from catalog.
+mobility-client-portal,2026-04-19,0,0,0,0,0,carry-forward catalog baseline,estimate,LOW,Sunset baseline seeded from catalog.

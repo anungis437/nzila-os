@@ -62,7 +62,17 @@
       "probability_of_close": 0.46,
       "runway_priority": 10,
       "pipeline_assumptions": "Enterprise labor and representation pipeline from active outreach and referral channels.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "enterprise_rfp",
+      "avg_deal_size": 55000,
+      "sales_cycle_days": 95,
+      "close_rate_pct": 18,
+      "renewal_rate_pct": 84,
+      "expansion_rate_pct": 28,
+      "gross_logo_target_12m": 8,
+      "primary_buyer": "Executive Director",
+      "proof_stage": "pilot",
+      "market_pull_score": 8
     },
     {
       "id": "flow",
@@ -97,7 +107,17 @@
       "probability_of_close": 0.44,
       "runway_priority": 10,
       "pipeline_assumptions": "Automation-led SMB pipeline estimated from in-flight demos and partner channels.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "direct_sales",
+      "avg_deal_size": 55000,
+      "sales_cycle_days": 48,
+      "close_rate_pct": 27,
+      "renewal_rate_pct": 84,
+      "expansion_rate_pct": 28,
+      "gross_logo_target_12m": 8,
+      "primary_buyer": "Operations Lead",
+      "proof_stage": "demo",
+      "market_pull_score": 7
     },
     {
       "id": "cfo",
@@ -132,7 +152,17 @@
       "probability_of_close": 0.36,
       "runway_priority": 8,
       "pipeline_assumptions": "Ops-finance wedge assumptions based on cross-sell potential into existing conversations.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "founder_led",
+      "avg_deal_size": 28000,
+      "sales_cycle_days": 72,
+      "close_rate_pct": 22,
+      "renewal_rate_pct": 84,
+      "expansion_rate_pct": 21,
+      "gross_logo_target_12m": 5,
+      "primary_buyer": "Finance Director",
+      "proof_stage": "interest",
+      "market_pull_score": 5
     },
     {
       "id": "partners",
@@ -167,7 +197,17 @@
       "probability_of_close": 0.33,
       "runway_priority": 7,
       "pipeline_assumptions": "Partner enablement revenue assumptions from referral and ecosystem-led channels.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "partner_channel",
+      "avg_deal_size": 28000,
+      "sales_cycle_days": 64,
+      "close_rate_pct": 19,
+      "renewal_rate_pct": 84,
+      "expansion_rate_pct": 21,
+      "gross_logo_target_12m": 5,
+      "primary_buyer": "Partnership Lead",
+      "proof_stage": "interest",
+      "market_pull_score": 5
     },
     {
       "id": "console",
@@ -202,7 +242,17 @@
       "probability_of_close": 0.1,
       "runway_priority": 6,
       "pipeline_assumptions": "Internal leverage surface; value mostly captured through portfolio operating efficiency.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "self_serve",
+      "avg_deal_size": 12000,
+      "sales_cycle_days": 28,
+      "close_rate_pct": 31,
+      "renewal_rate_pct": 76,
+      "expansion_rate_pct": 12,
+      "gross_logo_target_12m": 3,
+      "primary_buyer": "Internal Platform Owner",
+      "proof_stage": "none",
+      "market_pull_score": 3
     },
     {
       "id": "control-plane",
@@ -237,7 +287,17 @@
       "probability_of_close": 0.1,
       "runway_priority": 6,
       "pipeline_assumptions": "Internal governance/control value assumptions; no direct external revenue target.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "self_serve",
+      "avg_deal_size": 12000,
+      "sales_cycle_days": 28,
+      "close_rate_pct": 31,
+      "renewal_rate_pct": 76,
+      "expansion_rate_pct": 12,
+      "gross_logo_target_12m": 3,
+      "primary_buyer": "Internal Platform Owner",
+      "proof_stage": "none",
+      "market_pull_score": 3
     },
     {
       "id": "web",
@@ -272,7 +332,17 @@
       "probability_of_close": 0.15,
       "runway_priority": 6,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "self_serve",
+      "avg_deal_size": 12000,
+      "sales_cycle_days": 28,
+      "close_rate_pct": 31,
+      "renewal_rate_pct": 76,
+      "expansion_rate_pct": 12,
+      "gross_logo_target_12m": 3,
+      "primary_buyer": "Internal Platform Owner",
+      "proof_stage": "none",
+      "market_pull_score": 3
     },
     {
       "id": "orchestrator-api",
@@ -307,7 +377,17 @@
       "probability_of_close": 0.15,
       "runway_priority": 6,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "self_serve",
+      "avg_deal_size": 12000,
+      "sales_cycle_days": 28,
+      "close_rate_pct": 31,
+      "renewal_rate_pct": 76,
+      "expansion_rate_pct": 12,
+      "gross_logo_target_12m": 3,
+      "primary_buyer": "Internal Platform Owner",
+      "proof_stage": "none",
+      "market_pull_score": 3
     },
     {
       "id": "zonga",
@@ -342,7 +422,17 @@
       "probability_of_close": 0.22,
       "runway_priority": 5,
       "pipeline_assumptions": "Strategic creator-economy option assumptions; low confidence until repeatable demand appears.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "agrimo",
@@ -377,7 +467,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "cora",
@@ -412,7 +512,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "trade",
@@ -447,7 +557,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "abr",
@@ -482,7 +602,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "mobility",
@@ -517,7 +647,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "nacp-exams",
@@ -552,7 +692,17 @@
       "probability_of_close": 0.2,
       "runway_priority": 4,
       "pipeline_assumptions": "Estimated planning assumptions pending live CRM/finance feeds.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 9000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 2,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "platform-admin",
@@ -587,7 +737,17 @@
       "probability_of_close": 0,
       "runway_priority": 1,
       "pipeline_assumptions": "Sunset mode; no forward pipeline expected.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 7000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 1,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     },
     {
       "id": "mobility-client-portal",
@@ -622,7 +782,17 @@
       "probability_of_close": 0,
       "runway_priority": 1,
       "pipeline_assumptions": "Sunset mode; no forward pipeline expected.",
-      "data_quality": "estimated"
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 7000,
+      "sales_cycle_days": 120,
+      "close_rate_pct": 14,
+      "renewal_rate_pct": 68,
+      "expansion_rate_pct": 8,
+      "gross_logo_target_12m": 1,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 2
     }
   ],
   "capital_weights": {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, X, File, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -39,6 +39,10 @@ export function FileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    setAttachments(existingAttachments);
+  }, [existingAttachments]);
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -72,9 +76,8 @@ export function FileUpload({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('claimId', claimId);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`/api/cases/${claimId}/evidence`, {
         method: 'POST',
         body: formData,
       });
@@ -85,7 +88,10 @@ export function FileUpload({
         throw new Error(data.error || 'Upload failed');
       }
 
-      const newAttachment = data.attachment;
+      const newAttachment = data?.data?.attachment ?? data?.attachment;
+      if (!newAttachment) {
+        throw new Error('Upload completed without attachment metadata');
+      }
       setAttachments(prev => [...prev, newAttachment]);
       
       toast({
@@ -108,7 +114,7 @@ toast({
   const handleDelete = async (attachment: AttachmentMetadata) => {
     try {
       const response = await fetch(
-        `/api/upload?claimId=${claimId}&fileUrl=${encodeURIComponent(attachment.url)}`,
+        `/api/cases/${claimId}/evidence?fileUrl=${encodeURIComponent(attachment.url)}`,
         { method: 'DELETE' }
       );
 
@@ -253,7 +259,7 @@ toast({
                         {attachment.fileName}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatFileSize(attachment.fileSize)} â€¢ {new Date(attachment.uploadedAt).toLocaleDateString()}
+                        {formatFileSize(attachment.fileSize)} | {new Date(attachment.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>
 

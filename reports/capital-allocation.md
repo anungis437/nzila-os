@@ -1,33 +1,75 @@
 # Capital Allocation Report
 
-Generated from governance/portfolio/product-catalog.json
+Generated from governance/portfolio/product-catalog.json plus governance/capital/* operating inputs.
 
-| Product | Burn | Revenue | Margin % | Pipeline | Score | Decision |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Union Eyes | $30,000 | $26,000 | 82 | $620,000 | 80.7 | FUND NOW |
-| Flow | $27,000 | $21,000 | 79 | $520,000 | 68.3 | FUND NOW |
-| CFO | $19,000 | $8,000 | 74 | $290,000 | 38.9 | FUND NOW |
-| Partners | $17,000 | $5,000 | 70 | $210,000 | 30.5 | FUND NOW |
-| Web | $14,000 | $0 | 58 | $35,000 | 18.5 | PAUSE |
-| Orchestrator API | $14,000 | $0 | 58 | $35,000 | 18.5 | MAINTAIN |
-| Console | $15,000 | $0 | 45 | $20,000 | 18.1 | MAINTAIN |
-| Zonga | $8,500 | $0 | 64 | $65,000 | 17.3 | INCUBATE LIGHTLY |
-| Control Plane | $14,500 | $0 | 40 | $15,000 | 17.2 | MAINTAIN |
-| Agrimo | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| Cora | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| Trade | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| ABR | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| Mobility | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| NACP Exams | $9,000 | $0 | 62 | $30,000 | 13.8 | INCUBATE LIGHTLY |
-| Platform Admin | $900 | $0 | 0 | $0 | 0.7 | SUNSET |
-| Mobility Client Portal | $900 | $0 | 0 | $0 | 0.7 | SUNSET |
+| Product | Score | Confidence | Engine | Final | Revenue Source | Pipeline Source |
+| --- | ---: | ---: | --- | --- | --- | --- |
+| Union Eyes | 72.3 | 44.0% | FUND NOW | FUND NOW | carry-forward catalog baseline | carry-forward catalog baseline |
+| Flow | 60.2 | 44.0% | FUND NOW | FUND NOW | carry-forward catalog baseline | carry-forward catalog baseline |
+| CFO | 31.8 | 44.0% | FUND NOW | FUND NOW | carry-forward catalog baseline | carry-forward catalog baseline |
+| Partners | 23.9 | 44.0% | FUND NOW | FUND NOW | carry-forward catalog baseline | carry-forward catalog baseline |
+| Web | 12.5 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| Orchestrator API | 12.5 | 44.0% | MAINTAIN | MAINTAIN | carry-forward catalog baseline | carry-forward catalog baseline |
+| Console | 11.9 | 44.0% | MAINTAIN | MAINTAIN | carry-forward catalog baseline | carry-forward catalog baseline |
+| Zonga | 11.1 | 44.0% | INCUBATE LIGHTLY | INCUBATE LIGHTLY | carry-forward catalog baseline | carry-forward catalog baseline |
+| Control Plane | 11.0 | 44.0% | MAINTAIN | MAINTAIN | carry-forward catalog baseline | carry-forward catalog baseline |
+| Agrimo | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| Cora | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| Trade | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| ABR | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| Mobility | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| NACP Exams | 8.2 | 44.0% | PAUSE | PAUSE | carry-forward catalog baseline | carry-forward catalog baseline |
+| Platform Admin | 0.0 | 44.0% | SUNSET | SUNSET | carry-forward catalog baseline | carry-forward catalog baseline |
+| Mobility Client Portal | 0.0 | 44.0% | SUNSET | SUNSET | carry-forward catalog baseline | carry-forward catalog baseline |
 
 ## Next $100K and 400 Engineering Hours
 
-| Product | Capital Allocation | Engineering Hours |
-| --- | ---: | ---: |
-| Union Eyes | $36,951 | 148 |
-| Flow | $31,273 | 125 |
-| CFO | $17,811 | 71 |
-| Partners | $13,965 | 56 |
+| Product | Confidence | Capital Allocation | Engineering Hours |
+| --- | ---: | ---: | ---: |
+| Union Eyes | 44.0% | $38,417 | 154 |
+| Flow | 44.0% | $31,987 | 128 |
+| CFO | 44.0% | $16,897 | 68 |
+| Partners | 44.0% | $12,699 | 51 |
+
+## Score Explainability
+
+### Union Eyes
+
+- Revenue signal 26,000 from carry-forward catalog baseline (LOW).
+- Pipeline signal 620,000 from carry-forward catalog baseline (LOW).
+- Low churn/execution risk profile=63.3 support points.
+- Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
+- Engineering execution signal 100 supports current allocation.
+
+### Flow
+
+- Revenue signal 21,000 from carry-forward catalog baseline (LOW).
+- Pipeline signal 520,000 from carry-forward catalog baseline (LOW).
+- Low churn/execution risk profile=56.7 support points.
+- Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
+- Engineering execution signal 100 supports current allocation.
+
+### CFO
+
+- Revenue signal 8,000 from carry-forward catalog baseline (LOW).
+- Pipeline signal 290,000 from carry-forward catalog baseline (LOW).
+- Low churn/execution risk profile=50 support points.
+- Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
+- Engineering execution signal 100 supports current allocation.
+
+### Partners
+
+- Revenue signal 5,000 from carry-forward catalog baseline (LOW).
+- Pipeline signal 210,000 from carry-forward catalog baseline (LOW).
+- Low churn/execution risk profile=46.7 support points.
+- Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
+- Engineering execution signal 100 supports current allocation.
+
+### Web
+
+- Revenue signal 0 from carry-forward catalog baseline (LOW).
+- Pipeline signal 35,000 from carry-forward catalog baseline (LOW).
+- Low churn/execution risk profile=66.7 support points.
+- Confidence penalty subtracts 6.7 points due to estimate-heavy or unavailable data.
+- Engineering execution signal 100 supports current allocation.
 

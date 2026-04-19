@@ -1,0 +1,50 @@
+{
+  "as_of_date": "2026-04-19",
+  "pilots": [
+    {
+      "id": "pilot-ue-001",
+      "account": "Union Pilot B",
+      "product": "union-eyes",
+      "start_date": "2026-03-10",
+      "sponsor_strength": 8,
+      "users_active": 62,
+      "weekly_engagement": 0.73,
+      "business_pain_solved": 8,
+      "paid_likelihood_pct": 68,
+      "expansion_value": 42000,
+      "procurement_path_defined": true,
+      "source": "manual",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "pilot-flow-001",
+      "account": "SMB Ops Group C",
+      "product": "flow",
+      "start_date": "2026-03-28",
+      "sponsor_strength": 7,
+      "users_active": 31,
+      "weekly_engagement": 0.66,
+      "business_pain_solved": 7,
+      "paid_likelihood_pct": 57,
+      "expansion_value": 25000,
+      "procurement_path_defined": true,
+      "source": "manual",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "pilot-cfo-001",
+      "account": "Finance Team E",
+      "product": "cfo",
+      "start_date": "2026-02-18",
+      "sponsor_strength": 5,
+      "users_active": 12,
+      "weekly_engagement": 0.34,
+      "business_pain_solved": 5,
+      "paid_likelihood_pct": 33,
+      "expansion_value": 9000,
+      "procurement_path_defined": false,
+      "source": "manual",
+      "confidence": "LOW"
+    }
+  ]
+}

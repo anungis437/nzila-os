@@ -179,7 +179,7 @@ export function resolveCloudFrontConfig(): CloudFrontConfig {
   return cloudFrontConfigSchema.parse({
     distributionDomain: process.env.ZONGA_CLOUDFRONT_DOMAIN,
     keyPairId: process.env.ZONGA_CLOUDFRONT_KEY_PAIR_ID,
-    privateKeyPem: process.env.ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM,
+    privateKeyPem: process.env.ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM?.replace(/\\n/g, '\n'),
     defaultTtlSec: process.env.ZONGA_CLOUDFRONT_TTL_SEC
       ? Number(process.env.ZONGA_CLOUDFRONT_TTL_SEC)
       : 3600,

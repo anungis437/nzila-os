@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 
-import { buildCapitalOutputs } from './lib/capital-allocation'
+import { buildCapitalOutputs, evaluateScenarioStack } from './lib/capital-allocation'
 import { findRepoRoot } from './lib/portfolio-governance'
 
 function round2(value: number): number {
@@ -14,6 +14,35 @@ function parseArgNumber(flag: string): number | null {
   return Number.isNaN(parsed) ? null : parsed
 }
 
+function parseArgString(flag: string): string | null {
+  const token = process.argv.find((value) => value.startsWith(`${flag}=`))
+  if (!token) return null
+  return token.split('=')[1] ?? null
+}
+
+function parseScenarioIds(): string[] {
+  const scenarioIds: string[] = []
+  process.argv.forEach((value, index) => {
+    if (value.startsWith('--scenario=')) {
+      const raw = value.split('=')[1] ?? ''
+      scenarioIds.push(...raw.split(',').map((part) => part.trim()).filter(Boolean))
+      let lookahead = index + 1
+      while (lookahead < process.argv.length && !process.argv[lookahead].startsWith('--')) {
+        scenarioIds.push(...process.argv[lookahead].split(',').map((part) => part.trim()).filter(Boolean))
+        lookahead += 1
+      }
+    }
+    if (value === '--scenario') {
+      let lookahead = index + 1
+      while (lookahead < process.argv.length && !process.argv[lookahead].startsWith('--')) {
+        scenarioIds.push(...process.argv[lookahead].split(',').map((part) => part.trim()).filter(Boolean))
+        lookahead += 1
+      }
+    }
+  })
+  return [...new Set(scenarioIds)]
+}
+
 function monthsOfRunway(cash: number, netBurn: number): number {
   if (netBurn <= 0) return 120
   return cash / netBurn
@@ -21,20 +50,21 @@ function monthsOfRunway(cash: number, netBurn: number): number {
 
 function main(): void {
   const root = findRepoRoot()
-  const { catalog, validation, scores } = buildCapitalOutputs(root)
+  const outputs = buildCapitalOutputs(root)
 
-  if (validation.errors.length > 0) {
+  if (outputs.validation.errors.length > 0) {
     console.log('\n[runway-model] FAIL')
-    for (const error of validation.errors) console.log(` - ${error}`)
+    for (const error of outputs.validation.errors) console.log(` - ${error}`)
     process.exit(1)
   }
 
-  const model = catalog.capital_model.scenarios
+  const model = outputs.catalog.capital_model.scenarios
   const cash = parseArgNumber('--cash') ?? model.current_cash
   const overhead = parseArgNumber('--overhead') ?? model.monthly_overhead
+  const scenarioIds = parseScenarioIds()
 
-  const totalProductBurn = scores.reduce((acc, score) => acc + score.recommended_monthly_budget, 0)
-  const totalMonthlyRevenue = scores.reduce((acc, score) => acc + score.product.monthly_revenue, 0)
+  const totalProductBurn = outputs.scores.reduce((acc, score) => acc + score.recommended_monthly_budget, 0)
+  const totalMonthlyRevenue = outputs.scores.reduce((acc, score) => acc + (score.live_signals.metrics.monthly_revenue_actual.value ?? score.product.monthly_revenue), 0)
 
   const conservativeNetBurn = (overhead + totalProductBurn) - (totalMonthlyRevenue + model.expected_closes_monthly.conservative)
   const baseNetBurn = (overhead + totalProductBurn) - (totalMonthlyRevenue + model.expected_closes_monthly.base)
@@ -54,6 +84,23 @@ function main(): void {
   console.log(`Scenario A Conservative: ${round2(conservative)} months runway`) 
   console.log(`Scenario B Base: ${round2(base)} months runway`) 
   console.log(`Scenario C Aggressive: ${round2(aggressive)} months runway`) 
+
+  if (scenarioIds.length > 0) {
+    const scenarioOutcome = evaluateScenarioStack(root, scenarioIds)
+    if (!scenarioOutcome) {
+      console.log('')
+      console.log(`Scenario stack not found: ${scenarioIds.join(', ')}`)
+      process.exit(1)
+    }
+    console.log('')
+    console.log(`Scenario stack: ${scenarioOutcome.scenario.title}`)
+    console.log(`Runway under stack: ${scenarioOutcome.runway_months.toFixed(1)} months`)
+    console.log(`Survival probability: ${scenarioOutcome.survival_probability_pct.toFixed(1)}%`)
+    console.log(`Hiring recommendation: ${scenarioOutcome.hiring_recommendation}`)
+    for (const change of scenarioOutcome.allocation_changes.slice(0, 5)) {
+      console.log(` - ${change.product}: ${change.from} -> ${change.to} (${change.score_delta >= 0 ? '+' : ''}${change.score_delta})`)
+    }
+  }
 }
 
 main()

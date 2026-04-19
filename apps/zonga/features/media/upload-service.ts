@@ -9,6 +9,8 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { uploadBuffer, computeSha256 } from '@nzila/blob'
+import { uploadToS3, computeRawStorageKey } from '@nzila/zonga-streaming-aws/s3-storage'
+import { resolveS3Config } from '@nzila/zonga-streaming-aws'
 import { ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from './types'
 import type { ArtworkAsset } from './types'
 import { enqueueProcessingJobs } from './processing-pipeline'
@@ -64,17 +66,18 @@ export async function uploadTrackAudio(params: {
     }
   }
 
-  // Build storage key
-  const ext = file.name.split('.').pop() ?? 'bin'
-  const storageKey = `raw/${creatorId}/${contentAssetId}/${Date.now()}.${ext}`
+  // Build S3 storage key
+  const s3Config = resolveS3Config()
+  const storageKey = computeRawStorageKey(orgId, contentAssetId, file.name)
 
   try {
-    // Upload raw file to blob storage
-    await uploadBuffer({
-      container: 'zonga-audio',
-      blobPath: storageKey,
-      buffer,
+    // Upload raw file directly to S3 (MediaConvert reads from S3)
+    await uploadToS3(s3Config, {
+      orgId,
+      assetId: contentAssetId,
+      fileName: file.name,
       contentType: file.type,
+      body: buffer,
     })
 
     // Create track asset record
@@ -86,7 +89,7 @@ export async function uploadTrackAudio(params: {
         sha256_fingerprint, upload_status
       ) VALUES (
         ${contentAssetId}, ${orgId}, ${creatorId},
-        'raw-uploads', ${storageKey},
+        ${s3Config.rawBucket}, ${storageKey},
         ${file.name}, ${file.type}, ${file.size},
         ${sha256}, 'completed'
       )
