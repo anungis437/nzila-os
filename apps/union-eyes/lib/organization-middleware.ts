@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getOrganizationIdForUser, validateOrganizationExists } from "@/lib/organization-utils";
+import { getOrganizationIdForUser, getUserRoleInOrganization, userHasOrganizationAccess, validateOrganizationExists } from "@/lib/organization-utils";
 import { requireUser, requireUserForOrganization } from "@/lib/api-auth-guard";
 import { cookies } from "next/headers";
 import { createLogger } from "@nzila/os-core";
@@ -113,7 +113,7 @@ export async function validateOrganizationAccess(
   requestedOrganizationId: string
 ): Promise<boolean> {
   try {
-    const _userOrganizationId = await getOrganizationIdForUser(userId);
+    const userOrganizationId = await getOrganizationIdForUser(userId);
     
     // Check if organization exists
     const exists = await validateOrganizationExists(requestedOrganizationId);
@@ -121,12 +121,17 @@ export async function validateOrganizationAccess(
     if (!exists) {
       return false;
     }
-    
-    // For now, allow access if organization exists
-    // In the future, implement hierarchical access checks
-    // (e.g., federation admin can access all child unions/locals)
-    
-    return true;
+
+    if (userOrganizationId === requestedOrganizationId) {
+      return true;
+    }
+
+    if (await userHasOrganizationAccess(userId, requestedOrganizationId)) {
+      return true;
+    }
+
+    const roleInDefaultOrg = await getUserRoleInOrganization(userId, userOrganizationId);
+    return roleInDefaultOrg === 'admin' || roleInDefaultOrg === 'system_admin' || roleInDefaultOrg === 'app_owner';
   } catch (_error) {
 return false;
   }

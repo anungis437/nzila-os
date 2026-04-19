@@ -30,6 +30,34 @@ import Link from "next/link";
 
 type CasePriority = "low" | "medium" | "high" | "urgent";
 
+const categoryToCaseType: Record<string, string> = {
+  "Wage & Hour": "wage_dispute",
+  Safety: "safety",
+  Scheduling: "discipline",
+  Discrimination: "discrimination",
+  Harassment: "harassment",
+  Benefits: "benefits_denial",
+  Grievance: "discipline",
+  "Working Conditions": "contracting",
+  Other: "other",
+  wageHour: "wage_dispute",
+  safety: "safety",
+  scheduling: "discipline",
+  discrimination: "discrimination",
+  harassment: "harassment",
+  benefits: "benefits_denial",
+  grievance: "discipline",
+  workingConditions: "contracting",
+  other: "other",
+};
+
+const priorityToIntakePriority: Record<CasePriority, "low" | "medium" | "high" | "critical"> = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  urgent: "critical",
+};
+
 export default function NewClaimPage() {
   const t = useTranslations();
   const locale = useLocale();
@@ -193,43 +221,24 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
     setIsSubmitting(true);
 
     try {
-      // Map form category to claim type enum
-      const categoryToClaimType: Record<string, string> = {
-        "Wage & Hour": "grievance_pay",
-        "Safety": "workplace_safety",
-        "Scheduling": "grievance_schedule",
-        "Discrimination": "discrimination_other",
-        "Harassment": "harassment_verbal",
-        "Benefits": "contract_dispute",
-        "Grievance": "grievance_discipline",
-        "Working Conditions": "workplace_safety",
-        "Other": "other",
-        "wageHour": "grievance_pay",
-        "safety": "workplace_safety",
-        "scheduling": "grievance_schedule",
-        "discrimination": "discrimination_other",
-        "harassment": "harassment_verbal",
-        "benefits": "contract_dispute",
-        "grievance": "grievance_discipline",
-        "workingConditions": "workplace_safety",
-        "other": "other"
-      };
+      if (!user?.id) {
+        throw new Error("Authentication required before submitting a case");
+      }
 
       const claimData = {
-        claimType: categoryToClaimType[formData.category] || "other",
+        memberId: user.id,
+        title: formData.title,
+        caseType: categoryToCaseType[formData.category] || "other",
+        priority: priorityToIntakePriority[formData.priority],
         incidentDate: formData.date,
         location: formData.location || "Not specified",
         description: formData.description,
         desiredOutcome: `Resolution requested for: ${formData.title}`,
-        priority: formData.priority,
-        witnessesPresent: !!formData.witnesses,
-        witnessDetails: formData.witnesses || null,
-        previouslyReported: false,
+        witnesses: formData.witnesses || undefined,
         isAnonymous: true,
       };
 
-      // Create claim
-      const response = await fetch("/api/claims", {
+      const response = await fetch("/api/cases/intake", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -243,26 +252,30 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
       }
 
       const result = await response.json();
-      const claimId = result.data.claimId;
+      const claimId = result.claimId || result.data?.claimId;
+
+      if (!claimId) {
+        throw new Error("Case was created but no case ID was returned");
+      }
 
       // Track for pilot observability + feedback widget
       trackCaseCreated(claimId);
       incrementPilotCaseCount();
 
-      // Upload files if any
       if (formData.documents.length > 0) {
         const uploadPromises = formData.documents.map(async (file) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("claimId", claimId);
+          const uploadFormData = new FormData();
+          uploadFormData.append("file", file);
 
-          const uploadResponse = await fetch("/api/upload", {
+          const uploadResponse = await fetch(`/api/cases/${claimId}/evidence`, {
             method: "POST",
-            body: formData,
+            body: uploadFormData,
           });
 
           if (!uploadResponse.ok) {
-}
+            const uploadError = await uploadResponse.json().catch(() => ({}));
+            throw new Error(uploadError?.error || `Failed to upload ${file.name}`);
+          }
         });
 
         await Promise.all(uploadPromises);
@@ -273,7 +286,7 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
 
       // Redirect after success
       setTimeout(() => {
-        router.push("/dashboard/claims");
+        router.push(`/${locale}/dashboard/claims`);
       }, 2000);
     } catch (error) {
 setIsSubmitting(false);

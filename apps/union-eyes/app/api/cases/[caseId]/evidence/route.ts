@@ -1,11 +1,91 @@
 /**
- * Case evidence route — returns attachments from claim JSONB field.
+ * Case evidence route — list, upload, and delete attachments bound to a case.
  */
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { putBlob, deleteBlob } from '@/lib/blob-client';
+import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+
+interface AttachmentMetadata {
+  url: string;
+  pathname?: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  uploadedAt: string;
+  uploadedBy: string;
+}
+
+interface CaseRecord {
+  claimId: string;
+  claimNumber: string | null;
+  attachments?: unknown;
+}
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'text/csv',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+
+function normalizeAttachments(value: unknown): AttachmentMetadata[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is AttachmentMetadata => {
+    return typeof item === 'object' && item !== null && 'url' in item && 'fileName' in item;
+  });
+}
+
+function sanitizeFilename(fileName: string): string {
+  return fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
+}
+
+async function resolveCaseRecord(caseId: string, organizationId: string | null, userId: string | null): Promise<CaseRecord> {
+  const orgFilter = organizationId
+    ? sql`AND c.organization_id = ${organizationId}::uuid`
+    : userId
+      ? sql`AND c.member_id = ${userId}`
+      : sql`AND FALSE`;
+
+  const rows = await withRLSContext(async () => db.execute(sql`
+    SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments
+    FROM claims c
+    WHERE (c.claim_number = ${caseId} OR c.claim_id::text = ${caseId})
+      ${orgFilter}
+    LIMIT 1
+  `));
+
+  const row = rows[0] as unknown as CaseRecord | undefined;
+  if (!row) {
+    throw ApiError.notFound('Case', caseId);
+  }
+
+  return row;
+}
+
+async function persistAttachments(claimId: string, attachments: AttachmentMetadata[]): Promise<void> {
+  const serialized = JSON.stringify(attachments);
+  await withRLSContext(async () => db.execute(sql`
+    UPDATE claims
+    SET attachments = ${serialized}::jsonb,
+        updated_at = NOW()
+    WHERE claim_id = ${claimId}::uuid
+  `));
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -19,36 +99,128 @@ export const GET = withApi(
     },
   },
   async ({ params, organizationId, userId }) => {
-    const id = params.caseId;
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
+    const attachments = normalizeAttachments(claim.attachments);
+    return attachments;
+  },
+);
 
-    // Resolve organizationId fallback
-    let orgId = organizationId;
-    if (!orgId && userId) {
-      const memberRows = await withRLSContext(async () => db.execute(
-        sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      ));
-      orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Cases'],
+      summary: 'Upload case evidence',
+      description: 'Uploads a file and appends attachment metadata to the case.',
+    },
+  },
+  async ({ params, organizationId, userId, request }) => {
+    if (!userId) {
+      throw ApiError.unauthorized();
     }
 
-    const orgFilter = orgId
-      ? sql`AND c.organization_id = ${orgId}::uuid`
-      : userId
-        ? sql`AND c.member_id = ${userId}`
-        : sql`AND FALSE`;
+    const fileForm = await request.formData();
+    const file = fileForm.get('file');
 
-    const rows = await withRLSContext(async () => db.execute(sql`
-      SELECT c.attachments
-      FROM claims c
-      WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
-        ${orgFilter}
-      LIMIT 1
-    `));
+    if (!(file instanceof File)) {
+      throw ApiError.badRequest('A file is required');
+    }
 
-    const row = rows[0] as { attachments?: unknown } | undefined;
-    if (!row) throw ApiError.notFound('Case not found');
+    if (file.size > MAX_FILE_SIZE) {
+      throw ApiError.badRequest('File size exceeds 10MB limit');
+    }
 
-    // attachments is a JSONB array — normalize to always return an array
-    const attachments = Array.isArray(row.attachments) ? row.attachments : [];
-    return attachments;
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      throw ApiError.badRequest(`File type ${file.type || 'unknown'} is not allowed`);
+    }
+
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
+    const attachments = normalizeAttachments(claim.attachments);
+
+    const blob = await putBlob(
+      `cases/${claim.claimId}/${Date.now()}-${sanitizeFilename(file.name)}`,
+      file,
+      { addRandomSuffix: true },
+    );
+
+    const attachment: AttachmentMetadata = {
+      url: blob.url,
+      pathname: blob.pathname,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: userId,
+    };
+
+    const nextAttachments = [...attachments, attachment];
+    await persistAttachments(claim.claimId, nextAttachments);
+
+    await auditCaseMutation({
+      event: CaseAuditEvent.CASE_ATTACHMENT_UPLOADED,
+      userId,
+      organizationId: organizationId ?? '',
+      caseId: claim.claimId,
+      action: 'update',
+      newState: { attachments: nextAttachments },
+      details: {
+        fileName: attachment.fileName,
+        fileType: attachment.fileType,
+        fileSize: attachment.fileSize,
+        attachmentUrl: attachment.url,
+      },
+    });
+
+    return { attachment };
+  },
+);
+
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Cases'],
+      summary: 'Delete case evidence',
+      description: 'Deletes an attachment and removes it from the case metadata.',
+    },
+  },
+  async ({ params, organizationId, userId, request }) => {
+    if (!userId) {
+      throw ApiError.unauthorized();
+    }
+
+    const fileUrl = request.nextUrl.searchParams.get('fileUrl');
+    if (!fileUrl) {
+      throw ApiError.badRequest('fileUrl query parameter is required');
+    }
+
+    const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
+    const attachments = normalizeAttachments(claim.attachments);
+    const attachment = attachments.find((item) => item.url === fileUrl);
+
+    if (!attachment) {
+      throw ApiError.notFound('Attachment');
+    }
+
+    await deleteBlob(attachment.pathname || attachment.url);
+
+    const nextAttachments = attachments.filter((item) => item.url !== fileUrl);
+    await persistAttachments(claim.claimId, nextAttachments);
+
+    await auditCaseMutation({
+      event: CaseAuditEvent.CASE_ATTACHMENT_DELETED,
+      userId,
+      organizationId: organizationId ?? '',
+      caseId: claim.claimId,
+      action: 'update',
+      previousState: { attachment },
+      newState: { attachments: nextAttachments },
+      details: {
+        fileName: attachment.fileName,
+        attachmentUrl: attachment.url,
+      },
+    });
+
+    return { deleted: true };
   },
 );

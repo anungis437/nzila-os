@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     const contactResult = await upsertZongaLead(contactPayload)
-    let contactId: string | null = contactResult.ok ? contactResult.id : null
+    const contactId: string | null = contactResult.ok ? contactResult.id : null
     let queued = false
 
     if (!contactResult.ok) {

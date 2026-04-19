@@ -135,6 +135,82 @@ export async function withRequestContext<T>(
   return runWithContext(ctx, handler)
 }
 
+// ── Role-based access control ────────────────────────────────────────────────
+
+/**
+ * Zonga role hierarchy for fine-grained access control.
+ * Roles are stored in the `role` column of `org_members`.
+ * Deny-by-default: if the role column is null/missing, the user is treated as 'listener'.
+ */
+export type ZongaRole =
+  | 'super_admin'
+  | 'platform_operator'
+  | 'client_admin'
+  | 'artist_manager'
+  | 'creator'
+  | 'finance_admin'
+  | 'support_agent'
+  | 'listener'
+
+/** Roles that imply elevated platform access */
+const ELEVATED_ROLES: readonly ZongaRole[] = ['super_admin', 'platform_operator']
+
+/**
+ * Require the authenticated user to hold one of the allowed roles within
+ * their active org. Returns the userId and resolved role on success.
+ *
+ * Usage:
+ *   const guard = await requireRole(orgId, ['finance_admin', 'platform_operator'])
+ *   if (!guard.ok) return guard.response
+ */
+export async function requireRole(
+  orgId: string,
+  allowedRoles: ZongaRole[],
+): Promise<
+  | { ok: true; userId: string; role: ZongaRole }
+  | { ok: false; response: NextResponse }
+> {
+  const authResult = await authenticateUser()
+  if (!authResult.ok) return authResult
+
+  const rows = await platformDb
+    .select()
+    .from(orgMembers)
+    .where(
+      and(
+        eq(orgMembers.orgId, orgId),
+        eq(orgMembers.userId, authResult.userId),
+      ),
+    )
+    .limit(1)
+
+  const membership = rows[0]
+  if (!membership) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+    }
+  }
+
+  // Fall back to 'listener' when role column is null (e.g. older rows)
+  const memberRole = ((membership as Record<string, unknown>).role as ZongaRole | undefined) ?? 'listener'
+
+  // super_admin and platform_operator always pass role checks
+  const effectiveAllowed = [...allowedRoles, ...ELEVATED_ROLES]
+
+  if (!effectiveAllowed.includes(memberRole)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Insufficient privileges', required: allowedRoles },
+        { status: 403 },
+      ),
+    }
+  }
+
+  return { ok: true, userId: authResult.userId, role: memberRole }
+}
+
 // ── Org-scoped API route wrapper ────────────────────────────────────────────
 
 /**

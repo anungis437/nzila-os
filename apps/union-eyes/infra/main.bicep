@@ -9,6 +9,10 @@ param environment string
 @description('Product name')
 param productName string
 
+@description('PostgreSQL administrator password')
+@secure()
+param postgresAdminPassword string
+
 @description('Azure region')
 param location string = 'canadacentral'
 
@@ -53,7 +57,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
   }
   properties: {
     administratorLogin: 'nzilaadmin'
-    administratorPassword: ''
+    administratorLoginPassword: postgresAdminPassword
     storage: {
       storageSizeGB: environment == 'prod' ? 128 : 32
     }
@@ -67,10 +71,14 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: 'redis-${productName}-${environment}'
   location: location
-  sku: {
-    name: environment == 'prod' ? 'Standard' : 'Basic'
-    family: 'C'
-    capacity: environment == 'prod' ? 2 : 1
+  properties: {
+    sku: {
+      name: environment == 'prod' ? 'Standard' : 'Basic'
+      family: 'C'
+      capacity: environment == 'prod' ? 2 : 1
+    }
+    enableNonSslPort: false
+    minimumTlsVersion: '1.2'
   }
 }
 
@@ -112,5 +120,8 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 // Outputs
 output webAppUrl string = webApp.properties.defaultHostName
-output postgresConnectionString string = 'postgresql://nzilaadmin@${postgresServer.name}:${postgresServer.properties.administratorPassword}@${postgresServer.name}.postgres.database.azure.com:5432/${productName}'
-output redisConnectionString string = redisCache.properties.hostName
+output postgresServerName string = postgresServer.name
+output postgresServerFqdn string = postgresServer.properties.fullyQualifiedDomainName
+output postgresDatabaseName string = productName
+output postgresAdminUser string = 'nzilaadmin'
+output redisHostName string = redisCache.properties.hostName
