@@ -19,7 +19,7 @@ test.describe('CFO E2E', () => {
     expect([200, 503]).toContain(res.status())
     const body = await res.json()
     expect(body.status).toMatch(/ok|degraded/)
-    expect(body.service).toBe('cfo')
+    expect(body.app).toBe('cfo')
   })
 
   test('evidence export requires auth', async ({ request }) => {

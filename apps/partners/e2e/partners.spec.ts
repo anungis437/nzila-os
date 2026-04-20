@@ -12,7 +12,7 @@ test.describe('Partners E2E', () => {
     expect([200, 503]).toContain(res.status())
     const body = await res.json()
     expect(body.status).toMatch(/ok|degraded/)
-    expect(body.service).toBe('partners')
+    expect(body.app).toBe('partners')
   })
 
   test('evidence export requires auth', async ({ request }) => {
