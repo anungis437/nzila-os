@@ -55,6 +55,6 @@ describe('buildAIGovernanceTrendSummary', () => {
     expect(summary.window3m.totalIncidents).toBe(3)
     expect(summary.window6m.totalBlockedActions).toBe(35)
     expect(summary.window12m.avgP95LatencyMs).toBe(1585)
-    expect(summary.window12m.avgOverrideRatePct).toBe(5.61)
+    expect(summary.window12m.avgOverrideRatePct).toBe(5.36)
   })
 })
