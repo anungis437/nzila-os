@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 import { readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs'
-import { dirname, extname, join, relative, resolve } from 'node:path'
+import { dirname, extname, join, relative, resolve, sep } from 'node:path'
 
 import { findRepoRoot } from '../lib/portfolio-governance'
 
@@ -45,7 +45,7 @@ function safeJoin(root: string, relativePath: string): string {
   // nosemgrep
   const absolutePath = resolve(root, relativePath)
   // nosemgrep
-  const normalizedRoot = `${resolve(root)}\\`
+  const normalizedRoot = `${resolve(root)}${sep}`
   // nosemgrep
   if (!absolutePath.startsWith(normalizedRoot) && absolutePath !== resolve(root)) {
     throw new Error(`Unsafe path outside allowed root: ${relativePath}`)
