@@ -1,0 +1,41 @@
+{
+  "version": "2026-04-19.1",
+  "baseline": {
+    "costPerThousandStreamsUsd": 2.4,
+    "bandwidthGbPerUserMonthly": 3.8,
+    "storageGbPerTrack": 0.012,
+    "artistPayoutRatePct": 55,
+    "campaignCacUsd": 4.5,
+    "freeTierArpuUsd": 0.35,
+    "premiumArpuUsd": 8.5
+  },
+  "geoTrafficMultipliers": {
+    "na": 1,
+    "eu": 1.08,
+    "afr": 0.94,
+    "latam": 0.97,
+    "apac": 1.12
+  },
+  "scenarios": [
+    {
+      "name": "10k_users",
+      "users": 10000,
+      "premiumMixPct": 12
+    },
+    {
+      "name": "100k_users",
+      "users": 100000,
+      "premiumMixPct": 18
+    },
+    {
+      "name": "1m_users",
+      "users": 1000000,
+      "premiumMixPct": 25
+    }
+  ],
+  "dangerThresholds": {
+    "maxCogsPctOfRevenue": 72,
+    "maxBandwidthSharePct": 35,
+    "maxArtistLiabilityPct": 65
+  }
+}

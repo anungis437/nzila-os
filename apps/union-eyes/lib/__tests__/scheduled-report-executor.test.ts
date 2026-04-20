@@ -1,7 +1,7 @@
 /**
  * Tests for scheduled-report-executor.ts
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockExecute: vi.fn(),
@@ -64,6 +64,10 @@ describe('scheduled-report-executor', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
     mocks.mockUpdateScheduleAfterRun.mockResolvedValue(undefined);
     mocks.mockSendScheduledReportEmail.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   // ── executeScheduledReport ─────────────────────────────────────────────────

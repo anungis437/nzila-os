@@ -4,6 +4,12 @@
 
 ## Health Checks
 
+Canonical deployment paths:
+
+- Staging and development: `.github/workflows/gitops-deploy.yml`
+- Production: `.github/workflows/deploy-production.yml`
+- App-specific deploy workflows are emergency/manual only.
+
 Run health checks across all environments:
 
 ```sh
@@ -58,6 +64,32 @@ Arguments:
 5. Change record reference (optional)
 
 Snapshots are saved in `ops/governance-snapshots/`.
+
+## Release Governance Automation
+
+Generate governance scorecards and workflow-sprawl audit:
+
+```sh
+pnpm release:audit
+```
+
+Run secret inventory audit over all GitHub workflows:
+
+```sh
+pnpm release:secrets:audit
+```
+
+Run policy-aware smoke tests using deployment inventory:
+
+```sh
+pnpm release:smoke
+```
+
+Validate migration safety before promotion:
+
+```sh
+pnpm release:migration:safety
+```
 
 ## Rollback
 

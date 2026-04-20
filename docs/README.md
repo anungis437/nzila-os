@@ -2,6 +2,7 @@
 
 ## Start Here
 
+- Canonical docs index: [Documentation Index](documentation-index.md)
 - Commercial proof index: [Proof Center](proof-center/portfolio-proof-index.md)
 - Buyer packs: [Union Eyes](buyers/union-eyes-buyer-pack.md) · [Flow](buyers/flow-buyer-pack.md)
 - Investor summary: [Final Investor One-Pager](investor/final-investor-onepager.md)
@@ -15,6 +16,7 @@
 
 ## Governance and Operations
 
+- [Ownership Registry](ops/ownership-registry.md)
 - [Procurement Pack](governance/procurement-pack.md)
 - [Status Authority Model](platform/STATUS_AUTHORITY_MODEL.md)
 - [CUPE Pilot Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)

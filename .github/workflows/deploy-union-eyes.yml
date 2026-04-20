@@ -2,15 +2,11 @@ name: Deploy UnionEyes (Azure Container Apps)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/union-eyes/**'
-      - 'packages/db/**'
-      - 'packages/config/**'
-      - 'packages/commerce-core/**'
-      - 'packages/commerce-services/**'
-      - 'packages/payments-stripe/**'
+    inputs:
+      emergency_ack:
+        description: Type EMERGENCY to run this fallback workflow
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -36,6 +32,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Emergency acknowledgement gate
+        run: |
+          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
+            echo "Emergency ack missing. Use gitops-deploy.yml for canonical staging deployment."
+            exit 1
+          fi
 
       - name: Restore turbo cache
         uses: actions/cache@v5

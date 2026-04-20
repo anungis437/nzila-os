@@ -1,12 +1,29 @@
 name: Deploy Production
 
 on:
+  workflow_dispatch:
+    inputs:
+      staging_run_id:
+        description: Optional staging workflow run id to promote from
+        required: false
+        type: string
+      apps:
+        description: Comma-separated apps to promote (or all)
+        required: false
+        type: string
+        default: all
+      zonga_prod_override:
+        description: Allow Zonga pilot production promotion (emergency override)
+        required: false
+        type: boolean
+        default: false
   push:
     tags:
       - 'v*'
 
 permissions:
   contents: read
+  actions: read
   id-token: write       # W2-4: OIDC federation with Azure
   attestations: write   # W1-6: SLSA provenance
 
@@ -40,6 +57,12 @@ jobs:
         id: contract_tests
         run: pnpm contract:test
 
+      - name: Migration safety gate
+        run: pnpm release:migration:safety
+
+      - name: Release governance audit
+        run: pnpm release:audit
+
       - name: SLO gate
         id: slo_gate
         run: node --import tsx scripts/slo-gate.ts --env=production
@@ -48,14 +71,58 @@ jobs:
     runs-on: ubuntu-latest
     needs: pre-deploy-gates
     name: Verify Staged Artifact
+    outputs:
+      approved_apps: ${{ steps.resolve.outputs.approved_apps }}
+      source_run_id: ${{ steps.resolve.outputs.source_run_id }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download staging artifacts
-        uses: actions/download-artifact@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
         with:
-          name: staging-build-artifacts
-          path: ./staging-artifacts
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve source staging run and approved app set
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
+          ZONGA_OVERRIDE="${{ github.event.inputs.zonga_prod_override || 'false' }}"
+          RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env production --apps "$REQUESTED_APPS" --zonga-override "$ZONGA_OVERRIDE")
+          APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
+          echo "approved_apps=$APPROVED_APPS" >> "$GITHUB_OUTPUT"
+
+          SOURCE_RUN_ID="${{ github.event.inputs.staging_run_id }}"
+          if [ -z "$SOURCE_RUN_ID" ]; then
+            SOURCE_RUN_ID=$(gh run list --workflow deploy-staging.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          if [ -z "$SOURCE_RUN_ID" ] || [ "$SOURCE_RUN_ID" = "null" ]; then
+            echo "Unable to determine source staging run id"
+            exit 1
+          fi
+
+          echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
+
+          echo "### Production Promotion Plan" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source staging run id: $SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Requested apps: $REQUESTED_APPS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Policy-approved apps: $APPROVED_APPS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download staging artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging-artifacts
+          gh run download "${{ steps.resolve.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
       - name: Verify artifact digest
         run: |
@@ -63,6 +130,22 @@ jobs:
           test -f staging-artifacts/artifact-manifest.json
           echo "Verifying artifact manifest integrity"
           jq . staging-artifacts/artifact-manifest.json >/dev/null
+
+          # Ensure manifest targets exist and intersect with approved production apps.
+          APPROVED='${{ steps.resolve.outputs.approved_apps }}'
+          jq --arg approved "$APPROVED" '
+            .deployTargets = (
+              (.deployTargets // [])
+              | map(select((.containerAppName // .app // .name) as $n | ($approved | split(",") | index($n) != null)))
+            )
+          ' staging-artifacts/artifact-manifest.json > staging-artifacts/artifact-manifest.filtered.json
+
+          FILTERED_COUNT=$(jq '.deployTargets | length' staging-artifacts/artifact-manifest.filtered.json)
+          if [ "$FILTERED_COUNT" -eq 0 ]; then
+            echo "No deploy targets remain after production policy filtering"
+            exit 1
+          fi
+
           echo "Artifact manifest verified"
 
       - name: Verify SBOM
@@ -100,10 +183,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download staging artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: staging-build-artifacts
-          path: ./staging-artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging-artifacts
+          gh run download "${{ needs.verify-artifact.outputs.source_run_id }}" --name staging-build-artifacts --dir ./staging-artifacts
 
       - name: Generate SLSA provenance
         uses: actions/attest-build-provenance@v2
@@ -132,8 +217,16 @@ jobs:
         run: |
           set -euo pipefail
 
+          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+          jq --arg approved "$APPROVED" '
+            .deployTargets = (
+              (.deployTargets // [])
+              | map(select((.containerAppName // .app // .name) as $n | ($approved | split(",") | index($n) != null)))
+            )
+          ' staging-artifacts/artifact-manifest.json > staging-artifacts/artifact-manifest.filtered.json
+
           pnpm deploy:transactional \
-            --manifest staging-artifacts/artifact-manifest.json \
+            --manifest staging-artifacts/artifact-manifest.filtered.json \
             --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
             --health-attempts 10 \
             --health-delay-ms 5000 \
@@ -142,10 +235,18 @@ jobs:
         env:
           PRODUCTION_DEPLOY_TARGETS_JSON: ${{ secrets.PRODUCTION_DEPLOY_TARGETS_JSON }}
 
-      - name: Record governance snapshot
+      - name: Post-deploy smoke tests
+        run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "${{ needs.verify-artifact.outputs.approved_apps }}"
+
+      - name: Record governance snapshot + release manifest
         run: |
-          mkdir -p ops/governance-snapshots
+          set -euo pipefail
+          mkdir -p ops/governance-snapshots ops/releases
+
           TAG_NAME="${GITHUB_REF#refs/tags/}"
+          RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+          APPROVED='${{ needs.verify-artifact.outputs.approved_apps }}'
+
           cat > ops/governance-snapshots/governance-snapshot-prod-$(date -u +%Y-%m-%d).json <<EOF
           {
             "environment": "PRODUCTION",
@@ -154,9 +255,32 @@ jobs:
             "sbom_hash": "promoted-from-staging",
             "policy_engine_status": "pass",
             "change_record_ref": "$TAG_NAME",
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            "timestamp": "$RELEASE_DATE"
           }
           EOF
+
+          # Write structured release manifest
+          VERSION="${TAG_NAME#v}"
+          cat > "ops/releases/release-${TAG_NAME}.json" <<EOF
+          {
+            "version": "$VERSION",
+            "tag": "$TAG_NAME",
+            "previousVersion": "see-prior-tag",
+            "bumpType": "automated",
+            "gitSha": "${{ github.sha }}",
+            "gitBranch": "main",
+            "date": "$RELEASE_DATE",
+            "artifactId": "nzila-os-${VERSION}-${{ github.sha }}",
+            "releaseType": "standard",
+            "changelogUrl": "https://github.com/anungis437/nzila-os/releases/tag/${TAG_NAME}",
+            "approvedApps": $(echo "$APPROVED" | jq -R 'split(",")'),
+            "createdBy": "github-actions"
+          }
+          EOF
+
+      - name: Build release evidence pack
+        run: |
+          pnpm tsx scripts/release/build-deploy-evidence.ts --env production
 
       - name: Upload deployment evidence
         if: always()
@@ -165,5 +289,48 @@ jobs:
           name: production-deploy-evidence
           path: |
             ops/deploy-evidence/*.json
+            ops/evidence/*.json
             ops/governance-snapshots/governance-snapshot-prod-*.json
+            ops/releases/release-*.json
           retention-days: 365
+
+  # ── Post-deploy: Generate changelog + update dashboard ─────────────────────
+  post-deploy:
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    name: Post-Deploy Housekeeping
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        with:
+          config: cliff.toml
+          args: --output CHANGELOG.md
+        continue-on-error: true
+
+      - name: Generate portfolio release dashboard
+        run: pnpm release:dashboard --output markdown
+
+      - name: Commit post-deploy artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md docs/ops/release-status.md || true
+          git diff --cached --quiet || git commit -m "docs: update changelog and release dashboard [skip ci]"
+          git push origin HEAD:main || true

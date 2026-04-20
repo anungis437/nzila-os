@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -6,7 +6,15 @@ vi.mock('@/lib/logger', () => ({
 
 // Mock fetch globally
 const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+
+beforeEach(() => {
+  mockFetch.mockReset();
+  vi.stubGlobal('fetch', mockFetch);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 import {
   SignatureError,
@@ -116,7 +124,6 @@ describe('DocuSignProvider', () => {
   let provider: DocuSignProvider;
 
   beforeEach(() => {
-    mockFetch.mockReset();
     provider = new DocuSignProvider({
       apiKey: 'test-key',
       accountId: 'test-account',
@@ -283,7 +290,6 @@ describe('HelloSignProvider', () => {
   let provider: HelloSignProvider;
 
   beforeEach(() => {
-    mockFetch.mockReset();
     provider = new HelloSignProvider({ apiKey: 'hs-key' });
   });
 

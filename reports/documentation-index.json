@@ -1,0 +1,2539 @@
+{
+  "generatedAt": "2026-04-20T04:20:56.106Z",
+  "totalDocuments": 390,
+  "staleDocuments": 0,
+  "categories": [
+    {
+      "category": "GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "README.md",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "agri",
+      "count": 12,
+      "staleCount": 0
+    },
+    {
+      "category": "architecture",
+      "count": 42,
+      "staleCount": 0
+    },
+    {
+      "category": "archive",
+      "count": 10,
+      "staleCount": 0
+    },
+    {
+      "category": "backlog",
+      "count": 2,
+      "staleCount": 0
+    },
+    {
+      "category": "buyers",
+      "count": 10,
+      "staleCount": 0
+    },
+    {
+      "category": "commerce",
+      "count": 18,
+      "staleCount": 0
+    },
+    {
+      "category": "control-plane",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "decision-layer",
+      "count": 13,
+      "staleCount": 0
+    },
+    {
+      "category": "deploy",
+      "count": 2,
+      "staleCount": 0
+    },
+    {
+      "category": "documentation-index.md",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "explanation",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "faircase",
+      "count": 24,
+      "staleCount": 0
+    },
+    {
+      "category": "flow",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "ga",
+      "count": 2,
+      "staleCount": 0
+    },
+    {
+      "category": "governance",
+      "count": 32,
+      "staleCount": 0
+    },
+    {
+      "category": "gtm",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "hardening",
+      "count": 18,
+      "staleCount": 0
+    },
+    {
+      "category": "how-to",
+      "count": 4,
+      "staleCount": 0
+    },
+    {
+      "category": "index",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "investor",
+      "count": 8,
+      "staleCount": 0
+    },
+    {
+      "category": "migration",
+      "count": 12,
+      "staleCount": 0
+    },
+    {
+      "category": "ops",
+      "count": 24,
+      "staleCount": 0
+    },
+    {
+      "category": "personas",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "pilot",
+      "count": 14,
+      "staleCount": 0
+    },
+    {
+      "category": "plans",
+      "count": 7,
+      "staleCount": 0
+    },
+    {
+      "category": "platform",
+      "count": 66,
+      "staleCount": 0
+    },
+    {
+      "category": "platform-surface-migrations",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "proof-center",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "reference",
+      "count": 5,
+      "staleCount": 0
+    },
+    {
+      "category": "repo-contract",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "risk",
+      "count": 3,
+      "staleCount": 0
+    },
+    {
+      "category": "root",
+      "count": 4,
+      "staleCount": 0
+    },
+    {
+      "category": "stress-test",
+      "count": 4,
+      "staleCount": 0
+    },
+    {
+      "category": "tutorials",
+      "count": 4,
+      "staleCount": 0
+    },
+    {
+      "category": "union-eyes",
+      "count": 22,
+      "staleCount": 0
+    },
+    {
+      "category": "zonga",
+      "count": 6,
+      "staleCount": 0
+    }
+  ],
+  "entries": [
+    {
+      "path": "ARCHITECTURE.md",
+      "category": "root",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "CHANGELOG.md",
+      "category": "root",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/00-overview.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/01-market-map.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/02-architecture.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/03-data-model.md",
+      "category": "agri",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/04-events-and-integrations.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/05-security-and-isolation.md",
+      "category": "agri",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/06-evidence-and-traceability.md",
+      "category": "agri",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/07-ml-and-intelligence.md",
+      "category": "agri",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/08-cutover-plan.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/CANONICAL_REPORTING_SCHEMA.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/CORAGOV_INGESTION_GUIDE.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/agri/FINAL_LOCK_IN.md",
+      "category": "agri",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/AI_INTELLIGENCE_LAYER.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/AI_PLATFORM_CONTRACT.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURAL_BOUNDARIES.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/AUDIT_ENFORCEMENT.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/AUTH_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/aws-streaming-architecture.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/BOUNDARY_POLICY.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-03",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/build-strategy.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/compliance-snapshots.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/CONTROL_PLANE_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/CONTROL_PLANE_PRINCIPLES.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/DAPL_PLATFORM_LEDGER.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/DECISION_LAYER_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/DOMAIN_VS_AUDIT_MODEL.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ENFORCEMENT_SUMMARY.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ENTERPRISE_ARCHITECTURE_DIAGRAMS.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ENVIRONMENT_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/EVIDENCE_INTEGRATION_GUIDE.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-03",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/EVIDENCE_LIFECYCLE.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/evidence-packs.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/HARDENING_SUMMARY.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-03",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/innovation-future-tech-investments-strategy.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/integration-control-plane.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/MONETIZATION_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/multi-product-operating-architecture.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/observability.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ORG_ISOLATION.md",
+      "category": "architecture",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ORG_SCOPED_TABLES.md",
+      "category": "architecture",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ORM_BOUNDARY.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-27",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/platform-event-bus.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/policy-engine.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/POLYGLOT_PERSISTENCE.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/STACK_AUTHORITY.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/tools-nzila-cto-technical-strategy-summary.md",
+      "category": "architecture",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/VERTICAL_SCAFFOLDING.md",
+      "category": "architecture",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/WEBHOOK_VERIFICATION_MIGRATION.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-03",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/AI_ML_REMEDIATION_STATUS.md",
+      "category": "archive",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/DECISION_INTELLIGENCE_AUDIT_2026-07-06.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "category": "archive",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "category": "archive",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/CLEANUP_CHANGE_SUMMARY.md",
+      "category": "archive",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/README.md",
+      "category": "archive",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/backlog/abr-backend.md",
+      "category": "backlog",
+      "lastValidated": "2026-03-02",
+      "stale": false
+    },
+    {
+      "path": "docs/backlog/REMEDIATION_TASKS.md",
+      "category": "backlog",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/buyer-faq.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/deployment-models.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/flow-buyer-pack.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/flow-revenue-playbook.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/integration-readiness-matrix.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/pilot-readiness-checklist.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/product-capability-matrix.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/sla-support-model.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/union-eyes-buyer-pack.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/buyers/union-eyes-revenue-playbook.md",
+      "category": "buyers",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ADR/ADR-SQ-001-adapter-pattern.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ADR/ADR-SQ-002-pricing-extraction.md",
+      "category": "commerce",
+      "lastValidated": "2026-02-25",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ADR/README.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/COMMERCIAL_INTEGRATION_REPORT.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/DOMAIN_MODEL_DRAFT.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/gtm-sales-engine.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/LEGACY_REVIEW.md",
+      "category": "commerce",
+      "lastValidated": "2026-02-24",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/meie/PROGRESS_REPORT.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/meie/SOFTWARE_DELIVERABLES_MAP.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/meie/TECHNICAL_UNCERTAINTIES.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/meie/WP_DELIVERABLES.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/README.md",
+      "category": "commerce",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/spec/GLOSSARY.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
+      "category": "commerce",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/spec/STATE_MACHINE_GAP.md",
+      "category": "commerce",
+      "lastValidated": "2026-02-24",
+      "stale": false
+    },
+    {
+      "path": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "category": "control-plane",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/CAPABILITIES.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/demos/agri-trade-demo.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/demos/assessments-demo.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-12",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/demos/unions-demo.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-12",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/GOVERNANCE_AND_SAFETY.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/OVERVIEW.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-12",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/pilots/agri-trade-pilot.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/pilots/assessments-pilot.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/pilots/unions-pilot.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/VALUE_MODEL.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/verticals/agri-trade.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/verticals/assessments.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-12",
+      "stale": false
+    },
+    {
+      "path": "docs/decision-layer/verticals/unions.md",
+      "category": "decision-layer",
+      "lastValidated": "2026-03-12",
+      "stale": false
+    },
+    {
+      "path": "docs/deploy/data-residency-audit.md",
+      "category": "deploy",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/deploy/profiles.md",
+      "category": "deploy",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/documentation-index.md",
+      "category": "documentation-index.md",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/explanation/ai-risk-management.md",
+      "category": "explanation",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/explanation/evidence-first.md",
+      "category": "explanation",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/explanation/README.md",
+      "category": "explanation",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/buyer-pack.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/channel-strategy.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/competitor-positioning.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/demo-script.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/executive-summary.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/gtm-audit.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/icp-segments.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/implementation-guide.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/objection-handling.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/objections-v2.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/offers.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/outbound-engine.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/pilot-brochure.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/pilot-conversion.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/pilot-plan.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/pricing-model.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/pricing-pressure-test.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/procurement-checklist.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/proposal-template.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/revenue-cadence.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/roi-calculator.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/security-one-pager.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/security-overview.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/faircase/why-faircase.md",
+      "category": "faircase",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/flow/revenue-profile.md",
+      "category": "flow",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/ga/GA_CERTIFICATION_REPORT.md",
+      "category": "ga",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/ga/GA_READINESS_GATE.md",
+      "category": "ga",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "category": "GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/APP_GOLD_STANDARD.md",
+      "category": "governance",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/APP_LIFECYCLE_MATRIX.md",
+      "category": "governance",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/assurance-dashboard.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/audit-logging-model.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/bcp-dr-overview.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/BLINDSPOTS_VALIDATION.md",
+      "category": "governance",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/CBA_INTELLIGENCE_ADVERSARIAL_VALIDATION.md",
+      "category": "governance",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md",
+      "category": "governance",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/CHANGE_CALENDAR_MODEL.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/CHANGE_ENABLEMENT_ARCHITECTURE.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/CHANGE_POLICY.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/contracts.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/data-retention-policy.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/DECISION_POLICY_MODEL.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/DECISION_REVIEW_WORKFLOW.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/enterprise-readiness.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/GOVERNANCE_ARCHITECTURE.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/incident-response-summary.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/PACKAGE_LIFECYCLE_POLICY.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/PACKAGE_OWNERSHIP.md",
+      "category": "governance",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/pentest-plan.md",
+      "category": "governance",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "category": "governance",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/PLATFORM_VS_APP_DECISION_RULE.md",
+      "category": "governance",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/platform-readiness.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/PROCUREMENT_EVIDENCE_SYSTEM.md",
+      "category": "governance",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/procurement-faq.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/procurement-pack.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/rfp-generator.md",
+      "category": "governance",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/secure-coding-training.md",
+      "category": "governance",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/security-overview.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/vendor-questionnaire-starter-pack.md",
+      "category": "governance",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/vulnerability-disclosure-policy.md",
+      "category": "governance",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/gtm/faircase-engine.md",
+      "category": "gtm",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/AUDIT_TRAIL_SCHEMA.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/BASELINE.md",
+      "category": "hardening",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/build-reproducibility.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/CHAOS_LOAD_TEST_PLAN.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/COMPENSATION_PLAYBOOK.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/CRITICAL_OPERATIONS_MATRIX.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/DEPLOYMENT_CHECKLIST.md",
+      "category": "hardening",
+      "lastValidated": "2026-04-05",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/FINAL_RUNTIME_VALIDATION_REPORT.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/GUARD_ARCHITECTURE.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/INVARIANTS_REFERENCE.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/logging.md",
+      "category": "hardening",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/OBSERVABILITY_DASHBOARD.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/observability.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/PROOF_REPORT.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/PROOF_TARGET_MATRIX.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/secrets.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/SECURITY_POSTURE.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/hardening/WORKFLOW_OWNERSHIP_MAP.md",
+      "category": "hardening",
+      "lastValidated": "2026-03-20",
+      "stale": false
+    },
+    {
+      "path": "docs/how-to/create-model-card.md",
+      "category": "how-to",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "category": "how-to",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/how-to/README.md",
+      "category": "how-to",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/how-to/rotate-secrets.md",
+      "category": "how-to",
+      "lastValidated": "2026-03-05",
+      "stale": false
+    },
+    {
+      "path": "docs/index/doc-map.md",
+      "category": "index",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/index/glossary.md",
+      "category": "index",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/index/README.md",
+      "category": "index",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/defensible-moat-analysis.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/final-investor-onepager.md",
+      "category": "investor",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/product-expansion-strategy.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/revenue-scenarios.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/risk-register-and-mitigations.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/shared-platform-leverage-model.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/three-year-growth-narrative.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/investor/why-nzila-os-wins.md",
+      "category": "investor",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/app-alignment/3cuo.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/app-alignment/abr.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/app-alignment/cora.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/app-alignment/union-eyes.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/ENFORCEMENT_UPGRADE.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/legacy-trade-domain-models.md",
+      "category": "migration",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/nacp-inventory.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/ROLLBACK_RUNBOOK.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/trade/canonical-domain-map.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/trade/cars-vertical-scope.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/trade/TRADE-DELIVERABLES.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/migration/zonga-legacy-inventory.md",
+      "category": "migration",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/cba-intelligence-runbook.md",
+      "category": "ops",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/DEPLOYMENT_PROMOTION_MODEL.md",
+      "category": "ops",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/disaster-recovery.md",
+      "category": "ops",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/ENVIRONMENT_OPERATIONS.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/gameday-chaos-readiness.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incident-response.md",
+      "category": "ops",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incidents/communication-template.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incidents/customer-status-template.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incidents/postmortem-template.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incidents/sev1-runbook.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/incidents/sev2-runbook.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/live-event-operator-runbook.md",
+      "category": "ops",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/on-call.md",
+      "category": "ops",
+      "lastValidated": "2026-03-03",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/ownership-registry.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/phase7-technical-excellence-sweep-closure.md",
+      "category": "ops",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/release-governance/RELEASE_NOTE_TEMPLATE.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/release-governance/release-governance-audit.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/REPO_OPERATOR_RUNBOOK.md",
+      "category": "ops",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/revenue-metrics-canonical-layer.md",
+      "category": "ops",
+      "lastValidated": "2026-04-18",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/sre/executive-reliability-dashboard.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/sre/portfolio-reliability-audit.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md",
+      "category": "ops",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/personas/01-buyer.md",
+      "category": "personas",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/personas/02-operator.md",
+      "category": "personas",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/personas/03-auditor.md",
+      "category": "personas",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/01-scope-checklist.md",
+      "category": "pilot",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/02-data-onboarding.md",
+      "category": "pilot",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/03-security-privacy-packet.md",
+      "category": "pilot",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/04-monitoring-and-slos.md",
+      "category": "pilot",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/05-demo-script.md",
+      "category": "pilot",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_MALWARE_CONTROL_BOUNDARY.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_RBAC_MATRIX.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md",
+      "category": "pilot",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/IMPLEMENTATION_PLAN_FINAL.md",
+      "category": "plans",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md",
+      "category": "plans",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/partner-app-validation.md",
+      "category": "plans",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "category": "plans",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/REPO_ASSESSMENT.md",
+      "category": "plans",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/studio-maturity-10-of-10.md",
+      "category": "plans",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md",
+      "category": "plans",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/platform-surface-migrations/README.md",
+      "category": "platform-surface-migrations",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/acceptance-matrix.md",
+      "category": "platform",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_DATA_POISONING.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_HALLUCINATION.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/ALERTING_RUNBOOK.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/APP_ADOPTION_GUIDE.md",
+      "category": "platform",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/APP_LIFECYCLE_PROCESS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/AUTH_MIGRATION_STATUS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/auth-migration-architecture.md",
+      "category": "platform",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/auth-migration-final.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/COMMAND_CATALOG.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/CONSOLIDATION_CLOSEOUT.md",
+      "category": "platform",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/CONTRACTS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/COVERAGE_REPORTING.md",
+      "category": "platform",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/DATA_RESIDENCY_POLICY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/DOMAIN_EXPERTISE_MAP.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/dominance-train.md",
+      "category": "platform",
+      "lastValidated": "2026-02-28",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/EMERGING_THREAT_MODEL.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/EVIDENCE_LIFECYCLE_POLICY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/GA_READINESS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/governed-monetization.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/integration-fabric.md",
+      "category": "platform",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/integration-security-model.md",
+      "category": "platform",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/investor-brief.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/KILO_USAGE_PATTERNS.md",
+      "category": "platform",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/MIGRATION_NOTES.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/ONBOARDING.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/ORG_SCOPE_MODEL.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "category": "platform",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/pilot-metrics-architecture.md",
+      "category": "platform",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/PLATFORM_CONSOLIDATION_COMPLETION_REPORT.md",
+      "category": "platform",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/PLATFORM_SURFACE_MODEL.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/platform-boundaries.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/portfolio-matrix.md",
+      "category": "platform",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/ai-controlled-request.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/compliance-sensitive-action.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/demo-script.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/event-contract-flow.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/platform-proof-overview.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/README.md",
+      "category": "platform",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/proof/ue-governed-mutation.md",
+      "category": "platform",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/REGULATORY_CHANGE_MONITORING.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/revenue-architecture.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/revenue-products.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/revenue-system.md",
+      "category": "platform",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/runtime-adoption-matrix.md",
+      "category": "platform",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/runtime-classification.md",
+      "category": "platform",
+      "lastValidated": "2026-03-22",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/semantic-convergence-entity-to-org.md",
+      "category": "platform",
+      "lastValidated": "2026-03-19",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/SHARED_SERVICES.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/SHELL_ARCHITECTURE.md",
+      "category": "platform",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/SLO_ERROR_BUDGET_POLICY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/STATUS_AUTHORITY_MODEL.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/STRATEGIC_TELEMETRY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/THIRD_PARTY_RISK_REGISTER.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/TURBO_CACHE_STRATEGY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/what-is-nzila.md",
+      "category": "platform",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md",
+      "category": "platform",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/proof-center/flow-proof.md",
+      "category": "proof-center",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/proof-center/portfolio-proof-index.md",
+      "category": "proof-center",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/proof-center/union-eyes-proof.md",
+      "category": "proof-center",
+      "lastValidated": "2026-04-19",
+      "stale": false
+    },
+    {
+      "path": "docs/README.md",
+      "category": "README.md",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/reference/DEFERRED_ITEMS.md",
+      "category": "reference",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/reference/packages.md",
+      "category": "reference",
+      "lastValidated": "2026-03-05",
+      "stale": false
+    },
+    {
+      "path": "docs/reference/README.md",
+      "category": "reference",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/reference/TENANT_INVENTORY.md",
+      "category": "reference",
+      "lastValidated": "2026-04-10",
+      "stale": false
+    },
+    {
+      "path": "docs/reference/UNION_EYES_CURRENT_STATE.md",
+      "category": "reference",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/repo-contract/invariants.md",
+      "category": "repo-contract",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/repo-contract/README.md",
+      "category": "repo-contract",
+      "lastValidated": "2026-02-20",
+      "stale": false
+    },
+    {
+      "path": "docs/repo-contract/versioning.md",
+      "category": "repo-contract",
+      "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/risk/nzila-ai-risk-register-memora-deferred.md",
+      "category": "risk",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/risk/nzila-ai-risk-register.md",
+      "category": "risk",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/risk/nzila-issdlc-capabilities-assessment.md",
+      "category": "risk",
+      "lastValidated": "2026-04-01",
+      "stale": false
+    },
+    {
+      "path": "docs/stress-test/ENTERPRISE_STRESS_TEST.md",
+      "category": "stress-test",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/stress-test/EVIDENCE_INDEX.md",
+      "category": "stress-test",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/stress-test/ONE_WEEK_SPRINT.md",
+      "category": "stress-test",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/stress-test/REMEDIATION_PLAN.md",
+      "category": "stress-test",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/tutorials/adding-ai.md",
+      "category": "tutorials",
+      "lastValidated": "2026-04-05",
+      "stale": false
+    },
+    {
+      "path": "docs/tutorials/first-app.md",
+      "category": "tutorials",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/tutorials/MULTI_ORG_DEMO_FLOW.md",
+      "category": "tutorials",
+      "lastValidated": "2026-04-11",
+      "stale": false
+    },
+    {
+      "path": "docs/tutorials/README.md",
+      "category": "tutorials",
+      "lastValidated": "2026-03-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/admin-guide.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/case-intelligence.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-16",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/architecture.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/contractor-runtime-profile.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/controls-matrix.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/domain-model.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/evidence-chain.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/marathon-pilot.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/remittance-lifecycle.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/replay-audit-model.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/rollout-plan.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/employer-execution/scenario-pack.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-15",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/faq.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/integration-playbook.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/partner-overview.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-kpis.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/pilot-overview.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/quick-start.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/revenue-profile.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-17",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/user-guide.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/mobile-qa-checklist.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/monetization-model.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-13",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/pilot-commercial-model.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/pilot-go-no-go.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/pilot-kpis.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/zonga/pilot-readiness-audit.md",
+      "category": "zonga",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "README.md",
+      "category": "root",
+      "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "SECURITY.md",
+      "category": "root",
+      "lastValidated": "2026-02-20",
+      "stale": false
+    }
+  ]
+}

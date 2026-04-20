@@ -1,0 +1,22 @@
+{
+  "version": "2026-04-19.1",
+  "signals": [
+    "auth_outage",
+    "expired_certs",
+    "secret_expiry",
+    "webhook_failures",
+    "suspicious_traffic_spikes"
+  ],
+  "routing": {
+    "ops": "required",
+    "security": "required",
+    "sharedIncidentChannel": true
+  },
+  "defaultSeverity": {
+    "auth_outage": "p1",
+    "expired_certs": "p2",
+    "secret_expiry": "p2",
+    "webhook_failures": "p2",
+    "suspicious_traffic_spikes": "p1"
+  }
+}

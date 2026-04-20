@@ -1,19 +1,55 @@
 {
-  "generatedAt": "2026-03-10T20:46:02.742Z",
-  "filesScanned": 709,
-  "totalFindings": 633,
+  "generatedAt": "2026-04-20T04:20:52.502Z",
+  "filesScanned": 996,
+  "totalFindings": 995,
   "findingsByRule": {
-    "stale-package-ref": 25,
-    "stale-reference": 277,
-    "naming-inconsistency": 260,
-    "missing-package-readme": 71
+    "stale-reference": 299,
+    "stale-package-ref": 52,
+    "naming-inconsistency": 565,
+    "missing-required-doc": 3,
+    "missing-package-readme": 76
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 373,
-    "info": 260
+    "warning": 430,
+    "info": 565
   },
   "findings": [
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "line": 184,
+      "message": "Possible broken link: [PACKAGE_OWNERSHIP.md](PACKAGE_OWNERSHIP.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "line": 185,
+      "message": "Possible broken link: [PACKAGE_LIFECYCLE_POLICY.md](PACKAGE_LIFECYCLE_POLICY.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "line": 186,
+      "message": "Possible broken link: [PLATFORM_VS_APP_DECISION_RULE.md](PLATFORM_VS_APP_DECISION_RULE.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md",
+      "line": 47,
+      "message": "Possible broken link: [apps/flow/docs/DOMAIN_MODEL.md](../../apps/flow/docs/DOMAIN_MODEL.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/architecture/AUTH_ARCHITECTURE.md",
+      "line": 88,
+      "message": "Possible broken link: [docs/archive/auth-migration/](../archive/auth-migration/)"
+    },
     {
       "rule": "stale-package-ref",
       "severity": "warning",
@@ -53,21 +89,21 @@
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 378,
+      "line": 387,
       "message": "References @nzila/redis but package does not exist"
     },
     {
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 381,
+      "line": 390,
       "message": "References @nzila/redis but package does not exist"
     },
     {
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 423,
+      "line": 432,
       "message": "References @nzila/redis but package does not exist"
     },
     {
@@ -76,6 +112,132 @@
       "file": "docs/architecture/STACK_AUTHORITY.md",
       "line": 5,
       "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 61,
+      "message": "Possible broken link: [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 111,
+      "message": "Possible broken link: [portal/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/page.tsx)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 112,
+      "message": "Possible broken link: [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 113,
+      "message": "Possible broken link: [new/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/new/page.tsx)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 163,
+      "message": "Possible broken link: [priority-override/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/priority-override/route.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md",
+      "line": 198,
+      "message": "Possible broken link: [route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/route.ts)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/archive/README.md",
+      "line": 29,
+      "message": "Possible broken link: [auth-migration/](auth-migration/)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 8,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 10,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 16,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 92,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 128,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
+      "line": 245,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/PROGRESS_REPORT.md",
+      "line": 8,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/PROGRESS_REPORT.md",
+      "line": 15,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/PROGRESS_REPORT.md",
+      "line": 21,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/PROGRESS_REPORT.md",
+      "line": 37,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/SOFTWARE_DELIVERABLES_MAP.md",
+      "line": 6,
+      "message": "References @nzila/shop-quoter but package does not exist"
     },
     {
       "rule": "stale-reference",
@@ -106,11 +268,18 @@
       "message": "Possible broken link: [`packages/commerce-evidence/src/evidence.ts`](../../packages/commerce-evidence/src/evidence.ts)"
     },
     {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/TECHNICAL_UNCERTAINTIES.md",
+      "line": 103,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/commerce/meie/TECHNICAL_UNCERTAINTIES.md",
       "line": 112,
-      "message": "Possible broken link: [`packages/shop-quoter/`](../../packages/shop-quoter/)"
+      "message": "Possible broken link: [`apps/flow/`](../../apps/flow/)"
     },
     {
       "rule": "stale-reference",
@@ -118,6 +287,13 @@
       "file": "docs/commerce/meie/TECHNICAL_UNCERTAINTIES.md",
       "line": 139,
       "message": "Possible broken link: [`packages/commerce-governance/src/gates.ts`](../../packages/commerce-governance/src/gates.ts)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/TECHNICAL_UNCERTAINTIES.md",
+      "line": 152,
+      "message": "References @nzila/shop-quoter but package does not exist"
     },
     {
       "rule": "stale-reference",
@@ -208,7 +384,14 @@
       "severity": "warning",
       "file": "docs/commerce/meie/WP_DELIVERABLES.md",
       "line": 150,
-      "message": "Possible broken link: [`packages/shop-quoter/`](../../packages/shop-quoter/)"
+      "message": "Possible broken link: [`apps/flow/`](../../apps/flow/)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/commerce/meie/WP_DELIVERABLES.md",
+      "line": 150,
+      "message": "References @nzila/shop-quoter but package does not exist"
     },
     {
       "rule": "stale-reference",
@@ -251,6 +434,76 @@
       "file": "docs/ga/GA_READINESS_GATE.md",
       "line": 148,
       "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/APP_LIFECYCLE_MATRIX.md",
+      "line": 98,
+      "message": "Possible broken link: [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 17,
+      "message": "Possible broken link: [disaster-recovery.md](disaster-recovery.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 18,
+      "message": "Possible broken link: [incident-response.md](incident-response.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 126,
+      "message": "Possible broken link: [disaster-recovery.md](disaster-recovery.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 141,
+      "message": "Possible broken link: [incident-response.md](incident-response.md)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/governance/PACKAGE_OWNERSHIP.md",
+      "line": 177,
+      "message": "References @nzila/analytics but package does not exist"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "line": 6,
+      "message": "Possible broken link: [CONTROL_PLANE_PRINCIPLES.md](CONTROL_PLANE_PRINCIPLES.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "line": 176,
+      "message": "Possible broken link: [CONTROL_PLANE_PRINCIPLES.md](CONTROL_PLANE_PRINCIPLES.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "line": 177,
+      "message": "Possible broken link: [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/governance/PLATFORM_VS_APP_DECISION_RULE.md",
+      "line": 140,
+      "message": "Possible broken link: [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md)"
     },
     {
       "rule": "stale-package-ref",
@@ -298,22 +551,8 @@
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/hardening/BASELINE.md",
-      "line": 71,
-      "message": "References @nzila/security but package does not exist"
-    },
-    {
-      "rule": "stale-package-ref",
-      "severity": "warning",
-      "file": "docs/hardening/BASELINE.md",
-      "line": 71,
+      "line": 72,
       "message": "References @nzila/platform but package does not exist"
-    },
-    {
-      "rule": "stale-package-ref",
-      "severity": "warning",
-      "file": "docs/hardening/BASELINE.md",
-      "line": 183,
-      "message": "References @nzila/security but package does not exist"
     },
     {
       "rule": "stale-package-ref",
@@ -340,42 +579,49 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/how-to/README.md",
-      "line": 6,
+      "line": 7,
       "message": "Possible broken link: [Deploy to Azure](deploy-azure.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/how-to/README.md",
-      "line": 9,
-      "message": "Possible broken link: [Add a New Tenant](add-tenant.md)"
+      "line": 11,
+      "message": "Possible broken link: [Add a New Org](add-tenant.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/how-to/README.md",
-      "line": 13,
+      "line": 16,
       "message": "Possible broken link: [Add OPA Policy](add-opa-policy.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/how-to/README.md",
-      "line": 19,
+      "line": 24,
       "message": "Possible broken link: [Configure SLOs](configure-slos.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/how-to/README.md",
-      "line": 22,
+      "line": 28,
       "message": "Possible broken link: [Run Chaos Tests](run-chaos-tests.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
+      "file": "docs/how-to/rotate-secrets.md",
+      "line": 76,
+      "message": "Possible broken link: [Secret Compromise Runbook](../runbooks/secret-compromise.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
       "file": "docs/migration/app-alignment/union-eyes.md",
-      "line": 40,
+      "line": 47,
       "message": "Possible broken link: [app/api/health/route.ts](../../apps/union-eyes/app/api/health/route.ts)"
     },
     {
@@ -389,176 +635,260 @@
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/migration/ROLLBACK_RUNBOOK.md",
-      "line": 154,
+      "line": 155,
       "message": "References @nzila/platform but package does not exist"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
+      "file": "docs/ops/disaster-recovery.md",
+      "line": 133,
+      "message": "Possible broken link: [Enterprise Readiness Index](enterprise-readiness.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
       "file": "docs/ops/incident-response.md",
-      "line": 149,
-      "message": "Possible broken link: [Proof Pack](../../apps/console/app/(dashboard)"
+      "line": 164,
+      "message": "Possible broken link: [Enterprise Readiness Index](enterprise-readiness.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 16,
-      "message": "Possible broken link: [Creating a Package](tutorials/creating-package.md)"
+      "file": "docs/ops/on-call.md",
+      "line": 95,
+      "message": "Possible broken link: [docs/ops/runbooks/](runbooks/)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 17,
-      "message": "Possible broken link: [Setting Up Observability](tutorials/observability-setup.md)"
+      "file": "docs/ops/on-call.md",
+      "line": 131,
+      "message": "Possible broken link: [Runbooks](runbooks/)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 18,
-      "message": "Possible broken link: [Multi-Tenant Data Access](tutorials/multi-tenant.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 15,
+      "message": "Possible broken link: [`packages/analytics/portfolio/entity_consolidation.py`](packages/analytics/portfolio/entity_consolidation.py:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 25,
-      "message": "Possible broken link: [Deploy to Azure](how-to/deploy-azure.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 28,
+      "message": "Possible broken link: [`apps/console/lib/equity/models.ts`](apps/console/lib/equity/models.ts:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 26,
-      "message": "Possible broken link: [Add a New Tenant](how-to/add-tenant.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/README.md",
-      "line": 29,
-      "message": "Possible broken link: [Run Chaos Tests](how-to/run-chaos-tests.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/README.md",
-      "line": 30,
-      "message": "Possible broken link: [Add OPA Policy](how-to/add-opa-policy.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/README.md",
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
       "line": 31,
-      "message": "Possible broken link: [Configure SLOs](how-to/configure-slos.md)"
+      "message": "Possible broken link: [`PORTFOLIO_HEALTH.json`](packages/analytics/dashboards/PORTFOLIO_HEALTH.json:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 38,
-      "message": "Possible broken link: [Architecture](reference/architecture.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 37,
+      "message": "Possible broken link: [`packages/automation/orchestrator.py`](packages/automation/orchestrator.py:32)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 39,
-      "message": "Possible broken link: [API Reference](reference/api.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 76,
+      "message": "Possible broken link: [`governance/workflows.ts`](apps/console/lib/governance/workflows.ts:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 41,
-      "message": "Possible broken link: [Database Schema](reference/schema.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 77,
+      "message": "Possible broken link: [`governance/policy-engine.ts`](apps/console/lib/governance/policy-engine.ts:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 42,
-      "message": "Possible broken link: [Policy Engine](reference/policy-engine.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 78,
+      "message": "Possible broken link: [`ops/ops/`](ops/ops/README.md:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 43,
-      "message": "Possible broken link: [AI Gateway](reference/ai-gateway.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 94,
+      "message": "Possible broken link: [`ApprovalWorkflowSchema`](apps/console/lib/governance/workflows.ts:21)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 44,
-      "message": "Possible broken link: [Evidence System](reference/evidence.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 112,
+      "message": "Possible broken link: [`equity/models.ts`](apps/console/lib/equity/models.ts:18)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 45,
-      "message": "Possible broken link: [Configuration](reference/configuration.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 118,
+      "message": "Possible broken link: [`ops/ops/compliance/Required-Evidence-Map.md`](ops/ops/compliance/Required-Evidence-Map.md:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 53,
-      "message": "Possible broken link: [Org Isolation Model](explanation/org-isolation.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 127,
+      "message": "Possible broken link: [`MigrationOrchestrator`](packages/automation/orchestrator.py:32)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 54,
-      "message": "Possible broken link: [Stack Authority](explanation/stack-authority.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 203,
+      "message": "Possible broken link: [`apps/console/lib/equity/models.ts`](apps/console/lib/equity/models.ts:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 56,
-      "message": "Possible broken link: [SLO Philosophy](explanation/slo-philosophy.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 204,
+      "message": "Possible broken link: [`apps/console/lib/governance/workflows.ts`](apps/console/lib/governance/workflows.ts:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 57,
-      "message": "Possible broken link: [Content vs Governance](explanation/content-governance.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 205,
+      "message": "Possible broken link: [`packages/analytics/portfolio/entity_consolidation.py`](packages/analytics/portfolio/entity_consolidation.py:1)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 64,
-      "message": "Possible broken link: [Incident Response](runbooks/incident-response.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 206,
+      "message": "Possible broken link: [`packages/automation/orchestrator.py`](packages/automation/orchestrator.py:32)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 65,
-      "message": "Possible broken link: [Database Recovery](runbooks/database-recovery.md)"
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 207,
+      "message": "Possible broken link: [`ops/ops/compliance/Required-Evidence-Map.md`](ops/ops/compliance/Required-Evidence-Map.md:1)"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/plans/studio-maturity-10-of-10.md",
+      "line": 50,
+      "message": "References @nzila/shop-quoter but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 9,
+      "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 9,
+      "message": "References @nzila/eng but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 10,
+      "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 10,
+      "message": "References @nzila/eng but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 11,
+      "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 11,
+      "message": "References @nzila/eng but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 12,
+      "message": "References @nzila/ai but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 12,
+      "message": "References @nzila/eng but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 13,
+      "message": "References @nzila/ml but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 13,
+      "message": "References @nzila/eng but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 14,
+      "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 15,
+      "message": "References @nzila/platform but package does not exist"
+    },
+    {
+      "rule": "stale-package-ref",
+      "severity": "warning",
+      "file": "docs/platform/PACKAGE_OWNERSHIP_MATRIX.md",
+      "line": 16,
+      "message": "References @nzila/platform but package does not exist"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 67,
-      "message": "Possible broken link: [AI Model Rollback](runbooks/ai-model-rollback.md)"
+      "file": "docs/platform/PLATFORM_SURFACE_MODEL.md",
+      "line": 207,
+      "message": "Possible broken link: [CONTROL_PLANE_PRINCIPLES.md](governance/CONTROL_PLANE_PRINCIPLES.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/README.md",
-      "line": 69,
-      "message": "Possible broken link: [Tenant Offboarding](runbooks/tenant-offboarding.md)"
+      "file": "docs/platform/PLATFORM_SURFACE_MODEL.md",
+      "line": 208,
+      "message": "Possible broken link: [PLATFORM_VS_APP_DECISION_RULE.md](architecture/PLATFORM_VS_APP_DECISION_RULE.md)"
     },
     {
       "rule": "stale-package-ref",
@@ -571,56 +901,49 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/reference/README.md",
-      "line": 8,
+      "line": 9,
       "message": "Possible broken link: [Database Schema](schema.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/reference/README.md",
-      "line": 12,
+      "line": 13,
+      "message": "Possible broken link: [Policy Engine](policy-engine.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/reference/README.md",
+      "line": 14,
       "message": "Possible broken link: [Evidence System](evidence.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/reference/README.md",
-      "line": 15,
+      "line": 18,
       "message": "Possible broken link: [AI Gateway](ai-gateway.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/reference/README.md",
-      "line": 18,
+      "line": 22,
       "message": "Possible broken link: [Configuration](configuration.md)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
-      "file": "docs/runbooks/README.md",
-      "line": 10,
-      "message": "Possible broken link: [Database Recovery](database-recovery.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/runbooks/README.md",
-      "line": 11,
-      "message": "Possible broken link: [AI Model Rollback](ai-model-rollback.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/runbooks/README.md",
-      "line": 15,
-      "message": "Possible broken link: [Tenant Offboarding](tenant-offboarding.md)"
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 550,
+      "message": "Possible broken link: [The AI Risk Repository V4 (03/12/2025)](Copy%20of%20The%20AI%20Risk%20Repository%20V4_03_12_2025.xlsx)"
     },
     {
       "rule": "stale-reference",
       "severity": "warning",
       "file": "docs/tutorials/adding-ai.md",
-      "line": 136,
+      "line": 137,
       "message": "Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)"
     },
     {
@@ -642,7 +965,7 @@
       "severity": "warning",
       "file": "docs/tutorials/README.md",
       "line": 14,
-      "message": "Possible broken link: [Multi-Tenant Data Access](multi-tenant.md)"
+      "message": "Possible broken link: [Multi-Org Data Access](multi-tenant.md)"
     },
     {
       "rule": "stale-reference",
@@ -2027,6 +2350,27 @@
       "rule": "stale-reference",
       "severity": "warning",
       "file": "governance/docs/CORPORATE_INDEX.md",
+      "line": 179,
+      "message": "Possible broken link: [🏗️ Multi-Product Operating Architecture](../platform/architecture/multi-product-operating-architecture.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "governance/docs/CORPORATE_INDEX.md",
+      "line": 180,
+      "message": "Possible broken link: [💡 Future Tech Investments Strategy](../platform/architecture/innovation-future-tech-investments-strategy.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "governance/docs/CORPORATE_INDEX.md",
+      "line": 181,
+      "message": "Possible broken link: [🛠️ Nzila CTO Technical Strategy Summary](../platform/architecture/tools-nzila-cto-technical-strategy-summary.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "governance/docs/CORPORATE_INDEX.md",
       "line": 205,
       "message": "Possible broken link: [Technical Blueprints](../platform/blueprints/)"
     },
@@ -2145,6 +2489,20 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "ARCHITECTURE.md",
+      "line": 233,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "AWS_ZONGA_SETUP.md",
+      "line": 339,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "CONTRIBUTING.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -2201,30 +2559,9 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "README.md",
-      "line": 5,
-      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "README.md",
-      "line": 13,
+      "file": "TENANT_INVENTORY.md",
+      "line": 3,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "README.md",
-      "line": 15,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "README.md",
-      "line": 69,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
@@ -2251,8 +2588,106 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/agri/06-evidence-and-traceability.md",
-      "line": 83,
+      "line": 84,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AI_INTELLIGENCE_LAYER.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AI_INTELLIGENCE_LAYER.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AI_PLATFORM_CONTRACT.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AI_PLATFORM_CONTRACT.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AI_PLATFORM_CONTRACT.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 49,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 140,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 141,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 160,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/APP_DOMAIN_CORE_STANDARD.md",
+      "line": 167,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/ARCHITECTURAL_BOUNDARIES.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/ARCHITECTURAL_LAYERS.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -2300,21 +2735,14 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
-      "line": 75,
+      "line": 76,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
-      "line": 101,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
-      "line": 102,
+      "line": 103,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2328,15 +2756,71 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
-      "line": 107,
+      "line": 106,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/architecture/compliance-snapshots.md",
-      "line": 69,
+      "file": "docs/architecture/AUDIT_ENFORCEMENT.md",
+      "line": 109,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/AUTH_ARCHITECTURE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/BOUNDARY_POLICY.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/compliance-snapshots.md",
+      "line": 72,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/CONTROL_PLANE_ARCHITECTURE.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/CONTROL_PLANE_PRINCIPLES.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/CONTROL_PLANE_PRINCIPLES.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/DECISION_LAYER_ARCHITECTURE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/DOMAIN_VS_AUDIT_MODEL.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -2356,14 +2840,35 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/ENFORCEMENT_SUMMARY.md",
-      "line": 100,
+      "line": 101,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/ENFORCEMENT_SUMMARY.md",
-      "line": 106,
+      "line": 107,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/ENTERPRISE_ARCHITECTURE_DIAGRAMS.md",
+      "line": 52,
+      "message": "\"buyer pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/ENVIRONMENT_ARCHITECTURE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/EVIDENCE_INTEGRATION_GUIDE.md",
+      "line": 27,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2376,9 +2881,30 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/architecture/HARDENING_SUMMARY.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/architecture/integration-control-plane.md",
-      "line": 67,
+      "line": 72,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/MONETIZATION_ARCHITECTURE.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/MONETIZATION_ARCHITECTURE.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -2545,21 +3071,35 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/platform-event-bus.md",
-      "line": 58,
+      "line": 59,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/platform-event-bus.md",
-      "line": 65,
+      "line": 66,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/platform-event-bus.md",
-      "line": 80,
+      "line": 81,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/policy-engine.md",
+      "line": 73,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2580,20 +3120,6 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 146,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 147,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
       "line": 148,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
@@ -2601,49 +3127,56 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 164,
+      "line": 149,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 165,
+      "line": 150,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 174,
+      "line": 167,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 185,
+      "line": 168,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 186,
+      "line": 178,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 191,
+      "line": 189,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 192,
+      "line": 190,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
+      "line": 195,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2657,21 +3190,105 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 225,
+      "line": 200,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 273,
+      "line": 232,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
-      "line": 362,
+      "line": 282,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/POLYGLOT_PERSISTENCE.md",
+      "line": 371,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 18,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 51,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 52,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 53,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 54,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 55,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 56,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 57,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 62,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 64,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md",
+      "line": 83,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2685,21 +3302,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_AUTHORITY.md",
-      "line": 71,
+      "line": 74,
       "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_AUTHORITY.md",
-      "line": 89,
+      "line": 93,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_AUTHORITY.md",
-      "line": 90,
+      "line": 94,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2720,14 +3337,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
-      "line": 88,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
-      "line": 104,
+      "line": 89,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2741,14 +3351,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
-      "line": 109,
+      "line": 106,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
-      "line": 125,
+      "line": 110,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/architecture/STACK_FRAGMENTATION_MATRIX.md",
+      "line": 128,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2796,6 +3413,391 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 13,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 56,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 57,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 58,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 65,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 84,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 132,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 133,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 199,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md",
+      "line": 231,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md",
+      "line": 29,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md",
+      "line": 33,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md",
+      "line": 34,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md",
+      "line": 60,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 122,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 216,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 248,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 355,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 478,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 491,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 507,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/CLC_INTELLIGENCE_AUDIT_REPORT.md",
+      "line": 629,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 153,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 154,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 172,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 173,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 190,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 208,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 318,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 319,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 347,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 374,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 375,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 395,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md",
+      "line": 438,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/buyer-faq.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/buyer-faq.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/buyer-faq.md",
+      "line": 12,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 29,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 30,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 31,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 32,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/deployment-models.md",
+      "line": 33,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/flow-buyer-pack.md",
+      "line": 1,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/integration-readiness-matrix.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/pilot-readiness-checklist.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/pilot-readiness-checklist.md",
+      "line": 54,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/pilot-readiness-checklist.md",
+      "line": 14,
+      "message": "\"Buyer pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/product-capability-matrix.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/sla-support-model.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/union-eyes-buyer-pack.md",
+      "line": 1,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/buyers/union-eyes-revenue-playbook.md",
+      "line": 84,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/commerce/ADR/ADR-SQ-001-adapter-pattern.md",
       "line": 20,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -2803,15 +3805,22 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/commerce/gtm-sales-engine.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/commerce/IRAP_TECHNICAL_DESIGN.md",
-      "line": 205,
+      "line": 207,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/commerce/meie/PROGRESS_REPORT.md",
-      "line": 73,
+      "line": 75,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2824,86 +3833,212 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
-      "line": 254,
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 13,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
-      "line": 259,
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 101,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
-      "line": 268,
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 102,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 103,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 104,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 105,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 106,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 107,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 108,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 114,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/ORG_COMMERCE_CONFIGURATION.md",
+      "line": 117,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
+      "line": 256,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
+      "line": 261,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
       "line": 270,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
-      "line": 294,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/commerce/ORG_SCOPE_PLAN.md",
-      "line": 329,
+      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
+      "line": 272,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 254,
+      "line": 298,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 259,
+      "line": 335,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 268,
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 5,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 270,
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 6,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 294,
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 7,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/commerce/spec/ORG_SCOPE_PLAN.md",
-      "line": 329,
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 8,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 9,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 22,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 27,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/control-plane/pilot-metrics-operator-guide.md",
+      "line": 34,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/decision-layer/CAPABILITIES.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/decision-layer/GOVERNANCE_AND_SAFETY.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/decision-layer/OVERVIEW.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/decision-layer/OVERVIEW.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/decision-layer/OVERVIEW.md",
+      "line": 77,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -2922,36 +4057,43 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/disaster-recovery.md",
-      "line": 1,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/enterprise-readiness.md",
-      "line": 1,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/enterprise-readiness.md",
-      "line": 218,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+      "file": "docs/documentation-index.md",
+      "line": 262,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/explanation/evidence-first.md",
-      "line": 49,
+      "line": 52,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/faircase/buyer-pack.md",
+      "line": 1,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/faircase/demo-script.md",
+      "line": 56,
+      "message": "\"procurement package\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/faircase/gtm-audit.md",
+      "line": 8,
+      "message": "\"Buyer pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/ga/GA_CERTIFICATION_REPORT.md",
-      "line": 92,
+      "line": 97,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -2999,6 +4141,321 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "line": 62,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/APP_GOLD_STANDARD.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/APP_GOLD_STANDARD.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/APP_LIFECYCLE_MATRIX.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/audit-logging-model.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/BLINDSPOTS_VALIDATION.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md",
+      "line": 5,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md",
+      "line": 181,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/CHANGE_ENABLEMENT_ARCHITECTURE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/CHANGE_POLICY.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/CHANGE_POLICY.md",
+      "line": 8,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/data-retention-policy.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/enterprise-readiness.md",
+      "line": 218,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/GOVERNANCE_ARCHITECTURE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/GOVERNANCE_ARCHITECTURE.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PACKAGE_LIFECYCLE_POLICY.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PACKAGE_OWNERSHIP.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 21,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 22,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 23,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/pentest-plan.md",
+      "line": 121,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 292,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 305,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 36,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/platform-readiness.md",
+      "line": 38,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PLATFORM_SURFACE_RESPONSIBILITIES.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PLATFORM_VS_APP_DECISION_RULE.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PLATFORM_VS_APP_DECISION_RULE.md",
+      "line": 41,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/procurement-faq.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/procurement-faq.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/procurement-pack.md",
+      "line": 150,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PROCUREMENT_EVIDENCE_SYSTEM.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/PROCUREMENT_EVIDENCE_SYSTEM.md",
+      "line": 132,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/secure-coding-training.md",
+      "line": 8,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/security-overview.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/vulnerability-disclosure-policy.md",
+      "line": 13,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/vulnerability-disclosure-policy.md",
+      "line": 46,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/governance/vulnerability-disclosure-policy.md",
+      "line": 47,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/hardening/BASELINE.md",
       "line": 18,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -3007,15 +4464,22 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/hardening/BASELINE.md",
-      "line": 138,
+      "line": 148,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/hardening/BASELINE.md",
-      "line": 156,
+      "line": 166,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/hardening/DEPLOYMENT_CHECKLIST.md",
+      "line": 49,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -3034,15 +4498,57 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/incident-response.md",
+      "file": "docs/hardening/OBSERVABILITY_DASHBOARD.md",
+      "line": 66,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md",
+      "line": 62,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/index/doc-map.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/index/README.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/investor/final-investor-onepager.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/incident-response.md",
-      "line": 99,
+      "file": "docs/investor/why-nzila-os-wins.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/investor/why-nzila-os-wins.md",
+      "line": 5,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -3111,50 +4617,148 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/migrations/trade/TRADE-DELIVERABLES.md",
-      "line": 52,
+      "file": "docs/migration/trade/TRADE-DELIVERABLES.md",
+      "line": 61,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/migrations/trade/TRADE-DELIVERABLES.md",
-      "line": 255,
+      "file": "docs/migration/trade/TRADE-DELIVERABLES.md",
+      "line": 286,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/migrations/trade/TRADE-DELIVERABLES.md",
-      "line": 361,
+      "file": "docs/migration/trade/TRADE-DELIVERABLES.md",
+      "line": 392,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/migrations/trade/TRADE-DELIVERABLES.md",
-      "line": 369,
+      "file": "docs/migration/trade/TRADE-DELIVERABLES.md",
+      "line": 400,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/ops/runbooks/rb-006-tenant-isolation-breach.md",
-      "line": 46,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+      "file": "docs/ops/DEPLOYMENT_PROMOTION_MODEL.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/ops/runbooks/rb-006-tenant-isolation-breach.md",
-      "line": 60,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+      "file": "docs/ops/disaster-recovery.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/ops/runbooks/README.md",
+      "file": "docs/ops/incident-response.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/ops/incident-response.md",
+      "line": 103,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/ops/REPO_OPERATOR_RUNBOOK.md",
       "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md",
+      "line": 4,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/01-buyer.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/01-buyer.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/01-buyer.md",
+      "line": 8,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/01-buyer.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/02-operator.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/02-operator.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/02-operator.md",
+      "line": 100,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/03-auditor.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/03-auditor.md",
+      "line": 4,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/personas/03-auditor.md",
+      "line": 10,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -3198,6 +4802,76 @@
       "file": "docs/pilot/05-demo-script.md",
       "line": 26,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md",
+      "line": 125,
+      "message": "\"evidence bundle\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md",
+      "line": 112,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/probabilistic-cardinality-replicability-plan.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/REPO_ASSESSMENT.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/REPO_ASSESSMENT.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/REPO_ASSESSMENT.md",
+      "line": 154,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/studio-maturity-10-of-10.md",
+      "line": 336,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/plans/studio-maturity-10-of-10.md",
+      "line": 367,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
@@ -3286,6 +4960,62 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md",
+      "line": 37,
+      "message": "\"evidence bundle\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ALERTING_RUNBOOK.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/auth-migration-final.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/auth-migration-final.md",
+      "line": 110,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/auth-migration-final.md",
+      "line": 39,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/AUTH_MIGRATION_STATUS.md",
+      "line": 86,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/CONTRACTS.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/DATA_RESIDENCY_POLICY.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/platform/dominance-train.md",
       "line": 20,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -3314,6 +5044,363 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/platform/governed-monetization.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/governed-monetization.md",
+      "line": 11,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/governed-monetization.md",
+      "line": 54,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/governed-monetization.md",
+      "line": 75,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-fabric.md",
+      "line": 10,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-fabric.md",
+      "line": 21,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-fabric.md",
+      "line": 200,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-fabric.md",
+      "line": 207,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-security-model.md",
+      "line": 31,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/integration-security-model.md",
+      "line": 112,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/MIGRATION_NOTES.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/MIGRATION_NOTES.md",
+      "line": 28,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/MIGRATION_NOTES.md",
+      "line": 29,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ONBOARDING.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ONBOARDING.md",
+      "line": 41,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ONBOARDING.md",
+      "line": 54,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ONBOARDING.md",
+      "line": 55,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 15,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 61,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 62,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 90,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 91,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 92,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 93,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 98,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/ORG_SCOPE_MODEL.md",
+      "line": 99,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/platform-boundaries.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "line": 9,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "line": 64,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_OPERATING_MODEL.md",
+      "line": 65,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_SURFACE_MODEL.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/PLATFORM_SURFACE_MODEL.md",
+      "line": 13,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/portfolio-matrix.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/proof/demo-script.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/proof/demo-script.md",
+      "line": 15,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/proof/platform-proof-overview.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/proof/platform-proof-overview.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-architecture.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-architecture.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-architecture.md",
+      "line": 77,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-architecture.md",
+      "line": 94,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-system.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-system.md",
+      "line": 16,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-system.md",
+      "line": 40,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-system.md",
+      "line": 59,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/revenue-system.md",
+      "line": 81,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/runtime-adoption-matrix.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
       "line": 10,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -3322,112 +5409,182 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 52,
+      "line": 54,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 84,
+      "line": 88,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 85,
+      "line": 89,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 86,
+      "line": 90,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 93,
+      "line": 97,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/platform/semantic-convergence-entity-to-org.md",
-      "line": 98,
+      "line": 102,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/platform-readiness.md",
+      "file": "docs/platform/SHARED_SERVICES.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/platform-readiness.md",
-      "line": 11,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/platform-readiness.md",
-      "line": 280,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/platform-readiness.md",
-      "line": 293,
-      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/platform-readiness.md",
-      "line": 36,
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 31,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/platform-readiness.md",
-      "line": 38,
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 45,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/policy-engine.md",
-      "line": 73,
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 46,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/procurement-pack.md",
-      "line": 150,
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 47,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/README.md",
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 48,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 77,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 79,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 80,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHARED_SERVICES.md",
+      "line": 81,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHELL_ARCHITECTURE.md",
       "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
-      "file": "docs/README.md",
+      "file": "docs/platform/SHELL_ARCHITECTURE.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHELL_ARCHITECTURE.md",
+      "line": 16,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/SHELL_ARCHITECTURE.md",
+      "line": 50,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/STATUS_AUTHORITY_MODEL.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/STATUS_AUTHORITY_MODEL.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/THIRD_PARTY_RISK_REGISTER.md",
       "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/TURBO_CACHE_STRATEGY.md",
+      "line": 3,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/platform/what-is-nzila.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/README.md",
+      "line": 1,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -3450,6 +5607,125 @@
       "file": "docs/reference/README.md",
       "line": 3,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/reference/TENANT_INVENTORY.md",
+      "line": 352,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/reference/UNION_EYES_CURRENT_STATE.md",
+      "line": 37,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/reference/UNION_EYES_CURRENT_STATE.md",
+      "line": 137,
+      "message": "\"evidence bundle\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register-memora-deferred.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 135,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 285,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 456,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 514,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 520,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 965,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 312,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-ai-risk-register.md",
+      "line": 313,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-issdlc-capabilities-assessment.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-issdlc-capabilities-assessment.md",
+      "line": 6,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-issdlc-capabilities-assessment.md",
+      "line": 12,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/risk/nzila-issdlc-capabilities-assessment.md",
+      "line": 326,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
@@ -3504,7 +5780,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/stress-test/ENTERPRISE_STRESS_TEST.md",
-      "line": 367,
+      "line": 368,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -3546,14 +5822,14 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/stress-test/ONE_WEEK_SPRINT.md",
-      "line": 99,
+      "line": 100,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/stress-test/ONE_WEEK_SPRINT.md",
-      "line": 101,
+      "line": 102,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -3707,13 +5983,6 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/tutorials/adding-ai.md",
-      "line": 41,
-      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
-    },
-    {
-      "rule": "naming-inconsistency",
-      "severity": "info",
-      "file": "docs/tutorials/adding-ai.md",
       "line": 42,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
@@ -3721,14 +5990,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/tutorials/adding-ai.md",
-      "line": 50,
+      "line": 43,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/tutorials/adding-ai.md",
-      "line": 119,
+      "line": 51,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/tutorials/adding-ai.md",
+      "line": 120,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -3744,6 +6020,167 @@
       "file": "docs/tutorials/first-app.md",
       "line": 122,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/tutorials/MULTI_ORG_DEMO_FLOW.md",
+      "line": 54,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/tutorials/MULTI_ORG_DEMO_FLOW.md",
+      "line": 62,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/employer-execution/evidence-chain.md",
+      "line": 16,
+      "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 56,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 88,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 131,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 199,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 221,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 232,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/integration-playbook.md",
+      "line": 241,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/zonga/monetization-model.md",
+      "line": 27,
+      "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/BUYER_FAQ.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/BUYER_FAQ.md",
+      "line": 7,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/BUYER_FAQ.md",
+      "line": 93,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/POSITIONING.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/POSITIONING.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/PRICING_AND_PACKAGING.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/PRICING_AND_PACKAGING.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/PRICING_AND_PACKAGING.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/sales/objection-handling.md",
+      "line": 63,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/sales/one-pager.md",
+      "line": 1,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/business/sales/one-pager.md",
+      "line": 5,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
@@ -3916,6 +6353,27 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "governance/reports/enforcement-audit-2026-03.md",
+      "line": 11,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/security/AUDIT_READINESS.md",
+      "line": 15,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/security/AUDIT_READINESS.md",
+      "line": 228,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "governance/security/HSM_KEY_ROTATION.md",
       "line": 233,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
@@ -3925,6 +6383,27 @@
       "severity": "info",
       "file": "governance/security/MTLS_IMPLEMENTATION.md",
       "line": 22,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/security/PENTEST_SCOPE.md",
+      "line": 15,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/security/PENTEST_SCOPE.md",
+      "line": 24,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "governance/security/PENTEST_SCOPE.md",
+      "line": 139,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -3947,6 +6426,24 @@
       "file": "governance/security/THREAT_MODEL.md",
       "line": 144,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "missing-required-doc",
+      "severity": "warning",
+      "file": "docs/procurement-pack.md",
+      "message": "Required document missing: Procurement pack documentation"
+    },
+    {
+      "rule": "missing-required-doc",
+      "severity": "warning",
+      "file": "docs/disaster-recovery.md",
+      "message": "Required document missing: Disaster recovery plan"
+    },
+    {
+      "rule": "missing-required-doc",
+      "severity": "warning",
+      "file": "docs/incident-response.md",
+      "message": "Required document missing: Incident response plan"
     },
     {
       "rule": "missing-package-readme",
@@ -3975,8 +6472,38 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/agri-forecasting",
+      "message": "Package agri-forecasting missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/agri-intelligence",
       "message": "Package agri-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/agri-provenance",
+      "message": "Package agri-provenance missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/agri-reporting",
+      "message": "Package agri-reporting missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/agri-supply-chain",
+      "message": "Package agri-supply-chain missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/agri-sync-contracts",
+      "message": "Package agri-sync-contracts missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -3987,8 +6514,38 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/ai-registry",
-      "message": "Package ai-registry missing README.md"
+      "file": "packages/agrimo-core",
+      "message": "Package agrimo-core missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/agrimo-intelligence",
+      "message": "Package agrimo-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/audit",
+      "message": "Package audit missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/canadian-vocabulary",
+      "message": "Package canadian-vocabulary missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/cfo-core",
+      "message": "Package cfo-core missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/cfo-intelligence",
+      "message": "Package cfo-intelligence missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4001,6 +6558,18 @@
       "severity": "warning",
       "file": "packages/chatops-teams",
       "message": "Package chatops-teams missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/clc-decision-intelligence",
+      "message": "Package clc-decision-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/clc-executive-intelligence",
+      "message": "Package clc-executive-intelligence missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4101,8 +6670,26 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/deal-engine",
+      "message": "Package deal-engine missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/enforcement",
+      "message": "Package enforcement missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/finops",
       "message": "Package finops missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/fsm-core",
+      "message": "Package fsm-core missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4113,74 +6700,26 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/integrations-core",
-      "message": "Package integrations-core missing README.md"
+      "file": "packages/governance",
+      "message": "Package governance missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/integrations-db",
-      "message": "Package integrations-db missing README.md"
+      "file": "packages/governed-workflow",
+      "message": "Package governed-workflow missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/integrations-hubspot",
-      "message": "Package integrations-hubspot missing README.md"
+      "file": "packages/ingestion-core",
+      "message": "Package ingestion-core missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/integrations-m365",
-      "message": "Package integrations-m365 missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/integrations-runtime",
-      "message": "Package integrations-runtime missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/integrations-whatsapp",
-      "message": "Package integrations-whatsapp missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-ai",
-      "message": "Package mobility-ai missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-case-engine",
-      "message": "Package mobility-case-engine missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-compliance",
-      "message": "Package mobility-compliance missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-core",
-      "message": "Package mobility-core missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-family",
-      "message": "Package mobility-family missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/mobility-programs",
-      "message": "Package mobility-programs missing README.md"
+      "file": "packages/intelligence",
+      "message": "Package intelligence missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4191,122 +6730,14 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/org",
-      "message": "Package org missing README.md"
+      "file": "packages/onboarding-core",
+      "message": "Package onboarding-core missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/payments-stripe",
-      "message": "Package payments-stripe missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-assurance",
-      "message": "Package platform-assurance missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-compliance-snapshots",
-      "message": "Package platform-compliance-snapshots missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-cost",
-      "message": "Package platform-cost missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-deploy",
-      "message": "Package platform-deploy missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-events",
-      "message": "Package platform-events missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-evidence-pack",
-      "message": "Package platform-evidence-pack missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-export",
-      "message": "Package platform-export missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-integrations-control-plane",
-      "message": "Package platform-integrations-control-plane missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-marketplace",
-      "message": "Package platform-marketplace missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-metrics",
-      "message": "Package platform-metrics missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-observability",
-      "message": "Package platform-observability missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-ops",
-      "message": "Package platform-ops missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-performance",
-      "message": "Package platform-performance missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-procurement-proof",
-      "message": "Package platform-procurement-proof missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-proof",
-      "message": "Package platform-proof missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-rfp-generator",
-      "message": "Package platform-rfp-generator missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-rum",
-      "message": "Package platform-rum missing README.md"
-    },
-    {
-      "rule": "missing-package-readme",
-      "severity": "warning",
-      "file": "packages/platform-utils",
-      "message": "Package platform-utils missing README.md"
+      "file": "packages/pilot-mode",
+      "message": "Package pilot-mode missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4317,14 +6748,26 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
-      "file": "packages/qbo",
-      "message": "Package qbo missing README.md"
+      "file": "packages/quebec-vocabulary",
+      "message": "Package quebec-vocabulary missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/schema-core",
+      "message": "Package schema-core missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
       "file": "packages/secrets",
       "message": "Package secrets missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/security",
+      "message": "Package security missing README.md"
     },
     {
       "rule": "missing-package-readme",
@@ -4365,14 +6808,98 @@
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/ue-assistant",
+      "message": "Package ue-assistant missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/union-claims-financial",
+      "message": "Package union-claims-financial missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/webhooks",
       "message": "Package webhooks missing README.md"
     },
     {
       "rule": "missing-package-readme",
       "severity": "warning",
+      "file": "packages/workload-intelligence",
+      "message": "Package workload-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-analytics",
+      "message": "Package zonga-analytics missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-control-plane",
+      "message": "Package zonga-control-plane missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
       "file": "packages/zonga-core",
       "message": "Package zonga-core missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-economics",
+      "message": "Package zonga-economics missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-events",
+      "message": "Package zonga-events missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-growth",
+      "message": "Package zonga-growth missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-intelligence",
+      "message": "Package zonga-intelligence missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-monetization",
+      "message": "Package zonga-monetization missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-payments",
+      "message": "Package zonga-payments missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-rights",
+      "message": "Package zonga-rights missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-streaming",
+      "message": "Package zonga-streaming missing README.md"
+    },
+    {
+      "rule": "missing-package-readme",
+      "severity": "warning",
+      "file": "packages/zonga-streaming-aws",
+      "message": "Package zonga-streaming-aws missing README.md"
     }
   ]
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "10k_users",
+    "users": 10000,
+    "premiumMixPct": 12,
+    "revenueUsd": 13280,
+    "cogsUsd": 15635.38,
+    "grossMarginPct": -17.74,
+    "costPer1000StreamsUsd": 2.4,
+    "bandwidthGb": 38000,
+    "storageGb": 60,
+    "artistLiabilityUsd": 7304,
+    "campaignCostUsd": 1350,
+    "riskFlags": [
+      "cogs-exceeds-threshold"
+    ]
+  },
+  {
+    "scenario": "100k_users",
+    "users": 100000,
+    "premiumMixPct": 18,
+    "revenueUsd": 181700,
+    "cogsUsd": 183238.31,
+    "grossMarginPct": -0.85,
+    "costPer1000StreamsUsd": 2.4,
+    "bandwidthGb": 380000,
+    "storageGb": 144,
+    "artistLiabilityUsd": 99935,
+    "campaignCostUsd": 13500,
+    "riskFlags": [
+      "cogs-exceeds-threshold"
+    ]
+  },
+  {
+    "scenario": "1m_users",
+    "users": 1000000,
+    "premiumMixPct": 25,
+    "revenueUsd": 2387500,
+    "cogsUsd": 2146158.12,
+    "grossMarginPct": 10.11,
+    "costPer1000StreamsUsd": 2.4,
+    "bandwidthGb": 3800000,
+    "storageGb": 1440,
+    "artistLiabilityUsd": 1313125,
+    "campaignCostUsd": 135000,
+    "riskFlags": [
+      "cogs-exceeds-threshold"
+    ]
+  }
+]

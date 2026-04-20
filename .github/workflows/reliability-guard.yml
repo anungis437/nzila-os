@@ -1,0 +1,54 @@
+name: Reliability Guard
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  reliability-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test fast
+        run: pnpm test:fast
+
+      - name: Build
+        run: pnpm build
+
+      - name: Health contract
+        run: pnpm sre:health:contract
+
+      - name: Synthetic dry-run
+        run: pnpm sre:synthetic:dry-run
+
+      - name: Alert routing dry-run
+        run: pnpm sre:alerts:dry-run
+
+      - name: Reliability audit
+        run: pnpm sre:audit
+
+      - name: Executive dashboard
+        run: pnpm sre:dashboard

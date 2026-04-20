@@ -4,7 +4,7 @@
  * Covers ChatSessionManager (6 methods), RAGService (3 methods),
  * ChatbotService (sendMessage, getMessages).
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /* ── hoisted ────────────────────────────────────────────────────────── */
 
@@ -139,6 +139,11 @@ const session = {
   messageCount: 0,
   createdAt: new Date(),
 };
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  delete process.env.OPENAI_API_KEY;
+});
 
 describe("ChatSessionManager", () => {
   let mgr: ChatSessionManager;

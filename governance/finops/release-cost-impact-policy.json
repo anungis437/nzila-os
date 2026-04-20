@@ -1,0 +1,21 @@
+{
+  "version": "2026-04-19.1",
+  "dimensions": [
+    "infra_cost_delta_usd",
+    "logging_cost_delta_usd",
+    "storage_growth_gb",
+    "bandwidth_growth_gb",
+    "margin_impact_pct"
+  ],
+  "warnThresholds": {
+    "infra_cost_delta_usd": 500,
+    "logging_cost_delta_usd": 150,
+    "storage_growth_gb": 100,
+    "bandwidth_growth_gb": 300,
+    "margin_impact_pct": -1
+  },
+  "severity": {
+    "warn": "p3",
+    "gate": "p2"
+  }
+}

@@ -6,6 +6,7 @@
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { getAdminDashboard } from '@/features/admin/observability-dashboard'
 import { getRecentSyncEvents } from '@/features/nzila-integration/sync-service'
@@ -22,10 +23,16 @@ function deriveStatus(val: number, warnAt: number, critAt: number): 'healthy' | 
   return 'healthy'
 }
 
-export default async function OperationsPage() {
+export default async function OperationsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const { userId, orgId } = await auth()
   if (!userId) redirect('/sign-in')
   if (!orgId) redirect('/sign-in')
+
+  const { locale } = await params
 
   const [dashboard, recentSync] = await Promise.all([
     getAdminDashboard(orgId),
@@ -94,6 +101,14 @@ export default async function OperationsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Live system health, queues, and operational KPIs.
         </p>
+        <div className="mt-3">
+          <Link
+            href={`/${locale}/dashboard/operations/playback-health`}
+            className="inline-flex items-center rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/50"
+          >
+            Open Zonga Playback Health
+          </Link>
+        </div>
       </div>
 
       {/* KPI Grid */}

@@ -14,7 +14,7 @@ Nzila Ventures operates **15 production-grade platforms** across **10+ verticals
 | Metric | Value | Status |
 |--------|-------|--------|
 | **Total Platforms** | 15 | Production/Near-Production |
-| **Flagship Platforms** | UnionEyes, ABR Insights, CORA | Enterprise-ready |
+| **Flagship Platforms** | UnionEyes, FAIRCASE, CORA | Enterprise-ready |
 | **Business Verticals** | 10+ | Multi-vertical strategy |
 | **Engineering Investment** | $4M+ | Validated code analysis |
 | **Total Entities** | 12,000+ | Database schemas, models, APIs |
@@ -54,7 +54,7 @@ Detailed strategies for each of Nzila's 10+ verticals:
 | Vertical | Flagship Platform(s) | Market Size | Status |
 |----------|---------------------|-------------|--------|
 | **Uniontech** | 🏆 **UnionEyes** (Crown Jewel), C3UO | $50B+ | **FLAGSHIP** — 4,773 entities, production-ready |
-| **Justice & Equity** | 🏆 **ABR Insights** | $3B+ | **FLAGSHIP** — 132 tables, 9.1/10 production readiness |
+| **Justice & Equity** | 🏆 **FAIRCASE** | $3B+ | **FLAGSHIP** — 132 tables, 9.2/10 production readiness |
 | **Agrotech** | 🏆 **CORA** (Crown Jewel), AgrimoOps | $12B+ | **FLAGSHIP** — 80+ entities, comprehensive AgTech |
 | **Healthtech** | Memora | $250B+ | Active — MVP stage |
 | **Fintech/Banking** | DiasporaCore (C3UO), STSA | $1.8T+ | Active — Documentation in progress |
@@ -96,12 +96,12 @@ Detailed strategies for each of Nzila's 10+ verticals:
 ### Q1 2026: Foundation & Consolidation
 - ✅ Complete migration planning for 15 legacy platforms
 - ✅ Deploy world-class automation (Migration Orchestration System)
-- 🔄 Prepare flagship platforms (UnionEyes, ABR, CORA) for scale
+- 🔄 Prepare flagship platforms (UnionEyes, FAIRCASE, CORA) for scale
 - 🔄 Complete investor deck for Series A
 
 ### Q2 2026: Market Expansion
 - **UnionEyes**: Activate enterprise B2B sales, target 25+ unions
-- **ABR Insights**: Launch LMS + Tribunal Database to African law schools
+- **FAIRCASE**: Launch LMS + Tribunal Database to African law schools
 - **CORA**: Deploy AgTech solution to pilot farms, supply chain partners
 - Launch supporting platforms: Shop Quoter 2.0, Memora MVP
 
@@ -123,7 +123,7 @@ Detailed strategies for each of Nzila's 10+ verticals:
 
 ### Competitive Advantages
 
-1. **Three Production-Ready Flagships** — UnionEyes (4,773 entities), ABR Insights (9.1/10 readiness), CORA (80+ entities)
+1. **Three Production-Ready Flagships** — UnionEyes (4,773 entities), FAIRCASE (9.2/10 readiness), CORA (80+ entities)
 2. **Technical Excellence** — $4M+ proven engineering investment, 12,000+ entities across portfolio
 3. **Multi-Vertical Diversification** — 10+ verticals reduce market risk, cross-platform synergies
 4. **Underserved Markets** — Focus on African diaspora, unions, justice systems, agriculture

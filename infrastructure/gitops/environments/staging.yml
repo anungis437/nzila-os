@@ -45,6 +45,8 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
 
   partners:
     image_tag: "${VERSION}"
@@ -54,6 +56,8 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
 
   union-eyes:
     image_tag: "${VERSION}"
@@ -73,6 +77,8 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
       - name: WEB_CONCURRENCY
         value: "5"
       - name: CONN_MAX_AGE
@@ -98,6 +104,30 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
+
+  cfo:
+    image_tag: "${VERSION}"
+    port: 3008
+    cpu: 1.0
+    memory: 2Gi
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
+
+  flow:
+    image_tag: "${VERSION}"
+    port: 3009
+    cpu: 1.0
+    memory: 2Gi
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: staging
 
   orchestrator-api:
     image_tag: "${VERSION}"

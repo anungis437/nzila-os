@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-04-20T04:21:27.343Z",
+  "totalMrrUsd": 78000,
+  "arrRunRateUsd": 936000,
+  "burnRateUsd": 247000,
+  "runwayEstimateMonths": 3.44,
+  "portfolioGrossMarginPct": -316.67,
+  "bestAppByMargin": "union-eyes",
+  "fastestGrowingApp": "abr",
+  "highestSupportBurdenApp": "flow",
+  "top5CostLeaks": [
+    {
+      "leak": "Unresolved cloud cost attribution mappings",
+      "impactUsdMonthly": 17000,
+      "evidence": "ops/outputs/cost-allocation.json unresolved_app_count=17"
+    },
+    {
+      "leak": "Tier1 support burden not reduced through premium support routing",
+      "impactUsdMonthly": 12800,
+      "evidence": "support_human_ops share > 18% for multiple Tier1 apps"
+    },
+    {
+      "leak": "Zonga bandwidth and artist payout exposure under high-scale scenario",
+      "impactUsdMonthly": 9800,
+      "evidence": "zonga 1m_users scenario margin compression risk flags"
+    },
+    {
+      "leak": "Internal app overhead allocation drift above budget guardrails",
+      "impactUsdMonthly": 6200,
+      "evidence": "internal portfolio budget deltas from finops app scorecard"
+    },
+    {
+      "leak": "Underpriced pilot implementation work",
+      "impactUsdMonthly": 5300,
+      "evidence": "pilot profitability model classifies low-value pilots as reject-underpriced"
+    }
+  ],
+  "top5PricingOpportunities": [
+    {
+      "app": "union-eyes",
+      "currentSignal": "gross margin -50.31%",
+      "recommendation": "restructure_packaging",
+      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+    },
+    {
+      "app": "abr",
+      "currentSignal": "gross margin -99.8%",
+      "recommendation": "restructure_packaging",
+      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+    },
+    {
+      "app": "flow",
+      "currentSignal": "gross margin -61.42%",
+      "recommendation": "restructure_packaging",
+      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+    },
+    {
+      "app": "cfo",
+      "currentSignal": "gross margin -176.4%",
+      "recommendation": "restructure_packaging",
+      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+    },
+    {
+      "app": "partners",
+      "currentSignal": "gross margin -289.01%",
+      "recommendation": "restructure_packaging",
+      "rationale": "Margin is below portfolio standard for SaaS tiers; split premium capability and move high-support workflows into paid add-ons."
+    }
+  ],
+  "pilotRoiTracker": [
+    {
+      "pilotId": "pilot-ue-001",
+      "account": "Union Pilot B",
+      "app": "union-eyes",
+      "implementationHours": 70.75,
+      "founderHours": 27.6,
+      "supportHours": 28.1,
+      "infraCostUsd": 3398.4,
+      "paymentFeesUsd": 468,
+      "customRequestsUsd": 1200,
+      "totalCostUsd": 18321.15,
+      "opportunityValueUsd": 212160,
+      "expectedValueUsd": 193838.85,
+      "classification": "profitable-now"
+    },
+    {
+      "pilotId": "pilot-flow-001",
+      "account": "SMB Ops Group C",
+      "app": "flow",
+      "implementationHours": 69.5,
+      "founderHours": 26.4,
+      "supportHours": 30.2,
+      "infraCostUsd": 3081.6,
+      "paymentFeesUsd": 378,
+      "customRequestsUsd": 1200,
+      "totalCostUsd": 17827.1,
+      "opportunityValueUsd": 143640,
+      "expectedValueUsd": 125812.9,
+      "classification": "profitable-now"
+    },
+    {
+      "pilotId": "pilot-cfo-001",
+      "account": "Finance Team E",
+      "app": "cfo",
+      "implementationHours": 71.5,
+      "founderHours": 24,
+      "supportHours": 39.8,
+      "infraCostUsd": 2211.2,
+      "paymentFeesUsd": 144,
+      "customRequestsUsd": 700,
+      "totalCostUsd": 16988.7,
+      "opportunityValueUsd": 31680,
+      "expectedValueUsd": 14691.3,
+      "classification": "profitable-now"
+    }
+  ]
+}

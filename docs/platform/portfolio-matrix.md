@@ -6,6 +6,7 @@
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
+| FAIRCASE | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
@@ -14,7 +15,6 @@
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
-| ABR | 4 | incubating | hold | pre-revenue | none | low |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
@@ -28,6 +28,7 @@
 
 | Product | Registry Tier | Readiness | Deployment | Recommendation |
 | --- | --- | --- | --- | --- |
+| FAIRCASE | EXPERIMENTAL | pilot-safe | internal | KEEP |
 | Flow | PRODUCTION | pilot-safe | internal | KEEP |
 | Union Eyes | PRODUCTION | pilot-safe | internal | KEEP |
 | CFO | PILOT | pilot-safe | internal | HOLD |
@@ -36,7 +37,6 @@
 | Control Plane | PILOT | internal-only | internal | HOLD |
 | Orchestrator API | EXPERIMENTAL | internal-only | internal | HOLD |
 | Web | PRODUCTION | pilot-safe | external | HOLD |
-| ABR | EXPERIMENTAL | internal-only | internal | HOLD |
 | Agrimo | INCUBATING | internal-only | internal | HOLD |
 | Cora | INCUBATING | internal-only | internal | HOLD |
 | Mobility | INCUBATING | internal-only | internal | HOLD |

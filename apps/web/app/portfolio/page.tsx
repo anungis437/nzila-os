@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 const platforms = [
   { name: 'UnionEyes', vertical: 'Uniontech', orgs: '4,773', complexity: 'EXTREME', readiness: 9.5, status: 'Flagship', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
-  { name: 'ABR Insights', vertical: 'EdTech/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.1, status: 'Production Ready', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, AI coach' },
+  { name: 'FAIRCASE', vertical: 'Justice/Legaltech', orgs: '132', complexity: 'EXTREME', readiness: 9.2, status: 'Flagship', tam: '$1.5B+', description: 'Institutional anti-racism governance, tribunal intelligence, and evidence-ready remediation workflows' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', orgs: '485', complexity: 'EXTREME', readiness: 6.5, status: 'Flagship', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },
   { name: 'Zonga', vertical: 'Entertainment', orgs: '83+', complexity: 'HIGH-EXTREME', readiness: 10.0, status: 'Production Ready', tam: '$50B', description: 'Music streaming, royalty management, event ticketing' },
   { name: 'SentryIQ360', vertical: 'Insurtech', orgs: '79+', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$30B', description: 'Insurance arbitrage, underwriting AI, policy lifecycle' },

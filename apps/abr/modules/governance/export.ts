@@ -56,7 +56,7 @@ export async function buildExecutiveSummaryExport(
   ]);
 
   const markdown = [
-    '# ABR Executive Summary',
+    '# FAIRCASE Executive Summary',
     '',
     `Generated: ${generatedAt}`,
     `Organization: ${context.orgId}`,
@@ -88,9 +88,9 @@ export async function buildExecutiveSummaryExport(
 
   return {
     generatedAt,
-    title: 'ABR Executive Summary',
+    title: 'FAIRCASE Executive Summary',
     format: 'markdown',
-    filename: `abr-executive-summary-${context.orgId}-${context.dataMode}.md`,
+    filename: `faircase-executive-summary-${context.orgId}-${context.dataMode}.md`,
     payload: {
       generatedAt,
       dashboard,
@@ -140,9 +140,9 @@ export async function buildIncidentExport(
   return {
     json: {
       generatedAt,
-      title: 'ABR Incident Export',
+      title: 'FAIRCASE Incident Export',
       format: 'json',
-      filename: `abr-incidents-${context.orgId}.json`,
+      filename: `faircase-incidents-${context.orgId}.json`,
       payload: {
         generatedAt,
         role: context.role,
@@ -152,9 +152,9 @@ export async function buildIncidentExport(
     },
     csv: {
       generatedAt,
-      title: 'ABR Incident Export',
+      title: 'FAIRCASE Incident Export',
       format: 'csv',
-      filename: `abr-incidents-${context.orgId}.csv`,
+      filename: `faircase-incidents-${context.orgId}.csv`,
       payload: csv,
     },
   };
@@ -207,9 +207,9 @@ export async function buildRemediationExport(
   return {
     json: {
       generatedAt,
-      title: 'ABR Remediation Export',
+      title: 'FAIRCASE Remediation Export',
       format: 'json',
-      filename: `abr-remediation-${context.orgId}.json`,
+      filename: `faircase-remediation-${context.orgId}.json`,
       payload: {
         generatedAt,
         role: context.role,
@@ -219,9 +219,9 @@ export async function buildRemediationExport(
     },
     csv: {
       generatedAt,
-      title: 'ABR Remediation Export',
+      title: 'FAIRCASE Remediation Export',
       format: 'csv',
-      filename: `abr-remediation-${context.orgId}.csv`,
+      filename: `faircase-remediation-${context.orgId}.csv`,
       payload: csv,
     },
   };

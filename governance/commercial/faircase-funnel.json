@@ -1,0 +1,81 @@
+{
+  "as_of_date": "2026-04-19",
+  "confidence_note": "All values are operating assumptions unless marked verified.",
+  "targets_90_day": {
+    "leads": 180,
+    "meetings_booked": 36,
+    "demos": 24,
+    "proposals": 12,
+    "pilots": 3,
+    "closed_won": 2
+  },
+  "pipeline": {
+    "stages": {
+      "leads": 92,
+      "meetings_booked": 19,
+      "demos": 11,
+      "proposals": 6,
+      "pilots": 2,
+      "closed_won": 1
+    },
+    "conversion_rates_pct": {
+      "lead_to_meeting": 20.7,
+      "meeting_to_demo": 57.9,
+      "demo_to_proposal": 54.5,
+      "proposal_to_pilot": 33.3,
+      "pilot_to_close": 50.0,
+      "lead_to_close": 1.1
+    },
+    "sales_cycle_days": 92,
+    "avg_deal_size": 52000,
+    "cac_estimate": 9800,
+    "source_attribution_pct": {
+      "outbound": 38,
+      "referrals": 21,
+      "partners": 19,
+      "events": 12,
+      "inbound": 10
+    }
+  },
+  "deal_register": [
+    {
+      "id": "faircase-opp-001",
+      "account": "Regional Healthcare Network",
+      "segment": "healthcare",
+      "stage": "proposal",
+      "value": 96000,
+      "probability": 0.42,
+      "next_step": "Security review workshop",
+      "owner": "Sales Lead",
+      "expected_close_date": "2026-06-18",
+      "source": "partner",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "faircase-opp-002",
+      "account": "Municipal Services Group",
+      "segment": "public-sector",
+      "stage": "demo",
+      "value": 78000,
+      "probability": 0.34,
+      "next_step": "Pilot scope alignment",
+      "owner": "Founder",
+      "expected_close_date": "2026-07-05",
+      "source": "outbound",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "faircase-opp-003",
+      "account": "University Ombuds Office",
+      "segment": "education",
+      "stage": "pilot",
+      "value": 64000,
+      "probability": 0.61,
+      "next_step": "Day 30 proof review",
+      "owner": "Founder",
+      "expected_close_date": "2026-05-29",
+      "source": "referral",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

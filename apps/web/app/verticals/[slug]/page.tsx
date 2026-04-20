@@ -209,7 +209,7 @@ const verticalData: Record<string, {
     heroAlt: 'Scales of justice on a desk alongside legal reference books and documents',
     tam: '$13B+',
     orgs: '814',
-    platforms: ['Court Lens', 'ABR Insights'],
+    platforms: ['Court Lens', 'FAIRCASE'],
     status: '2 Platforms',
     color: 'from-violet to-coral',
     overview:
@@ -248,7 +248,7 @@ const verticalData: Record<string, {
     differentiators: [
       'Curated for social equity, labour, and human rights cases',
       'Semantic search rather than keyword-only retrieval',
-      'Built alongside ABR Insights for cross-vertical DEI intelligence',
+      'Built alongside FAIRCASE for cross-vertical equity intelligence',
       'Access-to-justice aligned with B Corp community impact standards',
     ],
   },
@@ -261,7 +261,7 @@ const verticalData: Record<string, {
     heroAlt: 'Students engaged in collaborative learning with laptops and digital devices',
     tam: '$13B+',
     orgs: '162',
-    platforms: ['ABR Insights', 'CyberLearn'],
+    platforms: ['FAIRCASE', 'CyberLearn'],
     status: '2 Platforms',
     color: 'from-electric to-emerald',
     overview:
@@ -534,11 +534,11 @@ const verticalData: Record<string, {
     heroAlt: 'Symbolic raised fist representing social justice, equity, and advocacy movements',
     tam: '$1.5B',
     orgs: '132',
-    platforms: ['ABR Insights'],
+    platforms: ['FAIRCASE'],
     status: 'Production Ready',
     color: 'from-coral to-violet',
     overview:
-      'The Justice vertical is Nzila\'s most explicitly values-aligned domain — and the clearest expression of our B Corp mission. ABR Insights gives organisations the tools to measure, understand, and act on systemic racism and inequity.',
+      'The Justice vertical is Nzila\'s most explicitly values-aligned domain and the clearest expression of our B Corp mission. FAIRCASE gives organisations the tools to measure, understand, and act on systemic racism and inequity.',
     capabilities: [
       {
         title: 'Anti-Racism Learning Pathways',

@@ -1,12 +1,12 @@
 # @nzila/abr
 
-ABR Insight OS is NzilaOS's Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
+FAIRCASE is NzilaOS's Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
 
-ABR is not a generic DEI LMS, generic complaint tracker, or generic legaltech tool. It is institutional accountability infrastructure.
+FAIRCASE is not a generic DEI LMS, generic complaint tracker, or generic legaltech tool. It is institutional accountability infrastructure.
 
 ## Canonical Product Definition
 
-ABR Insight OS is designed for serious Canadian institutions that need auditable, privacy-safe, evidence-based operating workflows for Anti-Black racism governance.
+FAIRCASE is designed for serious Canadian institutions that need auditable, privacy-safe, evidence-based operating workflows for Anti-Black racism governance.
 
 Core principles:
 

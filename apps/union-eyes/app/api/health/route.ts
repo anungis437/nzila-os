@@ -1,10 +1,8 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
+import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 
 const APP = 'union-eyes'
-const VERSION = process.env.npm_package_version ?? '0.0.0'
-const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local'
-const START_TIME = Date.now()
 
 async function checkDb(): Promise<boolean> {
   try {
@@ -39,25 +37,19 @@ async function checkQueue(): Promise<'ok' | 'degraded' | 'unreachable'> {
 export async function GET() {
   const [dbResult, queueResult] = await Promise.allSettled([checkDb(), checkQueue()])
 
-  const dbOk = dbResult.status === 'fulfilled' ? dbResult.value : false
-  const queueStatus = queueResult.status === 'fulfilled' ? queueResult.value : 'unreachable'
-
-  const allHealthy = dbOk && queueStatus === 'ok'
+  const checks = normalizeHealthChecks({
+    process: true,
+    database: dbResult.status === 'fulfilled' ? dbResult.value : false,
+    queue: queueResult.status === 'fulfilled' ? queueResult.value === 'ok' : false,
+  })
 
   return NextResponse.json(
     {
-      app: APP,
-      status: allHealthy ? 'ok' : 'degraded',
-      version: VERSION,
-      uptime: Math.floor((Date.now() - START_TIME) / 1000),
-      buildInfo: { version: VERSION, commit: COMMIT },
-      checks: {
-        db: dbOk ? 'ok' : 'fail',
-        queue: queueStatus,
-      },
-      timestamp: new Date().toISOString(),
+      status: healthStatusFromChecks(checks),
+      ...getBuildMetadata(APP),
+      checks,
     },
-    { status: allHealthy ? 200 : 503 },
+    { status: 200 },
   )
 }
 

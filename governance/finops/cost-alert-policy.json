@@ -1,0 +1,35 @@
+{
+  "version": "2026-04-19.1",
+  "alerts": [
+    {
+      "id": "cloud_spend_spike",
+      "condition": "monthly_cloud_spend_delta_pct > 15",
+      "severity": "p2"
+    },
+    {
+      "id": "ai_cost_spike",
+      "condition": "ai_api_cost_delta_pct > 20",
+      "severity": "p2"
+    },
+    {
+      "id": "bandwidth_anomaly",
+      "condition": "cdn_bandwidth_delta_pct > 25",
+      "severity": "p2"
+    },
+    {
+      "id": "dormant_app_cost",
+      "condition": "status in [internal,frozen,incubating] AND monthly_cost_usd > dormant_threshold_usd",
+      "severity": "p3"
+    },
+    {
+      "id": "pilot_support_overrun",
+      "condition": "pilot_support_hours > support_hour_budget",
+      "severity": "p3"
+    },
+    {
+      "id": "persistent_negative_margin_customer",
+      "condition": "customer_margin_band = D for >= 60 days",
+      "severity": "p2"
+    }
+  ]
+}

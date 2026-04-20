@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /* ---------- hoisted mocks ---------- */
 const mocks = vi.hoisted(() => ({
@@ -47,9 +47,6 @@ vi.mock('@/db/schema/recognition-rewards-schema', () => ({
 
 vi.mock('@/lib/logger', () => ({ logger: mocks.mockLogger }));
 
-// Mock global fetch
-vi.stubGlobal('fetch', mocks.mockFetch);
-
 import {
   fetchCuratedCollections,
   createDiscountCode,
@@ -59,6 +56,11 @@ import {
 describe('shopify-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal('fetch', mocks.mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   /* ============================= fetchCuratedCollections ============================= */

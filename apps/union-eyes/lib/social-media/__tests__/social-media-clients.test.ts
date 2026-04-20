@@ -1,11 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
 const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+
+beforeEach(() => {
+  mockFetch.mockReset();
+  vi.stubGlobal('fetch', mockFetch);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 import { MetaAPIClient } from '../meta-api-client';
 import { TwitterAPIClient } from '../twitter-api-client';
@@ -17,7 +25,6 @@ describe('MetaAPIClient', () => {
   let client: MetaAPIClient;
 
   beforeEach(() => {
-    mockFetch.mockReset();
     client = new MetaAPIClient('app-id', 'app-secret', 'access-token');
   });
 
@@ -115,7 +122,6 @@ describe('TwitterAPIClient', () => {
   let client: TwitterAPIClient;
 
   beforeEach(() => {
-    mockFetch.mockReset();
     client = new TwitterAPIClient('client-id', 'client-secret', 'access', 'refresh');
   });
 
@@ -186,7 +192,6 @@ describe('LinkedInAPIClient', () => {
   let client: LinkedInAPIClient;
 
   beforeEach(() => {
-    mockFetch.mockReset();
     client = new LinkedInAPIClient('li-id', 'li-secret', 'access');
   });
 

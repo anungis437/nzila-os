@@ -1,0 +1,18 @@
+{
+  "version": "2026-04-19.1",
+  "afterDeployCapture": [
+    "error_spike_delta",
+    "latency_delta",
+    "synthetic_failures",
+    "rollback_need_score"
+  ],
+  "rollbackRecommendation": {
+    "enabled": true,
+    "scoreThreshold": 70,
+    "hardTriggers": [
+      "tier1_full_outage",
+      "auth_path_failure",
+      "error_rate_2x_baseline"
+    ]
+  }
+}

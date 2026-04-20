@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-04-20",
+  "entries": [
+    {
+      "app": "web",
+      "stagingHost": "nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "productionHost": "www.nzila.ai",
+      "ingress": "external",
+      "tls": "managed",
+      "healthEndpoint": "/api/health",
+      "owner": "team-web-engineering@nzila.ai"
+    },
+    {
+      "app": "console",
+      "stagingHost": "nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "productionHost": "console.nzila.ai",
+      "ingress": "restricted",
+      "tls": "managed",
+      "healthEndpoint": "/api/health",
+      "owner": "team-platform-admin@nzila.ai"
+    },
+    {
+      "app": "union-eyes",
+      "stagingHost": "nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "productionHost": "ue.nzila.ai",
+      "ingress": "external",
+      "tls": "managed",
+      "healthEndpoint": "/api/auth_core/health/",
+      "owner": "team-union-eyes-engineering@nzila.ai"
+    },
+    {
+      "app": "partners",
+      "stagingHost": "nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "productionHost": "partners.nzila.ai",
+      "ingress": "external",
+      "tls": "managed",
+      "healthEndpoint": "/api/health",
+      "owner": "team-partners-engineering@nzila.ai"
+    },
+    {
+      "app": "zonga",
+      "stagingHost": "nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "productionHost": "pilot-only",
+      "ingress": "external",
+      "tls": "managed",
+      "healthEndpoint": "/api/health",
+      "owner": "team-zonga-engineering@nzila.ai"
+    }
+  ]
+}

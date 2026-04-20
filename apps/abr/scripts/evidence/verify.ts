@@ -1,5 +1,5 @@
 /**
- * ABR Insights — Evidence Verification Script
+ * FAIRCASE — Evidence Verification Script
  *
  * Reads evidence/pack.json + evidence/seal.json and verifies:
  *   1. Merkle root recomputed from artifact hashes matches seal.json
@@ -64,7 +64,7 @@ function fail(msg: string): never {
 }
 
 function main() {
-  console.log('🔍 ABR Insights — Verifying evidence seal...\n')
+  console.log('🔍 FAIRCASE — Verifying evidence seal...\n')
 
   if (!existsSync(PACK_PATH)) {
     fail('evidence/pack.json not found. Run collect.ts first.')

@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-04-20T04:21:20.869Z",
+  "schedule": "*/5 * * * *",
+  "targetCount": 6,
+  "results": [
+    {
+      "app": "union-eyes",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /sign-in",
+        "GET /dashboard",
+        "POST /api/cases"
+      ]
+    },
+    {
+      "app": "abr",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /intake",
+        "GET /workflow",
+        "GET /api/abr/remediation/export"
+      ]
+    },
+    {
+      "app": "flow",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /workspace",
+        "POST /api/quotes",
+        "POST /api/quotes/ai"
+      ]
+    },
+    {
+      "app": "web",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /",
+        "POST /api/contact",
+        "GET /products"
+      ]
+    },
+    {
+      "app": "partners",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /sign-in",
+        "GET /dashboard",
+        "GET /api/deals"
+      ]
+    },
+    {
+      "app": "cfo",
+      "tier": "tier1",
+      "checkCount": 3,
+      "status": "configured",
+      "checks": [
+        "GET /dashboard",
+        "GET /api/reports/export",
+        "GET /api/ledger"
+      ]
+    }
+  ],
+  "note": "Dry-run validates configuration and ownership, not live endpoint reachability."
+}

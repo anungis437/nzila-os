@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
   rows: unknown[];
@@ -45,6 +45,10 @@ describe('case-intelligence related-documents-service', () => {
     filterAuthorizedDocumentsForActor.mockReset();
     isFeatureEnabled.mockReset();
     isFeatureEnabled.mockResolvedValue(false);
+    delete process.env.FEATURE_CASE_INTELLIGENCE_V1_ML;
+  });
+
+  afterEach(() => {
     delete process.env.FEATURE_CASE_INTELLIGENCE_V1_ML;
   });
 

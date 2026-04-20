@@ -1,0 +1,17 @@
+{
+  "version": "2026-04-19.1",
+  "scope": "zonga",
+  "metrics": [
+    "stream_start_latency",
+    "buffering_pct",
+    "playback_failures",
+    "cdn_bandwidth_cost",
+    "mobile_playback_errors",
+    "top_geo_regions"
+  ],
+  "rules": {
+    "pilotDashboardRequired": true,
+    "partnerLaunchReadinessGate": true,
+    "bandwidthCostAnomalyThresholdPct": 15
+  }
+}

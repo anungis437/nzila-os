@@ -113,6 +113,15 @@ apps:
       - name: NODE_ENV
         value: production
 
+  flow:
+    image_tag: "${VERSION}"
+    port: 3009
+    cpu: 1.0
+    memory: 2Gi
+    env:
+      - name: NODE_ENV
+        value: production
+
   orchestrator-api:
     image_tag: "${VERSION}"
     port: 4000
@@ -132,19 +141,8 @@ apps:
       - name: NODE_ENV
         value: production
 
-  zonga:
-    image_tag: "${VERSION}"
-    port: 3006
-    cpu: 1.0
-    memory: 2Gi
-    scale_rules:
-      - name: http-requests
-        type: http
-        metadata:
-          concurrentRequests: "50"
-    env:
-      - name: NODE_ENV
-        value: production
+  # zonga intentionally excluded from default production manifest.
+  # Pilot promotion requires explicit override through deploy-production workflow.
 
 database:
   sku: GP_Standard_E8ds_v5      # 8 vCores, 64 GiB (upgrade path: E16 → E32)

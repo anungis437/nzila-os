@@ -1,8 +1,17 @@
 name: Deploy Staging
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      emergency_ack:
+        description: Type EMERGENCY to run this non-canonical staging workflow
+        required: true
+        type: string
+      apps:
+        description: Comma-separated apps to include in artifact manifest (or all)
+        required: false
+        type: string
+        default: all
 
 permissions:
   contents: read
@@ -27,6 +36,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Emergency acknowledgement gate
+        run: |
+          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
+            echo "This workflow is emergency-only. Use gitops-deploy.yml for canonical staging deployment."
+            exit 1
+          fi
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Fast tests
+        run: pnpm test:fast
+
       - name: Governance check
         run: pnpm governance:check
 
@@ -36,6 +61,9 @@ jobs:
       - name: Contract tests
         id: contract_tests
         run: pnpm contract:test
+
+      - name: Migration safety gate
+        run: pnpm release:migration:safety
 
       - name: SLO gate
         id: slo_gate
@@ -87,9 +115,13 @@ jobs:
 
       - name: Save artifact manifest
         run: |
+          REQUESTED_APPS="${{ github.event.inputs.apps || 'all' }}"
+          RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env staging --apps "$REQUESTED_APPS")
+          APPROVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
+
           DEPLOY_TARGETS_JSON='[]'
           if [ -n "${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}" ]; then
-            DEPLOY_TARGETS_JSON='${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}'
+            DEPLOY_TARGETS_JSON=$(echo '${{ secrets.STAGING_DEPLOY_TARGETS_JSON }}' | jq --arg approved "$APPROVED_APPS" '[ .[] | select((.containerAppName // .app // .name) as $n | ($approved | split(",") | index($n) != null)) ]')
           fi
 
           cat > artifact-manifest.json <<EOF
@@ -135,9 +167,7 @@ jobs:
           # Container image build & push for each service would go here
 
       - name: Run smoke tests
-        run: |
-          echo "Running staging smoke tests..."
-          # Smoke test commands here
+        run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "${{ github.event.inputs.apps || 'all' }}"
 
       - name: Record governance snapshot
         run: |

@@ -19,6 +19,26 @@ import {
   type ReactNode,
 } from 'react'
 
+const PLAYER_VOLUME_KEY = 'zonga.player.volume.v1'
+const PLAYER_POSITION_PREFIX = 'zonga.player.position.v1.'
+
+function buildPositionKey(assetId: string): string {
+  return `${PLAYER_POSITION_PREFIX}${assetId}`
+}
+
+async function emitPlaybackTelemetry(eventName: string, payload: Record<string, unknown>): Promise<void> {
+  try {
+    await fetch('/api/playback/telemetry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({ eventName, payload }),
+    })
+  } catch {
+    // Non-blocking by design — playback must continue even when telemetry fails.
+  }
+}
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export interface PlayerTrack {
@@ -170,6 +190,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(playerReducer, initialState)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const shuffleMapRef = useRef<number[]>([])
+  const prefetchAudioRef = useRef<HTMLAudioElement | null>(null)
+  const trackLoadStartedAtRef = useRef<number | null>(null)
+  const retryCountRef = useRef<number>(0)
+  const waitingStartedAtRef = useRef<number | null>(null)
+  const bufferCountRef = useRef<number>(0)
+  const wasPlayingBeforeHiddenRef = useRef<boolean>(false)
+  const lastPersistedSecondRef = useRef<number>(0)
 
   const currentTrack = state.queue[state.currentIndex] ?? null
 
@@ -177,10 +204,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioRef.current) {
       audioRef.current = new Audio()
-      audioRef.current.preload = 'auto'
+      audioRef.current.preload = 'metadata'
+      audioRef.current.crossOrigin = 'anonymous'
+
+      const persistedVolume = window.localStorage.getItem(PLAYER_VOLUME_KEY)
+      if (persistedVolume) {
+        const vol = Number(persistedVolume)
+        if (Number.isFinite(vol) && vol >= 0 && vol <= 1) {
+          dispatch({ type: 'SET_VOLUME', volume: vol })
+        }
+      }
+
+      prefetchAudioRef.current = new Audio()
+      prefetchAudioRef.current.preload = 'auto'
     }
     return () => {
       audioRef.current?.pause()
+      prefetchAudioRef.current?.pause()
     }
   }, [])
 
@@ -188,18 +228,66 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !currentTrack?.streamUrl) return
+    const streamUrl = currentTrack.streamUrl
+    if (!streamUrl) return
 
-    audio.src = currentTrack.streamUrl
-    audio.load()
-    audio.play().catch(() => {
-      dispatch({ type: 'SET_ERROR', error: 'Playback failed' })
-    })
+    trackLoadStartedAtRef.current = performance.now()
+    retryCountRef.current = 0
+    waitingStartedAtRef.current = null
+    bufferCountRef.current = 0
+
+    const startPlayback = async () => {
+      audio.src = streamUrl
+      audio.load()
+
+      const persistedPosition = window.localStorage.getItem(buildPositionKey(currentTrack.assetId))
+      if (persistedPosition) {
+        const sec = Number(persistedPosition)
+        if (Number.isFinite(sec) && sec > 0) {
+          audio.currentTime = sec
+        }
+      }
+
+      try {
+        await audio.play()
+      } catch {
+        if (retryCountRef.current < 2) {
+          retryCountRef.current += 1
+          setTimeout(() => {
+            void startPlayback()
+          }, 250 * retryCountRef.current)
+          return
+        }
+        dispatch({ type: 'SET_ERROR', error: 'Playback unavailable. Check your connection and try again.' })
+        void emitPlaybackTelemetry('device_browser_failure', {
+          assetId: currentTrack.assetId,
+          retries: retryCountRef.current,
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+        })
+      }
+    }
+
+    void startPlayback()
   }, [currentTrack?.assetId, currentTrack?.streamUrl])
+
+  // Preload next track for smoother transitions.
+  useEffect(() => {
+    const prefetch = prefetchAudioRef.current
+    if (!prefetch) return
+    const nextTrack = state.queue[state.currentIndex + 1]
+    if (!nextTrack?.streamUrl) return
+    prefetch.src = nextTrack.streamUrl
+    prefetch.load()
+  }, [state.queue, state.currentIndex])
 
   // Sync volume
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = state.muted ? 0 : state.volume
+    }
+
+    if (typeof window !== 'undefined' && !state.muted) {
+      window.localStorage.setItem(PLAYER_VOLUME_KEY, String(state.volume))
     }
   }, [state.volume, state.muted])
 
@@ -243,6 +331,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [state.shuffle, state.currentIndex, state.repeat, state.queue.length])
 
   const handleTrackEnded = useCallback(() => {
+    if (currentTrack) {
+      void emitPlaybackTelemetry('completion', {
+        assetId: currentTrack.assetId,
+        completionRate: 1,
+        completed: true,
+      })
+      window.localStorage.removeItem(buildPositionKey(currentTrack.assetId))
+    }
+
     if (state.repeat === 'one') {
       const audio = audioRef.current
       if (audio) {
@@ -258,24 +355,98 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else {
       dispatch({ type: 'SET_PLAYBACK_STATE', state: 'ended' })
     }
-  }, [state.repeat, getNextIndex])
+  }, [state.repeat, getNextIndex, currentTrack])
 
   // Wire up audio events
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
-    const onPlay = () => dispatch({ type: 'SET_PLAYBACK_STATE', state: 'playing' })
+    const onPlay = () => {
+      dispatch({ type: 'SET_PLAYBACK_STATE', state: 'playing' })
+      if (trackLoadStartedAtRef.current !== null && currentTrack) {
+        const latencyMs = Math.max(0, Math.round(performance.now() - trackLoadStartedAtRef.current))
+        void emitPlaybackTelemetry('play_start_latency', {
+          assetId: currentTrack.assetId,
+          latencyMs,
+        })
+        trackLoadStartedAtRef.current = null
+      }
+    }
     const onPause = () => dispatch({ type: 'SET_PLAYBACK_STATE', state: 'paused' })
     const onEnded = () => handleTrackEnded()
-    const onTimeUpdate = () => dispatch({ type: 'SET_CURRENT_TIME', time: audio.currentTime })
+    const onTimeUpdate = () => {
+      dispatch({ type: 'SET_CURRENT_TIME', time: audio.currentTime })
+      if (!currentTrack) return
+      const rounded = Math.floor(audio.currentTime)
+      if (rounded > 0 && rounded % 5 === 0 && rounded !== lastPersistedSecondRef.current) {
+        lastPersistedSecondRef.current = rounded
+        window.localStorage.setItem(buildPositionKey(currentTrack.assetId), String(rounded))
+      }
+    }
     const onDuration = () => dispatch({ type: 'SET_DURATION', duration: audio.duration })
-    const onError = () => dispatch({ type: 'SET_ERROR', error: 'Audio playback error' })
-    const onWaiting = () => dispatch({ type: 'SET_PLAYBACK_STATE', state: 'loading' })
+    const onError = () => {
+      dispatch({ type: 'SET_ERROR', error: 'Audio playback error' })
+      if (currentTrack) {
+        void emitPlaybackTelemetry('device_browser_failure', {
+          assetId: currentTrack.assetId,
+          retries: retryCountRef.current,
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+        })
+      }
+    }
+    const onWaiting = () => {
+      dispatch({ type: 'SET_PLAYBACK_STATE', state: 'loading' })
+      waitingStartedAtRef.current = performance.now()
+      bufferCountRef.current += 1
+      if (currentTrack) {
+        void emitPlaybackTelemetry('buffer_event', {
+          assetId: currentTrack.assetId,
+          bufferCount: bufferCountRef.current,
+          phase: 'start',
+        })
+      }
+    }
     const onCanPlay = () => {
       if (state.playbackState === 'loading') {
         dispatch({ type: 'SET_PLAYBACK_STATE', state: 'playing' })
       }
+
+      if (currentTrack && waitingStartedAtRef.current !== null) {
+        const waitMs = Math.max(0, Math.round(performance.now() - waitingStartedAtRef.current))
+        waitingStartedAtRef.current = null
+        void emitPlaybackTelemetry('buffer_event', {
+          assetId: currentTrack.assetId,
+          phase: 'end',
+          waitMs,
+          bufferCount: bufferCountRef.current,
+        })
+      }
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        wasPlayingBeforeHiddenRef.current = !audio.paused
+        return
+      }
+
+      if (wasPlayingBeforeHiddenRef.current && audio.paused) {
+        audio.play().catch(() => {
+          // Some browsers block auto-resume. Keep state consistent and let user tap play.
+          dispatch({ type: 'SET_PLAYBACK_STATE', state: 'paused' })
+        })
+      }
+      wasPlayingBeforeHiddenRef.current = false
+    }
+
+    const onBeforeUnload = () => {
+      if (!currentTrack) return
+      const completionRate = state.duration > 0 ? Number((state.currentTime / state.duration).toFixed(4)) : 0
+      void emitPlaybackTelemetry('completion', {
+        assetId: currentTrack.assetId,
+        completionRate,
+        completed: completionRate >= 0.95,
+      })
     }
 
     audio.addEventListener('play', onPlay)
@@ -286,6 +457,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     audio.addEventListener('error', onError)
     audio.addEventListener('waiting', onWaiting)
     audio.addEventListener('canplay', onCanPlay)
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('beforeunload', onBeforeUnload)
 
     return () => {
       audio.removeEventListener('play', onPlay)
@@ -296,8 +469,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('error', onError)
       audio.removeEventListener('waiting', onWaiting)
       audio.removeEventListener('canplay', onCanPlay)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('beforeunload', onBeforeUnload)
     }
-  })
+  }, [handleTrackEnded, state.playbackState, state.currentTime, state.duration, currentTrack])
 
   const value = useMemo<PlayerContextValue>(() => ({
     state,
@@ -317,7 +492,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     },
     skipNext: () => {
       const next = getNextIndex()
-      if (next !== null) dispatch({ type: 'SET_CURRENT_INDEX', index: next })
+      if (next !== null) {
+        if (currentTrack) {
+          const completionRate = state.duration > 0 ? Number((state.currentTime / state.duration).toFixed(4)) : 0
+          void emitPlaybackTelemetry('skip', {
+            assetId: currentTrack.assetId,
+            completionRate,
+            skippedAtSeconds: state.currentTime,
+          })
+        }
+        dispatch({ type: 'SET_CURRENT_INDEX', index: next })
+      }
     },
     skipPrevious: () => {
       // If past 3 seconds, restart; otherwise go to previous track

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nzila Portfolio FinOps Cost Entry",
+  "type": "object",
+  "required": [
+    "app",
+    "environment",
+    "owner",
+    "month",
+    "costBucket",
+    "amountUsd",
+    "costNature",
+    "allocationType"
+  ],
+  "properties": {
+    "app": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["prod", "staging", "dev", "shared"]
+    },
+    "owner": {
+      "type": "string"
+    },
+    "month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$"
+    },
+    "costBucket": {
+      "type": "string",
+      "enum": [
+        "compute",
+        "database",
+        "storage",
+        "cdn_bandwidth",
+        "email_sms",
+        "ai_api",
+        "monitoring_logging",
+        "payment_fees",
+        "support_human_ops",
+        "contractor_vendor",
+        "sales_marketing",
+        "shared_gna"
+      ]
+    },
+    "amountUsd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "costNature": {
+      "type": "string",
+      "enum": ["fixed", "variable"]
+    },
+    "allocationType": {
+      "type": "string",
+      "enum": ["direct", "shared"]
+    },
+    "source": {
+      "type": "string",
+      "enum": ["live", "estimated", "manual", "placeholder"]
+    },
+    "sourceReference": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

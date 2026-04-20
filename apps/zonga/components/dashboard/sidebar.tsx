@@ -139,6 +139,7 @@ function buildPlatformSections(locale: string, t: (key: string) => string): NavS
       items: [
         { href: p, icon: <Home size={16} />, label: t('home'), roles: allRoles },
         { href: `${p}/operations`, icon: <Activity size={16} />, label: 'Operations', roles: ['admin'] },
+        { href: `${p}/operations/playback-health`, icon: <Activity size={16} />, label: 'Playback Health', roles: ['admin'] },
         { href: `${p}/admin/organizations`, icon: <Building2 size={16} />, label: 'Organizations', roles: allRoles },
         { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: t('analytics'), roles: adminManager },
         { href: `${p}/moderation`, icon: <Shield size={16} />, label: t('moderation'), roles: adminManager },
@@ -196,7 +197,9 @@ function buildLabelSections(locale: string, t: (key: string) => string): NavSect
         { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: t('revenue'), roles: adminManager },
         { href: `${p}/payouts`, icon: <Zap size={16} />, label: t('payouts'), roles: adminOnly },
         { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: t('analytics'), roles: adminManager },
+        { href: `${p}/analytics/label`, icon: <FileBarChart size={16} />, label: 'Label Dashboard', roles: adminManager },
         { href: `${p}/creators`, icon: <Users size={16} />, label: t('creators'), roles: adminManager },
+        { href: `${p}/pilot`, icon: <Activity size={16} />, label: 'Pilot Dashboard', roles: adminManager },
         { href: `${p}/admin/billing`, icon: <CreditCard size={16} />, label: 'Billing', roles: adminManager },
       ],
     },
@@ -204,6 +207,7 @@ function buildLabelSections(locale: string, t: (key: string) => string): NavSect
       title: 'Creator Studio',
       items: [
         { href: `${p}/catalog`, icon: <Music size={16} />, label: t('catalog'), roles: creatorAndAbove },
+        { href: `${p}/catalog/label-console`, icon: <FileBarChart size={16} />, label: 'Label Upload Console', roles: creatorAndAbove },
         { href: `${p}/releases`, icon: <Disc3 size={16} />, label: t('releases'), roles: creatorAndAbove },
         { href: `${p}/artists`, icon: <Mic2 size={16} />, label: t('creators'), roles: adminManager },
         { href: `${p}/tracks`, icon: <Music size={16} />, label: t('catalog'), roles: creatorAndAbove },

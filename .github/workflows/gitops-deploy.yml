@@ -21,7 +21,6 @@ on:
         options:
           - development
           - staging
-          - production
         default: staging
       version:
         description: 'Image tag / version to deploy'
@@ -52,9 +51,19 @@ jobs:
       version: ${{ steps.plan.outputs.version }}
       apps: ${{ steps.plan.outputs.apps }}
       config_path: ${{ steps.plan.outputs.config_path }}
+      requested_apps: ${{ steps.plan.outputs.requested_apps }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Determine deployment parameters
         id: plan
@@ -63,15 +72,20 @@ jobs:
           VERSION="${{ github.event.inputs.version || github.sha }}"
           APPS="${{ github.event.inputs.apps || 'all' }}"
 
+          RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env "$ENV" --apps "$APPS")
+          RESOLVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
+
           echo "environment=$ENV" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "apps=$RESOLVED_APPS" >> "$GITHUB_OUTPUT"
+          echo "requested_apps=$APPS" >> "$GITHUB_OUTPUT"
           echo "config_path=infrastructure/gitops/environments/${ENV}.yml" >> "$GITHUB_OUTPUT"
 
           echo "### Deployment Plan" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Environment**: $ENV" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Version**: $VERSION" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Apps**: $APPS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Requested apps**: $APPS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Policy-approved apps**: $RESOLVED_APPS" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate environment config
         run: |
@@ -91,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -101,10 +115,22 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm typecheck 2>/dev/null || echo "Typecheck completed"
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Fast tests
+        run: pnpm test:fast
+
+      - name: Migration safety check
+        run: pnpm release:migration:safety
 
       - name: Run contract tests
-        run: pnpm contract-tests 2>/dev/null || echo "Contract tests completed"
+        run: pnpm contract-tests
+
+      - name: Release governance audit
+        run: pnpm release:audit
 
       - name: Validate deployment readiness
         run: |
@@ -129,7 +155,7 @@ jobs:
         id: check
         run: |
           APPS="${{ needs.plan.outputs.apps }}"
-          if [ "$APPS" = "all" ] || echo "$APPS" | grep -q "${{ matrix.app }}"; then
+          if echo ",$APPS," | grep -q ",${{ matrix.app }},"; then
             echo "should_build=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_build=false" >> "$GITHUB_OUTPUT"
@@ -185,6 +211,12 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.${DOMAIN}"
 
+          # Version truth: bake git SHA and build timestamp into image for /api/version drift detection
+          BUILD_ARGS="${BUILD_ARGS} --build-arg GITHUB_SHA=${{ github.sha }}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg ARTIFACT_ID=${{ github.sha }}-${APP}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg RELEASE_ID=${{ github.sha }}"
+
           # Entra External ID handles multi-app auth via NextAuth — no satellite config needed
 
           docker buildx build \
@@ -211,6 +243,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Azure Login
         uses: azure/login@v3
@@ -240,18 +281,16 @@ jobs:
           fi
 
           # Update each Container App with the newly built image
-          ALL_APPS=(web console partners union-eyes orchestrator-api cfo zonga abr flow agrimo cora trade mobility mobility-client-portal control-plane platform-admin nacp-exams)
+          IFS=',' read -r -a ALL_APPS <<< "$APPS"
           FAILED=()
 
           for APP in "${ALL_APPS[@]}"; do
-            if [ "$APPS" != "all" ] && ! echo "$APPS" | grep -q "$APP"; then
-              echo "Skipping $APP (not in requested list)"
-              continue
-            fi
-
             CA_NAME="nzila-os-${APP}"
             IMAGE="${ACR}/nzila/${APP}:${VERSION}"
             echo "Updating $CA_NAME → $IMAGE ..."
+
+            # Build runtime env var overrides (upserted, not replacing existing secret refs)
+            ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"
 
             # union-eyes has multiple containers; specify container name
             if [ "$APP" = "union-eyes" ]; then
@@ -260,12 +299,14 @@ jobs:
                 --resource-group "$RG" \
                 --container-name "nzila-os-union-eyes" \
                 --image "$IMAGE" \
+                --set-env-vars "$ENV_VARS" \
                 --output none 2>&1 || FAILED+=("$APP")
             else
               az containerapp update \
                 --name "$CA_NAME" \
                 --resource-group "$RG" \
                 --image "$IMAGE" \
+                --set-env-vars "$ENV_VARS" \
                 --output none 2>&1 || FAILED+=("$APP")
             fi
           done
@@ -273,10 +314,13 @@ jobs:
           echo "### Deployment Complete" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Environment**: $ENV" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Version**: $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Requested apps**: ${{ needs.plan.outputs.requested_apps }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployed apps**: $APPS" >> "$GITHUB_STEP_SUMMARY"
 
           if [ ${#FAILED[@]} -gt 0 ]; then
             echo "- **Failed apps**: ${FAILED[*]}" >> "$GITHUB_STEP_SUMMARY"
-            echo "::warning::Some apps failed to deploy: ${FAILED[*]}"
+            echo "::error::Deployment failed for: ${FAILED[*]} — staging is in a partial state"
+            exit 1
           fi
           echo "- **Status**: ✅ Success" >> "$GITHUB_STEP_SUMMARY"
 
@@ -317,6 +361,7 @@ jobs:
       - name: Health checks
         run: |
           ENV="${{ needs.plan.outputs.environment }}"
+          APPS="${{ needs.plan.outputs.apps }}"
           echo "Running health checks for $ENV environment..."
 
           # Resolve the Container Apps Environment default domain
@@ -325,40 +370,66 @@ jobs:
             --resource-group "nzila-canada-${ENV}-rg" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
 
-          # Verify all app health endpoints
-          APPS=(web console partners union-eyes cfo zonga abr flow agrimo cora trade mobility mobility-client-portal control-plane platform-admin nacp-exams)
-          for APP in "${APPS[@]}"; do
-            echo "Checking $APP health..."
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "https://nzila-os-${APP}.${DOMAIN}/" 2>/dev/null || echo "000")
-            if [ "$STATUS" = "200" ] || [ "$STATUS" = "307" ]; then
+          # Probe /api/health (canonical health endpoint) — NOT root /
+          # Root / may redirect (307) or return app HTML even when the service is broken.
+          # /api/health is the only reliable readiness signal.
+          IFS=',' read -r -a APPS_ARRAY <<< "$APPS"
+          FAILED_HEALTH=()
+          for APP in "${APPS_ARRAY[@]}"; do
+            echo "Checking $APP /api/health..."
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+              --max-time 10 --retry 3 --retry-delay 5 \
+              "https://nzila-os-${APP}.${DOMAIN}/api/health" 2>/dev/null || echo "000")
+            if [ "$STATUS" = "200" ]; then
               echo "  ✅ $APP: HTTP $STATUS"
             else
-              echo "  ⚠️  $APP: HTTP $STATUS (may not be deployed yet)"
+              echo "  ⚠️  $APP: HTTP $STATUS — /api/health did not return 200 (may be warming up)"
+              FAILED_HEALTH+=("$APP")
             fi
           done
 
+          if [ ${#FAILED_HEALTH[@]} -gt 0 ]; then
+            echo "::warning::Post-deploy health check failed for: ${FAILED_HEALTH[*]} — check logs"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@10.11.0 --ignore-scripts
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
       - name: Smoke tests
         run: |
-          echo "Running post-deployment smoke tests..."
-          echo "Smoke tests passed ✅"
+          pnpm tsx scripts/release/run-smoke.ts --env ${{ needs.plan.outputs.environment }} --apps "${{ needs.plan.outputs.apps }}"
+
+      - name: Version drift check
+        run: |
+          # Verify the deployed apps report the expected SHA — catches partial deploys
+          pnpm tsx scripts/release/drift-version.ts \
+            --env ${{ needs.plan.outputs.environment }} \
+            --apps "${{ needs.plan.outputs.apps }}" || true
+          # '|| true' — drift is expected immediately post-deploy while containers warm up.
+          # The drift report is uploaded as evidence; promotion gate enforces this separately.
 
       - name: Record deployment evidence
         run: |
-          mkdir -p evidence
-          cat > evidence/deployment-record.json <<EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "environment": "${{ needs.plan.outputs.environment }}",
-            "version": "${{ needs.plan.outputs.version }}",
-            "deployer": "${{ github.actor }}",
-            "commit": "${{ github.sha }}",
-            "workflow_run": "${{ github.run_id }}",
-            "status": "verified"
-          }
-          EOF
+          pnpm tsx scripts/release/build-deploy-evidence.ts --env ${{ needs.plan.outputs.environment }}
 
       - uses: actions/upload-artifact@v4
         with:
           name: deployment-evidence-${{ github.run_id }}
-          path: evidence/
+          path: ops/evidence/
           retention-days: 365
+
+      - name: Upload smoke report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-report-${{ github.run_id }}
+          path: ops/smoke/
+          retention-days: 90

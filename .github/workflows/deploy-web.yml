@@ -1,13 +1,12 @@
 name: Deploy Web (Azure Container Apps)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/web/**'
-      - 'packages/ui/**'
-      - 'packages/config/**'
-      - 'content/public/**'
+  workflow_dispatch:
+    inputs:
+      emergency_ack:
+        description: Type EMERGENCY to run this fallback workflow
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -32,6 +31,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Emergency acknowledgement gate
+        run: |
+          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
+            echo "Emergency ack missing. Use gitops-deploy.yml for canonical staging deployment."
+            exit 1
+          fi
 
       - name: Governance check
         run: pnpm governance:check

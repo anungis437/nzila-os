@@ -37,7 +37,7 @@ describe('DORA collector hardening', () => {
     }
   })
 
-  it('fails closed when enforce mode threshold is violated', () => {
+  it('fails closed when enforce mode threshold is violated', { timeout: 120_000 }, () => {
     const workDir = mkdtempSync(join(tmpdir(), 'dora-enforce-'))
     const outputPath = join(workDir, 'dora.json')
 

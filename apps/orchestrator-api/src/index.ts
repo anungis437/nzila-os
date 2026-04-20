@@ -3,6 +3,8 @@ import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 import { commandRoutes } from './routes/commands.js'
 import { healthRoutes } from './routes/health.js'
+import { readyRoutes } from './routes/ready.js'
+import { versionRoutes } from './routes/version.js'
 import { proofCenterRoutes } from './routes/proof-center.js'
 import { workflowRoutes } from './routes/workflows.js'
 import { jobRoutes } from './routes/jobs.js'
@@ -130,6 +132,8 @@ app.addHook('onRequest', async (req, reply) => {
 
 // ── Routes ──
 app.register(healthRoutes)
+app.register(readyRoutes)
+app.register(versionRoutes)
 app.register(metricsRoutes)
 app.register(telemetryHooks)
 app.register(commandRoutes, { prefix: '/commands' })

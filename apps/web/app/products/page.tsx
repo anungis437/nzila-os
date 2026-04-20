@@ -64,7 +64,7 @@ const flagships = [
 const pipeline = [
   { name: 'CORA', vertical: 'Agricultural Intelligence', tam: '$8.6B', status: 'Production Ready' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', tam: '$100B', status: 'Production Ready' },
-  { name: 'ABR Insights', vertical: 'Compliance & Audit', tam: '$1.5B', status: 'Production Ready' },
+  { name: 'FAIRCASE', vertical: 'Justice & Governance', tam: '$1.5B+', status: 'Production Ready' },
   { name: 'Zonga', vertical: 'Entertainment', tam: '$50B', status: 'Production Ready' },
   { name: 'SentryIQ360', vertical: 'Insurtech', tam: '$30B', status: 'In Development' },
   { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', status: 'In Development' },

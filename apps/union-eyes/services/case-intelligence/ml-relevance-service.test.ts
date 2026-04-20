@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const isFeatureEnabled = vi.fn();
 vi.mock('@/lib/services/feature-flags-service', () => ({ isFeatureEnabled }));
@@ -8,6 +8,11 @@ describe('case-intelligence ml-relevance-service', () => {
   beforeEach(() => {
     vi.resetModules();
     isFeatureEnabled.mockReset();
+    delete process.env.FEATURE_CASE_INTELLIGENCE_V1_ML;
+    delete process.env.FEATURE_CASE_INTELLIGENCE_V1_PATTERNS;
+  });
+
+  afterEach(() => {
     delete process.env.FEATURE_CASE_INTELLIGENCE_V1_ML;
     delete process.env.FEATURE_CASE_INTELLIGENCE_V1_PATTERNS;
   });
