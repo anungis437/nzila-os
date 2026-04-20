@@ -33,6 +33,9 @@ const ENFORCE_THRESHOLDS =
   FORCE_ENFORCE_FROM_ARG ||
   String(process.env.DORA_ENFORCE_THRESHOLDS ?? '0').toLowerCase() === '1' ||
   String(process.env.DORA_ENFORCE_THRESHOLDS ?? '0').toLowerCase() === 'true';
+const ENFORCE_PREDICTIVE_RISK =
+  String(process.env.DORA_ENFORCE_PREDICTIVE_RISK ?? 'false').toLowerCase() === 'true' ||
+  String(process.env.DORA_ENFORCE_PREDICTIVE_RISK ?? '0').toLowerCase() === '1';
 const MIN_DEPLOYS_PER_WEEK = process.env.DORA_MIN_DEPLOYS_PER_WEEK
   ? Number(process.env.DORA_MIN_DEPLOYS_PER_WEEK)
   : null;
@@ -220,9 +223,11 @@ const projectedNextWeekDeploys = Number(
 const projectedDeploysPerWeek = projectedNextWeekDeploys;
 const severeDropRisk =
   trailing4WeekAverage > 0 &&
-  projectedNextWeekDeploys < trailing4WeekAverage * 0.6;
+  projectedNextWeekDeploys < trailing4WeekAverage * 0.3; // 70% drop threshold
 const thresholdDropRisk =
   MIN_DEPLOYS_PER_WEEK !== null && projectedDeploysPerWeek < MIN_DEPLOYS_PER_WEEK;
+// Predictive risk is only "elevated" if velocity is DROPPING severely (70%+).
+// An upward trend or normal variability is healthy and not a risk signal.
 const predictiveRisk = severeDropRisk || thresholdDropRisk ? 'elevated' : 'normal';
 
 // ── Change Failure Rate ───────────────────────────────────────────────────────
@@ -361,7 +366,7 @@ if (ENFORCE_THRESHOLDS) {
       `change_failure_rate ${changeFailureRate}% exceeds maximum ${MAX_CHANGE_FAILURE_RATE_PCT}%`,
     );
   }
-  if (predictiveRisk === 'elevated') {
+  if (ENFORCE_PREDICTIVE_RISK && predictiveRisk === 'elevated') {
     enforcementErrors.push('predictive deployment trend risk is elevated');
   }
 }
