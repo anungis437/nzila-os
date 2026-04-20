@@ -67,7 +67,8 @@ scripts/*.json
 **/dist/
 
 # ----- Proof artifacts (generated) ------
-proof-artifacts/
+proof-artifacts/*
+!proof-artifacts/README.md
 
 # ----- pnpm ------
 .pnpm-store/
