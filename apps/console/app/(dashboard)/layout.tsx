@@ -16,6 +16,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { name: 'CEO One-Screen', href: '/ceo', icon: 'EyeIcon' },
+      { name: 'Intelligence', href: '/intelligence', icon: 'SparklesIcon' },
       { name: 'Today', href: '/today', icon: 'HomeIcon' },
       { name: 'Autopilot', href: '/autopilot', icon: 'BoltIcon' },
       { name: 'Briefing', href: '/briefing', icon: 'ClipboardDocumentCheckIcon' },

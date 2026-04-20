@@ -1,0 +1,30 @@
+{
+  "name": "@nzila/platform-intelligence-home",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./funding-service": "./src/funding-service.ts",
+    "./deal-service": "./src/deal-service.ts",
+    "./partner-service": "./src/partner-service.ts",
+    "./scoring-service": "./src/scoring-service.ts",
+    "./risk-service": "./src/risk-service.ts",
+    "./briefing-service": "./src/briefing-service.ts",
+    "./data-sync-service": "./src/data-sync-service.ts",
+    "./dashboard-service": "./src/dashboard-service.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^3.25.0",
+    "@nzila/platform-lakehouse": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}
