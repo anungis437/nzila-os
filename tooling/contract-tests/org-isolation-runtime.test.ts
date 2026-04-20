@@ -94,7 +94,10 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/webhooks/',               // Webhook endpoints (may be nested e.g. /payments/webhooks/)
   '/api/hooks/',
   '/api/auth/',
+  '/api/auth_core/',              // Django auth core health/status endpoints
+  '/api/rights/terms/agreement',  // Public pilot agreement download
   '/api/ready',               // Readiness probes
+  '/api/version',             // Build version metadata
   '/api/status',              // Status endpoints
   '/api/docs',                // API documentation
   '/unauthenticated-',        // Intentionally unauthenticated flows

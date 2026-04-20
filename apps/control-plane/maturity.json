@@ -1,6 +1,6 @@
 {
   "generated_from": "governance/portfolio/product-catalog.json",
-  "generated_at": "2026-04-19",
+  "generated_at": "2026-04-20",
   "status": "internal",
   "exposure": "internal",
   "data_integrity": "partial",
@@ -10,5 +10,5 @@
   "gtm_posture": "internal-only",
   "proof_level": "internal-proof",
   "revenue_status": "internal-cost-center",
-  "last_validated": "2026-04-19"
+  "last_validated": "2026-04-20"
 }

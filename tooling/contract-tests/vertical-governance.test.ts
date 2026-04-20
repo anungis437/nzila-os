@@ -151,6 +151,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/public',
     '/api/trial',               // Public product trial signup
     '/api/ready',               // Readiness/liveness probes
+    '/api/version',             // Build version metadata
     '/api/docs',                // OpenAPI documentation
     '/api/status',              // Status page (public)
     '/api/gdpr/cookie-consent', // Cookie consent must be public
@@ -161,6 +162,8 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/control-plane/architecture',     // Internal diagnostics (GET-only)
     '/api/contact',                        // Public contact/demo-request form (marketing)
     '/api/telemetry',                      // Public marketing telemetry (anonymous page events)
+    '/api/auth_core/',                     // Django auth core health/status endpoints
+    '/api/rights/terms/agreement',         // Public pilot agreement download
   ]
 
   for (const appDir of appDirs) {
