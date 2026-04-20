@@ -23,7 +23,7 @@ pnpm sre:staging:recovery
 3. Rebuild SRE validation bundle.
 
 ```bash
-pnpm sre:build
+pnpm sre:validate
 ```
 
 ## Triad Contract

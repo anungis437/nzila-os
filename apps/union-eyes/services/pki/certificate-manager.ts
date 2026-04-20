@@ -118,8 +118,7 @@ export function parseCertificate(certificatePem: string): CertificateInfo {
  */
 function parseDistinguishedName(dn: string): CertificateInfo['subject'] {
   const parts = dn.split(',').map(p => p.trim());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = {};
+  const result: Partial<CertificateInfo['subject']> = {};
   
   for (const part of parts) {
     const [key, value] = part.split('=').map(s => s.trim());
@@ -149,7 +148,7 @@ function parseDistinguishedName(dn: string): CertificateInfo['subject'] {
     }
   }
   
-  return result;
+  return { commonName: '', ...result };
 }
 
 /**

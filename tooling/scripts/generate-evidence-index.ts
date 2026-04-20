@@ -213,7 +213,7 @@ All schema logic lives in packages/os-core/src/evidence/generate-evidence-index.
       periodLabel,
       includeMl: values['include-ml'] as boolean | undefined,
       includeAiActions: values['include-ai-actions'] as boolean | undefined,
-    } as any)
+    })
     console.error(`✔ Evidence pack sealed.`)
     console.error(`  Pack ID:   ${result.packId}`)
     console.error(`  DB Pack:   ${result.evidencePackDbId}`)

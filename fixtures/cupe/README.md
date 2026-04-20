@@ -94,4 +94,4 @@ Contract test: `ue-fixture-validation.test.ts` (creates fixtures/validates struc
 - **Phase 2**: Use fixtures in intake/assignment hardening (PR-020, PR-021)
 - **Phase 5**: Dashboard tests using fixture data
 
-See also: `docs/DEFERRED_ITEMS.md` for post-pilot backlog (multi-org, customization, analytics fixtures)
+See also: `docs/reference/DEFERRED_ITEMS.md` for post-pilot backlog (multi-org, customization, analytics fixtures)

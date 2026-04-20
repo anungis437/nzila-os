@@ -327,11 +327,11 @@ export function checkVulnerabilityPolicy(
 
     for (const [key, advisory] of Object.entries(advisories)) {
       totalVulns++
-      const severity = (advisory as any).severity ?? 'unknown'
+      const severity = advisory.severity ?? 'unknown'
       if (severity === 'high' || severity === 'critical') {
         highOrCritical++
         // Check if waived by CVE or GHSA ID
-        const ids = [key, ...((advisory as any).cves ?? [])]
+        const ids = [key, ...(advisory.cves ?? [])]
         const isWaived = ids.some((id) => activeWaiverIds.has(id))
         if (isWaived) {
           waived++

@@ -48,6 +48,10 @@ export interface ProcessEvidencePackOptions {
   basePath?: string
   /** Period label for appendix collectors, e.g. '2026-02' */
   periodLabel?: string
+  /** Include ML drift evidence from collectors */
+  includeMl?: boolean
+  /** Include AI action evidence from collectors */
+  includeAiActions?: boolean
 }
 
 /** Local-only (no upload) representation of an evidence pack index. */

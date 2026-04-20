@@ -8,6 +8,10 @@ legacy-codebases/
 notion_export/
 *.zip
 
+# ----- Generated output (not committed) ------
+demo-output/
+logs/
+
 # ----- Staging / seed / ad-hoc SQL & CSV at repo root ------
 staging-*.sql
 staging-*.csv
@@ -26,6 +30,11 @@ temp-staging-*.sql
 /ci-failure-log.txt
 /email-otp.json
 /coverage.xml
+
+# ----- Ad-hoc debug / output files in scripts/ (never commit) ------
+scripts/*.txt
+scripts/*.json
+!scripts/package.json
 
 # ----- Scratch / temp / exploratory files at repo root ------
 /*.tmp

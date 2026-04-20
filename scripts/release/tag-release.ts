@@ -204,7 +204,7 @@ function main(): void {
     console.log(`✓ Committed version bump`)
 
     // Create signed annotated tag (GPG or SSH based on git config)
-    // Falls back to unsigned annotated if no signing key configured
+    // HARD REQUIREMENT: Production releases MUST be signed. No unsigned fallback.
     const signingKey = exec('git config --get user.signingkey', { capture: true }).trim()
     const signFormat = exec('git config --get gpg.format', { capture: true }).trim()
     const canSign = signingKey.length > 0
@@ -213,11 +213,19 @@ function main(): void {
       exec(`git tag -s "${tag}" -m "${tagBody.replace(/"/g, '\\"')}"`)
       const signMethod = signFormat === 'ssh' ? 'SSH' : 'GPG'
       console.log(`✓ Created signed tag (${signMethod}): ${tag}`)
-    } else {
-      console.log('⚠  No signing key configured — creating unsigned annotated tag')
-      console.log('   To enable: git config --global user.signingkey <KEY>')
+    } else if (hasFlag('--allow-unsigned')) {
+      console.log('⚠  No signing key — creating unsigned tag (--allow-unsigned override)')
+      console.log('   WARNING: This tag will be BLOCKED from production promotion.')
       exec(`git tag -a "${tag}" -m "${tagBody.replace(/"/g, '\\"')}"`)
-      console.log(`✓ Created annotated tag: ${tag}`)
+      console.log(`✓ Created annotated tag (unsigned): ${tag}`)
+    } else {
+      console.error('✗ BLOCKED: No signing key configured.')
+      console.error('  Production releases MUST be signed. Configure a key:')
+      console.error('    GPG: git config --global user.signingkey <KEY-ID>')
+      console.error('    SSH: git config --global gpg.format ssh')
+      console.error('         git config --global user.signingkey ~/.ssh/id_ed25519.pub')
+      console.error('  To create a development tag anyway: --allow-unsigned')
+      process.exit(1)
     }
 
     // Push commit + tag

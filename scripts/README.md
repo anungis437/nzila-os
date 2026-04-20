@@ -54,8 +54,6 @@ Test user and account provisioning for email/password and Entra SSO.
 | `seed-test-auth-accounts.mjs` | Seeds test auth accounts |
 | `seed-zonga-auth-accounts.mjs` | Seeds Zonga auth accounts |
 | `migrate-clerk-to-entra.mjs` | Clerk → Entra migration (historical) |
-| `clerk-provision-pilot-orgs.mjs` | Legacy: Clerk pilot org provisioning |
-| `zonga-clerk-provision.mjs` | Legacy: Zonga Clerk provisioning |
 | `seed-console-local-ai.sql` | Seeds local console AI app, profiles, models, deployments, and routes |
 
 ### Analysis & Checks

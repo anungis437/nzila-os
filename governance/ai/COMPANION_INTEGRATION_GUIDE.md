@@ -16,7 +16,7 @@ This guide provides a **step-by-step integration workflow** for adding the **Com
 - ✅ Platform uses standardized architecture (Django 5 backend + Next.js 14 frontend)
 - ✅ Azure OpenAI API access configured
 - ✅ PostgreSQL with pgVector extension enabled
-- ✅ Clerk authentication integrated
+- ✅ Entra ID authentication integrated (via @nzila/platform-auth)
 
 ---
 
