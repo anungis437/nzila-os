@@ -71,9 +71,11 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           NODE_ENV: production
           PORT: ${{ matrix.port }}
-          # control-plane boot-env requires these in production mode
+          # boot-env requires these in production mode (control-plane, console)
           CONTROL_PLANE_API_KEY: ci-e2e-placeholder-key
+          CONTROL_PLANE_URL: http://localhost:3010
           UNION_EYES_URL: http://localhost:3002
+          ORCHESTRATOR_API_URL: http://localhost:4000
 
       - name: Run Playwright tests
         run: pnpm --filter @nzila/${{ matrix.app }} e2e
