@@ -1,0 +1,286 @@
+{
+  "version": "2026-04-19.1",
+  "currency": "USD",
+  "apps": [
+    {
+      "app": "union-eyes",
+      "tier": "tier1",
+      "owner": "union-eyes-engineering",
+      "baselineMonthlyCostUsd": 30000,
+      "allocationModel": {
+        "compute": 0.22,
+        "database": 0.12,
+        "storage": 0.08,
+        "cdn_bandwidth": 0.06,
+        "email_sms": 0.07,
+        "ai_api": 0.09,
+        "monitoring_logging": 0.06,
+        "payment_fees": 0.03,
+        "support_human_ops": 0.19,
+        "contractor_vendor": 0.03,
+        "sales_marketing": 0.03,
+        "shared_gna": 0.02
+      }
+    },
+    {
+      "app": "abr",
+      "tier": "tier1",
+      "owner": "faircase-engineering",
+      "baselineMonthlyCostUsd": 28000,
+      "allocationModel": {
+        "compute": 0.23,
+        "database": 0.11,
+        "storage": 0.1,
+        "cdn_bandwidth": 0.05,
+        "email_sms": 0.04,
+        "ai_api": 0.09,
+        "monitoring_logging": 0.07,
+        "payment_fees": 0.02,
+        "support_human_ops": 0.2,
+        "contractor_vendor": 0.03,
+        "sales_marketing": 0.04,
+        "shared_gna": 0.02
+      }
+    },
+    {
+      "app": "flow",
+      "tier": "tier1",
+      "owner": "flow-engineering",
+      "baselineMonthlyCostUsd": 27000,
+      "allocationModel": {
+        "compute": 0.24,
+        "database": 0.12,
+        "storage": 0.08,
+        "cdn_bandwidth": 0.05,
+        "email_sms": 0.03,
+        "ai_api": 0.08,
+        "monitoring_logging": 0.07,
+        "payment_fees": 0.03,
+        "support_human_ops": 0.18,
+        "contractor_vendor": 0.03,
+        "sales_marketing": 0.06,
+        "shared_gna": 0.03
+      }
+    },
+    {
+      "app": "web",
+      "tier": "tier1",
+      "owner": "web-engineering",
+      "baselineMonthlyCostUsd": 14000,
+      "allocationModel": {
+        "compute": 0.2,
+        "database": 0.09,
+        "storage": 0.07,
+        "cdn_bandwidth": 0.09,
+        "email_sms": 0.02,
+        "ai_api": 0.03,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.01,
+        "support_human_ops": 0.12,
+        "contractor_vendor": 0.06,
+        "sales_marketing": 0.2,
+        "shared_gna": 0.03
+      }
+    },
+    {
+      "app": "partners",
+      "tier": "tier1",
+      "owner": "partners-engineering",
+      "baselineMonthlyCostUsd": 17000,
+      "allocationModel": {
+        "compute": 0.21,
+        "database": 0.11,
+        "storage": 0.07,
+        "cdn_bandwidth": 0.05,
+        "email_sms": 0.05,
+        "ai_api": 0.04,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.03,
+        "support_human_ops": 0.18,
+        "contractor_vendor": 0.05,
+        "sales_marketing": 0.1,
+        "shared_gna": 0.03
+      }
+    },
+    {
+      "app": "cfo",
+      "tier": "tier1",
+      "owner": "cfo-engineering",
+      "baselineMonthlyCostUsd": 19000,
+      "allocationModel": {
+        "compute": 0.18,
+        "database": 0.16,
+        "storage": 0.06,
+        "cdn_bandwidth": 0.03,
+        "email_sms": 0.02,
+        "ai_api": 0.05,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.02,
+        "support_human_ops": 0.2,
+        "contractor_vendor": 0.08,
+        "sales_marketing": 0.08,
+        "shared_gna": 0.04
+      }
+    },
+    {
+      "app": "zonga",
+      "tier": "tier2",
+      "owner": "zonga-engineering",
+      "baselineMonthlyCostUsd": 13000,
+      "allocationModel": {
+        "compute": 0.22,
+        "database": 0.1,
+        "storage": 0.14,
+        "cdn_bandwidth": 0.14,
+        "email_sms": 0.01,
+        "ai_api": 0.05,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.05,
+        "support_human_ops": 0.11,
+        "contractor_vendor": 0.04,
+        "sales_marketing": 0.04,
+        "shared_gna": 0.02
+      }
+    },
+    {
+      "app": "agrimo",
+      "tier": "tier2",
+      "owner": "agrimo-engineering",
+      "baselineMonthlyCostUsd": 12000,
+      "allocationModel": {
+        "compute": 0.2,
+        "database": 0.13,
+        "storage": 0.09,
+        "cdn_bandwidth": 0.04,
+        "email_sms": 0.01,
+        "ai_api": 0.05,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.01,
+        "support_human_ops": 0.16,
+        "contractor_vendor": 0.1,
+        "sales_marketing": 0.09,
+        "shared_gna": 0.04
+      }
+    },
+    {
+      "app": "cora",
+      "tier": "tier2",
+      "owner": "cora-engineering",
+      "baselineMonthlyCostUsd": 11000,
+      "allocationModel": {
+        "compute": 0.2,
+        "database": 0.12,
+        "storage": 0.08,
+        "cdn_bandwidth": 0.03,
+        "email_sms": 0.01,
+        "ai_api": 0.06,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.01,
+        "support_human_ops": 0.16,
+        "contractor_vendor": 0.12,
+        "sales_marketing": 0.09,
+        "shared_gna": 0.04
+      }
+    },
+    {
+      "app": "trade",
+      "tier": "tier2",
+      "owner": "trade-engineering",
+      "baselineMonthlyCostUsd": 10000,
+      "allocationModel": {
+        "compute": 0.21,
+        "database": 0.11,
+        "storage": 0.08,
+        "cdn_bandwidth": 0.04,
+        "email_sms": 0.01,
+        "ai_api": 0.04,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.02,
+        "support_human_ops": 0.16,
+        "contractor_vendor": 0.11,
+        "sales_marketing": 0.1,
+        "shared_gna": 0.04
+      }
+    },
+    {
+      "app": "mobility",
+      "tier": "tier2",
+      "owner": "mobility-engineering",
+      "baselineMonthlyCostUsd": 9000,
+      "allocationModel": {
+        "compute": 0.2,
+        "database": 0.11,
+        "storage": 0.07,
+        "cdn_bandwidth": 0.04,
+        "email_sms": 0.02,
+        "ai_api": 0.04,
+        "monitoring_logging": 0.08,
+        "payment_fees": 0.02,
+        "support_human_ops": 0.16,
+        "contractor_vendor": 0.12,
+        "sales_marketing": 0.1,
+        "shared_gna": 0.04
+      }
+    },
+    {
+      "app": "console",
+      "tier": "internal",
+      "owner": "platform-admin",
+      "baselineMonthlyCostUsd": 15000,
+      "allocationModel": {
+        "compute": 0.2,
+        "database": 0.1,
+        "storage": 0.06,
+        "cdn_bandwidth": 0.03,
+        "email_sms": 0.01,
+        "ai_api": 0.07,
+        "monitoring_logging": 0.09,
+        "payment_fees": 0,
+        "support_human_ops": 0.2,
+        "contractor_vendor": 0.11,
+        "sales_marketing": 0.03,
+        "shared_gna": 0.1
+      }
+    },
+    {
+      "app": "control-plane",
+      "tier": "internal",
+      "owner": "platform-admin",
+      "baselineMonthlyCostUsd": 14500,
+      "allocationModel": {
+        "compute": 0.22,
+        "database": 0.09,
+        "storage": 0.05,
+        "cdn_bandwidth": 0.02,
+        "email_sms": 0.01,
+        "ai_api": 0.04,
+        "monitoring_logging": 0.12,
+        "payment_fees": 0,
+        "support_human_ops": 0.2,
+        "contractor_vendor": 0.12,
+        "sales_marketing": 0.03,
+        "shared_gna": 0.1
+      }
+    },
+    {
+      "app": "orchestrator-api",
+      "tier": "internal",
+      "owner": "platform-admin",
+      "baselineMonthlyCostUsd": 9500,
+      "allocationModel": {
+        "compute": 0.25,
+        "database": 0.1,
+        "storage": 0.03,
+        "cdn_bandwidth": 0.01,
+        "email_sms": 0,
+        "ai_api": 0.03,
+        "monitoring_logging": 0.16,
+        "payment_fees": 0,
+        "support_human_ops": 0.2,
+        "contractor_vendor": 0.1,
+        "sales_marketing": 0.02,
+        "shared_gna": 0.1
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "2026-04-19.1",
+  "controls": {
+    "retryPolicy": "required",
+    "poisonQueueHandling": "required",
+    "deadLetterQueue": "required",
+    "duplicateSuppression": "required",
+    "visibilityTimeout": "required",
+    "stuckJobAlertMinutes": 10
+  },
+  "owners": {
+    "tier1": "platform-ops + app team",
+    "tier2": "app team",
+    "internal": "platform-ops"
+  }
+}

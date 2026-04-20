@@ -1,99 +1,57 @@
-/**
- * Readiness Probe API
- * 
- * Kubernetes readiness check - determines if app is ready to receive traffic
- */
+import { NextResponse } from 'next/server'
+import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 
-import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
-interface ReadinessCheck {
-  ready: boolean;
-  timestamp: string;
-  checks: {
-    database: boolean;
-    migrations: boolean;
-    cache: boolean;
-  };
-  message: string;
-}
+const APP = 'union-eyes'
 
-/**
- * GET /api/ready
- * Readiness probe for Kubernetes
- */
-export async function GET() {
-  try {
-    const checks = {
-      database: await checkDatabaseReady(),
-      migrations: await checkMigrationsComplete(),
-      cache: await checkCacheReady(),
-    };
-
-    const ready = Object.values(checks).every(check => check === true);
-
-    const response: ReadinessCheck = {
-      ready,
-      timestamp: new Date().toISOString(),
-      checks,
-      message: ready ? 'Service is ready' : 'Service is not ready',
-    };
-
-    return NextResponse.json(response, { status: ready ? 200 : 503 });
-  } catch (_error) {
-    return NextResponse.json({
-      ready: false,
-      timestamp: new Date().toISOString(),
-      message: 'Readiness check failed',
-    }, { status: 503 });
-  }
-}
-
-/**
- * Check if database is ready (not just alive, but ready for queries)
- */
 async function checkDatabaseReady(): Promise<boolean> {
   try {
-    // Test a real table exists
-    const _result = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      )
-    `);
-    
-    return true;
+    const { db } = await import('@nzila/db')
+    const { sql } = await import('drizzle-orm')
+    await db.execute(sql`SELECT 1`)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
-/**
- * Check if database migrations are complete
- */
-async function checkMigrationsComplete(): Promise<boolean> {
+async function checkQueueReady(): Promise<boolean> {
+  const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL || ''
+  if (!djangoUrl) {
+    return true
+  }
+
   try {
-    // Check if drizzle migrations table exists and has entries
-    const _result = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'drizzle' 
-        AND table_name = '__drizzle_migrations'
-      )
-    `);
-    
-    return true;
+    const base = djangoUrl.replace(/\/$/, '')
+    const response = await fetch(`${base}/api/auth_core/health/`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000),
+    })
+    return response.ok
   } catch {
-    return false;
+    return false
   }
 }
 
-/**
- * Check if cache/Redis is ready (if applicable)
- */
-async function checkCacheReady(): Promise<boolean> {
-  // If Redis/cache is critical, check it here
-  // For now, return true (cache is optional)
-  return true;
+export async function GET() {
+  const [database, queue] = await Promise.all([checkDatabaseReady(), checkQueueReady()])
+
+  const checks = normalizeHealthChecks({
+    process: true,
+    database,
+    queue,
+    storage: 'unknown',
+    thirdParty: 'unknown',
+  })
+
+  const ready = isReadyFromChecks(checks, ['process', 'database', 'queue'])
+
+  return NextResponse.json(
+    {
+      ready,
+      status: ready ? 'ready' : 'not_ready',
+      ...getBuildMetadata(APP),
+      checks,
+    },
+    { status: ready ? 200 : 503 },
+  )
 }

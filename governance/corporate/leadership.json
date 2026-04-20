@@ -1,0 +1,55 @@
+{
+  "updated_at": "2026-04-19",
+  "leadership": {
+    "founder_ceo": {
+      "name": "Aubert",
+      "title": "Founder / CEO",
+      "active": true,
+      "core_scope": [
+        "platform",
+        "shared-services",
+        "cross-portfolio strategy",
+        "capital allocation"
+      ]
+    },
+    "president": {
+      "name": "Michel",
+      "title": "President",
+      "active": true,
+      "core_scope": [
+        "union-eyes",
+        "abr",
+        "labour and legal commercialization",
+        "buyer trust programs"
+      ]
+    }
+  },
+  "routing_policy": {
+    "labour_legal_products": [
+      "union-eyes",
+      "abr"
+    ],
+    "platform_shared_products": [
+      "console",
+      "control-plane",
+      "web",
+      "orchestrator-api",
+      "platform-admin"
+    ],
+    "enterprise_threshold": 90000,
+    "co_owned_stages": [
+      "legal"
+    ]
+  },
+  "decision_rights": {
+    "union_eyes": "President",
+    "abr": "President",
+    "platform": "Founder / CEO",
+    "shared_services": "Founder / CEO",
+    "enterprise_deals": "Joint"
+  },
+  "constraints": {
+    "ambiguous_owner_is_failure": true,
+    "single_accountable_owner_required": true
+  }
+}

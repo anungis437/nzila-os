@@ -1,0 +1,18 @@
+{
+  "version": "2026-04-19.1",
+  "cadence": "quarterly",
+  "scenarios": [
+    "database_outage",
+    "auth_outage",
+    "region_outage",
+    "payment_outage",
+    "bad_deploy",
+    "queue_backlog"
+  ],
+  "measurements": [
+    "time_to_detect",
+    "time_to_ack",
+    "time_to_mitigate",
+    "time_to_recover"
+  ]
+}

@@ -115,14 +115,22 @@ Generated outputs:
 ## Proof and Trust Surfaces
 
 - Proof center: [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md)
-- Buyer packs: [docs/buyers/union-eyes-buyer-pack.md](docs/buyers/union-eyes-buyer-pack.md), [docs/buyers/flow-buyer-pack.md](docs/buyers/flow-buyer-pack.md)
+- Monthly evidence packs: [proof-artifacts/evidence-packs](proof-artifacts/evidence-packs)
+- Buyer packs: [docs/buyers/union-eyes-buyer-pack.md](docs/buyers/union-eyes-buyer-pack.md), [docs/buyers/flow-buyer-pack.md](docs/buyers/flow-buyer-pack.md), [docs/faircase/buyer-pack.md](docs/faircase/buyer-pack.md)
 - Investor one-pager: [docs/investor/final-investor-onepager.md](docs/investor/final-investor-onepager.md)
+- Ownership registry: [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md)
+- Documentation index: [docs/documentation-index.md](docs/documentation-index.md)
 
 ## Governance and Validation
 
 - Portfolio artifact generation: `pnpm generate:portfolio-artifacts`
 - Portfolio governance validation: `pnpm validate:portfolio-governance`
 - Full governance gate: `pnpm validate:governance`
+- Governance audit: `pnpm governance:audit`
+- Release dry runs: `pnpm release:staging`, `pnpm release:prod`
+- Reliability dry run: `pnpm sre:build`
+- Monthly evidence pack: `pnpm evidence:pack:monthly`
+- Repo excellence audit: `pnpm repo:audit`
 
 ## Additional References
 

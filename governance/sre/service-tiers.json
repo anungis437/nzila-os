@@ -1,0 +1,116 @@
+{
+  "version": "2026-04-19.1",
+  "owner": "platform-engineering",
+  "policy": {
+    "tier1": {
+      "availabilityTargetPct": 99.9,
+      "latencyP95Ms": 450,
+      "errorRateMaxPct": 1.0,
+      "mttrTargetMinutes": 60,
+      "supportHours": "24x7",
+      "errorBudgetMonthlyMinutes": 43.2
+    },
+    "tier2": {
+      "availabilityTargetPct": 99.5,
+      "latencyP95Ms": 700,
+      "errorRateMaxPct": 2.0,
+      "mttrTargetMinutes": 240,
+      "supportHours": "business-hours + after-hours p1",
+      "errorBudgetMonthlyMinutes": 216
+    },
+    "internal": {
+      "availabilityTargetPct": 99.0,
+      "latencyP95Ms": 500,
+      "errorRateMaxPct": 2.5,
+      "mttrTargetMinutes": 120,
+      "supportHours": "business-hours + after-hours p1",
+      "errorBudgetMonthlyMinutes": 432
+    }
+  },
+  "apps": [
+    {
+      "id": "union-eyes",
+      "name": "Union Eyes",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "abr",
+      "name": "FairCase",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "flow",
+      "name": "Flow",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "partners",
+      "name": "Partners",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "cfo",
+      "name": "CFO",
+      "tier": "tier1",
+      "supportModel": "24x7"
+    },
+    {
+      "id": "zonga",
+      "name": "Zonga",
+      "tier": "tier2",
+      "supportModel": "business-hours + after-hours p1"
+    },
+    {
+      "id": "agrimo",
+      "name": "Agrimo",
+      "tier": "tier2",
+      "supportModel": "business-hours"
+    },
+    {
+      "id": "cora",
+      "name": "Cora",
+      "tier": "tier2",
+      "supportModel": "business-hours"
+    },
+    {
+      "id": "trade",
+      "name": "Trade",
+      "tier": "tier2",
+      "supportModel": "business-hours"
+    },
+    {
+      "id": "mobility",
+      "name": "Mobility",
+      "tier": "tier2",
+      "supportModel": "business-hours"
+    },
+    {
+      "id": "console",
+      "name": "Console",
+      "tier": "internal",
+      "supportModel": "business-hours + after-hours p1"
+    },
+    {
+      "id": "control-plane",
+      "name": "Control Plane",
+      "tier": "internal",
+      "supportModel": "business-hours + after-hours p1"
+    },
+    {
+      "id": "orchestrator-api",
+      "name": "Orchestrator API",
+      "tier": "internal",
+      "supportModel": "business-hours + after-hours p1"
+    }
+  ]
+}

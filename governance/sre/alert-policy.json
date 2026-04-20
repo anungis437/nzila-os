@@ -1,0 +1,55 @@
+{
+  "version": "2026-04-19.1",
+  "severity": {
+    "p1": {
+      "conditions": [
+        "full_outage",
+        "critical_security_issue",
+        "data_corruption_risk"
+      ],
+      "ackSlaMinutes": 15
+    },
+    "p2": {
+      "conditions": [
+        "major_feature_unavailable",
+        "severe_latency_degradation"
+      ],
+      "ackSlaMinutes": 60
+    },
+    "p3": {
+      "conditions": [
+        "partial_degradation",
+        "warning_threshold_breach"
+      ],
+      "ackSlaMinutes": 240
+    },
+    "p4": {
+      "conditions": [
+        "informational_signal"
+      ],
+      "ackSlaMinutes": 1440
+    }
+  },
+  "deduplication": {
+    "fingerprint": [
+      "app",
+      "service",
+      "alertType",
+      "environment"
+    ],
+    "timeWindowMinutes": 20,
+    "suppressFlapping": true
+  },
+  "routing": {
+    "source": "governance/sre/oncall-ownership-matrix.json",
+    "requireOwner": true,
+    "fallback": "founder-escalation"
+  },
+  "securityOverlap": {
+    "authOutage": "p1",
+    "certificateExpiry": "p2",
+    "secretExpiry": "p2",
+    "webhookFailure": "p2",
+    "suspiciousTrafficSpike": "p1"
+  }
+}

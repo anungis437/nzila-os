@@ -7,6 +7,7 @@ Authority: governance/portfolio/product-catalog.json
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
+| FAIRCASE | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
@@ -15,7 +16,6 @@ Authority: governance/portfolio/product-catalog.json
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
-| ABR | 4 | incubating | hold | pre-revenue | none | low |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
@@ -27,7 +27,7 @@ Authority: governance/portfolio/product-catalog.json
 
 ## Allocation Summary
 
-- Sell now: flow, union-eyes
+- Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
 - Internal only: console, control-plane, orchestrator-api
 - Frozen / sunset: mobility-client-portal, platform-admin
@@ -38,6 +38,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 
 | Product | Weighted Score | Recommendation | Operational Tier | Readiness |
 | --- | ---: | --- | --- | --- |
+| FAIRCASE | 8.0 | KEEP | EXPERIMENTAL | pilot-safe |
 | Flow | 7.0 | KEEP | PRODUCTION | pilot-safe |
 | Union Eyes | 8.0 | KEEP | PRODUCTION | pilot-safe |
 | CFO | 5.6 | HOLD | PILOT | pilot-safe |
@@ -46,7 +47,6 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Control Plane | 5.0 | HOLD | PILOT | internal-only |
 | Orchestrator API | 4.8 | HOLD | EXPERIMENTAL | internal-only |
 | Web | 5.0 | HOLD | PRODUCTION | pilot-safe |
-| ABR | 3.6 | HOLD | EXPERIMENTAL | internal-only |
 | Agrimo | 3.6 | HOLD | INCUBATING | internal-only |
 | Cora | 3.6 | HOLD | INCUBATING | internal-only |
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |

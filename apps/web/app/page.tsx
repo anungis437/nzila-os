@@ -40,7 +40,7 @@ const flagships = [
   { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
   { name: 'Zonga', vertical: 'Music & Creator Economy', image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800', alt: 'Zonga — African music platform for artists, streaming, and creator royalties', tam: '$20B+', description: 'Africa-first music distribution and streaming platform for artists and creator payouts' },
   { name: 'Flow', vertical: 'Commerce & Operations', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', alt: 'Flow — enterprise order-to-cash and supply chain management platform', tam: '$100B+', description: 'Commerce operations platform covering order-to-cash, inventory, and multi-channel workflows' },
-  { name: 'Agrimo', vertical: 'Agriculture & Supply Chain', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'Agrimo — agricultural field operations and supply chain management', tam: '$8B', description: 'Agricultural operations and supply-chain platform for tracking, quality, and traceability' },
+  { name: 'FAIRCASE', vertical: 'Justice & Equity', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800', alt: 'FAIRCASE — institutional anti-racism governance and legal intelligence platform', tam: '$1.5B+', description: 'Institutional anti-racism governance platform with evidence-grade case workflows, analytics, and remediation oversight' },
 ];
 
 const intelligenceCapabilities = [
@@ -67,7 +67,7 @@ const flagshipDescriptionFr: Record<string, string> = {
   UnionEyes: 'Gestion syndicale, prevision des pensions, suivi des griefs',
   Zonga: 'Plateforme africaine de distribution et de streaming musical pour artistes et paiements de redevances.',
   Flow: 'Plateforme d operations commerciales couvrant order-to-cash, inventaire et flux multicanaux.',
-  Agrimo: 'Plateforme agricole pour les operations terrain, la qualite et la tracabilite de la chaine logistique.',
+  FAIRCASE: 'Plateforme de gouvernance anti-racisme avec workflows de preuve, intelligence juridique et pilotage de remediation.',
 };
 
 const intelligenceFr: Record<string, { name: string; metric: string; description: string }> = {

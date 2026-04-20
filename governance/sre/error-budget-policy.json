@@ -1,0 +1,28 @@
+{
+  "version": "2026-04-19.1",
+  "window": "monthly",
+  "rules": {
+    "burnThresholdPct": 100,
+    "freezeNonEssentialReleases": true,
+    "overrideRequiresApproval": true,
+    "approvalRoles": [
+      "release-owner",
+      "technical-owner",
+      "business-owner"
+    ]
+  },
+  "tierOverrides": {
+    "tier1": {
+      "strictMode": true,
+      "overrideRequires": "director_or_higher"
+    },
+    "tier2": {
+      "strictMode": false,
+      "overrideRequires": "release-owner"
+    },
+    "internal": {
+      "strictMode": true,
+      "overrideRequires": "vp-platform"
+    }
+  }
+}

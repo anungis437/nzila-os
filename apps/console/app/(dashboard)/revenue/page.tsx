@@ -387,6 +387,15 @@ export default async function RevenuePage() {
         <h3 className="font-semibold text-gray-700 mb-3">Revenue Playbooks</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
+            <p className="font-semibold text-gray-800 mb-1">FAIRCASE (Priority #1)</p>
+            <ul className="text-gray-500 text-xs space-y-1 list-disc list-inside">
+              <li>ICP: HR leaders, unions, universities, public sector, healthcare</li>
+              <li>Close trigger: pilot KPI proof + procurement track by day 30</li>
+              <li>Price hypothesis: $36k-$140k annual depending on scope</li>
+              <li>Next action: work FAIRCASE funnel board in /revenue/faircase</li>
+            </ul>
+          </div>
+          <div>
             <p className="font-semibold text-gray-800 mb-1">UnionEyes (Priority #1)</p>
             <ul className="text-gray-500 text-xs space-y-1 list-disc list-inside">
               <li>ICP: CUPE locals, unions with 200–5,000 members</li>
@@ -410,6 +419,7 @@ export default async function RevenuePage() {
       {/* Nav away */}
       <div className="flex gap-3">
         <Link href="/portfolio" className="text-sm text-gray-500 hover:text-gray-900">← Portfolio</Link>
+        <Link href="/revenue/faircase" className="text-sm text-blue-600 hover:text-blue-800">FAIRCASE funnel →</Link>
         <Link href="/capital" className="text-sm text-blue-600 hover:text-blue-800">Capital →</Link>
       </div>
     </div>

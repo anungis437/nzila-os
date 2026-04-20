@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-04-20T04:21:23.754Z",
+  "appCount": 14,
+  "endpointCoverage": [
+    {
+      "app": "union-eyes",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "abr",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "flow",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "web",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "partners",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "cfo",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "zonga",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "agrimo",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "cora",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "trade",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "mobility",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "console",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "control-plane",
+      "health": true,
+      "ready": true,
+      "version": true
+    },
+    {
+      "app": "orchestrator-api",
+      "health": true,
+      "ready": true,
+      "version": true
+    }
+  ],
+  "missingHealthEndpointContracts": [],
+  "scores": {
+    "reliability": 10,
+    "observability": 10,
+    "incidentReadiness": 10,
+    "costGovernance": 10,
+    "mttrReadiness": 10
+  }
+}

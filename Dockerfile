@@ -52,6 +52,17 @@ COPY --from=deps /app/packages ./packages
 # Copy source code
 COPY . .
 
+# Build-time metadata baked into the image for version truth enforcement.
+# These allow /api/version to return real deployment information for drift detection.
+ARG GITHUB_SHA=unknown
+ARG BUILD_TIME=unknown
+ARG ARTIFACT_ID=unknown
+ARG RELEASE_ID=unknown
+ENV GITHUB_SHA=$GITHUB_SHA
+ENV BUILD_TIME=$BUILD_TIME
+ENV ARTIFACT_ID=$ARTIFACT_ID
+ENV RELEASE_ID=$RELEASE_ID
+
 # Build args for auth (NextAuth / Entra External ID)
 # AUTH_SECRET must be set for NextAuth session encryption.
 ARG AUTH_SECRET=build_placeholder_secret_min_32_chars_xxxxxxxx

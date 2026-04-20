@@ -1,0 +1,24 @@
+{
+  "version": "2026-04-19.1",
+  "source": "tooling/scripts/collect-cost-attribution.mjs",
+  "dimensions": [
+    "infra_spend_by_app",
+    "cost_per_active_org",
+    "cost_per_deploy",
+    "bandwidth_cost",
+    "storage_growth",
+    "idle_resource_waste"
+  ],
+  "alerts": {
+    "monthlySpikePct": 20,
+    "weeklySpikePct": 12,
+    "requireOwnerAckHours": 24
+  },
+  "specialRules": {
+    "zonga": {
+      "trackBandwidthSeparately": true,
+      "includeGeoDeliveryCost": true,
+      "includePlaybackFailureCostCorrelation": true
+    }
+  }
+}

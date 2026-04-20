@@ -1,0 +1,18 @@
+{
+  "version": "2026-04-19.1",
+  "fields": [
+    "portfolio_uptime_pct",
+    "incidents_this_month",
+    "apps_breaching_slo",
+    "deploy_success_rate",
+    "rollback_count",
+    "cost_trend",
+    "top_risk_apps",
+    "open_action_items"
+  ],
+  "audience": [
+    "ceo",
+    "cfo",
+    "platform-lead"
+  ]
+}

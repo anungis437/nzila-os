@@ -15,28 +15,53 @@
 
 import type { BrandAsset, BrandRegistryEntry } from './types'
 import { registerBrand } from './registry'
+import { getZongaPilotMode } from '@/lib/pilot-mode'
 
 // ── Client Brand ────────────────────────────────────────────────────────────
 
-export const CLIENT_BRAND: BrandAsset = {
-  id: 'ms-celebration',
-  role: 'client',
-  name: 'MS Célébration Canada',
-  shortName: 'MSC',
-  logoUrl: '/ms-celebrations-logo.jpg',
-  tagline: 'La musique qui rassemble',
+const CLIENT_BRANDS: Record<string, BrandAsset> = {
+  none: {
+    id: 'ms-celebration',
+    role: 'client',
+    name: 'MS Célébration Canada',
+    shortName: 'MSC',
+    logoUrl: '/ms-celebrations-logo.jpg',
+    tagline: 'La musique qui rassemble',
+  },
+  ms_celebrations: {
+    id: 'ms-celebration',
+    role: 'client',
+    name: 'MS Célébration Canada',
+    shortName: 'MSC',
+    logoUrl: '/ms-celebrations-logo.jpg',
+    tagline: 'La musique qui rassemble',
+  },
 }
 
 // ── Partner Brand ───────────────────────────────────────────────────────────
 
-export const PARTNER_BRAND: BrandAsset = {
-  id: 'rock-power',
-  role: 'partner',
-  name: 'The Rock Power Group Inc.',
-  shortName: 'RPG',
-  logoUrl: '/rock-power-group-logo.png',
-  relationshipLabel: 'National Distribution Partner',
+const PARTNER_BRANDS: Record<string, BrandAsset> = {
+  none: {
+    id: 'rock-power',
+    role: 'partner',
+    name: 'The Rock Power Group Inc.',
+    shortName: 'RPG',
+    logoUrl: '/rock-power-group-logo.png',
+    relationshipLabel: 'National Distribution Partner',
+  },
+  ms_celebrations: {
+    id: 'rock-power',
+    role: 'partner',
+    name: 'The Rock Power Group Inc.',
+    shortName: 'RPG',
+    logoUrl: '/rock-power-group-logo.png',
+    relationshipLabel: 'National Distribution Partner',
+  },
 }
+
+const pilotMode = getZongaPilotMode()
+export const CLIENT_BRAND: BrandAsset = CLIENT_BRANDS[pilotMode]
+export const PARTNER_BRAND: BrandAsset = PARTNER_BRANDS[pilotMode]
 
 // ── Registry Entries ────────────────────────────────────────────────────────
 

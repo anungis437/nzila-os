@@ -1,0 +1,36 @@
+{
+  "version": "2026-04-19.1",
+  "allocationMethods": {
+    "founders": "headcount_weighted",
+    "shared_engineering": "usage_weighted",
+    "domains_and_platform_infra": "revenue_weighted",
+    "legal_admin_accounting": "fixed_split"
+  },
+  "monthlyPoolsUsd": {
+    "founders": 24000,
+    "shared_engineering": 42000,
+    "domains_and_platform_infra": 18000,
+    "legal_admin_accounting": 12000
+  },
+  "fixedSplit": {
+    "tier1": 0.55,
+    "tier2": 0.25,
+    "internal": 0.2
+  },
+  "usageWeights": {
+    "union-eyes": 0.13,
+    "abr": 0.12,
+    "flow": 0.12,
+    "web": 0.08,
+    "partners": 0.07,
+    "cfo": 0.09,
+    "zonga": 0.09,
+    "agrimo": 0.05,
+    "cora": 0.04,
+    "trade": 0.04,
+    "mobility": 0.04,
+    "console": 0.05,
+    "control-plane": 0.05,
+    "orchestrator-api": 0.03
+  }
+}

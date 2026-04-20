@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   createLogger: vi.fn(() => ({
@@ -10,7 +10,6 @@ vi.mock('@nzila/os-core', () => ({ createLogger: mocks.createLogger }));
 
 // Mock global fetch
 const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
 
 import {
   addEmailJob,
@@ -47,6 +46,12 @@ describe('job-queue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.DJANGO_API_URL = 'http://django:8000';
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete process.env.DJANGO_API_URL;
   });
 
   describe('addEmailJob', () => {

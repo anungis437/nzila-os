@@ -1,5 +1,5 @@
 /**
- * ABR Insights — Evidence Seal Script
+ * FAIRCASE — Evidence Seal Script
  *
  * Reads evidence/pack.json (draft), computes a SHA-256 seal over
  * the ordered artifact hashes, and writes:
@@ -87,7 +87,7 @@ function main() {
   pack.sealedAt = sealedAt
   writeFileSync(PACK_PATH, JSON.stringify(pack, null, 2), 'utf-8')
 
-  console.log('🔏 ABR Evidence sealed.')
+  console.log('🔏 FAIRCASE evidence sealed.')
   console.log(`   Merkle root : ${root}`)
   console.log(`   Seal        : ${seal}`)
   console.log(`   Artifacts   : ${hashes.length}\n`)

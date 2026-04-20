@@ -2,7 +2,7 @@
  * Sanitize — Unit Tests
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // ── Mock DOMPurify ───────────────────────────────────────────────────────────
 
@@ -15,6 +15,15 @@ vi.mock('dompurify', () => ({
 }));
 
 import { validateRedirectUrl, sanitizeHtml } from '../utils/sanitize';
+
+const originalLocation = window.location;
+
+afterEach(() => {
+  Object.defineProperty(window, 'location', {
+    value: originalLocation,
+    writable: true,
+  });
+});
 
 // ── validateRedirectUrl ─────────────────────────────────────────────────────
 

@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-04-20T04:21:10.880Z",
+  "environment": "staging",
+  "results": [
+    {
+      "app": "web",
+      "url": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "app": "console",
+      "url": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 500,
+      "ok": false
+    },
+    {
+      "app": "partners",
+      "url": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 503,
+      "ok": false
+    },
+    {
+      "app": "union-eyes",
+      "url": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/auth_core/health/",
+      "status": 404,
+      "ok": false
+    },
+    {
+      "app": "cfo",
+      "url": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 404,
+      "ok": false
+    },
+    {
+      "app": "flow",
+      "url": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 404,
+      "ok": false
+    },
+    {
+      "app": "abr",
+      "url": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 404,
+      "ok": false
+    }
+  ]
+}

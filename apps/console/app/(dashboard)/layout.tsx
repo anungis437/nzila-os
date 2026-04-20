@@ -29,6 +29,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { name: 'Pipeline', href: '/revenue', icon: 'ArrowTrendingUpIcon' },
+      { name: 'FAIRCASE Funnel', href: '/revenue/faircase', icon: 'ChartBarIcon' },
       { name: 'Pilot Export', href: '/pilot/export', icon: 'DocumentArrowDownIcon' },
     ],
   },
@@ -108,7 +109,7 @@ const appLinks = [
   { name: 'Public Web', href: process.env.NEXT_PUBLIC_WEB_URL, badge: '3000' },
   { name: 'Partner Portal', href: process.env.NEXT_PUBLIC_PARTNERS_URL, badge: '3002' },
   { name: 'Union Eyes', href: process.env.NEXT_PUBLIC_UNION_EYES_URL, badge: '3003' },
-  { name: 'ABR Insights', href: process.env.NEXT_PUBLIC_ABR_URL, badge: '3004' },
+  { name: 'FAIRCASE', href: process.env.NEXT_PUBLIC_ABR_URL, badge: '3004' },
 ]
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {

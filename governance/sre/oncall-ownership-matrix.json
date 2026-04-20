@@ -1,0 +1,94 @@
+{
+  "version": "2026-04-19.1",
+  "model": {
+    "businessHours": "primary",
+    "afterHours": "p1_only",
+    "escalationFallback": "founder"
+  },
+  "ownership": [
+    {
+      "app": "union-eyes",
+      "team": "union-eyes-engineering",
+      "primary": "oncall-union-eyes@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "abr",
+      "team": "faircase-engineering",
+      "primary": "oncall-faircase@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "flow",
+      "team": "flow-engineering",
+      "primary": "oncall-flow@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "web",
+      "team": "web-engineering",
+      "primary": "oncall-web@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "partners",
+      "team": "partners-engineering",
+      "primary": "oncall-partners@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "cfo",
+      "team": "cfo-engineering",
+      "primary": "oncall-cfo@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "zonga",
+      "team": "zonga-engineering",
+      "primary": "oncall-zonga@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "agrimo",
+      "team": "agrimo-engineering",
+      "primary": "oncall-agrimo@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "cora",
+      "team": "cora-engineering",
+      "primary": "oncall-cora@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "trade",
+      "team": "trade-engineering",
+      "primary": "oncall-trade@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "mobility",
+      "team": "mobility-engineering",
+      "primary": "oncall-mobility@nzila.ai",
+      "secondary": "team-platform-ops@nzila.ai"
+    },
+    {
+      "app": "console",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai"
+    },
+    {
+      "app": "control-plane",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai"
+    },
+    {
+      "app": "orchestrator-api",
+      "team": "platform-admin",
+      "primary": "oncall-platform@nzila.ai",
+      "secondary": "vp-platform@nzila.ai"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "version": "2026-04-19.1",
+  "schedule": "*/5 * * * *",
+  "targets": [
+    {
+      "app": "union-eyes",
+      "tier": "tier1",
+      "checks": [
+        "GET /sign-in",
+        "GET /dashboard",
+        "POST /api/cases"
+      ]
+    },
+    {
+      "app": "abr",
+      "tier": "tier1",
+      "checks": [
+        "GET /intake",
+        "GET /workflow",
+        "GET /api/abr/remediation/export"
+      ]
+    },
+    {
+      "app": "flow",
+      "tier": "tier1",
+      "checks": [
+        "GET /workspace",
+        "POST /api/quotes",
+        "POST /api/quotes/ai"
+      ]
+    },
+    {
+      "app": "web",
+      "tier": "tier1",
+      "checks": [
+        "GET /",
+        "POST /api/contact",
+        "GET /products"
+      ]
+    },
+    {
+      "app": "partners",
+      "tier": "tier1",
+      "checks": [
+        "GET /sign-in",
+        "GET /dashboard",
+        "GET /api/deals"
+      ]
+    },
+    {
+      "app": "cfo",
+      "tier": "tier1",
+      "checks": [
+        "GET /dashboard",
+        "GET /api/reports/export",
+        "GET /api/ledger"
+      ]
+    }
+  ],
+  "measurements": [
+    "latencyMs",
+    "successPct",
+    "degradationTrend"
+  ]
+}

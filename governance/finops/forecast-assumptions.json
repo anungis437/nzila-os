@@ -1,0 +1,33 @@
+{
+  "version": "2026-04-19.1",
+  "horizonsMonths": [12, 24, 36],
+  "scenarios": {
+    "base": {
+      "newCustomersGrowthMonthlyPct": 4,
+      "churnMonthlyPct": 2.6,
+      "pricingChangePct": 0,
+      "hiringGrowthPct": 2,
+      "infraGrowthPct": 3,
+      "pilotConversionPct": 26,
+      "zongaTrafficGrowthPct": 7
+    },
+    "upside": {
+      "newCustomersGrowthMonthlyPct": 7,
+      "churnMonthlyPct": 1.8,
+      "pricingChangePct": 6,
+      "hiringGrowthPct": 3,
+      "infraGrowthPct": 4,
+      "pilotConversionPct": 38,
+      "zongaTrafficGrowthPct": 12
+    },
+    "conservative": {
+      "newCustomersGrowthMonthlyPct": 2,
+      "churnMonthlyPct": 3.8,
+      "pricingChangePct": -1,
+      "hiringGrowthPct": 1,
+      "infraGrowthPct": 2,
+      "pilotConversionPct": 18,
+      "zongaTrafficGrowthPct": 4
+    }
+  }
+}

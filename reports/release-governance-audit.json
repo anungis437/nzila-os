@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-04-20T04:21:13.721Z",
+  "workflowCount": 40,
+  "inventoryAppCount": 18,
+  "canonical": [
+    "gitops-deploy.yml",
+    "deploy-production.yml"
+  ],
+  "appSpecific": [
+    "deploy-console.yml",
+    "deploy-partners.yml",
+    "deploy-union-eyes.yml",
+    "deploy-web.yml"
+  ],
+  "workflowSprawlScore": 6,
+  "deploymentRiskScore": 8,
+  "environmentDriftScore": 8,
+  "releaseGovernanceScore": 7
+}

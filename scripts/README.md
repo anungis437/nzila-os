@@ -72,10 +72,13 @@ Governance, architecture, and readiness enforcement scripts.
 | `dependency-boundary-check.ts` | Dependency boundary enforcement |
 | `check-dependency-policy.ts` | Dependency policy validation |
 | `validate-readmes.ts` | README completeness check |
+| `build-ownership-registry.ts` | Ownership coverage validator + registry generator |
 | `link-check.ts` | Documentation link checker |
 | `schema-audit.ts` | Schema audit |
 | `validate-portfolio.ts` | Portfolio validation |
 | `platform-health-report.ts` | Platform health report generator |
+| `docs/build-docs-index.ts` | Generated docs index with last validated dates |
+| `repo/build-excellence-audit.ts` | Repo-level excellence scorecard and remaining gaps |
 | `agri-*.ts` | Agrimo-specific checks (7 scripts) |
 | `cfo-*.ts` | CFO-specific checks (2 scripts) |
 | `zonga-*.ts` | Zonga-specific checks (3 scripts) |
@@ -115,6 +118,7 @@ Build proof generation and verification.
 | `proof/run-proof.ts` | Proof runner |
 | `proof/verify-artifacts.ts` | Proof verifier |
 | `proof/clean-proof-artifacts.ts` | Proof cleanup |
+| `proof/build-monthly-evidence-pack.ts` | Append-only monthly evidence pack builder |
 
 ## Running
 

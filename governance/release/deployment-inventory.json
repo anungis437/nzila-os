@@ -1,0 +1,262 @@
+{
+  "version": "2026-04-20",
+  "sourceOfTruth": {
+    "portfolioCatalog": "governance/portfolio/product-catalog.json",
+    "runtimeManifest": "nzila-truth-manifest.json"
+  },
+  "apps": {
+    "union-eyes": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["union-eyes", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://ue.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "faircase": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["faircase", "platform-ops"],
+      "routing": {
+        "staging": "n/a",
+        "production": "n/a",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "flow": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["flow", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://flow.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "web": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["web", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://www.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "partners": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["partners", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://partners.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "cfo": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["cfo", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://cfo.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "zonga": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "requiresExplicitProdOverride": true,
+      "owners": ["zonga", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "pilot-only",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "agrimo": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "owners": ["agrimo", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "cora": {
+      "tier": "tier-2",
+      "releaseStatus": "incubating",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "owners": ["cora", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-cora.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "trade": {
+      "tier": "tier-2",
+      "releaseStatus": "incubating",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "owners": ["trade", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-trade.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "mobility": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "owners": ["mobility", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-mobility.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "console": {
+      "tier": "internal",
+      "releaseStatus": "internal-only",
+      "track": "internal",
+      "prodPromotionEligible": true,
+      "owners": ["platform-admin", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://console.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "restricted",
+        "tls": "managed"
+      }
+    },
+    "control-plane": {
+      "tier": "internal",
+      "releaseStatus": "internal-only",
+      "track": "internal",
+      "prodPromotionEligible": true,
+      "owners": ["platform-admin", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://control.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "restricted",
+        "tls": "managed"
+      }
+    },
+    "orchestrator-api": {
+      "tier": "internal",
+      "releaseStatus": "internal-only",
+      "track": "internal",
+      "prodPromotionEligible": true,
+      "owners": ["platform-admin", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://orchestrator.nzila.ai",
+        "healthPath": "/health",
+        "ingress": "restricted",
+        "tls": "managed"
+      }
+    },
+    "mobility-client-portal": {
+      "tier": "frozen",
+      "releaseStatus": "frozen",
+      "track": "legacy",
+      "prodPromotionEligible": false,
+      "owners": ["mobility", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-mobility-client-portal.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "platform-admin": {
+      "tier": "frozen",
+      "releaseStatus": "frozen",
+      "track": "legacy",
+      "prodPromotionEligible": false,
+      "owners": ["platform-admin", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "restricted",
+        "tls": "managed"
+      }
+    },
+    "abr": {
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "prodPromotionEligible": true,
+      "owners": ["abr", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://abr.nzila.ai",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    },
+    "nacp-exams": {
+      "tier": "tier-2",
+      "releaseStatus": "blocked",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "owners": ["nacp-exams", "platform-ops"],
+      "routing": {
+        "staging": "https://nzila-os-nacp-exams.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed"
+      }
+    }
+  }
+}

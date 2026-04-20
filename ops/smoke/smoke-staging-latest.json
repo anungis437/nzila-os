@@ -1,0 +1,274 @@
+{
+  "timestamp": "2026-04-20T04:38:16.567Z",
+  "environment": "staging",
+  "appsChecked": 7,
+  "passed": 0,
+  "failed": 7,
+  "failureTally": {
+    "not_found": 6,
+    "server_error": 3
+  },
+  "results": [
+    {
+      "app": "web",
+      "host": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 200,
+          "ok": true,
+          "attempts": 1,
+          "durationMs": 1344,
+          "failureType": "none"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 478,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 434,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "not_found"
+      ]
+    },
+    {
+      "app": "console",
+      "host": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 500,
+          "ok": false,
+          "attempts": 3,
+          "durationMs": 2597,
+          "failureType": "server_error"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 500,
+          "ok": false,
+          "attempts": 3,
+          "durationMs": 2595,
+          "failureType": "server_error"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 500,
+          "ok": false,
+          "attempts": 3,
+          "durationMs": 2592,
+          "failureType": "server_error"
+        }
+      ],
+      "failureSummary": [
+        "server_error"
+      ]
+    },
+    {
+      "app": "partners",
+      "host": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 503,
+          "ok": false,
+          "attempts": 3,
+          "durationMs": 2662,
+          "failureType": "server_error"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 202,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 202,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "server_error",
+        "not_found"
+      ]
+    },
+    {
+      "app": "union-eyes",
+      "host": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 503,
+          "ok": false,
+          "attempts": 3,
+          "durationMs": 11572,
+          "failureType": "server_error"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 200,
+          "ok": true,
+          "attempts": 1,
+          "durationMs": 671,
+          "failureType": "none"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 464,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "server_error",
+        "not_found"
+      ]
+    },
+    {
+      "app": "cfo",
+      "host": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 232,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 229,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 216,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "not_found"
+      ]
+    },
+    {
+      "app": "flow",
+      "host": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 133,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 132,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 191,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "not_found"
+      ]
+    },
+    {
+      "app": "abr",
+      "host": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "ok": false,
+      "probes": [
+        {
+          "endpoint": "health",
+          "url": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 84,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "ready",
+          "url": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ready",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 81,
+          "failureType": "not_found"
+        },
+        {
+          "endpoint": "version",
+          "url": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/version",
+          "status": 404,
+          "ok": false,
+          "attempts": 1,
+          "durationMs": 94,
+          "failureType": "not_found"
+        }
+      ],
+      "failureSummary": [
+        "not_found"
+      ]
+    }
+  ]
+}

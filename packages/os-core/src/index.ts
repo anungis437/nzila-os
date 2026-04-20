@@ -53,3 +53,12 @@ export {
   type IdempotencyCheckOptions,
   type IdempotencyResult,
 } from './idempotency'
+export {
+  normalizeHealthChecks,
+  isReadyFromChecks,
+  healthStatusFromChecks,
+  getBuildMetadata,
+  type HealthCheckState,
+  type RawHealthCheck,
+  type BuildMetadata,
+} from './health'

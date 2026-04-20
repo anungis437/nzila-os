@@ -37,6 +37,9 @@ export default async function ArtistProfilePage({ params }: Props) {
 
   if (!artist) notFound()
 
+  const shareText = encodeURIComponent(`Listen to ${artist.name} on Zonga`)
+  const shareUrl = encodeURIComponent(`https://zonga.ca/artists/${artist.id}`)
+
   return (
     <>
       {/* Hero */}
@@ -85,6 +88,51 @@ export default async function ArtistProfilePage({ params }: Props) {
                 {artist.bio && (
                   <p className="mt-4 text-gray-300 max-w-xl leading-relaxed">{artist.bio}</p>
                 )}
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <a
+                    href={`https://wa.me/?text=${shareText}%20${shareUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/30"
+                  >
+                    Share on WhatsApp
+                  </a>
+                  <a
+                    href={`https://www.instagram.com/?url=${shareUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full bg-pink-500/20 px-3 py-1 text-xs font-semibold text-pink-200 hover:bg-pink-500/30"
+                  >
+                    Instagram
+                  </a>
+                  <a
+                    href={`https://www.tiktok.com/search?q=${encodeURIComponent(artist.name)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white hover:bg-white/30"
+                  >
+                    TikTok
+                  </a>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      <section className="bg-navy py-10 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <p className="text-xs uppercase tracking-wider text-gray-400">Artist Story · Histoire de l&apos;artiste</p>
+              <p className="mt-2 text-sm text-gray-200 leading-relaxed">
+                {artist.name} represents the diaspora sound bridge between local roots and global stages.
+                This page supports event tie-ins, playlist placement, and cross-market discovery.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <Link href="/events" className="rounded-full bg-electric/20 px-3 py-1 text-electric-light hover:bg-electric/30">Upcoming events</Link>
+                <Link href="/for-labels#community-playlists" className="rounded-full bg-white/10 px-3 py-1 text-white hover:bg-white/20">Community playlists</Link>
               </div>
             </div>
           </ScrollReveal>

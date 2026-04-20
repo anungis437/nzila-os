@@ -1,0 +1,16 @@
+{
+  "version": "2026-04-19.1",
+  "controls": {
+    "backupSchedule": "daily + weekly full",
+    "restoreTestEvidencePath": "ops/outputs/restore-drills",
+    "migrationRollbackPolicy": "required for tier1 and internal",
+    "connectionPoolHealth": "required",
+    "slowQueryDetection": "required",
+    "storageGrowthWarningThresholdPct": 80
+  },
+  "restoreDrill": {
+    "cadence": "monthly",
+    "owner": "platform-ops",
+    "evidenceRequired": true
+  }
+}

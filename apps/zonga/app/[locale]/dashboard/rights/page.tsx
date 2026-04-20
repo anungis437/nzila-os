@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { listRightsDisputes, listSyncLicenses } from '@/lib/actions/rights-actions'
 import { listReleases } from '@/lib/actions/release-actions'
+import { RightsTermsPanel } from '@/components/dashboard/rights-terms-panel'
 
 function disputeStatusBadge(status: string) {
   const map: Record<string, string> = {
@@ -225,6 +226,8 @@ export default async function RightsPage() {
           )}
         </div>
       </Card>
+
+      <RightsTermsPanel />
     </div>
   )
 }

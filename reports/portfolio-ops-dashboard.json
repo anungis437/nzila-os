@@ -3,7 +3,7 @@
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
     "total_products": 17,
-    "sell_now_count": 2,
+    "sell_now_count": 3,
     "internal_only_count": 3,
     "frozen_count": 2
   },
@@ -11,7 +11,7 @@
     "by_tier": [
       {
         "tier": 1,
-        "count": 2
+        "count": 3
       },
       {
         "tier": 2,
@@ -23,7 +23,7 @@
       },
       {
         "tier": 4,
-        "count": 7
+        "count": 6
       },
       {
         "tier": 5,
@@ -37,11 +37,11 @@
       },
       {
         "status": "pilot",
-        "count": 5
+        "count": 6
       },
       {
         "status": "incubating",
-        "count": 7
+        "count": 6
       },
       {
         "status": "internal",
@@ -68,6 +68,18 @@
     }
   },
   "products": [
+    {
+      "id": "abr",
+      "name": "FAIRCASE",
+      "tier": 1,
+      "status": "pilot",
+      "gtm_posture": "sell-now",
+      "recommendation": "KEEP",
+      "weighted_score": 8,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3014
+    },
     {
       "id": "flow",
       "name": "Flow",
@@ -163,18 +175,6 @@
       "readiness_tier": "pilot-safe",
       "registry_tier": "PRODUCTION",
       "dev_port": 3000
-    },
-    {
-      "id": "abr",
-      "name": "ABR",
-      "tier": 4,
-      "status": "incubating",
-      "gtm_posture": "hold",
-      "recommendation": "HOLD",
-      "weighted_score": 3.6,
-      "readiness_tier": "internal-only",
-      "registry_tier": "EXPERIMENTAL",
-      "dev_port": 3014
     },
     {
       "id": "agrimo",

@@ -7,6 +7,7 @@ Authority: governance/portfolio/product-catalog.json
 
 | Product | Status | Strategic Role | Proof | Recommendation |
 | --- | --- | --- | --- | --- |
+| FAIRCASE | pilot | Flagship justice-and-equity commercial wedge with enterprise governance readiness. | pilot-proof | KEEP |
 | Flow | pilot | Second flagship revenue wedge for SMB operations and commerce. | internal-proof | KEEP |
 | Union Eyes | pilot | Flagship labourtech wedge with the clearest near-term commercial path. | pilot-proof | KEEP |
 
@@ -16,7 +17,6 @@ Authority: governance/portfolio/product-catalog.json
 | --- | --- | --- | --- | --- |
 | CFO | pilot | Finance workflow option that can graduate if customer demand hardens. | internal-proof | HOLD |
 | Partners | pilot | Partner workflow option with selective growth value if external demand appears. | none | HOLD |
-| ABR | incubating | Specialized venture held in incubation rather than active commercialization. | none | HOLD |
 | Agrimo | incubating | Agtech option retained for future demand, not current capital concentration. | none | HOLD |
 | Cora | incubating | Early-stage concept kept as an option rather than a current operating priority. | none | HOLD |
 | Mobility | incubating | Mobility option retained for future demand rather than current execution focus. | none | HOLD |

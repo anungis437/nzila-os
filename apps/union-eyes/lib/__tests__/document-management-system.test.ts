@@ -6,7 +6,7 @@
  * markDocumentSigned, getSignatureStatus, applyRetentionPolicy,
  * archiveDocument, getGrievanceDocuments, updateDocumentOCR.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /* ── hoisted ────────────────────────────────────────────────────────── */
 
@@ -158,6 +158,10 @@ describe('document-management-system', () => {
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
       headers: { get: () => 'application/pdf' },
     }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   // ── uploadDocument ────────────────────────────────────────────────

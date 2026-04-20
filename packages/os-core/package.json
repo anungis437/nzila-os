@@ -50,7 +50,8 @@
     "./crypto/fips": "./src/crypto/fips.ts",
     "./resilience": "./src/resilience/index.ts",
     "./api-response": "./src/api-response.ts",
-    "./api-handler": "./src/api-handler.ts"
+    "./api-handler": "./src/api-handler.ts",
+    "./health": "./src/health.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

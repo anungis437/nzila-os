@@ -1,14 +1,11 @@
 /**
  * Tests for csrf-client.ts (client-side CSRF utils)
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockFetch: vi.fn(),
 }));
-
-// Stub global fetch
-vi.stubGlobal('fetch', mocks.mockFetch);
 
 describe('csrf-client', () => {
   const browserGlobal = globalThis as unknown as { document: { cookie: string } };
@@ -17,6 +14,7 @@ describe('csrf-client', () => {
     vi.clearAllMocks();
     vi.resetModules();
     mocks.mockFetch.mockResolvedValue(new Response('ok'));
+    vi.stubGlobal('fetch', mocks.mockFetch);
     // Simulate browser environment
     Object.defineProperty(globalThis, 'document', {
       value: {
@@ -25,6 +23,11 @@ describe('csrf-client', () => {
       writable: true,
       configurable: true,
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(globalThis, 'document');
   });
 
   // ── fetchWithCSRF ─────────────────────────────────────────────────────

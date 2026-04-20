@@ -11,9 +11,9 @@
  * - Public route (no auth required — see proxy.ts allowlist)
  */
 import { NextResponse } from 'next/server'
+import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 
-const VERSION = process.env.npm_package_version ?? '0.0.0'
-const START_TIME = Date.now()
+const APP = 'flow'
 
 async function checkDb(): Promise<boolean> {
   try {
@@ -69,26 +69,21 @@ export async function GET() {
     checkDb(), checkBlob(), checkShopify(), checkZoho(), checkCanva(),
   ])
 
-  const dependencies = {
+  const checks = normalizeHealthChecks({
+    process: true,
     db: db.status === 'fulfilled' ? db.value : false,
     storage: blob.status === 'fulfilled' ? blob.value : false,
     shopify: shopify.status === 'fulfilled' ? shopify.value : false,
     zoho: zoho.status === 'fulfilled' ? zoho.value : false,
     canva: canva.status === 'fulfilled' ? canva.value : false,
-  }
-
-  const coreHealthy = dependencies.db
-  const allHealthy = Object.values(dependencies).every(Boolean)
+  })
 
   return NextResponse.json(
     {
-      service: 'flow',
-      status: allHealthy ? 'ok' : coreHealthy ? 'degraded' : 'unhealthy',
-      version: VERSION,
-      uptime: Math.floor((Date.now() - START_TIME) / 1000),
-      dependencies,
-      generated_at: new Date().toISOString(),
+      status: healthStatusFromChecks(checks),
+      ...getBuildMetadata(APP),
+      checks,
     },
-    { status: coreHealthy ? 200 : 503 },
+    { status: 200 },
   )
 }

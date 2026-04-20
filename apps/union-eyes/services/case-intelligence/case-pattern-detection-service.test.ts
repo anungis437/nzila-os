@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
   rows: unknown[];
@@ -45,6 +45,10 @@ describe('case-intelligence case-pattern-detection-service', () => {
     isFeatureEnabled.mockReset();
     isFeatureEnabled.mockResolvedValue(true);
     process.env.FEATURE_CASE_INTELLIGENCE_V1_PATTERNS = 'true';
+  });
+
+  afterEach(() => {
+    delete process.env.FEATURE_CASE_INTELLIGENCE_V1_PATTERNS;
   });
 
   it('returns only authorized similar cases with matched dimensions', async () => {

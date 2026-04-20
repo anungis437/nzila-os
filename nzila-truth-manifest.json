@@ -18,6 +18,7 @@
     "operational_registry_source": "packages/platform-contracts/src/registry.ts"
   },
   "apps": {
+    "abr": "pilot",
     "flow": "pilot",
     "union-eyes": "pilot",
     "cfo": "pilot",
@@ -26,7 +27,6 @@
     "control-plane": "internal",
     "orchestrator-api": "internal",
     "web": "pilot",
-    "abr": "incubating",
     "agrimo": "incubating",
     "cora": "incubating",
     "mobility": "incubating",
@@ -37,6 +37,17 @@
     "platform-admin": "frozen"
   },
   "app_status": {
+    "abr": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal",
+      "portfolio_tier": 1,
+      "gtm_posture": "sell-now",
+      "proof_level": "pilot-proof",
+      "revenue_status": "pilot-contracting",
+      "priority": "critical"
+    },
     "flow": {
       "registry_tier": "PRODUCTION",
       "deployment_status": "pilot",
@@ -124,17 +135,6 @@
       "proof_level": "internal-proof",
       "revenue_status": "pre-revenue",
       "priority": "medium"
-    },
-    "abr": {
-      "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "incubating",
-      "readiness_tier": "internal-only",
-      "exposure": "internal",
-      "portfolio_tier": 4,
-      "gtm_posture": "hold",
-      "proof_level": "none",
-      "revenue_status": "pre-revenue",
-      "priority": "low"
     },
     "agrimo": {
       "registry_tier": "INCUBATING",
@@ -234,6 +234,7 @@
     "authority": "governance/portfolio/product-catalog.json",
     "tier_assignments": {
       "TIER 1 — Sell Now": [
+        "abr",
         "flow",
         "union-eyes"
       ],
@@ -248,7 +249,6 @@
         "web"
       ],
       "TIER 4 — Incubate": [
-        "abr",
         "agrimo",
         "cora",
         "mobility",
@@ -266,6 +266,7 @@
     "version": "2026-04-18.0",
     "classifications": {
       "sell_now": [
+        "abr",
         "flow",
         "union-eyes"
       ],
@@ -280,7 +281,6 @@
         "web"
       ],
       "incubate": [
-        "abr",
         "agrimo",
         "cora",
         "mobility",

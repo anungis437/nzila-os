@@ -1,0 +1,80 @@
+{
+  "base": [
+    {
+      "month": 12,
+      "revenueUsd": 96967.24,
+      "ebitdaProxyUsd": -490700.86,
+      "burnUsd": 490700.86,
+      "runwayMonths": 1.73,
+      "fundingNeedUsd": 5038410.35
+    },
+    {
+      "month": 24,
+      "revenueUsd": 119103.88,
+      "ebitdaProxyUsd": -943523.19,
+      "burnUsd": 943523.19,
+      "runwayMonths": 0.9,
+      "fundingNeedUsd": 10472278.31
+    },
+    {
+      "month": 36,
+      "revenueUsd": 144939.52,
+      "ebitdaProxyUsd": -1776512.89,
+      "burnUsd": 1776512.89,
+      "runwayMonths": 0.48,
+      "fundingNeedUsd": 20468154.73
+    }
+  ],
+  "upside": [
+    {
+      "month": 12,
+      "revenueUsd": 300206.65,
+      "ebitdaProxyUsd": -441667.31,
+      "burnUsd": 441667.31,
+      "runwayMonths": 1.92,
+      "fundingNeedUsd": 4450007.77
+    },
+    {
+      "month": 24,
+      "revenueUsd": 1109993.31,
+      "ebitdaProxyUsd": -583474.31,
+      "burnUsd": 583474.31,
+      "runwayMonths": 1.46,
+      "fundingNeedUsd": 6151691.75
+    },
+    {
+      "month": 36,
+      "revenueUsd": 4061095.08,
+      "ebitdaProxyUsd": 195434.97,
+      "burnUsd": 0,
+      "runwayMonths": 36,
+      "fundingNeedUsd": 0
+    }
+  ],
+  "conservative": [
+    {
+      "month": 12,
+      "revenueUsd": 58291.52,
+      "ebitdaProxyUsd": -406161.63,
+      "burnUsd": 406161.63,
+      "runwayMonths": 2.09,
+      "fundingNeedUsd": 4023939.5
+    },
+    {
+      "month": 24,
+      "revenueUsd": 44373.47,
+      "ebitdaProxyUsd": -619370.3,
+      "burnUsd": 619370.3,
+      "runwayMonths": 1.37,
+      "fundingNeedUsd": 6582443.54
+    },
+    {
+      "month": 36,
+      "revenueUsd": 34544.6,
+      "ebitdaProxyUsd": -914002.72,
+      "burnUsd": 914002.72,
+      "runwayMonths": 0.93,
+      "fundingNeedUsd": 10118032.65
+    }
+  ]
+}

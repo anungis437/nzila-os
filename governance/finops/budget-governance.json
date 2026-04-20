@@ -1,0 +1,35 @@
+{
+  "version": "2026-04-19.1",
+  "monthlyBudgetsUsd": {
+    "tier1": {
+      "union-eyes": 34000,
+      "abr": 32000,
+      "flow": 30000,
+      "web": 17000,
+      "partners": 20000,
+      "cfo": 22000
+    },
+    "tier2": {
+      "zonga": 16000,
+      "agrimo": 13000,
+      "cora": 12000,
+      "trade": 11000,
+      "mobility": 10000
+    },
+    "internal": {
+      "console": 17000,
+      "control-plane": 16500,
+      "orchestrator-api": 11000
+    }
+  },
+  "approvalThresholds": {
+    "warnPct": 0.1,
+    "approvalRequiredPct": 0.2,
+    "hardStopPct": 0.35
+  },
+  "governance": {
+    "tier1Policy": "growth + reliability budgets",
+    "tier2Policy": "controlled experiment budgets",
+    "internalPolicy": "strict efficiency budgets"
+  }
+}

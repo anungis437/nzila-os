@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -6,8 +6,16 @@ vi.mock('@/lib/logger', () => ({
 
 // Mock crypto.randomUUID with incrementing values for unique IDs
 let uuidCounter = 0;
-vi.stubGlobal('crypto', {
-  randomUUID: vi.fn(() => `${String(uuidCounter++).padStart(8, '0')}-0000-0000-0000-000000000000`),
+
+beforeEach(() => {
+  uuidCounter = 0;
+  vi.stubGlobal('crypto', {
+    randomUUID: vi.fn(() => `${String(uuidCounter++).padStart(8, '0')}-0000-0000-0000-000000000000`),
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 import {
