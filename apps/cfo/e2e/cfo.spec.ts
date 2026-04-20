@@ -3,7 +3,7 @@
  */
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.CFO_URL ?? 'http://localhost:3008'
+const BASE = process.env.CFO_URL ?? 'http://localhost:3005'
 
 test.describe('CFO E2E', () => {
   test('dashboard loads successfully', async ({ page }) => {

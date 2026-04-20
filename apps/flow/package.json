@@ -13,7 +13,8 @@
     "seed:staging": "tsx lib/seed-flow-staging.ts",
     "clean": "rm -rf .next .turbo node_modules",
     "test:coverage": "vitest run --coverage",
-    "lockdown:check": "tsx scripts/flow-lockdown-check.ts"
+    "lockdown:check": "tsx scripts/flow-lockdown-check.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -53,6 +54,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^25",

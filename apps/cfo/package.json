@@ -11,7 +11,8 @@
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
     "clean": "rm -rf .next .turbo node_modules",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@nzila/ai-sdk": "workspace:*",
@@ -48,6 +49,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^25",

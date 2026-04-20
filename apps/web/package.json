@@ -11,7 +11,8 @@
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
     "clean": "rm -rf .next .turbo node_modules",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -40,6 +41,7 @@
     "sanitize-html": "^2.17.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/config": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

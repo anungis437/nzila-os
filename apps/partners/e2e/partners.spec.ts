@@ -3,7 +3,7 @@
  */
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.PARTNERS_URL ?? 'http://localhost:3002'
+const BASE = process.env.PARTNERS_URL ?? 'http://localhost:3004'
 
 test.describe('Partners E2E', () => {
   test('health endpoint returns ok with service name', async ({ request }) => {

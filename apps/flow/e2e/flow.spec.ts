@@ -16,7 +16,7 @@
  */
 import { test, expect, type APIRequestContext } from '@playwright/test'
 
-const BASE = process.env.FLOW_URL ?? 'http://localhost:3007'
+const BASE = process.env.FLOW_URL ?? 'http://localhost:3003'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 

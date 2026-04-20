@@ -1,11 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Union-Eyes Playwright E2E Configuration
- *
- * Run with: pnpm -C apps/union-eyes e2e
- * Debug with: pnpm -C apps/union-eyes e2e --headed
- */
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -17,10 +11,9 @@ export default defineConfig({
     : [['html', { open: 'on-failure' }]],
 
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3002',
+    baseURL: 'http://localhost:3005',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
   },
 
   projects: [
@@ -30,15 +23,10 @@ export default defineConfig({
     },
   ],
 
-  /* Start local dev server if not running in CI */
-  ...(process.env.CI
-    ? {}
-    : {
-        webServer: {
-          command: 'pnpm dev',
-          port: 3002,
-          reuseExistingServer: true,
-          timeout: 120_000,
-        },
-      }),
+  webServer: {
+    command: process.env.CI ? 'pnpm build && pnpm start' : 'pnpm dev',
+    port: 3005,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });
