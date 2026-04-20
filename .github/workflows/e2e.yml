@@ -63,12 +63,13 @@ jobs:
 
       - name: Start app
         run: |
-          pnpm --filter @nzila/${{ matrix.app }} start -- -p ${{ matrix.port }} &
+          pnpm --filter @nzila/${{ matrix.app }} start &
           # Wait for the server to be ready
           timeout 60 bash -c 'until curl -sf http://localhost:${{ matrix.port }}/ > /dev/null 2>&1 || curl -sf http://localhost:${{ matrix.port }}/api/health > /dev/null 2>&1; do sleep 2; done'
         env:
           AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
           NODE_ENV: production
+          PORT: ${{ matrix.port }}
 
       - name: Run Playwright tests
         run: pnpm --filter @nzila/${{ matrix.app }} e2e
