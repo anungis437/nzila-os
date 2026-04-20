@@ -450,6 +450,9 @@ importers:
       '@nzila/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
@@ -634,6 +637,9 @@ importers:
       '@nzila/ml-sdk':
         specifier: workspace:*
         version: link:../../packages/ml-sdk
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
@@ -1060,6 +1066,9 @@ importers:
       '@nzila/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
@@ -1500,6 +1509,9 @@ importers:
       '@nzila/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
@@ -2431,6 +2443,9 @@ importers:
       '@nzila/ml-sdk':
         specifier: workspace:*
         version: link:../../packages/ml-sdk
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.59.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
