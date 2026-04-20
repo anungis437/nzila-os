@@ -69,14 +69,14 @@ All stale Clerk references in documentation, tooling, and runbooks were updated 
 
 ### Scripts to Archive (post-GA)
 
-These scripts reference Clerk provisioning and can be archived once Clerk is fully decommissioned:
+These scripts referenced Clerk provisioning and have been archived/deleted:
 
-| Script | Purpose | Action |
+| Script | Purpose | Status |
 |--------|---------|--------|
-| `scripts/zonga-clerk-seed.sql` | Seed Clerk orgs for Zonga | Archive after GA |
-| `scripts/zonga-clerk-provision.mjs` | Provision Clerk resources | Archive after GA |
-| `scripts/provision-all-test-users.mjs` | Provision test users via Clerk | Archive after GA |
-| `scripts/clerk-provision-pilot-orgs.mjs` | Provision pilot organizations | Archive after GA |
+| `scripts/zonga-clerk-seed.sql` | Seed Clerk orgs for Zonga | **Deleted** |
+| `scripts/zonga-clerk-provision.mjs` | Provision Clerk resources | **Deleted** |
+| `scripts/provision-all-test-users.mjs` | Provision test users via Clerk | Superseded by `seed-test-auth-accounts.mjs` |
+| `scripts/clerk-provision-pilot-orgs.mjs` | Provision pilot organizations | **Deleted** |
 | `tooling/staging-certification/clerk-pilot-orgs.cert.ts` | Pilot org certification | Archive after GA |
 
 ## Entra ID Configuration

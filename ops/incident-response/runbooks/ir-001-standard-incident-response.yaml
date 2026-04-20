@@ -67,7 +67,7 @@ content:
       action: Contain
       command: |
         1. Isolate affected systems:
-           - Revoke compromised credentials via Clerk admin / DB rotation.
+           - Revoke compromised credentials via Entra ID admin / DB rotation.
            - Block attacker IPs in Azure NSG / WAF.
            - Disable affected service endpoints if necessary.
         2. Preserve forensic evidence:
@@ -107,8 +107,8 @@ content:
            - If vulnerability: apply patch / hotfix.
            - If misconfiguration: correct IaC and redeploy.
         2. Rotate ALL potentially compromised credentials:
-           - Clerk API keys, DB passwords, Azure Storage keys.
-           - Invalidate existing sessions.
+           - Entra ID app credentials, DB passwords, Azure Storage keys.
+           - Invalidate existing sessions (clear auth_user_sessions).
         3. Re-scan for indicators of compromise (IOC).
         4. Verify hash-chain integrity on audit_events:
            npx tsx packages/os-core/src/evidence/generate-evidence-index.ts \
@@ -221,7 +221,7 @@ content:
 
   dependencies:
     - PagerDuty / Azure Monitor alerts
-    - Clerk admin console (credential rotation)
+    - Entra ID admin portal (credential rotation)
     - Azure Portal (NSG / WAF / Blob snapshots)
     - PostgreSQL admin access (audit_events queries)
     - Slack #security-incidents channel

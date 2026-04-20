@@ -23,7 +23,7 @@ can be restored within RTO (≤ 4 hours) and RPO (≤ 1 hour) targets.
 | PostgreSQL database | Azure automated backup + PITR | Continuous (WAL) | 35 days |
 | Azure Blob Storage | RA-GRS (geo-redundant) | Real-time replication | Per retention class |
 | Application config | Git (Infrastructure as Code) | Per commit | Permanent |
-| Clerk auth config | Clerk platform (managed) | Platform-managed | N/A |
+| Entra ID auth config | Git (IaC) + Azure AD | Per commit | Permanent |
 
 ## DR Test Procedure
 

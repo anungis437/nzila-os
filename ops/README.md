@@ -16,5 +16,5 @@ Objective: SOC-style operational defensibility
 ## Operating Principles
 1. Evidence-first (Azure Blob, hashed artifacts)
 2. Append-only ledgers (share_ledger_entries, audit_events)
-3. Least privilege (Clerk RBAC + entity scoping)
+3. Least privilege (platform-auth RBAC + entity scoping)
 4. Separation of duties

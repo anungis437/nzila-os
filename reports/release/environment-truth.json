@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-04-20T15:25:13.722Z",
+  "mode": "dry-run",
+  "checks": [
+    {
+      "check": "inventory-structure",
+      "status": "pass",
+      "message": "18 apps in inventory with valid structure"
+    },
+    {
+      "check": "routing-missing",
+      "app": "faircase",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-missing",
+      "app": "flow",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-missing",
+      "app": "cfo",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-missing",
+      "app": "control-plane",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-missing",
+      "app": "orchestrator-api",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-missing",
+      "app": "abr",
+      "status": "warn",
+      "message": "Prod-eligible app missing from domain routing registry"
+    },
+    {
+      "check": "routing-consistency",
+      "status": "pass",
+      "message": "Routing registry has 5 entries, 5 unique apps"
+    },
+    {
+      "check": "azure-live",
+      "status": "skip",
+      "message": "Skipped live Azure validation — use --live"
+    }
+  ],
+  "appCount": 18,
+  "tierBreakdown": {
+    "tier-1": 7,
+    "tier-2": 6,
+    "internal": 3,
+    "frozen": 2
+  },
+  "statusBreakdown": {
+    "prod-approved": 7,
+    "staging-only": 3,
+    "incubating": 2,
+    "internal-only": 3,
+    "frozen": 2,
+    "blocked": 1
+  },
+  "overallStatus": "pass",
+  "failCount": 0,
+  "warnCount": 6
+}

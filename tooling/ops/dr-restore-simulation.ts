@@ -48,16 +48,24 @@ export interface DrSimulationStep {
 const RTO_TARGET_SECONDS = 4 * 60 * 60 // 4 hours
 const RPO_TARGET_SECONDS = 1 * 60 * 60 // 1 hour
 
+// ── pg connection helper (eliminates repeated dynamic-import + null-guard) ──
+
+type PgPool = InstanceType<typeof import('pg').Pool>
+
+async function connectPg(dbUrl: string): Promise<PgPool | null> {
+  const { Pool } = await import('pg').catch(() => ({ Pool: null as unknown as typeof import('pg').Pool }))
+  if (!Pool) return null
+  return new Pool({ connectionString: dbUrl, connectionTimeoutMillis: 10000 })
+}
+
 // ── Simulation Steps ──────────────────────────────────────────────────────
 
 async function simulateSchemaRestore(dbUrl: string): Promise<DrSimulationStep> {
   const start = Date.now()
   try {
-    // Attempt to connect and verify schema tables exist
-    // In CI this runs against a real PostgreSQL; in dry-run it's simulated
-    const { Pool } = await import('pg').catch(() => ({ Pool: null }))
+    const pool = await connectPg(dbUrl)
 
-    if (!Pool) {
+    if (!pool) {
       return {
         name: 'schema-restore',
         status: 'skip',
@@ -65,11 +73,6 @@ async function simulateSchemaRestore(dbUrl: string): Promise<DrSimulationStep> {
         details: 'pg module not available — skipped (dry-run mode)',
       }
     }
-
-    const pool = new (Pool as any)({
-      connectionString: dbUrl,
-      connectionTimeoutMillis: 10000,
-    })
 
     try {
       // Check that core tables exist
@@ -88,7 +91,7 @@ async function simulateSchemaRestore(dbUrl: string): Promise<DrSimulationStep> {
         [coreTables],
       )
 
-      const foundTables = new Set(rows.map((r: any) => r.table_name))
+      const foundTables = new Set(rows.map((r: { table_name: string }) => r.table_name))
       const missingTables = coreTables.filter((t) => !foundTables.has(t))
 
       if (missingTables.length > 0) {
@@ -122,9 +125,9 @@ async function simulateSchemaRestore(dbUrl: string): Promise<DrSimulationStep> {
 async function simulateHashChainVerify(dbUrl: string): Promise<DrSimulationStep> {
   const start = Date.now()
   try {
-    const { Pool } = await import('pg').catch(() => ({ Pool: null }))
+    const pool = await connectPg(dbUrl)
 
-    if (!Pool) {
+    if (!pool) {
       return {
         name: 'hash-chain-verify',
         status: 'skip',
@@ -132,11 +135,6 @@ async function simulateHashChainVerify(dbUrl: string): Promise<DrSimulationStep>
         details: 'pg module not available — skipped',
       }
     }
-
-    const pool = new (Pool as any)({
-      connectionString: dbUrl,
-      connectionTimeoutMillis: 10000,
-    })
 
     try {
       // Verify audit_events hash chain integrity (sample check)
@@ -193,9 +191,9 @@ async function simulateHashChainVerify(dbUrl: string): Promise<DrSimulationStep>
 async function simulateBlobRefCheck(dbUrl: string): Promise<DrSimulationStep> {
   const start = Date.now()
   try {
-    const { Pool } = await import('pg').catch(() => ({ Pool: null }))
+    const pool = await connectPg(dbUrl)
 
-    if (!Pool) {
+    if (!pool) {
       return {
         name: 'blob-ref-check',
         status: 'skip',
@@ -203,11 +201,6 @@ async function simulateBlobRefCheck(dbUrl: string): Promise<DrSimulationStep> {
         details: 'pg module not available — skipped',
       }
     }
-
-    const pool = new (Pool as any)({
-      connectionString: dbUrl,
-      connectionTimeoutMillis: 10000,
-    })
 
     try {
       // Check that document blob references have valid structure
@@ -249,9 +242,9 @@ async function simulateBlobRefCheck(dbUrl: string): Promise<DrSimulationStep> {
 async function simulateSchemaSnapshot(dbUrl: string): Promise<DrSimulationStep> {
   const start = Date.now()
   try {
-    const { Pool } = await import('pg').catch(() => ({ Pool: null }))
+    const pool = await connectPg(dbUrl)
 
-    if (!Pool) {
+    if (!pool) {
       return {
         name: 'schema-snapshot-compare',
         status: 'skip',
@@ -259,11 +252,6 @@ async function simulateSchemaSnapshot(dbUrl: string): Promise<DrSimulationStep> 
         details: 'pg module not available — skipped',
       }
     }
-
-    const pool = new (Pool as any)({
-      connectionString: dbUrl,
-      connectionTimeoutMillis: 10000,
-    })
 
     try {
       // Get a deterministic schema fingerprint

@@ -1,0 +1,16 @@
+{
+  "$schema": "governance/release/allowed-signers.schema.json",
+  "version": "1.0",
+  "lastUpdated": "2026-04-20",
+  "description": "Release tag signing is REQUIRED for production promotion. Only identities in this list may sign release tags.",
+  "signers": [
+    "anungis437",
+    "nzila-ci-bot"
+  ],
+  "policy": {
+    "unsignedTagsBlocked": true,
+    "lightweightTagsBlocked": true,
+    "requireAnnotated": true,
+    "acceptedMethods": ["gpg", "ssh"]
+  }
+}

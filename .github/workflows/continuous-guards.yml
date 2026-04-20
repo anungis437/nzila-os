@@ -1,0 +1,86 @@
+name: Continuous Guards
+on:
+  schedule:
+    # Daily at 06:30 UTC (after platform-automation at 06:00)
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+    inputs:
+      skip-live:
+        description: 'Skip live Azure queries (dry-run only)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: continuous-guards
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guards:
+    name: Run Continuous Guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # ── Staging Truth Gate ──────────────────────────────────
+      - name: Staging truth
+        run: pnpm staging:truth --ci || echo "::warning::Staging truth check reported issues"
+
+      # ── Drift Detection ─────────────────────────────────────
+      - name: Version drift
+        run: pnpm drift:version:staging || echo "::warning::Version drift detected"
+
+      - name: Env drift
+        run: pnpm drift:env:staging || echo "::warning::Env drift detected"
+
+      # ── Environment Truth Crosscheck ────────────────────────
+      - name: Environment truth (structural)
+        run: pnpm release:env-truth || echo "::warning::Environment truth check failed"
+
+      # ── Runtime Proof Generation ────────────────────────────
+      - name: Generate runtime proof
+        run: pnpm proof:runtime
+
+      # ── DB Health ───────────────────────────────────────────
+      - name: DB doctor
+        run: pnpm db:doctor || echo "::warning::DB doctor reported issues"
+
+      # ── Migration Safety ────────────────────────────────────
+      - name: Migration safety
+        run: pnpm db:migration-safety || echo "::warning::Migration safety issues"
+
+      # ── Evidence Pack Continuity ────────────────────────────
+      - name: Check evidence pack exists for current month
+        run: |
+          MONTH=$(date -u +%Y-%m)
+          if [ -d "proof-artifacts/evidence-packs/$MONTH" ]; then
+            echo "✓ Evidence pack exists for $MONTH"
+          else
+            echo "::warning::No evidence pack for $MONTH — run: pnpm evidence:pack:monthly"
+          fi
+
+      # ── Upload Reports ──────────────────────────────────────
+      - name: Upload guard reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guard-reports-${{ github.run_number }}
+          path: |
+            reports/runtime/runtime-latest.json
+            reports/release/environment-truth.json
+            ops/staging/staging-truth-latest.json
+            ops/drift/
+          retention-days: 30

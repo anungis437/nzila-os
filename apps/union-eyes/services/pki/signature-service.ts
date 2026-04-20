@@ -15,12 +15,36 @@ import { digitalSignatures } from '@/services/financial-service/src/db/schema';
 import { eq, and, lte } from 'drizzle-orm';
 import crypto from 'crypto';
 import { getUserCertificate } from './certificate-manager';
-import { signatureWorkflows, signers } from '@/db/schema/domains/documents';
+import { signatureWorkflows, signers, type signatureWorkflowStatusEnum } from '@/db/schema/domains/documents';
 import { logger } from '@/lib/logger';
+
+/** Drizzle-inferred enum values for signatureWorkflowStatusEnum */
+type WorkflowStatus = (typeof signatureWorkflowStatusEnum.enumValues)[number];
 
 // =====================================================================================
 // TYPES
 // =====================================================================================
+
+/** Typed shape for signatureWorkflows.workflowData JSONB column */
+interface WorkflowData {
+  requesterName?: string;
+  signings?: SignerRequirement[];
+  documentType?: string;
+}
+
+/** Summary returned by getDocumentSignatures */
+export interface DocumentSignatureSummary {
+  id: string;
+  signerUserId: string | null;
+  signerName: string | null;
+  signerTitle: string | null;
+  signerEmail: string | null;
+  signatureStatus: string | null;
+  signedAt: Date | null;
+  certificateThumbprint: string | null;
+  isVerified: boolean | null;
+  verifiedAt: Date | null;
+}
 
 export interface SignatureRequest {
   id: string;
@@ -31,7 +55,7 @@ export interface SignatureRequest {
   organizationId: string;
   requiredSigners: SignerRequirement[];
   dueDate?: Date;
-  status: 'pending' | 'in_progress' | 'completed' | 'expired' | 'cancelled';
+  status: WorkflowStatus;
   createdAt: Date;
   completedAt?: Date;
 }
@@ -285,8 +309,7 @@ export async function signDocumentWithKey(
 export async function getDocumentSignatures(
   documentId: string,
   organizationId?: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[]> {
+): Promise<DocumentSignatureSummary[]> {
   const conditions = [eq(digitalSignatures.documentId, documentId)];
   
   if (organizationId) {
@@ -407,7 +430,6 @@ export async function createSignatureRequest(
       
       await db.insert(signers).values({
         workflowId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         memberId: signer.userId as any,
         email: signerEmail,
         name: signer.userName,
@@ -426,7 +448,7 @@ export async function createSignatureRequest(
       organizationId,
       requiredSigners: sortedSigners,
       dueDate,
-      status: 'pending',
+      status: 'draft',
       createdAt: new Date(),
     };
   } catch (error) {
@@ -441,21 +463,18 @@ export async function createSignatureRequest(
 export async function getUserSignatureRequests(
   userId: string,
   organizationId?: string,
-  status?: 'pending' | 'in_progress' | 'completed' | 'expired'
+  status?: WorkflowStatus
 ): Promise<SignatureRequest[]> {
   try {
     // Query workflows where user is a signer
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conditions = [eq(signers.memberId, userId as any)];
 
     if (organizationId) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(eq(signatureWorkflows.organizationId, organizationId as any));
     }
 
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(signatureWorkflows.status, status as any));
+      conditions.push(eq(signatureWorkflows.status, status));
     }
 
     const results = await db
@@ -474,8 +493,7 @@ export async function getUserSignatureRequests(
       const workflowId = result.workflow.id;
       
       if (!workflowMap.has(workflowId)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const workflowData = result.workflow.workflowData as any;
+          const workflowData = result.workflow.workflowData as WorkflowData | null;
         workflowMap.set(workflowId, {
           id: workflowId,
           documentId: result.workflow.documentId,
@@ -485,8 +503,7 @@ export async function getUserSignatureRequests(
           organizationId: result.workflow.organizationId,
           requiredSigners: workflowData?.signings || [],
           dueDate: result.workflow.expiresAt || undefined,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          status: result.workflow.status as any,
+          status: result.workflow.status,
           createdAt: result.workflow.createdAt,
           completedAt: result.workflow.completedAt || undefined,
         });
@@ -516,9 +533,7 @@ export async function completeSignatureRequestStep(
       .from(signers)
       .where(
         and(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(signers.workflowId, workflowId as any),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(signers.memberId, userId as any)
         )
       );
@@ -544,7 +559,6 @@ export async function completeSignatureRequestStep(
       .from(signers)
       .where(
         and(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(signers.workflowId, workflowId as any),
           eq(signers.status, 'pending')
         )
@@ -559,7 +573,6 @@ export async function completeSignatureRequestStep(
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .where(eq(signatureWorkflows.id, workflowId as any));
     }
 
@@ -567,17 +580,14 @@ export async function completeSignatureRequestStep(
     const [workflow] = await db
       .select()
       .from(signatureWorkflows)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(eq(signatureWorkflows.id, workflowId as any));
 
     const workflowSigners = await db
       .select()
       .from(signers)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(eq(signers.workflowId, workflowId as any));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const workflowData = workflow.workflowData as any;
+    const workflowData = workflow.workflowData as WorkflowData | null;
 
     return {
       id: workflowId,
@@ -596,8 +606,7 @@ export async function completeSignatureRequestStep(
         signatureId: s.externalSignerId || undefined,
       })),
       dueDate: workflow.expiresAt || undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      status: workflow.status as any,
+      status: workflow.status,
       createdAt: workflow.createdAt,
       completedAt: workflow.completedAt || undefined,
     };
@@ -621,12 +630,10 @@ export async function cancelSignatureRequest(
       .set({
         status: 'cancelled',
         voidedAt: new Date(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         voidedBy: cancelledBy as any,
         voidReason: cancellationReason,
         updatedAt: new Date(),
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(eq(signatureWorkflows.id, workflowId as any));
 
     // Update all pending signers to skipped status
@@ -638,7 +645,6 @@ export async function cancelSignatureRequest(
       })
       .where(
         and(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(signers.workflowId, workflowId as any),
           eq(signers.status, 'pending')
         )
@@ -664,8 +670,7 @@ export async function expireOverdueSignatureRequests(): Promise<number> {
       .where(
         and(
           lte(signatureWorkflows.expiresAt, new Date()),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(signatureWorkflows.status, 'in_progress' as any)
+          eq(signatureWorkflows.status, 'in_progress')
         )
       );
 

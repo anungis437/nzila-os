@@ -13,18 +13,18 @@ and technology required to maintain critical operations during disruptions.
 
 | Service | Priority | Max Downtime | Dependencies |
 |---|---|---|---|
-| Console (apps/console) | P1 | 4 hours | Clerk, PostgreSQL, Azure Blob |
+| Console (apps/console) | P1 | 4 hours | Entra ID, PostgreSQL, Azure Blob |
 | Web (apps/web) | P2 | 8 hours | Static content, CDN |
 | Equity ledger (share_ledger_entries) | P1 | 4 hours | PostgreSQL |
 | Document storage (Azure Blob) | P1 | 0 (RA-GRS failover) | Azure Storage |
-| Authentication (Clerk) | P1 | Dependent on Clerk SLA | Clerk platform |
+| Authentication (Entra ID / platform-auth) | P1 | Dependent on Azure AD SLA | Microsoft Entra ID |
 
 ## BCP Activation Criteria
 
 - Primary Azure region unavailable > 30 minutes
 - Database unrecoverable from primary backup
 - Key personnel unavailable (bus factor event)
-- Third-party provider (Clerk) extended outage
+- Third-party provider (Entra ID) extended outage
 
 ## Annual Review Process
 

@@ -1,140 +1,149 @@
 # Nzila OS
 
-Nzila is a governed multi-product software group. This repository is the canonical operating and truth system.
+A governed multi-product software platform for labour, commerce, agriculture, and operations across emerging markets.
 
-All apps use `@nzila/platform-auth` as the canonical authentication layer.
+## Products
 
-## Portfolio Governance
+| Product | Domain | Status | Tier |
+|---------|--------|--------|------|
+| **Union Eyes** | Labour representation & case management | Pilot — sell-now | 1 |
+| **FairCase** | Justice & equity governance (formerly ABR) | Pilot — sell-now | 1 |
+| **Flow** | SMB operations & commerce automation | Pilot — sell-now | 1 |
+| **CFO** | Finance workflows | Pilot | 2 |
+| **Partners** | Partner enablement portal | Pilot | 2 |
+| **Console** | Internal ops & governance control surface | Internal | 3 |
+| **Control Plane** | Platform governance engine | Internal | 3 |
+| **Web** | Public marketing & lead generation | Maintain | 3 |
+| **Agrimo** | Agricultural field operations | Incubating | 4 |
+| **Cora** | Agri intelligence dashboard | Incubating | 4 |
+| **Zonga** | Creator economy platform | Incubating | 4 |
+| **Trade** | Cross-border trade | Incubating | 4 |
+| **Mobility** | Immigration & mobility | Incubating | 4 |
+| **NACP Exams** | Certification workflows | Incubating | 4 |
 
-Portfolio lifecycle truth has one editable authority: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
+Portfolio truth source: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
 
-The score engine is also governed there through `scoring.weights`, so recommendation rankings are policy-controlled at the source.
+## Quick Start
 
-Everything else is generated or validated from that catalog:
+```bash
+pnpm install            # Install all dependencies
+pnpm dev:web            # Start the web app
+pnpm dev:console        # Start the console
+pnpm test:fast          # Run unit tests (skip contract tests)
+pnpm build              # Build everything
+```
 
-- Truth manifest: [nzila-truth-manifest.json](nzila-truth-manifest.json)
-- Executive portfolio report: [reports/portfolio-status.md](reports/portfolio-status.md)
-- Machine-readable portfolio status: [reports/portfolio-status.json](reports/portfolio-status.json)
-- Investor view: [reports/portfolio-investor-view.md](reports/portfolio-investor-view.md)
-- Ops dashboard feed: [reports/portfolio-ops-dashboard.json](reports/portfolio-ops-dashboard.json)
-- Portfolio matrix: [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md)
+## Repo Structure
 
-Safe update flow:
+```
+apps/              17 deployable applications
+packages/          170+ shared libraries (platform, domain, infra)
+services/          Backend services
+tooling/           Contract tests, scaffolding, CI tools
+governance/        Portfolio catalog, capital model, commercial data
+scripts/           Validation, release, SRE, finops tooling
+docs/              Documentation (builders, buyers, operators, security)
+ops/               Environment configs, runbooks, policies
+reports/           Generated reports (capital, SRE, compliance)
+infrastructure/    IaC and deployment configs
+```
 
-1. Edit [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
-2. Run `pnpm generate:portfolio-artifacts`.
-3. Run `pnpm validate:portfolio-governance`.
+## Canonical Commands
 
-CI rejects drift if generated artifacts or downstream metadata fall out of sync with the catalog.
+### Daily Development
 
-## Capital Discipline System
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Start all apps |
+| `pnpm build` | Build everything |
+| `pnpm lint` | Lint all packages |
+| `pnpm typecheck` | Type-check all packages |
+| `pnpm test:fast` | Fast tests (skip contracts) |
+| `pnpm test` | Full test suite |
 
-Nzila allocates capital, engineering hours, and founder attention from a single authority: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
+### Release & Deploy
 
-Capital model governance rules:
+| Command | Purpose |
+|---------|---------|
+| `pnpm release:staging` | Staging gate (audit + smoke + migration safety) |
+| `pnpm release:prod` | Production gate (full checks) |
+| `pnpm release:rollback` | Roll back production |
+| `pnpm release:hotfix` | Initiate hotfix |
 
-- Product-level financial, resource, risk, and strategic fields are required for every product.
-- Allocation weights are governed by `capital_weights` in the catalog (no hardcoded score weights).
-- Scenario runway inputs are governed by `capital_model.scenarios` and explicitly marked as assumptions until live feeds are connected.
+### Governance & Audit
 
-Run the engine:
+| Command | Purpose |
+|---------|---------|
+| `pnpm validate:governance` | Full governance gate |
+| `pnpm governance:audit` | Doc, ownership, release, and repo audit |
+| `pnpm repo:audit` | Repo excellence audit |
+| `pnpm docs:index` | Rebuild documentation index |
 
-1. Generate executive capital reports: `pnpm generate:capital-allocation`
-2. Validate discipline gates: `pnpm validate:capital-discipline`
-3. Compute runway scenarios: `pnpm runway:model`
+### Operations
 
-Generated executive outputs:
+| Command | Purpose |
+|---------|---------|
+| `pnpm db:doctor` | Database health check |
+| `pnpm sre:validate` | Full SRE check (health, synthetics, alerts, audit) |
+| `pnpm finops:build` | FinOps portfolio report |
+| `pnpm evidence:pack:monthly` | Monthly evidence pack |
 
-- [reports/capital-allocation.md](reports/capital-allocation.md)
-- [reports/resource-allocation.md](reports/resource-allocation.md)
-- [reports/top-3-to-fund.md](reports/top-3-to-fund.md)
-- [reports/kill-list.md](reports/kill-list.md)
-- [reports/founder-time-map.md](reports/founder-time-map.md)
-- [reports/runway-scenarios.md](reports/runway-scenarios.md)
-- [reports/capital-signal-readiness.md](reports/capital-signal-readiness.md)
+### Portfolio & Capital
 
-## Board-Grade Capital OS
+| Command | Purpose |
+|---------|---------|
+| `pnpm generate:portfolio-artifacts` | Regenerate all portfolio reports |
+| `pnpm generate:capital-allocation` | Capital allocation engine |
+| `pnpm generate:commercial-traction` | Commercial traction reports |
 
-The capital engine now operates as a board-grade capital operating system with four additional governance surfaces:
+Full command catalog: `pnpm help:commands`
 
-- Live signal ingestion via [governance/capital/manual-live-signals.csv](governance/capital/manual-live-signals.csv) and connector toggles for Stripe, HubSpot, QuickBooks, Gmail pipeline parsing, Supabase analytics, and GitHub engineering telemetry.
-- Override governance via [governance/capital/override-log.json](governance/capital/override-log.json), so leadership deviations from model recommendations are tracked and reviewed over time.
-- Cash calendar and scenario governance via [governance/capital/cash-calendar.json](governance/capital/cash-calendar.json) and [governance/capital/scenario-pack.json](governance/capital/scenario-pack.json).
-- Confidence-aware scoring, board-pack automation, capital alerts, scenario stress tests, shutdown playbooks, and recommendation explainability.
+## Release Model
 
-Live signal operating notes:
+Staging → Production promotion with governance gates at every step:
 
-- [governance/capital/manual-live-signals.csv](governance/capital/manual-live-signals.csv) is now pre-seeded with carry-forward catalog baselines so every product has an editable row. These seeded rows are explicitly marked `estimate` / `LOW`; they are not treated as verified actuals.
-- Import-ready connector files live under [governance/capital/exports/stripe-export.csv](governance/capital/exports/stripe-export.csv), [governance/capital/exports/hubspot-export.csv](governance/capital/exports/hubspot-export.csv), [governance/capital/exports/quickbooks-export.csv](governance/capital/exports/quickbooks-export.csv), [governance/capital/exports/gmail-pipeline-export.csv](governance/capital/exports/gmail-pipeline-export.csv), and [governance/capital/exports/supabase-export.csv](governance/capital/exports/supabase-export.csv).
-- Toggle and path wiring lives in [.env.capital.example](.env.capital.example). Do not enable a connector until a real export file exists.
-- Leadership overrides can be appended without hand-editing JSON via `pnpm capital:override:add -- --product=zonga --engine=PAUSE --override="INCUBATE LIGHTLY" --reason="..." --owner=CEO`.
+1. **Staging gate** — `pnpm release:staging` runs audit, migration safety, and smoke tests
+2. **Production gate** — `pnpm release:prod` adds secret audit and full deployment resolution
+3. **Rollback** — `pnpm release:rollback` for immediate revert
+4. **Hotfix** — `pnpm release:hotfix` with SLA tracking
 
-Additional commands:
+CI enforces portfolio-governance, compliance drift, and reliability checks on every PR.
 
-1. Generate the 30/60/90 liquidity report: `pnpm cash:calendar`
-2. Evaluate scenario stacks: `pnpm runway:model -- --scenario=union-eyes-major-pilot,flow-slips-90-days`
-3. Rebuild the full board-grade capital pack: `pnpm generate:capital-allocation`
+## Governance
 
-Additional outputs:
+- **Single truth source** — [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json) drives all portfolio artifacts
+- **Capital discipline** — Allocation weights, runway scenarios, override tracking
+- **Commercial traction** — Pipeline, pilot conversion, retention risk with evidence separation
+- **Evidence packs** — Monthly tamper-evident audit packs in [proof-artifacts/](proof-artifacts/)
+- **200+ contract tests** — Enforcing platform boundaries, security posture, and operating standards
 
-- [reports/cash-calendar.md](reports/cash-calendar.md)
-- [reports/capital-alerts.md](reports/capital-alerts.md)
-- [reports/capital-overrides.md](reports/capital-overrides.md)
-- [reports/capital-scenarios.md](reports/capital-scenarios.md)
-- [reports/product-shutdown-playbooks.md](reports/product-shutdown-playbooks.md)
-- [reports/board-pack.md](reports/board-pack.md)
+## Architecture
 
-## Commercial Traction OS
+- **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO
+- **Database**: PostgreSQL + Drizzle ORM
+- **Infra**: Azure Container Apps (Canada Central staging)
+- **CI**: 41 GitHub Actions workflows covering governance, security, deployment, and compliance
+- **Monorepo**: pnpm workspaces + Turborepo
 
-Commercial traction now runs as a governed operating layer that separates evidence from assumptions for forecast, pipeline, pilot conversion, and retention risk.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview.
 
-Governed commercial sources:
+## Documentation
 
-- [governance/commercial/opportunities.json](governance/commercial/opportunities.json)
-- [governance/commercial/pilots.json](governance/commercial/pilots.json)
-- [governance/commercial/founder-activities.json](governance/commercial/founder-activities.json)
-- [governance/commercial/retention-accounts.json](governance/commercial/retention-accounts.json)
-- Connector templates in [governance/commercial/exports](governance/commercial/exports)
-- Connector wiring in [.env.commercial.example](.env.commercial.example)
+| Audience | Location | Contents |
+|----------|----------|----------|
+| **Builders** | [docs/builders/](docs/builders/) | Setup, commands, architecture, contributing |
+| **Operators** | [docs/ops/](docs/ops/) | Release, incidents, staging, runbooks |
+| **Buyers** | [docs/buyers/](docs/buyers/) | Product packs, security, reliability, pricing |
+| **Security** | [SECURITY.md](SECURITY.md), [docs/governance/](docs/governance/) | Policies, threat model, vendor assessment |
+| **Investors** | [docs/investor/](docs/investor/) | Growth narrative, moat analysis, revenue scenarios |
+| **All** | [docs/INDEX.md](docs/INDEX.md) | Complete documentation index |
 
-Run the engine:
+## Maturity Signals
 
-1. Generate all commercial reports: `pnpm generate:commercial-traction`
-2. Run contract coverage (includes traction specs): `pnpm contract-tests`
-
-Generated outputs:
-
-- [reports/revenue-forecast.md](reports/revenue-forecast.md)
-- [reports/pilot-conversion.md](reports/pilot-conversion.md)
-- [reports/founder-commercial-roi.md](reports/founder-commercial-roi.md)
-- [reports/market-pull.md](reports/market-pull.md)
-- [reports/retention-risk.md](reports/retention-risk.md)
-- [reports/commercial-alerts.md](reports/commercial-alerts.md)
-- [reports/commercial-board-pack.md](reports/commercial-board-pack.md)
-
-## Proof and Trust Surfaces
-
-- Proof center: [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md)
-- Monthly evidence packs: [proof-artifacts/evidence-packs](proof-artifacts/evidence-packs)
-- Buyer packs: [docs/buyers/union-eyes-buyer-pack.md](docs/buyers/union-eyes-buyer-pack.md), [docs/buyers/flow-buyer-pack.md](docs/buyers/flow-buyer-pack.md), [docs/faircase/buyer-pack.md](docs/faircase/buyer-pack.md)
-- Investor one-pager: [docs/investor/final-investor-onepager.md](docs/investor/final-investor-onepager.md)
-- Ownership registry: [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md)
-- Documentation index: [docs/documentation-index.md](docs/documentation-index.md)
-
-## Governance and Validation
-
-- Portfolio artifact generation: `pnpm generate:portfolio-artifacts`
-- Portfolio governance validation: `pnpm validate:portfolio-governance`
-- Full governance gate: `pnpm validate:governance`
-- Governance audit: `pnpm governance:audit`
-- Release dry runs: `pnpm release:staging`, `pnpm release:prod`
-- Reliability dry run: `pnpm sre:build`
-- Monthly evidence pack: `pnpm evidence:pack:monthly`
-- Repo excellence audit: `pnpm repo:audit`
-
-## Additional References
-
-- Platform overview: [docs/platform/what-is-nzila.md](docs/platform/what-is-nzila.md)
-- Portfolio matrix: [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md)
-- Documentation index: [docs/README.md](docs/README.md)
-- Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tooling/repo-inventory/output/repo-inventory.md)
+- 170+ governed packages with lifecycle classification
+- Board-grade capital allocation with live signal connectors
+- SOC 2 / ISO 27001 compliance automation
+- SBOM generation, Trivy container scans, DAST via OWASP ZAP
+- Red-team adversarial testing (nightly)
+- Game-day chaos engineering (weekly)
+- Evidence-first proof packs for buyer diligence

@@ -100,29 +100,29 @@ This plan covers all 7 control families from `Required-Evidence-Map.md`:
 
 **Procedure:**
 
-1. **Export Clerk users**: Pull all active users from Clerk organization
+1. **Export platform-auth users**: Pull all active users from `auth_users` table
 2. **Export org_members**: Query `org_members` table for all entities under review
 3. **Cross-reference**:
-   - Every `org_members.clerk_user_id` maps to an active Clerk user
-   - No Clerk users have entity access they shouldn't (compare with HR active roster)
+   - Every `org_members.user_id` maps to an active `auth_users` record
+   - No users have entity access they shouldn't (compare with HR active roster)
    - No orphaned `org_members` rows (user deactivated but membership remains)
 4. **Role distribution audit**:
    - Count users per role (admin, editor, viewer) per entity
    - Flag any entity where admin count > 3 or where admin:total ratio > 25%
 5. **Off-boarding check**:
    - Get list of terminations from HR in the review period
-   - Confirm each terminated user was deactivated in Clerk within 24 hours
+   - Confirm each terminated user was deactivated in platform-auth within 24 hours
    - Confirm `org_members` rows were deleted
 6. **Generate evidence**:
    - Access review report (JSON) with user counts, role distributions, exceptions
-   - Clerk user export (sanitized — no passwords/tokens)
+   - Platform-auth user export (sanitized — no passwords/tokens)
    - org_members export per entity
    - Off-boarding compliance report (termination date vs deactivation date deltas)
 7. **Store evidence**:
    ```
    evidence/{org_id}/access/{YYYY}/Q{N}/access-review-report/ACR-Q{N}-{YYYY}/
    ├── access-review-report.json
-   ├── clerk-user-export.json
+   ├── auth-user-export.json
    ├── entity-members-export.json
    ├── offboarding-compliance.json
    └── evidence-pack-index.json

@@ -80,13 +80,11 @@ function parseSeedAccounts(): Account[] {
 
 export async function getDeals(): Promise<Deal[]> {
   try {
-    const live = await getDealAdapter().getDeals();
-    if (live.length > 0) return live;
+    return await getDealAdapter().getDeals();
   } catch (err) {
-    logger.error("[DATA] deal adapter unavailable", { error: err });
+    logger.error("[DATA] deal adapter unavailable, using seed fallback", { error: err });
+    return parseSeedDeals();
   }
-  logger.info("[DEV FALLBACK] Using seed data for deals");
-  return parseSeedDeals();
 }
 
 export async function getPipelineSummary(preloadedDeals?: Deal[]): Promise<PipelineSummary> {
@@ -117,62 +115,52 @@ export async function getPipelineSummary(preloadedDeals?: Deal[]): Promise<Pipel
 
 export async function getPilots(): Promise<Pilot[]> {
   try {
-    const live = await getPilotAdapter().getPilots();
-    if (live.length > 0) return live;
+    return await getPilotAdapter().getPilots();
   } catch (err) {
-    logger.error("[DATA] pilot adapter unavailable", { error: err });
+    logger.error("[DATA] pilot adapter unavailable, using seed fallback", { error: err });
+    return parseSeedPilots();
   }
-  logger.info("[DEV FALLBACK] Using seed data for pilots");
-  return parseSeedPilots();
 }
 
 // ── Ingestion ───────────────────────────────────────────
 
 export async function getIngestionRuns(): Promise<IngestionRun[]> {
   try {
-    const live = await getIngestionAdapter().getIngestionRuns();
-    if (live.length > 0) return live;
+    return await getIngestionAdapter().getIngestionRuns();
   } catch (err) {
-    logger.error("[DATA] ingestion adapter unavailable", { error: err });
+    logger.error("[DATA] ingestion adapter unavailable, using seed fallback", { error: err });
+    return parseSeedIngestion();
   }
-  logger.info("[DEV FALLBACK] Using seed data for ingestion runs");
-  return parseSeedIngestion();
 }
 
 // ── Proposals ───────────────────────────────────────────
 
 export async function getProposals(): Promise<Proposal[]> {
   try {
-    const live = await getProposalAdapter().getProposals();
-    if (live.length > 0) return live;
+    return await getProposalAdapter().getProposals();
   } catch (err) {
-    logger.error("[DATA] proposal adapter unavailable", { error: err });
+    logger.error("[DATA] proposal adapter unavailable, using seed fallback", { error: err });
+    return parseSeedProposals();
   }
-  logger.info("[DEV FALLBACK] Using seed data for proposals");
-  return parseSeedProposals();
 }
 
 // ── Partners ────────────────────────────────────────────
 
 export async function getReferrals(): Promise<PartnerReferral[]> {
   try {
-    const live = await getPartnerAdapter().getReferrals();
-    if (live.length > 0) return live;
+    return await getPartnerAdapter().getReferrals();
   } catch (err) {
-    logger.error("[DATA] referral adapter unavailable", { error: err });
+    logger.error("[DATA] referral adapter unavailable, using seed fallback", { error: err });
+    return parseSeedReferrals();
   }
-  logger.info("[DEV FALLBACK] Using seed data for referrals");
-  return parseSeedReferrals();
 }
 
 export async function getPartnerStats(): Promise<PartnerStats> {
   try {
-    const stats = await getPartnerAdapter().getPartnerStats();
-    if (stats.totalReferrals > 0) return stats;
+    return await getPartnerAdapter().getPartnerStats();
   } catch (err) {
-    logger.error("[DATA] partner stats adapter unavailable", { error: err });
+    logger.error("[DATA] partner stats adapter unavailable, using seed fallback", { error: err });
   }
-  logger.info("[DEV FALLBACK] Using seed data for partner stats");
   const refs = parseSeedReferrals();
   const converted = refs.filter((r) => r.referralStatus === "converted").length;
   const earnedComm = refs
@@ -225,26 +213,22 @@ export async function getAccountHealthRecords(): Promise<AccountHealth[]> {
 
 export async function getFollowUps(): Promise<FollowUp[]> {
   try {
-    const live = await getFollowUpAdapter().getFollowUps();
-    if (live.length > 0) return live;
+    return await getFollowUpAdapter().getFollowUps();
   } catch (err) {
-    logger.error("[DATA] follow-up adapter unavailable", { error: err });
+    logger.error("[DATA] follow-up adapter unavailable, using seed fallback", { error: err });
+    return parseSeedFollowUps();
   }
-  logger.info("[DEV FALLBACK] Using seed data for follow-ups");
-  return parseSeedFollowUps();
 }
 
 // ── Accounts ────────────────────────────────────────────
 
 export async function getAccounts(): Promise<Account[]> {
   try {
-    const live = await getAccountAdapter().getAccounts();
-    if (live.length > 0) return live;
+    return await getAccountAdapter().getAccounts();
   } catch (err) {
-    logger.error("[DATA] account adapter unavailable", { error: err });
+    logger.error("[DATA] account adapter unavailable, using seed fallback", { error: err });
+    return parseSeedAccounts();
   }
-  logger.info("[DEV FALLBACK] Using seed data for accounts");
-  return parseSeedAccounts();
 }
 
 // ── Pipeline Intelligence ───────────────────────────────

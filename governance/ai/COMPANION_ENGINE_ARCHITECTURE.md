@@ -31,7 +31,7 @@ The **Companion Engine** is Nzila's proprietary AI personalization layer, provid
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    COMPANION API GATEWAY (Django 5)                      │
-│  - Authentication (Clerk JWT validation)                                 │
+│  - Authentication (Entra ID JWT validation)                              │
 │  - Rate limiting (per-platform quotas)                                   │
 │  - Request routing (prompt generation, memory retrieval, nudge delivery) │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -222,7 +222,7 @@ CREATE INDEX idx_companion_nudge_log_created ON companion_nudge_log(created_at);
 
 ### **Base URL**: `https://api.nzila.com/v1/companion`
 
-All endpoints require **Clerk JWT authentication** (Bearer token).
+All endpoints require **Entra ID JWT authentication** (Bearer token).
 
 ---
 
@@ -639,8 +639,10 @@ spec:
       secretRef: openai-api-key
     - name: DATABASE_URL
       secretRef: postgres-connection-string
-    - name: CLERK_SECRET_KEY
-      secretRef: clerk-secret-key
+    - name: AUTH_SECRET
+      secretRef: auth-secret
+    - name: AZURE_AD_CLIENT_ID
+      secretRef: azure-ad-client-id
     resources:
       cpu: 2.0
       memory: 4Gi

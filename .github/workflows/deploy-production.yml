@@ -160,6 +160,12 @@ jobs:
           test -f staging-artifacts/release-attestation.json
           echo "Attestation verified"
 
+      - name: Verify release signature
+        run: |
+          set -euo pipefail
+          # Hard-block: unsigned tags cannot promote to production
+          pnpm tsx scripts/release/verify-signature.ts --require-signed
+
   # ── W1-6: SLSA Provenance ────────────────────────────────────────────────
   slsa-provenance:
     runs-on: ubuntu-latest

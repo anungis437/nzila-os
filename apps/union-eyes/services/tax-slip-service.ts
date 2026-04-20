@@ -239,8 +239,7 @@ export class TaxSlipService {
       );
 
     const uniqueUsers = [...new Set(usersRequiringSlips.map((u) => u.userId))];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const slips: any[] = [];
+    const slips: (typeof t4aTaxSlips.$inferSelect)[] = [];
 
     for (const userId of uniqueUsers) {
       // Calculate total strike pay for year
@@ -336,8 +335,7 @@ export class TaxSlipService {
       );
 
     const uniqueUsers = [...new Set(usersRequiringSlips.map((u) => u.userId))];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const slips: any[] = [];
+    const slips: (typeof rl1TaxSlips.$inferSelect)[] = [];
 
     for (const userId of uniqueUsers) {
       // Calculate total strike pay for year
