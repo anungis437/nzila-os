@@ -18,7 +18,7 @@ test.describe('Console E2E', () => {
     expect([200, 503]).toContain(res.status())
     const body = await res.json()
     expect(body.status).toBeDefined()
-    expect(body.service).toBeDefined()
+    expect(body.app).toBeDefined()
   })
 
   test('metrics endpoint requires auth', async ({ request }) => {
