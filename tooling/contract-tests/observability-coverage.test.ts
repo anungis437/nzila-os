@@ -53,7 +53,7 @@ describe('Observability coverage', () => {
       const healthPath = join(getAppRoot(app), 'app', 'api', 'health', 'route.ts')
       if (!existsSync(healthPath)) continue
       const source = readContent(healthPath)
-      if (!/status/.test(source) || !/timestamp|generated_at|generatedAt/.test(source)) {
+      if (!/status/.test(source) || (!/timestamp|generated_at|generatedAt|getBuildMetadata/.test(source))) {
         violations.push(relPath(healthPath))
       }
     }

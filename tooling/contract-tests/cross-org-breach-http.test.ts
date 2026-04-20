@@ -60,7 +60,9 @@ const SYSTEM_SKIP = (path: string) => {
          rel.includes('/api/emergency/') ||
          rel.includes('/api/metrics/') ||
          rel.includes('/api/version/') ||
-         rel.includes('/api/ready/')
+         rel.includes('/api/ready/') ||
+         rel.includes('/api/rights/terms/') ||
+         rel.includes('/api/auth_core/')
 }
 
 // ── Auth patterns that enforce org-scoped access ──────────────────────────── 

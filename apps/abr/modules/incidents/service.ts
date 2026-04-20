@@ -1,4 +1,4 @@
-import { db } from '@nzila/db/client';
+import { db } from '@nzila/db';
 import { sql } from 'drizzle-orm';
 
 import { applyIncidentRedaction } from '@/lib/visibility';

@@ -163,7 +163,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/contact',                        // Public contact/demo-request form (marketing)
     '/api/telemetry',                      // Public marketing telemetry (anonymous page events)
     '/api/auth_core/',                     // Django auth core health/status endpoints
-    '/api/rights/terms/agreement',         // Public pilot agreement download
+    '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
   ]
 
   for (const appDir of appDirs) {

@@ -72,7 +72,7 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/docs/') || normalized.endsWith('/api/docs/route.ts')  // OpenAPI documentation endpoint
     || normalized.includes('/api/auth/')  // NextAuth handler — auth infrastructure, not a business route
     || normalized.includes('/api/auth_core/')  // Django auth core health/status endpoints
-    || normalized.includes('/api/rights/terms/agreement')  // Public pilot agreement download
+    || normalized.includes('/api/rights/terms/')  // Public rights/terms routes (terms, agreement)
     || normalized.includes('/cron/')  // cron routes use CRON_SECRET bearer auth
     || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
     || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)

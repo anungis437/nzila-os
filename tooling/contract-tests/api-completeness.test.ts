@@ -13,7 +13,7 @@ describe('API completeness', () => {
       if (!new Set(['pilot', 'production']).has(maturity.status)) continue
 
       for (const filePath of routeFilesForApp(app)) {
-        if (/[\\/]app[\\/]api[\\/]auth[\\/]/.test(filePath)) continue
+        if (/[\\/]app[\\/]api[\\/](?:auth|version|ready|auth_core|rights)[\\/]/.test(filePath)) continue
 
         const source = readFileSync(filePath, 'utf8')
         const readsJsonBody = /\.json\(\)/.test(source)

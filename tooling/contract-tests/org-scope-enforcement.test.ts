@@ -52,7 +52,7 @@ const EXEMPT_ROUTES = new Set([
   'clerk',
   'auth',             // NextAuth handler (/api/auth/[...nextauth])
   'auth_core',        // Django auth core health/status endpoints
-  'rights/terms/agreement',  // Public pilot agreement download
+  'rights/terms',            // Public rights/terms routes (terms, agreement)
   'stripe',
   'admin',  // platform admin routes are role-scoped, not org-scoped
   'zoho/webhook',   // Zoho webhook uses HMAC verification

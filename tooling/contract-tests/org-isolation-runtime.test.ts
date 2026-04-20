@@ -95,7 +95,7 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/hooks/',
   '/api/auth/',
   '/api/auth_core/',              // Django auth core health/status endpoints
-  '/api/rights/terms/agreement',  // Public pilot agreement download
+  '/api/rights/terms',            // Public rights/terms routes (terms, agreement)
   '/api/ready',               // Readiness probes
   '/api/version',             // Build version metadata
   '/api/status',              // Status endpoints

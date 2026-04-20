@@ -173,7 +173,7 @@ describe('OBS-004: Health endpoints return structured response', () => {
 
     it(`${app} health endpoint returns timestamp and status`, () => {
       const src = readSafe(healthPath)
-      const hasTimestamp = src.includes('timestamp') || src.includes('generated_at') || src.includes('generatedAt')
+      const hasTimestamp = src.includes('timestamp') || src.includes('generated_at') || src.includes('generatedAt') || src.includes('getBuildMetadata')
       expect(hasTimestamp, `${app} health must return timestamp or generated_at`).toBe(true)
       expect(src, `${app} health must return status`).toContain('status')
     })

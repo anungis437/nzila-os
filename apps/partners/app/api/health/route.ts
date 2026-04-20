@@ -35,12 +35,14 @@ export async function GET() {
     blob: blob.status === 'fulfilled' ? blob.value : false,
   })
 
+  const status = healthStatusFromChecks(checks)
+
   return NextResponse.json(
     {
-      status: healthStatusFromChecks(checks),
+      status,
       ...getBuildMetadata(APP),
       checks,
     },
-    { status: 200 },
+    { status: status === 'ok' ? 200 : 503 },
   )
 }
