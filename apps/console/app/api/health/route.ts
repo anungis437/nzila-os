@@ -43,6 +43,6 @@ export async function GET() {
       ...getBuildMetadata(APP),
       checks,
     },
-    { status: 200 },
+    { status: status === 'ok' ? 200 : 503 },
   )
 }

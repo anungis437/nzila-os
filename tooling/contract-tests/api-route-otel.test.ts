@@ -87,7 +87,12 @@ describe('API Route OTel Instrumentation — STUDIO-OTEL-01 contract', () => {
     const businessRoutes = routeFiles.filter(
       (f) => {
         const normalized = f.replace(/\\/g, '/')
-        return !normalized.includes('/api/health/') && !normalized.includes('/api/auth/')
+        return !normalized.includes('/api/health/')
+          && !normalized.includes('/api/auth/')
+          && !normalized.includes('/api/version/')
+          && !normalized.includes('/api/ready/')
+          && !normalized.includes('/api/auth_core/')
+          && !normalized.includes('/api/rights/terms/')
       },
     )
 

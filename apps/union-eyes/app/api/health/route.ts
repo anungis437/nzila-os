@@ -43,13 +43,15 @@ export async function GET() {
     queue: queueResult.status === 'fulfilled' ? queueResult.value === 'ok' : false,
   })
 
+  const status = healthStatusFromChecks(checks)
+
   return NextResponse.json(
     {
-      status: healthStatusFromChecks(checks),
+      status,
       ...getBuildMetadata(APP),
       checks,
     },
-    { status: 200 },
+    { status: status === 'ok' ? 200 : 503 },
   )
 }
 

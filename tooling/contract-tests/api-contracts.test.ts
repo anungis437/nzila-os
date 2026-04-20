@@ -25,9 +25,15 @@ describe('Health Endpoint Contracts', () => {
       const routePath = join(REPO_ROOT, 'apps', app, 'app', 'api', 'health', 'route.ts')
       const content = readFileSync(routePath, 'utf-8')
       expect(content).toContain('status')
-      expect(content).toContain('buildInfo')
+      expect(
+        content.includes('buildInfo') || content.includes('getBuildMetadata'),
+        `${app} health must include buildInfo or getBuildMetadata`,
+      ).toBe(true)
       expect(content).toContain('checks')
-      expect(content).toContain("app: APP")
+      expect(
+        content.includes('app: APP') || content.includes('getBuildMetadata(APP)'),
+        `${app} health must include app identifier`,
+      ).toBe(true)
     })
   }
 })

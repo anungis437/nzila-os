@@ -58,7 +58,11 @@ const SYSTEM_SKIP = (path: string) => {
   return rel.includes('/api/cron/') ||
          rel.includes('/api/docs/') ||
          rel.includes('/api/emergency/') ||
-         rel.includes('/api/metrics/')
+         rel.includes('/api/metrics/') ||
+         rel.includes('/api/version/') ||
+         rel.includes('/api/ready/') ||
+         rel.includes('/api/rights/terms/') ||
+         rel.includes('/api/auth_core/')
 }
 
 // ── Auth patterns that enforce org-scoped access ──────────────────────────── 
@@ -286,7 +290,11 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
           const content = read(route)
 
           // If the route uses a raw SQL join, it must include org scoping
-          const hasRawJoin = /\bJOIN\b/i.test(content) || content.includes('.innerJoin(') || content.includes('.leftJoin(')
+          // Match SQL JOIN keywords (INNER JOIN, LEFT JOIN, RIGHT JOIN, CROSS JOIN, JOIN table)
+          // but exclude JS imports like `import { join } from 'node:path'`
+          const hasRawJoin = /\b(?:INNER|LEFT|RIGHT|CROSS|FULL)\s+JOIN\b/i.test(content) ||
+            /\bJOIN\s+[a-z_][a-z0-9_.]*\s+(?:ON|USING)\b/i.test(content) ||
+            content.includes('.innerJoin(') || content.includes('.leftJoin(')
           if (hasRawJoin) {
             const hasOrgScope = content.includes('orgId') ||
               content.includes('org_id') ||

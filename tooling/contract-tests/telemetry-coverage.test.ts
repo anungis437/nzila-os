@@ -60,6 +60,10 @@ function isApiRoute(filePath: string): boolean {
   return (
     rel.includes('/api/') &&
     !rel.includes('/api/auth/') && // NextAuth handler — auth infrastructure, not a business route
+    !rel.includes('/api/version/') && // Build version metadata (public)
+    !rel.includes('/api/ready/') && // Readiness probe (k8s/infra)
+    !rel.includes('/api/auth_core/') && // Django auth core health/status
+    !rel.includes('/api/rights/terms/') && // Public rights/terms routes
     (rel.endsWith('route.ts') || rel.endsWith('route.tsx'))
   )
 }

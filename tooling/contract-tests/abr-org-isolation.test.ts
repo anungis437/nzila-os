@@ -69,6 +69,10 @@ function isPublicRoute(routeFile: string): boolean {
   return (
     normalized.includes('/api/health/') ||
     normalized.endsWith('/api/health/route.ts') ||
+    normalized.includes('/api/ready/') ||
+    normalized.endsWith('/api/ready/route.ts') ||
+    normalized.includes('/api/version/') ||
+    normalized.endsWith('/api/version/route.ts') ||
     normalized.includes('/api/auth/')  // NextAuth handler — auth infrastructure, not a business route
   )
 }
