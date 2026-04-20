@@ -38,6 +38,7 @@
     "@nzila/platform-ops": "workspace:*",
     "@nzila/platform-performance": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
+    "@nzila/platform-intelligence-home": "workspace:*",
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-proof": "workspace:*",
     "@nzila/chatops-slack": "workspace:*",
