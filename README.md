@@ -48,6 +48,8 @@ reports/           Generated reports (capital, SRE, compliance)
 infrastructure/    IaC and deployment configs
 ```
 
+Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tooling/repo-inventory/output/repo-inventory.md)
+
 ## Canonical Commands
 
 ### Daily Development
@@ -109,9 +111,10 @@ Staging → Production promotion with governance gates at every step:
 
 CI enforces portfolio-governance, compliance drift, and reliability checks on every PR.
 
-## Governance
+## Portfolio Governance
 
 - **Single truth source** — [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json) drives all portfolio artifacts
+- **Portfolio status** — Generated report at [reports/portfolio-status.md](reports/portfolio-status.md)
 - **Capital discipline** — Allocation weights, runway scenarios, override tracking
 - **Commercial traction** — Pipeline, pilot conversion, retention risk with evidence separation
 - **Evidence packs** — Monthly tamper-evident audit packs in [proof-artifacts/](proof-artifacts/)

@@ -1,7 +1,7 @@
 # Nzila Vertical App - Backend Dependencies
 
 # Django
-Django>=5.1,<6.0
+Django>=5.2.1,<6.0
 djangorestframework>=3.15.2,<4.0
 django-cors-headers>=4.3,<5.0
 django-filter>=24.0,<25.0

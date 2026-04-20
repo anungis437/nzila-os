@@ -248,6 +248,7 @@ const memory = {
   errors: [] as Array<{ id: string; jobId: string; message: string; createdAt: string }>,
 };
 
+// ga-check:exempt — short-lived TTL cache, not primary persistence (data in DB / in-memory demo store)
 const cache = new Map<string, { expiresAt: number; value: unknown }>();
 let tablesReady = false;
 
