@@ -68,6 +68,7 @@ jobs:
           timeout 60 bash -c 'until curl -sf http://localhost:${{ matrix.port }}/ > /dev/null 2>&1 || curl -sf http://localhost:${{ matrix.port }}/api/health > /dev/null 2>&1; do sleep 2; done'
         env:
           AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           NODE_ENV: production
           PORT: ${{ matrix.port }}
 
