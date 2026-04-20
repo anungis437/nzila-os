@@ -127,7 +127,7 @@ customMetrics
 ### If Org Isolation Concern
 
 1. **Immediately** check the cross-org query log (Step 2)
-2. If cross-org queries found → **escalate to P1**, follow [org-isolation-breach runbook](../commerce/org-isolation-breach.md)
+2. If cross-org queries found → **escalate to P1**, follow [org-isolation-breach runbook](commerce/org-isolation-breach.md)
 3. If no cross-org queries → check Django-side RLS via admin panel
 4. Verify `withRLSContext` is wrapping all DB calls in affected route
 5. Check that `djangoProxy()` passes through the platform-auth session correctly

@@ -93,7 +93,7 @@ This ensures no regression ships to a customer environment.
 ## 6. What Happens When an SLO Is Breached?
 
 1. Alert fires to on-call via ChatOps + PagerDuty.
-2. On-call follows the appropriate runbook (see [runbooks](../ops/runbooks/)).
+2. On-call follows the appropriate runbook (see [runbooks](../../ops/runbooks/)).
 3. Incident ticket created if SLA is at risk.
 4. Postmortem for P1/P2 incidents within 5–10 business days.
 5. All actions audited and evidence-sealed.
@@ -115,5 +115,5 @@ Pilot customers can request:
 - [SLO Policy](../../ops/slo-policy.yml)
 - [On-Call Rotation](../ops/on-call.md)
 - [Incident Response](../ops/incident-response.md)
-- [Runbooks](../ops/runbooks/)
+- [Runbooks](../../ops/runbooks/)
 - [Perf Budgets](../../ops/perf-budgets.yml)

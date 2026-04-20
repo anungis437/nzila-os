@@ -44,7 +44,7 @@ ML model outputs, deal analytics, and entity-level signals.
 
 ## Health Endpoint
 
-- [x] `GET /api/health` implemented at [app/api/health/route.ts](../../apps/union-eyes/app/api/health/route.ts)
+- [x] `GET /api/health` implemented at [app/api/health/route.ts](../../../apps/union-eyes/app/api/health/route.ts)
 
 ## Environment Validation
 

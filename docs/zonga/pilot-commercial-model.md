@@ -14,9 +14,9 @@
 - Termination: Either party may terminate with written notice per agreement; unresolved rights obligations survive termination.
 
 ## In-Product Trust Surfaces
-- Rights summary panel: [apps/zonga/components/dashboard/rights-terms-panel.tsx](apps/zonga/components/dashboard/rights-terms-panel.tsx)
-- Terms acceptance log API: [apps/zonga/app/api/rights/terms/route.ts](apps/zonga/app/api/rights/terms/route.ts)
-- Downloadable agreement copy: [apps/zonga/app/api/rights/terms/agreement/route.ts](apps/zonga/app/api/rights/terms/agreement/route.ts)
+- Rights summary panel: [apps/zonga/components/dashboard/rights-terms-panel.tsx](../../apps/zonga/components/dashboard/rights-terms-panel.tsx)
+- Terms acceptance log API: [apps/zonga/app/api/rights/terms/route.ts](../../apps/zonga/app/api/rights/terms/route.ts)
+- Downloadable agreement copy: [apps/zonga/app/api/rights/terms/agreement/route.ts](../../apps/zonga/app/api/rights/terms/agreement/route.ts)
 
 ## Governance Notes
 - All acceptance actions are logged to audit trail for accountability.

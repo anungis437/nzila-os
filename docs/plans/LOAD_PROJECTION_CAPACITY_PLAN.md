@@ -84,17 +84,17 @@ This document outlines the load testing strategy, expected resource requirements
 ### Zonga (Media Platform)
 - **Workload**: 60% static content retrieval, 30% playback URL generation, 10% live stream metadata
 - **Key Metrics**: Media catalog latency, playback URL signing latency, live stream latency
-- **Load Test**: [tests/load/zonga.js](tests/load/zonga.js)
+- **Load Test**: [tests/load/zonga.js](../../tests/load/zonga.js)
 
 ### Union Eyes (Case Management)
 - **Workload**: 60% case/member search, 30% case creation, 10% bulk member import
 - **Key Metrics**: Search latency, case creation latency, import throughput
-- **Load Test**: [tests/load/union-eyes.js](tests/load/union-eyes.js)
+- **Load Test**: [tests/load/union-eyes.js](../../tests/load/union-eyes.js)
 
 ### Agrimo (Cooperative Management)
 - **Workload**: 50% farmer profile reads, 30% harvest data ingestion, 20% member profile updates
 - **Key Metrics**: Profile latency, ingestion throughput, update latency
-- **Load Test**: [tests/load/agrimo.js](tests/load/agrimo.js)
+- **Load Test**: [tests/load/agrimo.js](../../tests/load/agrimo.js)
 
 ---
 

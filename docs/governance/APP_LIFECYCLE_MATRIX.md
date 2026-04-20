@@ -95,5 +95,5 @@
 ## Related Documents
 
 - [APP_GOLD_STANDARD.md](APP_GOLD_STANDARD.md) — structural requirements for production apps
-- [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md) — dependency model and layer rules
+- [ARCHITECTURAL_LAYERS.md](../architecture/ARCHITECTURAL_LAYERS.md) — dependency model and layer rules
 - [PACKAGE_OWNERSHIP.md](PACKAGE_OWNERSHIP.md) — package metadata registry

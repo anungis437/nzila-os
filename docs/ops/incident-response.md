@@ -161,7 +161,7 @@ PIR documents stored in `ops/incident-response/pir/`.
 ## 8. Related Documents
 
 - [Disaster Recovery Plan](disaster-recovery.md)
-- [Enterprise Readiness Index](enterprise-readiness.md)
-- [On-Call Runbooks](../ops/oncall/)
-- [Security Operations](../ops/security-operations/)
-- [SLO Policy](../ops/slo-policy.yml)
+- [Enterprise Readiness Index](../governance/enterprise-readiness.md)
+- [On-Call Runbooks](../../ops/runbooks/)
+- [Security Operations](../../ops/security-operations/)
+- [SLO Policy](../../ops/slo-policy.yml)

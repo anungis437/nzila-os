@@ -8,21 +8,21 @@
 
 | #  | Domain                    | Document                                                              | Status     |
 |----|---------------------------|-----------------------------------------------------------------------|------------|
-| 1  | Architecture              | [ARCHITECTURE.md](../ARCHITECTURE.md)                                 | Complete   |
+| 1  | Architecture              | [ARCHITECTURE.md](../../ARCHITECTURE.md)                                 | Complete   |
 | 2  | Governance                | [governance/](../governance/)                                         | Complete   |
-| 3  | Compliance                | [Compliance Snapshots](../packages/platform-compliance-snapshots/)    | Complete   |
-| 4  | Evidence Systems          | [Evidence Pack](../packages/platform-evidence-pack/)                  | Complete   |
-| 5  | Supply Chain Integrity    | [SBOM Generator](../scripts/generate-sbom.ts)                        | Complete   |
-| 6  | Observability             | [Platform Observability](../packages/platform-observability/)         | Complete   |
-| 7  | Disaster Recovery         | [disaster-recovery.md](disaster-recovery.md)                          | Complete   |
-| 8  | Incident Response         | [incident-response.md](incident-response.md)                         | Complete   |
+| 3  | Compliance                | [Compliance Snapshots](../../packages/platform-compliance-snapshots/)    | Complete   |
+| 4  | Evidence Systems          | [Evidence Pack](../../packages/platform-evidence-pack/)                  | Complete   |
+| 5  | Supply Chain Integrity    | [SBOM Generator](../../scripts/generate-sbom.ts)                        | Complete   |
+| 6  | Observability             | [Platform Observability](../../packages/platform-observability/)         | Complete   |
+| 7  | Disaster Recovery         | [disaster-recovery.md](../ops/disaster-recovery.md)                          | Complete   |
+| 8  | Incident Response         | [incident-response.md](../ops/incident-response.md)                         | Complete   |
 | 9  | Verification Procedures   | [Verification](#9-verification-procedures)                              | Complete   |
 
 ---
 
 ## 1. Architecture
 
-The platform architecture is documented in [ARCHITECTURE.md](../ARCHITECTURE.md). Key properties:
+The platform architecture is documented in [ARCHITECTURE.md](../../ARCHITECTURE.md). Key properties:
 
 - Monorepo with strict package boundaries
 - Deterministic builds via lockfile-pinned dependencies
@@ -123,7 +123,7 @@ Log structure:
 
 ## 7. Disaster Recovery
 
-Full disaster recovery plan: [disaster-recovery.md](disaster-recovery.md)
+Full disaster recovery plan: [disaster-recovery.md](../ops/disaster-recovery.md)
 
 Key targets:
 
@@ -138,7 +138,7 @@ Verification: `pnpm verify:backup`
 
 ## 8. Incident Response
 
-Full incident response plan: [incident-response.md](incident-response.md)
+Full incident response plan: [incident-response.md](../ops/incident-response.md)
 
 Severity levels:
 

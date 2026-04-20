@@ -52,5 +52,5 @@ The cap table snapshot is also stored in `cap_table_snapshots` table as JSON, cr
 
 - [Required Evidence Map](../../compliance/Required-Evidence-Map.md) — IC-02, IC-05
 - [Control Test Plan](../../compliance/Control-Test-Plan.md) — CT-04
-- [DB Schema — equity](../../packages/db/src/schema/equity.ts)
+- [DB Schema — equity](../../../packages/db/src/schema/equity.ts)
 - [Runbook Template Schema](../TEMPLATE_SCHEMA.md) — `fc-001` template

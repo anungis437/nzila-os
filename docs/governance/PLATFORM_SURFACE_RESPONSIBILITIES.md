@@ -3,7 +3,7 @@
 > Defines the purpose and boundaries of each operational surface in Nzila OS.
 > Prevents scope creep and surface duplication across the platform.
 >
-> Related: [CONTROL_PLANE_PRINCIPLES.md](CONTROL_PLANE_PRINCIPLES.md)
+> Related: [CONTROL_PLANE_PRINCIPLES.md](../architecture/CONTROL_PLANE_PRINCIPLES.md)
 > Machine-readable route manifest: `apps/control-plane/route.meta.json`
 
 ---
@@ -33,7 +33,7 @@
 - **ATTENTION** — What needs attention? (anomalies, decisions, intelligence, changes)
 - **ACTION** — What can I act on? (approvals, exports, review queues, agent recommendations)
 
-**Route governance**: Every route documented in [route.meta.json](../apps/control-plane/route.meta.json) and [ROUTE_GOVERNANCE.md](../apps/control-plane/docs/ROUTE_GOVERNANCE.md).
+**Route governance**: Every route documented in [route.meta.json](../../apps/control-plane/route.meta.json) and [ROUTE_GOVERNANCE.md](../../apps/control-plane/docs/ROUTE_GOVERNANCE.md).
 
 ---
 
@@ -173,6 +173,6 @@ When deciding where a new feature or page belongs:
 
 ## Related Documents
 
-- [CONTROL_PLANE_PRINCIPLES.md](CONTROL_PLANE_PRINCIPLES.md) — route buckets and control plane design
-- [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md) — layer model and boundary rules
+- [CONTROL_PLANE_PRINCIPLES.md](../architecture/CONTROL_PLANE_PRINCIPLES.md) — route buckets and control plane design
+- [ARCHITECTURAL_LAYERS.md](../architecture/ARCHITECTURAL_LAYERS.md) — layer model and boundary rules
 - [PLATFORM_VS_APP_DECISION_RULE.md](PLATFORM_VS_APP_DECISION_RULE.md) — where new capabilities belong

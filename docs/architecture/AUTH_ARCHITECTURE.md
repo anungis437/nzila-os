@@ -85,4 +85,4 @@ The platform migrated from Clerk to `@nzila/platform-auth` in early 2026. Legacy
 - Code comments and function names (backward-compat aliases)
 - Archived docs under `*/docs/archive/`
 
-See [docs/archive/auth-migration/](../archive/auth-migration/) for historical migration artifacts.
+See [auth-migration-architecture.md](../platform/auth-migration-architecture.md) for historical migration artifacts.

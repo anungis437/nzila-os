@@ -43,5 +43,5 @@ The `share_ledger_entries` table maintains its own hash chain (`hash`, `previous
 ## References
 
 - [Required Evidence Map](../../compliance/Required-Evidence-Map.md) — IC-02, IC-05
-- [DB Schema — equity](../../packages/db/src/schema/equity.ts)
-- [DB Schema — governance](../../packages/db/src/schema/governance.ts)
+- [DB Schema — equity](../../../packages/db/src/schema/equity.ts)
+- [DB Schema — governance](../../../packages/db/src/schema/governance.ts)

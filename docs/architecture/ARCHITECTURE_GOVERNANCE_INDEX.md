@@ -44,7 +44,7 @@
 | App | Document |
 |---|---|
 | union-eyes | [apps/union-eyes/docs/DOMAIN_MODEL.md](../../apps/union-eyes/docs/DOMAIN_MODEL.md) |
-| flow | [apps/flow/docs/DOMAIN_MODEL.md](../../apps/flow/docs/DOMAIN_MODEL.md) |
+| flow | [apps/flow/docs/DOMAIN_MODEL.md](../../apps/flow/docs/architecture/DOMAIN_MODEL.md) |
 | zonga | [apps/zonga/docs/DOMAIN_MODEL.md](../../apps/zonga/docs/DOMAIN_MODEL.md) |
 
 ## App Architecture Shapes
@@ -63,22 +63,22 @@
 
 | Document | Purpose |
 |---|---|
-| [Route Governance](../apps/control-plane/docs/ROUTE_GOVERNANCE.md) | Per-route bucket assignment and justification |
-| [route.meta.json](../apps/control-plane/route.meta.json) | Machine-readable route manifest (v2: with actionability_score, duplication_risk, source_contracts_used) |
+| [Route Governance](../../apps/control-plane/docs/ROUTE_GOVERNANCE.md) | Per-route bucket assignment and justification |
+| [route.meta.json](../../apps/control-plane/route.meta.json) | Machine-readable route manifest (v2: with actionability_score, duplication_risk, source_contracts_used) |
 
 ## Route Manifests (All Surfaces)
 
 | Surface | Manifest | Routes |
 |---|---|---|
-| Control Plane | [route.meta.json](../apps/control-plane/route.meta.json) | 13 routes |
-| Console | [route.meta.json](../apps/console/route.meta.json) | 22 routes |
-| Platform Admin | [route.meta.json](../apps/platform-admin/route.meta.json) | 13 routes |
+| Control Plane | [route.meta.json](../../apps/control-plane/route.meta.json) | 13 routes |
+| Console | [route.meta.json](../../apps/console/route.meta.json) | 22 routes |
+| Platform Admin | [route.meta.json](../../apps/platform-admin/route.meta.json) | 13 routes |
 
 ## Surface Migration Tracking
 
 | Document | Purpose |
 |---|---|
-| [platform-surface-migrations/README.md](platform-surface-migrations/README.md) | Active surface boundary violations and migration plans |
+| [platform-surface-migrations/README.md](../platform-surface-migrations/README.md) | Active surface boundary violations and migration plans |
 
 ## Enforcement Scripts
 

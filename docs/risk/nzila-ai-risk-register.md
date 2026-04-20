@@ -547,7 +547,7 @@ The following intelligent Secure Software Development Lifecycle (iSSDLC) documen
 
 | Document | Format | Purpose |
 |----------|--------|---------|
-| [The AI Risk Repository V4 (03/12/2025)](Copy%20of%20The%20AI%20Risk%20Repository%20V4_03_12_2025.xlsx) | XLSX | MIT AI Risk Repository v4 (Slattery et al., arxiv:2408.12622) — source taxonomy for domain/sub-domain classification and causal decomposition used in this register |
+| [The AI Risk Repository V4 (03/12/2025)](./Copy%20of%20The%20AI%20Risk%20Repository%20V4_03_12_2025.xlsx) | XLSX | MIT AI Risk Repository v4 (Slattery et al., arxiv:2408.12622) — source taxonomy for domain/sub-domain classification and causal decomposition used in this register |
 
 ---
 

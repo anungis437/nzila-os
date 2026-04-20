@@ -130,7 +130,7 @@ Backup integrity is verified via `pnpm verify:backup`, which checks:
 ## 7. Related Documents
 
 - [Incident Response Plan](incident-response.md)
-- [Enterprise Readiness Index](enterprise-readiness.md)
-- [Business Continuity](../ops/business-continuity/)
-- [SLO Policy](../ops/slo-policy.yml)
-- [On-Call Runbooks](../ops/oncall/)
+- [Enterprise Readiness Index](../governance/enterprise-readiness.md)
+- [Business Continuity](../../ops/business-continuity/)
+- [SLO Policy](../../ops/slo-policy.yml)
+- [On-Call Runbooks](../../ops/runbooks/)

@@ -137,7 +137,7 @@ The ADR does not need to be long. It must capture:
 
 ## Related Documents
 
-- [ARCHITECTURAL_LAYERS.md](ARCHITECTURAL_LAYERS.md) — layer model and dependency directions
+- [ARCHITECTURAL_LAYERS.md](../architecture/ARCHITECTURAL_LAYERS.md) — layer model and dependency directions
 - [PACKAGE_OWNERSHIP.md](PACKAGE_OWNERSHIP.md) — package metadata and ownership
 - [PACKAGE_LIFECYCLE_POLICY.md](PACKAGE_LIFECYCLE_POLICY.md) — package creation and graduation
 - [PLATFORM_SURFACE_RESPONSIBILITIES.md](PLATFORM_SURFACE_RESPONSIBILITIES.md) — control plane vs console vs admin

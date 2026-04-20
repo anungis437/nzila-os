@@ -24,6 +24,6 @@ Operational runbooks for Nzila OS incident response and remediation.
 
 ## Related Documents
 
-- [Incident Response Playbook](../incident-response.md)
-- [On-Call Rotation](../on-call.md)
+- [Incident Response Playbook](../platform/incident-response.md)
+- [On-Call Rotation](../../../docs/ops/on-call.md)
 - [SLO Policy](../../../ops/slo-policy.yml)

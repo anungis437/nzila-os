@@ -306,20 +306,20 @@ All 5 unsupported claims identified in the original audit have been corrected:
 
 | Category | Key Files |
 |----------|-----------|
-| **Core Schema** | [services/financial-service/src/db/schema.ts](../apps/union-eyes/services/financial-service/src/db/schema.ts) (lines 182-340) |
-| **CBA Migration** | [db/migrations/manual/cba_intelligence_manual.sql](../apps/union-eyes/db/migrations/manual/cba_intelligence_manual.sql) (399 lines) |
-| **CBA Service** | [lib/services/cba-service.ts](../apps/union-eyes/lib/services/cba-service.ts) |
-| **Clause Extraction** | [lib/services/ai/clause-extraction-service.ts](../apps/union-eyes/lib/services/ai/clause-extraction-service.ts) |
-| **Clause Reasoning** | [lib/ai/clause-reasoning.ts](../apps/union-eyes/lib/ai/clause-reasoning.ts) |
-| **Vector Search** | [lib/services/ai/vector-search-service.ts](../apps/union-eyes/lib/services/ai/vector-search-service.ts) |
-| **Wage Enrichment** | [lib/services/external-data/wage-enrichment-service.ts](../apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts) |
-| **LRB Service (Stubs)** | [lib/services/external-data/lrb-unified-service.ts](../apps/union-eyes/lib/services/external-data/lrb-unified-service.ts) |
-| **Defensibility Pack** | [lib/services/defensibility-pack.ts](../apps/union-eyes/lib/services/defensibility-pack.ts) |
-| **AI Feature Guard** | [lib/ai/ai-feature-guard.ts](../apps/union-eyes/lib/ai/ai-feature-guard.ts) |
-| **Audit Logger** | [lib/audit-logger.ts](../apps/union-eyes/lib/audit-logger.ts) |
-| **Claims (uniontech)** | [governance/business/verticals/uniontech/README.md](../governance/business/verticals/uniontech/README.md) |
-| **CUPE Vocabulary** | [packages/cupe-vocabulary/src/vocabulary.ts](../packages/cupe-vocabulary/src/vocabulary.ts) |
-| **Wage Benchmarks Schema** | [db/schema/wage-benchmarks-schema.ts](../apps/union-eyes/db/schema/wage-benchmarks-schema.ts) |
+| **Core Schema** | [services/financial-service/src/db/schema.ts](../../apps/union-eyes/services/financial-service/src/db/schema.ts) (lines 182-340) |
+| **CBA Migration** | [db/migrations/manual/cba_intelligence_manual.sql](../../apps/union-eyes/db/migrations/manual/cba_intelligence_manual.sql) (399 lines) |
+| **CBA Service** | [lib/services/cba-service.ts](../../apps/union-eyes/lib/services/cba-service.ts) |
+| **Clause Extraction** | [lib/services/ai/clause-extraction-service.ts](../../apps/union-eyes/lib/services/ai/clause-extraction-service.ts) |
+| **Clause Reasoning** | [lib/ai/clause-reasoning.ts](../../apps/union-eyes/lib/ai/clause-reasoning.ts) |
+| **Vector Search** | [lib/services/ai/vector-search-service.ts](../../apps/union-eyes/lib/services/ai/vector-search-service.ts) |
+| **Wage Enrichment** | [lib/services/external-data/wage-enrichment-service.ts](../../apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts) |
+| **LRB Service (Stubs)** | [lib/services/external-data/lrb-unified-service.ts](../../apps/union-eyes/lib/services/external-data/lrb-unified-service.ts) |
+| **Defensibility Pack** | [lib/services/defensibility-pack.ts](../../apps/union-eyes/lib/services/defensibility-pack.ts) |
+| **AI Feature Guard** | [lib/ai/ai-feature-guard.ts](../../apps/union-eyes/lib/ai/ai-feature-guard.ts) |
+| **Audit Logger** | [lib/audit-logger.ts](../../apps/union-eyes/lib/audit-logger.ts) |
+| **Claims (uniontech)** | [governance/business/verticals/uniontech/README.md](../../governance/business/verticals/uniontech/README.md) |
+| **CUPE Vocabulary** | [packages/cupe-vocabulary/src/vocabulary.ts](../../packages/cupe-vocabulary/src/vocabulary.ts) |
+| **Wage Benchmarks Schema** | [db/schema/wage-benchmarks-schema.ts](../../apps/union-eyes/db/schema/wage-benchmarks-schema.ts) |
 
 ### New (Remediation — April 2026)
 

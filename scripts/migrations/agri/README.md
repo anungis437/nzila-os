@@ -57,4 +57,4 @@ On re-run, existing records are skipped (upsert by legacy key).
 
 ## Rollback
 
-See [docs/agri/08-cutover-plan.md](../../docs/agri/08-cutover-plan.md) for full rollback procedure.
+See [docs/agri/08-cutover-plan.md](../../../docs/agri/08-cutover-plan.md) for full rollback procedure.

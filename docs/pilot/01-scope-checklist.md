@@ -44,7 +44,7 @@
 - [ ] SLO monitoring active for pilot org
 - [ ] Health digest alerts enabled for pilot org
 - [ ] Console → System Health populated
-- [ ] Runbooks reviewed for pilot-relevant incidents (see [runbooks](../ops/runbooks/))
+- [ ] Runbooks reviewed for pilot-relevant incidents (see [runbooks](../../ops/runbooks/))
 
 ### 6. Demo & Training
 

@@ -181,6 +181,6 @@ If an app needs a capability provided by infrastructure, wrap it in a platform s
 ## Related Documents
 
 - [ARCHITECTURAL_BOUNDARIES.md](ARCHITECTURAL_BOUNDARIES.md) — detailed dependency direction rules and vertical isolation
-- [PACKAGE_OWNERSHIP.md](PACKAGE_OWNERSHIP.md) — package metadata registry
-- [PACKAGE_LIFECYCLE_POLICY.md](PACKAGE_LIFECYCLE_POLICY.md) — package creation, graduation, and deprecation
-- [PLATFORM_VS_APP_DECISION_RULE.md](PLATFORM_VS_APP_DECISION_RULE.md) — deciding where new capabilities belong
+- [PACKAGE_OWNERSHIP.md](../governance/PACKAGE_OWNERSHIP.md) — package metadata registry
+- [PACKAGE_LIFECYCLE_POLICY.md](../governance/PACKAGE_LIFECYCLE_POLICY.md) — package creation, graduation, and deprecation
+- [PLATFORM_VS_APP_DECISION_RULE.md](../governance/PLATFORM_VS_APP_DECISION_RULE.md) — deciding where new capabilities belong

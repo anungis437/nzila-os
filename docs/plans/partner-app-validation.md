@@ -60,7 +60,7 @@ The partner app currently supports only **partner self-service** features:
 ## Technical Architecture Analysis
 
 ### Database Schema Readiness ✅
-The database schema in [`packages/db/src/schema/partners.ts`](packages/db/src/schema/partners.ts) already supports platform owner features:
+The database schema in [`packages/db/src/schema/partners.ts`](../../packages/db/src/schema/partners.ts) already supports platform owner features:
 
 ```typescript
 // partners table has:
@@ -80,7 +80,7 @@ The database schema in [`packages/db/src/schema/partners.ts`](packages/db/src/sc
 
 ### Authentication/Authorization Gap ⚠️
 - Currently uses Clerk with partner roles only
-- **No platform owner role defined** in [`apps/partners/lib/partner-auth.ts`](apps/partners/lib/partner-auth.ts)
+- **No platform owner role defined** in [`apps/partners/lib/partner-auth.ts`](../../apps/partners/lib/partner-auth.ts)
 - No admin middleware route protection
 
 ---
@@ -106,7 +106,7 @@ The database schema in [`packages/db/src/schema/partners.ts`](packages/db/src/sc
 
 ## References
 
-- Database Schema: [`packages/db/src/schema/partners.ts`](packages/db/src/schema/partners.ts)
-- Partner Auth: [`apps/partners/lib/partner-auth.ts`](apps/partners/lib/partner-auth.ts)
-- Portal Layout: [`apps/partners/app/portal/layout.tsx`](apps/partners/app/portal/layout.tsx)
-- Partner Dashboard: [`apps/partners/app/portal/page.tsx`](apps/partners/app/portal/page.tsx)
+- Database Schema: [`packages/db/src/schema/partners.ts`](../../packages/db/src/schema/partners.ts)
+- Partner Auth: [`apps/partners/lib/partner-auth.ts`](../../apps/partners/lib/partner-auth.ts)
+- Portal Layout: [`apps/partners/app/portal/layout.tsx`](../../apps/partners/app/portal/layout.tsx)
+- Partner Dashboard: [`apps/partners/app/portal/page.tsx`](../../apps/partners/app/portal/page.tsx)

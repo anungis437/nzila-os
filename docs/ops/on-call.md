@@ -92,7 +92,7 @@ P2 Flow:
 | Teams `Ops Alerts` | Redundant alerting | All eng |
 | Console → System Health | Health dashboard | platform_admin, ops |
 | Console → Performance | Perf metrics + regressions | platform_admin, ops |
-| Runbooks | Step-by-step remediation | [docs/ops/runbooks/](runbooks/) |
+| Runbooks | Step-by-step remediation | [docs/ops/runbooks/](../../ops/runbooks/) |
 
 ---
 
@@ -128,5 +128,5 @@ Alerts are routed via the on-call alert router at `ops/oncall/alert-routing.ts`:
 ## Related Documents
 
 - [Incident Response Playbook](incident-response.md)
-- [Runbooks](runbooks/)
+- [Runbooks](../../ops/runbooks/)
 - [SLO Policy](../../ops/slo-policy.yml)

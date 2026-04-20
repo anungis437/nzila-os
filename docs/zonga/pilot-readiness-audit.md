@@ -3,8 +3,8 @@
 Date: 2026-04-19
 
 ## Scope Audited
-- Audio playback stack: [apps/zonga/components/player/player-context.tsx](apps/zonga/components/player/player-context.tsx)
-- Stream API and fallback: [apps/zonga/app/api/stream/[assetId]/route.ts](apps/zonga/app/api/stream/[assetId]/route.ts), [apps/zonga/features/media/playback-service.ts](apps/zonga/features/media/playback-service.ts)
+- Audio playback stack: [apps/zonga/components/player/player-context.tsx](../../apps/zonga/components/player/player-context.tsx)
+- Stream API and fallback: [apps/zonga/app/api/stream/[assetId]/route.ts](../../apps/zonga/app/api/stream/[assetId]/route.ts), [apps/zonga/features/media/playback-service.ts](../../apps/zonga/features/media/playback-service.ts)
 - Upload and metadata flows: [apps/zonga/app/[locale]/dashboard/catalog/upload/page.tsx](apps/zonga/app/[locale]/dashboard/catalog/upload/page.tsx), [apps/zonga/app/[locale]/dashboard/catalog/label-console/page.tsx](apps/zonga/app/[locale]/dashboard/catalog/label-console/page.tsx)
 - Label analytics: [apps/zonga/app/[locale]/dashboard/analytics/label/page.tsx](apps/zonga/app/[locale]/dashboard/analytics/label/page.tsx)
 - Rights and moderation: [apps/zonga/app/[locale]/dashboard/rights/page.tsx](apps/zonga/app/[locale]/dashboard/rights/page.tsx), [apps/zonga/app/[locale]/dashboard/moderation/page.tsx](apps/zonga/app/[locale]/dashboard/moderation/page.tsx)
