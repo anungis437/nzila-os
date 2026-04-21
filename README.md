@@ -122,7 +122,7 @@ CI enforces portfolio-governance, compliance drift, and reliability checks on ev
 
 ## Architecture
 
-- **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO
+- **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO. All apps use `@nzila/platform-auth` as the canonical auth authority; legacy Clerk references in `apps/union-eyes` are compatibility-only.
 - **Database**: PostgreSQL + Drizzle ORM
 - **Infra**: Azure Container Apps (Canada Central staging)
 - **CI**: 41 GitHub Actions workflows covering governance, security, deployment, and compliance
