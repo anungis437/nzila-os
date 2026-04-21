@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { releaseGuardAgent, type ReleaseGuardSignal } from './release-guard.js'
+import { releaseGuardAgent, type ReleaseGuardSignal } from './release-guard'
 
 function run(input: ReleaseGuardSignal) {
   return releaseGuardAgent.run({ orgId: 'org-1', input })

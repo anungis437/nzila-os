@@ -31,18 +31,18 @@ export type {
   CrossDomainCorrelation,
   CorrelationStrength,
   NilErrorCode,
-} from './types.js'
+} from './types'
 
 export {
   NIL_APPS,
   NilError,
   intelligenceRequestSchema,
   intelligenceContextSchema,
-} from './types.js'
+} from './types'
 
 // ── Context ─────────────────────────────────────────────────────────────────
 
-export { buildContext, mergeContexts } from './context.js'
+export { buildContext, mergeContexts } from './context'
 
 // ── Explainability ──────────────────────────────────────────────────────────
 
@@ -50,16 +50,16 @@ export {
   traceFromReasoningChain,
   traceFromDecisionRecord,
   emptyTrace,
-} from './explainability.js'
+} from './explainability'
 
 // ── Decision ────────────────────────────────────────────────────────────────
 
-export { executeDecision } from './decision.js'
+export { executeDecision } from './decision'
 
 // ── Reasoning ───────────────────────────────────────────────────────────────
 
-export { executeReasoning } from './reasoning.js'
-export type { ReasoningDeps } from './reasoning.js'
+export { executeReasoning } from './reasoning'
+export type { ReasoningDeps } from './reasoning'
 
 // ── Registry ────────────────────────────────────────────────────────────────
 
@@ -74,16 +74,16 @@ export {
   recordCapabilityExecution,
   getCapabilityHealth,
   listCapabilityHealth,
-} from './registry.js'
+} from './registry'
 
 export type {
   CapabilityExecutionTelemetry,
   CapabilityHealth,
-} from './registry.js'
+} from './registry'
 
 // ── Adaptive Routing ───────────────────────────────────────────────────────
 
-export { routeCapability } from './routing.js'
+export { routeCapability } from './routing'
 
 // ── Cross-Domain Correlation ───────────────────────────────────────────────
 
@@ -91,4 +91,4 @@ export {
   pearsonCorrelation,
   classifyCorrelationStrength,
   detectCrossDomainCorrelations,
-} from './correlation.js'
+} from './correlation'

@@ -7,7 +7,7 @@
  *   - runway compression (forecast vs assumption drift)
  *   - payable timing concentration (large outflows in same week)
  */
-import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract.js'
+import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract'
 
 export interface WeekCashFlow {
   /** ISO week start date */

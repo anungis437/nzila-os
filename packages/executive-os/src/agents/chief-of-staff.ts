@@ -9,7 +9,7 @@
  * executionInitiatives, executiveDecisions, treasurySnapshots, and
  * passing them in the request. This keeps the agent pure & testable.
  */
-import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract.js'
+import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract'
 
 export interface ChiefOfStaffSignal {
   initiatives: ReadonlyArray<{

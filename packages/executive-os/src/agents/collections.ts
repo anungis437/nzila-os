@@ -6,7 +6,7 @@
  *   - draft follow-up actions (email reminder / call / escalation)
  *   - dispute flags (invoices flagged by client)
  */
-import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract.js'
+import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract'
 
 export interface OverdueInvoice {
   invoiceId: string

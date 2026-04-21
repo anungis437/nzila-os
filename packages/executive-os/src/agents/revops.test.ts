@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { revopsAgent, type RevOpsSignal } from './revops.js'
+import { revopsAgent, type RevOpsSignal } from './revops'
 
 function run(input: RevOpsSignal) {
   return revopsAgent.run({ orgId: 'org-1', input })

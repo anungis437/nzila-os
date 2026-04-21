@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { internalCfoAgent, type CfoSignal } from './internal-cfo.js'
+import { internalCfoAgent, type CfoSignal } from './internal-cfo'
 
 function sig(o: Partial<CfoSignal> = {}): CfoSignal {
   return {

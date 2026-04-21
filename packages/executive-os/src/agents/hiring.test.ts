@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hiringAgent, type HiringSignal } from './hiring.js'
+import { hiringAgent, type HiringSignal } from './hiring'
 
 const base = (overrides: Partial<HiringSignal> = {}): HiringSignal => ({
   openRoles: [],

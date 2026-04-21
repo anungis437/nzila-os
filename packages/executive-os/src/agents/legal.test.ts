@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { legalAgent, type LegalSignal } from './legal.js'
+import { legalAgent, type LegalSignal } from './legal'
 
 function run(input: LegalSignal) {
   return legalAgent.run({ orgId: 'o1', input })

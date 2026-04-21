@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { productStrategyAgent, type ProductStrategySignal } from './product-strategy.js'
+import { productStrategyAgent, type ProductStrategySignal } from './product-strategy'
 
 const req = (input: ProductStrategySignal) => ({
   orgId: 'org-1',

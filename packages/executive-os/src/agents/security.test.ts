@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { securityAgent, type SecuritySignal } from './security.js'
+import { securityAgent, type SecuritySignal } from './security'
 
 function run(input: SecuritySignal, now?: Date) {
   return securityAgent.run({ orgId: 'org-1', input, now })

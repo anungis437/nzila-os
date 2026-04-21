@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cooAgent, type CooSignal } from './coo.js'
+import { cooAgent, type CooSignal } from './coo'
 
 const base = (overrides: Partial<CooSignal> = {}): CooSignal => ({
   initiatives: [],

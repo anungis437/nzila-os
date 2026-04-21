@@ -52,7 +52,16 @@ export interface RankOutput {
  * Sum of positive weights ≈ sum of negative weights so the neutral case
  * returns score ~ 0.
  */
-export const DEFAULT_WEIGHTS = {
+export const DEFAULT_WEIGHTS: {
+  value: number
+  urgency: number
+  confidence: number
+  downside: number
+  strategicLeverage: number
+  reversibility: number
+  effort: number
+  founderUniqueness: number
+} = {
   value: 0.30,
   urgency: 0.20,
   confidence: 0.15,
@@ -61,7 +70,7 @@ export const DEFAULT_WEIGHTS = {
   reversibility: 0.05, // small positive: reversible things are slightly easier to say yes to
   effort: -0.10,
   founderUniqueness: -0.05, // slight penalty: founder time is scarce, prefer delegatable work
-} as const
+}
 
 export type RankWeights = typeof DEFAULT_WEIGHTS
 

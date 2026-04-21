@@ -6,8 +6,8 @@ import type {
   CapabilityRouteDecision,
   IntelligenceCapability,
   IntelligenceRequest,
-} from './types.js'
-import { getCapabilityHealth, listCapabilities } from './registry.js'
+} from './types'
+import { getCapabilityHealth, listCapabilities } from './registry'
 
 function tokenizeUseCase(value: string): string[] {
   return value

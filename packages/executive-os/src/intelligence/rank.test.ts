@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { rank, rankCompare, explainTopFactors, DEFAULT_WEIGHTS } from './rank.js'
+import { rank, rankCompare, explainTopFactors, DEFAULT_WEIGHTS } from './rank'
 
 describe('rank', () => {
   it('produces higher score for high-value urgent reversible items', () => {

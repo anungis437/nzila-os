@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { getCapability, unregisterCapability } from '@nzila/intelligence'
-import { EXECUTIVE_CAPABILITIES, registerExecutiveCapabilities } from './capabilities.js'
+import { EXECUTIVE_CAPABILITIES, registerExecutiveCapabilities } from './capabilities'
 
 describe('registerExecutiveCapabilities', () => {
   beforeEach(() => {

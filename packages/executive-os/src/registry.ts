@@ -4,7 +4,7 @@
  * In-memory registry of ExecutiveAgent definitions. The console resolves
  * agents by key when scheduling runs.
  */
-import type { ExecutiveAgent, ExecutiveDomain } from './contract.js'
+import type { ExecutiveAgent, ExecutiveDomain } from './contract'
 
 const agents = new Map<string, ExecutiveAgent<any>>()
 

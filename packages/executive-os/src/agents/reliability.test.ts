@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reliabilityAgent, type ReliabilitySignal } from './reliability.js'
+import { reliabilityAgent, type ReliabilitySignal } from './reliability'
 
 function run(input: ReliabilitySignal) {
   return reliabilityAgent.run({ orgId: 'org-1', input })

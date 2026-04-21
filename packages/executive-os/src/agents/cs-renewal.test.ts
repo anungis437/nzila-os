@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { csRenewalAgent, type CsSignal } from './cs-renewal.js'
+import { csRenewalAgent, type CsSignal } from './cs-renewal'
 
 function run(input: CsSignal) {
   return csRenewalAgent.run({ orgId: 'org-1', input })

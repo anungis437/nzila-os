@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chiefOfStaffV2Agent, type CosV2Signal } from './chief-of-staff-v2.js'
+import { chiefOfStaffV2Agent, type CosV2Signal } from './chief-of-staff-v2'
 
 const base = (overrides: Partial<CosV2Signal> = {}): CosV2Signal => ({
   recentInsights: [],

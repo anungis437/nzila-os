@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pmoAgent, type PmoSignal } from './pmo.js'
+import { pmoAgent, type PmoSignal } from './pmo'
 
 const req = (input: PmoSignal) => ({
   orgId: 'org-1',

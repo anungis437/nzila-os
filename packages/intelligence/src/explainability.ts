@@ -8,7 +8,7 @@ import type {
   ExplanationTrace,
   ExplanationStep,
   ExplanationCitation,
-} from './types.js'
+} from './types'
 import type { ReasoningChain, Citation } from '@nzila/platform-reasoning-engine'
 import type { DecisionRecord } from '@nzila/platform-decision-engine/types'
 

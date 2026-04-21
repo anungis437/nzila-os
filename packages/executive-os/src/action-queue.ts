@@ -12,7 +12,7 @@
  * Persistence (writing to executive_agent_actions) is the host runner's
  * responsibility — these helpers only validate transitions.
  */
-import type { ApprovalState, ExecutionStatus, ActionClass } from './contract.js'
+import type { ApprovalState, ExecutionStatus, ActionClass } from './contract'
 
 export class ApprovalTransitionError extends Error {
   constructor(message: string) {

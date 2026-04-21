@@ -11,7 +11,7 @@ import type {
   AgentAction,
   AgentInsight,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export type PackStatus = 'draft' | 'sealed' | 'verified' | 'expired'
 export type ChainIntegrity = 'VERIFIED' | 'UNVERIFIED' | 'BROKEN'

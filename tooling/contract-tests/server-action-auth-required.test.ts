@@ -60,6 +60,7 @@ const AUTH_PATTERNS = [
   'getDbContext(',              // Flow clerk-org-resolver — calls auth() internally
   'resolveListenerContext(',    // Zonga listener-scoped auth wrapper — calls auth() internally
   'resolveListenerUUID(',       // Zonga listener UUID resolver — calls auth() internally
+  'currentUser(',               // @nzila/platform-auth/entra/server — returns null if unauthenticated
 ]
 
 /** Paths explicitly allowed to have no auth (e.g. health/status endpoints, DAL layers) */

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fpaAgent, type FpaSignal } from './fpa.js'
+import { fpaAgent, type FpaSignal } from './fpa'
 
 function line(label: string, category: 'revenue' | 'expense', actuals: Array<[number, number]>): FpaSignal['lines'][number] {
   return {

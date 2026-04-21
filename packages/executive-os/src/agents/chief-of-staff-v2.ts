@@ -18,7 +18,7 @@ import type {
   AgentResult,
   ExecutiveDomain,
   Severity,
-} from '../contract.js'
+} from '../contract'
 
 export interface RecentInsight {
   agentKey: string

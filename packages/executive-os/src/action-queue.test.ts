@@ -9,7 +9,7 @@ import {
   isAwaitingApproval,
   ApprovalTransitionError,
   type ActionRecord,
-} from './action-queue.js'
+} from './action-queue'
 
 function baseAction(overrides: Partial<ActionRecord> = {}): ActionRecord {
   return {

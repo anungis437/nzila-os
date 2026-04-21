@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-04-18T18:39:39.950Z",
+  "capturedAt": "2026-04-21T16:25:01.261Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -34,9 +34,13 @@
       "hash": "0fd6a70ac3ffbd6857b9edd13a145a3abfbc8333dac18e802078fcb16b5e5f7b",
       "size": 4803
     },
+    "packages/db/src/schema/exec-data.ts": {
+      "hash": "ec11560dd47a7bc7cba0b650454a6842ab61ec55a9117c3a8af3edd894791311",
+      "size": 7021
+    },
     "packages/db/src/schema/executive.ts": {
-      "hash": "ff2ce73e329ff214ec3e751d4e57feff767b7239ce2dced0702cfd4c0c2ce021",
-      "size": 6978
+      "hash": "8bd922e7b7654941ace0000a6e4a500d74f3b561373f37c8b5f1a0a816ef8d23",
+      "size": 17155
     },
     "packages/db/src/schema/finance.ts": {
       "hash": "29436abc580bf1d71b1ee6ae6cc2e55cd39b656a82b47ee6d4a47e3b72f28118",
@@ -106,13 +110,21 @@
       "hash": "bb8a212287eaba316edd07dad1f580416848b94126c4e0997338d6f505cee4d7",
       "size": 4293
     },
+    "packages/db/src/schema/grants.ts": {
+      "hash": "997099f91df00ecce6775d1b3df40ba8f573090145b4c9ce240525c0fb8bd4fe",
+      "size": 1850
+    },
     "packages/db/src/schema/index.ts": {
-      "hash": "2d22b183c58b47dd8e54fc681718d1891785dc72dcc9067fa8616b8e68d0d8c9",
-      "size": 1472
+      "hash": "a132d8e6c692f445f9a9870404969d3d0182639e6ce6af351601cc4aec6d1d24",
+      "size": 1548
     },
     "packages/db/src/schema/integrations.ts": {
       "hash": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65",
       "size": 4233
+    },
+    "packages/db/src/schema/itsm.ts": {
+      "hash": "885ca599ffa6ee9ad37caa5e683d041838661f18990f251199558182870dab4f",
+      "size": 25752
     },
     "packages/db/src/schema/ml.ts": {
       "hash": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304",
@@ -167,5 +179,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "f948af5597db9519f9cc123b68a02ca9d0c76cb8df116a8177fe14249e694d05"
+  "compositeHash": "7e3c7eb1b88b5d4032ba2199ac3732018b154cd4bdc520cd27d0b11c78a06872"
 }

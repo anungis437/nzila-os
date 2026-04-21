@@ -5,10 +5,10 @@
  * and translates results into the unified IntelligenceResponse shape.
  */
 import { randomUUID } from 'node:crypto'
-import type { IntelligenceRequest, IntelligenceResponse, RiskLevel } from './types.js'
-import { buildContext } from './context.js'
-import { traceFromDecisionRecord, emptyTrace } from './explainability.js'
-import { NilError } from './types.js'
+import type { IntelligenceRequest, IntelligenceResponse, RiskLevel } from './types'
+import { buildContext } from './context'
+import { traceFromDecisionRecord, emptyTrace } from './explainability'
+import { NilError } from './types'
 import {
   generateDecisions,
   type DecisionRecord,

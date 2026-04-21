@@ -3,7 +3,7 @@ import {
   crossDomainSynthesisAgent,
   synthesizeFindings,
   type SynthesisSignal,
-} from './cross-domain-synthesis.js'
+} from './cross-domain-synthesis'
 
 const emptySignal: SynthesisSignal = {
   runwayMonths: null,

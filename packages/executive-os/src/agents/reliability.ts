@@ -11,7 +11,7 @@ import type {
   AgentAction,
   AgentInsight,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export interface RouteHealth {
   route: string

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { chiefOfStaffAgent, type ChiefOfStaffSignal } from './chief-of-staff.js'
+import { chiefOfStaffAgent, type ChiefOfStaffSignal } from './chief-of-staff'
 
 const REF_NOW = new Date('2026-04-21T12:00:00Z')
 

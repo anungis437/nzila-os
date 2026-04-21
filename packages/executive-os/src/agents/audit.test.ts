@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { auditAgent, type AuditSignal, type EvidencePackSummary } from './audit.js'
+import { auditAgent, type AuditSignal, type EvidencePackSummary } from './audit'
 
 function pack(p: Partial<EvidencePackSummary>): EvidencePackSummary {
   return {

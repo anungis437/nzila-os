@@ -19,8 +19,8 @@ import type {
   AgentAction,
   AgentInsight,
   AgentResult,
-} from '../contract.js'
-import { rank, rankCompare, explainTopFactors, type RankOutput } from '../intelligence/rank.js'
+} from '../contract'
+import { rank, rankCompare, explainTopFactors, type RankOutput } from '../intelligence/rank'
 
 export interface SynthesisAccount {
   accountId: string

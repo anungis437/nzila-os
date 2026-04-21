@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { finopsAgent, type FinopsSignal } from './finops.js'
+import { finopsAgent, type FinopsSignal } from './finops'
 
 function run(input: FinopsSignal) {
   return finopsAgent.run({ orgId: 'org-1', input })

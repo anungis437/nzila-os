@@ -11,7 +11,7 @@ import type {
   AgentAction,
   AgentInsight,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export type InitiativeStatus = 'not-started' | 'in-progress' | 'done'
 

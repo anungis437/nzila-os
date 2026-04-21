@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { collectionsAgent, type CollectionsSignal, type OverdueInvoice } from './collections.js'
+import { collectionsAgent, type CollectionsSignal, type OverdueInvoice } from './collections'
 
 const NOW = new Date('2026-04-21T12:00:00Z')
 

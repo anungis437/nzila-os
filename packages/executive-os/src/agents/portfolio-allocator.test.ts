@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { portfolioAllocatorAgent, type PortfolioSignal } from './portfolio-allocator.js'
+import { portfolioAllocatorAgent, type PortfolioSignal } from './portfolio-allocator'
 
 const base = (overrides: Partial<PortfolioSignal> = {}): PortfolioSignal => ({
   initiatives: [],

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { taxAgent, type TaxSignal } from './tax.js'
+import { taxAgent, type TaxSignal } from './tax'
 
 function sig(o: Partial<TaxSignal> = {}): TaxSignal {
   return { filings: [], installments: [], ...o }

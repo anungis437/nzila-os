@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { treasuryAgent, type TreasurySignal } from './treasury.js'
+import { treasuryAgent, type TreasurySignal } from './treasury'
 
 function sig(o: Partial<TreasurySignal> = {}): TreasurySignal {
   return {

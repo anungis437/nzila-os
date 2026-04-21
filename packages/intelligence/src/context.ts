@@ -5,7 +5,7 @@
  * NIL request, merging caller-supplied overrides with platform defaults.
  */
 import { randomUUID } from 'node:crypto'
-import type { IntelligenceContext, IntelligenceRequest, DataClass } from './types.js'
+import type { IntelligenceContext, IntelligenceRequest, DataClass } from './types'
 
 // ── Defaults ────────────────────────────────────────────────────────────────
 

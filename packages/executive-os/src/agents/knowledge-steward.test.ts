@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { knowledgeStewardAgent, type KnowledgeSignal } from './knowledge-steward.js'
+import { knowledgeStewardAgent, type KnowledgeSignal } from './knowledge-steward'
 
 function run(input: KnowledgeSignal) {
   return knowledgeStewardAgent.run({ orgId: 'o1', input })

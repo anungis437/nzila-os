@@ -13,7 +13,7 @@ import type {
   AgentInsight,
   AgentAction,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export type RevOpsStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won'
 

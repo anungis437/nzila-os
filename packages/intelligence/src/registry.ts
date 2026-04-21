@@ -5,8 +5,8 @@
  * Each capability describes a specific AI/intelligence function
  * (e.g. "grievance-triage", "cash-forecast") and the apps that may use it.
  */
-import type { IntelligenceCapability, NilApp } from './types.js'
-import { NilError } from './types.js'
+import type { IntelligenceCapability, NilApp } from './types'
+import { NilError } from './types'
 
 export interface CapabilityExecutionTelemetry {
   readonly latencyMs: number

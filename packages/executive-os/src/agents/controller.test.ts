@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { controllerAgent, type ControllerSignal } from './controller.js'
+import { controllerAgent, type ControllerSignal } from './controller'
 
 function sig(o: Partial<ControllerSignal> = {}): ControllerSignal {
   return { openPeriods: [], overdueTasks: [], openExceptions: [], ...o }

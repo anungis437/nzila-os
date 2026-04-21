@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { partnershipsAgent, type PartnershipsSignal } from './partnerships.js'
+import { partnershipsAgent, type PartnershipsSignal } from './partnerships'
 
 function run(input: PartnershipsSignal) {
   return partnershipsAgent.run({ orgId: 'org-1', input })

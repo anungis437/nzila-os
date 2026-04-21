@@ -9,7 +9,7 @@ import type {
   CrossDomainCorrelation,
   DomainSignal,
   CorrelationStrength,
-} from './types.js'
+} from './types'
 
 function toUtcDay(isoTimestamp: string): string {
   const date = new Date(isoTimestamp)

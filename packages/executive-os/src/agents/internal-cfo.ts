@@ -11,7 +11,7 @@
  * Emits draft_action recommendations for material decisions
  * (e.g. "pause discretionary spend", "delay hire", "open raise process").
  */
-import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract.js'
+import type { ExecutiveAgent, AgentResult, AgentInsight, AgentAction } from '../contract'
 
 export interface CfoSignal {
   /** Latest cash on hand */

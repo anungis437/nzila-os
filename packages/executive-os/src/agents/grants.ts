@@ -10,7 +10,7 @@ import type {
   AgentInsight,
   AgentAction,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export type GrantStage =
   | 'prospecting'

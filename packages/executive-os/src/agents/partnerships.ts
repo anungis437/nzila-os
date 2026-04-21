@@ -12,7 +12,7 @@ import type {
   AgentInsight,
   AgentAction,
   AgentResult,
-} from '../contract.js'
+} from '../contract'
 
 export type PartnerDealStage = 'registered' | 'submitted' | 'approved' | 'won' | 'lost'
 
