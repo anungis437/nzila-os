@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-18T00:00:00.000Z",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
   "appCount": 17,
-  "packageCount": 166,
-  "workflowCount": 37,
-  "contractTestCount": 214,
-  "tsTestFileCount": 1177,
+  "packageCount": 170,
+  "workflowCount": 43,
+  "contractTestCount": 218,
+  "tsTestFileCount": 1215,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -32,8 +32,8 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "Agricultural Business Review — compliance audits, analytics, and Django-backed AI services for agri-business operations.",
-      "codeFileCount": 202
+      "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
+      "codeFileCount": 247
     },
     {
       "name": "agrimo",
@@ -70,7 +70,7 @@
         "ui"
       ],
       "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
-      "codeFileCount": 100
+      "codeFileCount": 102
     },
     {
       "name": "cfo",
@@ -106,7 +106,7 @@
         "ui"
       ],
       "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks.",
-      "codeFileCount": 234
+      "codeFileCount": 237
     },
     {
       "name": "console",
@@ -130,7 +130,9 @@
         "config",
         "crm-hubspot",
         "db",
+        "executive-os",
         "governed-workflow",
+        "itsm-core",
         "ml-sdk",
         "os-core",
         "payments-stripe",
@@ -142,6 +144,7 @@
         "platform-evidence-pack",
         "platform-export",
         "platform-integrations-control-plane",
+        "platform-intelligence-home",
         "platform-marketplace",
         "platform-metrics",
         "platform-observability",
@@ -157,7 +160,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 252
+      "codeFileCount": 310
     },
     {
       "name": "control-plane",
@@ -203,7 +206,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 211
+      "codeFileCount": 213
     },
     {
       "name": "cora",
@@ -235,7 +238,7 @@
         "ui"
       ],
       "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability.",
-      "codeFileCount": 37
+      "codeFileCount": 39
     },
     {
       "name": "flow",
@@ -275,7 +278,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 330
+      "codeFileCount": 333
     },
     {
       "name": "mobility",
@@ -304,7 +307,7 @@
         "ui"
       ],
       "purpose": "Investment migration advisory platform — case management, program intelligence, KYC/AML compliance, and document workflows for citizenship-by-investment (CBI) and residency-by-investment (RBI) firms.",
-      "codeFileCount": 36
+      "codeFileCount": 38
     },
     {
       "name": "mobility-client-portal",
@@ -368,6 +371,8 @@
       "dependsOnPlatformAuth": false,
       "nzilaDeps": [
         "db",
+        "fsm-core",
+        "itsm-core",
         "os-core",
         "platform-event-fabric",
         "platform-observability",
@@ -376,7 +381,7 @@
         "platform-utils"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 27
+      "codeFileCount": 30
     },
     {
       "name": "partners",
@@ -405,7 +410,7 @@
         "ui"
       ],
       "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations.",
-      "codeFileCount": 104
+      "codeFileCount": 107
     },
     {
       "name": "platform-admin",
@@ -422,6 +427,7 @@
         "governed-workflow",
         "integrations-core",
         "integrations-runtime",
+        "itsm-core",
         "os-core",
         "platform-auth",
         "platform-context-orchestrator",
@@ -441,7 +447,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 31
+      "codeFileCount": 37
     },
     {
       "name": "trade",
@@ -470,7 +476,7 @@
         "ui"
       ],
       "purpose": "Cross-border trade management — deals, listings, shipments, and commission tracking.",
-      "codeFileCount": 51
+      "codeFileCount": 53
     },
     {
       "name": "union-eyes",
@@ -500,7 +506,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3142
+      "codeFileCount": 3146
     },
     {
       "name": "web",
@@ -524,7 +530,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 70
+      "codeFileCount": 73
     },
     {
       "name": "zonga",
@@ -565,7 +571,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 416
+      "codeFileCount": 434
     }
   ],
   "workflows": [
@@ -574,10 +580,12 @@
     "ai-governance.yml",
     "app-floor-check.yml",
     "canary-deploy.yml",
+    "capital-discipline.yml",
     "ci.yml",
     "compliance-drift.yml",
     "compliance.yml",
     "console-weekly-digest.yml",
+    "continuous-guards.yml",
     "control-tests.yml",
     "cupe-pilot-readiness.yml",
     "dast.yml",
@@ -589,6 +597,8 @@
     "deploy-staging.yml",
     "deploy-union-eyes.yml",
     "deploy-web.yml",
+    "doc-hygiene.yml",
+    "e2e.yml",
     "game-day.yml",
     "gitops-deploy.yml",
     "lighthouse.yml",
@@ -597,9 +607,11 @@
     "nzila-playbook-runner.yml",
     "ops-pack.yml",
     "platform-automation.yml",
+    "portfolio-governance.yml",
     "preview-deploy.yml",
     "red-team.yml",
     "release-train.yml",
+    "reliability-guard.yml",
     "repo-inventory-check.yml",
     "sbom.yml",
     "secret-scan.yml",
