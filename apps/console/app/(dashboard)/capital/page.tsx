@@ -18,12 +18,9 @@ import {
   platformCostRollups,
   platformCostBudgetBreaches,
 } from '@nzila/db/schema'
-import { sum, count, desc, gte, sql } from 'drizzle-orm'
+import { sum, desc, gte, sql } from 'drizzle-orm'
 import {
   BanknotesIcon,
-  ArrowTrendingUpIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
   ArrowRightIcon,
   FireIcon,
 } from '@heroicons/react/24/outline'

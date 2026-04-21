@@ -18,18 +18,15 @@ import { platformDb } from '@nzila/db/platform'
 import {
   commerceQuotes,
   pilotDefinitions,
-  pilotHealthScores,
   zongaRevenueEvents,
 } from '@nzila/db/schema'
-import { count, sum, eq, desc, gte, and, sql } from 'drizzle-orm'
+import { count, sum, desc, gte, sql } from 'drizzle-orm'
 import {
   ArrowTrendingUpIcon,
   BoltIcon,
   DocumentTextIcon,
-  CheckCircleIcon,
   ClockIcon,
   ArrowRightIcon,
-  CurrencyDollarIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 

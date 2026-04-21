@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { executionInitiatives, executiveDecisions, orgs } from '@nzila/db/schema'
-import { and, asc, eq, lt, or } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 

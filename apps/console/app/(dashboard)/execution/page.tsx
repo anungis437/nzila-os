@@ -486,7 +486,7 @@ export default async function ExecutionPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {data.topVentures.map((v) => {
-                const hasGap = v.evidence_status === 'none' || v.code_presence === 'scaffold'
+                const _hasGap = v.evidence_status === 'none' || v.code_presence === 'scaffold'
                 return (
                   <tr key={v.name} className="hover:bg-gray-50">
                     <td className="px-4 py-3">

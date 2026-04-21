@@ -2,17 +2,11 @@ import Link from 'next/link'
 import { requireRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { automationCommands } from '@nzila/db/schema'
-import { and, desc, eq, lt, or, sql } from 'drizzle-orm'
+import { desc, sql } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
 const STUCK_THRESHOLD_MINUTES = Number(process.env.ORCHESTRATOR_STUCK_THRESHOLD_MINUTES ?? 10)
-
-function asNumber(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value === 'string') return Number(value)
-  return 0
-}
 
 function isDeadLettered(args: unknown): boolean {
   if (!args || typeof args !== 'object') return false

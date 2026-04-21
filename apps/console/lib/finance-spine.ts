@@ -11,7 +11,7 @@ import {
   treasurySnapshots,
   zongaRevenueEvents,
 } from '@nzila/db/schema'
-import { and, desc, eq, gte } from 'drizzle-orm'
+import { desc, eq, gte } from 'drizzle-orm'
 
 interface CatalogProduct {
   id: string

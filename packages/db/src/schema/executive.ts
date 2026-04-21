@@ -9,6 +9,7 @@ import {
   text,
   numeric,
   integer,
+  jsonb,
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
@@ -157,5 +158,200 @@ export const decisionScorebacks = pgTable(
     index('decision_scorebacks_org_status_idx').on(table.orgId, table.outcomeStatus),
     index('decision_scorebacks_org_evaluated_idx').on(table.orgId, table.evaluatedAt),
     uniqueIndex('decision_scorebacks_org_decision_idx').on(table.orgId, table.decisionId),
+  ],
+)
+
+// ── ExecutiveOS — agent runs / insights / actions ──────────────────────────
+//
+// Substrate for the Nzila ExecutiveOS autonomous agent stack
+// (Chief of Staff, CFO, RevOps, Platform Reliability, etc.).
+// Every agent invocation produces:
+//   - a run record (audit + telemetry)
+//   - 0..N insights (observations)
+//   - 0..N actions (insight | recommendation | draft_action) which may
+//     require human approval before execution.
+// Approvals are tracked inline; material executions write back here.
+
+export const executiveAgentRuns = pgTable(
+  'executive_agent_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id').notNull().references(() => orgs.id),
+    agentKey: varchar('agent_key', { length: 64 }).notNull(),
+    agentVersion: varchar('agent_version', { length: 16 }).notNull().default('v1'),
+    triggeredBy: varchar('triggered_by', { length: 32 }).notNull().default('schedule'),
+    actorId: varchar('actor_id', { length: 128 }),
+    correlationId: varchar('correlation_id', { length: 64 }),
+    status: varchar('status', { length: 16 }).notNull().default('succeeded'),
+    durationMs: integer('duration_ms').notNull().default(0),
+    inputDigest: jsonb('input_digest'),
+    summary: text('summary'),
+    errorMessage: text('error_message'),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('executive_agent_runs_org_agent_idx').on(table.orgId, table.agentKey, table.startedAt),
+    index('executive_agent_runs_org_status_idx').on(table.orgId, table.status, table.startedAt),
+    index('executive_agent_runs_org_correlation_idx').on(table.orgId, table.correlationId),
+  ],
+)
+
+export const executiveAgentInsights = pgTable(
+  'executive_agent_insights',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id').notNull().references(() => orgs.id),
+    runId: uuid('run_id').notNull().references(() => executiveAgentRuns.id, { onDelete: 'cascade' }),
+    agentKey: varchar('agent_key', { length: 64 }).notNull(),
+    domain: varchar('domain', { length: 32 }).notNull(),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    severity: varchar('severity', { length: 16 }).notNull().default('info'),
+    confidence: real('confidence').notNull().default(0.5),
+    evidence: jsonb('evidence'),
+    consequenceIfIgnored: text('consequence_if_ignored'),
+    recommendedNextStep: text('recommended_next_step'),
+    dismissedAt: timestamp('dismissed_at', { withTimezone: true }),
+    dismissedBy: varchar('dismissed_by', { length: 128 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('executive_agent_insights_org_agent_idx').on(table.orgId, table.agentKey, table.createdAt),
+    index('executive_agent_insights_org_severity_idx').on(table.orgId, table.severity, table.createdAt),
+    index('executive_agent_insights_org_domain_idx').on(table.orgId, table.domain, table.createdAt),
+    index('executive_agent_insights_run_idx').on(table.runId),
+  ],
+)
+
+export const executiveAgentActions = pgTable(
+  'executive_agent_actions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id').notNull().references(() => orgs.id),
+    runId: uuid('run_id').notNull().references(() => executiveAgentRuns.id, { onDelete: 'cascade' }),
+    insightId: uuid('insight_id').references(() => executiveAgentInsights.id, { onDelete: 'set null' }),
+    agentKey: varchar('agent_key', { length: 64 }).notNull(),
+    actionClass: varchar('action_class', { length: 24 }).notNull(),
+    title: text('title').notNull(),
+    description: text('description'),
+    payload: jsonb('payload'),
+    requiresApproval: boolean('requires_approval').notNull().default(true),
+    approvalState: varchar('approval_state', { length: 16 }).notNull().default('pending'),
+    approverId: varchar('approver_id', { length: 128 }),
+    approvedAt: timestamp('approved_at', { withTimezone: true }),
+    rejectionReason: text('rejection_reason'),
+    executedAt: timestamp('executed_at', { withTimezone: true }),
+    executionResult: jsonb('execution_result'),
+    executionStatus: varchar('execution_status', { length: 16 }).notNull().default('not_executed'),
+    confidence: real('confidence').notNull().default(0.5),
+    riskLevel: varchar('risk_level', { length: 16 }).notNull().default('low'),
+    dueDate: date('due_date'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('executive_agent_actions_org_state_idx').on(table.orgId, table.approvalState, table.createdAt),
+    index('executive_agent_actions_org_agent_idx').on(table.orgId, table.agentKey, table.createdAt),
+    index('executive_agent_actions_org_class_idx').on(table.orgId, table.actionClass, table.createdAt),
+    index('executive_agent_actions_org_due_idx').on(table.orgId, table.dueDate),
+    index('executive_agent_actions_run_idx').on(table.runId),
+  ],
+)
+
+// ── Learning loop: recommendation memory ──────────────────────────────────
+// Persistent, ranked recommendations that survive across agent runs so we
+// can correlate outcome quality back to the original signal.
+export const executiveRecommendations = pgTable(
+  'executive_recommendations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id').notNull().references(() => orgs.id),
+    /** Stable key so the same underlying signal dedupes across runs, e.g. `churn-risk:<accountId>`. */
+    dedupeKey: varchar('dedupe_key', { length: 256 }).notNull(),
+    sourceAgent: varchar('source_agent', { length: 64 }).notNull(),
+    sourceRunId: uuid('source_run_id'),
+    sourceActionId: uuid('source_action_id'),
+    kind: varchar('kind', { length: 16 }).notNull(), // 'risk' | 'opportunity' | 'task'
+    domains: jsonb('domains').notNull().default([]),
+    title: text('title').notNull(),
+    narrative: text('narrative').notNull(),
+    /** Ranked score snapshot at time of first sighting. */
+    rankScore: real('rank_score').notNull(),
+    rankBucket: varchar('rank_bucket', { length: 16 }).notNull(),
+    rankExplanation: jsonb('rank_explanation').notNull().default([]),
+    confidence: real('confidence').notNull().default(0.5),
+    reversibility: real('reversibility').notNull().default(0.5),
+    estimatedValueCad: numeric('estimated_value_cad', { precision: 18, scale: 2 }),
+    owner: varchar('owner', { length: 128 }),
+    evidence: jsonb('evidence').notNull().default({}),
+    /** Lifecycle: open → accepted/rejected/postponed/modified → closed */
+    status: varchar('status', { length: 24 }).notNull().default('open'),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    closedAt: timestamp('closed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('executive_recommendations_org_dedupe_idx').on(table.orgId, table.dedupeKey),
+    index('executive_recommendations_org_status_idx').on(table.orgId, table.status, table.rankScore),
+    index('executive_recommendations_org_kind_idx').on(table.orgId, table.kind, table.rankBucket),
+    index('executive_recommendations_org_agent_idx').on(table.orgId, table.sourceAgent),
+  ],
+)
+
+export const executiveRecommendationFeedback = pgTable(
+  'executive_recommendation_feedback',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    recommendationId: uuid('recommendation_id').notNull().references(() => executiveRecommendations.id, { onDelete: 'cascade' }),
+    actorId: varchar('actor_id', { length: 128 }).notNull(),
+    /** 'accept' | 'reject' | 'postpone' | 'modify' | 'mark_wrong' | 'mark_high_impact' */
+    verdict: varchar('verdict', { length: 24 }).notNull(),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('executive_recommendation_feedback_rec_idx').on(table.recommendationId, table.createdAt),
+    index('executive_recommendation_feedback_verdict_idx').on(table.verdict),
+  ],
+)
+
+export const executiveRecommendationOutcomes = pgTable(
+  'executive_recommendation_outcomes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    recommendationId: uuid('recommendation_id').notNull().references(() => executiveRecommendations.id, { onDelete: 'cascade' }),
+    /** Concrete outcome class: 'resolved' | 'escalated' | 'fizzled' | 'blocked' | 'unknown' */
+    outcome: varchar('outcome', { length: 24 }).notNull(),
+    realizedValueCad: numeric('realized_value_cad', { precision: 18, scale: 2 }),
+    daysToResolve: integer('days_to_resolve'),
+    notes: text('notes'),
+    recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('executive_recommendation_outcomes_rec_idx').on(table.recommendationId, table.recordedAt),
+    index('executive_recommendation_outcomes_class_idx').on(table.outcome),
+  ],
+)
+
+/**
+ * Periodic snapshot of the top-N ranked recommendations so we can trend
+ * priority drift over time (was "X was top-5 last week, now backlog — why?").
+ */
+export const executivePrioritySnapshots = pgTable(
+  'executive_priority_snapshots',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id').notNull().references(() => orgs.id),
+    snapshotAt: timestamp('snapshot_at', { withTimezone: true }).notNull().defaultNow(),
+    /** JSON array of { recommendationId, rankScore, rankBucket, title }, ordered by score desc. */
+    topRanked: jsonb('top_ranked').notNull().default([]),
+    /** Summary metrics at snapshot time. */
+    metrics: jsonb('metrics').notNull().default({}),
+  },
+  (table) => [
+    index('executive_priority_snapshots_org_time_idx').on(table.orgId, table.snapshotAt),
   ],
 )

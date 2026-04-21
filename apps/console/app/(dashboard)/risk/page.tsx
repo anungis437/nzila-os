@@ -15,14 +15,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
-import { approvals, platformCostBudgetBreaches, auditEvents } from '@nzila/db/schema'
-import { count, eq, desc } from 'drizzle-orm'
+import { approvals, platformCostBudgetBreaches } from '@nzila/db/schema'
+import { count, eq } from 'drizzle-orm'
 import fs from 'node:fs'
 import path from 'node:path'
-import {
-  computeOpsScore,
-  computeOpsScoreDelta,
-} from '@nzila/platform-ops'
+import { computeOpsScore } from '@nzila/platform-ops'
 import {
   ShieldExclamationIcon,
   ExclamationTriangleIcon,

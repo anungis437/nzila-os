@@ -16,6 +16,8 @@
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.0.0",
     "@nzila/db": "workspace:*",
+    "@nzila/fsm-core": "workspace:*",
+    "@nzila/itsm-core": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-event-fabric": "workspace:*",
     "@nzila/platform-observability": "workspace:*",

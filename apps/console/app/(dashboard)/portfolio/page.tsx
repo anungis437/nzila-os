@@ -21,9 +21,10 @@ import {
   BuildingOffice2Icon,
   ArrowRightIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
 } from '@heroicons/react/24/outline'
 import { getCapitalPriorityRows } from '@/lib/executive-intelligence'
+import { PRODUCT_SCORE_LABELS } from '@nzila/itsm-core'
+import type { PortfolioProduct, ProductScoreCategory } from '@nzila/itsm-core'
 
 export const dynamic = 'force-dynamic'
 
@@ -171,6 +172,16 @@ export default async function PortfolioPage() {
   const hold = products.filter((p) => p.capitalAction === 'Hold')
   const cutReview = products.filter((p) => p.capitalAction === 'Cut review')
 
+  const opsProductsRaw: PortfolioProduct[] | null = null
+  const opsProducts: PortfolioProduct[] = opsProductsRaw ?? [
+    { key: 'union_eyes' as const, label: 'Union Eyes', revenueScore: 85, closeabilityScore: 75, supportBurden: 30, founderEnergy: 40, strategicFit: 90, marketPull: 80, buildMaturity: 70, recommendation: 'double_down' as const, recommendationNote: 'Anchor product. COSATU + union segment. Double down on sales.' },
+    { key: 'flow' as const, label: 'Flow', revenueScore: 70, closeabilityScore: 60, supportBurden: 20, founderEnergy: 30, strategicFit: 75, marketPull: 65, buildMaturity: 80, recommendation: 'maintain' as const, recommendationNote: 'Clean product. Low burden. Maintain and keep pipeline warm.' },
+    { key: 'faircase' as const, label: 'FairCase', revenueScore: 60, closeabilityScore: 55, supportBurden: 70, founderEnergy: 60, strategicFit: 65, marketPull: 50, buildMaturity: 55, recommendation: 'incubate' as const, recommendationNote: 'High support burden this quarter. Invest in quality before scaling.' },
+    { key: 'agrimo' as const, label: 'Agrimo', revenueScore: 80, closeabilityScore: 45, supportBurden: 50, founderEnergy: 55, strategicFit: 70, marketPull: 70, buildMaturity: 50, recommendation: 'incubate' as const, recommendationNote: 'Strong market pull but incomplete build. Hold cadence at current client.' },
+    { key: 'zonga' as const, label: 'Zonga', revenueScore: 65, closeabilityScore: 40, supportBurden: 45, founderEnergy: 50, strategicFit: 60, marketPull: 55, buildMaturity: 40, recommendation: 'incubate' as const, recommendationNote: 'Pilot stalled. Need to unblock onboarding before next sale.' },
+    { key: 'platform' as const, label: 'Platform', revenueScore: 40, closeabilityScore: 20, supportBurden: 15, founderEnergy: 25, strategicFit: 95, marketPull: 30, buildMaturity: 85, recommendation: 'maintain' as const, recommendationNote: 'Critical infrastructure. Maintain. Not a revenue product.' },
+  ]
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
 
@@ -311,6 +322,70 @@ export default async function PortfolioPage() {
           </div>
         </div>
       )}
+
+      {/* Ops Product Allocation */}
+      <div className="bg-slate-950 border border-slate-800 rounded-xl p-6">
+        <div className="mb-4">
+          <h2 className="font-semibold text-white text-sm">Ops Product Allocation — 7-Dimension Scoring</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Revenue potential · Closeability · Support burden (↓) · Founder energy (↓) · Strategic fit · Market pull · Build maturity</p>
+        </div>
+        <div className="space-y-3">
+          {opsProducts.map((product: PortfolioProduct) => {
+            const recColor: Record<ProductScoreCategory, string> = {
+              double_down: 'bg-emerald-900/60 text-emerald-300 border border-emerald-700',
+              maintain: 'bg-blue-900/60 text-blue-300 border border-blue-700',
+              incubate: 'bg-amber-900/60 text-amber-300 border border-amber-600',
+              pause: 'bg-slate-800 text-slate-400 border border-slate-700',
+            }
+            const dimensions: { key: keyof PortfolioProduct; label: string; invert?: boolean }[] = [
+              { key: 'revenueScore', label: 'Revenue' },
+              { key: 'closeabilityScore', label: 'Closeable' },
+              { key: 'supportBurden', label: 'Support', invert: true },
+              { key: 'founderEnergy', label: 'Energy', invert: true },
+              { key: 'strategicFit', label: 'Strategic' },
+              { key: 'marketPull', label: 'Market' },
+              { key: 'buildMaturity', label: 'Build' },
+            ]
+            return (
+              <div key={product.key} className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{product.label}</p>
+                    {product.recommendationNote && (
+                      <p className="text-xs text-slate-400 mt-0.5">{product.recommendationNote}</p>
+                    )}
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${recColor[product.recommendation]}`}>
+                    {PRODUCT_SCORE_LABELS[product.recommendation]}
+                  </span>
+                </div>
+                <div className="grid grid-cols-7 gap-1.5">
+                  {dimensions.map(dim => {
+                    const rawVal = product[dim.key] as number
+                    const displayVal = dim.invert ? 100 - rawVal : rawVal
+                    const barColor =
+                      displayVal >= 70 ? 'bg-emerald-500' :
+                      displayVal >= 40 ? 'bg-amber-500' :
+                      'bg-red-500'
+                    return (
+                      <div key={dim.key} className="flex flex-col items-center gap-1">
+                        <div className="h-16 w-full bg-slate-800 rounded flex flex-col justify-end overflow-hidden">
+                          <div
+                            className={`w-full rounded-sm ${barColor} transition-all`}
+                            style={{ height: `${displayVal}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 text-center leading-tight">{dim.label}</p>
+                        <p className={`text-[10px] font-medium ${barColor.replace('bg-', 'text-')}`}>{rawVal}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Decision Framework */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">

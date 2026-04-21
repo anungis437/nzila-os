@@ -76,6 +76,9 @@ export const ORG_SCOPED_TABLES = [
   'executionInitiatives',
   'executiveDecisions',
   'decisionScorebacks',
+  'executiveAgentRuns',
+  'executiveAgentInsights',
+  'executiveAgentActions',
 
   // ── payments.ts ─────────────────────────────────────────
   'stripeConnections',

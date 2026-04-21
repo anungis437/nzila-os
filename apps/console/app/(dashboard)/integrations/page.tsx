@@ -153,7 +153,7 @@ const catalog: CatalogItem[] = [
   },
 ]
 
-function StatusBadge({ status }: { status: CatalogItem['status'] }) {
+function StatusBadge({ status: _status }: { status: CatalogItem['status'] }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
       <span className="h-1.5 w-1.5 rounded-full bg-green-500" />

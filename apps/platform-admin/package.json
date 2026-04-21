@@ -17,6 +17,7 @@
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-core": "workspace:*",
     "@nzila/integrations-runtime": "workspace:*",
+    "@nzila/itsm-core": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",

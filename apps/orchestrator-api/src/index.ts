@@ -12,6 +12,7 @@ import { runRoutes } from './routes/runs.js'
 import { metricsRoutes } from './routes/metrics.js'
 import { statusRoutes } from './routes/status.js'
 import { executeRoutes } from './routes/execute.js'
+import { itsmRoutes } from './routes/itsm.js'
 import { startExecutionRecoveryLoop } from './execution-engine.js'
 import { createLogger } from '@nzila/os-core'
 import { getEventBus } from './platform.js'
@@ -143,6 +144,7 @@ app.register(runRoutes, { prefix: '/runs' })
 app.register(statusRoutes, { prefix: '/status' })
 app.register(proofCenterRoutes, { prefix: '/api/proof-center' })
 app.register(executeRoutes, { prefix: '/execute' })
+app.register(itsmRoutes, { prefix: '/itsm' })
 
 // ── Start ──
 async function main() {
