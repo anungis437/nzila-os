@@ -21,6 +21,7 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
+| WeekOne | 4 | incubating | hold | pre-revenue | internal-proof | medium |
 | Zonga | 4 | incubating | hold | pre-revenue | internal-proof | low |
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
@@ -52,6 +53,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |
 | NACP Exams | 3.6 | HOLD | INCUBATING | internal-only |
 | Trade | 3.6 | HOLD | INCUBATING | internal-only |
+| WeekOne | 4.6 | HOLD | UNREGISTERED | internal-only |
 | Zonga | 4.4 | HOLD | INCUBATING | internal-only |
 | Mobility Client Portal | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Platform Admin | 2.0 | SUNSET | EXPERIMENTAL | internal-only |

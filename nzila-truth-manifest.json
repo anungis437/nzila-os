@@ -32,6 +32,7 @@
     "mobility": "incubating",
     "nacp-exams": "incubating",
     "trade": "incubating",
+    "weekone": "incubating",
     "zonga": "incubating",
     "mobility-client-portal": "frozen",
     "platform-admin": "frozen"
@@ -191,6 +192,17 @@
       "revenue_status": "pre-revenue",
       "priority": "low"
     },
+    "weekone": {
+      "registry_tier": "UNREGISTERED",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
     "zonga": {
       "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
@@ -254,6 +266,7 @@
         "mobility",
         "nacp-exams",
         "trade",
+        "weekone",
         "zonga"
       ],
       "TIER 5 — Sunset": [
@@ -286,6 +299,7 @@
         "mobility",
         "nacp-exams",
         "trade",
+        "weekone",
         "zonga"
       ],
       "sunset": [

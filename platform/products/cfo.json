@@ -1,0 +1,22 @@
+{
+  "slug": "cfo",
+  "name": "CFO",
+  "tier": 2,
+  "tierLabel": "growth",
+  "status": "pilot",
+  "owner": "Nzila Ventures",
+  "pricingTier": "growth",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "tier-2-internal",
+  "launchStage": "internal-beta",
+  "publicVisible": false,
+  "gtmPosture": "maintain",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Finance workflow option that can graduate if customer demand hardens.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

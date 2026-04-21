@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "byPricingTier": {
+    "enterprise": [
+      "abr",
+      "mobility",
+      "union-eyes"
+    ],
+    "growth": [
+      "agrimo",
+      "cfo",
+      "cora",
+      "flow",
+      "nacp-exams",
+      "trade"
+    ],
+    "n/a": [
+      "console",
+      "control-plane",
+      "mobility-client-portal",
+      "orchestrator-api",
+      "partners",
+      "platform-admin",
+      "web",
+      "weekone"
+    ],
+    "consumer": [
+      "zonga"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "slug": "control-plane",
+  "name": "Control Plane",
+  "tier": 3,
+  "tierLabel": "component",
+  "status": "internal",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "internal-control-plane",
+  "launchStage": "internal-only",
+  "publicVisible": false,
+  "gtmPosture": "internal-only",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Operational governance engine supporting all products and control loops.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

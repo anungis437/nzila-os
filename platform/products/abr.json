@@ -1,0 +1,22 @@
+{
+  "slug": "abr",
+  "name": "FAIRCASE",
+  "tier": 1,
+  "tierLabel": "flagship",
+  "status": "pilot",
+  "owner": "Nzila Ventures",
+  "pricingTier": "enterprise",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "tier-1-public",
+  "launchStage": "pilot",
+  "publicVisible": true,
+  "gtmPosture": "sell-now",
+  "proofLevel": "pilot-proof",
+  "strategicRole": "Flagship justice-and-equity commercial wedge with enterprise governance readiness.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

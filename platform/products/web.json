@@ -1,0 +1,22 @@
+{
+  "slug": "web",
+  "name": "Web",
+  "tier": 3,
+  "tierLabel": "component",
+  "status": "pilot",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "tier-1-public",
+  "launchStage": "ga",
+  "publicVisible": true,
+  "gtmPosture": "maintain",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Commercial front door and lead-generation layer for the portfolio.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

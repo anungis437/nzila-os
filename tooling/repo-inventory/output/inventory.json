@@ -1,10 +1,10 @@
 {
   "generatedAt": "2026-04-21T00:00:00.000Z",
-  "appCount": 17,
+  "appCount": 18,
   "packageCount": 170,
   "workflowCount": 43,
-  "contractTestCount": 218,
-  "tsTestFileCount": 1215,
+  "contractTestCount": 219,
+  "tsTestFileCount": 1217,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -530,7 +530,29 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 73
+      "codeFileCount": 81
+    },
+    {
+      "name": "weekone",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3009,
+      "hasReadme": false,
+      "hasEnvExample": false,
+      "dependsOnPlatformShell": true,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "ai-sdk",
+        "config",
+        "db",
+        "os-core",
+        "payments-stripe",
+        "platform-auth",
+        "platform-shell",
+        "ui"
+      ],
+      "purpose": "",
+      "codeFileCount": 45
     },
     {
       "name": "zonga",

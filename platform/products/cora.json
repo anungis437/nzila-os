@@ -1,0 +1,22 @@
+{
+  "slug": "cora",
+  "name": "Cora",
+  "tier": 4,
+  "tierLabel": "lab",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "growth",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "tier-2-public",
+  "launchStage": "pilot",
+  "publicVisible": true,
+  "gtmPosture": "hold",
+  "proofLevel": "none",
+  "strategicRole": "Early-stage concept kept as an option rather than a current operating priority.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

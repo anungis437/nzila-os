@@ -1,0 +1,22 @@
+{
+  "slug": "orchestrator-api",
+  "name": "Orchestrator API",
+  "tier": 3,
+  "tierLabel": "component",
+  "status": "internal",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": true,
+  "finopsEnabled": true,
+  "trustProfile": "internal-control-plane",
+  "launchStage": "internal-only",
+  "publicVisible": false,
+  "gtmPosture": "internal-only",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Shared orchestration backbone that remains important operationally but is not a standalone commercial SKU.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

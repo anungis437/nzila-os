@@ -2,7 +2,7 @@
   "generated_at": "2026-04-21",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 17,
+    "total_products": 18,
     "sell_now_count": 3,
     "internal_only_count": 3,
     "frozen_count": 2
@@ -23,7 +23,7 @@
       },
       {
         "tier": 4,
-        "count": 6
+        "count": 7
       },
       {
         "tier": 5,
@@ -41,7 +41,7 @@
       },
       {
         "status": "incubating",
-        "count": 6
+        "count": 7
       },
       {
         "status": "internal",
@@ -235,6 +235,18 @@
       "readiness_tier": "internal-only",
       "registry_tier": "INCUBATING",
       "dev_port": 3008
+    },
+    {
+      "id": "weekone",
+      "name": "WeekOne",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 4.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
     },
     {
       "id": "zonga",

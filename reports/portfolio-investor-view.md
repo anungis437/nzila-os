@@ -22,6 +22,7 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility | incubating | Mobility option retained for future demand rather than current execution focus. | none | HOLD |
 | NACP Exams | incubating | Certification workflow option with limited current commercial proof. | none | HOLD |
 | Trade | incubating | Trade venture option that stays in incubation until evidence improves. | none | HOLD |
+| WeekOne | incubating | Onboarding and first-week activation surface for new tenants across the portfolio. | internal-proof | HOLD |
 | Zonga | incubating | Future growth option in the creator economy pending stronger market evidence. | internal-proof | HOLD |
 
 ## Internal R&D

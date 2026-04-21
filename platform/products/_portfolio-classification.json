@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "flagship": [
+    "abr",
+    "flow",
+    "union-eyes"
+  ],
+  "growth": [
+    "cfo",
+    "partners"
+  ],
+  "component": [
+    "console",
+    "control-plane",
+    "orchestrator-api",
+    "web"
+  ],
+  "lab": [
+    "agrimo",
+    "cora",
+    "mobility",
+    "nacp-exams",
+    "trade",
+    "weekone",
+    "zonga"
+  ],
+  "sunset": [
+    "mobility-client-portal",
+    "platform-admin"
+  ]
+}

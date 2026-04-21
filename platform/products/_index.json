@@ -1,0 +1,114 @@
+{
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "count": 18,
+  "products": [
+    {
+      "slug": "abr",
+      "tier": 1,
+      "tierLabel": "flagship",
+      "publicVisible": true
+    },
+    {
+      "slug": "agrimo",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "cfo",
+      "tier": 2,
+      "tierLabel": "growth",
+      "publicVisible": false
+    },
+    {
+      "slug": "console",
+      "tier": 3,
+      "tierLabel": "component",
+      "publicVisible": false
+    },
+    {
+      "slug": "control-plane",
+      "tier": 3,
+      "tierLabel": "component",
+      "publicVisible": false
+    },
+    {
+      "slug": "cora",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": true
+    },
+    {
+      "slug": "flow",
+      "tier": 1,
+      "tierLabel": "flagship",
+      "publicVisible": true
+    },
+    {
+      "slug": "mobility",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "mobility-client-portal",
+      "tier": 5,
+      "tierLabel": "sunset",
+      "publicVisible": false
+    },
+    {
+      "slug": "nacp-exams",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "orchestrator-api",
+      "tier": 3,
+      "tierLabel": "component",
+      "publicVisible": false
+    },
+    {
+      "slug": "partners",
+      "tier": 2,
+      "tierLabel": "growth",
+      "publicVisible": false
+    },
+    {
+      "slug": "platform-admin",
+      "tier": 5,
+      "tierLabel": "sunset",
+      "publicVisible": false
+    },
+    {
+      "slug": "trade",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "union-eyes",
+      "tier": 1,
+      "tierLabel": "flagship",
+      "publicVisible": true
+    },
+    {
+      "slug": "web",
+      "tier": 3,
+      "tierLabel": "component",
+      "publicVisible": true
+    },
+    {
+      "slug": "weekone",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "zonga",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": true
+    }
+  ]
+}

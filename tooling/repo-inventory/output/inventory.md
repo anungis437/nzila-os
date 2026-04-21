@@ -6,11 +6,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Apps | 17 |
+| Apps | 18 |
 | Packages | 170 |
 | GitHub Workflows | 43 |
-| Contract Test Files | 218 |
-| TS/JS Test Files | 1215 |
+| Contract Test Files | 219 |
+| TS/JS Test Files | 1217 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -32,7 +32,8 @@
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
 | union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3146 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 73 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| weekone | Next.js | 3009 | ❌ | ❌ | ✅ | ✅ | 45 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 434 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows

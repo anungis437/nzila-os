@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "products": [
+    {
+      "slug": "abr",
+      "name": "FAIRCASE",
+      "trustProfile": "tier-1-public",
+      "launchStage": "pilot"
+    },
+    {
+      "slug": "cora",
+      "name": "Cora",
+      "trustProfile": "tier-2-public",
+      "launchStage": "pilot"
+    },
+    {
+      "slug": "flow",
+      "name": "Flow",
+      "trustProfile": "tier-1-public",
+      "launchStage": "pilot"
+    },
+    {
+      "slug": "union-eyes",
+      "name": "Union Eyes",
+      "trustProfile": "tier-1-public",
+      "launchStage": "pilot-paid"
+    },
+    {
+      "slug": "web",
+      "name": "Web",
+      "trustProfile": "tier-1-public",
+      "launchStage": "ga"
+    },
+    {
+      "slug": "zonga",
+      "name": "Zonga",
+      "trustProfile": "tier-2-public",
+      "launchStage": "early-access"
+    }
+  ]
+}

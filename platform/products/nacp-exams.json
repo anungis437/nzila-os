@@ -1,0 +1,22 @@
+{
+  "slug": "nacp-exams",
+  "name": "NACP Exams",
+  "tier": 4,
+  "tierLabel": "lab",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "growth",
+  "telemetryRequired": false,
+  "finopsEnabled": true,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "hold",
+  "proofLevel": "none",
+  "strategicRole": "Certification workflow option with limited current commercial proof.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

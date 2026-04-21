@@ -1,0 +1,22 @@
+{
+  "slug": "partners",
+  "name": "Partners",
+  "tier": 2,
+  "tierLabel": "growth",
+  "status": "pilot",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": false,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "internal-only",
+  "publicVisible": false,
+  "gtmPosture": "maintain",
+  "proofLevel": "none",
+  "strategicRole": "Partner workflow option with selective growth value if external demand appears.",
+  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}
