@@ -178,7 +178,7 @@ export default async function CollectionsPage() {
       <section className="mb-8">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Insights</h2>
         {insights.length === 0 ? (
-          <p className="text-sm text-slate-500">No insights yet. Click "Run now" to refresh against live AR.</p>
+          <p className="text-sm text-slate-500">No insights yet. Click &quot;Run now&quot; to refresh against live AR.</p>
         ) : (
           <ul className="space-y-2">
             {insights.map((i) => (

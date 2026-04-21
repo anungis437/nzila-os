@@ -151,7 +151,7 @@ export default async function ChiefOfStaffPage() {
         <div>
           <h1 className="text-3xl font-semibold text-slate-900">Chief of Staff</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Coordinates leadership priorities. Surfaces today's decisive next steps from
+            Coordinates leadership priorities. Surfaces today&apos;s decisive next steps from
             initiatives, decisions, treasury, and founder time signals.
           </p>
         </div>
@@ -173,7 +173,7 @@ export default async function ChiefOfStaffPage() {
 
       {orgId && !lastRun && (
         <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
-          No runs yet. Click <strong>Run now</strong> to surface today's priorities.
+          No runs yet. Click <strong>Run now</strong> to surface today&apos;s priorities.
         </div>
       )}
 
