@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --navy: 220 40% 9%;
+  --navy-light: 215 28% 17%;
+  --navy-mid: 218 34% 14%;
+  --electric: 217 91% 53%;
+  --electric-light: 213 94% 68%;
+  --gold: 40 55% 55%;
+  --gold-light: 44 85% 76%;
+  --emerald: 160 84% 39%;
+  --coral: 347 77% 50%;
+  --violet: 258 90% 66%;
+
+  --background: 0 0% 100%;
+  --foreground: 220 40% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 40% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 40% 9%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 215 20% 95%;
+  --secondary-foreground: 220 40% 9%;
+  --muted: 215 20% 95%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 215 20% 95%;
+  --accent-foreground: 220 40% 9%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 217 91% 53%;
+  --radius: 0.75rem;
+
+  --chart-1: 217 91% 53%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 40 55% 55%;
+  --chart-4: 258 90% 66%;
+  --chart-5: 347 77% 50%;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 220 40% 9%;
+  --sidebar-primary: 217 91% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 20% 95%;
+  --sidebar-accent-foreground: 220 40% 9%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217 91% 53%;
+}
+
+.dark {
+  --background: 220 40% 9%;
+  --foreground: 210 20% 98%;
+  --card: 218 34% 14%;
+  --card-foreground: 210 20% 98%;
+  --popover: 218 34% 14%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 215 28% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 215 28% 17%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 28% 17%;
+  --input: 215 28% 17%;
+  --ring: 217 91% 53%;
+
+  --chart-1: 213 94% 68%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 44 85% 76%;
+  --chart-4: 258 90% 66%;
+  --chart-5: 347 77% 50%;
+
+  --sidebar-background: 218 34% 14%;
+  --sidebar-foreground: 210 20% 98%;
+  --sidebar-primary: 217 91% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 28% 17%;
+  --sidebar-accent-foreground: 210 20% 98%;
+  --sidebar-border: 215 28% 17%;
+  --sidebar-ring: 217 91% 53%;
+}
+
+/* ── Base Styles ───────────────────────────────────────────── */
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Premium Utility Classes ───────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #d4a843 50%, #60a5fa 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-x 6s ease infinite;
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+/* ── WeekOne Utility Classes ───────────────────────────────── */
+.metric-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  transition: box-shadow 0.2s ease;
+}
+.metric-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.runway-bar {
+  height: 8px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  overflow: hidden;
+}
+.runway-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}

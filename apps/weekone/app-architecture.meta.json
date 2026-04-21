@@ -1,0 +1,10 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "lib", "components", "app"],
+  "layers_missing": [],
+  "exceptions": [],
+  "migration_status": "initial",
+  "priority_migrations": [],
+  "completed_migrations": [],
+  "app_tier": "MVP"
+}

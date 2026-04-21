@@ -1,6 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
   "globalPassThroughEnv": [
     "USERNAME",
     "COMPUTERNAME",
@@ -24,7 +26,9 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "inputs": [
         "src/**",
         "app/**",
@@ -37,7 +41,11 @@
         "tailwind.config.*",
         "postcss.config.*"
       ],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ],
       "env": [
         "AZURE_AD_CLIENT_ID",
         "AZURE_AD_TENANT_ID",
@@ -49,7 +57,8 @@
         "NEXT_PUBLIC_CFO_URL",
         "NEXT_PUBLIC_APP_URL",
         "AUTH_SECRET",
-        "NODE_ENV"
+        "NODE_ENV",
+        "NEXT_PUBLIC_WEEKONE_URL"
       ]
     },
     "dev": {
@@ -57,7 +66,9 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "inputs": [
         "src/**",
         "app/**",
@@ -69,7 +80,9 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "inputs": [
         "src/**",
         "app/**",
@@ -80,7 +93,9 @@
       ]
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "inputs": [
         "src/**",
         "app/**",
@@ -94,8 +109,12 @@
       ]
     },
     "test:coverage": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
     },
     "clean": {
       "cache": false

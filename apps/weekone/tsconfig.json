@@ -1,0 +1,20 @@
+{
+  "extends": "@nzila/config/tsconfig/nextjs",
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "useUnknownInCatchVariables": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./*"],
+      "@nzila/ui": ["../../packages/ui/src"],
+      "@nzila/db": ["../../packages/db/src/index.ts"],
+      "@nzila/db/schema": ["../../packages/db/src/schema/index.ts"],
+      "@nzila/db/client": ["../../packages/db/src/client.ts"],
+      "@nzila/os-core": ["../../packages/os-core/src/index.ts"],
+      "@nzila/ai-sdk": ["../../packages/ai-sdk/src"],
+      "@nzila/payments-stripe": ["../../packages/payments-stripe/src"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", ".turbo", "dist", "_legacy"]
+}

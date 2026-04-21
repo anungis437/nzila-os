@@ -201,7 +201,9 @@
     "openapi:gen:yaml": "tsx tooling/openapi-gen/src/cli.ts --format yaml",
     "build:baseline": "tsx scripts/build-baseline.ts",
     "build:baseline:save": "tsx scripts/build-baseline.ts --save",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "build:weekone": "turbo build --filter=@nzila/weekone...",
+    "dev:weekone": "turbo dev --filter=@nzila/weekone"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
