@@ -9,6 +9,9 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { DEFAULT_SLA_TARGETS } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmTickets, opsClients } from '@nzila/db/schema'
+import { sql, eq, and, ne } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,8 +45,32 @@ export default async function ItsmDashboardPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: pull real metrics from DB + itsm-core analytics functions
-  // e.g. computeSlaAttainment(), computeMttr()
+  // Fetch real counts from internal ops tables
+  const [openTicketsRow, liveClientsRow, overdueRow] = await Promise.all([
+    platformDb
+      .select({ count: sql<number>`count(*)::int` })
+      .from(itsmTickets)
+      .where(and(ne(itsmTickets.status, 'resolved'), ne(itsmTickets.status, 'closed')))
+      .then((rows) => rows[0] ?? { count: 0 })
+      .catch(() => ({ count: 0 })),
+    platformDb
+      .select({ count: sql<number>`count(*)::int` })
+      .from(opsClients)
+      .where(eq(opsClients.onboardingStage, 'live'))
+      .then((rows) => rows[0] ?? { count: 0 })
+      .catch(() => ({ count: 0 })),
+    platformDb
+      .select({ count: sql<number>`count(*)::int` })
+      .from(itsmTickets)
+      .where(sql`${itsmTickets.slaResolutionDue}::timestamptz < now() and ${itsmTickets.status} not in ('resolved','closed')`)
+      .then((rows) => rows[0] ?? { count: 0 })
+      .catch(() => ({ count: 0 })),
+  ])
+
+  const openTicketsCount = String(openTicketsRow.count ?? 0)
+  const liveClientsCount = String(liveClientsRow.count ?? 0)
+  const overdueCount = String(overdueRow.count ?? 0)
+
   const slaTargets = DEFAULT_SLA_TARGETS
 
   return (
@@ -63,10 +90,10 @@ export default async function ItsmDashboardPage() {
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Open Tickets" value="—" sub="Active right now" />
+        <KpiCard label="Open Tickets" value={openTicketsCount} sub="Active right now" />
         <KpiCard label="Avg MTTR" value="— h" sub="Mean time to resolve (all products)" />
-        <KpiCard label="Clients Live" value="—" sub="Fully onboarded" trend="neutral" />
-        <KpiCard label="Overdue Items" value="—" sub="Past SLA or renewal" />
+        <KpiCard label="Clients Live" value={liveClientsCount} sub="Fully onboarded" trend="neutral" />
+        <KpiCard label="Overdue Items" value={overdueCount} sub="Past SLA or renewal" />
       </div>
 
       {/* Open tickets by product */}
