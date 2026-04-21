@@ -41,7 +41,7 @@ export function generateWeeklyBrief(input: WeeklyBriefInput): WeeklyBrief {
     topDeal: input.topDeal,
   });
 
-  const weekStartDate = new Date().toISOString().split("T")[0]!;
+  const weekStartDate = new Date().toISOString().split("T")[0] ?? new Date().toISOString();
 
   return {
     weekStartDate,

@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { SectionHeader } from "@/components/ui/section-header";
+import { GenerateBriefButton } from "@/components/weekly/generate-brief-button";
 import { getDb } from "@/lib/db";
 
 interface WeeklyBrief {
@@ -45,14 +46,7 @@ export default async function WeeklyPage() {
 
         {/* Generate Button */}
         <div className="flex">
-          <form action="/api/weekly-brief" method="POST">
-            <button
-              type="submit"
-              className="rounded-md bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
-            >
-              Generate Brief
-            </button>
-          </form>
+          <GenerateBriefButton />
         </div>
 
         {briefs.length === 0 ? (
