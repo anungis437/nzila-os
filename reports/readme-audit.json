@@ -1,53 +1,31 @@
 {
-  "generatedAt": "2026-03-10T19:25:37.800Z",
-  "totalPackages": 97,
-  "criticalPackages": 58,
-  "criticalMissing": [
-    "ai-registry",
-    "integrations-core",
-    "integrations-db",
-    "integrations-hubspot",
-    "integrations-m365",
-    "integrations-runtime",
-    "integrations-whatsapp",
-    "mobility-ai",
-    "mobility-case-engine",
-    "mobility-compliance",
-    "mobility-core",
-    "mobility-family",
-    "mobility-programs",
-    "org",
-    "payments-stripe",
-    "platform-assurance",
-    "platform-compliance-snapshots",
-    "platform-cost",
-    "platform-deploy",
-    "platform-events",
-    "platform-evidence-pack",
-    "platform-export",
-    "platform-integrations-control-plane",
-    "platform-marketplace",
-    "platform-metrics",
-    "platform-observability",
-    "platform-ops",
-    "platform-performance",
-    "platform-procurement-proof",
-    "platform-proof",
-    "platform-rfp-generator",
-    "platform-rum",
-    "platform-utils",
-    "qbo"
-  ],
+  "generatedAt": "2026-04-21T16:46:39.031Z",
+  "totalPackages": 170,
+  "criticalPackages": 87,
+  "criticalMissing": [],
   "criticalStub": [],
   "nonCriticalMissing": [
     "agri-adapters",
     "agri-core",
     "agri-db",
     "agri-events",
+    "agri-forecasting",
     "agri-intelligence",
+    "agri-provenance",
+    "agri-reporting",
+    "agri-supply-chain",
+    "agri-sync-contracts",
     "agri-traceability",
+    "agrimo-core",
+    "agrimo-intelligence",
+    "audit",
+    "canadian-vocabulary",
+    "cfo-core",
+    "cfo-intelligence",
     "chatops-slack",
     "chatops-teams",
+    "clc-decision-intelligence",
+    "clc-executive-intelligence",
     "cli",
     "commerce-audit",
     "commerce-core",
@@ -64,19 +42,47 @@
     "comms-sms",
     "crm-hubspot",
     "data-lifecycle",
+    "deal-engine",
+    "enforcement",
+    "executive-os",
     "finops",
+    "fsm-core",
     "fx",
+    "governance",
+    "governed-workflow",
+    "ingestion-core",
+    "intelligence",
+    "itsm-core",
     "nacp-core",
+    "onboarding-core",
+    "pilot-mode",
     "pricing-engine",
+    "quebec-vocabulary",
+    "schema-core",
     "secrets",
+    "security",
     "tax",
     "tools-runtime",
     "trade-adapters",
     "trade-cars",
     "trade-core",
     "trade-db",
+    "ue-assistant",
+    "union-claims-financial",
     "webhooks",
-    "zonga-core"
+    "workload-intelligence",
+    "zonga-analytics",
+    "zonga-control-plane",
+    "zonga-core",
+    "zonga-economics",
+    "zonga-events",
+    "zonga-growth",
+    "zonga-intelligence",
+    "zonga-monetization",
+    "zonga-payments",
+    "zonga-rights",
+    "zonga-streaming",
+    "zonga-streaming-aws"
   ],
   "checks": [
     {
@@ -104,7 +110,37 @@
       "readmeLength": 0
     },
     {
+      "package": "agri-forecasting",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "agri-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-provenance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-reporting",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-supply-chain",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-sync-contracts",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0
@@ -116,6 +152,24 @@
       "readmeLength": 0
     },
     {
+      "package": "agrimo-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agrimo-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ai-control",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 832
+    },
+    {
       "package": "ai-core",
       "critical": true,
       "hasReadme": true,
@@ -124,8 +178,8 @@
     {
       "package": "ai-registry",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 1272
     },
     {
       "package": "ai-sdk",
@@ -134,10 +188,34 @@
       "readmeLength": 1089
     },
     {
+      "package": "audit",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "blob",
       "critical": true,
       "hasReadme": true,
       "readmeLength": 1131
+    },
+    {
+      "package": "canadian-vocabulary",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cfo-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cfo-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
     },
     {
       "package": "chatops-slack",
@@ -147,6 +225,18 @@
     },
     {
       "package": "chatops-teams",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "clc-decision-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "clc-executive-intelligence",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0
@@ -242,10 +332,22 @@
       "readmeLength": 679
     },
     {
+      "package": "contracts",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 497
+    },
+    {
       "package": "crm-hubspot",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0
+    },
+    {
+      "package": "cupe-vocabulary",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 2197
     },
     {
       "package": "data-lifecycle",
@@ -257,7 +359,25 @@
       "package": "db",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 1363
+      "readmeLength": 1357
+    },
+    {
+      "package": "deal-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "enforcement",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "events",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 460
     },
     {
       "package": "evidence",
@@ -266,7 +386,19 @@
       "readmeLength": 991
     },
     {
+      "package": "executive-os",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "finops",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "fsm-core",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0
@@ -278,38 +410,80 @@
       "readmeLength": 0
     },
     {
-      "package": "integrations-core",
-      "critical": true,
+      "package": "governance",
+      "critical": false,
       "hasReadme": false,
       "readmeLength": 0
+    },
+    {
+      "package": "governed-workflow",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ingestion-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "integrations-calendar",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 645
+    },
+    {
+      "package": "integrations-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3442
     },
     {
       "package": "integrations-db",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 3572
     },
     {
       "package": "integrations-hubspot",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2603
     },
     {
       "package": "integrations-m365",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2273
+    },
+    {
+      "package": "integrations-pension",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 574
     },
     {
       "package": "integrations-runtime",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 6306
     },
     {
       "package": "integrations-whatsapp",
       "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2176
+    },
+    {
+      "package": "intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "itsm-core",
+      "critical": false,
       "hasReadme": false,
       "readmeLength": 0
     },
@@ -328,38 +502,38 @@
     {
       "package": "mobility-ai",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 725
     },
     {
       "package": "mobility-case-engine",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2787
     },
     {
       "package": "mobility-compliance",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 666
     },
     {
       "package": "mobility-core",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2725
     },
     {
       "package": "mobility-family",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2605
     },
     {
       "package": "mobility-programs",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 1977
     },
     {
       "package": "nacp-core",
@@ -368,16 +542,28 @@
       "readmeLength": 0
     },
     {
-      "package": "org",
-      "critical": true,
+      "package": "observability",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 460
+    },
+    {
+      "package": "onboarding-core",
+      "critical": false,
       "hasReadme": false,
       "readmeLength": 0
+    },
+    {
+      "package": "org",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1891
     },
     {
       "package": "os-core",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 3560
+      "readmeLength": 3554
     },
     {
       "package": "otel-core",
@@ -388,20 +574,80 @@
     {
       "package": "payments-stripe",
       "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3636
+    },
+    {
+      "package": "pilot-mode",
+      "critical": false,
       "hasReadme": false,
       "readmeLength": 0
+    },
+    {
+      "package": "platform-agent-workflows",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 750
+    },
+    {
+      "package": "platform-ai-contract",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 664
+    },
+    {
+      "package": "platform-ai-governance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1534
+    },
+    {
+      "package": "platform-ai-query",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 798
+    },
+    {
+      "package": "platform-anomaly-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 717
     },
     {
       "package": "platform-assurance",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2396
+    },
+    {
+      "package": "platform-auth",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 768
+    },
+    {
+      "package": "platform-billing",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 685
+    },
+    {
+      "package": "platform-change-management",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1164
+    },
+    {
+      "package": "platform-commerce-org",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1602
     },
     {
       "package": "platform-compliance-snapshots",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 997
     },
     {
       "package": "platform-context-orchestrator",
@@ -410,16 +656,28 @@
       "readmeLength": 2546
     },
     {
+      "package": "platform-contracts",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1174
+    },
+    {
       "package": "platform-cost",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 774
     },
     {
       "package": "platform-data-fabric",
       "critical": true,
       "hasReadme": true,
       "readmeLength": 1891
+    },
+    {
+      "package": "platform-decision-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 6119
     },
     {
       "package": "platform-decision-graph",
@@ -430,14 +688,20 @@
     {
       "package": "platform-deploy",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2460
     },
     {
       "package": "platform-entity-graph",
       "critical": true,
       "hasReadme": true,
       "readmeLength": 1021
+    },
+    {
+      "package": "platform-environment",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1079
     },
     {
       "package": "platform-event-fabric",
@@ -448,20 +712,32 @@
     {
       "package": "platform-events",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 889
     },
     {
       "package": "platform-evidence-pack",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 982
     },
     {
       "package": "platform-export",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 451
+    },
+    {
+      "package": "platform-feature-flags",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 512
+    },
+    {
+      "package": "platform-governance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 908
     },
     {
       "package": "platform-governed-ai",
@@ -470,10 +746,40 @@
       "readmeLength": 2226
     },
     {
+      "package": "platform-integrations",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 925
+    },
+    {
+      "package": "platform-integrations-connectors",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 860
+    },
+    {
       "package": "platform-integrations-control-plane",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 1127
+    },
+    {
+      "package": "platform-integrations-types",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 828
+    },
+    {
+      "package": "platform-intelligence",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 778
+    },
+    {
+      "package": "platform-intelligence-home",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 268
     },
     {
       "package": "platform-isolation",
@@ -482,28 +788,46 @@
       "readmeLength": 1000
     },
     {
+      "package": "platform-jurisdiction-compliance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 845
+    },
+    {
       "package": "platform-knowledge-registry",
       "critical": true,
       "hasReadme": true,
       "readmeLength": 1170
     },
     {
+      "package": "platform-lakehouse",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 251
+    },
+    {
       "package": "platform-marketplace",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 808
     },
     {
       "package": "platform-metrics",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 1912
+    },
+    {
+      "package": "platform-notifications",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 699
     },
     {
       "package": "platform-observability",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 3765
     },
     {
       "package": "platform-ontology",
@@ -514,14 +838,26 @@
     {
       "package": "platform-ops",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 3301
     },
     {
       "package": "platform-performance",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 721
+    },
+    {
+      "package": "platform-pilot-metrics",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 785
+    },
+    {
+      "package": "platform-pilot-metrics-types",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 759
     },
     {
       "package": "platform-policy-engine",
@@ -532,32 +868,38 @@
     {
       "package": "platform-procurement-proof",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 3306
     },
     {
       "package": "platform-proof",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 2137
     },
     {
       "package": "platform-reasoning-engine",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 2143
+      "readmeLength": 2137
+    },
+    {
+      "package": "platform-revenue",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 709
     },
     {
       "package": "platform-rfp-generator",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 631
     },
     {
       "package": "platform-rum",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 731
     },
     {
       "package": "platform-semantic-search",
@@ -566,16 +908,22 @@
       "readmeLength": 1731
     },
     {
+      "package": "platform-shell",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 872
+    },
+    {
       "package": "platform-utils",
       "critical": true,
-      "hasReadme": false,
-      "readmeLength": 0
+      "hasReadme": true,
+      "readmeLength": 446
     },
     {
       "package": "platform-validation",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 1231
+      "readmeLength": 2178
     },
     {
       "package": "pricing-engine",
@@ -586,6 +934,18 @@
     {
       "package": "qbo",
       "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3459
+    },
+    {
+      "package": "quebec-vocabulary",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "schema-core",
+      "critical": false,
       "hasReadme": false,
       "readmeLength": 0
     },
@@ -593,7 +953,7 @@
       "package": "scripts-book",
       "critical": false,
       "hasReadme": true,
-      "readmeLength": 4806
+      "readmeLength": 5129
     },
     {
       "package": "secrets",
@@ -602,10 +962,10 @@
       "readmeLength": 0
     },
     {
-      "package": "shop-quoter",
+      "package": "security",
       "critical": false,
-      "hasReadme": true,
-      "readmeLength": 2270
+      "hasReadme": false,
+      "readmeLength": 0
     },
     {
       "package": "tax",
@@ -644,10 +1004,22 @@
       "readmeLength": 0
     },
     {
+      "package": "ue-assistant",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "ui",
       "critical": true,
       "hasReadme": true,
       "readmeLength": 828
+    },
+    {
+      "package": "union-claims-financial",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
     },
     {
       "package": "webhooks",
@@ -656,7 +1028,79 @@
       "readmeLength": 0
     },
     {
+      "package": "workload-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-analytics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-control-plane",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "zonga-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-economics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-events",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-growth",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-monetization",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-payments",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-rights",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-streaming",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-streaming-aws",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0

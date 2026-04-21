@@ -12,9 +12,9 @@ import { z } from 'zod'
 /**
  * Every Nzila application that may invoke the intelligence layer.
  */
-export type NilApp = 'ue' | 'cfo' | 'zonga' | 'agrimo' | 'flow'
+export type NilApp = 'ue' | 'cfo' | 'zonga' | 'agrimo' | 'flow' | 'itsm' | 'console'
 
-export const NIL_APPS = ['ue', 'cfo', 'zonga', 'agrimo', 'flow'] as const
+export const NIL_APPS = ['ue', 'cfo', 'zonga', 'agrimo', 'flow', 'itsm', 'console'] as const
 
 // ── Confidence & Risk ───────────────────────────────────────────────────────
 

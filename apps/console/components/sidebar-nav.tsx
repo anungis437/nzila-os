@@ -37,6 +37,11 @@ import {
   ChevronDownIcon,
   ExclamationTriangleIcon,
   DocumentDuplicateIcon,
+  CommandLineIcon,
+  CalendarDaysIcon,
+  SparklesIcon,
+  CheckCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline'
 
 const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
@@ -72,6 +77,11 @@ const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>
   ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
   DocumentDuplicateIcon,
+  CommandLineIcon,
+  CalendarDaysIcon,
+  SparklesIcon,
+  CheckCircleIcon,
+  ClockIcon,
 }
 
 export interface NavItem {

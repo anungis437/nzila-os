@@ -26,6 +26,9 @@ export * from './mobility'
 export * from './flow'
 export * from './pilot-metrics'
 export * from './executive'
+export * from './itsm'
+export * from './exec-data'
+export * from './grants'
 
 // Platform OS schemas (re-exported from dedicated packages)
 export {

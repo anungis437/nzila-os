@@ -97,6 +97,21 @@ function checkFile(filePath: string): BrokenLink[] {
       // Skip external links
       if (/^https?:\/\/|^mailto:|^#\s*$/.test(rawLink)) continue;
 
+      // Skip absolute SPA route links (Next.js routes like /command-center,
+      // /portfolio) — these are application URLs, not files.
+      if (rawLink.startsWith('/')) continue;
+
+      // Skip references to runtime/generated artifact directories that are
+      // gitignored and only exist on a developer machine or after a build.
+      if (
+        rawLink.includes('proof-artifacts/') ||
+        rawLink.includes('demo-output/') ||
+        rawLink.includes('coverage/') ||
+        rawLink.includes('coverage_html/')
+      ) {
+        continue
+      }
+
       // Anchor-only link
       if (rawLink.startsWith('#')) {
         const anchor = rawLink.slice(1);

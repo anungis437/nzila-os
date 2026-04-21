@@ -1,0 +1,34 @@
+{
+  "name": "@nzila/itsm-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./ticket-fsm": "./src/ticket-fsm.ts",
+    "./sla": "./src/sla.ts",
+    "./automation": "./src/automation.ts",
+    "./ticket-number": "./src/ticket-number.ts",
+    "./asset-risk": "./src/asset-risk.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/fsm-core": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
+    "@nzila/platform-events": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "typescript": "^6",
+    "vitest": "^4.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^10"
+  }
+}

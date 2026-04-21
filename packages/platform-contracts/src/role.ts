@@ -15,6 +15,15 @@ export const platformRoleValues = [
   'org_member',
   'org_viewer',
   'service_account',
+  // ── ITSM roles ──────────────────────────────────────────────────────────────
+  /** Frontline support technician — can triage, update, and resolve tickets */
+  'itsm_agent',
+  /** Team lead / supervisor — can assign, escalate, approve, manage queues */
+  'itsm_manager',
+  /** Designated CAB / change approver — can approve or reject change requests */
+  'itsm_change_approver',
+  /** Read-only portal access for MSP client users */
+  'itsm_client_viewer',
 ] as const
 
 export type PlatformRole = (typeof platformRoleValues)[number]
@@ -72,6 +81,10 @@ const roleHierarchy: Record<PlatformRole, number> = {
   org_member: 50,
   org_viewer: 30,
   service_account: 80,
+  itsm_agent: 45,
+  itsm_manager: 65,
+  itsm_change_approver: 55,
+  itsm_client_viewer: 20,
 }
 
 /** Check if `userRole` meets or exceeds `requiredRole` in hierarchy. */

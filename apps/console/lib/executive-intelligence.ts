@@ -23,8 +23,7 @@ import {
   weeklyFocusTargets,
   zongaRevenueEvents,
 } from '@nzila/db/schema'
-import { computeOpsScore } from '@nzila/platform-ops'
-import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, sql } from 'drizzle-orm'
 
 interface CatalogProduct {
   id: string
@@ -1014,9 +1013,6 @@ export async function getWeeklyBriefingData(): Promise<WeeklyBriefingData> {
   const prior7Quotes = signals.quotes.filter((row) => row.createdAt && row.createdAt >= previous7Start && row.createdAt < signals.since7)
   const last7Revenue = signals.zongaRevenue.filter((row) => row.occurredAt && row.occurredAt >= signals.since7).reduce((sum, row) => sum + row.amount, 0)
   const prior7Revenue = signals.zongaRevenue.filter((row) => row.occurredAt && row.occurredAt >= previous7Start && row.occurredAt < signals.since7).reduce((sum, row) => sum + row.amount, 0)
-  const last7Burn = signals.costs.reduce((sum, row) => sum + row.totalUsd, 0) / 30 * 7
-  const prior7Burn = last7Burn
-
   const improved: string[] = []
   const worsened: string[] = []
   if (last7Revenue > prior7Revenue) improved.push(`Revenue increased week over week by $${(last7Revenue - prior7Revenue).toFixed(0)}.`)

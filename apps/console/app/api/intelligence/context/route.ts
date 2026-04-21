@@ -8,6 +8,7 @@
  * Auth-gated — returns 401 for unauthenticated requests.
  */
 import { auth } from '@nzila/platform-auth/entra/server'
+import { NextResponse } from 'next/server'
 import {
   getOpenOpportunities,
   getUpcomingDeadlines,
@@ -19,10 +20,11 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const { userId } = await auth()
   if (!userId) {
-    return new Response('Unauthorized', { status: 401 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const now = new Date()
@@ -111,5 +113,5 @@ export async function GET() {
     tasksDue,
   }
 
-  return Response.json(payload)
+  return Response.json(payload, { headers: { 'x-request-id': requestId } })
 }

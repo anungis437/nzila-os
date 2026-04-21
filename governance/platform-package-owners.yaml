@@ -305,6 +305,18 @@ packages:
     tier: service
     description: "Anomaly detection across verticals"
 
+  platform-intelligence-home:
+    owner: "@nzila/ai"
+    steward: null
+    tier: service
+    description: "Funding/deal/home intelligence services"
+
+  platform-lakehouse:
+    owner: "@nzila/platform"
+    steward: null
+    tier: service
+    description: "Lakehouse adapters and query helpers"
+
   platform-agent-workflows:
     owner: "@nzila/ai"
     steward: null

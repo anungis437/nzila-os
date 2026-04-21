@@ -76,6 +76,9 @@ export const ORG_SCOPED_TABLES = [
   'executionInitiatives',
   'executiveDecisions',
   'decisionScorebacks',
+  'executiveAgentRuns',
+  'executiveAgentInsights',
+  'executiveAgentActions',
 
   // ── payments.ts ─────────────────────────────────────────
   'stripeConnections',
@@ -289,6 +292,28 @@ export const ORG_SCOPED_TABLES = [
   'commerceTimelineEvents',
   'commerceShopifyCredentials',
   'commerceShopifySyncRecords',
+
+  // ── itsm.ts (ITSM + Command Center) ─────────────────────
+  'itsmQueues',
+  'itsmSlas',
+  'itsmContracts',
+  'itsmTickets',
+  'itsmTicketEvents',
+  'itsmAssets',
+  'itsmProblems',
+  'itsmChanges',
+  'itsmApprovals',
+  'opsClients',
+  'itsmKbArticles',
+  'commandAlerts',
+  'revenueEvents',
+  'renewalTasks',
+  'productHealthSnapshots',
+  'founderPriorities',
+
+  // ── executive.ts (Founder Focus Engine) ──────────────────
+  'executiveRecommendations',
+  'executivePrioritySnapshots',
 ] as const
 
 /**
@@ -349,6 +374,21 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'aiGovernanceModels', reason: 'Global AI governance model registry — not Org-specific' },
   { table: 'aiGovernancePromptVersions', reason: 'Global prompt versioning for governance — not Org-specific' },
   { table: 'aiGovernanceReviewFlags', reason: 'Scoped via decision_id FK → aiGovernanceDecisionLog (Org-scoped)' },
+  // ── exec-data.ts (Founder Focus internal tables — no org_id) ─
+  { table: 'jobPostings', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'jobApplications', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'customerOnboardingMilestones', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'budgetLines', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'csAccounts', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'securityFindings', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'securityWaivers', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'erpInvoices', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  // ── grants.ts (Internal Founder Focus tables — no org_id) ────
+  { table: 'grants', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  { table: 'grantReports', reason: 'Internal Founder Focus tracking — not multi-tenant' },
+  // ── executive.ts (FK-scoped via recommendation_id) ────────────
+  { table: 'executiveRecommendationFeedback', reason: 'Scoped via recommendation_id FK → executiveRecommendations (Org-scoped)' },
+  { table: 'executiveRecommendationOutcomes', reason: 'Scoped via recommendation_id FK → executiveRecommendations (Org-scoped)' },
 ] as const
 
 /**

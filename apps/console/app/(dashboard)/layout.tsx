@@ -22,6 +22,8 @@ const navGroups: NavGroup[] = [
       { name: 'Briefing', href: '/briefing', icon: 'ClipboardDocumentCheckIcon' },
       { name: 'Focus', href: '/focus', icon: 'ClockIcon' },
       { name: 'Portfolio', href: '/portfolio', icon: 'BuildingOffice2Icon' },
+      { name: 'Command Center', href: '/command-center', icon: 'CommandLineIcon' },
+      { name: 'Weekly Review', href: '/weekly-review', icon: 'CalendarDaysIcon' },
     ],
   },
   // ── Zone 2: REVENUE — Sales Command Center ─────────────────────────────────
@@ -92,6 +94,19 @@ const navGroups: NavGroup[] = [
       { name: 'Performance', href: '/performance', icon: 'BoltIcon' },
       { name: 'Integrations', href: '/integrations', icon: 'PuzzlePieceIcon' },
       { name: 'Control Plane', href: '/integrations-control-plane', icon: 'WrenchScrewdriverIcon' },
+    ],
+  },
+  // ── Service Operations Layer ───────────────────────────────────────────────
+  {
+    label: 'Service Operations',
+    items: [
+      { name: 'Ops Dashboard', href: '/itsm/dashboard', icon: 'ChartBarSquareIcon' },
+      { name: 'Support Desk', href: '/itsm/queue', icon: 'CircleStackIcon' },
+      { name: 'Client Accounts', href: '/itsm/clients', icon: 'UsersIcon' },
+      { name: 'Incidents', href: '/itsm/incidents', icon: 'ExclamationTriangleIcon' },
+      { name: 'Change Log', href: '/itsm/changes', icon: 'CalendarIcon' },
+      { name: 'Knowledge Base', href: '/itsm/kb', icon: 'BookOpenIcon' },
+      { name: 'Assets & Vendors', href: '/itsm/assets', icon: 'ServerIcon' },
     ],
   },
   // ── Admin (minimal) ────────────────────────────────────────────────────────

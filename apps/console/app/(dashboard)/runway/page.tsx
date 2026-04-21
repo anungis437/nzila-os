@@ -5,7 +5,6 @@ import { platformDb } from '@nzila/db/platform'
 import { runwayAssumptions, treasurySnapshots } from '@nzila/db/schema'
 import {
   BanknotesIcon,
-  ExclamationTriangleIcon,
   ArrowTrendingUpIcon,
   ArrowPathIcon,
   ShieldExclamationIcon,

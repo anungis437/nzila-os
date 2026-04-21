@@ -1,0 +1,53 @@
+{
+  "name": "@nzila/executive-os",
+  "version": "0.1.0",
+  "description": "Nzila ExecutiveOS — governed multi-agent executive stack (Chief of Staff, CFO, RevOps, Platform, Legal, Knowledge).",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contract": "./src/contract.ts",
+    "./action-queue": "./src/action-queue.ts",
+    "./registry": "./src/registry.ts",
+    "./agents/chief-of-staff": "./src/agents/chief-of-staff.ts",
+    "./agents/internal-cfo": "./src/agents/internal-cfo.ts",
+    "./agents/treasury": "./src/agents/treasury.ts",
+    "./agents/collections": "./src/agents/collections.ts",
+    "./agents/controller": "./src/agents/controller.ts",
+    "./agents/fpa": "./src/agents/fpa.ts",
+    "./agents/tax": "./src/agents/tax.ts",
+    "./agents/revops": "./src/agents/revops.ts",
+    "./agents/cs-renewal": "./src/agents/cs-renewal.ts",
+    "./agents/partnerships": "./src/agents/partnerships.ts",
+    "./agents/grants": "./src/agents/grants.ts",
+    "./agents/reliability": "./src/agents/reliability.ts",
+    "./agents/release-guard": "./src/agents/release-guard.ts",
+    "./agents/finops": "./src/agents/finops.ts",
+    "./agents/security": "./src/agents/security.ts",
+    "./agents/audit": "./src/agents/audit.ts",
+    "./agents/legal": "./src/agents/legal.ts",
+    "./agents/knowledge-steward": "./src/agents/knowledge-steward.ts",
+    "./agents/portfolio-allocator": "./src/agents/portfolio-allocator.ts",
+    "./agents/coo": "./src/agents/coo.ts",
+    "./agents/pmo": "./src/agents/pmo.ts",
+    "./agents/product-strategy": "./src/agents/product-strategy.ts",
+    "./agents/hiring": "./src/agents/hiring.ts",
+    "./agents/chief-of-staff-v2": "./src/agents/chief-of-staff-v2.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/intelligence": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

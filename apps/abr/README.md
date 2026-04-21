@@ -1,5 +1,7 @@
 # @nzila/abr
 
+> FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
+
 FAIRCASE is NzilaOS's Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
 
 FAIRCASE is not a generic DEI LMS, generic complaint tracker, or generic legaltech tool. It is institutional accountability infrastructure.

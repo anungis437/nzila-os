@@ -3,15 +3,7 @@ import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import fs from 'node:fs'
 import path from 'node:path'
-import {
-  ArrowTrendingUpIcon,
-  CalendarDaysIcon,
-  UserGroupIcon,
-  PresentationChartLineIcon,
-  DocumentTextIcon,
-  RocketLaunchIcon,
-  TrophyIcon,
-} from '@heroicons/react/24/outline'
+import { ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
 
