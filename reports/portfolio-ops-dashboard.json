@@ -293,8 +293,8 @@
       "recommendation": "SUNSET",
       "weighted_score": 2,
       "readiness_tier": "internal-only",
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "FROZEN",
+      "dev_port": 3017
     }
   ]
 }

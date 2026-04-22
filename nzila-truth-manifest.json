@@ -238,7 +238,7 @@
       "priority": "low"
     },
     "test-scaffold-gp": {
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "FROZEN",
       "deployment_status": "frozen",
       "readiness_tier": "internal-only",
       "exposure": "internal",

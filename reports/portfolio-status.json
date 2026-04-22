@@ -1277,8 +1277,8 @@
         "readiness": 1,
         "margin_potential": 0
       },
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "FROZEN",
+      "dev_port": 3017
     }
   ]
 }
