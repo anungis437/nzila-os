@@ -101,7 +101,7 @@ jobs:
 
           STAGING_DNS_TARGET="${{ vars.DNS_STAGING_ORIGIN }}"
           if [ -z "$STAGING_DNS_TARGET" ]; then
-            STAGING_DNS_TARGET="nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+            STAGING_DNS_TARGET="nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
           fi
 
           echo "environment=$DEPLOY_ENV" >> "$GITHUB_OUTPUT"
