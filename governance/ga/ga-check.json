@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-17T21:38:36.090Z",
-  "commitSha": "60e63977",
-  "overall": "PASS",
+  "timestamp": "2026-04-22T01:18:58.711Z",
+  "commitSha": "caea4496",
+  "overall": "FAIL",
   "summary": {
     "total": 23,
-    "passed": 23,
-    "failed": 0
+    "passed": 21,
+    "failed": 2
   },
   "gates": [
     {
@@ -14,7 +14,7 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 1463
+      "durationMs": 1534
     },
     {
       "id": "ORG-REGISTRY",
@@ -51,7 +51,7 @@
       "status": "PASS",
       "details": "All apps use withAudit in API guards",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUDIT-MANDATORY",
@@ -65,14 +65,14 @@
       "name": "Evidence: verifySeal exported from seal module",
       "status": "PASS",
       "details": "generateSeal + verifySeal both exported",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-WORKFLOW-SEAL",
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -103,7 +103,7 @@
       "name": "CI gates: Governance workflow exists",
       "status": "PASS",
       "details": "nzila-governance.yml + ci.yml both present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "TRIVY-BLOCKING",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 7
+      "durationMs": 6
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -133,8 +133,8 @@
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "211 contract test files (require ≥20)",
-      "durationMs": 7
+      "details": "219 contract test files (require ≥20)",
+      "durationMs": 4
     },
     {
       "id": "CODEOWNERS",
@@ -142,7 +142,7 @@
       "status": "PASS",
       "details": "All governance paths have code ownership",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "RED-TEAM-WORKFLOW",
@@ -161,17 +161,21 @@
     {
       "id": "STUDIO-PLATFORM-SCORE",
       "name": "Studio maturity: Every app scores ≥ 7/10 on platform integration",
-      "status": "PASS",
-      "details": "All 17 apps score ≥ 7/10 on platform integration",
-      "violations": [],
-      "durationMs": 12
+      "status": "FAIL",
+      "details": "1 app(s) below 7/10 platform score",
+      "violations": [
+        "apps/test-scaffold-gp: 1/10 (missing: ai-client, ml-client, evidence, api-guards, otel, @nzila/db, @nzila/os-core, @nzila/config, env-validation)"
+      ],
+      "durationMs": 10
     },
     {
       "id": "STUDIO-AI-CLAIMS",
       "name": "Studio maturity: No AI marketing claims without ai-sdk wiring",
-      "status": "PASS",
-      "details": "All apps with AI claims have runtime ai-sdk wiring",
-      "violations": [],
+      "status": "FAIL",
+      "details": "1 app(s) claim AI without wiring",
+      "violations": [
+        "apps/test-scaffold-gp: claims AI but has no ai-client.ts or @nzila/ai-sdk dependency"
+      ],
       "durationMs": 8
     },
     {
@@ -180,14 +184,14 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 2135
+      "durationMs": 4517
     }
   ],
   "environment": {
     "nodeVersion": "v24.13.1",
     "platform": "win32",
-    "ci": true,
+    "ci": false,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 3741
+  "totalDurationMs": 6209
 }
