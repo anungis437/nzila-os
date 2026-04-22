@@ -29,6 +29,13 @@
       "owner": "mobility-team",
       "justification": "Client-facing portal with custom branding and layout distinct from internal platform shell. Uses platform-auth for identity but not the internal shell chrome.",
       "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/test-scaffold-gp",
+      "package": "platform-shell",
+      "owner": "platform-team",
+      "justification": "Golden-path scaffold harness used for platform validation and contract checks. It intentionally validates auth and enforcement primitives without adopting the full internal shell UI.",
+      "expiresOn": "2027-01-01"
     }
   ]
 }

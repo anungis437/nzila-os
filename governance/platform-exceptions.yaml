@@ -36,3 +36,12 @@ exceptions:
       internal shell chrome.
     owner: mobility-team
     reviewDate: "2027-01-01"
+
+  - app: test-scaffold-gp
+    missing: platform-shell
+    reason: >-
+      Golden-path scaffold harness used for platform validation and contract
+      checks. It intentionally validates auth and enforcement primitives
+      without adopting the full internal shell UI.
+    owner: platform-team
+    reviewDate: "2027-01-01"
