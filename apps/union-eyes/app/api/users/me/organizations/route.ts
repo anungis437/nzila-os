@@ -12,7 +12,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { profiles } from '@/db/schema';
-import { eq, inArray, or, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('users:me:organizations')

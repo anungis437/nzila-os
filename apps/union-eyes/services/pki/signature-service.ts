@@ -430,7 +430,7 @@ export async function createSignatureRequest(
       
       await db.insert(signers).values({
         workflowId,
-        memberId: signer.userId as any,
+        memberId: signer.userId,
         email: signerEmail,
         name: signer.userName,
         signerOrder: signer.order,
@@ -467,10 +467,10 @@ export async function getUserSignatureRequests(
 ): Promise<SignatureRequest[]> {
   try {
     // Query workflows where user is a signer
-    const conditions = [eq(signers.memberId, userId as any)];
+    const conditions = [eq(signers.memberId, userId)];
 
     if (organizationId) {
-      conditions.push(eq(signatureWorkflows.organizationId, organizationId as any));
+      conditions.push(eq(signatureWorkflows.organizationId, organizationId));
     }
 
     if (status) {
@@ -533,8 +533,8 @@ export async function completeSignatureRequestStep(
       .from(signers)
       .where(
         and(
-          eq(signers.workflowId, workflowId as any),
-          eq(signers.memberId, userId as any)
+          eq(signers.workflowId, workflowId),
+          eq(signers.memberId, userId)
         )
       );
 
@@ -559,7 +559,7 @@ export async function completeSignatureRequestStep(
       .from(signers)
       .where(
         and(
-          eq(signers.workflowId, workflowId as any),
+          eq(signers.workflowId, workflowId),
           eq(signers.status, 'pending')
         )
       );
@@ -573,19 +573,19 @@ export async function completeSignatureRequestStep(
           completedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(signatureWorkflows.id, workflowId as any));
+        .where(eq(signatureWorkflows.id, workflowId));
     }
 
     // Fetch and return updated workflow
     const [workflow] = await db
       .select()
       .from(signatureWorkflows)
-      .where(eq(signatureWorkflows.id, workflowId as any));
+      .where(eq(signatureWorkflows.id, workflowId));
 
     const workflowSigners = await db
       .select()
       .from(signers)
-      .where(eq(signers.workflowId, workflowId as any));
+      .where(eq(signers.workflowId, workflowId));
 
     const workflowData = workflow.workflowData as WorkflowData | null;
 
@@ -630,11 +630,11 @@ export async function cancelSignatureRequest(
       .set({
         status: 'cancelled',
         voidedAt: new Date(),
-        voidedBy: cancelledBy as any,
+        voidedBy: cancelledBy,
         voidReason: cancellationReason,
         updatedAt: new Date(),
       })
-      .where(eq(signatureWorkflows.id, workflowId as any));
+      .where(eq(signatureWorkflows.id, workflowId));
 
     // Update all pending signers to skipped status
     await db
@@ -645,7 +645,7 @@ export async function cancelSignatureRequest(
       })
       .where(
         and(
-          eq(signers.workflowId, workflowId as any),
+          eq(signers.workflowId, workflowId),
           eq(signers.status, 'pending')
         )
       );

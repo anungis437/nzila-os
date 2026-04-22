@@ -78,6 +78,11 @@ ARG NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.az
 # Union Eyes custom domain (GoDaddy → Azure Container Apps)
 ARG NEXT_PUBLIC_SITE_URL=https://unioneyes.app
 ARG NEXT_PUBLIC_APP_URL=https://app.unioneyes.app
+ARG NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app
+ARG NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app
+ARG UE_ENVIRONMENT=production
+ARG UE_MARKETING_URL=https://unioneyes.app
+ARG UE_APP_URL=https://app.unioneyes.app
 ARG NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
@@ -94,6 +99,11 @@ ENV NEXT_PUBLIC_UNION_EYES_URL=$NEXT_PUBLIC_UNION_EYES_URL
 ENV NEXT_PUBLIC_ABR_URL=$NEXT_PUBLIC_ABR_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_SITE_URL_STAGING=$NEXT_PUBLIC_SITE_URL_STAGING
+ENV NEXT_PUBLIC_APP_URL_STAGING=$NEXT_PUBLIC_APP_URL_STAGING
+ENV UE_ENVIRONMENT=$UE_ENVIRONMENT
+ENV UE_MARKETING_URL=$UE_MARKETING_URL
+ENV UE_APP_URL=$UE_APP_URL
 ENV NEXT_PUBLIC_CFO_URL=$NEXT_PUBLIC_CFO_URL
 ENV NEXT_PUBLIC_CONTROL_PLANE_URL=$NEXT_PUBLIC_CONTROL_PLANE_URL
 ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
@@ -200,7 +210,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3003
+ENV PORT=3000
 
 # Copy necessary files
 COPY --from=builder /app/apps/union-eyes/.next/standalone ./
@@ -217,9 +227,9 @@ RUN groupadd --system --gid 1001 nodejs && \
 USER nextjs
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3003/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-EXPOSE 3003
+EXPOSE 3000
 
 CMD ["node", "apps/union-eyes/server.js"]
 

@@ -127,11 +127,12 @@ export default function OrganizationDetailPage() {
   const children = childrenData?.data || [];
   const members = membersData?.data || [];
   const ancestors = ancestorsData?.data || [];
-  const pathNodes: HierarchyNode[] = pathData?.data || [];
-  const descendantNodes: HierarchyNode[] = descendantsData?.data || [];
 
   const hierarchyNodes = React.useMemo(() => {
     if (!organization) return [];
+
+    const pathNodes: HierarchyNode[] = pathData?.data || [];
+    const descendantNodes: HierarchyNode[] = descendantsData?.data || [];
 
     const currentNode: HierarchyNode = {
       id: organization.id,
@@ -175,7 +176,7 @@ export default function OrganizationDetailPage() {
         updatedAt: undefined,
       };
     });
-  }, [descendantNodes, organization, pathNodes]);
+  }, [descendantsData?.data, organization, pathData?.data]);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to archive this organization? This action can be reversed later.")) return;

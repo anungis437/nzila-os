@@ -74,7 +74,7 @@ apps:
 
   union-eyes:
     image_tag: "${VERSION}"
-    port: 3003
+    port: 3000
     cpu: 2.0
     memory: 4Gi
     scale_rules:

@@ -1,25 +1,139 @@
-name: Deploy UnionEyes (Azure Container Apps)
+name: Deploy Union Eyes (Azure Container Apps)
 
 on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/union-eyes/**'
+      - 'Dockerfile'
+      - '.github/workflows/deploy-union-eyes.yml'
+      - 'governance/release/deployment-inventory.json'
   workflow_dispatch:
     inputs:
-      emergency_ack:
-        description: Type EMERGENCY to run this fallback workflow
+      environment:
+        description: Target environment override
         required: true
-        type: string
+        type: choice
+        options:
+          - production
+          - staging
+        default: staging
 
 permissions:
   contents: read
+  id-token: write
 
 env:
-  APP_NAME: nzila-os-union-eyes
   IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
   BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.plan.outputs.environment }}
+      app_name: ${{ steps.plan.outputs.app_name }}
+      resource_group: ${{ steps.plan.outputs.resource_group }}
+      containerapp_environment: ${{ steps.plan.outputs.containerapp_environment }}
+      acr_name: ${{ steps.plan.outputs.acr_name }}
+      marketing_url: ${{ steps.plan.outputs.marketing_url }}
+      app_url: ${{ steps.plan.outputs.app_url }}
+      title_suffix: ${{ steps.plan.outputs.title_suffix }}
+      smoke_urls: ${{ steps.plan.outputs.smoke_urls }}
+      dns_zone_name: ${{ steps.plan.outputs.dns_zone_name }}
+      prod_dns_target: ${{ steps.plan.outputs.prod_dns_target }}
+      staging_dns_target: ${{ steps.plan.outputs.staging_dns_target }}
+    steps:
+      - name: Resolve deployment topology
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            DEPLOY_ENV="${{ github.event.inputs.environment }}"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            DEPLOY_ENV="production"
+          else
+            DEPLOY_ENV="staging"
+          fi
+
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            APP_NAME="nzila-os-union-eyes"
+            MARKETING_URL="https://unioneyes.app"
+            APP_URL="https://app.unioneyes.app"
+            TITLE_SUFFIX=""
+            SMOKE_URLS='https://unioneyes.app https://app.unioneyes.app'
+            RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP_PRODUCTION }}"
+            CONTAINERAPP_ENVIRONMENT="${{ vars.AZURE_CONTAINERAPPS_ENVIRONMENT_PRODUCTION }}"
+          else
+            APP_NAME="nzila-os-union-eyes-staging"
+            MARKETING_URL="https://staging.unioneyes.app"
+            APP_URL="https://staging-app.unioneyes.app"
+            TITLE_SUFFIX=" [Staging]"
+            SMOKE_URLS='https://staging.unioneyes.app https://staging-app.unioneyes.app'
+            RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP_STAGING }}"
+            CONTAINERAPP_ENVIRONMENT="${{ vars.AZURE_CONTAINERAPPS_ENVIRONMENT_STAGING }}"
+          fi
+
+          if [ -z "$RESOURCE_GROUP" ]; then
+            RESOURCE_GROUP="nzila-canada-staging-rg"
+          fi
+
+          if [ -z "$CONTAINERAPP_ENVIRONMENT" ]; then
+            CONTAINERAPP_ENVIRONMENT="nzila-canada-staging-env"
+          fi
+
+          ACR_NAME="${{ vars.AZURE_ACR_NAME }}"
+          if [ -z "$ACR_NAME" ]; then
+            ACR_NAME="nzilacanadaacr"
+          fi
+
+          DNS_ZONE_NAME="${{ vars.DNS_ZONE_NAME }}"
+          if [ -z "$DNS_ZONE_NAME" ]; then
+            DNS_ZONE_NAME="unioneyes.app"
+          fi
+
+          PROD_DNS_TARGET="${{ vars.DNS_PROD_ORIGIN }}"
+          if [ -z "$PROD_DNS_TARGET" ]; then
+            PROD_DNS_TARGET="nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+          fi
+
+          STAGING_DNS_TARGET="${{ vars.DNS_STAGING_ORIGIN }}"
+          if [ -z "$STAGING_DNS_TARGET" ]; then
+            STAGING_DNS_TARGET="nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+          fi
+
+          echo "environment=$DEPLOY_ENV" >> "$GITHUB_OUTPUT"
+          echo "app_name=$APP_NAME" >> "$GITHUB_OUTPUT"
+          echo "resource_group=$RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+          echo "containerapp_environment=$CONTAINERAPP_ENVIRONMENT" >> "$GITHUB_OUTPUT"
+          echo "acr_name=$ACR_NAME" >> "$GITHUB_OUTPUT"
+          echo "marketing_url=$MARKETING_URL" >> "$GITHUB_OUTPUT"
+          echo "app_url=$APP_URL" >> "$GITHUB_OUTPUT"
+          echo "title_suffix=$TITLE_SUFFIX" >> "$GITHUB_OUTPUT"
+          echo "smoke_urls=$SMOKE_URLS" >> "$GITHUB_OUTPUT"
+          echo "dns_zone_name=$DNS_ZONE_NAME" >> "$GITHUB_OUTPUT"
+          echo "prod_dns_target=$PROD_DNS_TARGET" >> "$GITHUB_OUTPUT"
+          echo "staging_dns_target=$STAGING_DNS_TARGET" >> "$GITHUB_OUTPUT"
+
+          echo "### Union Eyes Deployment Topology" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Environment: $DEPLOY_ENV" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Container App: $APP_NAME" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Resource Group: $RESOURCE_GROUP" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Container Apps Environment: $CONTAINERAPP_ENVIRONMENT" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ACR: $ACR_NAME" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Marketing URL: $MARKETING_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App URL: $APP_URL" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            echo "- Note: production currently runs in staging-named Azure infrastructure; this workflow preserves that live topology intentionally." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   pre-deploy-gates:
     runs-on: ubuntu-latest
+    needs: plan
     name: Pre-Deploy Gates
+    environment: ${{ needs.plan.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,12 +147,59 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Emergency acknowledgement gate
+      - name: DNS provider preflight (fail fast)
+        if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
+        shell: bash
+        env:
+          DNS_PROVIDER: ${{ vars.DNS_PROVIDER }}
+          DNS_ZONE_ID: ${{ vars.DNS_ZONE_ID }}
+          DNS_ZONE_NAME: ${{ vars.DNS_ZONE_NAME }}
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
         run: |
-          if [ "${{ github.event.inputs.emergency_ack }}" != "EMERGENCY" ]; then
-            echo "Emergency ack missing. Use gitops-deploy.yml for canonical staging deployment."
+          set -euo pipefail
+
+          if [ -z "${DNS_PROVIDER:-}" ]; then
+            echo "DNS_PROVIDER is required when DNS_AUTOMATION_ENABLED=true"
             exit 1
           fi
+          if [ -z "${DNS_ZONE_ID:-}" ]; then
+            echo "DNS_ZONE_ID is required when DNS_AUTOMATION_ENABLED=true"
+            exit 1
+          fi
+          if [ -z "${DNS_ZONE_NAME:-}" ]; then
+            echo "DNS_ZONE_NAME is required when DNS_AUTOMATION_ENABLED=true"
+            exit 1
+          fi
+          if [ -z "${DNS_API_TOKEN:-}" ]; then
+            echo "DNS_API_TOKEN secret is required when DNS_AUTOMATION_ENABLED=true"
+            exit 1
+          fi
+
+          if [ "$DNS_PROVIDER" != "cloudflare" ]; then
+            echo "DNS preflight not implemented for provider: $DNS_PROVIDER"
+            exit 1
+          fi
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $DNS_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/$DNS_ZONE_ID")
+
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+          ACTUAL_ZONE=$(echo "$RESPONSE" | jq -r '.result.name')
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Cloudflare zone preflight failed"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          if [ "${ACTUAL_ZONE,,}" != "${DNS_ZONE_NAME,,}" ]; then
+            echo "Cloudflare zone mismatch: expected $DNS_ZONE_NAME got $ACTUAL_ZONE"
+            exit 1
+          fi
+
+          echo "DNS provider preflight passed for $DNS_ZONE_NAME"
 
       - name: Restore turbo cache
         uses: actions/cache@v5
@@ -53,7 +214,7 @@ jobs:
         run: pnpm governance:check
 
       - name: Change window validation
-        run: node --import tsx scripts/validate-change-window.ts --env=STAGING --service=union-eyes --commit=${{ github.sha }}
+        run: node --import tsx scripts/validate-change-window.ts --env=${{ needs.plan.outputs.environment == 'production' && 'PROD' || 'STAGING' }} --service=union-eyes --commit=${{ github.sha }}
 
       - name: Run contract tests (fail closed)
         id: contract_tests
@@ -61,11 +222,11 @@ jobs:
 
       - name: SLO gate (fail closed)
         id: slo_gate
-        run: node --import tsx scripts/slo-gate.ts --env=pilot
+        run: node --import tsx scripts/slo-gate.ts --env=${{ needs.plan.outputs.environment }}
 
       - name: Generate SLO summary
         if: always()
-        run: node --import tsx scripts/slo-gate.ts --env=pilot > slo-summary.txt 2>&1 || true
+        run: node --import tsx scripts/slo-gate.ts --env=${{ needs.plan.outputs.environment }} > slo-summary.txt 2>&1 || true
 
       - name: Upload SLO summary
         if: always()
@@ -89,7 +250,7 @@ jobs:
           node --import tsx scripts/release-attestation.ts \
             --sha ${{ github.sha }} \
             $CONTRACT_FLAG $SLO_FLAG \
-            --env pilot
+            --env ${{ needs.plan.outputs.environment }}
 
       - name: Upload release attestation
         if: always()
@@ -101,8 +262,9 @@ jobs:
 
   build-and-deploy:
     runs-on: ubuntu-latest
-    needs: pre-deploy-gates
+    needs: [plan, pre-deploy-gates]
     name: Build & Deploy UnionEyes
+    environment: ${{ needs.plan.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
 
@@ -112,7 +274,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
-        run: az acr login --name nzilacanadaacr
+        run: az acr login --name ${{ needs.plan.outputs.acr_name }}
 
       - name: Build & push frontend image
         run: |
@@ -122,42 +284,183 @@ jobs:
             --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
             --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
             --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
-            --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.UE_APP_URL }} \
+            --build-arg NEXT_PUBLIC_SITE_URL=https://unioneyes.app \
+            --build-arg NEXT_PUBLIC_APP_URL=https://app.unioneyes.app \
+            --build-arg NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app \
+            --build-arg NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app \
+            --build-arg UE_ENVIRONMENT=${{ needs.plan.outputs.environment }} \
+            --build-arg UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }} \
+            --build-arg UE_APP_URL=${{ needs.plan.outputs.app_url }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
-            -t ${{ env.IMAGE }}:latest \
+            -t ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }} \
             .
           docker push ${{ env.IMAGE }}:${{ github.sha }}
-          docker push ${{ env.IMAGE }}:latest
+          docker push ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }}
 
       - name: Build & push backend image
         run: |
           az acr build \
-            --registry nzilacanadaacr \
+            --registry ${{ needs.plan.outputs.acr_name }} \
             --image nzila-os-union-eyes-backend:${{ github.sha }} \
             --image nzila-os-union-eyes-backend:latest \
             --file apps/union-eyes/backend/Dockerfile \
             apps/union-eyes/backend
 
+      - name: Ensure target Container App exists
+        run: |
+          set -euo pipefail
+
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          TARGET_ENV="${{ needs.plan.outputs.containerapp_environment }}"
+
+          if az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>/dev/null; then
+            echo "Container App $TARGET_APP already exists."
+            exit 0
+          fi
+
+          if [ "${{ needs.plan.outputs.environment }}" != "staging" ]; then
+            echo "Container App $TARGET_APP is missing in production context. Refusing to auto-create."
+            exit 1
+          fi
+
+          echo "Creating missing staging Container App $TARGET_APP..."
+          az containerapp create \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --environment "$TARGET_ENV" \
+            --image ${{ env.IMAGE }}:${{ github.sha }} \
+            --ingress external \
+            --target-port 3000 \
+            --cpu 1.0 \
+            --memory 2Gi \
+            --min-replicas 1 \
+            --max-replicas 3 \
+            --registry-server ${{ needs.plan.outputs.acr_name }}.azurecr.io
+
       - name: Update Container App (frontend + backend sidecar)
         run: |
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+
+          if ! az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>/dev/null; then
+            echo "Container App $TARGET_APP does not exist and could not be provisioned."
+            exit 1
+          fi
+
           az containerapp update \
-            --name ${{ env.APP_NAME }} \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
             --set-env-vars \
+              "NODE_ENV=production" \
+              "PORT=3000" \
+              "NEXT_PUBLIC_APP_ENV=${{ needs.plan.outputs.environment }}" \
+              "UE_ENVIRONMENT=${{ needs.plan.outputs.environment }}" \
+              "UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }}" \
+              "UE_APP_URL=${{ needs.plan.outputs.app_url }}" \
+              "NEXT_PUBLIC_SITE_URL=https://unioneyes.app" \
+              "NEXT_PUBLIC_APP_URL=https://app.unioneyes.app" \
+              "NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app" \
+              "NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app" \
+              "AUTH_URL=${{ needs.plan.outputs.app_url }}" \
+              "AUTH_TRUST_HOST=true" \
               "DJANGO_API_URL=http://localhost:8000" \
               "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
               "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
               "UPSTASH_REDIS_REST_URL=secretref:upstash-redis-url" \
               "UPSTASH_REDIS_REST_TOKEN=secretref:upstash-redis-token" \
-            --container-name ${{ env.APP_NAME }} \
+            --container-name "$TARGET_APP" \
             --image ${{ env.IMAGE }}:${{ github.sha }}
           # Backend runs migrations automatically on startup (Dockerfile CMD)
           az containerapp update \
-            --name ${{ env.APP_NAME }} \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
             --container-name django-backend \
             --set-env-vars \
               "AUTH_JWKS_URL=${{ secrets.AUTH_JWKS_URL }}" \
               "AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret" \
               "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
+              "CORS_ALLOWED_ORIGINS=${{ needs.plan.outputs.marketing_url }},${{ needs.plan.outputs.app_url }}" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Custom domain smoke checks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_APP="${{ needs.plan.outputs.app_name }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+
+          DEFAULT_HOST=$(az containerapp show \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "properties.configuration.ingress.fqdn" \
+            -o tsv)
+
+          if [ -n "$DEFAULT_HOST" ]; then
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "https://$DEFAULT_HOST" || echo "000")
+            if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+              echo "✅ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
+            else
+              echo "❌ default hostname https://$DEFAULT_HOST -> HTTP $STATUS"
+              exit 1
+            fi
+          fi
+
+          if [ "${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE }}" != "true" ]; then
+            echo "::notice::Custom domain smoke checks skipped for ${{ needs.plan.outputs.environment }}; UE_CUSTOM_DOMAIN_ACTIVE is not true in this GitHub environment."
+            exit 0
+          fi
+
+          for URL in ${{ needs.plan.outputs.smoke_urls }}; do
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "$URL" || echo "000")
+            if [[ "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+              echo "✅ $URL -> HTTP $STATUS"
+            else
+              echo "❌ $URL -> HTTP $STATUS"
+              exit 1
+            fi
+          done
+
+      - name: DNS record verification (post-deploy)
+        if: ${{ vars.DNS_AUTOMATION_ENABLED == 'true' }}
+        shell: bash
+        env:
+          DNS_PROVIDER: ${{ vars.DNS_PROVIDER }}
+          DNS_ZONE_NAME: ${{ needs.plan.outputs.dns_zone_name }}
+          PROD_DNS_TARGET: ${{ needs.plan.outputs.prod_dns_target }}
+          STAGING_DNS_TARGET: ${{ needs.plan.outputs.staging_dns_target }}
+        run: |
+          set -euo pipefail
+
+          if [ "$DNS_PROVIDER" != "cloudflare" ]; then
+            echo "DNS verification not implemented for provider: $DNS_PROVIDER"
+            exit 1
+          fi
+
+          ZONE="$DNS_ZONE_NAME"
+          PROD_TARGET="$PROD_DNS_TARGET"
+          STAGING_TARGET="$STAGING_DNS_TARGET"
+
+          APP_CNAME=$(nslookup "app.$ZONE" | sed -n 's/.*canonical name = //p' | tr -d '.' | tail -n 1)
+          STAGING_APP_CNAME=$(nslookup "staging-app.$ZONE" | sed -n 's/.*canonical name = //p' | tr -d '.' | tail -n 1)
+
+          if [ "${APP_CNAME,,}" != "${PROD_TARGET,,}" ]; then
+            echo "app.$ZONE DNS mismatch. expected=$PROD_TARGET got=${APP_CNAME:-none}"
+            exit 1
+          fi
+
+          if [ "${STAGING_APP_CNAME,,}" != "${STAGING_TARGET,,}" ]; then
+            echo "staging-app.$ZONE DNS mismatch. expected=$STAGING_TARGET got=${STAGING_APP_CNAME:-none}"
+            exit 1
+          fi
+
+          for URL in "https://$ZONE" "https://app.$ZONE" "https://staging.$ZONE" "https://staging-app.$ZONE"; do
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "$URL" || echo "000")
+            if [[ ! "$STATUS" =~ ^(200|301|302|307|308)$ ]]; then
+              echo "HTTPS check failed for $URL status=$STATUS"
+              exit 1
+            fi
+          done
+
+          echo "DNS verification passed for $ZONE"

@@ -15,6 +15,13 @@ const withBundleAnalyzer = bundleAnalyzer({
   openAnalyzer: true,
 });
 
+const unionEyesHosts = {
+  apex: 'unioneyes.app',
+  www: 'www.unioneyes.app',
+  stagingMarketing: 'staging.unioneyes.app',
+  stagingApp: 'staging-app.unioneyes.app',
+};
+
 // =============================================================================
 // CONTENT SECURITY POLICY (CSP)
 // =============================================================================
@@ -307,8 +314,29 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: unionEyesHosts.www }],
+        destination: `https://${unionEyesHosts.apex}/:path*`,
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: unionEyesHosts.stagingMarketing }],
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: unionEyesHosts.stagingApp }],
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
       {
         // Apply all security headers to non-CSS-static paths
         source: '/((?!_next/static/css).*)',

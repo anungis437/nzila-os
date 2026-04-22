@@ -954,7 +954,6 @@
     },
     "staff": {
       "title": "CLC Staff Operations",
-      "workflow": "Workflow Management",
       "approvals": "Pending Approvals",
       "communications": "Communications",
       "dashboard": {
@@ -1802,9 +1801,11 @@
       "pacific": "Pacific (Vancouver)"
     },
     "languages": {
-      "en": "English",
-      "fr": "Français",
-      "es": "Español"
+      "en": "Inglês",
+      "fr": "Francês",
+      "es": "Español",
+      "it": "Italiano",
+      "pt": "Português"
     },
     "months": {
       "january": "January",

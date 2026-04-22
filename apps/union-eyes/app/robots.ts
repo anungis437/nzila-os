@@ -1,9 +1,21 @@
 import { MetadataRoute } from 'next';
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app';
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 
 export default function robots(): MetadataRoute.Robots {
+  const site = getUnionEyesSiteTopology();
+
+  if (site.isStaging) {
+    return {
+      rules: [
+        {
+          userAgent: '*',
+          disallow: '/',
+        },
+      ],
+      host: site.marketingUrl,
+    };
+  }
+
   return {
     rules: [
       {
@@ -20,7 +32,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    sitemap: `${site.marketingUrl}/sitemap.xml`,
+    host: site.marketingUrl,
   };
 }

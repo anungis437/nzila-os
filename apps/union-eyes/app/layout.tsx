@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
 import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 import { Poppins } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import './globals.css';
@@ -22,20 +23,20 @@ const poppins = Poppins({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
+  const site = getUnionEyesSiteTopology();
+
   return {
     title: {
-      default: 'Union Eyes | Modern Operating System for Unions',
-      template: '%s | Union Eyes',
+      default: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
+      template: `%s | Union Eyes${site.titleSuffix}`,
     },
     description:
       'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app',
-    ),
+    metadataBase: new URL(site.marketingUrl),
     openGraph: {
       type: 'website',
       siteName: 'Union Eyes',
-      title: 'Union Eyes | Modern Operating System for Unions',
+      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
       description:
         'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
       images: [
@@ -49,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Union Eyes | Modern Operating System for Unions',
+      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
       description:
         'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
       images: ['/images/og-default.png'],
@@ -62,6 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
     themeColor: '#1e3a5f',
     // Next.js will automatically use app/icon.tsx for favicon and icon
     other: {
+      ...(site.isStaging ? { 'x-robots-tag': 'noindex, nofollow' } : {}),
       ...await Sentry.getTraceData()
     }
   };
@@ -71,10 +73,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Note: Profile creation/claiming is now handled in protected routes
   // to avoid calling auth() in the root layout which causes middleware detection issues
   const locale = await getLocale();
+  const site = getUnionEyesSiteTopology();
 
   return (
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={poppins.className} suppressHydrationWarning>
+        {site.isStaging ? (
+          <div className="sticky top-0 z-[100] border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
+            Staging environment. Pre-production data and behavior may change without notice.
+          </div>
+        ) : null}
         <AuthProvider>
           <NzilaAppShell moduleId="union-eyes">
             <Providers>
