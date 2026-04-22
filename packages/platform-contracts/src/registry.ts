@@ -510,7 +510,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     navOrder: 75,
     owner: 'platform-core',
     packageName: '@nzila/weekone',
-    devPort: 3009,
+    devPort: 3016,
     domains: ['founder-ops', 'finance'],
     enabledCapabilities: ['auth', 'org-scope', 'telemetry'],
     governanceRequirements: [],
