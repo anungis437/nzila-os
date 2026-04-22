@@ -528,7 +528,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     name: 'Test Scaffold GP',
     description: 'GP test scaffold — frozen reference implementation for governance pattern verification',
     basePath: '/test-scaffold-gp',
-    tier: 'FROZEN',
+    tier: 'DEPRECATED',
     appType: 'web-app',
     iconToken: 'beaker',
     enabledByDefault: false,
