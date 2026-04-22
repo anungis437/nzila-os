@@ -24,7 +24,7 @@ export interface DnsConfig {
 }
 
 const DEFAULT_PROD_TARGET = 'nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
-const DEFAULT_STAGING_TARGET = 'nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
+const DEFAULT_STAGING_TARGET = 'nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
 
 function parseBoolean(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
