@@ -447,16 +447,25 @@ jobs:
           PROD_TARGET="$PROD_DNS_TARGET"
           STAGING_TARGET="$STAGING_DNS_TARGET"
 
-          APP_CNAME=$(nslookup "app.$ZONE" | sed -n 's/.*canonical name = //p' | tr -d '.' | tail -n 1)
-          STAGING_APP_CNAME=$(nslookup "staging-app.$ZONE" | sed -n 's/.*canonical name = //p' | tr -d '.' | tail -n 1)
+          normalize_host() {
+            echo "$1" | tr -d '[:space:]' | sed 's/\.$//' | tr '[:upper:]' '[:lower:]'
+          }
 
-          if [ "${APP_CNAME,,}" != "${PROD_TARGET,,}" ]; then
-            echo "app.$ZONE DNS mismatch. expected=$PROD_TARGET got=${APP_CNAME:-none}"
+          APP_CNAME_RAW=$(nslookup "app.$ZONE" | sed -n 's/.*canonical name = //p' | tail -n 1)
+          STAGING_APP_CNAME_RAW=$(nslookup "staging-app.$ZONE" | sed -n 's/.*canonical name = //p' | tail -n 1)
+
+          APP_CNAME=$(normalize_host "${APP_CNAME_RAW:-}")
+          STAGING_APP_CNAME=$(normalize_host "${STAGING_APP_CNAME_RAW:-}")
+          PROD_TARGET_NORM=$(normalize_host "$PROD_TARGET")
+          STAGING_TARGET_NORM=$(normalize_host "$STAGING_TARGET")
+
+          if [ "$APP_CNAME" != "$PROD_TARGET_NORM" ]; then
+            echo "app.$ZONE DNS mismatch. expected=$PROD_TARGET got=${APP_CNAME_RAW:-none}"
             exit 1
           fi
 
-          if [ "${STAGING_APP_CNAME,,}" != "${STAGING_TARGET,,}" ]; then
-            echo "staging-app.$ZONE DNS mismatch. expected=$STAGING_TARGET got=${STAGING_APP_CNAME:-none}"
+          if [ "$STAGING_APP_CNAME" != "$STAGING_TARGET_NORM" ]; then
+            echo "staging-app.$ZONE DNS mismatch. expected=$STAGING_TARGET got=${STAGING_APP_CNAME_RAW:-none}"
             exit 1
           fi
 
