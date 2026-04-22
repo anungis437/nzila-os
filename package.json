@@ -163,6 +163,7 @@
     "validate:workspace-links": "tsx scripts/validate-workspace-links.ts",
     "inventory:generate": "pnpm --filter @nzila/repo-inventory generate",
     "inventory:check": "pnpm --filter @nzila/repo-inventory check",
+    "docs:sync": "pnpm --filter @nzila/repo-inventory check",
     "validate:readmes": "tsx scripts/validate-readmes.ts",
     "validate:release:strict": "tsx scripts/validate-release-strict.ts",
     "validate:governance": "pnpm ga-check && pnpm contract-tests && pnpm inventory:check && pnpm validate:portfolio-governance && pnpm validate:auth-authority && pnpm validate:ga-state && pnpm validate:workspace-links && pnpm validate:release:strict && pnpm generate:commercial-traction",

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-21T00:00:00.000Z",
-  "count": 18,
+  "generatedAt": "2026-04-22T00:00:00.000Z",
+  "count": 19,
   "products": [
     {
       "slug": "abr",
@@ -76,6 +76,12 @@
     },
     {
       "slug": "platform-admin",
+      "tier": 5,
+      "tierLabel": "sunset",
+      "publicVisible": false
+    },
+    {
+      "slug": "test-scaffold-gp",
       "tier": 5,
       "tierLabel": "sunset",
       "publicVisible": false

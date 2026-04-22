@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-04-21T00:00:00.000Z",
-  "appCount": 18,
+  "generatedAt": "2026-04-22T00:00:00.000Z",
+  "appCount": 19,
   "packageCount": 170,
-  "workflowCount": 43,
-  "contractTestCount": 219,
-  "tsTestFileCount": 1217,
+  "workflowCount": 42,
+  "contractTestCount": 220,
+  "tsTestFileCount": 1218,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -450,6 +450,23 @@
       "codeFileCount": 37
     },
     {
+      "name": "test-scaffold-gp",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": null,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "enforcement",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 6
+    },
+    {
       "name": "trade",
       "language": "typescript",
       "framework": "Next.js",
@@ -506,7 +523,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3146
+      "codeFileCount": 3150
     },
     {
       "name": "web",
@@ -530,15 +547,15 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 82
     },
     {
       "name": "weekone",
       "language": "typescript",
       "framework": "Next.js",
       "port": 3009,
-      "hasReadme": false,
-      "hasEnvExample": false,
+      "hasReadme": true,
+      "hasEnvExample": true,
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
@@ -598,7 +615,6 @@
   ],
   "workflows": [
     "agri-core-check.yml",
-    "agri-gov-ingestion-check.yml",
     "ai-governance.yml",
     "app-floor-check.yml",
     "canary-deploy.yml",

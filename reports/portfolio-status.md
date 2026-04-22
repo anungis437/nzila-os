@@ -25,13 +25,14 @@ Authority: governance/portfolio/product-catalog.json
 | Zonga | 4 | incubating | hold | pre-revenue | internal-proof | low |
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
+| Test Scaffold GP | 5 | frozen | sunset | sunsetting | none | low |
 
 ## Allocation Summary
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
 - Internal only: console, control-plane, orchestrator-api
-- Frozen / sunset: mobility-client-portal, platform-admin
+- Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
 
 ## Score Engine
 
@@ -57,4 +58,5 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Zonga | 4.4 | HOLD | INCUBATING | internal-only |
 | Mobility Client Portal | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Platform Admin | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
+| Test Scaffold GP | 2.0 | SUNSET | DEPRECATED | internal-only |
 

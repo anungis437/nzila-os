@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 
 const __filename2 = fileURLToPath(import.meta.url)
 const __dirname2 = dirname(__filename2)
-const ROOT = join(__dirname2, '..', '..')
+const REPO_ROOT = join(__dirname2, '..', '..')
 
 // ── Parse args ──────────────────────────────────────────────────────────────
 
@@ -34,6 +34,7 @@ if (!appName || !/^[a-z][a-z0-9-]*$/.test(appName)) {
 
 const riskLevel = flags.find(f => f.startsWith('--risk='))?.split('=')[1] ?? 'medium'
 const profile = flags.find(f => f.startsWith('--profile='))?.split('=')[1] ?? null
+const outputRoot = flags.find(f => f.startsWith('--root='))?.split('=')[1] ?? REPO_ROOT
 
 const VALID_RISKS = ['critical', 'high', 'medium', 'low', 'none']
 if (!VALID_RISKS.includes(riskLevel)) {
@@ -47,7 +48,7 @@ if (profile && !VALID_PROFILES.includes(profile)) {
   process.exit(1)
 }
 
-const appDir = join(ROOT, 'apps', appName)
+const appDir = join(outputRoot, 'apps', appName)
 if (existsSync(appDir)) {
   console.error(`App directory already exists: apps/${appName}`)
   process.exit(1)

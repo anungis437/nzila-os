@@ -1,16 +1,16 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-21 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-22 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Apps | 18 |
+| Apps | 19 |
 | Packages | 170 |
-| GitHub Workflows | 43 |
-| Contract Test Files | 219 |
-| TS/JS Test Files | 1217 |
+| GitHub Workflows | 42 |
+| Contract Test Files | 220 |
+| TS/JS Test Files | 1218 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -30,16 +30,16 @@
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 30 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 107 | Partner portal for managing deals, commissions, certifications, and go-to-market |
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
+| test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 6 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3146 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| weekone | Next.js | 3009 | ❌ | ❌ | ✅ | ✅ | 45 |  |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3150 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| weekone | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 45 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 434 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 
 - agri-core-check.yml
-- agri-gov-ingestion-check.yml
 - ai-governance.yml
 - app-floor-check.yml
 - canary-deploy.yml

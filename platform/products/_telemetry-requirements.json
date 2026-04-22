@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedAt": "2026-04-22T00:00:00.000Z",
   "requiredApps": [
     "abr",
     "cfo",
@@ -20,6 +20,7 @@
     "nacp-exams",
     "partners",
     "platform-admin",
+    "test-scaffold-gp",
     "weekone"
   ]
 }

@@ -621,6 +621,7 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/platform-admin': 3, // Pre-GA — internal admin tooling
     'apps/trade': 4,          // Pre-GA — trade vertical
     'apps/weekone': 3,        // INCUBATING — founder-internal OS, platform wiring planned pre-PILOT
+    'apps/test-scaffold-gp': 3, // FROZEN — sunset reference scaffold, minimal platform wiring by design
   }
 
   for (const appDir of appDirs) {

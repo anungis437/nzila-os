@@ -14,7 +14,7 @@
   "gtmPosture": "internal-only",
   "proofLevel": "internal-proof",
   "strategicRole": "Primary operating control surface for governance, finance, and portfolio execution.",
-  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedAt": "2026-04-22T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

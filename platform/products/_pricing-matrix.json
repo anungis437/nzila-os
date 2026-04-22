@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T00:00:00.000Z",
+  "generatedAt": "2026-04-22T00:00:00.000Z",
   "byPricingTier": {
     "enterprise": [
       "abr",
@@ -21,6 +21,7 @@
       "orchestrator-api",
       "partners",
       "platform-admin",
+      "test-scaffold-gp",
       "web",
       "weekone"
     ],

@@ -15,5 +15,25 @@
   "orchestrator_playbooks": [
     "reminder_dispatch",
     "onboarding_trigger"
-  ]
+  ],
+  "maturity_gaps": {
+    "contracts_complete": {
+      "status": "open",
+      "owner": "platform-team",
+      "blocker": "Flow org-level isolation contract tests cover core paths; edge cases around multi-org sync pending.",
+      "target": "2026-Q2"
+    },
+    "data_integrity": {
+      "status": "partial",
+      "owner": "platform-team",
+      "blocker": "RLS and org isolation verified; financial transaction reconciliation logic not yet covered by CI assertions.",
+      "target": "2026-Q2"
+    },
+    "observability": {
+      "status": "partial",
+      "owner": "platform-team",
+      "blocker": "Application errors tracked; business-level KPI stream (conversion, activation) not yet wired to console dashboard.",
+      "target": "2026-Q3"
+    }
+  }
 }

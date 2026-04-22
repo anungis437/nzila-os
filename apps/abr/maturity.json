@@ -10,5 +10,25 @@
   "gtm_posture": "sell-now",
   "proof_level": "pilot-proof",
   "revenue_status": "pilot-contracting",
-  "last_validated": "2026-04-22"
+  "last_validated": "2026-04-22",
+  "maturity_gaps": {
+    "contracts_complete": {
+      "status": "open",
+      "owner": "platform-team",
+      "blocker": "Employer execution and remittance lifecycle contract tests not yet merged to CI.",
+      "target": "2026-Q2"
+    },
+    "data_integrity": {
+      "status": "partial",
+      "owner": "platform-team",
+      "blocker": "RLS verified; pension contribution reconciliation checks pending automated validation.",
+      "target": "2026-Q2"
+    },
+    "observability": {
+      "status": "partial",
+      "owner": "platform-team",
+      "blocker": "Error tracking in Sentry; structured logs emitted; alert routing to on-call not yet configured.",
+      "target": "2026-Q3"
+    }
+  }
 }

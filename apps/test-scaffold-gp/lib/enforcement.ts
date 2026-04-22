@@ -46,9 +46,9 @@ export function createAppPipeline() {
       },
     }),
     auditLayer({
-      record: async (entry) => {
+      record: async (_entry) => {
         // TODO: Wire to @nzila/audit appendEntry()
-        console.log('[audit]', JSON.stringify(entry))
+        return
       },
     }),
   ])

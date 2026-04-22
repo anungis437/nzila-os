@@ -24,6 +24,7 @@
 | Zonga | 4 | incubating | hold | pre-revenue | internal-proof | low |
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
+| Test Scaffold GP | 5 | frozen | sunset | sunsetting | none | low |
 
 ## Operational Overlay
 
@@ -47,4 +48,5 @@
 | Zonga | INCUBATING | internal-only | internal | HOLD |
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Platform Admin | EXPERIMENTAL | internal-only | internal | SUNSET |
+| Test Scaffold GP | DEPRECATED | internal-only | internal | SUNSET |
 

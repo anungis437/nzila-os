@@ -1,6 +1,7 @@
 {
   "extends": "@nzila/config/tsconfig/nextjs",
   "compilerOptions": {
+    "skipLibCheck": true,
     "noImplicitAny": true,
     "useUnknownInCatchVariables": true,
     "jsx": "preserve",

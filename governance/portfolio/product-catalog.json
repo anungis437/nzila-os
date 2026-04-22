@@ -72,7 +72,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Executive Director",
       "proof_stage": "pilot",
-      "market_pull_score": 8
+      "market_pull_score": 8,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "flow",
@@ -117,7 +128,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Operations Lead",
       "proof_stage": "demo",
-      "market_pull_score": 7
+      "market_pull_score": 7,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "cfo",
@@ -162,7 +184,18 @@
       "gross_logo_target_12m": 5,
       "primary_buyer": "Finance Director",
       "proof_stage": "interest",
-      "market_pull_score": 5
+      "market_pull_score": 5,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "scenario",
+        "expected_12m_revenue": "scenario",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "scenario",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "scenario"
+      }
     },
     {
       "id": "partners",
@@ -207,7 +240,18 @@
       "gross_logo_target_12m": 5,
       "primary_buyer": "Partnership Lead",
       "proof_stage": "interest",
-      "market_pull_score": 5
+      "market_pull_score": 5,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "scenario",
+        "expected_12m_revenue": "scenario",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "scenario",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "scenario"
+      }
     },
     {
       "id": "console",
@@ -612,7 +656,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Chief People Officer",
       "proof_stage": "pilot",
-      "market_pull_score": 8
+      "market_pull_score": 8,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "mobility",
@@ -838,6 +893,51 @@
       "primary_buyer": "Internal Owner",
       "proof_stage": "none",
       "market_pull_score": 3
+    },
+    {
+      "id": "test-scaffold-gp",
+      "name": "Test Scaffold GP",
+      "tier": 5,
+      "status": "frozen",
+      "deployment": "internal",
+      "gtm_posture": "sunset",
+      "revenue_status": "sunsetting",
+      "customers": 0,
+      "pilots": 0,
+      "proof_level": "none",
+      "owner": "Nzila Ventures",
+      "priority": "low",
+      "strategic_role": "Internal scaffold template used to bootstrap new apps under the NzilaOS enforcement pipeline. Not a commercial product.",
+      "last_reviewed": "2026-04-22",
+      "monthly_burn": 0,
+      "monthly_revenue": 0,
+      "annual_recurring_revenue": 0,
+      "pipeline_value": 0,
+      "expected_12m_revenue": 0,
+      "gross_margin_pct": 0,
+      "eng_hours_required_monthly": 0,
+      "founder_attention_hours": 0,
+      "support_hours": 0,
+      "customer_concentration_risk": 1,
+      "execution_risk": 1,
+      "churn_risk": 1,
+      "moat_score": 1,
+      "strategic_option_value": 1,
+      "ecosystem_synergy": 2,
+      "probability_of_close": 0,
+      "runway_priority": 1,
+      "pipeline_assumptions": "Scaffold template only; no revenue pipeline.",
+      "data_quality": "actual",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 0,
+      "sales_cycle_days": 0,
+      "close_rate_pct": 0,
+      "renewal_rate_pct": 0,
+      "expansion_rate_pct": 0,
+      "gross_logo_target_12m": 0,
+      "primary_buyer": "Internal Platform Owner",
+      "proof_stage": "none",
+      "market_pull_score": 1
     }
   ],
   "capital_weights": {

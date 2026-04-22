@@ -153,6 +153,14 @@
       "trustProfile": "tier-3-internal",
       "launchStage": "incubating",
       "publicVisible": false
+    },
+    "test-scaffold-gp": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "sunset",
+      "launchStage": "sunset",
+      "publicVisible": false
     }
   }
 }

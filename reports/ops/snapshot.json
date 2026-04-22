@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "schema_version": "1.0.0",
+    "description": "Operational evidence snapshot — machine-readable baseline for investors, buyers, and auditors.",
+    "generated_at": "2026-04-22T00:00:00Z",
+    "next_refresh": "monthly",
+    "notes": "Values marked 'TODO' require live telemetry wiring. See snapshot.md for status."
+  },
+  "deployment": {
+    "frequency_per_week": "TODO",
+    "source": "GitHub Actions run count — not yet auto-exported",
+    "lead_time_hours": "TODO",
+    "last_production_deploy": "2026-04-22"
+  },
+  "build_pipeline": {
+    "success_rate_30d_pct": "TODO",
+    "source": "GitHub Actions API — not yet auto-exported",
+    "p50_build_duration_min": "TODO",
+    "current_ci_status": "passing"
+  },
+  "incident_response": {
+    "mttr_hours": "TODO",
+    "source": "No incident management tool configured — manual estimate only",
+    "open_p1_incidents": 0,
+    "last_incident_date": null
+  },
+  "uptime": {
+    "web_30d_pct": "TODO",
+    "console_30d_pct": "TODO",
+    "union_eyes_30d_pct": "TODO",
+    "source": "Azure Container Apps metrics — not yet exported to ops snapshot",
+    "monitoring_url": "Azure Monitor — nzila-canada-staging-env"
+  },
+  "error_rates": {
+    "union_eyes_error_rate_pct": "TODO",
+    "web_error_rate_pct": "TODO",
+    "source": "Application Insights / Sentry — not yet wired to this snapshot"
+  },
+  "latency": {
+    "union_eyes_p50_ms": "TODO",
+    "union_eyes_p95_ms": "TODO",
+    "source": "Azure Monitor / Application Insights — not yet exported"
+  },
+  "auth": {
+    "login_success_rate_30d_pct": "TODO",
+    "lockout_events_30d": "TODO",
+    "source": "platform-auth logs — not yet exported to ops snapshot"
+  },
+  "feature_usage": {
+    "union_eyes_active_users_30d": "TODO",
+    "union_eyes_cases_opened_30d": "TODO",
+    "union_eyes_evidence_packs_generated_30d": "TODO",
+    "source": "DB query against union-eyes — not yet automated"
+  },
+  "onboarding": {
+    "pilots_signed": 1,
+    "pilots_in_negotiation": 2,
+    "avg_onboard_days": "TODO",
+    "source": "pilots_signed is actual (maturity.json); in_negotiation is estimated"
+  },
+  "infrastructure_cost": {
+    "monthly_azure_cad": "TODO",
+    "breakdown_available": false,
+    "source": "Azure Cost Management — manual review only"
+  },
+  "security": {
+    "last_dependency_audit": "2026-04-22",
+    "open_critical_vulns": 0,
+    "open_high_vulns": 0,
+    "source": "tooling/security/supply-chain-policy.ts + pnpm audit",
+    "soc2_status": "roadmap",
+    "pen_test_status": "planned"
+  }
+}
