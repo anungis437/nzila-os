@@ -23,8 +23,43 @@ const poppins = Poppins({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Union Claims Platform",
-    description: "A comprehensive platform for union case management and tracking.",
+    title: {
+      default: 'Union Eyes | Modern Operating System for Unions',
+      template: '%s | Union Eyes',
+    },
+    description:
+      'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app',
+    ),
+    openGraph: {
+      type: 'website',
+      siteName: 'Union Eyes',
+      title: 'Union Eyes | Modern Operating System for Unions',
+      description:
+        'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+      images: [
+        {
+          url: '/images/og-default.png',
+          width: 1200,
+          height: 630,
+          alt: 'Union Eyes — Modern Operating System for Unions',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Union Eyes | Modern Operating System for Unions',
+      description:
+        'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+      images: ['/images/og-default.png'],
+    },
+    icons: {
+      icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+      apple: '/apple-touch-icon.png',
+    },
+    manifest: '/manifest.json',
+    themeColor: '#1e3a5f',
     // Next.js will automatically use app/icon.tsx for favicon and icon
     other: {
       ...await Sentry.getTraceData()

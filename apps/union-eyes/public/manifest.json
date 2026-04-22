@@ -1,15 +1,16 @@
 {
-  "name": "UnionEyes",
-  "short_name": "UnionEyes",
-  "description": "Union membership management and grievance tracking",
+  "name": "Union Eyes",
+  "short_name": "Union Eyes",
+  "description": "Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#1e3a5f",
+  "theme_color": "#1e3a5f",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "en",
-  "categories": ["business", "productivity"],
+  "lang": "en-CA",
+  "categories": ["business", "productivity", "government"],
+  "id": "unioneyes.app",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",

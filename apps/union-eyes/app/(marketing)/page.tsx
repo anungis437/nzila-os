@@ -17,12 +17,32 @@ import AnimatedCTA from './components/animated-cta';
 import UnionWorkCarousel from './components/union-work-carousel';
 
 export const metadata: Metadata = {
-  title: 'UnionEyes — A Decision System for Labour Leadership',
-  description: 'UnionEyes is a decision system for labour leadership. From intake to outcome, all in one system.',
+  title: 'Union Eyes | Modern Operating System for Unions',
+  description:
+    'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+  alternates: {
+    canonical: 'https://unioneyes.app',
+  },
   openGraph: {
-    title: 'UnionEyes — A Decision System for Labour Leadership',
-    description: 'Know what matters. Act with confidence. From intake to outcome, all in one system.',
-    images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — UnionEyes' }],
+    title: 'Union Eyes | Modern Operating System for Unions',
+    description:
+      'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
+    url: 'https://unioneyes.app',
+    images: [
+      {
+        url: '/images/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'Union Eyes — Modern Operating System for Unions',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Union Eyes | Modern Operating System for Unions',
+    description:
+      'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
+    images: ['/images/og-default.png'],
   },
 };
 
@@ -45,21 +65,22 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-              A Decision System for Labour Leadership
+              Built for Canadian Labour Leadership
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Know what to do.<br />
-              <span className="gradient-text">Not just what&apos;s happening.</span>
+              Protect Members.<br />
+              <span className="gradient-text">Modernize Operations.</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-              UnionEyes brings intake, casework, intelligence, and outcomes
-              into one decision system — built with Canadian unions, now entering pilot.
+              Grievances, governance, member communications, elections,
+              intelligence, and defensible operations — all in one system built
+              for modern unions.
             </p>
           </ScrollReveal>
 
