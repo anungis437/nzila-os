@@ -117,8 +117,8 @@ jobs:
             --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
             --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
             --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
-            --build-arg NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
-            --build-arg NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
+            --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com \
+            --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com \
             --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
             --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
             --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \
