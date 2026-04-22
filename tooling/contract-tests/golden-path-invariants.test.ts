@@ -11,15 +11,17 @@
  *   GP-005: Template app-adoption directory is complete
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { execSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
 
 const ROOT = join(__dirname, '..', '..')
 const SCAFFOLD_SCRIPT = join(ROOT, 'tooling', 'golden-path', 'scaffold-governed-app.ts')
 const GUIDE_PATH = join(ROOT, 'docs', 'GOLDEN_PATH_DEVELOPER_GUIDE.md')
-const TEST_APP = 'test-scaffold-gp'
-const TEST_APP_DIR = join(ROOT, 'apps', TEST_APP)
+const TEST_APP = 'test-scaffold-gp-ci'
+let tempRoot = ''
+let TEST_APP_DIR = ''
 
 // ── GP-001: Scaffold generator exists ───────────────────────────────────────
 
@@ -56,15 +58,16 @@ describe('GP-002: developer guide', () => {
 
 describe('GP-003/004: scaffold output', () => {
   beforeAll(() => {
-    if (existsSync(TEST_APP_DIR)) rmSync(TEST_APP_DIR, { recursive: true })
+    tempRoot = mkdtempSync(join(tmpdir(), 'nzila-gp-'))
+    TEST_APP_DIR = join(tempRoot, 'apps', TEST_APP)
     execSync(
-      `npx tsx "${SCAFFOLD_SCRIPT}" ${TEST_APP} --risk=high --profile=commerce`,
-      { cwd: ROOT, stdio: 'pipe' }
+      `npx tsx "${SCAFFOLD_SCRIPT}" ${TEST_APP} --risk=high --profile=commerce --root="${tempRoot}"`,
+      { cwd: ROOT, stdio: 'pipe' },
     )
   }, 60_000)
 
   afterAll(() => {
-    if (existsSync(TEST_APP_DIR)) rmSync(TEST_APP_DIR, { recursive: true })
+    if (tempRoot && existsSync(tempRoot)) rmSync(tempRoot, { recursive: true, force: true })
   })
 
   it('creates app directory', () => {
