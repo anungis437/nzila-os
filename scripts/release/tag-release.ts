@@ -99,6 +99,7 @@ function validateSemver(v: string): void {
 function main(): void {
   const dryRun = hasFlag('--dry-run')
   const hotfix = hasFlag('--hotfix')
+  const allowNonMain = hasFlag('--allow-non-main')
   const bumpArg = parseArg('--bump') as BumpType | undefined
   const versionArg = parseArg('--version')
 
@@ -121,8 +122,24 @@ function main(): void {
   const tag = `v${newVersion}`
   const gitSha = exec('git rev-parse HEAD', { capture: true })
   const gitBranch = exec('git rev-parse --abbrev-ref HEAD', { capture: true })
+  const originMainSha = exec('git rev-parse origin/main', { capture: true })
   const date = new Date().toISOString()
   const artifactId = `nzila-os-${newVersion}-${gitSha.slice(0, 8)}`
+
+  // Production release tags should only be created from main and from the current
+  // origin/main commit unless explicitly overridden.
+  if (!allowNonMain && gitBranch !== 'main') {
+    console.error(`✗ Release tagging must run from main. Current branch: ${gitBranch}`)
+    console.error('  Use --allow-non-main only for exceptional recovery workflows.')
+    process.exit(1)
+  }
+
+  if (!allowNonMain && originMainSha && gitSha !== originMainSha) {
+    console.error('✗ HEAD does not match origin/main. Pull/rebase main before tagging.')
+    console.error(`  HEAD:        ${gitSha}`)
+    console.error(`  origin/main: ${originMainSha}`)
+    process.exit(1)
+  }
 
   // Reject if tag already exists
   const existingTags = exec('git tag --list', { capture: true }).split('\n').map((t) => t.trim())
