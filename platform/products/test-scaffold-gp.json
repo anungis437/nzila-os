@@ -1,6 +1,6 @@
 {
-  "slug": "platform-admin",
-  "name": "Platform Admin",
+  "slug": "test-scaffold-gp",
+  "name": "Test Scaffold GP",
   "tier": 5,
   "tierLabel": "sunset",
   "status": "frozen",
@@ -13,7 +13,7 @@
   "publicVisible": false,
   "gtmPosture": "sunset",
   "proofLevel": "none",
-  "strategicRole": "Legacy admin surface slated for retirement and minimal maintenance only.",
+  "strategicRole": "Internal scaffold template used to bootstrap new apps under the NzilaOS enforcement pipeline. Not a commercial product.",
   "generatedAt": "2026-04-22T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
