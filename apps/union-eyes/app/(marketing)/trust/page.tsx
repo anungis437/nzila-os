@@ -242,8 +242,8 @@ export default function TrustPage() {
                   ['Audit logging', '✅ HMAC-sealed', 'Cryptographic evidence packages'],
                   ['AI data handling', '✅ No training use', 'Azure OpenAI, data stays in tenant'],
                   ['Vulnerability scanning', '✅ CI pipeline', 'Dependency audit + Trivy container scan'],
-                  ['SOC 2 Type II', '🔄 In progress', 'Target: Q4 2025'],
-                  ['Penetration test', '🔄 Scheduled', 'Third-party pen test Q3 2025'],
+                  ['SOC 2 Type II', '🔄 Roadmap', 'Scoping in progress — pre-audit readiness 2026'],
+                  ['Penetration test', '🔄 Planned', 'Third-party pen test scheduled pre-production'],
                 ].map(([control, status, detail]) => (
                   <tr key={control} className="hover:bg-gray-50">
                     <td className="px-6 py-3 font-medium text-gray-900">{control}</td>

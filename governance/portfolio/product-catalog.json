@@ -72,7 +72,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Executive Director",
       "proof_stage": "pilot",
-      "market_pull_score": 8
+      "market_pull_score": 8,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "flow",
@@ -117,7 +128,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Operations Lead",
       "proof_stage": "demo",
-      "market_pull_score": 7
+      "market_pull_score": 7,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "cfo",
@@ -162,7 +184,18 @@
       "gross_logo_target_12m": 5,
       "primary_buyer": "Finance Director",
       "proof_stage": "interest",
-      "market_pull_score": 5
+      "market_pull_score": 5,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "scenario",
+        "expected_12m_revenue": "scenario",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "scenario",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "scenario"
+      }
     },
     {
       "id": "partners",
@@ -207,7 +240,18 @@
       "gross_logo_target_12m": 5,
       "primary_buyer": "Partnership Lead",
       "proof_stage": "interest",
-      "market_pull_score": 5
+      "market_pull_score": 5,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "scenario",
+        "expected_12m_revenue": "scenario",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "scenario",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "scenario"
+      }
     },
     {
       "id": "console",
@@ -612,7 +656,18 @@
       "gross_logo_target_12m": 8,
       "primary_buyer": "Chief People Officer",
       "proof_stage": "pilot",
-      "market_pull_score": 8
+      "market_pull_score": 8,
+      "metric_classifications": {
+        "monthly_revenue": "estimated",
+        "annual_recurring_revenue": "forecast",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "estimated",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "estimated"
+      }
     },
     {
       "id": "mobility",

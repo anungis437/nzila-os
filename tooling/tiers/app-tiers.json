@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "schema_version": "1.0.0",
+    "description": "Canonical app tier registry. Governs investment priority, CI enforcement, and release gating.",
+    "authority": "product-catalog.json is the source of truth for commercial tier; this file maps app identifiers to those tiers.",
+    "last_updated": "2026-04-22"
+  },
+  "tier1": {
+    "label": "Revenue-generating — commercial pilots underway",
+    "apps": ["union-eyes", "abr", "flow"],
+    "ci_requirements": [
+      "contract tests must pass",
+      "typecheck must pass",
+      "no open CRITICAL or HIGH vulnerabilities",
+      "maturity.json must have maturity_gaps block",
+      "metric_classifications required in product-catalog.json"
+    ]
+  },
+  "tier2": {
+    "label": "Revenue-ready — pipeline being built",
+    "apps": ["cfo", "partners"],
+    "ci_requirements": [
+      "typecheck must pass",
+      "metric_classifications required in product-catalog.json"
+    ]
+  },
+  "tier3": {
+    "label": "Platform infrastructure — internal tooling",
+    "apps": ["console", "control-plane", "web", "orchestrator-api"],
+    "ci_requirements": [
+      "typecheck must pass"
+    ]
+  },
+  "tier4": {
+    "label": "Experimental — approved incubation projects",
+    "apps": ["zonga", "agrimo", "mobility", "nacp-exams", "trade", "weekone", "cora"],
+    "ci_requirements": [
+      "PRs require 'approved-experiment' label before merge to main"
+    ],
+    "label_enforcement_note": "Tier 4 PRs should not advance without an explicit strategic decision. The 'approved-experiment' label acts as a lightweight approval gate."
+  },
+  "tier5": {
+    "label": "Maintained — active but non-strategic",
+    "apps": ["mobility-client-portal", "platform-admin"],
+    "ci_requirements": [
+      "typecheck must pass",
+      "no regressions"
+    ]
+  }
+}
