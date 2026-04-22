@@ -36,8 +36,8 @@ pnpm build              # Build everything
 ## Repo Structure
 
 ```
-apps/              17 deployable applications
-packages/          170+ shared libraries (platform, domain, infra)
+apps/              19 applications
+packages/          170 shared libraries (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
 governance/        Portfolio catalog, capital model, commercial data
@@ -125,7 +125,7 @@ CI enforces portfolio-governance, compliance drift, and reliability checks on ev
 - **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO. All apps use `@nzila/platform-auth` as the canonical auth authority; legacy Clerk references in `apps/union-eyes` are compatibility-only.
 - **Database**: PostgreSQL + Drizzle ORM
 - **Infra**: Azure Container Apps (Canada Central staging)
-- **CI**: 41 GitHub Actions workflows covering governance, security, deployment, and compliance
+- **CI**: 42 GitHub Actions workflows covering governance, security, deployment, and compliance
 - **Monorepo**: pnpm workspaces + Turborepo
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview.
