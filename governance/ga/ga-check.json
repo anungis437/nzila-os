@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-22T01:18:58.711Z",
-  "commitSha": "caea4496",
-  "overall": "FAIL",
+  "timestamp": "2026-04-22T04:25:31.200Z",
+  "commitSha": "a8fe1b39",
+  "overall": "PASS",
   "summary": {
     "total": 23,
-    "passed": 21,
-    "failed": 2
+    "passed": 23,
+    "failed": 0
   },
   "gates": [
     {
@@ -14,14 +14,14 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 1534
+      "durationMs": 1980
     },
     {
       "id": "ORG-REGISTRY",
       "name": "Org boundary: Org-scoped registry exists and consistent",
       "status": "PASS",
       "details": "Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "HASH-CHAIN",
@@ -35,7 +35,7 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUTH-MIDDLEWARE",
@@ -43,7 +43,7 @@
       "status": "PASS",
       "details": "All 4 apps have auth edge guards (proxy.ts/middleware.ts)",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUDITED-WRITES",
@@ -51,7 +51,7 @@
       "status": "PASS",
       "details": "All apps use withAudit in API guards",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUDIT-MANDATORY",
@@ -65,7 +65,7 @@
       "name": "Evidence: verifySeal exported from seal module",
       "status": "PASS",
       "details": "generateSeal + verifySeal both exported",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-WORKFLOW-SEAL",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 7
+      "durationMs": 5
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 6
+      "durationMs": 5
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -133,8 +133,8 @@
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "219 contract test files (require ≥20)",
-      "durationMs": 4
+      "details": "220 contract test files (require ≥20)",
+      "durationMs": 8
     },
     {
       "id": "CODEOWNERS",
@@ -161,22 +161,18 @@
     {
       "id": "STUDIO-PLATFORM-SCORE",
       "name": "Studio maturity: Every app scores ≥ 7/10 on platform integration",
-      "status": "FAIL",
-      "details": "1 app(s) below 7/10 platform score",
-      "violations": [
-        "apps/test-scaffold-gp: 1/10 (missing: ai-client, ml-client, evidence, api-guards, otel, @nzila/db, @nzila/os-core, @nzila/config, env-validation)"
-      ],
-      "durationMs": 10
+      "status": "PASS",
+      "details": "All 19 apps score ≥ 7/10 on platform integration",
+      "violations": [],
+      "durationMs": 7
     },
     {
       "id": "STUDIO-AI-CLAIMS",
       "name": "Studio maturity: No AI marketing claims without ai-sdk wiring",
-      "status": "FAIL",
-      "details": "1 app(s) claim AI without wiring",
-      "violations": [
-        "apps/test-scaffold-gp: claims AI but has no ai-client.ts or @nzila/ai-sdk dependency"
-      ],
-      "durationMs": 8
+      "status": "PASS",
+      "details": "All apps with AI claims have runtime ai-sdk wiring",
+      "violations": [],
+      "durationMs": 6
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -184,7 +180,7 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 4517
+      "durationMs": 2265
     }
   ],
   "environment": {
@@ -193,5 +189,5 @@
     "ci": false,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 6209
+  "totalDurationMs": 4353
 }

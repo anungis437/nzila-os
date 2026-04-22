@@ -11,7 +11,7 @@ A governed app in the Nzila OS monorepo.
 | Audit | ✓ Required |
 | Observability | ✓ Required |
 | Security | ✓ Required |
-| AI Control | ○ Optional |
+| Model/ML Control | ○ Optional |
 
 ## Quick Start
 
