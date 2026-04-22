@@ -202,9 +202,9 @@ jobs:
 
           # Cross-app navigation URLs (baked into Next.js at build time)
           DOMAIN="jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_WEB_URL=https://nzila-os-web.${DOMAIN}"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.${DOMAIN}"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.${DOMAIN}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_WEB_URL=https://nzilaventures.com"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.${DOMAIN}"
