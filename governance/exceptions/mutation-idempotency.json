@@ -1,0 +1,25 @@
+{
+  "$schema": "./exception-schema.json",
+  "ruleId": "MUTATION_IDEMPOTENCY_REQUIRED_001",
+  "description": "Routes legitimately exempt from per-request Idempotency-Key enforcement (must have alternative dedup or be low-risk).",
+  "entries": [
+    {
+      "path": "apps/weekone/app/api/cash/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
+      "expiresOn": "2026-07-22"
+    },
+    {
+      "path": "apps/weekone/app/api/deals/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
+      "expiresOn": "2026-07-22"
+    },
+    {
+      "path": "apps/weekone/app/api/weekly-brief/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
+      "expiresOn": "2026-07-22"
+    }
+  ]
+}

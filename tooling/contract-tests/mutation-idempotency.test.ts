@@ -148,11 +148,10 @@ function loadIdempotencyExceptions(): string[] {
   if (!existsSync(exPath)) return []
   try {
     const data = JSON.parse(readFileSync(exPath, 'utf-8'))
-    if (Array.isArray(data)) {
-      return data
-        .filter((e: { expiresOn?: string }) => !e.expiresOn || new Date(e.expiresOn) > new Date())
-        .map((e: { path: string }) => e.path)
-    }
+    const entries = Array.isArray(data) ? data : Array.isArray(data?.entries) ? data.entries : []
+    return entries
+      .filter((e: { expiresOn?: string }) => !e.expiresOn || new Date(e.expiresOn) > new Date())
+      .map((e: { path: string }) => e.path)
   } catch { /* empty */ }
   return []
 }

@@ -57,6 +57,7 @@ const TS_AUTHORITATIVE_APPS = [
   'union-eyes',
   'zonga',
   'web',
+  'weekone',
   'orchestrator-api',
 ]
 
