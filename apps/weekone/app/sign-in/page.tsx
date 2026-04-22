@@ -9,6 +9,7 @@ export default function SignInPage() {
           Welcome back. Sign in to continue.
         </p>
         <div className="mt-6">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- /api/auth/signin is a NextAuth API route, not a page; <Link> would be incorrect */}
           <a
             href="/api/auth/signin"
             className="block w-full rounded-lg bg-electric py-2.5 text-sm font-semibold text-white hover:bg-electric/90"
