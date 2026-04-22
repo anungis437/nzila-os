@@ -102,6 +102,7 @@ const _isPublicRoute = createRouteMatcher([
   "/case-studies(.*)",
   "/pilot-request(.*)",
   "/features(.*)",
+  "/trust(.*)",
   // Locale-prefixed marketing pages (e.g. /fr-CA/story, /en-CA/pricing)
   "/:locale/story(.*)",
   "/:locale/pricing(.*)",
@@ -110,6 +111,7 @@ const _isPublicRoute = createRouteMatcher([
   "/:locale/case-studies(.*)",
   "/:locale/pilot-request(.*)",
   "/:locale/features(.*)",
+  "/:locale/trust(.*)",
   // Legal pages
   "/legal(.*)",
   "/:locale/legal(.*)",

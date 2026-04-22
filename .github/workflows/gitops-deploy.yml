@@ -211,6 +211,12 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.${DOMAIN}"
 
+          # Union Eyes custom domain — baked in at build time for OG metadata / canonical URLs
+          if [ "$APP" = "union-eyes" ]; then
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_SITE_URL=https://unioneyes.app"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_APP_URL=https://app.unioneyes.app"
+          fi
+
           # Version truth: bake git SHA and build timestamp into image for /api/version drift detection
           BUILD_ARGS="${BUILD_ARGS} --build-arg GITHUB_SHA=${{ github.sha }}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -402,6 +408,25 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Custom domain smoke check (unioneyes.app)
+        if: needs.plan.outputs.environment == 'staging'
+        run: |
+          # Only run once the custom domain DNS has been pointed at the Container App.
+          # Controlled by the UE_CUSTOM_DOMAIN_ACTIVE secret — set to "true" after cutover.
+          if [ "${{ secrets.UE_CUSTOM_DOMAIN_ACTIVE }}" != "true" ]; then
+            echo "::notice::Custom domain check skipped — UE_CUSTOM_DOMAIN_ACTIVE is not 'true'"
+            exit 0
+          fi
+          for URL in "https://unioneyes.app" "https://app.unioneyes.app"; do
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 15 "$URL" 2>/dev/null || echo "000")
+            if [[ "$STATUS" =~ ^(200|301|302)$ ]]; then
+              echo "  ✅ $URL: HTTP $STATUS"
+            else
+              echo "  ❌ $URL: HTTP $STATUS — custom domain may be misconfigured"
+              echo "::warning::Custom domain $URL returned HTTP $STATUS — check DNS and Azure hostname bindings"
+            fi
+          done
 
       - name: Smoke tests
         run: |
