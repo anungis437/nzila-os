@@ -1277,7 +1277,7 @@
         "readiness": 1,
         "margin_potential": 0
       },
-      "registry_tier": "FROZEN",
+      "registry_tier": "DEPRECATED",
       "dev_port": 3017
     }
   ]

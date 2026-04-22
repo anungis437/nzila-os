@@ -293,7 +293,7 @@
       "recommendation": "SUNSET",
       "weighted_score": 2,
       "readiness_tier": "internal-only",
-      "registry_tier": "FROZEN",
+      "registry_tier": "DEPRECATED",
       "dev_port": 3017
     }
   ]

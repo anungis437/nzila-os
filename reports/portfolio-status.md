@@ -58,5 +58,5 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Zonga | 4.4 | HOLD | INCUBATING | internal-only |
 | Mobility Client Portal | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Platform Admin | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
-| Test Scaffold GP | 2.0 | SUNSET | FROZEN | internal-only |
+| Test Scaffold GP | 2.0 | SUNSET | DEPRECATED | internal-only |
 
