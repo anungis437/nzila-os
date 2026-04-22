@@ -620,6 +620,7 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/mobility-client-portal': 3, // Pre-GA — thin client portal
     'apps/platform-admin': 3, // Pre-GA — internal admin tooling
     'apps/trade': 4,          // Pre-GA — trade vertical
+    'apps/weekone': 3,        // INCUBATING — founder-internal OS, platform wiring planned pre-PILOT
   }
 
   for (const appDir of appDirs) {
