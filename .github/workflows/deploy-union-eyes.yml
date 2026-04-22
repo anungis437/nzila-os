@@ -451,8 +451,8 @@ jobs:
             echo "$1" | tr -d '[:space:]' | sed 's/\.$//' | tr '[:upper:]' '[:lower:]'
           }
 
-          APP_CNAME_RAW=$(nslookup "app.$ZONE" | sed -n 's/.*canonical name = //p' | tail -n 1)
-          STAGING_APP_CNAME_RAW=$(nslookup "staging-app.$ZONE" | sed -n 's/.*canonical name = //p' | tail -n 1)
+          APP_CNAME_RAW=$(dig +short CNAME "app.$ZONE" | tail -n 1)
+          STAGING_APP_CNAME_RAW=$(dig +short CNAME "staging-app.$ZONE" | tail -n 1)
 
           APP_CNAME=$(normalize_host "${APP_CNAME_RAW:-}")
           STAGING_APP_CNAME=$(normalize_host "${STAGING_APP_CNAME_RAW:-}")
