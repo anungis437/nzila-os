@@ -3,8 +3,26 @@ name: Agri Core Check
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/agrimo/**'
+      - 'apps/cora/**'
+      - 'apps/abr/**'
+      - 'apps/trade/**'
+      - 'packages/agri-*/**'
+      - 'packages/cora-*/**'
+      - 'scripts/agri-*.ts'
+      - '.github/workflows/agri-core-check.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/agrimo/**'
+      - 'apps/cora/**'
+      - 'apps/abr/**'
+      - 'apps/trade/**'
+      - 'packages/agri-*/**'
+      - 'packages/cora-*/**'
+      - 'scripts/agri-*.ts'
+      - '.github/workflows/agri-core-check.yml'
 
 permissions:
   contents: read

@@ -34,6 +34,9 @@ jobs:
       - name: Check generated artifact freshness
         run: pnpm generate:portfolio-artifacts -- --check
 
+      - name: Check platform product manifest drift
+        run: pnpm tsx scripts/generate-platform-products.ts --check
+
       - name: Check portfolio drift
         run: pnpm validate:portfolio
 
@@ -42,3 +45,6 @@ jobs:
 
       - name: Run portfolio governance tests
         run: pnpm exec vitest run --project contract-tests tooling/contract-tests/portfolio-governance.test.ts
+
+      - name: Run telemetry manifest enforcement
+        run: pnpm exec vitest run --project contract-tests tooling/contract-tests/telemetry-manifest-enforcement.test.ts

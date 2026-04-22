@@ -229,9 +229,13 @@ function main(): void {
 
   if (checkOnly) {
     let drift = false
+    // Strip `generatedAt` so daily timestamp churn doesn't trigger drift.
+    // Only meaningful content changes should fail the gate.
+    const normalize = (s: string): string =>
+      s.replace(/"generatedAt"\s*:\s*"[^"]*"/g, '"generatedAt":"<NORMALIZED>"')
     for (const [name, content] of artifacts) {
       const p = join(OUT_DIR, name)
-      if (!existsSync(p) || readFileSync(p, 'utf-8') !== content) {
+      if (!existsSync(p) || normalize(readFileSync(p, 'utf-8')) !== normalize(content)) {
         console.error(`[generate-platform-products] drift: platform/products/${name}`)
         drift = true
       }

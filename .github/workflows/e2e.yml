@@ -3,8 +3,20 @@ name: E2E Tests
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'governance/**'
+      - 'platform/products/**'
+      - 'reports/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'governance/**'
+      - 'platform/products/**'
+      - 'reports/**'
 
 permissions:
   contents: read
