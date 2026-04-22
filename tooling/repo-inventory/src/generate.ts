@@ -33,6 +33,7 @@ export interface RepoInventory {
   generatedAt: string;
   appCount: number;
   packageCount: number;
+  workspacePackageCount: number;
   workflowCount: number;
   contractTestCount: number;
   tsTestFileCount: number;
@@ -153,6 +154,25 @@ function scanPackages(): number {
     .length;
 }
 
+function scanWorkspacePackages(): number {
+  const roots = ['apps', 'packages', 'services', 'tooling'];
+  let count = 0;
+
+  for (const root of roots) {
+    const rootDir = join(ROOT, root);
+    if (!existsSync(rootDir)) continue;
+
+    for (const entry of readdirSync(rootDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const relPath = `${root}/${entry.name}`;
+      if (relPath === 'packages/automation' || relPath === 'packages/packages') continue;
+      if (existsSync(join(rootDir, entry.name, 'package.json'))) count++;
+    }
+  }
+
+  return count;
+}
+
 function scanWorkflows(): string[] {
   const wfDir = join(ROOT, '.github', 'workflows');
   if (!existsSync(wfDir)) return [];
@@ -200,6 +220,7 @@ function generate(): RepoInventory {
     generatedAt: `${dayStamp}T00:00:00.000Z`,
     appCount: apps.length,
     packageCount: scanPackages(),
+    workspacePackageCount: scanWorkspacePackages(),
     workflowCount: workflows.length,
     contractTestCount: scanContractTests(),
     tsTestFileCount: scanTsTests(),
@@ -222,7 +243,8 @@ function toMarkdown(inv: RepoInventory): string {
   lines.push(`| Metric | Count |`);
   lines.push(`|--------|-------|`);
   lines.push(`| Apps | ${inv.appCount} |`);
-  lines.push(`| Packages | ${inv.packageCount} |`);
+  lines.push(`| Packages (packages/*) | ${inv.packageCount} |`);
+  lines.push(`| Workspace Packages (apps|packages|services|tooling) | ${inv.workspacePackageCount} |`);
   lines.push(`| GitHub Workflows | ${inv.workflowCount} |`);
   lines.push(`| Contract Test Files | ${inv.contractTestCount} |`);
   lines.push(`| TS/JS Test Files | ${inv.tsTestFileCount} |`);
@@ -262,7 +284,8 @@ writeFileSync(join(outDir, 'repo-inventory.md'), toMarkdown(inventory));
 
 console.log(`✓ Repo inventory generated at ${new Date().toISOString().split('T')[0]}`);
 console.log(`  Apps: ${inventory.appCount}`);
-console.log(`  Packages: ${inventory.packageCount}`);
+console.log(`  Packages (packages/*): ${inventory.packageCount}`);
+console.log(`  Workspace packages: ${inventory.workspacePackageCount}`);
 console.log(`  Workflows: ${inventory.workflowCount}`);
 console.log(`  Contract tests: ${inventory.contractTestCount}`);
 console.log(`  TS/JS test files: ${inventory.tsTestFileCount}`);
