@@ -1,0 +1,29 @@
+{
+  "change_id": "CHG-2026-0106",
+  "title": "Deploy union-eyes to production",
+  "description": "Approved production deployment for Union Eyes release commit edd3495ec60a5ca25c5f34dd9d80ff052b2888f9.",
+  "service": "union-eyes",
+  "environment": "PROD",
+  "change_type": "STANDARD",
+  "risk_level": "LOW",
+  "impact_summary": "Production deployment of tested Union Eyes changes. Rollback via previous image tag if needed.",
+  "requested_by": "platform-team",
+  "approvers_required": [],
+  "approved_by": [],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-04-22T00:00:00.000Z",
+  "implementation_window_end": "2026-04-30T23:59:59.000Z",
+  "rollback_plan": "Revert to previous stable container image and rerun smoke checks.",
+  "test_evidence_refs": [
+    "evidence/union-eyes-contract-gates-2026-04-22.json"
+  ],
+  "linked_prs": [
+    "#402"
+  ],
+  "linked_commits": [
+    "edd3495ec60a5ca25c5f34dd9d80ff052b2888f9"
+  ],
+  "status": "APPROVED",
+  "created_at": "2026-04-22T00:00:00.000Z",
+  "updated_at": "2026-04-22T00:00:00.000Z"
+}
