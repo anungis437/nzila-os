@@ -11,6 +11,7 @@ export function validateInventorySchema(value: unknown): RepoInventory {
   assert(typeof inv.generatedAt === 'string' && inv.generatedAt.length > 0, 'Missing generatedAt')
   assert(typeof inv.appCount === 'number', 'Missing appCount')
   assert(typeof inv.packageCount === 'number', 'Missing packageCount')
+  assert(typeof inv.workspacePackageCount === 'number', 'Missing workspacePackageCount')
   assert(typeof inv.workflowCount === 'number', 'Missing workflowCount')
   assert(typeof inv.contractTestCount === 'number', 'Missing contractTestCount')
   assert(typeof inv.tsTestFileCount === 'number', 'Missing tsTestFileCount')

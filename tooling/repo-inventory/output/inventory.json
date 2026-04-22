@@ -2,6 +2,7 @@
   "generatedAt": "2026-04-22T00:00:00.000Z",
   "appCount": 19,
   "packageCount": 170,
+  "workspacePackageCount": 193,
   "workflowCount": 42,
   "contractTestCount": 220,
   "tsTestFileCount": 1218,
@@ -464,7 +465,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 6
+      "codeFileCount": 8
     },
     {
       "name": "trade",
@@ -523,7 +524,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3150
+      "codeFileCount": 3152
     },
     {
       "name": "web",
@@ -569,7 +570,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 45
+      "codeFileCount": 46
     },
     {
       "name": "zonga",
