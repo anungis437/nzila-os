@@ -1,6 +1,6 @@
 {
   "generated_from": "governance/portfolio/product-catalog.json",
-  "generated_at": "2026-04-21",
+  "generated_at": "2026-04-22",
   "status": "pilot",
   "exposure": "internal",
   "data_integrity": "partial",
@@ -10,7 +10,7 @@
   "gtm_posture": "sell-now",
   "proof_level": "internal-proof",
   "revenue_status": "pilot-contracting",
-  "last_validated": "2026-04-21",
+  "last_validated": "2026-04-22",
   "orchestrator_integration": true,
   "orchestrator_playbooks": [
     "reminder_dispatch",

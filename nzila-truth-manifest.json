@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-04-21",
+  "last_audit": "2026-04-22",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -193,7 +193,7 @@
       "priority": "low"
     },
     "weekone": {
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
       "readiness_tier": "internal-only",
       "exposure": "internal",

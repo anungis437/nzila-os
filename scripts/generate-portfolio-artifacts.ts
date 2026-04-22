@@ -23,7 +23,7 @@ function main(): void {
   }
 
   const artifacts = buildGeneratedArtifacts(context)
-  const drift = detectArtifactDrift(root, artifacts)
+  const drift = detectArtifactDrift(root, artifacts, { ignoreDailyStamps: checkOnly })
 
   if (checkOnly) {
     if (drift.length > 0) {

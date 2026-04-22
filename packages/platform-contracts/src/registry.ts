@@ -498,6 +498,32 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
   },
 
   {
+    id: 'weekone',
+    name: 'WeekOne',
+    description: 'Founder operating system — runway, pipeline, weekly brief',
+    basePath: '/weekone',
+    tier: 'INCUBATING',
+    appType: 'web-app',
+    iconToken: 'calendar',
+    enabledByDefault: false,
+    requiresOrgScope: true,
+    navOrder: 75,
+    owner: 'platform-core',
+    packageName: '@nzila/weekone',
+    devPort: 3009,
+    domains: ['founder-ops', 'finance'],
+    enabledCapabilities: ['auth', 'org-scope', 'telemetry'],
+    governanceRequirements: [],
+    integrationDependencies: [
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
+      { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
+    ],
+    deployment: { environments: ['local'], requiresDatabase: true },
+    policyBindings: [],
+    supportedOrgScopes: ['*'],
+  },
+
+  {
     id: 'mobility',
     name: 'Mobility',
     description: 'Case management for immigration and mobility services',

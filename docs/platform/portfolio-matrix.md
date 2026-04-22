@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-21
+> Generated: 2026-04-22
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,7 +43,7 @@
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |
-| WeekOne | UNREGISTERED | internal-only | internal | HOLD |
+| WeekOne | INCUBATING | internal-only | internal | HOLD |
 | Zonga | INCUBATING | internal-only | internal | HOLD |
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Platform Admin | EXPERIMENTAL | internal-only | internal | SUNSET |

@@ -1,6 +1,6 @@
 # Portfolio Status
 
-Generated: 2026-04-21
+Generated: 2026-04-22
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix
@@ -53,7 +53,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |
 | NACP Exams | 3.6 | HOLD | INCUBATING | internal-only |
 | Trade | 3.6 | HOLD | INCUBATING | internal-only |
-| WeekOne | 4.6 | HOLD | UNREGISTERED | internal-only |
+| WeekOne | 4.6 | HOLD | INCUBATING | internal-only |
 | Zonga | 4.4 | HOLD | INCUBATING | internal-only |
 | Mobility Client Portal | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Platform Admin | 2.0 | SUNSET | EXPERIMENTAL | internal-only |

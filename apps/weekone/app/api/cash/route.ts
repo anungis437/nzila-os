@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@nzila/platform-auth/entra/server";
 import { getDb } from "@/lib/db";
 import { calculateRunway } from "@/domain/runway";
 import { z } from "zod";
@@ -11,6 +12,10 @@ const snapshotSchema = z.object({
 });
 
 export async function GET() {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   const db = await getDb();
   if (!db) {
     return NextResponse.json({ data: null, error: "No database connection" }, { status: 503 });
@@ -28,6 +33,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   const db = await getDb();
   if (!db) {
     return NextResponse.json({ error: "No database connection" }, { status: 503 });

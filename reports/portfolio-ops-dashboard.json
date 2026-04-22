@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-21",
+  "generated_at": "2026-04-22",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
     "total_products": 18,
@@ -245,8 +245,8 @@
       "recommendation": "HOLD",
       "weighted_score": 4.6,
       "readiness_tier": "internal-only",
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "INCUBATING",
+      "dev_port": 3009
     },
     {
       "id": "zonga",

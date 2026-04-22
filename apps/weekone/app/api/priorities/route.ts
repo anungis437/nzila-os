@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
+import { auth } from "@nzila/platform-auth/entra/server";
 import { getDb } from "@/lib/db";
 import { calculateRunway } from "@/domain/runway";
 import { rankPriorities } from "@/domain/priorities";
 
 export async function GET() {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   const db = await getDb();
   if (!db) {
     const defaultPriorities = rankPriorities({

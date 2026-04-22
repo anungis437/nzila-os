@@ -772,12 +772,26 @@ export function buildGeneratedArtifacts(context: PortfolioContext): GeneratedArt
   return artifacts.sort((left, right) => left.path.localeCompare(right.path))
 }
 
-export function detectArtifactDrift(root: string, artifacts: GeneratedArtifact[]): string[] {
+export function detectArtifactDrift(
+  root: string,
+  artifacts: GeneratedArtifact[],
+  options: { ignoreDailyStamps?: boolean } = {},
+): string[] {
+  const { ignoreDailyStamps } = options
+  const normalize = (value: string | null) => {
+    if (value === null) return null
+    if (!ignoreDailyStamps) return value
+    return value
+      // JSON fields with ISO date values that re-stamp daily
+      .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
+      // Markdown footers like "Generated: 2026-04-21" or "> Generated: 2026-04-21"
+      .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
+  }
   const drift: string[] = []
   for (const artifact of artifacts) {
     const absolutePath = join(root, artifact.path)
     const existing = existsSync(absolutePath) ? readFileSync(absolutePath, 'utf8') : null
-    if (existing !== artifact.content) drift.push(artifact.path)
+    if (normalize(existing) !== normalize(artifact.content)) drift.push(artifact.path)
   }
   return drift
 }
