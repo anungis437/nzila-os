@@ -3,6 +3,11 @@ import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzi
 
 const APP = 'union-eyes'
 
+function parseBoolEnv(value: string | undefined, defaultValue: boolean): boolean {
+  if (!value) return defaultValue
+  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
+}
+
 async function checkDatabaseReady(): Promise<boolean> {
   try {
     const { db } = await import('@nzila/db')
@@ -34,16 +39,23 @@ async function checkQueueReady(): Promise<boolean> {
 
 export async function GET() {
   const [database, queue] = await Promise.all([checkDatabaseReady(), checkQueueReady()])
+  const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
 
-  const checks = normalizeHealthChecks({
+  const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
     database,
-    queue,
     storage: 'unknown',
     thirdParty: 'unknown',
-  })
+  }
 
-  const ready = isReadyFromChecks(checks, ['process', 'database', 'queue'])
+  if (requireQueue) {
+    checksInput.queue = queue
+  }
+
+  const checks = normalizeHealthChecks(checksInput)
+
+  const requiredChecks = ['process', 'database', ...(requireQueue ? ['queue'] : [])]
+  const ready = isReadyFromChecks(checks, requiredChecks)
 
   return NextResponse.json(
     {

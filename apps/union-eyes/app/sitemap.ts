@@ -1,55 +1,59 @@
 import { MetadataRoute } from 'next';
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unioneyes.app';
+import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const site = getUnionEyesSiteTopology();
+
+  if (site.isStaging) {
+    return [];
+  }
+
   const now = new Date();
   return [
     {
-      url: SITE_URL,
+      url: site.marketingUrl,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: `${SITE_URL}/story`,
+      url: `${site.marketingUrl}/story`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/pricing`,
+      url: `${site.marketingUrl}/pricing`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/pilot-request`,
+      url: `${site.marketingUrl}/pilot-request`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
-      url: `${SITE_URL}/trust`,
+      url: `${site.marketingUrl}/trust`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${SITE_URL}/contact`,
+      url: `${site.marketingUrl}/contact`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${SITE_URL}/case-studies`,
+      url: `${site.marketingUrl}/case-studies`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${SITE_URL}/features`,
+      url: `${site.marketingUrl}/features`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,

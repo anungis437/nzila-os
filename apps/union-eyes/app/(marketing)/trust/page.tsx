@@ -1,19 +1,25 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { buildMarketingUrl, getUnionEyesSiteTopology } from '@/lib/site-topology';
 
-export const metadata: Metadata = {
-  title: 'Trust & Security',
-  description:
-    'How Union Eyes protects member data with Canadian hosting, enterprise encryption, strict access controls, and a responsible AI stance.',
-  alternates: {
-    canonical: 'https://unioneyes.app/trust',
-  },
-  openGraph: {
-    title: 'Trust & Security | Union Eyes',
+export async function generateMetadata(): Promise<Metadata> {
+  const site = getUnionEyesSiteTopology();
+
+  return {
+    title: `Trust & Security${site.titleSuffix}`,
     description:
-      'Canadian hosting, end-to-end encryption, audit trails, RBAC, and responsible AI. Built for labour organizations that cannot afford a data breach.',
-  },
-};
+      'How Union Eyes protects member data with Canadian hosting, enterprise encryption, strict access controls, and a responsible AI stance.',
+    alternates: {
+      canonical: buildMarketingUrl('/trust'),
+    },
+    openGraph: {
+      title: `Trust & Security | Union Eyes${site.titleSuffix}`,
+      description:
+        'Canadian hosting, end-to-end encryption, audit trails, RBAC, and responsible AI. Built for labour organizations that cannot afford a data breach.',
+      url: buildMarketingUrl('/trust'),
+    },
+  };
+}
 
 const sections = [
   {

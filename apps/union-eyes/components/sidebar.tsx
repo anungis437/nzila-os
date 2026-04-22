@@ -186,7 +186,6 @@ export default function Sidebar({ profile, userEmail, whopMonthlyPlanId: _whopMo
   const unionAll = ["member", "steward", "chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "bargaining_committee", "health_safety_rep", "national_officer", "admin"];
   const repsAndAbove = ["steward", "chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "bargaining_committee", "national_officer", "admin"];
   const leadershipRoles = ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin"];
-  const execRoles = ["president", "vice_president", "secretary_treasurer", "national_officer"];
   const clcRoles = ["congress_staff", "federation_staff", "clc_staff", "clc_executive", "fed_staff", "fed_executive", "system_admin", "national_officer", "admin"];
   const nzilaAll = [...NZILA_ROLES];
 

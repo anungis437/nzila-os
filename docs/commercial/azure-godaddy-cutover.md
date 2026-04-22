@@ -1,242 +1,187 @@
-# Union Eyes: Custom Domain Cutover — Azure + GoDaddy
+# Union Eyes: Custom Domain Cutover — Azure Container Apps + Registrar-Only GoDaddy
 
-**Target domains**: `unioneyes.app` (marketing), `www.unioneyes.app` (redirect), `app.unioneyes.app` (authenticated app)  
-**Container App**: `nzila-os-union-eyes` in `nzila-canada-staging-rg`, Canada Central  
-**Container Apps Environment**: `nzila-canada-staging-env`  
-**Default domain**: `nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io`
+This runbook covers dual-environment topology with separate production and staging hostnames while preserving Azure default hostnames as fallback.
 
----
+## Target Topology
+
+- Production marketing: unioneyes.app
+- Production web app: app.unioneyes.app
+- Production redirect host: www.unioneyes.app -> unioneyes.app
+- Staging marketing: staging.unioneyes.app
+- Staging web app: staging-app.unioneyes.app
+
+## Azure Resources
+
+- Resource group: nzila-canada-staging-rg
+- Container Apps environment: nzila-canada-staging-env
+- Production app: nzila-os-union-eyes
+- Staging app: nzila-os-union-eyes-staging
+
+## Default Azure Hostnames (must remain available)
+
+- Production app default host: nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+- Staging app default host: nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
 ## Prerequisites
 
 ```bash
-# Ensure you're logged in and targeting the right subscription
 az login
 az account set --subscription <your-subscription-id>
 
-# Verify the Container App is healthy
-az containerapp show \
-  --name nzila-os-union-eyes \
-  --resource-group nzila-canada-staging-rg \
-  --query "properties.provisioningState" -o tsv
-# Expected: Succeeded
+RG="nzila-canada-staging-rg"
+ENV="nzila-canada-staging-env"
+PROD_APP="nzila-os-union-eyes"
+STAGE_APP="nzila-os-union-eyes-staging"
+
+az extension add --name containerapp --upgrade
+
+az containerapp show --name "$PROD_APP" --resource-group "$RG" --query "properties.provisioningState" -o tsv
+az containerapp show --name "$STAGE_APP" --resource-group "$RG" --query "properties.provisioningState" -o tsv
 ```
 
----
-
-## Step 1 — Add Hostnames to the Container App
-
-Each domain requires its own hostname binding before Azure issues a managed certificate.
+## Step 1 — Add Custom Hostnames in Azure
 
 ```bash
 RG="nzila-canada-staging-rg"
-APP="nzila-os-union-eyes"
+PROD_APP="nzila-os-union-eyes"
+STAGE_APP="nzila-os-union-eyes-staging"
 
-# Apex domain
-az containerapp hostname add \
-  --hostname unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG"
+# Production hostnames
+az containerapp hostname add --hostname unioneyes.app --name "$PROD_APP" --resource-group "$RG"
+az containerapp hostname add --hostname www.unioneyes.app --name "$PROD_APP" --resource-group "$RG"
+az containerapp hostname add --hostname app.unioneyes.app --name "$PROD_APP" --resource-group "$RG"
 
-# www subdomain
-az containerapp hostname add \
-  --hostname www.unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG"
-
-# app subdomain (authenticated app entry point)
-az containerapp hostname add \
-  --hostname app.unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG"
+# Staging hostnames
+az containerapp hostname add --hostname staging.unioneyes.app --name "$STAGE_APP" --resource-group "$RG"
+az containerapp hostname add --hostname staging-app.unioneyes.app --name "$STAGE_APP" --resource-group "$RG"
 ```
 
-Each command will output a **domain verification token** (a TXT record value). Record these — you need them in Step 2.
-
-To retrieve verification tokens at any time:
+Capture verification IDs:
 
 ```bash
-az containerapp hostname list \
-  --name nzila-os-union-eyes \
-  --resource-group nzila-canada-staging-rg \
-  -o table
+az containerapp hostname list --name "$PROD_APP" --resource-group "$RG" -o table
+az containerapp hostname list --name "$STAGE_APP" --resource-group "$RG" -o table
 ```
 
----
+## Step 2 — Configure Authoritative DNS (Cloudflare Recommended)
 
-## Step 2 — Add DNS Records in GoDaddy
+Add verification TXT records first, then routing records at the authoritative DNS provider.
 
-Log in to GoDaddy → "My Products" → `unioneyes.app` → DNS → Manage DNS.
+### Verification TXT Records
 
-### 2a. Domain Verification TXT Records (do these first)
-
-Azure needs to verify you own the domain before issuing a certificate. Add one TXT record per domain:
-
-| Type | Name (Host) | Value | TTL |
+| Type | Name | Value | TTL |
 |---|---|---|---|
-| TXT | `@` | `<verification-token-for-unioneyes.app>` | 600 |
-| TXT | `www` | `<verification-token-for-www.unioneyes.app>` | 600 |
-| TXT | `app` | `<verification-token-for-app.unioneyes.app>` | 600 |
+| TXT | @ | <verification-token-for-unioneyes.app> | 600 |
+| TXT | www | <verification-token-for-www.unioneyes.app> | 600 |
+| TXT | app | <verification-token-for-app.unioneyes.app> | 600 |
+| TXT | staging | <verification-token-for-staging.unioneyes.app> | 600 |
+| TXT | staging-app | <verification-token-for-staging-app.unioneyes.app> | 600 |
 
-Replace `<verification-token-...>` with the values from Step 1.
+### Routing Records
 
-### 2b. Apex Domain — ALIAS Record (GoDaddy supports ALIAS)
-
-GoDaddy supports ALIAS records (also called ANAME) for the apex domain. This allows the apex to point to a hostname instead of an IP address, which is required for Azure Container Apps (which use a DNS hostname, not a static IP).
-
-| Type | Name (Host) | Points to | TTL |
+| Type | Name | Points to | TTL |
 |---|---|---|---|
-| ALIAS | `@` | `nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | 600 |
+| ALIAS | @ | nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io | 600 |
+| CNAME | www | nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io | 600 |
+| CNAME | app | nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io | 600 |
+| CNAME | staging | nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io | 600 |
+| CNAME | staging-app | nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io | 600 |
 
-> **Note**: If GoDaddy's DNS editor does not show ALIAS as a record type, use their "Forwarding" feature for the apex, or contact GoDaddy support to enable ALIAS. Alternatively, delegate DNS to Azure DNS (see Appendix A).
+Notes:
 
-### 2c. Subdomains — CNAME Records
-
-| Type | Name (Host) | Points to | TTL |
-|---|---|---|---|
-| CNAME | `www` | `nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | 600 |
-| CNAME | `app` | `nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | 600 |
-
----
+- Keep existing Azure default hostname access for both apps during and after cutover.
+- In registrar-only mode, GoDaddy only hosts nameserver delegation.
+- For Cloudflare, apex CNAME flattening handles the @ record.
 
 ## Step 3 — Bind Managed Certificates
 
-After DNS propagation (typically 5–30 minutes; allow up to 1 hour), bind the managed TLS certificates:
-
 ```bash
-ENV="nzila-canada-staging-env"
 RG="nzila-canada-staging-rg"
-APP="nzila-os-union-eyes"
+ENV="nzila-canada-staging-env"
+PROD_APP="nzila-os-union-eyes"
+STAGE_APP="nzila-os-union-eyes-staging"
 
-az containerapp hostname bind \
-  --hostname unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG" \
-  --environment "$ENV" \
-  --validation-method CNAME
+# Production certs
+az containerapp hostname bind --hostname unioneyes.app --name "$PROD_APP" --resource-group "$RG" --environment "$ENV" --validation-method CNAME
+az containerapp hostname bind --hostname www.unioneyes.app --name "$PROD_APP" --resource-group "$RG" --environment "$ENV" --validation-method CNAME
+az containerapp hostname bind --hostname app.unioneyes.app --name "$PROD_APP" --resource-group "$RG" --environment "$ENV" --validation-method CNAME
 
-az containerapp hostname bind \
-  --hostname www.unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG" \
-  --environment "$ENV" \
-  --validation-method CNAME
-
-az containerapp hostname bind \
-  --hostname app.unioneyes.app \
-  --name "$APP" \
-  --resource-group "$RG" \
-  --environment "$ENV" \
-  --validation-method CNAME
+# Staging certs
+az containerapp hostname bind --hostname staging.unioneyes.app --name "$STAGE_APP" --resource-group "$RG" --environment "$ENV" --validation-method CNAME
+az containerapp hostname bind --hostname staging-app.unioneyes.app --name "$STAGE_APP" --resource-group "$RG" --environment "$ENV" --validation-method CNAME
 ```
 
-> For the apex domain (`unioneyes.app`) use `--validation-method HTTP` if CNAME validation fails (apex CNAMEs are not standard; GoDaddy's ALIAS record may not pass CNAME validation).
-
-Certificate provisioning typically takes 2–10 minutes. Monitor with:
+If apex validation fails with CNAME, retry apex with HTTP validation:
 
 ```bash
-az containerapp hostname list \
-  --name nzila-os-union-eyes \
-  --resource-group nzila-canada-staging-rg \
-  --query "[].{hostname:name, bindingType:bindingType, certStatus:customDomainVerificationId}" \
-  -o table
+az containerapp hostname bind --hostname unioneyes.app --name "$PROD_APP" --resource-group "$RG" --environment "$ENV" --validation-method HTTP
 ```
 
----
-
-## Step 4 — Verify
+## Step 4 — Verify End-to-End
 
 ```bash
-# Check all hostnames are bound with certificates
-az containerapp hostname list \
-  --name nzila-os-union-eyes \
-  --resource-group nzila-canada-staging-rg \
-  -o table
+RG="nzila-canada-staging-rg"
+PROD_APP="nzila-os-union-eyes"
+STAGE_APP="nzila-os-union-eyes-staging"
 
-# Manual smoke check
+az containerapp hostname list --name "$PROD_APP" --resource-group "$RG" -o table
+az containerapp hostname list --name "$STAGE_APP" --resource-group "$RG" -o table
+
 curl -I https://unioneyes.app
 curl -I https://www.unioneyes.app
 curl -I https://app.unioneyes.app
+curl -I https://staging.unioneyes.app
+curl -I https://staging-app.unioneyes.app
+
+curl -I https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+curl -I https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 ```
 
-Expected: HTTP 200 or 301/302 (redirect), TLS handshake succeeds, certificate issuer is "Microsoft Azure" or "Let's Encrypt via Azure".
+Expected:
 
----
+- 200/301/302/307/308 status on custom domains.
+- Valid managed cert on each custom hostname.
+- Azure default hostnames still serve traffic.
+- www redirects to apex.
 
-## Step 5 — Post-Cutover GitHub Secret
+## Step 5 — GitHub Environment Flags
 
-Once the custom domain is verified, set the GitHub secret to enable custom domain smoke checks in CI:
+Enable custom-domain smoke checks after DNS and certs are active:
 
 ```bash
-gh secret set UE_CUSTOM_DOMAIN_ACTIVE --body "true" --repo anungis437/nzila-os
-```
+gh secret set UE_CUSTOM_DOMAIN_ACTIVE --env production --body "true" --repo anungis437/nzila-os
+gh secret set UE_CUSTOM_DOMAIN_ACTIVE --env staging --body "true" --repo anungis437/nzila-os
 
-This enables the `Custom domain smoke check (unioneyes.app)` step in `gitops-deploy.yml`.
-
----
-
-## Step 6 — Add www → apex Redirect (Optional)
-
-To redirect `www.unioneyes.app` → `unioneyes.app`, add a route in the Next.js config or use Azure Container Apps' ingress rules. The simplest approach is a Next.js redirect in `next.config.ts`:
-
-```typescript
-async redirects() {
-  return [
-    {
-      source: '/:path*',
-      has: [{ type: 'host', value: 'www.unioneyes.app' }],
-      destination: 'https://unioneyes.app/:path*',
-      permanent: true,
-    },
-  ];
-},
-```
-
----
-
-## Rollback Plan
-
-If the custom domain causes issues, the Container App continues to respond on its default Azure domain:
-
-```
-https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
-```
-
-To remove a custom hostname binding:
+Set DNS automation values in GitHub environments:
 
 ```bash
-az containerapp hostname delete \
-  --hostname unioneyes.app \
-  --name nzila-os-union-eyes \
-  --resource-group nzila-canada-staging-rg \
-  --yes
+gh variable set DNS_AUTOMATION_ENABLED --env production --body "true" --repo anungis437/nzila-os
+gh variable set DNS_AUTOMATION_ENABLED --env staging --body "true" --repo anungis437/nzila-os
+gh variable set DNS_PROVIDER --env production --body "cloudflare" --repo anungis437/nzila-os
+gh variable set DNS_PROVIDER --env staging --body "cloudflare" --repo anungis437/nzila-os
+gh variable set DNS_ZONE_NAME --env production --body "unioneyes.app" --repo anungis437/nzila-os
+gh variable set DNS_ZONE_NAME --env staging --body "unioneyes.app" --repo anungis437/nzila-os
+gh variable set DNS_ZONE_ID --env production --body "<cloudflare-zone-id>" --repo anungis437/nzila-os
+gh variable set DNS_ZONE_ID --env staging --body "<cloudflare-zone-id>" --repo anungis437/nzila-os
+gh secret set DNS_API_TOKEN --env production --body "<cloudflare-token>" --repo anungis437/nzila-os
+gh secret set DNS_API_TOKEN --env staging --body "<cloudflare-token>" --repo anungis437/nzila-os
+```
 ```
 
-Then revert the GoDaddy ALIAS/CNAME records.
+## Rollback
 
----
+If a custom domain breaks:
 
-## Appendix A — Delegating to Azure DNS (Optional)
+```bash
+RG="nzila-canada-staging-rg"
+az containerapp hostname delete --hostname unioneyes.app --name nzila-os-union-eyes --resource-group "$RG" --yes
+az containerapp hostname delete --hostname app.unioneyes.app --name nzila-os-union-eyes --resource-group "$RG" --yes
+az containerapp hostname delete --hostname staging.unioneyes.app --name nzila-os-union-eyes-staging --resource-group "$RG" --yes
+az containerapp hostname delete --hostname staging-app.unioneyes.app --name nzila-os-union-eyes-staging --resource-group "$RG" --yes
+```
 
-If GoDaddy's DNS editor does not support ALIAS records for the apex, the cleanest solution is to delegate the `unioneyes.app` zone to Azure DNS:
+Then revert ALIAS/CNAME records to previous values or remove them. Continue access through Azure default hostnames while repairing DNS/certs.
 
-1. Create an Azure DNS zone: `az network dns zone create --name unioneyes.app --resource-group nzila-canada-staging-rg`
-2. Note the 4 Azure name servers returned
-3. In GoDaddy, replace the nameservers with the 4 Azure ones
-4. Add all DNS records in Azure DNS instead of GoDaddy
+## Operational Risk Note
 
-This also gives you Azure Monitor integration for DNS query logging.
-
----
-
-## Estimated Timeline
-
-| Activity | Duration |
-|---|---|
-| Step 1 (hostname add commands) | 5 minutes |
-| Step 2 (GoDaddy DNS update) | 10 minutes |
-| DNS propagation | 5–60 minutes |
-| Step 3 (certificate binding) | 2–10 minutes per domain |
-| Total cutover window | ~1–2 hours |
-
-**Best time to run**: Low-traffic window. The Container App remains accessible on its Azure default domain throughout — there is no downtime during cutover.
+Production currently runs in staging-named Azure infrastructure (resource group and environment). This is intentionally preserved to avoid disruption but should be tracked as a naming and governance risk.

@@ -409,7 +409,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Custom domain smoke check (unioneyes.app)
+      - name: DNS provider preflight
+        if: needs.plan.outputs.environment == 'staging' && vars.DNS_AUTOMATION_ENABLED == 'true'
+        env:
+          DNS_PROVIDER: ${{ vars.DNS_PROVIDER }}
+          DNS_ZONE_ID: ${{ vars.DNS_ZONE_ID }}
+          DNS_ZONE_NAME: ${{ vars.DNS_ZONE_NAME }}
+          DNS_API_TOKEN: ${{ secrets.DNS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ "$DNS_PROVIDER" != "cloudflare" ]; then
+            echo "DNS preflight not implemented for provider: $DNS_PROVIDER"
+            exit 1
+          fi
+
+          RESPONSE=$(curl -fsSL \
+            -H "Authorization: Bearer $DNS_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/$DNS_ZONE_ID")
+
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+          ACTUAL_ZONE=$(echo "$RESPONSE" | jq -r '.result.name')
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Cloudflare zone preflight failed"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          if [ "${ACTUAL_ZONE,,}" != "${DNS_ZONE_NAME,,}" ]; then
+            echo "Cloudflare zone mismatch: expected $DNS_ZONE_NAME got $ACTUAL_ZONE"
+            exit 1
+          fi
+
+      - name: Custom domain smoke check (staging union-eyes)
         if: needs.plan.outputs.environment == 'staging'
         run: |
           # Only run once the custom domain DNS has been pointed at the Container App.
@@ -418,7 +452,7 @@ jobs:
             echo "::notice::Custom domain check skipped — UE_CUSTOM_DOMAIN_ACTIVE is not 'true'"
             exit 0
           fi
-          for URL in "https://unioneyes.app" "https://app.unioneyes.app"; do
+          for URL in "https://staging.unioneyes.app" "https://staging-app.unioneyes.app"; do
             STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 15 "$URL" 2>/dev/null || echo "000")
             if [[ "$STATUS" =~ ^(200|301|302)$ ]]; then
               echo "  ✅ $URL: HTTP $STATUS"

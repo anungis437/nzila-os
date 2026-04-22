@@ -12,8 +12,8 @@
       "prodPromotionEligible": true,
       "owners": ["union-eyes", "platform-ops"],
       "routing": {
-        "staging": "https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://ue.nzila.ai",
+        "staging": "https://staging-app.unioneyes.app",
+        "production": "https://app.unioneyes.app",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"

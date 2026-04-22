@@ -71,20 +71,6 @@ export function OrganizationSelector() {
     setOpen(false);
   };
 
-  if (error) {
-    return (
-      <Button 
-        variant="outline" 
-        className="w-70 justify-between text-red-600"
-        onClick={() => refreshOrganizations()}
-      >
-        <span className="flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          Error loading - Click to retry
-        </span>
-      </Button>
-    );
-  }
 
   // In some auth/context races, `organization` can be null while the org list
   // is already loaded. Fall back to the selected org (or first available)
@@ -150,6 +136,21 @@ export function OrganizationSelector() {
         <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
         <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Button 
+        variant="outline" 
+        className="w-70 justify-between text-red-600"
+        onClick={() => refreshOrganizations()}
+      >
+        <span className="flex items-center gap-2">
+          <Building2 className="h-4 w-4" />
+          Error loading - Click to retry
+        </span>
+      </Button>
     );
   }
 

@@ -10,41 +10,46 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { buildMarketingUrl, getUnionEyesSiteTopology } from '@/lib/site-topology';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import WorkflowSection from './components/workflow-section';
 import RolesSection from './components/roles-section';
 import AnimatedCTA from './components/animated-cta';
 import UnionWorkCarousel from './components/union-work-carousel';
 
-export const metadata: Metadata = {
-  title: 'Union Eyes | Modern Operating System for Unions',
-  description:
-    'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
-  alternates: {
-    canonical: 'https://unioneyes.app',
-  },
-  openGraph: {
-    title: 'Union Eyes | Modern Operating System for Unions',
+export async function generateMetadata(): Promise<Metadata> {
+  const site = getUnionEyesSiteTopology();
+
+  return {
+    title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
     description:
-      'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
-    url: 'https://unioneyes.app',
-    images: [
-      {
-        url: '/images/og-default.png',
-        width: 1200,
-        height: 630,
-        alt: 'Union Eyes — Modern Operating System for Unions',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Union Eyes | Modern Operating System for Unions',
-    description:
-      'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
-    images: ['/images/og-default.png'],
-  },
-};
+      'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+    alternates: {
+      canonical: buildMarketingUrl('/'),
+    },
+    openGraph: {
+      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
+      description:
+        'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
+      url: buildMarketingUrl('/'),
+      images: [
+        {
+          url: '/images/og-default.png',
+          width: 1200,
+          height: 630,
+          alt: 'Union Eyes — Modern Operating System for Unions',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
+      description:
+        'Protect members. Modernize operations. From intake to outcome, all in one system built for Canadian unions.',
+      images: ['/images/og-default.png'],
+    },
+  };
+}
 
 export default function HomePage() {
   return (

@@ -4,6 +4,11 @@ import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from 
 
 const APP = 'union-eyes'
 
+function parseBoolEnv(value: string | undefined, defaultValue: boolean): boolean {
+  if (!value) return defaultValue
+  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
+}
+
 async function checkDb(): Promise<boolean> {
   try {
     const { db } = await import('@nzila/db')
@@ -36,12 +41,18 @@ async function checkQueue(): Promise<'ok' | 'degraded' | 'unreachable'> {
 
 export async function GET() {
   const [dbResult, queueResult] = await Promise.allSettled([checkDb(), checkQueue()])
+  const requireQueue = parseBoolEnv(process.env.HEALTH_REQUIRE_QUEUE, false)
 
-  const checks = normalizeHealthChecks({
+  const checksInput: Record<string, boolean> = {
     process: true,
     database: dbResult.status === 'fulfilled' ? dbResult.value : false,
-    queue: queueResult.status === 'fulfilled' ? queueResult.value === 'ok' : false,
-  })
+  }
+
+  if (requireQueue) {
+    checksInput.queue = queueResult.status === 'fulfilled' ? queueResult.value === 'ok' : false
+  }
+
+  const checks = normalizeHealthChecks(checksInput)
 
   const status = healthStatusFromChecks(checks)
 

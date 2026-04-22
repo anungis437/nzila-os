@@ -895,7 +895,7 @@ export default function ProfilePage() {
                       >
                         <option value="en">English</option>
                         <option value="fr">Français (French)</option>
-                        <option value="es">Español (Spanish)</option>
+                        <option value="it">Italiano (Italian)</option>
                         <option value="pt">Português (Portuguese)</option>
                       </select>
                       <p className="text-sm text-gray-600 mt-2">

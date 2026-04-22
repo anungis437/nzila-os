@@ -173,7 +173,12 @@ export function validateRequiredSecrets(requiredSecrets: string[]): void {
  * @returns The current environment
  */
 export function getEnvironment(): 'development' | 'staging' | 'production' | 'test' {
-  const env = (process.env.NODE_ENV as string) || 'development';
+  const env = (
+    process.env.UE_ENVIRONMENT
+    || process.env.NEXT_PUBLIC_APP_ENV
+    || process.env.NODE_ENV
+    || 'development'
+  ) as string;
   
   if (env === 'test' || env === 'staging' || env === 'production') {
     return env;

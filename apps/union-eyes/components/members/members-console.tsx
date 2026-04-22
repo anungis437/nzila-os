@@ -49,6 +49,7 @@ type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
 type Department = "Manufacturing" | "Logistics" | "Administration" | "Maintenance" | "Customer Service" | "IT";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LooseMembersResponse = Record<string, any>;
 
 interface Member {

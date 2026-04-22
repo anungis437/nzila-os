@@ -5,10 +5,12 @@
  * Purpose: Allow proxy.ts (Edge runtime) to access locale constants
  * without importing i18n.ts which has async imports.
  * 
+ * Keep in sync with i18n/config.ts
+ * 
  * @module lib/locales
  */
 
-// Supported locales
+// Supported locales (must match i18n/config.ts)
 export const locales = ['en-CA', 'fr-CA', 'it', 'pt'] as const;
 export type Locale = (typeof locales)[number];
 

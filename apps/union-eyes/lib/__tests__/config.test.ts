@@ -114,6 +114,19 @@ describe('config', () => {
       expect(getEnvironment()).toBe('test');
     });
 
+    it('prefers UE_ENVIRONMENT over NODE_ENV', () => {
+      process.env.NODE_ENV = 'production';
+      process.env.UE_ENVIRONMENT = 'staging';
+      expect(getEnvironment()).toBe('staging');
+    });
+
+    it('falls back to NEXT_PUBLIC_APP_ENV when UE_ENVIRONMENT is unset', () => {
+      process.env.NODE_ENV = 'production';
+      delete process.env.UE_ENVIRONMENT;
+      process.env.NEXT_PUBLIC_APP_ENV = 'staging';
+      expect(getEnvironment()).toBe('staging');
+    });
+
     it('returns development for unknown', () => {
       process.env.NODE_ENV = 'unknown';
       expect(getEnvironment()).toBe('development');

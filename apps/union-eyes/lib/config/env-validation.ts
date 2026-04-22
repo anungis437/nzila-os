@@ -25,6 +25,12 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'staging', 'test'])
     .default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url('Invalid APP_URL'),
+  NEXT_PUBLIC_SITE_URL: z.string().url('Invalid SITE_URL').optional(),
+  NEXT_PUBLIC_APP_URL_STAGING: z.string().url('Invalid staging APP_URL').optional(),
+  NEXT_PUBLIC_SITE_URL_STAGING: z.string().url('Invalid staging SITE_URL').optional(),
+  UE_ENVIRONMENT: z.enum(['development', 'staging', 'production', 'test']).optional(),
+  UE_MARKETING_URL: z.string().url('Invalid UE_MARKETING_URL').optional(),
+  UE_APP_URL: z.string().url('Invalid UE_APP_URL').optional(),
   NEXT_RUNTIME: z.string().optional(),
   NEXT_PHASE: z.string().optional(),
   NEXT_TELEMETRY_DISABLED: z.string().optional(),
@@ -160,6 +166,20 @@ const envSchema = z.object({
   AZURE_STORAGE_ACCOUNT_NAME: z.string().optional(),
   AZURE_STORAGE_ACCOUNT_KEY: z.string().optional(),
   AZURE_STORAGE_CONTAINER: z.string().optional(),
+
+  // ============== HIGH - DNS Automation (Provider-Neutral) ==============
+  DNS_AUTOMATION_ENABLED: z.string().transform(val => val === 'true').default('false').optional(),
+  DNS_PROVIDER: z.enum(['cloudflare', 'route53', 'azure_dns']).optional(),
+  DNS_API_TOKEN: z.string().optional(),
+  DNS_ZONE_ID: z.string().optional(),
+  DNS_ZONE_NAME: z.string().optional(),
+  DNS_TTL: z.string().transform(val => parseInt(val, 10)).default('600').optional(),
+  DNS_PROD_ORIGIN: z.string().optional(),
+  DNS_STAGING_ORIGIN: z.string().optional(),
+
+  // Legacy registrar API credentials (optional; registrar-only mode supported)
+  GODADDY_API_KEY: z.string().optional(),
+  GODADDY_API_SECRET: z.string().optional(),
 
   // ============== HIGH - Document Signing ==============
   DOCUSIGN_INTEGRATION_KEY: z.string().optional(),
@@ -453,6 +473,27 @@ class EnvironmentManager {
           }
           if (this.environment.EMAIL_PROVIDER === 'resend' && !this.environment.EMAIL_FROM) {
             warnings.push('ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â EMAIL_FROM missing for Resend delivery');
+          }
+        }
+
+        if (this.environment.DNS_AUTOMATION_ENABLED) {
+          if (!this.environment.DNS_PROVIDER) {
+            errors.push('DNS_PROVIDER is required when DNS_AUTOMATION_ENABLED=true');
+          }
+          if (!this.environment.DNS_API_TOKEN) {
+            errors.push('DNS_API_TOKEN is required when DNS_AUTOMATION_ENABLED=true');
+          }
+          if (!this.environment.DNS_ZONE_ID) {
+            errors.push('DNS_ZONE_ID is required when DNS_AUTOMATION_ENABLED=true');
+          }
+          if (!this.environment.DNS_ZONE_NAME) {
+            errors.push('DNS_ZONE_NAME is required when DNS_AUTOMATION_ENABLED=true');
+          }
+          if (!this.environment.DNS_PROD_ORIGIN) {
+            errors.push('DNS_PROD_ORIGIN is required when DNS_AUTOMATION_ENABLED=true');
+          }
+          if (!this.environment.DNS_STAGING_ORIGIN) {
+            errors.push('DNS_STAGING_ORIGIN is required when DNS_AUTOMATION_ENABLED=true');
           }
         }
       }
