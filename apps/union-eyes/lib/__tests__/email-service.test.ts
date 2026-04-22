@@ -88,14 +88,6 @@ describe('email-service', () => {
     vi.resetModules();
     delete process.env.RESEND_API_KEY;
 
-    // Re-mock after resetModules
-    vi.mock('resend', () => ({
-      Resend: class { emails = { send: mocks.mockSend }; },
-    }));
-    vi.mock('@/lib/logger', () => ({
-      logger: { info: mocks.mockInfo, warn: mocks.mockWarn, error: mocks.mockError, debug: mocks.mockDebug },
-    }));
-
     const { sendEmail } = await import('../email-service');
     const result = await sendEmail({
       to: [{ email: 'test@test.com', name: 'Test' }],

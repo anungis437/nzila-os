@@ -39,15 +39,19 @@ interface ProbeResult {
  * a code change.
  */
 function publicHealthUrls(): Record<string, string | null> {
-  const base = process.env.STATUS_PUBLIC_DOMAIN
-    ?? 'https://jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
+  // STATUS_ACA_ENV_DOMAIN is the environment-level domain suffix, e.g.
+  // "jollydune-88c1e97f.canadacentral.azurecontainerapps.io".
+  // Each Container App is reachable at https://<appname>.<env-domain>.
+  const envDomain = process.env.STATUS_ACA_ENV_DOMAIN
+    ?? 'jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
+  const aca = (app: string) => `https://${app}.${envDomain}/api/health`;
   return {
-    web:                `${base.replace('jollydune', 'nzila-os-web-jollydune')}/api/health`,
-    'union-eyes':       `${base.replace('jollydune', 'nzila-os-union-eyes-jollydune')}/api/health`,
+    web:                aca('nzila-os-web'),
+    'union-eyes':       aca('nzila-os-union-eyes'),
     flow:               null,                  // internal — proxied via union-eyes
-    zonga:              `${base.replace('jollydune', 'nzila-os-zonga-jollydune')}/api/health`,
-    console:            `${base.replace('jollydune', 'nzila-os-console-jollydune')}/api/health`,
-    'orchestrator-api': null,                  // internal — Fastify, not on Container Apps
+    zonga:              aca('nzila-os-zonga'),
+    console:            aca('nzila-os-console'),
+    'orchestrator-api': null,                  // internal — not deployed as a Container App
     abr:                null,                  // internal
     cfo:                null,                  // internal
     cora:               null,                  // internal
