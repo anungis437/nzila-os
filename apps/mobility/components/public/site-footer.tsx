@@ -17,7 +17,7 @@ import { ArrowRight, Linkedin, Twitter, Github, Mail, Globe } from "lucide-react
 const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? "https://nzilaventures.com";
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? "https://console.nzilaventures.com";
 const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? "https://partners.nzilaventures.com";
-const UE_URL = process.env.NEXT_PUBLIC_UE_URL ?? "https://unioneyes.nzilaventures.com";
+const UE_URL = process.env.NEXT_PUBLIC_UE_URL ?? "https://unioneyes.app";
 
 const footerLinks = {
   Platform: [

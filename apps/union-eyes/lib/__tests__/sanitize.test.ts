@@ -31,13 +31,13 @@ describe('validateRedirectUrl', () => {
   beforeEach(() => {
     // jsdom sets window.location.origin
     Object.defineProperty(window, 'location', {
-      value: { origin: 'https://app.unioneyes.ca', hostname: 'app.unioneyes.ca', href: '' },
+      value: { origin: 'https://unioneyes.app', hostname: 'unioneyes.app', href: '' },
       writable: true,
     });
   });
 
   it('allows same-origin URL', () => {
-    expect(validateRedirectUrl('https://app.unioneyes.ca/dashboard')).toBe('https://app.unioneyes.ca/dashboard');
+    expect(validateRedirectUrl('https://unioneyes.app/dashboard')).toBe('https://unioneyes.app/dashboard');
   });
 
   it('allows relative path', () => {

@@ -307,7 +307,7 @@ describe('sendAdminIntervention', () => {
 
     await sendAdminIntervention('tx-1');
     expect(mocks.mockSend).toHaveBeenCalledWith(
-      expect.objectContaining({ recipientEmail: 'admin@unioneyes.ca' }),
+      expect.objectContaining({ recipientEmail: 'admin@unioneyes.app' }),
     );
   });
 

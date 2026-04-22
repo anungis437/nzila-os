@@ -32,7 +32,7 @@ const footerSections = [
     title: "Ecosystem",
     links: [
       { label: "NzilaOS Platform", href: "https://nzilaventures.com" },
-      { label: "UnionEyes", href: "https://unioneyes.ca" },
+      { label: "UnionEyes", href: "https://unioneyes.app" },
       { label: "NACP Exams", href: "#" },
       { label: "Zonga", href: "#" },
     ],

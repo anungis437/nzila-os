@@ -359,7 +359,7 @@ export class DuesReminderScheduler {
           pac: transaction.pacAmount || '0.00',
           strikeFund: transaction.strikeFundAmount || '0.00',
         },
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.unioneyes.ca'}/dashboard/dues/pay/${transaction.id}`,
+        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
       };
 
       // Send email
@@ -434,7 +434,7 @@ export class DuesReminderScheduler {
         periodStart: transaction.periodStart,
         periodEnd: transaction.periodEnd,
         transactionId: transaction.id,
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.unioneyes.ca'}/dashboard/dues/pay/${transaction.id}`,
+        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
       };
 
       // Send email
@@ -527,7 +527,7 @@ export class DuesReminderScheduler {
         periodStart: transaction.periodStart,
         periodEnd: transaction.periodEnd,
         transactionId: transaction.id,
-        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.unioneyes.ca'}/dashboard/dues/pay/${transaction.id}`,
+        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
       };
 
       // Send email

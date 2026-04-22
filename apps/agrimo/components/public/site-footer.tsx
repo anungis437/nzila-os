@@ -34,7 +34,7 @@ const footerSections = [
       { label: "NzilaOS Platform", href: "https://nzilaventures.com" },
       { label: "CORA Insights", href: "#" },
       { label: "Trade OS", href: "#" },
-      { label: "UnionEyes", href: "https://unioneyes.ca" },
+      { label: "UnionEyes", href: "https://unioneyes.app" },
     ],
   },
 ];

@@ -237,7 +237,7 @@ export async function sendPaymentFailure(
       failureReason: errorMessage,
       retryDate,
       attemptNumber,
-      paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.unioneyes.ca'}/dashboard/dues/pay/${transaction.id}`,
+      paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
     };
 
     // Send email
@@ -348,7 +348,7 @@ export async function sendAdminIntervention(
 
     const recipients = adminEmails.length > 0
       ? adminEmails
-      : [process.env.ADMIN_EMAIL || 'admin@unioneyes.ca'];
+      : [process.env.ADMIN_EMAIL || 'admin@unioneyes.app'];
 
     await Promise.all(
       recipients.map((adminEmail) =>
