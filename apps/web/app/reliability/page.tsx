@@ -29,6 +29,12 @@ export default async function ReliabilityPage() {
           <p className="text-gray-300 max-w-2xl">
             {isFr ? 'Cibles SLO, réponse aux incidents et gestion du changement.' : 'SLO targets, incident response, and change management.'}
           </p>
+          <a
+            href="/status"
+            className="inline-block mt-6 px-4 py-2 bg-electric text-navy rounded-md font-semibold hover:bg-white transition"
+          >
+            {isFr ? 'Voir l\u2019\u00e9tat en direct \u2192' : 'View live status \u2192'}
+          </a>
         </div>
       </section>
 

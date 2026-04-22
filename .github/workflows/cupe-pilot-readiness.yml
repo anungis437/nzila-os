@@ -3,8 +3,24 @@ name: CUPE Pilot Readiness Gates
 on:
   push:
     branches: [release/cupe-pilot-0.1, main]
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/union-eyes-*/**'
+      - 'packages/cupe-*/**'
+      - 'governance/cupe-pilot-*'
+      - 'docs/cupe-pilot-*'
+      - 'scripts/cupe-*'
+      - '.github/workflows/cupe-pilot-readiness.yml'
   pull_request:
     branches: [release/cupe-pilot-0.1, main]
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/union-eyes-*/**'
+      - 'packages/cupe-*/**'
+      - 'governance/cupe-pilot-*'
+      - 'docs/cupe-pilot-*'
+      - 'scripts/cupe-*'
+      - '.github/workflows/cupe-pilot-readiness.yml'
 
 permissions:
   contents: read

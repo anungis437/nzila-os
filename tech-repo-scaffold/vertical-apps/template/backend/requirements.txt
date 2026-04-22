@@ -19,7 +19,8 @@ azure-storage-blob>=12.19,<13.0
 
 # Auth (OIDC/Entra)
 PyJWT>=2.8,<3.0
-cryptography>=41.0,<44.0
+# cryptography pinned >=44.0.1 for CVE-2026-26007 + CVE-2026-34073
+cryptography>=44.0.1,<46.0
 
 # Stripe
 stripe>=7.8,<8.0
@@ -41,11 +42,13 @@ pytz>=2024.1,<2025.0
 # Development
 ipython>=8.21,<9.0
 django-extensions>=3.2,<4.0
-pytest>=7.4,<8.0
+# pytest pinned >=8.4.0 for CVE-2025-71176
+pytest>=8.4.0,<9.0
 pytest-django>=4.7,<5.0
 pytest-cov>=4.1,<5.0
 factory-boy>=3.3,<4.0
 
 # Production
-gunicorn>=21.2,<22.0
+# gunicorn pinned >=23.0.0 for CVE-2024-1135 + CVE-2024-6827
+gunicorn>=23.0.0,<24.0
 whitenoise>=6.6,<7.0
