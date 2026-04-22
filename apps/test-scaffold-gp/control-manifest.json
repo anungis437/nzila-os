@@ -1,0 +1,18 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "test-scaffold-gp",
+  "version": "1.0.0",
+  "riskLevel": "high",
+  "policyProfile": "commerce",
+  "controls": {
+    "enforcement": true,
+    "governance": true,
+    "audit": true,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": true,
+    "events": true
+  },
+  "exceptions": []
+}
