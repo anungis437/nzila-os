@@ -16,8 +16,16 @@ function toMarkdownReport(payload: {
   staging_resolution: string;
   last_verified_at: string;
   certificate_status: string;
+  certificate_checks: Array<{ host: string; ok: boolean; status: number; error?: string }>;
   drift_detected: boolean;
+  drift_reasons: string[];
 }) {
+  const certificateLines = payload.certificate_checks.map(
+    (check) => `  - ${check.host}: ${check.ok ? 'ok' : 'failed'} (status=${check.status}${check.error ? `, error=${check.error}` : ''})`,
+  );
+
+  const reasonLines = payload.drift_reasons.map((reason) => `  - ${reason}`);
+
   return [
     '# DNS Health',
     '',
@@ -26,7 +34,11 @@ function toMarkdownReport(payload: {
     `- prod_resolution: ${payload.prod_resolution}`,
     `- staging_resolution: ${payload.staging_resolution}`,
     `- certificate_status: ${payload.certificate_status}`,
+    '- certificate_checks:',
+    ...certificateLines,
     `- drift_detected: ${payload.drift_detected}`,
+    '- drift_reasons:',
+    ...reasonLines,
     `- last_verified_at: ${payload.last_verified_at}`,
     '',
   ].join('\n');
@@ -70,9 +82,26 @@ async function main() {
     checkHttps(`https://staging-app.${config.zoneName}`),
   ]);
 
-  const certificateStatus = [prodHttps, appHttps, stagingHttps, stagingAppHttps].every((x) => x.ok)
+  const certificateChecks = [
+    { host: config.zoneName, ...prodHttps },
+    { host: `app.${config.zoneName}`, ...appHttps },
+    { host: `staging.${config.zoneName}`, ...stagingHttps },
+    { host: `staging-app.${config.zoneName}`, ...stagingAppHttps },
+  ];
+
+  const certificateStatus = certificateChecks.every((x) => x.ok)
     ? 'reachable'
     : 'degraded';
+
+  const driftReasons: string[] = [];
+  if (!prodResolution) driftReasons.push('prod_resolution_failed');
+  if (!stagingResolution) driftReasons.push('staging_resolution_failed');
+  if (certificateStatus !== 'reachable') {
+    const failedHosts = certificateChecks
+      .filter((check) => !check.ok)
+      .map((check) => `${check.host}:${check.status}${check.error ? `:${check.error}` : ''}`);
+    driftReasons.push(`certificate_degraded(${failedHosts.join(',')})`);
+  }
 
   const payload = {
     authoritative_provider: config.provider,
@@ -81,7 +110,9 @@ async function main() {
     staging_resolution: stagingResolution ? 'ok' : 'failed',
     last_verified_at: new Date().toISOString(),
     certificate_status: certificateStatus,
-    drift_detected: !(prodResolution && stagingResolution && certificateStatus === 'reachable'),
+    certificate_checks: certificateChecks,
+    drift_detected: driftReasons.length > 0,
+    drift_reasons: driftReasons,
   };
 
   const reportDir = join(process.cwd(), 'reports', 'ops');
