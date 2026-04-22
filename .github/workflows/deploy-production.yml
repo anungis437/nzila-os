@@ -69,6 +69,11 @@ jobs:
       - name: Governance check
         run: pnpm governance:check
 
+      - name: Sync change records from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- ops/change-records ops/change-management
+
       - name: Change window validation
         run: node --import tsx scripts/validate-change-window.ts --env=PROD --service=all --commit=${{ github.sha }}
 
