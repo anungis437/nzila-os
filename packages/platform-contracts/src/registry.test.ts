@@ -10,8 +10,8 @@ import {
 } from './registry.js'
 
 describe('APP_REGISTRY', () => {
-  it('contains all 18 apps', () => {
-    expect(APP_REGISTRY.length).toBe(18)
+  it('contains all 19 apps', () => {
+    expect(APP_REGISTRY.length).toBe(19)
   })
 
   it('has unique ids', () => {
@@ -43,7 +43,10 @@ describe('APP_REGISTRY', () => {
         ),
     )
     // orchestrator-api is a pure API service — no Entra dependency expected
-    const nonApiApps = appsWithoutEntra.filter(a => a.appType !== 'api-service')
+    // test-scaffold-gp is a DEPRECATED local-only governance reference — no Entra dependency expected
+    const nonApiApps = appsWithoutEntra.filter(
+      a => a.appType !== 'api-service' && a.tier !== 'DEPRECATED',
+    )
     expect(nonApiApps).toEqual([])
   })
 })
