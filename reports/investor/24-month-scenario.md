@@ -2,7 +2,7 @@
 
 **Report type**: Investor scenario planning  
 **Classification**: All monetary figures are `scenario` or `forecast` unless explicitly marked `actual`. See [tooling/truth/metric-schema.ts](../../tooling/truth/metric-schema.ts) for classification definitions.  
-**Reference docs**: [docs/investor/revenue-scenarios.md](../investor/revenue-scenarios.md), [docs/investor/three-year-growth-narrative.md](../investor/three-year-growth-narrative.md), [reports/portfolio-forecast.json](../portfolio-forecast.json)  
+**Reference docs**: [docs/investor/revenue-scenarios.md](../../docs/investor/revenue-scenarios.md), [docs/investor/three-year-growth-narrative.md](../../docs/investor/three-year-growth-narrative.md), [reports/portfolio-forecast.json](../portfolio-forecast.json)  
 **Last updated**: 2026-04-22  
 
 ---
@@ -165,4 +165,4 @@ Three scenarios are modeled across 24 months. All assume:
 
 ---
 
-*Cross-references*: [docs/investor/revenue-scenarios.md](../investor/revenue-scenarios.md) | [reports/portfolio-forecast.json](../portfolio-forecast.json) | [reports/capital-scenarios.md](../capital-scenarios.md) | [reports/runway-scenarios.md](../runway-scenarios.md)
+*Cross-references*: [docs/investor/revenue-scenarios.md](../../docs/investor/revenue-scenarios.md) | [reports/portfolio-forecast.json](../portfolio-forecast.json) | [reports/capital-scenarios.md](../capital-scenarios.md) | [reports/runway-scenarios.md](../runway-scenarios.md)

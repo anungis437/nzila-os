@@ -35,7 +35,8 @@
     "weekone": "incubating",
     "zonga": "incubating",
     "mobility-client-portal": "frozen",
-    "platform-admin": "frozen"
+    "platform-admin": "frozen",
+    "test-scaffold-gp": "frozen"
   },
   "app_status": {
     "abr": {
@@ -235,6 +236,17 @@
       "proof_level": "none",
       "revenue_status": "sunsetting",
       "priority": "low"
+    },
+    "test-scaffold-gp": {
+      "registry_tier": "UNREGISTERED",
+      "deployment_status": "frozen",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 5,
+      "gtm_posture": "sunset",
+      "proof_level": "none",
+      "revenue_status": "sunsetting",
+      "priority": "low"
     }
   },
   "blocking_gaps": [
@@ -271,7 +283,8 @@
       ],
       "TIER 5 — Sunset": [
         "mobility-client-portal",
-        "platform-admin"
+        "platform-admin",
+        "test-scaffold-gp"
       ]
     }
   },
@@ -304,7 +317,8 @@
       ],
       "sunset": [
         "mobility-client-portal",
-        "platform-admin"
+        "platform-admin",
+        "test-scaffold-gp"
       ],
       "internal_only": [
         "console",

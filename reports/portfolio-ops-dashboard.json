@@ -2,10 +2,10 @@
   "generated_at": "2026-04-22",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 18,
+    "total_products": 19,
     "sell_now_count": 3,
     "internal_only_count": 3,
-    "frozen_count": 2
+    "frozen_count": 3
   },
   "charts": {
     "by_tier": [
@@ -27,7 +27,7 @@
       },
       {
         "tier": 5,
-        "count": 2
+        "count": 3
       }
     ],
     "by_status": [
@@ -49,7 +49,7 @@
       },
       {
         "status": "frozen",
-        "count": 2
+        "count": 3
       },
       {
         "status": "sunset",
@@ -246,7 +246,7 @@
       "weighted_score": 4.6,
       "readiness_tier": "internal-only",
       "registry_tier": "INCUBATING",
-      "dev_port": 3009
+      "dev_port": 3016
     },
     {
       "id": "zonga",
@@ -283,6 +283,18 @@
       "readiness_tier": "internal-only",
       "registry_tier": "EXPERIMENTAL",
       "dev_port": 3015
+    },
+    {
+      "id": "test-scaffold-gp",
+      "name": "Test Scaffold GP",
+      "tier": 5,
+      "status": "frozen",
+      "gtm_posture": "sunset",
+      "recommendation": "SUNSET",
+      "weighted_score": 2,
+      "readiness_tier": "internal-only",
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
     }
   ]
 }
