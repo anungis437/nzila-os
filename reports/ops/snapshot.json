@@ -1,74 +1,71 @@
 {
   "_meta": {
-    "schema_version": "1.0.0",
-    "description": "Operational evidence snapshot — machine-readable baseline for investors, buyers, and auditors.",
-    "generated_at": "2026-04-22T00:00:00Z",
-    "next_refresh": "monthly",
-    "notes": "Values marked 'TODO' require live telemetry wiring. See snapshot.md for status."
+    "schema_version": "2.0.0",
+    "generated_at": "2026-04-22T06:08:15.022Z",
+    "generator": "tooling/scripts/generate-ops-evidence.mjs",
+    "freshness_days": 7,
+    "window_days": 30
   },
-  "deployment": {
-    "frequency_per_week": "TODO",
-    "source": "GitHub Actions run count — not yet auto-exported",
-    "lead_time_hours": "TODO",
-    "last_production_deploy": "2026-04-22"
-  },
-  "build_pipeline": {
-    "success_rate_30d_pct": "TODO",
-    "source": "GitHub Actions API — not yet auto-exported",
-    "p50_build_duration_min": "TODO",
-    "current_ci_status": "passing"
-  },
-  "incident_response": {
-    "mttr_hours": "TODO",
-    "source": "No incident management tool configured — manual estimate only",
-    "open_p1_incidents": 0,
-    "last_incident_date": null
-  },
-  "uptime": {
-    "web_30d_pct": "TODO",
-    "console_30d_pct": "TODO",
-    "union_eyes_30d_pct": "TODO",
-    "source": "Azure Container Apps metrics — not yet exported to ops snapshot",
-    "monitoring_url": "Azure Monitor — nzila-canada-staging-env"
-  },
-  "error_rates": {
-    "union_eyes_error_rate_pct": "TODO",
-    "web_error_rate_pct": "TODO",
-    "source": "Application Insights / Sentry — not yet wired to this snapshot"
-  },
-  "latency": {
-    "union_eyes_p50_ms": "TODO",
-    "union_eyes_p95_ms": "TODO",
-    "source": "Azure Monitor / Application Insights — not yet exported"
-  },
-  "auth": {
-    "login_success_rate_30d_pct": "TODO",
-    "lockout_events_30d": "TODO",
-    "source": "platform-auth logs — not yet exported to ops snapshot"
-  },
-  "feature_usage": {
-    "union_eyes_active_users_30d": "TODO",
-    "union_eyes_cases_opened_30d": "TODO",
-    "union_eyes_evidence_packs_generated_30d": "TODO",
-    "source": "DB query against union-eyes — not yet automated"
-  },
-  "onboarding": {
-    "pilots_signed": 1,
-    "pilots_in_negotiation": 2,
-    "avg_onboard_days": "TODO",
-    "source": "pilots_signed is actual (maturity.json); in_negotiation is estimated"
-  },
-  "infrastructure_cost": {
-    "monthly_azure_cad": "TODO",
-    "breakdown_available": false,
-    "source": "Azure Cost Management — manual review only"
-  },
-  "security": {
-    "last_dependency_audit": "2026-04-22",
-    "open_critical_vulns": 0,
-    "open_high_vulns": 0,
-    "source": "tooling/security/supply-chain-policy.ts + pnpm audit",
-    "soc2_status": "roadmap",
-    "pen_test_status": "planned"
+  "metrics": {
+    "deploy_frequency_30d": {
+      "value": 10.47,
+      "source": "ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)",
+      "source_needed": null
+    },
+    "build_success_rate_30d": {
+      "value": null,
+      "source": "GitHub Actions API (not available in current execution context)",
+      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+    },
+    "median_build_minutes": {
+      "value": null,
+      "source": "GitHub Actions API (not available in current execution context)",
+      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+    },
+    "change_failure_rate_30d": {
+      "value": 0,
+      "source": "ops/outputs/dora-metrics.json: metrics.change_failure_rate.value",
+      "source_needed": null
+    },
+    "mttr_minutes": {
+      "value": null,
+      "source": "ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)",
+      "source_needed": "Incident tracker integration required; dora-metrics currently reports null mttr."
+    },
+    "uptime_30d": {
+      "value": null,
+      "source": "Azure Monitor / Application Insights uptime SLO exporter",
+      "source_needed": "No committed uptime export in repository. Wire Azure Monitor export to ops/outputs/uptime.json."
+    },
+    "p50_latency_ms": {
+      "value": null,
+      "source": "Application Insights latency export",
+      "source_needed": "No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json."
+    },
+    "p95_latency_ms": {
+      "value": null,
+      "source": "Application Insights latency export",
+      "source_needed": "No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json."
+    },
+    "auth_success_rate": {
+      "value": null,
+      "source": "platform-auth auth event rollup",
+      "source_needed": "No auth rollup artifact found. Add monthly auth success export to ops/outputs/auth-metrics.json."
+    },
+    "error_rate": {
+      "value": null,
+      "source": "Application Insights / Sentry error metric export",
+      "source_needed": "No error-rate rollup artifact found. Add monthly app error export to ops/outputs/error-rate.json."
+    },
+    "monthly_infra_cost_estimate": {
+      "value": null,
+      "source": "ops/outputs/cost-allocation.json: total_monthly_cost_usd",
+      "source_needed": "Run pnpm collect:cost with Azure API enabled to populate real monthly cost."
+    },
+    "incidents_last_30d": {
+      "value": null,
+      "source": "Incident registry export (GitHub issues/PagerDuty)",
+      "source_needed": "No incident registry artifact found in repository for 30d count."
+    }
   }
 }

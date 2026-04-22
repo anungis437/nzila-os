@@ -24,8 +24,9 @@ const sections = [
       <p>
         All member data is stored and processed exclusively in{' '}
         <strong>Microsoft Azure Canada Central (Toronto)</strong>. No data
-        transits U.S. infrastructure. This satisfies PIPEDA, provincial privacy
-        statutes, and CBA/CUPE data-sovereignty requirements.
+        residency transfer is enabled by default in the production data plane.
+        This supports PIPEDA-aligned controls, provincial privacy programs, and
+        CBA/CUPE data-sovereignty requirements.
       </p>
     ),
     badges: ['Azure Canada Central', 'PIPEDA-aligned', 'No cross-border transfer'],
@@ -100,8 +101,8 @@ const sections = [
         are <strong>advisory only</strong>. Every AI output is surfaced with
         confidence indicators, human-review prompts, and a complete audit trail.
         No automated decisions are made without human confirmation. Models run
-        on <strong>Azure OpenAI</strong> within the same Canadian tenant — your
-        data is never used to train public models.
+        on <strong>Azure OpenAI</strong> under Microsoft enterprise controls —
+        your data is not used to train public models.
       </p>
     ),
     badges: ['Human-in-the-loop', 'Azure OpenAI (Canada)', 'No model training on your data'],
@@ -113,8 +114,9 @@ const sections = [
     body: (
       <p>
         Hosted on <strong>Azure Container Apps</strong> with auto-scaling and
-        zero-downtime deployments. Database backups run nightly with a 30-day
-        retention window. An uptime status page is available at{' '}
+        deployment orchestration. Database backups run nightly with a 30-day
+        retention window and restoration drills tracked through operations
+        evidence. An uptime status page is available at{' '}
         <Link
           href="/status"
           className="text-electric hover:underline"
@@ -134,8 +136,9 @@ const sections = [
       <p>
         Larger federations may request a dedicated Azure subscription isolated
         from all other tenants — your own ACR, Container Apps environment,
-        PostgreSQL flexible server, and Key Vault. Contact us to discuss private
-        deployment options for federations of 10,000+ members.
+        PostgreSQL flexible server, and Key Vault. Dedicated tenancy is
+        available by commercial scope and security review for qualifying
+        federations.
       </p>
     ),
     badges: ['Isolated Azure subscription', 'Dedicated DB', 'CUPE / large federations'],
@@ -242,8 +245,8 @@ export default function TrustPage() {
                   ['Audit logging', '✅ HMAC-sealed', 'Cryptographic evidence packages'],
                   ['AI data handling', '✅ No training use', 'Azure OpenAI, data stays in tenant'],
                   ['Vulnerability scanning', '✅ CI pipeline', 'Dependency audit + Trivy container scan'],
-                  ['SOC 2 Type II', '🔄 Roadmap', 'Scoping in progress — pre-audit readiness 2026'],
-                  ['Penetration test', '🔄 Planned', 'Third-party pen test scheduled pre-production'],
+                  ['SOC 2 Type II', '🔄 Roadmap', 'Roadmap item; no active attestation engagement yet'],
+                  ['Penetration test', '🔄 Planned', 'Planned prior to production scale-up; not yet scheduled'],
                 ].map(([control, status, detail]) => (
                   <tr key={control} className="hover:bg-gray-50">
                     <td className="px-6 py-3 font-medium text-gray-900">{control}</td>

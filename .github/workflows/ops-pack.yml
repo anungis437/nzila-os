@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
     paths:
       - 'ops/**'
+      - 'reports/ops/**'
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - 'ops/**'
+      - 'reports/ops/**'
       - 'ARCHITECTURE.md'
       - 'SECURITY.md'
       - 'tooling/ops/**'

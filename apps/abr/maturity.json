@@ -11,6 +11,10 @@
   "proof_level": "pilot-proof",
   "revenue_status": "pilot-contracting",
   "last_validated": "2026-04-22",
+  "runbooks": "complete",
+  "backup_restore": "partial",
+  "analytics_readiness": "partial",
+  "access_reviews": "partial",
   "maturity_gaps": {
     "contracts_complete": {
       "status": "open",
@@ -28,7 +32,29 @@
       "status": "partial",
       "owner": "platform-team",
       "blocker": "Error tracking in Sentry; structured logs emitted; alert routing to on-call not yet configured.",
-      "target": "2026-Q3"
+      "target": "2026-07-15",
+      "severity": "high"
+    },
+    "backup_restore": {
+      "status": "partial",
+      "owner": "sre-team",
+      "blocker": "Backups are configured, but restoration drill evidence for FairCase data sets is not committed as proof artifacts.",
+      "target": "2026-06-30",
+      "severity": "critical"
+    },
+    "analytics_readiness": {
+      "status": "partial",
+      "owner": "data-platform",
+      "blocker": "Governance metrics exist but board-facing KPI lineage and confidence annotations are not enforced in generated reports.",
+      "target": "2026-07-31",
+      "severity": "high"
+    },
+    "access_reviews": {
+      "status": "partial",
+      "owner": "security-team",
+      "blocker": "Role attestation workflow is documented but not yet emitted as a quarterly signed evidence artifact.",
+      "target": "2026-06-15",
+      "severity": "high"
     }
   }
 }

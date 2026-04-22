@@ -11,6 +11,10 @@
   "proof_level": "pilot-proof",
   "revenue_status": "pilot-contracting",
   "last_validated": "2026-04-22",
+  "runbooks": "complete",
+  "backup_restore": "partial",
+  "analytics_readiness": "partial",
+  "access_reviews": "partial",
   "orchestrator_integration": true,
   "orchestrator_playbooks": [
     "evidence_seal",
@@ -33,7 +37,29 @@
       "status": "partial",
       "owner": "platform-team",
       "blocker": "Sentry integrated; OpenTelemetry traces wired; per-route latency dashboards not yet published in Azure Monitor.",
-      "target": "2026-Q3"
+      "target": "2026-07-15",
+      "severity": "high"
+    },
+    "backup_restore": {
+      "status": "partial",
+      "owner": "sre-team",
+      "blocker": "Nightly backups exist, but restore drill evidence and RTO verification are not published in a reproducible report.",
+      "target": "2026-06-30",
+      "severity": "critical"
+    },
+    "analytics_readiness": {
+      "status": "partial",
+      "owner": "data-platform",
+      "blocker": "Executive dashboard metrics exist, but provenance-linked KPI rollups are not yet emitted to reports/ops in CI.",
+      "target": "2026-07-31",
+      "severity": "high"
+    },
+    "access_reviews": {
+      "status": "partial",
+      "owner": "security-team",
+      "blocker": "Quarterly role/access attestations are defined but not yet enforced as a fail-closed CI artifact check.",
+      "target": "2026-06-15",
+      "severity": "high"
     }
   }
 }

@@ -25,6 +25,22 @@ interface RequiredDoc {
   minWordCount?: number
 }
 
+const SNAPSHOT_MAX_AGE_DAYS = 7
+const REQUIRED_OPS_METRIC_KEYS = [
+  'deploy_frequency_30d',
+  'build_success_rate_30d',
+  'median_build_minutes',
+  'change_failure_rate_30d',
+  'mttr_minutes',
+  'uptime_30d',
+  'p50_latency_ms',
+  'p95_latency_ms',
+  'auth_success_rate',
+  'error_rate',
+  'monthly_infra_cost_estimate',
+  'incidents_last_30d',
+] as const
+
 const REQUIRED_DOCS: RequiredDoc[] = [
   {
     path: 'ops/runbooks/README.md',
@@ -118,6 +134,48 @@ export function validateOpsPack(repoRoot: string): ValidationResult {
         if (doc.severity === 'error') errors.push(msg)
         else warnings.push(msg)
       }
+    }
+  }
+
+  // Enforce operational evidence freshness and schema completeness
+  const snapshotPath = join(repoRoot, 'reports/ops/snapshot.json')
+  checkedFiles.push('reports/ops/snapshot.json')
+  if (!existsSync(snapshotPath)) {
+    errors.push('Missing required ops evidence snapshot: reports/ops/snapshot.json')
+  } else {
+    try {
+      const snapshotRaw = readFileSync(snapshotPath, 'utf-8')
+      const snapshot = JSON.parse(snapshotRaw) as {
+        _meta?: { generated_at?: string }
+        metrics?: Record<string, unknown>
+      }
+
+      const generatedAtRaw = snapshot._meta?.generated_at
+      if (!generatedAtRaw) {
+        errors.push('reports/ops/snapshot.json missing _meta.generated_at')
+      } else {
+        const generatedAt = new Date(generatedAtRaw)
+        if (Number.isNaN(generatedAt.getTime())) {
+          errors.push('reports/ops/snapshot.json has invalid _meta.generated_at timestamp')
+        } else {
+          const ageMs = Date.now() - generatedAt.getTime()
+          const ageDays = ageMs / (1000 * 60 * 60 * 24)
+          if (ageDays > SNAPSHOT_MAX_AGE_DAYS) {
+            errors.push(
+              `reports/ops/snapshot.json is stale (${ageDays.toFixed(1)} days old; max ${SNAPSHOT_MAX_AGE_DAYS}). Run pnpm ops:evidence.`,
+            )
+          }
+        }
+      }
+
+      const metrics = snapshot.metrics ?? {}
+      for (const metricKey of REQUIRED_OPS_METRIC_KEYS) {
+        if (!(metricKey in metrics)) {
+          errors.push(`reports/ops/snapshot.json missing required metric key: ${metricKey}`)
+        }
+      }
+    } catch (error) {
+      errors.push(`Failed parsing reports/ops/snapshot.json: ${(error as Error).message}`)
     }
   }
 

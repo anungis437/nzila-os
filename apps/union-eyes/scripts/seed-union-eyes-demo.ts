@@ -25,21 +25,21 @@ const DEMO_MEMBERS = [
     organizationId: DEMO_ORG_ID,
     role: 'steward',
     status: 'active',
-    displayName: 'Sarah Johnson',
+    displayName: 'Alex Martins',
   },
   {
-    userId: 'demo-steward-002',
+    userId: 'demo-grievance-officer-001',
     organizationId: DEMO_ORG_ID,
-    role: 'steward',
+    role: 'grievance_officer',
     status: 'active',
-    displayName: 'Marcus Chen',
+    displayName: 'Priya Patel',
   },
   {
-    userId: 'demo-admin-001',
+    userId: 'demo-executive-001',
     organizationId: DEMO_ORG_ID,
-    role: 'admin',
+    role: 'executive',
     status: 'active',
-    displayName: 'Angela Moreau',
+    displayName: 'Diane Okafor',
   },
   {
     userId: 'demo-member-001',
@@ -60,211 +60,129 @@ const DEMO_MEMBERS = [
 const NOW = new Date('2026-03-16T10:00:00.000Z')
 const DAY = 24 * 60 * 60 * 1000
 
-const DEMO_CLAIMS = [
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000001',
-    claimNumber: 'DEMO-2026-001',
-    organizationId: DEMO_ORG_ID,
-    memberId: 'demo-member-001',
-    claimType: 'grievance_pay' as const,
-    status: 'submitted' as const,
-    priority: 'high' as const,
-    incidentDate: new Date(NOW.getTime() - 2 * DAY),
-    location: 'Plant Floor A',
-    description: 'Pay grade mismatch after shift reassignment. Expected Grade 7 pay, received Grade 5.',
-    desiredOutcome: 'Retroactive pay correction and updated records.',
-    progress: 10,
-    createdAt: new Date(NOW.getTime() - 2 * DAY),
-    updatedAt: new Date(NOW.getTime() - 2 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000002',
-    claimNumber: 'DEMO-2026-002',
-    organizationId: DEMO_ORG_ID,
-    memberId: 'demo-member-002',
-    claimType: 'workplace_safety' as const,
-    status: 'investigation' as const,
-    priority: 'critical' as const,
-    incidentDate: new Date(NOW.getTime() - 10 * DAY),
-    location: 'Warehouse B — Dock 4',
-    description: 'Forklift near-miss incident. Safety guardrails missing from loading bay.',
-    desiredOutcome: 'Guardrail installation and safety audit.',
-    assignedTo: 'demo-steward-001',
-    assignedAt: new Date(NOW.getTime() - 7 * DAY),
-    progress: 50,
-    createdAt: new Date(NOW.getTime() - 10 * DAY),
-    updatedAt: new Date(NOW.getTime() - 3 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000003',
-    claimNumber: 'DEMO-2026-003',
-    organizationId: DEMO_ORG_ID,
-    memberId: 'demo-member-001',
-    claimType: 'harassment_workplace' as const,
-    status: 'under_review' as const,
-    priority: 'high' as const,
-    incidentDate: new Date(NOW.getTime() - 5 * DAY),
-    location: 'Office 302',
-    description: 'Hostile work environment. Repeated dismissive behaviour from supervisor in team meetings.',
-    desiredOutcome: 'Formal investigation and mediation.',
-    progress: 25,
-    createdAt: new Date(NOW.getTime() - 5 * DAY),
-    updatedAt: new Date(NOW.getTime() - 3 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000004',
-    claimNumber: 'DEMO-2026-004',
-    organizationId: DEMO_ORG_ID,
-    memberId: 'demo-member-002',
-    claimType: 'contract_dispute' as const,
-    status: 'resolved' as const,
-    priority: 'medium' as const,
-    incidentDate: new Date(NOW.getTime() - 30 * DAY),
-    location: 'HR Office',
-    description: 'Overtime calculation error under Article 14.3 of current CBA.',
-    desiredOutcome: 'Recalculation and back-pay.',
-    assignedTo: 'demo-steward-002',
-    assignedAt: new Date(NOW.getTime() - 25 * DAY),
-    progress: 90,
-    createdAt: new Date(NOW.getTime() - 30 * DAY),
-    updatedAt: new Date(NOW.getTime() - 1 * DAY),
-    resolvedAt: new Date(NOW.getTime() - 1 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000005',
-    claimNumber: 'DEMO-2026-005',
-    organizationId: DEMO_ORG_ID,
-    memberId: 'demo-member-001',
-    claimType: 'discrimination_gender' as const,
-    status: 'pending_documentation' as const,
-    priority: 'high' as const,
-    incidentDate: new Date(NOW.getTime() - 8 * DAY),
-    location: 'Conference Room 1',
-    description: 'Gender-based comments during promotion evaluation meeting.',
-    desiredOutcome: 'Formal apology and policy review.',
-    assignedTo: 'demo-steward-001',
-    assignedAt: new Date(NOW.getTime() - 6 * DAY),
-    progress: 60,
-    createdAt: new Date(NOW.getTime() - 8 * DAY),
-    updatedAt: new Date(NOW.getTime() - 2 * DAY),
-  },
-]
+const claimTypes = [
+  'grievance_pay',
+  'workplace_safety',
+  'harassment_workplace',
+  'contract_dispute',
+  'discrimination_gender',
+] as const
+const claimStatuses = [
+  'submitted',
+  'under_review',
+  'investigation',
+  'pending_documentation',
+  'resolved',
+] as const
+const priorities = ['medium', 'high', 'critical'] as const
 
-const DEMO_EVENTS = [
-  // Claim 1 events
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000001',
-    updateType: 'status_change',
-    message: 'Claim submitted by member.',
-    createdBy: 'demo-member-001',
-    isInternal: false,
-    metadata: { previousStatus: null, newStatus: 'submitted' },
-    createdAt: new Date(NOW.getTime() - 2 * DAY),
-  },
-  // Claim 2 events (full lifecycle)
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000002',
-    updateType: 'status_change',
-    message: 'Claim submitted.',
-    createdBy: 'demo-member-002',
-    isInternal: false,
-    metadata: { previousStatus: null, newStatus: 'submitted' },
-    createdAt: new Date(NOW.getTime() - 10 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000002',
-    updateType: 'status_change',
-    message: 'Status changed from \'submitted\' to \'under_review\'.',
-    createdBy: 'demo-steward-001',
-    isInternal: false,
-    metadata: { previousStatus: 'submitted', newStatus: 'under_review' },
-    createdAt: new Date(NOW.getTime() - 9 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000002',
-    updateType: 'assignment',
-    message: 'Assigned to Sarah Johnson.',
-    createdBy: 'demo-admin-001',
-    isInternal: true,
-    metadata: { assignedTo: 'demo-steward-001' },
-    createdAt: new Date(NOW.getTime() - 7 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000002',
-    updateType: 'status_change',
-    message: 'Status changed from \'under_review\' to \'investigation\'.',
-    createdBy: 'demo-steward-001',
-    isInternal: false,
-    metadata: { previousStatus: 'under_review', newStatus: 'investigation' },
-    createdAt: new Date(NOW.getTime() - 5 * DAY),
-  },
-  // Claim 3 events
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000003',
-    updateType: 'status_change',
-    message: 'Claim submitted.',
-    createdBy: 'demo-member-001',
-    isInternal: false,
-    metadata: { previousStatus: null, newStatus: 'submitted' },
-    createdAt: new Date(NOW.getTime() - 5 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000003',
-    updateType: 'status_change',
-    message: 'Status changed from \'submitted\' to \'under_review\'.',
-    createdBy: 'demo-steward-002',
-    isInternal: false,
-    metadata: { previousStatus: 'submitted', newStatus: 'under_review' },
-    createdAt: new Date(NOW.getTime() - 3 * DAY),
-  },
-  // Claim 4 events (full resolution)
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000004',
-    updateType: 'status_change',
-    message: 'Claim submitted.',
-    createdBy: 'demo-member-002',
-    isInternal: false,
-    metadata: { previousStatus: null, newStatus: 'submitted' },
-    createdAt: new Date(NOW.getTime() - 30 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000004',
-    updateType: 'status_change',
-    message: 'Status changed from \'submitted\' to \'under_review\'.',
-    createdBy: 'demo-steward-002',
-    isInternal: false,
-    metadata: { previousStatus: 'submitted', newStatus: 'under_review' },
-    createdAt: new Date(NOW.getTime() - 28 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000004',
-    updateType: 'status_change',
-    message: 'Status changed from \'under_review\' to \'resolved\'. Overtime recalculated and back-pay approved.',
-    createdBy: 'demo-steward-002',
-    isInternal: false,
-    metadata: { previousStatus: 'under_review', newStatus: 'resolved' },
-    createdAt: new Date(NOW.getTime() - 1 * DAY),
-  },
-  // Claim 5 events
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000005',
-    updateType: 'status_change',
-    message: 'Claim submitted.',
-    createdBy: 'demo-member-001',
-    isInternal: false,
-    metadata: { previousStatus: null, newStatus: 'submitted' },
-    createdAt: new Date(NOW.getTime() - 8 * DAY),
-  },
-  {
-    claimId: 'dc000001-0000-4000-a000-000000000005',
-    updateType: 'status_change',
-    message: 'Status changed from \'submitted\' to \'pending_documentation\'. Additional evidence requested.',
-    createdBy: 'demo-steward-001',
-    isInternal: false,
-    metadata: { previousStatus: 'submitted', newStatus: 'pending_documentation' },
-    createdAt: new Date(NOW.getTime() - 2 * DAY),
-  },
-]
+const DEMO_CLAIMS = Array.from({ length: 12 }, (_, index) => {
+  const claimIndex = index + 1
+  const claimId = `dc000001-0000-4000-a000-0000000000${String(claimIndex).padStart(2, '0')}`
+  const createdOffset = 2 + index * 2
+  const status = claimStatuses[index % claimStatuses.length]
+  const claimType = claimTypes[index % claimTypes.length]
+  const memberId = index % 2 === 0 ? 'demo-member-001' : 'demo-member-002'
+  const assignee = index % 3 === 0 ? 'demo-grievance-officer-001' : 'demo-steward-001'
+  const isResolved = status === 'resolved'
+
+  return {
+    claimId,
+    claimNumber: `GRV-2026-${String(claimIndex).padStart(3, '0')}`,
+    organizationId: DEMO_ORG_ID,
+    memberId,
+    claimType,
+    status,
+    priority: priorities[index % priorities.length],
+    incidentDate: new Date(NOW.getTime() - (createdOffset + 1) * DAY),
+    location: `Unit ${100 + claimIndex}`,
+    description: `Demo grievance ${claimIndex} for procurement walkthrough and evidence traceability validation.`,
+    desiredOutcome: 'Timely case resolution with complete audit trail and exportable evidence package.',
+    assignedTo: assignee,
+    assignedAt: new Date(NOW.getTime() - createdOffset * DAY),
+    progress: Math.min(95, 15 + claimIndex * 6),
+    createdAt: new Date(NOW.getTime() - createdOffset * DAY),
+    updatedAt: new Date(NOW.getTime() - Math.max(1, createdOffset - 1) * DAY),
+    resolvedAt: isResolved ? new Date(NOW.getTime() - DAY) : undefined,
+  }
+})
+
+const OVERDUE_CLAIM_IDS = new Set(DEMO_CLAIMS.slice(0, 3).map((claim) => claim.claimId))
+const EXPORTABLE_CASE_CLAIM_ID = DEMO_CLAIMS[4]?.claimId
+
+const DEMO_EVENTS: Array<{
+  claimId: string
+  updateType: string
+  message: string
+  createdBy: string
+  isInternal: boolean
+  metadata: Record<string, unknown>
+  createdAt: Date
+}> = DEMO_CLAIMS.flatMap((claim, index) => {
+  const events: Array<{
+    claimId: string
+    updateType: string
+    message: string
+    createdBy: string
+    isInternal: boolean
+    metadata: Record<string, unknown>
+    createdAt: Date
+  }> = [
+    {
+      claimId: claim.claimId,
+      updateType: 'status_change',
+      message: 'Claim submitted by member.',
+      createdBy: claim.memberId,
+      isInternal: false,
+      metadata: { previousStatus: null, newStatus: 'submitted' },
+      createdAt: new Date(claim.createdAt),
+    },
+    {
+      claimId: claim.claimId,
+      updateType: 'assignment',
+      message: `Assigned to ${claim.assignedTo}.`,
+      createdBy: 'demo-executive-001',
+      isInternal: true,
+      metadata: { assignedTo: claim.assignedTo },
+      createdAt: new Date(claim.assignedAt ?? claim.createdAt),
+    },
+    {
+      claimId: claim.claimId,
+      updateType: 'document_added',
+      message: `Evidence document uploaded: grievance-${String(index + 1).padStart(3, '0')}.pdf`,
+      createdBy: 'demo-grievance-officer-001',
+      isInternal: false,
+      metadata: { docType: 'evidence_pdf' },
+      createdAt: new Date(claim.updatedAt),
+    },
+  ]
+
+  if (OVERDUE_CLAIM_IDS.has(claim.claimId)) {
+    events.push({
+      claimId: claim.claimId,
+      updateType: 'deadline_alert',
+      message: 'Deadline overdue by 3+ days. Escalated for immediate steward action.',
+      createdBy: 'demo-grievance-officer-001',
+      isInternal: true,
+      metadata: { overdue: true, overdueDays: 3 },
+      createdAt: new Date(NOW.getTime() - DAY),
+    })
+  }
+
+  if (claim.claimId === EXPORTABLE_CASE_CLAIM_ID) {
+    events.push({
+      claimId: claim.claimId,
+      updateType: 'export_ready',
+      message: 'Evidence package generated and marked export-ready for procurement demo.',
+      createdBy: 'demo-steward-001',
+      isInternal: false,
+      metadata: { exportableCase: true },
+      createdAt: new Date(NOW.getTime() - DAY),
+    })
+  }
+
+  return events
+})
 
 // ── Main ────────────────────────────────────────────────
 
@@ -321,6 +239,18 @@ async function main() {
       console.log(`  ✓ Event: ${e.claimId.slice(-4)} → ${e.updateType}`)
     }
   }
+
+  const dashboardMetrics = {
+    steward_user: 'demo-steward-001',
+    grievance_officer_user: 'demo-grievance-officer-001',
+    executive_user: 'demo-executive-001',
+    grievances_seeded: DEMO_CLAIMS.length,
+    overdue_deadlines: OVERDUE_CLAIM_IDS.size,
+    evidence_documents_seeded: DEMO_CLAIMS.length,
+    exportable_case_claim_id: EXPORTABLE_CASE_CLAIM_ID,
+  }
+  console.log('\n📊 Demo dashboard metrics:')
+  console.log(JSON.stringify(dashboardMetrics, null, 2))
 
   console.log('\n✅ Demo seed complete.')
   process.exit(0)

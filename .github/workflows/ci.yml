@@ -226,6 +226,8 @@ jobs:
     needs: [lint-and-typecheck, test]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -238,6 +240,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Enforce tier focus labels
+        run: pnpm validate:tier-focus
 
       - name: Start governance runtime timer
         run: echo "GOVERNANCE_JOB_START_TS=$(date +%s)" >> "$GITHUB_ENV"

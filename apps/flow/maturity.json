@@ -11,6 +11,10 @@
   "proof_level": "internal-proof",
   "revenue_status": "pilot-contracting",
   "last_validated": "2026-04-22",
+  "runbooks": "complete",
+  "backup_restore": "partial",
+  "analytics_readiness": "partial",
+  "access_reviews": "partial",
   "orchestrator_integration": true,
   "orchestrator_playbooks": [
     "reminder_dispatch",
@@ -33,7 +37,29 @@
       "status": "partial",
       "owner": "platform-team",
       "blocker": "Application errors tracked; business-level KPI stream (conversion, activation) not yet wired to console dashboard.",
-      "target": "2026-Q3"
+      "target": "2026-07-15",
+      "severity": "high"
+    },
+    "backup_restore": {
+      "status": "partial",
+      "owner": "sre-team",
+      "blocker": "Database backups are present, but restore verification for Flow-specific workflow data is not yet automated in CI.",
+      "target": "2026-06-30",
+      "severity": "critical"
+    },
+    "analytics_readiness": {
+      "status": "partial",
+      "owner": "data-platform",
+      "blocker": "Activation and conversion KPIs are tracked ad hoc; deterministic monthly exports for procurement review are pending.",
+      "target": "2026-07-31",
+      "severity": "high"
+    },
+    "access_reviews": {
+      "status": "partial",
+      "owner": "security-team",
+      "blocker": "Access review policy exists but lacks CI enforcement that quarterly attestations were completed for Flow roles.",
+      "target": "2026-06-15",
+      "severity": "high"
     }
   }
 }

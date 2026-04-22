@@ -22,7 +22,7 @@ export function createAppPipeline() {
   return composePipeline([
     traceLayer(),
     authLayer({
-      extractActor: async (headers) => {
+      extractActor: async (headers: { authorization?: string }) => {
         // TODO: Replace with your auth provider (e.g., Clerk, NextAuth)
         const token = headers.authorization?.replace('Bearer ', '')
         if (!token) return null
@@ -34,19 +34,19 @@ export function createAppPipeline() {
       },
     }),
     rateLimitLayer({
-      check: async (_orgId, _route) => {
+      check: async (_orgId: string, _route: string) => {
         // TODO: Wire to your rate limiter (Redis, in-memory, etc.)
         return { allowed: true, remaining: 100, resetAt: Date.now() + 60000 }
       },
     }),
     governanceLayer({
-      evaluate: async (_ctx) => {
+      evaluate: async (_ctx: unknown) => {
         // TODO: Wire to @nzila/governance canAccess()
         return { outcome: 'allow' as const, reason: 'default-allow' }
       },
     }),
     auditLayer({
-      record: async (_entry) => {
+      record: async (_entry: unknown) => {
         // TODO: Wire to @nzila/audit appendEntry()
         return
       },

@@ -6,11 +6,11 @@
 
 ### Data Residency
 
-All member data — grievance files, case notes, member records, communications, election data — is stored exclusively in **Microsoft Azure Canada Central (Toronto)**.
+All member data — grievance files, case notes, member records, communications, election data — is stored in **Microsoft Azure Canada Central (Toronto)** by default.
 
-No data is processed in or transmitted to U.S. servers. No data is shared with third-party analytics platforms. This satisfies:
+Cross-border residency transfer is disabled in the production data plane by policy. This supports:
 - Canada's *Personal Information Protection and Electronic Documents Act* (PIPEDA)
-- Ontario FIPPA / provincial privacy statutes
+- Ontario FIPPA / provincial privacy programs
 - CBA and CUPE data-sovereignty requirements
 
 ---
@@ -59,8 +59,8 @@ No data is processed in or transmitted to U.S. servers. No data is shared with t
 | Control | Status |
 |---|---|
 | PIPEDA alignment | ✅ In place |
-| SOC 2 Type II | 🔄 In progress (target Q4 2025) |
-| Third-party penetration test | 🔄 Scheduled Q3 2025 |
+| SOC 2 Type II | 🔄 Roadmap (no active attestation engagement yet) |
+| Third-party penetration test | 🔄 Planned (not yet scheduled) |
 | ISO 27001 | 📋 Roadmap (post-SOC 2) |
 
 ---
@@ -70,8 +70,8 @@ No data is processed in or transmitted to U.S. servers. No data is shared with t
 | Subprocessor | Purpose | Data Region |
 |---|---|---|
 | Microsoft Azure | Hosting, compute, storage, AI | Canada Central |
-| Sentry | Error monitoring (anonymized stack traces only) | No PII transmitted |
-| Resend | Transactional email (member notifications) | No member data stored |
+| Sentry | Error monitoring (configured to minimize payloads) | PII redaction controls required |
+| Resend | Transactional email (member notifications) | Message metadata only |
 | Stripe | Payment processing (org billing only) | No member data |
 
 No subprocessor receives member grievance data, case files, or personally identifiable information beyond what is required for their specific function.
