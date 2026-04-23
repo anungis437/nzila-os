@@ -372,3 +372,15 @@ packages:
     steward: null
     tier: service
     description: "Pilot proof metrics layer: ingestion, rollups, scoring, alerts, reports"
+
+  platform-cognition-core:
+    owner: "@nzila/ai"
+    steward: null
+    tier: foundational
+    description: "Consent-native cognition engine (memory, trajectory, state, consent gate)"
+
+  platform-growth-os:
+    owner: "@nzila/commerce"
+    steward: null
+    tier: service
+    description: "Growth operating layer (campaigns, scoring, attribution, proof, founder narrative)"

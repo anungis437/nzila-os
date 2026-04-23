@@ -8,8 +8,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/api-auth-guard'
+import { db } from '@/db/db'
 import { enrollMfa } from '@nzila/platform-auth/mfa'
-import { db } from '@nzila/db'
 import { authUsers } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 

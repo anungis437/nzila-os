@@ -237,6 +237,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'deadlines/page.tsx',                          minRole: 'member',               description: 'Deadline tracking (client-side)' },
   { path: 'insights/page.tsx',                           minRole: 'member',               description: 'AI insights (client-side)' },
   { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Messages inbox (client-side)' },
+  { path: 'cognition/page.tsx',                          minRole: 'member',               description: 'Cognition operations dashboard' },
 
   // ── Health & safety (client-side pages) ────────────────────────────────
   { path: 'health-safety/page.tsx',                      minRole: 'member',               description: 'H&S dashboard overview (client-side)' },

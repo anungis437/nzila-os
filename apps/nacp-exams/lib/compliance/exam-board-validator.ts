@@ -246,7 +246,7 @@ export function checkCertificateExpiry(
       expiryDate,
       daysRemaining: Math.max(daysRemaining, 0),
     }
-  } catch (error) {
+  } catch {
     return {
       expired: true,
       expiryDate: new Date(),

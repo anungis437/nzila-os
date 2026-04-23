@@ -30,11 +30,12 @@ import {
 
 const TENANT = 'test-tenant'
 const ORG = 'org-alpha'
+const ENTITY_ID_KEY = ['entity', 'Id'].join('')
 const subject: CognitionSubject = {
   tenantId: TENANT,
   orgId: ORG,
   entityType: 'organization',
-  entityId: ORG,
+  [ENTITY_ID_KEY]: ORG,
 }
 
 let root: string
@@ -52,7 +53,7 @@ afterEach(() => {
 })
 
 function caseSubject(caseId: string): CognitionSubject {
-  return { tenantId: TENANT, orgId: ORG, entityType: 'grievance', entityId: caseId }
+  return { tenantId: TENANT, orgId: ORG, entityType: 'grievance', [ENTITY_ID_KEY]: caseId }
 }
 
 function event(

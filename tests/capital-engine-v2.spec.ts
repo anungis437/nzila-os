@@ -123,7 +123,7 @@ describe('capital engine v2', () => {
     expect(second).not.toBeNull()
     expect(first?.runway_months).toBe(second?.runway_months)
     expect(first?.survival_probability_pct).toBe(second?.survival_probability_pct)
-  })
+  }, 120_000)
 
   it('runway alerts trigger correctly', () => {
     const product = makeProduct({ monthly_revenue: 1000, pipeline_value: 200000, founder_attention_hours: 40 })

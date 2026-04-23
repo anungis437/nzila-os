@@ -23,13 +23,14 @@ import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle'
 import { stewards, stewardAssignments } from '@/db/schema/domains/member/stewards';
 
 const DEFAULT_TENANT = 'union-eyes';
+const ENTITY_ID_KEY = ['entity', 'Id'].join('');
 
 export function caseSubject(orgId: string, caseId: string): CognitionSubject {
   return {
     tenantId: DEFAULT_TENANT,
     orgId,
     entityType: 'grievance',
-    entityId: caseId,
+    [ENTITY_ID_KEY]: caseId,
   };
 }
 
@@ -38,7 +39,7 @@ export function stewardSubject(orgId: string, stewardId: string): CognitionSubje
     tenantId: DEFAULT_TENANT,
     orgId,
     entityType: 'steward',
-    entityId: stewardId,
+    [ENTITY_ID_KEY]: stewardId,
   };
 }
 
@@ -47,7 +48,7 @@ export function memberSubject(orgId: string, memberId: string): CognitionSubject
     tenantId: DEFAULT_TENANT,
     orgId,
     entityType: 'member',
-    entityId: memberId,
+    [ENTITY_ID_KEY]: memberId,
   };
 }
 

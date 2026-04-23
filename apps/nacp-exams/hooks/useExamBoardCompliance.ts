@@ -9,7 +9,6 @@
 
 'use client'
 
-import { useMemo } from 'react'
 import {
   getExamPolicy,
   validateExamGrade,
@@ -57,39 +56,13 @@ interface ComplianceState {
 export function useExamBoardCompliance(options: UseExamBoardComplianceOptions) {
   const { jurisdiction, examType } = options
 
-  const state: ComplianceState = useMemo(() => {
-    try {
-      const policy = getExamPolicy(jurisdiction)
-      const isSupported = isSupportedExamType(examType, jurisdiction)
+  let state: ComplianceState
+  try {
+    const policy = getExamPolicy(jurisdiction)
+    const isSupported = isSupportedExamType(examType, jurisdiction)
 
-      if (!isSupported) {
-        return {
-          jurisdiction,
-          examType,
-          examBoard: null,
-          isSupported: false,
-          minimumGrade: 0,
-          maxAttempts: 0,
-          certificateValidityYears: 0,
-          appealDeadlineDays: 0,
-        }
-      }
-
-      // Find applicable board
-      const board = policy.examBoards.find((b) => b.examTypes.includes(examType))
-
-      return {
-        jurisdiction,
-        examType,
-        examBoard: board ? { name: board.name } : null,
-        isSupported: true,
-        minimumGrade: board?.minimumPassingGrade ?? 60,
-        maxAttempts: board?.maxAttempts ?? 3,
-        certificateValidityYears: board?.certificateValidityYears ?? 3,
-        appealDeadlineDays: board?.appealDeadlineDays ?? 30,
-      }
-    } catch {
-      return {
+    if (!isSupported) {
+      state = {
         jurisdiction,
         examType,
         examBoard: null,
@@ -99,8 +72,33 @@ export function useExamBoardCompliance(options: UseExamBoardComplianceOptions) {
         certificateValidityYears: 0,
         appealDeadlineDays: 0,
       }
+    } else {
+      // Find applicable board
+      const board = policy.examBoards.find((b) => b.examTypes.includes(examType))
+
+      state = {
+        jurisdiction,
+        examType,
+        examBoard: board ? { name: board.name } : null,
+        isSupported: true,
+        minimumGrade: board?.minimumPassingGrade ?? 60,
+        maxAttempts: board?.maxAttempts ?? 3,
+        certificateValidityYears: board?.certificateValidityYears ?? 3,
+        appealDeadlineDays: board?.appealDeadlineDays ?? 30,
+      }
     }
-  }, [jurisdiction, examType])
+  } catch {
+    state = {
+      jurisdiction,
+      examType,
+      examBoard: null,
+      isSupported: false,
+      minimumGrade: 0,
+      maxAttempts: 0,
+      certificateValidityYears: 0,
+      appealDeadlineDays: 0,
+    }
+  }
 
   const validateGrade = (grade: number): { valid: boolean; error?: string } => {
     return validateExamGrade(grade, examType, jurisdiction)

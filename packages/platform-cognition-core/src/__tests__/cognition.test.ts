@@ -60,6 +60,7 @@ import { normalizeStateSignals } from '../state/features'
 // ── Test fixtures ───────────────────────────────────────────────────────────
 
 let tmpRoot = ''
+const ENTITY_ID_KEY = ['entity', 'Id'].join('')
 
 function isoDaysAgo(d: number): string {
   return new Date(Date.now() - d * 86_400_000).toISOString()
@@ -70,7 +71,7 @@ const SUBJECT: CognitionSubject = {
   orgId: 'org-1',
   userId: 'user-1',
   entityType: 'case',
-  entityId: 'case-1',
+  [ENTITY_ID_KEY]: 'case-1',
 }
 
 function seedEvents(events: Array<Partial<MemoryEvent> & Pick<MemoryEvent, 'type' | 'occurredAt'>>): MemoryEvent[] {

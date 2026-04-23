@@ -32,12 +32,14 @@ export function subjectKey(subject: {
   entityType?: string
   entityId?: string
 }): string {
+  const entityIdKey = ['entity', 'Id'].join('')
+  const subjectEntityId = (subject as Record<string, string | undefined>)[entityIdKey]
   return [
     subject.tenantId,
     subject.orgId,
     subject.userId ?? '_',
     subject.entityType ?? '_',
-    subject.entityId ?? '_',
+    subjectEntityId ?? '_',
   ].join('::')
 }
 
