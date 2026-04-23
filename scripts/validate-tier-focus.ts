@@ -9,10 +9,13 @@ type Catalog = {
 type PullRequestLabel = { name?: string }
 type PullRequestPayload = {
   pull_request?: {
+    number?: number
     labels?: PullRequestLabel[]
     base?: { ref?: string }
   }
 }
+
+type IssueLabelResponse = Array<{ name?: string }>
 
 const ROOT = process.cwd()
 const CATALOG_PATH = resolve(ROOT, 'governance/portfolio/product-catalog.json')
@@ -53,13 +56,38 @@ function getLabelsFromPrContext(): string[] {
   return labels.map((l) => (l.name ?? '').trim().toLowerCase()).filter(Boolean)
 }
 
+async function getLiveLabelsFromPrApi(): Promise<string[] | null> {
+  const eventPath = process.env.GITHUB_EVENT_PATH
+  if (!eventPath || !existsSync(eventPath)) return null
+
+  const payload = JSON.parse(readFileSync(eventPath, 'utf8')) as PullRequestPayload
+  const prNumber = payload.pull_request?.number
+  const repo = process.env.GITHUB_REPOSITORY
+  const token = process.env.GITHUB_TOKEN
+
+  if (!prNumber || !repo || !token) return null
+
+  const response = await fetch(`https://api.github.com/repos/${repo}/issues/${prNumber}/labels`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  })
+
+  if (!response.ok) return null
+
+  const labels = (await response.json()) as IssueLabelResponse
+  return labels.map((l) => (l.name ?? '').trim().toLowerCase()).filter(Boolean)
+}
+
 function appIdFromPath(filePath: string): string | null {
   const m = filePath.match(/^apps\/([^/]+)\//)
   if (!m) return null
   return m[1]
 }
 
-function main() {
+async function main() {
   const eventName = process.env.GITHUB_EVENT_NAME
   if (eventName !== 'pull_request') {
     console.log('[validate-tier-focus] Non-PR event; skipping label gate.')
@@ -81,7 +109,9 @@ function main() {
     return
   }
 
-  const labels = new Set(getLabelsFromPrContext())
+  const labelsFromPayload = getLabelsFromPrContext()
+  const liveLabels = await getLiveLabelsFromPrApi()
+  const labels = new Set((liveLabels && liveLabels.length > 0 ? liveLabels : labelsFromPayload))
 
   const touchedTier2: string[] = []
   const touchedTier34: string[] = []
@@ -118,4 +148,4 @@ function main() {
   console.log('[validate-tier-focus] PASS')
 }
 
-main()
+void main()
