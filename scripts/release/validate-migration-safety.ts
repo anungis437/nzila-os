@@ -1,9 +1,30 @@
 import { execSync } from 'node:child_process'
 
-const range = process.argv[2] ?? 'HEAD~1..HEAD'
+function resolveRange(): string {
+  const explicitRange = process.argv[2]
+  if (explicitRange) return explicitRange
+
+  const before = process.env.GITHUB_EVENT_BEFORE
+  const sha = process.env.GITHUB_SHA
+  if (before && sha && before !== '0000000000000000000000000000000000000000') {
+    return `${before}..${sha}`
+  }
+
+  try {
+    execSync('git rev-parse --verify --quiet HEAD~1', { stdio: 'ignore' })
+    return 'HEAD~1..HEAD'
+  } catch {
+    return 'HEAD'
+  }
+}
+
+const range = resolveRange()
 
 function getChangedFiles(): string[] {
-  const output = execSync(`git diff --name-only ${range}`, { encoding: 'utf8' })
+  const command = range.includes('..')
+    ? `git diff --name-only ${range}`
+    : `git show --pretty="" --name-only ${range}`
+  const output = execSync(command, { encoding: 'utf8' })
   return output.split('\n').map((f) => f.trim()).filter(Boolean)
 }
 
