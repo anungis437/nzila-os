@@ -6,7 +6,7 @@ import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
 import TechStackBar from '@/components/public/TechStackBar';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS, platformCoverageLabel, portfolioHeadlineLabel } from '@/lib/marketing-facts';
+import { MARKETING_FACTS, portfolioHeadlineLabel } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {

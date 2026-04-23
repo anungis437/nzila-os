@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import { trackEvent } from '@/lib/telemetry';
@@ -152,32 +152,28 @@ export default function Contact() {
   const locale = useLocale() as Locale;
   const copy = contactCopy[locale] ?? contactCopy['en-CA'];
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    vertical: '',
-    message: '',
-    source: 'contact_page',
-    utmSource: '',
-    utmMedium: '',
-    utmCampaign: '',
-    website: '',
+  const [formData, setFormData] = useState(() => {
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : null;
+
+    return {
+      name: '',
+      email: '',
+      company: '',
+      vertical: '',
+      message: '',
+      source: 'contact_page',
+      utmSource: params?.get('utm_source') ?? '',
+      utmMedium: params?.get('utm_medium') ?? '',
+      utmCampaign: params?.get('utm_campaign') ?? '',
+      website: '',
+    };
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setFormData((prev) => ({
-      ...prev,
-      utmSource: params.get('utm_source') ?? '',
-      utmMedium: params.get('utm_medium') ?? '',
-      utmCampaign: params.get('utm_campaign') ?? '',
-    }));
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

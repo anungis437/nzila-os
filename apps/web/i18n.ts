@@ -1,6 +1,6 @@
 import { getRequestConfig } from 'next-intl/server';
 import { cookies } from 'next/headers';
-import { locales, defaultLocale, type Locale } from './lib/locales';
+import { locales, defaultLocale } from './lib/locales';
 import { mergeMessages, normalizeLocaleCandidate } from './lib/i18n-utils';
 
 export { locales, defaultLocale, type Locale } from './lib/locales';
