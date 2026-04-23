@@ -112,6 +112,8 @@ export default function StoryPage() {
               icon={<Handshake className="h-6 w-6" />}
               title="Democratic governance baked in"
               description="UnionEyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn&apos;t marketing—it&apos;s in our shareholder agreement."
+              learnMoreHref="/governance"
+              learnMoreLabel="How the golden share works →"
             />
           </div>
         </section>
@@ -147,9 +149,11 @@ interface PrincipleCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  learnMoreHref?: string;
+  learnMoreLabel?: string;
 }
 
-function PrincipleCard({ icon, title, description }: PrincipleCardProps) {
+function PrincipleCard({ icon, title, description, learnMoreHref, learnMoreLabel }: PrincipleCardProps) {
   return (
     <div className="flex gap-4 p-6 bg-white border border-slate-200 rounded-lg">
       <div className="shrink-0 w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
@@ -158,6 +162,11 @@ function PrincipleCard({ icon, title, description }: PrincipleCardProps) {
       <div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
         <p className="text-slate-700">{description}</p>
+        {learnMoreHref && learnMoreLabel && (
+          <Link href={learnMoreHref} className="inline-block mt-3 text-sm font-semibold text-blue-700 hover:underline">
+            {learnMoreLabel}
+          </Link>
+        )}
       </div>
     </div>
   );

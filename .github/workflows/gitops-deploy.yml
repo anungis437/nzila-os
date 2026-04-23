@@ -35,11 +35,15 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   NODE_VERSION: '22'
 
   ACR_NAME: nzilacanadaacr
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   # ── Determine deployment parameters ───────────────────────────────────────
@@ -167,8 +171,16 @@ jobs:
         with:
           driver: docker-container
 
-      - name: Azure Login
-        if: steps.check.outputs.should_build == 'true'
+      - name: Azure Login (OIDC)
+        if: steps.check.outputs.should_build == 'true' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Login (Credentials Fallback)
+        if: steps.check.outputs.should_build == 'true' && (env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == '')
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -176,14 +188,6 @@ jobs:
       - name: ACR login
         if: steps.check.outputs.should_build == 'true'
         run: az acr login --name ${{ env.ACR_NAME }}
-
-      - name: Resolve Entra auth env vars
-        if: steps.check.outputs.should_build == 'true'
-        id: auth
-        run: |
-          echo "auth_secret=${{ secrets.AUTH_SECRET }}" >> "$GITHUB_OUTPUT"
-          echo "client_id=${{ secrets.AZURE_AD_CLIENT_ID }}" >> "$GITHUB_OUTPUT"
-          echo "tenant_id=${{ secrets.AZURE_AD_TENANT_ID }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         if: steps.check.outputs.should_build == 'true'
@@ -194,11 +198,8 @@ jobs:
 
           BUILD_ARGS="--build-arg APP_NAME=${APP}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg TURBO_FILTER=--filter=@nzila/${APP}"
-          if [ -n "${{ steps.auth.outputs.auth_secret }}" ]; then
-            BUILD_ARGS="${BUILD_ARGS} --build-arg AUTH_SECRET=${{ steps.auth.outputs.auth_secret }}"
-            BUILD_ARGS="${BUILD_ARGS} --build-arg AZURE_AD_CLIENT_ID=${{ steps.auth.outputs.client_id }}"
-            BUILD_ARGS="${BUILD_ARGS} --build-arg AZURE_AD_TENANT_ID=${{ steps.auth.outputs.tenant_id }}"
-          fi
+          # Do not pass runtime secrets during docker build.
+          BUILD_ARGS="${BUILD_ARGS} --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x"
 
           # Cross-app navigation URLs (baked into Next.js at build time)
           DOMAIN="jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
@@ -262,7 +263,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Login (Credentials Fallback)
+        if: env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == ''
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}

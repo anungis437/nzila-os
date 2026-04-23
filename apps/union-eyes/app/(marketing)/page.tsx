@@ -14,7 +14,6 @@ import { buildMarketingUrl, getUnionEyesSiteTopology } from '@/lib/site-topology
 import ScrollReveal from '@/components/public/scroll-reveal';
 import WorkflowSection from './components/workflow-section';
 import RolesSection from './components/roles-section';
-import AnimatedCTA from './components/animated-cta';
 import UnionWorkCarousel from './components/union-work-carousel';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -134,6 +133,12 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <p className="text-center text-xs text-gray-400 mt-5">
+            Self-reported by pilot organizations under confidentiality agreements.{' '}
+            <Link href="/case-studies" className="underline hover:text-gray-600">
+              Read the full pilot results →
+            </Link>
+          </p>
         </div>
       </section>
 
@@ -250,14 +255,6 @@ export default function HomePage() {
               </div>
             </ScrollReveal>
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ CTA ═══════════════════════ */}
-      <section className="py-24 bg-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-30" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedCTA />
         </div>
       </section>
     </main>

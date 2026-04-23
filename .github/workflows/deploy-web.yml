@@ -10,10 +10,14 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   APP_NAME: nzila-os-web
   IMAGE: nzilacanadaacr.azurecr.io/nzila-os-web
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   pre-deploy-gates:
@@ -101,7 +105,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure login
+      - name: Azure Login (OIDC)
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Login (Credentials Fallback)
+        if: env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == ''
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -114,9 +127,7 @@ jobs:
           docker build \
             --target web \
             --build-arg TURBO_FILTER="--filter=@nzila/web" \
-            --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
-            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
-            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
             --build-arg NEXT_PUBLIC_CONSOLE_URL=https://console.nzilaventures.com \
             --build-arg NEXT_PUBLIC_PARTNERS_URL=https://partners.nzilaventures.com \
             --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io \

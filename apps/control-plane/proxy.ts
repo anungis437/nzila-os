@@ -1,4 +1,3 @@
-import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
@@ -9,10 +8,8 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'never',
 })
 
-const publicPaths = ['/', '/sign-in', '/sign-up', '/api/health', '/api/auth']
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth((req: any) => {
+export const proxy = (req: any) => {
   const { pathname } = req.nextUrl
 
   // -- Idempotency-Key enforcement (fail-closed in pilot/prod) --
@@ -39,12 +36,6 @@ export const proxy = auth((req: any) => {
     }
   }
 
-  // -- Authentication --
-  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
-  if (!isPublic && !req.auth) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
-  }
-
   // -- Request-ID + Correlation-ID propagation --
   const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
   const correlationId = req.headers.get('x-correlation-id') ?? requestId
@@ -61,7 +52,7 @@ export const proxy = auth((req: any) => {
   response.headers.set('x-request-id', requestId)
   response.headers.set('x-correlation-id', correlationId)
   return response
-})
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],

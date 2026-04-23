@@ -96,21 +96,15 @@ export default function SiteNavigation() {
         <div className="flex justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center group">
               <Image
-                src="/images/brand/icon.png"
+                src="/UnionEyes-LO-FF.png"
                 alt="UnionEyes"
-                width={36}
-                height={36}
-                className="w-9 h-9 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
+                width={144}
+                height={44}
+                className="h-9 w-auto object-contain"
+                priority
               />
-              <span
-                className={`text-xl font-bold transition-colors ${
-                  scrolled ? 'text-navy' : 'text-white'
-                }`}
-              >
-                UnionEyes
-              </span>
             </Link>
           </div>
 

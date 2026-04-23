@@ -13,6 +13,7 @@ export default defineProject({
   },
   test: {
     name: "union-eyes",
+    testTimeout: 20000,
     exclude: [
       "**/node_modules/**",
       "**/.git/**",

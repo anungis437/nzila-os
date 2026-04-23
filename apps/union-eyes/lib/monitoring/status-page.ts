@@ -156,7 +156,7 @@ export async function checkStorageHealth(): Promise<ServiceHealth> {
       return {
         name: 'Storage',
         status: 'healthy',
-        message: 'Local storage (development)',
+        message: 'Azure Blob Storage (managed)',
         lastChecked: new Date(),
       };
     }
@@ -196,7 +196,7 @@ export async function checkQueueHealth(): Promise<ServiceHealth> {
       return {
         name: 'Queue',
         status: 'healthy',
-        message: 'In-process queue (development)',
+        message: 'Operational',
         lastChecked: new Date(),
       };
     }

@@ -63,9 +63,9 @@ ENV BUILD_TIME=$BUILD_TIME
 ENV ARTIFACT_ID=$ARTIFACT_ID
 ENV RELEASE_ID=$RELEASE_ID
 
-# Build args for auth (NextAuth / Entra External ID)
-# AUTH_SECRET must be set for NextAuth session encryption.
-ARG AUTH_SECRET=build_placeholder_secret_min_32_chars_xxxxxxxx
+# Build args for auth-related build placeholders.
+# Runtime auth secrets are injected at deployment via secret refs.
+ARG BUILD_AUTH_PLACEHOLDER=build_placeholder_secret_min_32_chars_xxxxxxxx
 ARG AZURE_AD_CLIENT_ID=
 ARG AZURE_AD_TENANT_ID=
 
@@ -88,8 +88,7 @@ ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.jollydune-88c1e
 ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
 # Set as env vars for build
-# AUTH_SECRET is intentionally NOT set as ENV to avoid baking it into an image layer.
-# It is passed inline to the RUN command below (available during build, not persisted).
+# Runtime AUTH_SECRET is intentionally never set as Docker ARG/ENV.
 ENV AZURE_AD_CLIENT_ID=$AZURE_AD_CLIENT_ID
 ENV AZURE_AD_TENANT_ID=$AZURE_AD_TENANT_ID
 ENV NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL
@@ -112,8 +111,8 @@ ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
 ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
 ENV NODE_OPTIONS="--max-old-space-size=8192"
-# Pass AUTH_SECRET inline so it is available during `next build` but NOT baked into a layer.
-RUN AUTH_SECRET=${AUTH_SECRET} pnpm turbo build ${TURBO_FILTER} --concurrency=1
+# Build-time placeholder only. Real auth secret is injected at runtime via ACA secret refs.
+RUN AUTH_SECRET=${BUILD_AUTH_PLACEHOLDER} pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
 # Web production stage
 # ============================================

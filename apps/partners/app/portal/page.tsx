@@ -31,10 +31,10 @@ async function getPartnerStats(): Promise<PartnerStats> {
 
     return {
       activeDeals: dealsResult.status === 'fulfilled'
-        ? Number((dealsResult.value as unknown as { rows: { count: number }[] }).rows?.[0]?.count ?? 0)
+        ? Number((dealsResult.value as unknown as { count: number }[])?.[0]?.count ?? 0)
         : null,
       ytdCommissions: commissionsResult.status === 'fulfilled'
-        ? Number((commissionsResult.value as unknown as { rows: { total: number }[] }).rows?.[0]?.total ?? 0)
+        ? Number((commissionsResult.value as unknown as { total: number }[])?.[0]?.total ?? 0)
         : null,
       certifications: '0 / 6',
       partnerScore: null, // Computed metric — future

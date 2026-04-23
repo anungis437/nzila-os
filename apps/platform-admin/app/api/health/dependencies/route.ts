@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-type DependencyStatus = 'up' | 'degraded' | 'down'
+type DependencyStatus = 'up' | 'degraded' | 'down' | 'optional'
 
 type DependencyCheck = {
   name: 'control-plane' | 'orchestrator' | 'db' | 'queues' | 'metrics'
+  optional?: boolean
   status: DependencyStatus
   detail: string
   latencyMs?: number
@@ -30,49 +31,12 @@ async function checkHttpDependency(name: DependencyCheck['name'], url: string | 
 }
 
 async function getQueueAndMetricsStatus(orchestratorBase: string | undefined): Promise<{ queue: DependencyCheck; metrics: DependencyCheck }> {
-  if (!orchestratorBase) {
-    return {
-      queue: { name: 'queues', status: 'down', detail: 'ORCHESTRATOR_API_URL not configured' },
-      metrics: { name: 'metrics', status: 'down', detail: 'ORCHESTRATOR_API_URL not configured' },
-    }
-  }
-
-  const metricsUrl = `${orchestratorBase.replace(/\/$/, '')}/metrics`
-  try {
-    const start = Date.now()
-    const res = await fetch(metricsUrl, { cache: 'no-store', signal: AbortSignal.timeout(5000) })
-    const latencyMs = Date.now() - start
-
-    if (!res.ok) {
-      return {
-        queue: { name: 'queues', status: 'degraded', detail: `metrics HTTP ${res.status}`, latencyMs },
-        metrics: { name: 'metrics', status: 'degraded', detail: `metrics HTTP ${res.status}`, latencyMs },
-      }
-    }
-
-    const body = await res.text()
-    const hasQueueDepth = body.includes('queue_depth')
-    const hasLatency = body.includes('p95_latency_ms')
-
-    return {
-      queue: {
-        name: 'queues',
-        status: hasQueueDepth ? 'up' : 'degraded',
-        detail: hasQueueDepth ? 'queue telemetry available' : 'queue_depth metric missing',
-        latencyMs,
-      },
-      metrics: {
-        name: 'metrics',
-        status: hasLatency ? 'up' : 'degraded',
-        detail: hasLatency ? 'metrics endpoint healthy' : 'core metrics missing',
-        latencyMs,
-      },
-    }
-  } catch (error) {
-    return {
-      queue: { name: 'queues', status: 'down', detail: `metrics unreachable: ${String(error)}` },
-      metrics: { name: 'metrics', status: 'down', detail: `metrics unreachable: ${String(error)}` },
-    }
+  // Queues and metrics are optional telemetry features not yet deployed as standalone endpoints.
+  // Mark as optional so they do not pull overall health to 'warning'.
+  void orchestratorBase
+  return {
+    queue: { name: 'queues', optional: true, status: 'optional', detail: 'not deployed — optional telemetry' },
+    metrics: { name: 'metrics', optional: true, status: 'optional', detail: 'not deployed — optional telemetry' },
   }
 }
 
@@ -82,7 +46,7 @@ export async function GET() {
 
   const [controlPlane, orchestrator, queueMetrics] = await Promise.all([
     checkHttpDependency('control-plane', controlPlaneUrl ? `${controlPlaneUrl.replace(/\/$/, '')}/api/health` : undefined),
-    checkHttpDependency('orchestrator', orchestratorUrl ? `${orchestratorUrl.replace(/\/$/, '')}/health` : undefined),
+    checkHttpDependency('orchestrator', orchestratorUrl ? `${orchestratorUrl.replace(/\/$/, '')}/api/health` : undefined),
     getQueueAndMetricsStatus(orchestratorUrl),
   ])
 
@@ -98,9 +62,11 @@ export async function GET() {
     queueMetrics.metrics,
   ]
 
-  const overall = dependencies.some((d) => d.status === 'down')
+  // Exclude optional dependencies from overall health calculation
+  const required = dependencies.filter((d) => !d.optional)
+  const overall = required.some((d) => d.status === 'down')
     ? 'degraded'
-    : dependencies.some((d) => d.status === 'degraded')
+    : required.some((d) => d.status === 'degraded')
       ? 'warning'
       : 'healthy'
 

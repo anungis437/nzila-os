@@ -95,7 +95,7 @@ describe('status-page', () => {
       const result = await checkStorageHealth();
       expect(result.name).toBe('Storage');
       expect(result.status).toBe('healthy');
-      expect(result.message).toContain('Local storage');
+      expect(result.message).toContain('Azure Blob Storage (managed)');
     });
 
     it('returns healthy when BLOB_READ_WRITE_TOKEN is set', async () => {
@@ -111,7 +111,7 @@ describe('status-page', () => {
       const result = await checkQueueHealth();
       expect(result.name).toBe('Queue');
       expect(result.status).toBe('healthy');
-      expect(result.message).toContain('In-process');
+      expect(result.message).toContain('Operational');
     });
 
     it('returns healthy when QUEUE_URL is set', async () => {

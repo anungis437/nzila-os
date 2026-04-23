@@ -49,12 +49,17 @@
 
 ### Step 1: Verify Service Health
 
+Follow `docs/ops/HEALTH_CHECK_STANDARD.md` for probe order and endpoint format.
+
 ```bash
-# Check Kubernetes readiness
+# Check UE ingress liveness
+curl -s https://<UE_HOST>/api/health | jq .
+
+# Check UE ingress readiness
 curl -s https://<UE_HOST>/api/ready | jq .
 
-# Check Django backend health
-curl -s https://<UE_HOST>/api/health | jq .
+# Check Django backend sidecar health (component-level)
+curl -s https://<UE_HOST>/api/auth_core/health/ | jq .
 ```
 
 ```kql
