@@ -519,14 +519,35 @@ jobs:
 
       - name: Smoke tests
         run: |
-          pnpm tsx scripts/release/run-smoke.ts --env ${{ needs.plan.outputs.environment }} --apps "${{ needs.plan.outputs.apps }}"
+          APPS="${{ needs.deploy.outputs.deployed_apps }}"
+          if [ -z "$APPS" ]; then
+            echo "::error::No deployed apps were provided to smoke tests"
+            exit 1
+          fi
+
+          if [ "${{ needs.plan.outputs.environment }}" = "staging" ]; then
+            echo "Staging warm-up window before smoke tests..."
+            sleep 45
+          fi
+
+          pnpm tsx scripts/release/run-smoke.ts \
+            --env ${{ needs.plan.outputs.environment }} \
+            --apps "$APPS" \
+            --retries 4 \
+            --retry-delay-ms 3000
 
       - name: Version drift check
         run: |
+          APPS="${{ needs.deploy.outputs.deployed_apps }}"
+          if [ -z "$APPS" ]; then
+            echo "::error::No deployed apps were provided to version drift check"
+            exit 1
+          fi
+
           # Verify the deployed apps report the expected SHA — catches partial deploys
           pnpm tsx scripts/release/drift-version.ts \
             --env ${{ needs.plan.outputs.environment }} \
-            --apps "${{ needs.plan.outputs.apps }}" || true
+            --apps "$APPS" || true
           # '|| true' — drift is expected immediately post-deploy while containers warm up.
           # The drift report is uploaded as evidence; promotion gate enforces this separately.
 
