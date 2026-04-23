@@ -120,6 +120,20 @@ export default function PilotRequestPage() {
           className="mb-8"
         />
 
+        {/* Low-friction escape hatch */}
+        <div className="mb-8 p-5 rounded-xl border border-electric/30 bg-electric/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-navy">Not ready for the full form?</p>
+            <p className="text-sm text-gray-600">Book a 20-minute call — no prep needed, no commitment.</p>
+          </div>
+          <a
+            href="mailto:pilots@unioneyes.com?subject=20-minute%20intro%20call"
+            className="shrink-0 inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-navy text-white text-sm font-semibold hover:bg-navy/90 transition-all"
+          >
+            Book a 20-min Call
+          </a>
+        </div>
+
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-between items-center">

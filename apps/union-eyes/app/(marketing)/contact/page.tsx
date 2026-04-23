@@ -96,7 +96,7 @@ export default function ContactPage() {
                     Toronto, Ontario, Canada
                   </p>
                   <p className="text-sm text-slate-500 mt-1">
-                    We work with unions across North America
+                    Built exclusively for Canadian labour organizations
                   </p>
                 </div>
               </div>
