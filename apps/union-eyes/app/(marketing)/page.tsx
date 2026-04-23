@@ -135,7 +135,9 @@ export default function HomePage() {
           </div>
           <p className="text-center text-xs text-gray-400 mt-5">
             Self-reported by pilot organizations under confidentiality agreements.{' '}
-            <a href="/case-studies" className="underline hover:text-gray-600">Read the full pilot results →</a>
+            <Link href="/case-studies" className="underline hover:text-gray-600">
+              Read the full pilot results →
+            </Link>
           </p>
         </div>
       </section>
