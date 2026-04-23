@@ -63,7 +63,7 @@ const safeguards = [
     icon: ShieldCheck,
     title: 'Transparency Engine',
     description:
-      'Every AI decision includes a reasoning chain — you can see exactly why a suggestion was made and override it.',
+      'AI responses include confidence and rationale metadata where available, and users can always override suggestions.',
   },
   {
     icon: Scale,
@@ -143,8 +143,8 @@ export default function AIWorkbenchPage() {
             Curious about AI for your union?
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            The workbench is in pilot with unions across Canada.
-            Book a walkthrough to see how it handles real grievance data.
+            The workbench is available for controlled pilots.
+            Book a walkthrough to evaluate fit for your organization and workflow.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

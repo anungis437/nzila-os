@@ -26,7 +26,18 @@
     "./entra/admin": "./src/entra/admin.ts",
     "./entra/verify": "./src/entra/verify.ts",
     "./password": "./src/password/index.ts",
-    "./password/handlers": "./src/password/handlers.ts"
+    "./password/handlers": "./src/password/handlers.ts",
+    "./magic-link": "./src/magic-link/index.ts",
+    "./magic-link/handlers": "./src/magic-link/handlers.ts",
+    "./invites": "./src/invites/index.ts",
+    "./invites/handlers": "./src/invites/handlers.ts",
+    "./policy": "./src/policy/index.ts",
+    "./policy/handlers": "./src/policy/handlers.ts",
+    "./policy/admin": "./src/policy/admin.ts",
+    "./mfa": "./src/mfa/index.ts",
+    "./mfa/handlers": "./src/mfa/handlers.ts",
+    "./risk": "./src/risk/index.ts",
+    "./lifecycle": "./src/lifecycle/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

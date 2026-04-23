@@ -1,0 +1,38 @@
+Section,Label,Input/Output,Value (Expected),Value (Low),Value (High),Unit,Formula / Source
+Inputs,Active members,Input,800,,,count,Buyer
+Inputs,Grievances per month,Input,20,,,count,Buyer
+Inputs,Number of stewards,Input,15,,,count,Buyer
+Inputs,Loaded hourly rate,Input,65,,,CAD/hr,Buyer
+Inputs,Admin time per case,Input,3.0,,,hours,Buyer
+Inputs,Backlog size,Input,30,,,count,Buyer
+Inputs,Exec reporting hours per month,Input,12,,,hours,Buyer
+Inputs,Missed deadlines per year,Input,4,,,count,Buyer
+Inputs,Arbitration filings per year,Input,2,,,count,Buyer
+Inputs,Avoided arbitration cost,Input,15000,,,CAD,Buyer
+Drivers,Precedent retrievals per month,Assumption,16,8,32,count,UNION_EYES_COGNITION_ROI
+Drivers,Early-warning interventions per month,Assumption,24,12,48,count,UNION_EYES_COGNITION_ROI
+Drivers,Reassignments accepted per month,Assumption,8,4,16,count,UNION_EYES_COGNITION_ROI
+Drivers,Hours per precedent retrieval,Assumption,1.5,1.0,2.0,hours,UNION_EYES_COGNITION_ROI
+Drivers,Hours per early-warning intervention,Assumption,0.75,0.5,1.0,hours,UNION_EYES_COGNITION_ROI
+Drivers,Hours per reassignment,Assumption,1.0,0.75,1.5,hours,UNION_EYES_COGNITION_ROI
+Drivers,Overloaded stewards percent,Assumption,0.20,0.10,0.30,ratio,Fairness score methodology
+Drivers,Excess hours per overloaded steward per month,Assumption,8,4,16,hours,Fairness score methodology
+Drivers,Reassignment acceptance rate,Assumption,0.50,0.30,0.70,ratio,Operator-confirmed
+Drivers,Exec reporting savings rate,Assumption,0.50,0.30,0.70,ratio,Executive Health Summary
+Drivers,Early-warning coverage of missed-deadline root cause,Assumption,0.60,0.40,0.80,ratio,UNION_EYES_COGNITION_ROI
+Drivers,Arbitration avoidance rate,Assumption,0.20,0.10,0.40,ratio,Conservative estimate
+Outputs,Admin hours saved per month,Output,50,30,80,hours,precedent*h + early*h + reassignments*h
+Outputs,Admin dollars saved per month,Output,3250,1950,5200,CAD,hours * I4
+Outputs,Steward rebalance hours redistributed per month,Output,12,6,28,hours,overloaded * excess_h * acceptance
+Outputs,Steward rebalance dollars per month,Output,780,390,1820,CAD,hours * I4
+Outputs,Exec reporting hours saved per month,Output,6,3.6,8.4,hours,I7 * savings_rate
+Outputs,Exec reporting dollars saved per month,Output,390,234,546,CAD,hours * I4
+Outputs,Total monthly hours saved,Output,68,39.6,116.4,hours,sum of driver lines
+Outputs,Total monthly dollar value,Output,4420,2574,7566,CAD,total_hours * I4
+Outputs,Annualised dollar value,Output,53040,30888,90792,CAD/yr,monthly * 12
+Outputs,Arbitration avoidance annual,Output,6000,3000,12000,CAD/yr,I9 * rate * I10
+Outputs,Total annualised value,Output,59040,33888,102792,CAD/yr,annual + arbitration
+Outputs,Pilot fee,Reference,12000,12000,12000,CAD,pricing-framework.md Local tier
+Outputs,Pilot payback months,Output,2.7,4.7,1.6,months,pilot_fee / monthly_value
+Outputs,Local subscription annual,Reference,28000,28000,28000,CAD/yr,pricing-framework.md 501-1500 band
+Outputs,Year-1 ROI percent,Output,110.9,21.0,267.1,percent,(annual_value - sub) / sub * 100

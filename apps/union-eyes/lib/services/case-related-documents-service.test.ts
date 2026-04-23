@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
   rows: unknown[];
-  directWhere?: boolean;
 };
 
 const selectSteps: SelectStep[] = [];
@@ -14,12 +13,14 @@ const dbMock = {
       throw new Error('No mocked select step configured');
     }
 
-    const builder: Record<string, (...args: unknown[]) => unknown> = {
+    const builder = {
       from: () => builder,
       leftJoin: () => builder,
       orderBy: () => builder,
+      where: () => builder,
       limit: async () => step.rows,
-      where: () => (step.directWhere ? Promise.resolve(step.rows) : builder),
+      then: (onFulfilled: (value: unknown[]) => unknown, onRejected?: (reason: unknown) => unknown) =>
+        Promise.resolve(step.rows).then(onFulfilled, onRejected),
     };
 
     return builder;
@@ -96,7 +97,7 @@ describe('case-related-documents-service', () => {
         ],
       },
       { rows: [] },
-      { rows: [], directWhere: true },
+      { rows: [] },
     ]);
 
     filterAuthorizedDocumentsForActor.mockImplementation(async ({ documents }) => documents);
@@ -166,7 +167,7 @@ describe('case-related-documents-service', () => {
         ],
       },
       { rows: [] },
-      { rows: [], directWhere: true },
+      { rows: [] },
     ]);
 
     filterAuthorizedDocumentsForActor.mockImplementation(async ({ documents }) => documents);
@@ -236,7 +237,7 @@ describe('case-related-documents-service', () => {
         ],
       },
       { rows: [] },
-      { rows: [], directWhere: true },
+      { rows: [] },
     ]);
 
     filterAuthorizedDocumentsForActor.mockImplementation(async ({ documents }) =>

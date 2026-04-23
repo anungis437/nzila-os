@@ -1,0 +1,14 @@
+{
+  "owner": "growth-platform",
+  "category": "PLATFORM_CORE",
+  "stability": "EVOLVING",
+  "description": "Internal-agency operating layer: campaigns, lead/deal scoring, multi-touch attribution, proof-capture lifecycle, founder narrative themes. Composes existing CRM/partner/decision/cognition packages — does not replace them.",
+  "allowed_dependents": [
+    "apps/console",
+    "apps/partners",
+    "apps/control-plane",
+    "apps/web",
+    "packages/platform-*"
+  ],
+  "forbidden_dependents": []
+}

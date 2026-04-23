@@ -1,3 +1,34 @@
+# Union Eyes Trust Center
+
+A reader-facing summary of how Union Eyes is operated, how data is
+protected, who gets access, and what we will do if something goes wrong.
+
+This center is **procurement-defensible**: every claim links to either
+a runbook, a code module, or an audit-log query. We make no claims we
+cannot demonstrate.
+
+## Contents
+
+1. [Security overview](./01-security-overview.md)
+2. [Data residency and processing](./02-data-residency.md) *(see vendor-risk-pack)*
+3. [Encryption and key management](./03-encryption.md) *(see one-pager)*
+4. [Access control model](./04-access-control-model.md)
+5. [Audit and evidence trail](./05-audit-trail.md) *(see vendor-risk-pack)*
+6. [Vulnerability and patch management](./06-vuln-mgmt.md) *(see SECURITY.md)*
+7. [Backup and restore](./07-backup-restore.md) *(see vendor-risk-pack)*
+8. [Incident response](./08-incident-response.md) *(see vendor-risk-pack)*
+9. [Contact and SLA](./09-contact-and-sla.md)
+10. [FAQ](./10-faq.md)
+11. [Identity and access management](./11-identity-and-access-management.md)
+
+## Companion documents
+
+- One-page executive summary: [`UNION_EYES_SECURITY_ONE_PAGER.md`](../UNION_EYES_SECURITY_ONE_PAGER.md)
+- Procurement Q&A: [`sales-kit/AUTH_PROCUREMENT_QA.md`](../sales-kit/AUTH_PROCUREMENT_QA.md)
+- Access modes (commercial-friendly): [`UNION_EYES_ACCESS_MODES.md`](../UNION_EYES_ACCESS_MODES.md)
+- Internal runbooks: [`docs/runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md), [`docs/runbooks/union-eyes-identity-lifecycle.md`](../../runbooks/union-eyes-identity-lifecycle.md)
+
+_Last revised: 2026-04-24._
 # Trust Center Package
 
 Date: 2026-04-22  

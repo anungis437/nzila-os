@@ -10,12 +10,18 @@ export const metadata: Metadata = {
 
 const controls = [
   { en: 'Single sign-on via Microsoft Entra ID + Argon2id email/password fallback', fr: 'SSO via Microsoft Entra ID et bascule mot de passe Argon2id' },
+  { en: 'Passwordless magic-link sign-in (single-use, 15-minute token TTL)', fr: 'Connexion sans mot de passe par lien magique (jeton à usage unique, TTL de 15 min)' },
+  { en: 'Two-factor (TOTP) self-enrollment with role-based MFA enforcement for privileged accounts', fr: 'Auto-inscription au double facteur (TOTP) avec MFA obligatoire selon le rôle pour les comptes privilégiés' },
+  { en: 'Org-level admin policy: SSO-only, invite-only, allowed email domains, MFA-by-role', fr: 'Politique admin par organisation : SSO uniquement, accès sur invitation, domaines autorisés, MFA par rôle' },
+  { en: 'Risk-based step-up: new device or privileged role triggers automatic MFA challenge', fr: 'Élévation basée sur le risque : nouvel appareil ou rôle privilégié déclenche un défi MFA automatique' },
+  { en: 'Lifecycle controls: suspend / reactivate / deprovision atomically revoke all active sessions', fr: 'Contrôles de cycle de vie : suspension / réactivation / déprovisionnement révoquent toutes les sessions actives' },
   { en: 'All secrets resolved at runtime from Azure Key Vault — no plaintext in CI', fr: 'Secrets résolus depuis Azure Key Vault — aucun texte clair en CI' },
   { en: 'Per-organization row-level isolation enforced at the DAL layer', fr: 'Isolation par organisation appliquée au niveau de la couche DAL' },
   { en: 'Mandatory hash-chained audit trail on every mutation', fr: 'Journal d audit en chaîne hachée obligatoire sur chaque mutation' },
+  { en: 'Append-only auth audit log with 25+ event types (signup, login, MFA, lifecycle, policy)', fr: 'Journal d audit d authentification en ajout seul avec plus de 25 types d événements' },
   { en: 'Container images scanned with Trivy (CRITICAL gate) on every build', fr: 'Images conteneurs scannées avec Trivy (porte CRITICAL) à chaque build' },
   { en: 'Dependency audit + Snyk + secret-scan workflows on every PR', fr: 'Audit des dépendances + Snyk + scan des secrets sur chaque PR' },
-  { en: 'Account lockout after 5 failed attempts (15-minute window)', fr: 'Verrouillage de compte après 5 tentatives échouées (fenêtre de 15 min)' },
+  { en: 'Account lockout after 5 failed attempts (15-minute window) plus risk-based soft-lockout', fr: 'Verrouillage de compte après 5 tentatives échouées (15 min) plus verrouillage doux basé sur le risque' },
   { en: 'Privilege escalation, RLS and cross-org breach contract tests', fr: 'Tests contractuels d escalade de privilèges, RLS et fuite inter-organisations' },
 ];
 

@@ -42,6 +42,7 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   ClockIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
 
 const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
@@ -82,6 +83,7 @@ const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>
   SparklesIcon,
   CheckCircleIcon,
   ClockIcon,
+  RocketLaunchIcon,
 }
 
 export interface NavItem {
@@ -124,9 +126,9 @@ function NavSection({ group, pathname }: { group: NavGroup; pathname: string }) 
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition"
       >
-        {group.label}
+          {group.label}
         <ChevronDownIcon
-          className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`}
+            className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`}
         />
       </button>
       {open && (

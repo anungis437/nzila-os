@@ -28,14 +28,13 @@ const sections = [
     heading: 'Canadian Data Residency',
     body: (
       <p>
-        All member data is stored and processed exclusively in{' '}
-        <strong>Microsoft Azure Canada Central (Toronto)</strong>. No data
-        residency transfer is enabled by default in the production data plane.
-        This supports PIPEDA-aligned controls, provincial privacy programs, and
-        CBA/CUPE data-sovereignty requirements.
+        Union Eyes production app workloads and primary data plane are hosted in{' '}
+        <strong>Microsoft Azure Canada Central (Toronto)</strong>. Some optional
+        AI and speech services may run in separately configured Azure regions;
+        verify regional settings in your deployment runbook before go-live.
       </p>
     ),
-    badges: ['Azure Canada Central', 'PIPEDA-aligned', 'No cross-border transfer'],
+    badges: ['Azure Canada Central', 'Regional controls documented', 'PIPEDA-aligned controls'],
   },
   {
     id: 'encryption',
@@ -44,14 +43,12 @@ const sections = [
     body: (
       <p>
         Data at rest uses <strong>AES-256</strong> (Azure Storage Service
-        Encryption). Data in transit is enforced via <strong>TLS 1.3</strong>{' '}
-        with HSTS and <code>upgrade-insecure-requests</code> on all production
-        surfaces. Database credentials, API keys, and secrets are stored in{' '}
-        <strong>Azure Key Vault</strong> and never in source code or environment
-        variables directly.
+        Encryption). Data in transit is protected with <strong>TLS</strong>{' '}
+        over HTTPS. Secrets support Azure secret references and can integrate
+        with <strong>Azure Key Vault</strong> based on environment policy.
       </p>
     ),
-    badges: ['AES-256 at rest', 'TLS 1.3 in transit', 'Azure Key Vault'],
+    badges: ['AES-256 at rest', 'TLS in transit', 'Secret reference support'],
   },
   {
     id: 'access-control',
@@ -74,13 +71,12 @@ const sections = [
     heading: 'Immutable Audit Trails',
     body: (
       <p>
-        Every case state change, file access, and admin action is logged with a
-        cryptographic HMAC seal (AES-256 / SHA-256). Audit logs cannot be
-        retroactively altered. Evidence packages are exportable as PDF bundles
-        suitable for arbitration, OLRB proceedings, and internal reviews.
+        Case state changes, access events, and admin actions are audit logged,
+        with tamper-evident controls on critical flows and export support for
+        investigation and arbitration workflows.
       </p>
     ),
-    badges: ['HMAC-sealed logs', 'Arbitration-ready exports', 'Non-repudiation'],
+    badges: ['Audit logging', 'Evidence exports', 'Tamper-evident controls'],
   },
   {
     id: 'identity',
@@ -105,13 +101,12 @@ const sections = [
       <p>
         AI features (case analysis, pattern detection, grievance risk scoring)
         are <strong>advisory only</strong>. Every AI output is surfaced with
-        confidence indicators, human-review prompts, and a complete audit trail.
+        confidence/rationale metadata where available, plus human-review prompts.
         No automated decisions are made without human confirmation. Models run
-        on <strong>Azure OpenAI</strong> under Microsoft enterprise controls —
-        your data is not used to train public models.
+        on configured providers under enterprise controls.
       </p>
     ),
-    badges: ['Human-in-the-loop', 'Azure OpenAI (Canada)', 'No model training on your data'],
+    badges: ['Human-in-the-loop', 'Provider-governed', 'Advisory-only output'],
   },
   {
     id: 'availability',
@@ -120,9 +115,9 @@ const sections = [
     body: (
       <p>
         Hosted on <strong>Azure Container Apps</strong> with auto-scaling and
-        deployment orchestration. Database backups run nightly with a 30-day
-        retention window and restoration drills tracked through operations
-        evidence. An uptime status page is available at{' '}
+        deployment orchestration. Backup/restore policy and retention windows
+        are environment-specific and should be validated during pilot and
+        production gating. An uptime status page is available at{' '}
         <Link
           href="/status"
           className="text-electric hover:underline"
@@ -243,13 +238,13 @@ export default function TrustPage() {
                 {[
                   ['Data residency', '✅ Canadian', 'Azure Canada Central (Toronto)'],
                   ['Encryption at rest', '✅ AES-256', 'Azure Storage Service Encryption'],
-                  ['Encryption in transit', '✅ TLS 1.3', 'HSTS + HTTPS enforced'],
-                  ['Secret management', '✅ Key Vault', 'Azure Key Vault — no env-var secrets in prod'],
+                  ['Encryption in transit', '✅ TLS', 'HTTPS enforced for public surfaces'],
+                  ['Secret management', '✅ Secret refs + policy', 'Secret references supported; Key Vault integration by environment policy'],
                   ['Authentication', '✅ MFA-capable', 'Argon2id + Entra ID SSO'],
                   ['Session security', '✅ Server-side', 'Opaque tokens, no localStorage'],
                   ['Database isolation', '✅ Row-Level Security', 'PostgreSQL RLS per org'],
-                  ['Audit logging', '✅ HMAC-sealed', 'Cryptographic evidence packages'],
-                  ['AI data handling', '✅ No training use', 'Azure OpenAI, data stays in tenant'],
+                  ['Audit logging', '✅ Enabled', 'Audit logs and evidence exports implemented; integrity controls vary by flow'],
+                  ['AI data handling', '✅ Advisory controls', 'AI output is advisory and review-required; provider/regional setup is environment-dependent'],
                   ['Vulnerability scanning', '✅ CI pipeline', 'Dependency audit + Trivy container scan'],
                   ['SOC 2 Type II', '🔄 Roadmap', 'Roadmap item; no active attestation engagement yet'],
                   ['Penetration test', '🔄 Planned', 'Planned prior to production scale-up; not yet scheduled'],

@@ -32,6 +32,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { name: 'Pipeline', href: '/revenue', icon: 'ArrowTrendingUpIcon' },
+      { name: 'UE Revenue Cockpit', href: '/ue-revenue-cockpit', icon: 'RocketLaunchIcon' },
       { name: 'FAIRCASE Funnel', href: '/revenue/faircase', icon: 'ChartBarIcon' },
       { name: 'Pilot Export', href: '/pilot/export', icon: 'DocumentArrowDownIcon' },
     ],
