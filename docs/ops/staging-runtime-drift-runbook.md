@@ -246,14 +246,14 @@ If `gitSha` is a short prefix that matches HEAD SHA, the app is current.
 
 The `gitops-deploy.yml` workflow:
 1. Fails hard if **any** app fails to deploy (exits 1 — no silent partial failures)
-2. Probes `/api/health` (not `/`) in the verify step
+2. Probes canonical health endpoints from `governance/release/deployment-inventory.json` (not `/`)
 3. Runs full smoke (`run-smoke.ts`) post-deploy
 4. Runs version drift check post-deploy and uploads as artifact
 5. Generates deployment evidence pack and uploads as artifact
 
 A deployment is only considered **promotion-ready** when:
-- ✅ All apps return 200 on `/api/health`
-- ✅ All apps return 200 on `/api/ready`
+- ✅ All required apps return 200 on canonical health endpoint
+- ✅ All required apps return 200 on canonical ready endpoint
 - ✅ `drift:version:staging` score = 100%
 - ✅ `drift:env:staging` reports no blocking gaps
 - ✅ Deployment evidence pack shows `promotionVerdict: "ready"`

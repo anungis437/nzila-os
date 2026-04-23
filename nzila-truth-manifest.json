@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-04-22",
+  "last_audit": "2026-04-23",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",

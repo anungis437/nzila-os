@@ -4,6 +4,9 @@
 
 ## Health Checks
 
+Canonical endpoint policy is defined in `docs/ops/HEALTH_CHECK_STANDARD.md`.
+Use that document for endpoint format, probe order, and service-specific exceptions.
+
 Canonical deployment paths:
 
 - Staging and development: `.github/workflows/gitops-deploy.yml`
@@ -29,6 +32,7 @@ Health checks verify:
 - Artifact directory is ready
 - Governance snapshot directory is ready
 - Protected environment gates are configured
+- Service probes follow the canonical health-check standard
 
 ## Staging Seed
 

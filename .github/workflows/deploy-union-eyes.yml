@@ -26,6 +26,9 @@ permissions:
 env:
   IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
   BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   plan:
@@ -273,7 +276,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure login
+      - name: Azure Login (OIDC)
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Login (Credentials Fallback)
+        if: env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == ''
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -286,7 +298,7 @@ jobs:
           docker build \
             --target union-eyes \
             --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
-            --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
             --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
             --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
             --build-arg NEXT_PUBLIC_SITE_URL=https://unioneyes.app \

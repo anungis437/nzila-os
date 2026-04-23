@@ -1,14 +1,5 @@
-import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
-import createIntlMiddleware from 'next-intl/middleware'
-import { locales, defaultLocale } from './lib/locales'
-
-const intlMiddleware = createIntlMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'never',
-})
 
 /**
  * Platform Admin Edge Middleware — Three-layer protection.
@@ -18,18 +9,11 @@ const intlMiddleware = createIntlMiddleware({
  * Layer 3: Request-ID propagation (x-request-id header)
  */
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/auth(.*)',
-  '/api/health(.*)',
-])
-
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export const proxy = authMiddleware(async (auth, request) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const proxy = async (request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -51,28 +35,15 @@ export const proxy = authMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Authentication (skip in dev — prevents auth handshake loops) ────
-  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
-    await auth.protect()
-  }
-
   // ── Request-ID + Correlation-ID propagation ───────────────────────────
   const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
   const correlationId = request.headers.get('x-correlation-id') ?? requestId
-
-  // ── Internationalisation ──────────────────────────────────────────────
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
-    intlResponse.headers.set('x-request-id', requestId)
-    intlResponse.headers.set('x-correlation-id', correlationId)
-    return intlResponse
-  }
 
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   response.headers.set('x-correlation-id', correlationId)
   return response
-})
+}
 
 export const config = {
   matcher: [

@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-22 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-23 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,7 +9,7 @@
 | Apps | 19 |
 | Packages (packages/*) | 170 |
 | Workspace Packages (apps|packages|services|tooling) | 193 |
-| GitHub Workflows | 42 |
+| GitHub Workflows | 43 |
 | Contract Test Files | 220 |
 | TS/JS Test Files | 1218 |
 | Python Test Files | 31 |
@@ -18,7 +18,7 @@
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 310 | Internal operations console — platform governance, compliance, analytics, integr |
@@ -33,9 +33,9 @@
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3152 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| weekone | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 46 |  |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3153 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 46 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 434 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
@@ -43,6 +43,7 @@
 - agri-core-check.yml
 - ai-governance.yml
 - app-floor-check.yml
+- branch-tag-governance.yml
 - canary-deploy.yml
 - capital-discipline.yml
 - ci.yml

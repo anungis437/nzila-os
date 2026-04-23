@@ -42,6 +42,7 @@
     "evidence:pack:monthly": "tsx scripts/proof/build-monthly-evidence-pack.ts",
     "release": "changeset publish",
     "version-packages": "changeset version",
+    "release:validate:refs": "tsx scripts/release/validate-branch-tag-policy.ts",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
