@@ -28,11 +28,10 @@ pnpm sre:validate
 
 ## Triad Contract
 
-Every release-critical app must expose:
+Every release-critical app must expose the canonical health triad described in `docs/ops/HEALTH_CHECK_STANDARD.md`.
 
-- /api/health as liveness (HTTP 200 when process is alive)
-- /api/ready as readiness (HTTP 200 only when required dependencies are ready; otherwise 503)
-- /api/version as immutable build metadata
+- Next.js services: `/api/health`, `/api/ready`, `/api/version`
+- Fastify services (for example `orchestrator-api`): `/health`, `/ready`, `/version`
 
 ## Failure Classification
 
@@ -54,9 +53,8 @@ Treat classification as first-response guidance, then verify logs and ingress se
 1. Identify failing app and endpoint from smoke report in ops/smoke/smoke-staging-latest.json.
 2. Validate routing truth in governance/release/deployment-inventory.json.
 3. Confirm route existence and semantics in app source:
-   - app/api/health/route.ts
-   - app/api/ready/route.ts
-   - app/api/version/route.ts
+   - Next.js services: `app/api/{health,ready,version}/route.ts`
+   - Fastify services: `src/routes/{health,ready,version}.ts`
 4. Redeploy failing app image with current commit and environment variables.
 5. Rerun release smoke and confirm all triad probes pass for required apps.
 6. Regenerate dashboard and archive artifacts in reports/ and docs/ops/sre/.

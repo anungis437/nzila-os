@@ -198,6 +198,8 @@
         "staging": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://orchestrator.nzila.ai",
         "healthPath": "/health",
+        "readyPath": "/ready",
+        "versionPath": "/version",
         "ingress": "restricted",
         "tls": "managed"
       }

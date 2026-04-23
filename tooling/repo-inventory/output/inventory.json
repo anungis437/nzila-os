@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-22T00:00:00.000Z",
+  "generatedAt": "2026-04-23T00:00:00.000Z",
   "appCount": 19,
   "packageCount": 170,
   "workspacePackageCount": 193,
-  "workflowCount": 42,
+  "workflowCount": 43,
   "contractTestCount": 220,
   "tsTestFileCount": 1218,
   "pythonTestFileCount": 31,
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 248
+      "codeFileCount": 247
     },
     {
       "name": "agrimo",
@@ -524,7 +524,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3152
+      "codeFileCount": 3153
     },
     {
       "name": "web",
@@ -548,13 +548,13 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 82
     },
     {
       "name": "weekone",
       "language": "typescript",
       "framework": "Next.js",
-      "port": 3009,
+      "port": 3016,
       "hasReadme": true,
       "hasEnvExample": true,
       "dependsOnPlatformShell": true,
@@ -618,6 +618,7 @@
     "agri-core-check.yml",
     "ai-governance.yml",
     "app-floor-check.yml",
+    "branch-tag-governance.yml",
     "canary-deploy.yml",
     "capital-discipline.yml",
     "ci.yml",

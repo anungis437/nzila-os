@@ -2,7 +2,7 @@
 
 ## SRE Practices
 
-- **Health contracts**: Every app exposes standardized health endpoints, validated by `pnpm sre:health:contract`
+- **Health contracts**: Every app exposes standardized health endpoints, validated by `pnpm sre:health:contract` and documented in `docs/ops/HEALTH_CHECK_STANDARD.md`
 - **SLO policy**: Defined in `ops/slo-policy.yml`, enforced by contract tests
 - **Alert routing**: Dry-run validated via `pnpm sre:alerts:dry-run`
 - **Synthetic monitoring**: Dry-run validated via `pnpm sre:synthetic:dry-run`
