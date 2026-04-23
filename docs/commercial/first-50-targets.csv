@@ -1,0 +1,51 @@
+org_name,type,province,size_tier,priority,wedge,entry_motion,status,next_action
+CUPE Local 79 (City of Toronto Inside Workers),local,ON,large,A,grievance_ops+cognition,warm_intro,cold,Send Touch 1 cold email to President + Secretary-Treasurer
+CUPE Local 416 (City of Toronto Outside Workers),local,ON,large,A,grievance_ops+executive_reporting,warm_intro,cold,Warm path via CUPE 79 land-and-expand after deal-002 closes
+CUPE Local 4400 (Toronto District School Board),local,ON,large,A,governance_elections+grievance_ops,conference,cold,Conference approach at CUPE National Convention / OFL
+CUPE Local 503 (City of Ottawa Municipal Employees),local,ON,large,A,grievance_ops+communications,outbound_email,cold,Send bilingual (FR/EN) Touch 1 to Secretary-Treasurer
+CUPE Local 15 (City of Vancouver Civic Employees),local,BC,large,A,grievance_ops+executive_reporting,conference,cold,Conference at CUPE BC Convention
+CUPE Local 3902 (University of Toronto Contract Academic Staff),local,ON,large,B,governance_elections+grievance_ops,outbound_email,cold,Send Touch 1 (avoid May–Aug); target Sept re-open
+CUPE Local 3903 (York University Contract Academic Staff),local,ON,medium,B,grievance_ops+communications,outbound_email,cold,Send Touch 1 outbound email to President
+CUPE Local 374 (Burnaby School District Education Support),local,BC,medium,B,grievance_ops,referral,cold,Warm path referral via CUPE 15 after CUPE 15 engagement
+CUPE Local 5167 (City of Hamilton Municipal Employees),local,ON,medium,B,grievance_ops+governance,outbound_email,cold,Send Touch 1 outbound email
+CUPE Local 1190 (Government of New Brunswick Employees),local,NB,large,B,governance_elections+grievance_ops,outbound_email,cold,Send bilingual outbound email to Secretary-Treasurer
+ATU Local 113 (Toronto Transit Commission),local,ON,large,A,grievance_ops+cognition,conference,cold,Conference at CLC National Convention; parallel cold email to President
+ATU Local 583 (Edmonton Transit Service Workers),local,AB,medium,B,grievance_ops,outbound_email,cold,Send Touch 1 outbound email
+ATU Local 569 (Calgary Transit Workers),local,AB,medium,B,grievance_ops,outbound_email,cold,Send Touch 1 outbound email
+IAFF Local 3888 (Toronto Professional Fire Fighters Association),local,ON,medium,B,grievance_ops+governance,conference,cold,Conference approach at IAFF Canada
+IAFF Local 162 (Ottawa Professional Fire Fighters Association),local,ON,medium,B,grievance_ops,outbound_email,cold,Send bilingual Touch 1 outbound email
+IAFF Local 255 (Calgary Firefighters Association),local,AB,medium,B,grievance_ops,outbound_email,cold,Send Touch 1 outbound email
+Edmonton Police Association,local,AB,medium,B,grievance_ops+governance,linkedin,cold,LinkedIn to President/Executive Director; follow with email
+Vancouver Police Officers Guild,local,BC,small,B,governance_elections,linkedin,cold,LinkedIn to President
+ONA (Ontario Nurses Association),provincial,ON,large,A,cognition+grievance_ops,conference,cold,Conference at ONA AGM; parallel cold email to CEO/Executive Director
+MNU (Manitoba Nurses Union),provincial,MB,large,A,grievance_ops+cognition,outbound_email,cold,Send Touch 1 outbound email + MFL conference approach
+SUN (Saskatchewan Union of Nurses),provincial,SK,large,A,grievance_ops+executive_reporting,outbound_email,cold,Send Touch 1 outbound email to President/CEO
+NSNU (Nova Scotia Nurses Union),provincial,NS,medium,A,grievance_ops,outbound_email,cold,Send Touch 1 outbound email — Atlantic market low competition density
+NBNU (New Brunswick Nurses Union),provincial,NB,medium,A,grievance_ops+communications,outbound_email,cold,Send bilingual outbound email; NBFL conference follow-up
+HSA BC (Health Sciences Association of British Columbia),provincial,BC,large,A,grievance_ops+cognition,conference,cold,Conference at BCFED Convention; parallel cold email to President
+SEIU Healthcare,provincial,ON,large,B,grievance_ops+cognition,conference,cold,Conference at SEIU Canada events; Canadian hosting as primary wedge
+CUPE Local 3550 (Winnipeg Regional Health Authority Workers),local,MB,medium,B,grievance_ops,outbound_email,cold,Send Touch 1 via CUPE pilot offer
+OSSTF (Ontario Secondary School Teachers Federation),provincial,ON,large,B,governance_elections+executive_reporting,conference,cold,Conference at OSSTF Annual Meeting
+ETFO (Elementary Teachers Federation of Ontario),provincial,ON,large,B,governance_elections+communications,conference,cold,Conference at ETFO Annual Meeting
+BCTF (BC Teachers Federation),provincial,BC,large,B,governance_elections+communications,conference,cold,Conference at BCTF AGM / BCFED Convention
+ATA (Alberta Teachers Association),provincial,AB,large,B,governance_elections,conference,cold,Conference at ATA Annual Representative Assembly
+NSTU (Nova Scotia Teachers Union),provincial,NS,medium,B,grievance_ops+governance,outbound_email,cold,Send Touch 1 outbound email
+STF (Saskatchewan Teachers Federation),provincial,SK,large,B,governance_elections,outbound_email,cold,Send Touch 1 + SFL conference
+MTS (Manitoba Teachers Society),provincial,MB,large,B,governance_elections+communications,outbound_email,cold,Send Touch 1 + MFL conference
+NBTA (New Brunswick Teachers Association),provincial,NB,medium,B,governance_elections+communications,outbound_email,cold,Send bilingual outbound email
+CAPE-ACEP (Canadian Association of Professional Employees),national,federal,large,A,grievance_ops+executive_reporting,warm_intro,active_deal,Escalate to Day-0 close sequence (deal-002 active)
+PIPSC (Professional Institute of the Public Service of Canada),national,federal,large,B,grievance_ops+cognition,conference,cold,Conference at PIPSC AGM; PIPEDA + data sovereignty anchor
+OPSEU/SEFPO (Ontario Public Service Employees Union),provincial,ON,large,B,grievance_ops+executive_reporting,conference,cold,Conference at OPSEU Biennial Convention
+BCGEU (BC Government and Service Employees Union),provincial,BC,large,B,grievance_ops+cognition,conference,cold,Conference at BCGEU Convention / BCFED
+AUPE (Alberta Union of Provincial Employees),provincial,AB,large,B,governance_elections+grievance_ops,conference,cold,Conference at AUPE General Meeting
+NSGEU (Nova Scotia Government and General Employees Union),provincial,NS,large,B,grievance_ops+executive_reporting,outbound_email,cold,Send Touch 1 + NSFL conference
+MGEU (Manitoba Government and General Employees Union),provincial,MB,large,B,grievance_ops+governance,outbound_email,cold,Send Touch 1 + MFL conference
+SGEU (Saskatchewan Government and General Employees Union),provincial,SK,large,B,grievance_ops,outbound_email,cold,Send Touch 1 + SFL conference
+OFL (Ontario Federation of Labour),umbrella,ON,large,B,endorsement_partnership,conference,cold,Attend OFL Annual Convention (November); meet Executive Director
+BCFED (BC Federation of Labour),umbrella,BC,large,B,endorsement_partnership,conference,cold,Attend BCFED Convention; propose endorsed partner status
+AFL (Alberta Federation of Labour),umbrella,AB,large,B,endorsement_partnership,conference,cold,Attend AFL Convention
+MFL (Manitoba Federation of Labour),umbrella,MB,large,B,endorsement_partnership,conference,cold,Attend MFL Convention; open MGEU + MNU warm paths
+SFL (Saskatchewan Federation of Labour),umbrella,SK,large,C,endorsement_partnership,conference,cold,Attend SFL Convention when in region
+NSFL (Nova Scotia Federation of Labour),umbrella,NS,medium,C,endorsement_partnership,conference,cold,Attend NSFL Convention; open NSNU + NSTU warm paths
+NBFL (New Brunswick Federation of Labour),umbrella,NB,medium,C,endorsement_partnership,conference,cold,Attend NBFL Convention; open NBNU + NBTA warm paths
+CLC (Canadian Labour Congress),national,national,large,B,endorsement_partnership,conference,cold,Attend CLC National Convention; meet Secretary-Treasurer for national endorsement pathway

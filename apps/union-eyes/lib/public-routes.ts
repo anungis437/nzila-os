@@ -56,6 +56,11 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth/logout',            // Session logout (no-op if unauthenticated)
   '/api/auth/forgot-password',   // Request password reset (rate-limited)
   '/api/auth/reset-password',    // Reset password with emailed token
+  '/api/auth/magic-link/request',// Request a passwordless sign-in link (rate-limited)
+  '/api/auth/magic-link/verify', // Consume a passwordless sign-in token
+  '/api/auth/invite/accept',     // Accept an org-membership invite (token IS the credential)
+  '/api/auth/methods',           // Discover allowed sign-in methods for an email/org
+  '/api/auth/mfa/challenge',     // Consume MFA challenge token post-password (token IS the credential)
   
   // ========================================================================
   // PUBLIC TRACKING/ANALYTICS

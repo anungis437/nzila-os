@@ -13,6 +13,8 @@ import {
   authPasswordResetTokens,
   authAuditLog,
   authOrganizationUsers,
+  authMfaTotp,
+  authOrgPolicies,
 } from '@nzila/db/schema'
 import { eq, and, sql, gt } from 'drizzle-orm'
 import {
@@ -30,6 +32,8 @@ import {
   getSessionFromCookie,
 } from './session'
 import type { CreateSessionOptions, SessionData } from './session'
+import { issueMfaChallenge } from '../mfa/service'
+import { assessRisk } from '../risk/assess'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -42,6 +46,13 @@ export interface AuthResult {
     firstName: string | null
     lastName: string | null
   }
+  /** Set when the user must complete MFA before a session is issued. */
+  requiresMfa?: boolean
+  /** Present iff requiresMfa — opaque token to redeem at /api/auth/mfa/challenge. */
+  mfaChallengeToken?: string
+  mfaChallengeExpiresAt?: Date
+  /** Risk tier if assessed (logged-for-debugging only; not exposed over the wire in most cases). */
+  riskTier?: 'low' | 'medium' | 'high'
 }
 
 export interface SignupInput {
@@ -101,6 +112,9 @@ type AuditEvent =
   | 'password_reset_complete'
   | 'account_locked'
   | 'session_revoked'
+  | 'login_blocked_lifecycle'
+  | 'login_risk_assessed'
+  | 'login_soft_lockout'
 
 async function logAuditEvent(
   event: AuditEvent,
@@ -234,6 +248,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
       isActive: authUsers.isActive,
       failedLoginAttempts: authUsers.failedLoginAttempts,
       accountLockedUntil: authUsers.accountLockedUntil,
+      lifecycleState: authUsers.lifecycleState,
     })
     .from(authUsers)
     .where(sql`lower(${authUsers.email}) = ${email}`)
@@ -260,6 +275,22 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     return {
       success: false,
       error: 'Account is deactivated. Contact support.',
+    }
+  }
+
+  // 2b. Lifecycle state gate (independent of isActive — newer mechanism)
+  if (user.lifecycleState && user.lifecycleState !== 'active') {
+    await logAuditEvent('login_blocked_lifecycle', {
+      userId: user.userId,
+      ipAddress: input.ipAddress,
+      metadata: { lifecycleState: user.lifecycleState },
+    })
+    return {
+      success: false,
+      error:
+        user.lifecycleState === 'deprovisioned'
+          ? 'This account has been removed. Contact your administrator.'
+          : 'Account is temporarily disabled. Contact your administrator.',
     }
   }
 
@@ -338,8 +369,12 @@ export async function login(input: LoginInput): Promise<AuthResult> {
 
   // 7. Resolve organization membership (pick primary or first)
   let organizationId: string | null = null
+  let userRole: string | null = null
   const [membership] = await db
-    .select({ organizationId: authOrganizationUsers.organizationId })
+    .select({
+      organizationId: authOrganizationUsers.organizationId,
+      role: authOrganizationUsers.role,
+    })
     .from(authOrganizationUsers)
     .where(
       and(
@@ -351,9 +386,101 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     .limit(1)
   if (membership) {
     organizationId = membership.organizationId
+    userRole = membership.role
   }
 
-  // 8. Create session
+  // 7b. Risk assessment
+  const risk = await assessRisk({
+    userId: user.userId,
+    ipAddress: input.ipAddress,
+    userAgent: input.userAgent,
+    userRoles: userRole ? [userRole] : [],
+  })
+  if (risk.tier !== 'low') {
+    await logAuditEvent('login_risk_assessed', {
+      userId: user.userId,
+      ipAddress: input.ipAddress,
+      metadata: { score: risk.score, tier: risk.tier, reasons: risk.reasons },
+    })
+  }
+  if (risk.recommendedAction === 'soft_lockout') {
+    await logAuditEvent('login_soft_lockout', {
+      userId: user.userId,
+      ipAddress: input.ipAddress,
+      metadata: { score: risk.score, reasons: risk.reasons },
+    })
+    return {
+      success: false,
+      error:
+        'For your security, please try again in a few minutes or contact support.',
+      riskTier: risk.tier,
+    }
+  }
+
+  // 7c. MFA gate — either the user has enrolled, or org policy mandates it for their role.
+  const [mfaRow] = await db
+    .select({
+      enabledAt: authMfaTotp.enabledAt,
+      disabledAt: authMfaTotp.disabledAt,
+    })
+    .from(authMfaTotp)
+    .where(eq(authMfaTotp.userId, user.userId))
+    .limit(1)
+  const mfaEnabled = Boolean(mfaRow?.enabledAt && !mfaRow?.disabledAt)
+
+  let mfaMandatedByPolicy = false
+  if (organizationId && userRole) {
+    const [policy] = await db
+      .select({ mfaRequiredForRoles: authOrgPolicies.mfaRequiredForRoles })
+      .from(authOrgPolicies)
+      .where(eq(authOrgPolicies.organizationId, organizationId))
+      .limit(1)
+    const roles = (policy?.mfaRequiredForRoles ?? []) as unknown as string[]
+    if (Array.isArray(roles) && roles.includes(userRole)) {
+      mfaMandatedByPolicy = true
+    }
+  }
+
+  const mustCompleteMfa =
+    mfaEnabled || mfaMandatedByPolicy || risk.recommendedAction === 'require_mfa'
+
+  if (mustCompleteMfa) {
+    if (!mfaEnabled) {
+      // Policy / risk demands MFA but user hasn't enrolled — fail closed with
+      // an actionable message; admin must enroll them or relax the policy.
+      await logAuditEvent('login_failed', {
+        userId: user.userId,
+        ipAddress: input.ipAddress,
+        metadata: { reason: 'mfa_required_but_not_enrolled' },
+      })
+      return {
+        success: false,
+        error:
+          'Two-factor authentication is required for this account. Please contact your administrator to enroll.',
+      }
+    }
+    const challenge = await issueMfaChallenge({
+      userId: user.userId,
+      ipAddress: input.ipAddress,
+      userAgent: input.userAgent,
+    })
+    // Do NOT set a session cookie yet — client must complete MFA challenge.
+    return {
+      success: true,
+      requiresMfa: true,
+      mfaChallengeToken: challenge.challengeToken,
+      mfaChallengeExpiresAt: challenge.expiresAt,
+      user: {
+        id: user.userId,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      riskTier: risk.tier,
+    }
+  }
+
+  // 8. Create session (no MFA required path)
   const { token, session } = await createSession({
     userId: user.userId,
     organizationId,
@@ -368,6 +495,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     userId: user.userId,
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
+    metadata: { riskTier: risk.tier },
   })
 
   return {
@@ -378,6 +506,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
       firstName: user.firstName,
       lastName: user.lastName,
     },
+    riskTier: risk.tier,
   }
 }
 

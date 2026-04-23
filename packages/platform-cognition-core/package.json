@@ -1,0 +1,38 @@
+{
+  "name": "@nzila/platform-cognition-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./schemas": "./src/schemas.ts",
+    "./utils": "./src/utils.ts",
+    "./memory": "./src/memory/index.ts",
+    "./trajectory": "./src/trajectory/index.ts",
+    "./state": "./src/state/index.ts",
+    "./consent": "./src/consent/index.ts",
+    "./integration/decision-engine-adapter": "./src/integration/decision-engine-adapter.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage",
+    "report": "tsx src/cli/report.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.0",
+    "drizzle-orm": "^0.36.0",
+    "@nzila/platform-decision-engine": "workspace:*",
+    "@nzila/platform-intelligence": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2",
+    "typescript": "^6",
+    "tsx": "^4.20.0"
+  }
+}

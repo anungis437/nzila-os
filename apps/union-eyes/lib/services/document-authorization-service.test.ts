@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
   rows: unknown[];
-  directWhere?: boolean;
 };
 
 const selectSteps: SelectStep[] = [];
@@ -14,12 +13,14 @@ const dbMock = {
       throw new Error('No mocked select step configured');
     }
 
-    const builder: Record<string, (...args: unknown[]) => unknown> = {
+    const builder = {
       from: () => builder,
-      where: () => (step.directWhere ? Promise.resolve(step.rows) : builder),
-      limit: async () => step.rows,
-      orderBy: () => builder,
       leftJoin: () => builder,
+      orderBy: () => builder,
+      where: () => builder,
+      limit: async () => step.rows,
+      then: (onFulfilled: (value: unknown[]) => unknown, onRejected?: (reason: unknown) => unknown) =>
+        Promise.resolve(step.rows).then(onFulfilled, onRejected),
     };
 
     return builder;
@@ -48,7 +49,7 @@ describe('document-authorization-service', () => {
   });
 
   it('allows privileged docs when explicit grant exists', async () => {
-    queueSelectSteps([{ rows: [{ documentId: 'doc-1' }], directWhere: true }]);
+    queueSelectSteps([{ rows: [{ documentId: 'doc-1' }] }]);
     getEffectiveCaseAccess.mockResolvedValue({
       canViewCase: true,
       canViewPrivateDocuments: false,
@@ -78,7 +79,7 @@ describe('document-authorization-service', () => {
   });
 
   it('filters out case-restricted docs without case access', async () => {
-    queueSelectSteps([{ rows: [], directWhere: true }]);
+    queueSelectSteps([{ rows: [] }]);
     getEffectiveCaseAccess.mockResolvedValue({
       canViewCase: false,
       canViewPrivateDocuments: false,
@@ -107,7 +108,7 @@ describe('document-authorization-service', () => {
   });
 
   it('returns case_access reason for authorized collaborators', async () => {
-    queueSelectSteps([{ rows: [], directWhere: true }]);
+    queueSelectSteps([{ rows: [] }]);
     getEffectiveCaseAccess.mockResolvedValue({
       canViewCase: true,
       canViewPrivateDocuments: false,
