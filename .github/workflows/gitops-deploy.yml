@@ -244,6 +244,9 @@ jobs:
     needs: [plan, build]
     runs-on: ubuntu-latest
     name: Deploy to ${{ needs.plan.outputs.environment }}
+    outputs:
+      deployed_apps: ${{ steps.deploy.outputs.deployed_apps }}
+      skipped_missing_apps: ${{ steps.deploy.outputs.skipped_missing_apps }}
     environment:
       name: ${{ needs.plan.outputs.environment }}
       url: ${{ steps.deploy.outputs.url }}
@@ -298,11 +301,21 @@ jobs:
 
           # Update each Container App with the newly built image
           IFS=',' read -r -a ALL_APPS <<< "$APPS"
+          mapfile -t LIVE_APPS < <(az containerapp list --resource-group "$RG" --query "[].name" -o tsv)
+          DEPLOYED=()
+          SKIPPED_MISSING=()
           FAILED=()
 
           for APP in "${ALL_APPS[@]}"; do
             CA_NAME="nzila-os-${APP}"
             IMAGE="${ACR}/nzila/${APP}:${VERSION}"
+
+            if ! printf '%s\n' "${LIVE_APPS[@]}" | grep -Fxq "$CA_NAME"; then
+              echo "::warning::Skipping $CA_NAME because it does not exist in $RG"
+              SKIPPED_MISSING+=("$APP")
+              continue
+            fi
+
             echo "Updating $CA_NAME → $IMAGE ..."
 
             # Build runtime env var overrides (upserted, not replacing existing secret refs)
@@ -325,13 +338,32 @@ jobs:
                 --set-env-vars "$ENV_VARS" \
                 --output none 2>&1 || FAILED+=("$APP")
             fi
+
+            if ! printf '%s\n' "${FAILED[@]}" | grep -Fxq "$APP"; then
+              DEPLOYED+=("$APP")
+            fi
           done
+
+          DEPLOYED_CSV=$(IFS=,; echo "${DEPLOYED[*]}")
+          SKIPPED_CSV=$(IFS=,; echo "${SKIPPED_MISSING[*]}")
+
+          echo "deployed_apps=$DEPLOYED_CSV" >> "$GITHUB_OUTPUT"
+          echo "skipped_missing_apps=$SKIPPED_CSV" >> "$GITHUB_OUTPUT"
 
           echo "### Deployment Complete" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Environment**: $ENV" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Version**: $VERSION" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Requested apps**: ${{ needs.plan.outputs.requested_apps }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Deployed apps**: $APPS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployed apps**: ${DEPLOYED_CSV:-none}" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ ${#SKIPPED_MISSING[@]} -gt 0 ]; then
+            echo "- **Skipped missing apps**: ${SKIPPED_MISSING[*]}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ ${#DEPLOYED[@]} -eq 0 ]; then
+            echo "::error::No live Container Apps matched approved deployment targets in $RG"
+            exit 1
+          fi
 
           if [ ${#FAILED[@]} -gt 0 ]; then
             echo "- **Failed apps**: ${FAILED[*]}" >> "$GITHUB_STEP_SUMMARY"
@@ -377,7 +409,7 @@ jobs:
       - name: Health checks
         run: |
           ENV="${{ needs.plan.outputs.environment }}"
-          APPS="${{ needs.plan.outputs.apps }}"
+          APPS="${{ needs.deploy.outputs.deployed_apps }}"
           echo "Running health checks for $ENV environment..."
 
           # Resolve the Container Apps Environment default domain
@@ -389,6 +421,11 @@ jobs:
           # Probe /api/health (canonical health endpoint) — NOT root /
           # Root / may redirect (307) or return app HTML even when the service is broken.
           # /api/health is the only reliable readiness signal.
+          if [ -z "$APPS" ]; then
+            echo "::error::No deployed apps were provided to post-deploy verification"
+            exit 1
+          fi
+
           IFS=',' read -r -a APPS_ARRAY <<< "$APPS"
           FAILED_HEALTH=()
           for APP in "${APPS_ARRAY[@]}"; do

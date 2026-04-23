@@ -9,7 +9,7 @@ import TechStackBar from '@/components/public/TechStackBar';
 import InvestorCTA from '@/components/public/InvestorCTA';
 import SectionDivider from '@/components/public/SectionDivider';
 import TrackedLink from '@/components/public/TrackedLink';
-import { MARKETING_FACTS, governedCoverageLabel, platformCoverageLabel } from '@/lib/marketing-facts';
+import { MARKETING_FACTS } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
