@@ -169,6 +169,8 @@ async function loadAppSeeders(): Promise<void> {
   // from outside. New apps add an entry below.
   const loaders: readonly { app: string; load: () => Promise<unknown> }[] = [
     { app: 'union-eyes', load: () => import('./seeders/union-eyes') },
+    { app: 'flow', load: () => import('./seeders/flow') },
+    { app: 'zonga', load: () => import('./seeders/zonga') },
   ]
   for (const { app, load } of loaders) {
     try {
