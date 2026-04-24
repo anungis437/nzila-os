@@ -17,7 +17,8 @@
 
 // eslint-disable-next-line no-console
 console.warn(
-  '[seed-union-eyes-demo] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes`. ' +
+  '[seed-union-eyes-demo] DEPRECATED: prefer `pnpm seed:legacy --script=union-eyes-demo` ' +
+    '(unified entry point) or `pnpm seed:staging --app=union-eyes` (synthetic). ' +
     'This script is retained for sales-kit demo runbooks only.',
 )
 

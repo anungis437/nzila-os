@@ -83,6 +83,7 @@
     "platform:vs-app:check": "tsx scripts/platform-vs-app-check.ts",
     "arch:seed": "tsx scripts/seed-architecture-demo.ts",
     "seed:staging": "tsx tooling/staging-seed/src/cli.ts seed",
+    "seed:legacy": "tsx tooling/staging-seed/src/cli.ts legacy",
     "reseed:app": "tsx tooling/staging-seed/src/cli.ts reseed",
     "reset:staging": "tsx tooling/staging-seed/src/cli.ts reset",
     "governance:snapshot": "tsx scripts/governance-snapshot.ts",

@@ -18,8 +18,8 @@
  */
 
 console.warn(
-  '[seed-cupe-pilot] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes`. ' +
-    'This script is retained for fixture-based admin-form seeding.',
+  '[seed-cupe-pilot] DEPRECATED: prefer `pnpm seed:legacy --script=cupe-pilot` ' +
+    '(unified entry point). This script is retained for fixture-based admin-form seeding.',
 );
 
 import { exec } from 'child_process';

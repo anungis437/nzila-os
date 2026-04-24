@@ -17,8 +17,8 @@
 
 // eslint-disable-next-line no-console
 console.warn(
-  '[seed-cba-intelligence] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes` ' +
-    'once CBA Intelligence coverage lands in the framework. Retained for validation parity.',
+  '[seed-cba-intelligence] DEPRECATED: prefer `pnpm seed:legacy --script=cba-intelligence` ' +
+    '(unified entry point). Retained for CBA Intelligence validation parity.',
 );
 
 import { db } from "../db/db";

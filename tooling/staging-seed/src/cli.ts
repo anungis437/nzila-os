@@ -40,14 +40,16 @@ import {
   type DbAdapter,
   type SafetyDecision,
 } from './db'
+import { LEGACY_SCRIPTS, getLegacyScript } from './legacy-bridge/registry'
+import { runLegacyScript } from './legacy-bridge/runner'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const REPO_ROOT = path.resolve(__dirname, '../../..')
 const DEFAULT_REPORT = path.join(REPO_ROOT, 'demo-output', 'seed-report.json')
 
-type Command = 'seed' | 'reseed' | 'reset'
-const VALID_COMMANDS: readonly Command[] = ['seed', 'reseed', 'reset']
+type Command = 'seed' | 'reseed' | 'reset' | 'legacy'
+const VALID_COMMANDS: readonly Command[] = ['seed', 'reseed', 'reset', 'legacy']
 
 interface ParsedArgs {
   command: Command
@@ -59,6 +61,10 @@ interface ParsedArgs {
   confirm: boolean
   reportPath: string
   help: boolean
+  /** For `legacy` command: which script id to run. */
+  legacyScript?: string
+  /** For `legacy` command: list available scripts and exit. */
+  legacyList: boolean
 }
 
 function parseArgs(argv: readonly string[]): ParsedArgs {
@@ -85,6 +91,10 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     }
     if (token === '--help' || token === '-h') {
       result.help = true
+      continue
+    }
+    if (token === '--list') {
+      result.legacyList = true
       continue
     }
     const m = /^--([a-z-]+)=(.+)$/.exec(token)
@@ -118,6 +128,9 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
       case 'report':
         result.reportPath = path.isAbsolute(value!) ? value! : path.resolve(process.cwd(), value!)
         break
+      case 'script':
+        result.legacyScript = value
+        break
       default:
         throw new Error(`Unknown flag --${key}`)
     }
@@ -138,6 +151,7 @@ function makeDefaultArgs(command: Command, overrides: Partial<ParsedArgs> = {}):
     confirm: false,
     reportPath: DEFAULT_REPORT,
     help: false,
+    legacyList: false,
     ...overrides,
   }
 }
@@ -152,6 +166,8 @@ Commands:
   seed                       Run all (or one) registered seeders
   reseed   --app=<app>       Reset+seed a single app
   reset                      Run reset() on all (or one) registered seeders
+  legacy   --list            List deprecated per-app seed scripts
+  legacy   --script=<id>     Invoke a deprecated per-app seed script (delegation)
 
 Options:
   --profile=<name>           One of: ${SEED_PROFILES.join(', ')} (default: ${DEFAULT_PROFILE})
@@ -160,6 +176,8 @@ Options:
   --dry-run                  Compute plan + report, no writes
   --confirm, --yes, -y       Required to actually reset
   --report=<path>            JSON report output (default: demo-output/seed-report.json)
+  --script=<id>              Legacy script id (see "legacy --list")
+  --list                     List legacy scripts (used with "legacy")
   --help, -h                 Show this help
 
 Persistence:
@@ -257,6 +275,56 @@ function makePersistHook(
   }
 }
 
+async function runLegacyCommand(args: ParsedArgs): Promise<number> {
+  if (args.legacyList || !args.legacyScript) {
+    process.stdout.write('Legacy seed scripts (delegated):\n\n')
+    for (const s of LEGACY_SCRIPTS) {
+      process.stdout.write(`  ${s.id.padEnd(20)} ${s.app.padEnd(14)} ${s.path}\n`)
+      process.stdout.write(`    ${s.description}\n`)
+      process.stdout.write(`    retained for: ${s.retainedFor}\n\n`)
+    }
+    if (!args.legacyScript && !args.legacyList) {
+      process.stderr.write('Pass --script=<id> to invoke one, or --list to suppress this hint.\n')
+      return 2
+    }
+    return 0
+  }
+
+  const script = getLegacyScript(args.legacyScript)
+  if (!script) {
+    process.stderr.write(
+      `Unknown legacy script "${args.legacyScript}". Run \`legacy --list\` to see available ids.\n`,
+    )
+    return 2
+  }
+
+  consoleLogger.warn('Invoking deprecated seed script via legacy bridge.', {
+    id: script.id,
+    app: script.app,
+    note: 'Long-term: shapes will be ported into the framework seeders.',
+  })
+
+  try {
+    const result = await runLegacyScript({
+      script,
+      repoRoot: REPO_ROOT,
+      logger: consoleLogger,
+    })
+    writeReport(args.reportPath, {
+      command: 'legacy',
+      script: result.script,
+      app: result.app,
+      exitCode: result.exitCode,
+      durationMs: result.durationMs,
+      finishedAt: new Date().toISOString(),
+    })
+    return result.exitCode
+  } catch (err) {
+    consoleLogger.error('Legacy seed run failed', { message: (err as Error).message })
+    return 1
+  }
+}
+
 export async function main(argv: readonly string[] = process.argv.slice(2)): Promise<number> {
   let args: ParsedArgs
   try {
@@ -270,6 +338,10 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
   if (args.help) {
     printHelp()
     return 0
+  }
+
+  if (args.command === 'legacy') {
+    return runLegacyCommand(args)
   }
 
   if (args.command === 'reset' && !args.confirm) {

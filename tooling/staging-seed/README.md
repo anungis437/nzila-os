@@ -30,6 +30,8 @@ pnpm seed:staging -- --profile=executive-showcase
 pnpm seed:staging -- --app=union-eyes --dry-run
 pnpm reseed:app -- --app=union-eyes              # reset+seed a single app
 pnpm reset:staging -- --yes                      # reset all registered apps (DESTRUCTIVE)
+pnpm seed:legacy -- --list                       # list deprecated per-app scripts (delegated)
+pnpm seed:legacy -- --script=union-eyes-demo     # invoke a deprecated script via the framework
 ```
 
 Flags:
