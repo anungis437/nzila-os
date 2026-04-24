@@ -12,7 +12,7 @@
   "revenue_status": "pilot-contracting",
   "last_validated": "2026-04-23",
   "runbooks": "complete",
-  "backup_restore": "partial",
+  "backup_restore": "progressing",
   "analytics_readiness": "partial",
   "access_reviews": "partial",
   "orchestrator_integration": true,
@@ -41,11 +41,12 @@
       "severity": "high"
     },
     "backup_restore": {
-      "status": "partial",
+      "status": "progressing",
       "owner": "sre-team",
-      "blocker": "Nightly backups exist, but restore drill evidence and RTO verification are not published in a reproducible report.",
-      "target": "2026-06-30",
-      "severity": "critical"
+      "blocker": "DR runbooks published (docs/union-eyes/dr/). Reproducible drill script operational (pnpm db:restore-drill). First evidence artifact at reports/dr/restore-drill-2026-04-24.md. Live staging execution with measured RTO pending — target 2026-Q2. Blob-backup-manifest creation pending.",
+      "target": "2026-Q2",
+      "severity": "medium",
+      "evidence": "reports/dr/restore-drill-2026-04-24.json"
     },
     "analytics_readiness": {
       "status": "partial",
