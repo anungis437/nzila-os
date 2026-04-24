@@ -97,14 +97,14 @@ for (const bundle of BUNDLES) {
       }
     })
 
-    it('reset returns a single skipped phase-2 step', async () => {
+    it('reset returns a single skipped step in dry-run', async () => {
       const ctx = makeCtx(bundle.app, 'demo-light')
       expect(seeder.reset).toBeDefined()
       const report = await seeder.reset!(ctx)
       expect(report.steps).toHaveLength(1)
       expect(report.steps[0]!.step).toBe('reset')
       expect(report.steps[0]!.skipped).toBe(true)
-      expect(report.steps[0]!.note).toMatch(/phase 2/i)
+      expect(report.steps[0]!.note).toMatch(/dry-run/i)
     })
 
     it('is deterministic for the same (profile, seed)', async () => {

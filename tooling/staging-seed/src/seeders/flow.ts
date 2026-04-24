@@ -16,6 +16,7 @@ import type {
   SeedProfile,
   SeederModule,
 } from '../core/types'
+import { persistOrSkip, persistResetOrSkip } from './_persist-helpers'
 
 const SUPPORTED_PROFILES: readonly SeedProfile[] = [
   'demo-light',
@@ -227,12 +228,21 @@ const seeder: SeederModule = {
     ctx.report.step({ step: 'notifications', entity: 'notifications', count: plan.notifications.length })
     ctx.report.step({ step: 'activity_logs', entity: 'activity_logs', count: plan.activityLogs.length })
 
-    if (ctx.dryRun) {
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'dry-run mode' })
-    } else {
-      // TODO(phase-3): Wire Drizzle writes for commerce* tables, scoped to STAGING_ORG.id only.
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'phase 2: plan-only — DB writers land in phase 3' })
-    }
+    await persistOrSkip(ctx, STAGING_ORG.id, [
+      { entityType: 'organizations', rows: plan.orgs },
+      { entityType: 'customers', rows: plan.customers },
+      { entityType: 'suppliers', rows: plan.supplierOrgs },
+      { entityType: 'products', rows: plan.products },
+      { entityType: 'quotes', rows: plan.quotes },
+      { entityType: 'orders', rows: plan.orders },
+      { entityType: 'invoices', rows: plan.invoices },
+      { entityType: 'payments', rows: plan.payments },
+      { entityType: 'fulfillment_tasks', rows: plan.fulfillmentTasks },
+      { entityType: 'purchase_orders', rows: plan.purchaseOrders },
+      { entityType: 'inventory_movements', rows: plan.inventoryMovements },
+      { entityType: 'notifications', rows: plan.notifications },
+      { entityType: 'activity_logs', rows: plan.activityLogs },
+    ])
 
     ctx.logger.info('flow seed plan computed', {
       profile: ctx.profile,
@@ -245,13 +255,8 @@ const seeder: SeederModule = {
   },
 
   async reset(ctx: SeedContext): Promise<SeedAppReport> {
-    ctx.report.step({
-      step: 'reset',
-      count: 0,
-      skipped: true,
-      note: `phase 2: nothing to reset — staging org "${STAGING_ORG.id}" untouched`,
-    })
-    ctx.logger.info('flow reset (no-op in phase 2)', { org: STAGING_ORG.id })
+    await persistResetOrSkip(ctx, STAGING_ORG.id)
+    ctx.logger.info('flow reset', { org: STAGING_ORG.id })
     return ctx.report.finish()
   },
 }

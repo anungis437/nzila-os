@@ -17,6 +17,7 @@ import type {
   SeedProfile,
   SeederModule,
 } from '../core/types'
+import { persistOrSkip, persistResetOrSkip } from './_persist-helpers'
 
 const SUPPORTED_PROFILES: readonly SeedProfile[] = [
   'demo-light',
@@ -305,12 +306,23 @@ const seeder: SeederModule = {
     ctx.report.step({ step: 'notifications', entity: 'notifications', count: plan.notifications.length })
     ctx.report.step({ step: 'activity_logs', entity: 'activity_logs', count: plan.activityLogs.length })
 
-    if (ctx.dryRun) {
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'dry-run mode' })
-    } else {
-      // TODO(phase-3): Wire Drizzle writes for zonga* tables, scoped to STAGING_ORG.id only.
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'phase 2: plan-only — DB writers land in phase 3' })
-    }
+    await persistOrSkip(ctx, STAGING_ORG.id, [
+      { entityType: 'organizations', rows: plan.orgs },
+      { entityType: 'creators', rows: plan.creators },
+      { entityType: 'listeners', rows: plan.listeners },
+      { entityType: 'releases', rows: plan.releases },
+      { entityType: 'tracks', rows: plan.tracks },
+      { entityType: 'revenue_events', rows: plan.revenueEvents },
+      { entityType: 'payouts', rows: plan.payouts },
+      { entityType: 'royalty_splits', rows: plan.royaltySplits },
+      { entityType: 'subscriptions', rows: plan.subscriptions },
+      { entityType: 'playlists', rows: plan.playlists },
+      { entityType: 'events', rows: plan.events },
+      { entityType: 'ticket_purchases', rows: plan.ticketPurchases },
+      { entityType: 'moderation_cases', rows: plan.moderationCases },
+      { entityType: 'notifications', rows: plan.notifications },
+      { entityType: 'activity_logs', rows: plan.activityLogs },
+    ])
 
     ctx.logger.info('zonga seed plan computed', {
       profile: ctx.profile,
@@ -324,13 +336,8 @@ const seeder: SeederModule = {
   },
 
   async reset(ctx: SeedContext): Promise<SeedAppReport> {
-    ctx.report.step({
-      step: 'reset',
-      count: 0,
-      skipped: true,
-      note: `phase 2: nothing to reset — staging org "${STAGING_ORG.id}" untouched`,
-    })
-    ctx.logger.info('zonga reset (no-op in phase 2)', { org: STAGING_ORG.id })
+    await persistResetOrSkip(ctx, STAGING_ORG.id)
+    ctx.logger.info('zonga reset', { org: STAGING_ORG.id })
     return ctx.report.finish()
   },
 }

@@ -15,6 +15,7 @@ import type {
   SeedProfile,
   SeederModule,
 } from '../core/types'
+import { persistOrSkip, persistResetOrSkip } from './_persist-helpers'
 
 const SUPPORTED_PROFILES: readonly SeedProfile[] = [
   'demo-light',
@@ -224,11 +225,20 @@ const seeder: SeederModule = {
     ctx.report.step({ step: 'notifications', entity: 'notifications', count: plan.notifications.length })
     ctx.report.step({ step: 'activity_logs', entity: 'activity_logs', count: plan.activityLogs.length })
 
-    if (ctx.dryRun) {
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'dry-run mode' })
-    } else {
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'phase 2: plan-only — DB writers land in phase 3' })
-    }
+    await persistOrSkip(ctx, STAGING_ORG.id, [
+      { entityType: 'organizations', rows: plan.orgs },
+      { entityType: 'users', rows: plan.users },
+      { entityType: 'subscriptions', rows: plan.subscriptions },
+      { entityType: 'cash_snapshots', rows: plan.cashSnapshots },
+      { entityType: 'deals', rows: plan.deals },
+      { entityType: 'invoices', rows: plan.invoices },
+      { entityType: 'weekly_briefs', rows: plan.weeklyBriefs },
+      { entityType: 'priorities', rows: plan.priorities },
+      { entityType: 'recommendations', rows: plan.recommendations },
+      { entityType: 'integrations', rows: plan.integrations },
+      { entityType: 'notifications', rows: plan.notifications },
+      { entityType: 'activity_logs', rows: plan.activityLogs },
+    ])
 
     ctx.logger.info('weekone seed plan computed', {
       profile: ctx.profile, deals: plan.deals.length, briefs: plan.weeklyBriefs.length, org: STAGING_ORG.id,
@@ -237,8 +247,8 @@ const seeder: SeederModule = {
   },
 
   async reset(ctx: SeedContext): Promise<SeedAppReport> {
-    ctx.report.step({ step: 'reset', count: 0, skipped: true, note: `phase 2: nothing to reset — staging org "${STAGING_ORG.id}" untouched` })
-    ctx.logger.info('weekone reset (no-op in phase 2)', { org: STAGING_ORG.id })
+    await persistResetOrSkip(ctx, STAGING_ORG.id)
+    ctx.logger.info('weekone reset', { org: STAGING_ORG.id })
     return ctx.report.finish()
   },
 }

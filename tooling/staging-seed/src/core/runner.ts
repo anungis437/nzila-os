@@ -8,6 +8,8 @@ import type {
   SeedAppReport,
   SeedContext,
   SeedLogger,
+  SeedPersistOutcome,
+  SeedPlanSnapshot,
   SeedProfile,
   SeedRunReport,
   SeederModule,
@@ -22,6 +24,20 @@ export interface RunOptions {
   /** Override `new Date()` (used by tests). */
   now?: () => Date
   logger?: SeedLogger
+  /**
+   * Optional persistence hook. Called once per seeder with the seeder's
+   * plan snapshot. The runner does NOT decide whether to persist — it
+   * just forwards the call. Callers (CLI) construct this hook only when
+   * the safety gate has passed.
+   */
+  persist?: (args: {
+    app: SeedApp
+    command: 'seed' | 'reseed' | 'reset'
+    profile: SeedProfile
+    seed: number
+    dryRun: boolean
+    plan: SeedPlanSnapshot
+  }) => Promise<SeedPersistOutcome>
 }
 
 const noopLogger: SeedLogger = {
@@ -33,8 +49,9 @@ const noopLogger: SeedLogger = {
 function buildContext(args: {
   module: SeederModule
   options: RunOptions
+  command: 'seed' | 'reseed' | 'reset'
 }): SeedContext {
-  const { module, options } = args
+  const { module, options, command } = args
   const seed = options.seed ?? DEFAULT_SEED
   const targets = getProfileTargets(options.profile)
   // Each app gets its own RNG seeded from `seed + hash(app)` so different
@@ -48,6 +65,17 @@ function buildContext(args: {
     dryRun: options.dryRun ?? false,
     now: options.now,
   })
+  const persist = options.persist
+    ? (plan: SeedPlanSnapshot) =>
+        options.persist!({
+          app: module.app,
+          command,
+          profile: options.profile,
+          seed: appSeed,
+          dryRun: options.dryRun ?? false,
+          plan,
+        })
+    : undefined
   return {
     app: module.app,
     profile: options.profile,
@@ -58,6 +86,7 @@ function buildContext(args: {
     dryRun: options.dryRun ?? false,
     logger: options.logger ?? noopLogger,
     report,
+    persist,
   }
 }
 
@@ -93,7 +122,7 @@ async function executeOne(args: {
   options: RunOptions
 }): Promise<SeedAppReport | { skipped: true; reason: string }> {
   const { module, command, options } = args
-  const ctx = buildContext({ module, options })
+  const ctx = buildContext({ module, options, command })
 
   if (!module.supportedProfiles.includes(options.profile)) {
     return {

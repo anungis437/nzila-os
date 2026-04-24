@@ -5,12 +5,15 @@
  * Commands:
  *   tsx src/cli.ts seed     [--profile=<p>] [--app=<a>] [--seed=<n>] [--dry-run] [--report=<path>]
  *   tsx src/cli.ts reseed   --app=<a> [--profile=<p>] [--seed=<n>] [--report=<path>]
- *   tsx src/cli.ts reset    [--app=<a>] [--yes] [--report=<path>]
+ *   tsx src/cli.ts reset    [--app=<a>] [--confirm] [--report=<path>]
  *
- * Per-app seeders are loaded from this file's `loadAppSeeders()` block so
- * their `registerSeeder()` side effects run before the CLI dispatches.
- * Phase 1 ships with NO per-app seeders registered — follow-up PRs add
- * imports here.
+ * Persistence (Phase 3A.0):
+ *   The CLI passes a `persist` hook to the runner ONLY when the safety
+ *   gate {@link evaluateSafety} returns `allowed: true`. That hook writes
+ *   into `staging_seed_artifacts` (JSONB) and `staging_seed_runs` (audit)
+ *   inside a per-seeder transaction. Without `STAGING_SEED_ENABLED=true`
+ *   the seeders run plan-only and emit a `db_write` step with
+ *   `skipped: true` — safe by default.
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
@@ -25,8 +28,18 @@ import {
   SEED_PROFILES,
   type SeedApp,
   type SeedLogger,
+  type SeedPersistOutcome,
+  type SeedPlanSnapshot,
   type SeedProfile,
 } from './core/types'
+import {
+  createPostgresAdapter,
+  evaluateSafety,
+  persistAppPlan,
+  resetForOrgs,
+  type DbAdapter,
+  type SafetyDecision,
+} from './db'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -42,7 +55,8 @@ interface ParsedArgs {
   app?: SeedApp
   seed: number
   dryRun: boolean
-  yes: boolean
+  /** True when --confirm or --yes is passed. Required for `reset`. */
+  confirm: boolean
   reportPath: string
   help: boolean
 }
@@ -65,8 +79,8 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
       result.dryRun = true
       continue
     }
-    if (token === '--yes' || token === '-y') {
-      result.yes = true
+    if (token === '--yes' || token === '-y' || token === '--confirm') {
+      result.confirm = true
       continue
     }
     if (token === '--help' || token === '-h') {
@@ -121,7 +135,7 @@ function makeDefaultArgs(command: Command, overrides: Partial<ParsedArgs> = {}):
     profile: DEFAULT_PROFILE,
     seed: DEFAULT_SEED,
     dryRun: false,
-    yes: false,
+    confirm: false,
     reportPath: DEFAULT_REPORT,
     help: false,
     ...overrides,
@@ -144,9 +158,14 @@ Options:
   --app=<name>               One of: ${SEED_APPS.join(', ')}
   --seed=<int>               Deterministic RNG seed (default: ${DEFAULT_SEED})
   --dry-run                  Compute plan + report, no writes
-  --yes, -y                  Required to actually reset
+  --confirm, --yes, -y       Required to actually reset
   --report=<path>            JSON report output (default: demo-output/seed-report.json)
   --help, -h                 Show this help
+
+Persistence:
+  Set STAGING_SEED_ENABLED=true and DATABASE_URL=postgres://... to persist
+  synthetic data into the framework's audit + JSONB store. Without those
+  the CLI runs plan-only and emits a skipped 'db_write' step.
 `)
 }
 
@@ -162,11 +181,6 @@ function formatLog(level: string, msg: string, fields?: Record<string, unknown>)
 }
 
 async function loadAppSeeders(): Promise<void> {
-  // Each per-app seeder registers itself on import via `registerSeeder(...)`.
-  // Per-app seeder modules live inside this package (under `./seeders/`) so
-  // they share a single registry instance — pnpm symlinks would otherwise
-  // produce two distinct module instances when seeders import the package
-  // from outside. New apps add an entry below.
   const loaders: readonly { app: string; load: () => Promise<unknown> }[] = [
     { app: 'union-eyes', load: () => import('./seeders/union-eyes') },
     { app: 'flow', load: () => import('./seeders/flow') },
@@ -195,6 +209,54 @@ function writeReport(reportPath: string, payload: unknown): void {
   fs.writeFileSync(reportPath, JSON.stringify(payload, null, 2), 'utf-8')
 }
 
+interface AdapterContext {
+  readonly adapter: DbAdapter | null
+  readonly safety: SafetyDecision
+  readonly persistedRunIds: Set<string>
+  readonly orgIds: Set<string>
+}
+
+async function buildAdapter(): Promise<AdapterContext> {
+  const safety = evaluateSafety()
+  if (!safety.allowed) {
+    return { adapter: null, safety, persistedRunIds: new Set(), orgIds: new Set() }
+  }
+  const adapter = await createPostgresAdapter({ databaseUrl: safety.databaseUrl! })
+  return { adapter, safety, persistedRunIds: new Set(), orgIds: new Set() }
+}
+
+function makePersistHook(
+  ctx: AdapterContext,
+):
+  | ((args: {
+      app: SeedApp
+      command: 'seed' | 'reseed' | 'reset'
+      profile: SeedProfile
+      seed: number
+      dryRun: boolean
+      plan: SeedPlanSnapshot
+    }) => Promise<SeedPersistOutcome>)
+  | undefined {
+  if (!ctx.adapter) return undefined
+  const adapter = ctx.adapter
+  return async (args) => {
+    const result = await persistAppPlan(
+      adapter,
+      {
+        app: args.app,
+        orgId: args.plan.orgId,
+        profile: args.profile,
+        seed: args.seed,
+        entities: args.plan.entities,
+      },
+      { command: args.command === 'reset' ? 'seed' : args.command, dryRun: args.dryRun },
+    )
+    ctx.persistedRunIds.add(result.runId)
+    ctx.orgIds.add(args.plan.orgId)
+    return result
+  }
+}
+
 export async function main(argv: readonly string[] = process.argv.slice(2)): Promise<number> {
   let args: ParsedArgs
   try {
@@ -210,8 +272,8 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
     return 0
   }
 
-  if (args.command === 'reset' && !args.yes) {
-    process.stderr.write('reset is destructive — re-run with --yes to confirm.\n')
+  if (args.command === 'reset' && !args.confirm) {
+    process.stderr.write('reset is destructive — re-run with --confirm (or --yes).\n')
     return 2
   }
 
@@ -219,7 +281,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
 
   const registered = listSeeders()
   if (registered.length === 0) {
-    consoleLogger.warn('No seeders registered. Phase 1 framework only.', {
+    consoleLogger.warn('No seeders registered.', {
       command: args.command,
       profile: args.profile,
     })
@@ -233,37 +295,76 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       durationMs: 0,
       apps: [],
       skippedApps: [],
-      note: 'Phase 1 — no per-app seeders registered yet.',
+      note: 'No per-app seeders registered.',
     })
     return 0
   }
 
-  const report = await runSeed({
-    command: args.command,
-    options: {
-      profile: args.profile,
-      seed: args.seed,
-      dryRun: args.dryRun,
-      app: args.app,
-      logger: consoleLogger,
-    },
-  })
+  const adapterCtx = await buildAdapter()
+  if (!adapterCtx.adapter) {
+    consoleLogger.warn('Persistence disabled — running plan-only.', {
+      reason: adapterCtx.safety.reason,
+    })
+  } else {
+    consoleLogger.info('Persistence enabled.', { hostMatched: adapterCtx.safety.hostMatched })
+  }
 
-  writeReport(args.reportPath, report)
+  let resetCounts: Record<string, number> | null = null
+  let exitCode = 0
+  try {
+    const persist = makePersistHook(adapterCtx)
+    const report = await runSeed({
+      command: args.command,
+      options: {
+        profile: args.profile,
+        seed: args.seed,
+        dryRun: args.dryRun,
+        app: args.app,
+        logger: consoleLogger,
+        persist,
+      },
+    })
 
-  consoleLogger.info('Done', {
-    command: report.command,
-    profile: report.profile,
-    apps: report.apps.length,
-    skipped: report.skippedApps.length,
-    totalRecords: report.apps.reduce((s, a) => s + a.totalRecords, 0),
-    durationMs: report.durationMs,
-    report: args.reportPath,
-  })
-  return 0
+    if (args.command === 'reset' && adapterCtx.adapter && !args.dryRun) {
+      const orgIds = Array.from(adapterCtx.orgIds)
+      if (orgIds.length > 0) {
+        resetCounts = await resetForOrgs(adapterCtx.adapter, orgIds)
+        consoleLogger.info('Reset deletions', { orgIds, counts: resetCounts })
+      }
+    }
+
+    const enriched = {
+      ...report,
+      persistence: {
+        enabled: Boolean(adapterCtx.adapter),
+        hostMatched: adapterCtx.safety.hostMatched ?? null,
+        runIds: Array.from(adapterCtx.persistedRunIds),
+        orgIds: Array.from(adapterCtx.orgIds),
+        resetCounts,
+      },
+    }
+    writeReport(args.reportPath, enriched)
+
+    consoleLogger.info('Done', {
+      command: report.command,
+      profile: report.profile,
+      apps: report.apps.length,
+      skipped: report.skippedApps.length,
+      totalRecords: report.apps.reduce((s, a) => s + a.totalRecords, 0),
+      durationMs: report.durationMs,
+      report: args.reportPath,
+      persisted: adapterCtx.persistedRunIds.size,
+    })
+  } catch (err) {
+    consoleLogger.error('Seed run failed', { message: (err as Error).message })
+    exitCode = 1
+  } finally {
+    if (adapterCtx.adapter) await adapterCtx.adapter.close()
+  }
+
+  return exitCode
 }
 
-// Detect direct execution (works for both `tsx src/cli.ts` and bin scripts).
 const invokedDirectly =
   import.meta.url === `file://${process.argv[1]}` ||
   process.argv[1]?.endsWith('cli.ts') === true ||

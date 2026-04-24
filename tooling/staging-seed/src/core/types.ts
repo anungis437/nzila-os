@@ -134,6 +134,29 @@ export interface SeedContext {
   readonly dryRun: boolean
   readonly logger: SeedLogger
   readonly report: SeedReporter
+  /**
+   * When set, the seeder SHOULD call it once with a plan snapshot to
+   * persist the synthetic data via the staging-seed framework's audit +
+   * JSONB store. Absent when the runner has no DB adapter (plan-only
+   * runs, e.g. CI without `STAGING_SEED_ENABLED`).
+   */
+  readonly persist?: (plan: SeedPlanSnapshot) => Promise<SeedPersistOutcome>
+}
+
+/** What a seeder hands to `ctx.persist` for the framework to write. */
+export interface SeedPlanSnapshot {
+  readonly orgId: string
+  readonly entities: ReadonlyArray<{
+    readonly entityType: string
+    readonly rows: ReadonlyArray<{ readonly id: string }>
+  }>
+}
+
+export interface SeedPersistOutcome {
+  readonly runId: string
+  readonly status: 'ok' | 'dry-run' | 'error'
+  readonly totals: Record<string, number>
+  readonly durationMs: number
 }
 
 /** Seeder module — what apps register. */

@@ -24,6 +24,7 @@ import type {
   SeedProfile,
   SeederModule,
 } from '../core/types'
+import { persistOrSkip, persistResetOrSkip } from './_persist-helpers'
 
 const SUPPORTED_PROFILES: readonly SeedProfile[] = [
   'demo-light',
@@ -219,14 +220,19 @@ const seeder: SeederModule = {
     ctx.report.step({ step: 'notifications', entity: 'notifications', count: plan.notifications.length })
     ctx.report.step({ step: 'activity_logs', entity: 'activity_logs', count: plan.activityLogs.length })
 
-    if (ctx.dryRun) {
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'dry-run mode' })
-    } else {
-      // TODO(phase-3): Wire actual DB writers (Drizzle ue_cache + Django API)
-      // scoped exclusively to STAGING_LOCAL.id. Until then, the seeder is
-      // plan-only so reviewers can audit the entity shape safely.
-      ctx.report.step({ step: 'db_write', count: 0, skipped: true, note: 'phase 2: plan-only — DB writers land in phase 3' })
-    }
+    await persistOrSkip(ctx, STAGING_LOCAL.id, [
+      { entityType: 'organizations', rows: plan.orgs },
+      { entityType: 'members', rows: plan.people },
+      { entityType: 'users', rows: plan.users },
+      { entityType: 'stewards', rows: plan.stewards.map((s, i) => ({ id: `steward-${ctx.profile}-${i}`, ...s })) },
+      { entityType: 'worksites', rows: plan.worksites },
+      { entityType: 'grievances', rows: plan.grievances },
+      { entityType: 'claims', rows: plan.claims },
+      { entityType: 'dues_invoices', rows: plan.duesInvoices },
+      { entityType: 'cba', rows: plan.cbas },
+      { entityType: 'notifications', rows: plan.notifications },
+      { entityType: 'activity_logs', rows: plan.activityLogs },
+    ])
 
     ctx.logger.info('union-eyes seed plan computed', {
       profile: ctx.profile,
@@ -240,13 +246,8 @@ const seeder: SeederModule = {
   },
 
   async reset(ctx: SeedContext): Promise<SeedAppReport> {
-    ctx.report.step({
-      step: 'reset',
-      count: 0,
-      skipped: true,
-      note: `phase 2: nothing to reset — staging org "${STAGING_LOCAL.id}" untouched`,
-    })
-    ctx.logger.info('union-eyes reset (no-op in phase 2)', { org: STAGING_LOCAL.id })
+    await persistResetOrSkip(ctx, STAGING_LOCAL.id)
+    ctx.logger.info('union-eyes reset', { org: STAGING_LOCAL.id })
     return ctx.report.finish()
   },
 }

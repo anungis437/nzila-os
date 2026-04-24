@@ -16,6 +16,8 @@ export type {
   SeedAppReport,
   SeedContext,
   SeedLogger,
+  SeedPersistOutcome,
+  SeedPlanSnapshot,
   SeedProfile,
   SeedReporter,
   SeedRng,
@@ -40,3 +42,4 @@ export { runSeed } from './core/runner'
 export type { RunOptions } from './core/runner'
 
 export * as shared from './shared'
+export * as db from './db'
