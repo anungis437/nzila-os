@@ -1904,9 +1904,6 @@ importers:
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
-      '@nzila/staging-seed':
-        specifier: workspace:*
-        version: link:../../tooling/staging-seed
       '@nzila/ue-cognition':
         specifier: workspace:*
         version: link:../../packages/ue-cognition
