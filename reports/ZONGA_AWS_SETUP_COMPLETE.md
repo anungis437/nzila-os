@@ -1,12 +1,17 @@
 # Zonga AWS Setup - Completion Summary
 
-**Date**: 2026-04-19 | **Last Verified**: 2026-04-24 | **Status**: ⚠️ PROVISIONED, BUT CDN MISCONFIGURED
+**Date**: 2026-04-19 | **Last Verified**: 2026-04-24 | **Status**: ✅ FULLY FUNCTIONAL (end-to-end smoke green)
 
 > **2026-04-24 update — end-to-end smoke** (`packages/zonga-streaming-aws/scripts/smoke-aws-e2e.mjs`, proof: [proof-artifacts/zonga-aws-e2e-smoke.json](../proof-artifacts/zonga-aws-e2e-smoke.json)):
 > - ✅ Upload → MediaConvert (5s transcode) → S3 processed output → HEAD all outputs
-> - ❌ CloudFront returns **403** on every processed object — the live distribution `E3ASNK7MK51C7Y` (`d2a1tso1ra5muk.cloudfront.net`) has its **origin pointing at `zonga-raw-media-ca` (raw uploads bucket) instead of `zonga-processed-media-ca`**. OAC `E2T13XAQ39FYIU` and trusted key group are configured correctly; the bug is the origin bucket.
-> - The distribution IDs/domain shown below (`E1DATPL8COC7VK` / `d3aiy8dm8sjmk9.cloudfront.net`) are from the original 2026-04-19 setup and **do not match** the live `.env.local`. Live values are `E3ASNK7MK51C7Y` / `d2a1tso1ra5muk.cloudfront.net`.
-> - Remediation: update distribution origin DomainName to `zonga-processed-media-ca.s3.ca-central-1.amazonaws.com`, attach OAC bucket policy on the processed bucket, then issue an invalidation `/*`.
+> - ✅ CloudFront signed URL HEAD = **200** (validated after the fix below).
+>
+> **Fix applied 2026-04-24** via `packages/zonga-streaming-aws/scripts/fix-cloudfront-origin.mjs`:
+> Distribution `E3ASNK7MK51C7Y` (`d2a1tso1ra5muk.cloudfront.net`) origin previously pointed at the raw uploads bucket, returning 403 on every processed object. Script updated the origin DomainName to `zonga-processed-media-ca.s3.ca-central-1.amazonaws.com`, attached the OAC bucket policy on the processed bucket, and invalidated `/*`. Distribution status: Deployed. Re-running the smoke afterwards returned 200.
+>
+> The distribution IDs/domain shown later in this document (`E1DATPL8COC7VK` / `d3aiy8dm8sjmk9.cloudfront.net`) are from the original 2026-04-19 setup and have been superseded by `E3ASNK7MK51C7Y` / `d2a1tso1ra5muk.cloudfront.net`.
+
+---
 
 ---
 
