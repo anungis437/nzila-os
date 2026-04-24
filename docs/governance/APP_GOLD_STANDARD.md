@@ -87,7 +87,7 @@ Export endpoint must return:
 | `dev` | `next dev --port <port>` | Development server |
 | `build` | `next build` | Production build |
 | `test` | `vitest run` | Unit tests |
-| `demo:seed` | `tsx lib/demoSeed.ts` | Seed demo data |
+| `demo:seed` | `tsx lib/demoSeed.ts` | Seed demo data (per-app legacy path; new work should register a seeder under `lib/staging-seed/index.ts` consumed by `pnpm seed:staging`) |
 | `typecheck` | `tsc --noEmit` | Type checking |
 | `lint` | `eslint` | Linting |
 

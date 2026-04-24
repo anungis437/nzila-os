@@ -75,7 +75,7 @@ These scripts referenced Clerk provisioning and have been archived/deleted:
 |--------|---------|--------|
 | `scripts/zonga-clerk-seed.sql` | Seed Clerk orgs for Zonga | **Deleted** |
 | `scripts/zonga-clerk-provision.mjs` | Provision Clerk resources | **Deleted** |
-| `scripts/provision-all-test-users.mjs` | Provision test users via Clerk | Superseded by `seed-test-auth-accounts.mjs` |
+| `scripts/provision-all-test-users.mjs` | Provision test users via Clerk | Superseded by `pnpm seed:staging` (`@nzila/staging-seed` framework) |
 | `scripts/clerk-provision-pilot-orgs.mjs` | Provision pilot organizations | **Deleted** |
 | `tooling/staging-certification/clerk-pilot-orgs.cert.ts` | Pilot org certification | Archive after GA |
 

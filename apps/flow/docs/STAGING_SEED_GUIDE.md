@@ -47,9 +47,24 @@ for testing, demos, and QA validation.
 
 ## Running the Seed Script
 
+> **Preferred (since April 2026)**: use the unified
+> [`@nzila/staging-seed`](../../../tooling/staging-seed/README.md) framework:
+>
+> ```bash
+> # From the repository root — runs the registered Flow seeder against staging
+> pnpm seed:staging --app=flow --profile=demo-standard
+> ```
+>
+> The framework writes synthetic Flow data into `staging_seed_artifacts`
+> (JSONB) and reports counts via the shared seed reporter.
+
+The legacy `pnpm flow:seed-staging` / `pnpm flow:reset-staging` commands and
+the SQL fallback below are kept only for ad-hoc command-bus exercise (they
+dispatch through the Flow command-bus rather than the seed framework).
+
 ```bash
-# From the repository root
-pnpm flow:seed-staging
+# Legacy: command-bus exerciser (kept for command-bus debugging)
+pnpm --filter @nzila/flow seed:staging
 
 # Or manually with a SQL file
 psql "$DATABASE_URL" < apps/flow/seeds/staging.sql
@@ -75,8 +90,11 @@ Check the application UI:
 ## Resetting Staging Data
 
 ```bash
-# Truncate all Flow tables and re-seed
-pnpm flow:reset-staging
+# Preferred: framework reset (clears staging_seed_artifacts + re-runs seeder)
+pnpm reset:staging --app=flow
+
+# Legacy command-bus path (kept for ad-hoc command-bus debugging)
+pnpm --filter @nzila/flow reset:staging
 ```
 
 Or manually:

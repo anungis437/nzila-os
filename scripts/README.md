@@ -51,10 +51,13 @@ Test user and account provisioning for email/password and Entra SSO.
 |--------|---------|
 | `provision-entra-test-users.mjs` | Provisions Entra SSO test users |
 | `provision-all-test-users.mjs` | Provisions all test users |
-| `seed-test-auth-accounts.mjs` | Seeds test auth accounts |
-| `seed-zonga-auth-accounts.mjs` | Seeds Zonga auth accounts |
 | `migrate-clerk-to-entra.mjs` | Clerk → Entra migration (historical) |
 | `seed-console-local-ai.sql` | Seeds local console AI app, profiles, models, deployments, and routes |
+
+> **Note**: Legacy `seed-test-auth-accounts.mjs`, `seed-admin-user.mjs`, and
+> `seed-zonga-auth-accounts.mjs` were removed in favour of the unified
+> `@nzila/staging-seed` framework — use `pnpm seed:staging` (see
+> `tooling/staging-seed/README.md`).
 
 ### Analysis & Checks
 

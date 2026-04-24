@@ -28,6 +28,21 @@ Complete demo org for testing:
 
 ## Seeding Methods
 
+### Method 0 (Preferred — since April 2026): `@nzila/staging-seed` framework
+
+The unified staging-seed framework registers a Union-Eyes seeder that
+generates CUPE-shaped synthetic data deterministically from a profile:
+
+```bash
+# From the repo root
+pnpm seed:staging --app=union-eyes --profile=demo-light
+```
+
+See [`tooling/staging-seed/README.md`](../../tooling/staging-seed/README.md)
+and [`apps/union-eyes/lib/staging-seed/index.ts`](../../apps/union-eyes/lib/staging-seed/index.ts).
+The methods below are kept for the admin-console workflow and for ad-hoc
+local fixture loading; new automation should use the framework.
+
 ### Method 1: Admin Console Form
 **Component:** `apps/union-eyes/app/components/admin/LoadCUPEPilotForm.tsx`
 
