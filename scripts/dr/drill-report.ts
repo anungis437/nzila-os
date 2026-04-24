@@ -20,7 +20,6 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import * as crypto from 'node:crypto'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const DB_REPORTS_DIR = path.join(ROOT, 'reports', 'db')
