@@ -1,6 +1,12 @@
 # Zonga AWS Setup - Completion Summary
 
-**Date**: 2026-04-19 | **Status**: ✅ COMPLETE
+**Date**: 2026-04-19 | **Last Verified**: 2026-04-24 | **Status**: ⚠️ PROVISIONED, BUT CDN MISCONFIGURED
+
+> **2026-04-24 update — end-to-end smoke** (`packages/zonga-streaming-aws/scripts/smoke-aws-e2e.mjs`, proof: [proof-artifacts/zonga-aws-e2e-smoke.json](../proof-artifacts/zonga-aws-e2e-smoke.json)):
+> - ✅ Upload → MediaConvert (5s transcode) → S3 processed output → HEAD all outputs
+> - ❌ CloudFront returns **403** on every processed object — the live distribution `E3ASNK7MK51C7Y` (`d2a1tso1ra5muk.cloudfront.net`) has its **origin pointing at `zonga-raw-media-ca` (raw uploads bucket) instead of `zonga-processed-media-ca`**. OAC `E2T13XAQ39FYIU` and trusted key group are configured correctly; the bug is the origin bucket.
+> - The distribution IDs/domain shown below (`E1DATPL8COC7VK` / `d3aiy8dm8sjmk9.cloudfront.net`) are from the original 2026-04-19 setup and **do not match** the live `.env.local`. Live values are `E3ASNK7MK51C7Y` / `d2a1tso1ra5muk.cloudfront.net`.
+> - Remediation: update distribution origin DomainName to `zonga-processed-media-ca.s3.ca-central-1.amazonaws.com`, attach OAC bucket policy on the processed bucket, then issue an invalidation `/*`.
 
 ---
 
@@ -46,15 +52,16 @@
 
 ## ⚠️ Remaining Actions (Non-Blocking for Launch)
 
-### CloudFront Key Pair (Optional for Signed URLs)
+### CloudFront Key Pair (Configured 2026-04-24)
 
-**Status**: Deferred - not required for basic streaming delivery
+**Status**: ✅ Configured (verified 2026-04-24)
 
-For signed URL support (optional enhancement):
-
-1. Generate RSA 2048-bit key pair (instructions in AWS_ZONGA_SETUP.md Part 4)
-2. Create CloudFront public key via AWS console or CLI
-3. Add `ZONGA_CLOUDFRONT_KEY_PAIR_ID` and `ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM` to `.env.local`
+Live `.env.local` has all three CloudFront signing variables set
+(`ZONGA_CLOUDFRONT_DOMAIN`, `ZONGA_CLOUDFRONT_KEY_PAIR_ID`,
+`ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM`) and the live distribution
+`E3ASNK7MK51C7Y` has `TrustedKeyGroups.Enabled = true`.
+Signed URL generation works; only the origin-bucket misconfiguration
+above blocks end-to-end delivery.
 
 ---
 
