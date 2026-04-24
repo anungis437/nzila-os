@@ -1,7 +1,4 @@
-'use client';
-
-import { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import type { CSSProperties, ReactNode } from 'react';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -16,32 +13,23 @@ export default function ScrollReveal({
   className = '',
   delay = 0,
   direction = 'up',
-  duration = 0.6,
 }: ScrollRevealProps) {
-  const prefersReducedMotion = useReducedMotion();
-  const offsets = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { y: 0, x: -40 },
-    right: { y: 0, x: 40 },
-    none: { y: 0, x: 0 },
+  const transformByDirection: Record<NonNullable<ScrollRevealProps['direction']>, string> = {
+    up: 'translate3d(0, 12px, 0)',
+    down: 'translate3d(0, -12px, 0)',
+    left: 'translate3d(-12px, 0, 0)',
+    right: 'translate3d(12px, 0, 0)',
+    none: 'translate3d(0, 0, 0)',
   };
 
-  const offset = offsets[direction];
+  const style: CSSProperties = {
+    animationDelay: `${delay}s`,
+    transform: transformByDirection[direction],
+  };
 
   return (
-    <motion.div
-      className={className}
-      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: offset.y, x: offset.x }}
-      whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, x: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{
-        duration: prefersReducedMotion ? 0 : duration,
-        delay,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-    >
+    <div className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }
