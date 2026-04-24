@@ -78,6 +78,7 @@ export default async function DashboardPage({
 
   const { locale } = await params
   const base = `/${locale}/dashboard`
+  const nowMs = new Date().getTime()
 
   // Parallel data fetch
   const [quotesResult, ordersResult, invoicesResult, customersResult, productsResult, lowStockResult] =
@@ -152,7 +153,7 @@ export default async function DashboardPage({
     over14: 0,
   }
   for (const quote of quotes.filter((q) => ['draft', 'pricing', 'ready', 'sent', 'reviewing', 'revised'].includes((q.status ?? '').toLowerCase()))) {
-    const ageDays = Math.floor((Date.now() - new Date(quote.createdAt).getTime()) / 86_400_000)
+    const ageDays = Math.floor((nowMs - new Date(quote.createdAt).getTime()) / 86_400_000)
     if (ageDays <= 7) agingBuckets.under7 += 1
     else if (ageDays <= 14) agingBuckets.between8And14 += 1
     else agingBuckets.over14 += 1

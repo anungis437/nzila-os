@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     if (!validated.success) {
       return NextResponse.json({ ok: false, error: 'invalid_event_shape' }, { status: 400 })
     }
-    const event: StripeEventLike = validated.data
+    const event = validated.data as StripeEventLike
     const objectMetadata = (event.data.object as { metadata?: Record<string, string> }).metadata
     const orgId = objectMetadata?.org_id ?? null
 
