@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createLogger } from '@nzila/os-core/telemetry'
+
+const log = createLogger('weekone.waitlist')
 
 const schema = z.object({
   email: z.string().email(),
@@ -14,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Invalid waitlist payload' }, { status: 400 })
   }
 
-  console.info('[weekone.waitlist]', {
+  log.info('signup_received', {
     email: parsed.data.email,
     source: parsed.data.source,
     occurredAt: new Date().toISOString(),

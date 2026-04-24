@@ -109,6 +109,13 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/trial',                      // Public Flow trial signup form
   '/api/telemetry',                  // Public marketing telemetry (anonymous page events)
   '/api/metrics',                    // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
+  '/api/waitlist',                   // Public marketing waitlist signup
+  '/api/newsletter',                 // Public marketing newsletter signup
+  '/api/referrals',                  // Public referral signup
+  '/api/templates/download',         // Public template download lead capture
+  '/api/analytics',                  // Public marketing analytics events (anonymous)
+  '/api/monday-reset',               // Public weekly checklist (static content)
+  '/api/billing/checkout',           // Public SaaS checkout (Stripe-hosted)
 ]
 
 function isPublicRoute(path: string): boolean {

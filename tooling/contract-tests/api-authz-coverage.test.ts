@@ -69,6 +69,13 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/pilot\/apply/,        // Public pilot application form
       /\/api\/trial(?:\/|$)/,       // Public Flow trial signup form
       /\/api\/telemetry/,            // Public marketing telemetry (anonymous page events)
+      /\/api\/waitlist/,             // Public marketing waitlist signup
+      /\/api\/newsletter/,           // Public marketing newsletter signup
+      /\/api\/referrals/,            // Public referral signup
+      /\/api\/templates\/download/,  // Public template download lead capture
+      /\/api\/analytics(?:\/|$)/,    // Public marketing analytics events (anonymous)
+      /\/api\/monday-reset/,         // Public weekly checklist (static content)
+      /\/api\/billing\/checkout/,    // Public SaaS checkout (Stripe-hosted)
     ]
 
     const AUTH_PATTERNS = [

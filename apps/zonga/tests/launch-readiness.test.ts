@@ -266,7 +266,7 @@ describe('Platform Maturity Tracking', () => {
   })
 
   it('launch readiness reports have been generated', () => {
-    const reports = [
+    const reports: ReportPath[] = [
       '../../reports/zonga-auth-rbac-audit.md',
       '../../reports/zonga-billing-payouts-readiness.md',
       '../../reports/zonga-streaming-readiness.md',

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@nzila/platform-auth/entra/server";
 import { z } from "zod";
+import { createLogger } from "@nzila/os-core/telemetry";
+
+const log = createLogger("weekone.activation");
 
 const activationSchema = z.object({
   action: z.enum(["complete", "skip"]),
@@ -42,7 +45,7 @@ export async function POST(req: NextRequest) {
       ),
     };
 
-    console.info("[weekone.activation]", payload);
+    log.info("activation_event", payload);
 
     return NextResponse.json({ ok: true, data: payload });
   } catch (err) {

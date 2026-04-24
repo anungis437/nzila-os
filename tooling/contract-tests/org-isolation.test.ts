@@ -81,6 +81,13 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/trial/')  // Public Flow trial signup form
     || normalized.includes('/api/metrics/')  // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
     || normalized.includes('/(marketing)/')  // Public-facing marketing route groups (no auth required)
+    || normalized.includes('/api/waitlist/')  // Public marketing waitlist signup
+    || normalized.includes('/api/newsletter/')  // Public marketing newsletter signup
+    || normalized.includes('/api/referrals/')  // Public referral signup
+    || normalized.includes('/api/templates/download/')  // Public template download lead capture
+    || normalized.includes('/api/analytics/')  // Public marketing analytics events (anonymous)
+    || normalized.includes('/api/monday-reset/')  // Public weekly checklist (static content)
+    || normalized.includes('/api/billing/checkout/')  // Public SaaS checkout (Stripe-hosted)
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {
