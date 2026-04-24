@@ -78,6 +78,10 @@ describe('union-eyes seeder', () => {
       'cba',
       'notifications',
       'activity_logs',
+      'cba_intel_sources',
+      'cba_intel_documents',
+      'cba_intel_findings',
+      'cba_intel_review_decisions',
       'db_write',
     ]) {
       expect(stepNames).toContain(expected)
@@ -120,5 +124,39 @@ describe('union-eyes seeder', () => {
     expect(r1.steps.map((s) => `${s.step}:${s.count}`)).toEqual(
       r2.steps.map((s) => `${s.step}:${s.count}`),
     )
+  })
+
+  it('CBA Intelligence parity matches CBA_INTELLIGENCE_VALIDATION_REPORT.md', async () => {
+    // Locked counts: 4 sources / 3 documents / 3 findings / 1 review decision.
+    // Changing this assertion requires updating the validation report in lockstep.
+    for (const profile of [
+      'demo-light',
+      'demo-standard',
+      'executive-showcase',
+      'investor-showcase',
+    ] as const) {
+      const ctx = makeCtx(profile)
+      const report = await seeder.seed(ctx)
+      const counts = Object.fromEntries(
+        report.steps
+          .filter((s) => s.step.startsWith('cba_intel_'))
+          .map((s) => [s.step, s.count]),
+      )
+      expect(counts).toEqual({
+        cba_intel_sources: 4,
+        cba_intel_documents: 3,
+        cba_intel_findings: 3,
+        cba_intel_review_decisions: 1,
+      })
+    }
+  })
+
+  it('exposes CBA_INTEL_PARITY constants for external lockstep checks', () => {
+    expect(ueSeeder.CBA_INTEL_PARITY).toEqual({
+      sources: 4,
+      documents: 3,
+      findings: 3,
+      reviewDecisions: 1,
+    })
   })
 })
