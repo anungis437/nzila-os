@@ -1,0 +1,62 @@
+##
+# Access Review Governance Gate
+#
+# Validates that the current quarter's privileged-access review attestation
+# exists and is signed before allowing merge to main.
+#
+# Fails if:
+#   - reports/compliance/access-review/<current-quarter>.json is missing
+#   - signoffStatus is 'unsigned' or 'missing'
+#
+# Bypass:
+#   Set ACCESS_REVIEW_BYPASS=true (requires CISO approval — logged loudly).
+#
+# Related docs:
+#   docs/union-eyes/dr/continuity-matrix.md
+#   reports/compliance/access-review/
+##
+
+name: Access Review Governance Gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bypass:
+        description: 'Bypass access review gate (CISO approval required)'
+        required: false
+        type: boolean
+        default: false
+      bypass_reason:
+        description: 'Reason for bypass (required if bypass=true)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  access-review-gate:
+    runs-on: ubuntu-latest
+    name: Access Review Attestation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate access review attestation
+        env:
+          ACCESS_REVIEW_BYPASS: ${{ (github.event.inputs.bypass == 'true' || vars.ACCESS_REVIEW_BYPASS) && 'true' || 'false' }}
+          ACCESS_REVIEW_BYPASS_REASON: ${{ github.event.inputs.bypass_reason || vars.ACCESS_REVIEW_BYPASS_REASON || '(no reason provided)' }}
+        run: pnpm ue:access-review:validate

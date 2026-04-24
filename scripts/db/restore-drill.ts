@@ -376,4 +376,27 @@ const reportPath = path.join(REPORTS_DIR, `restore-drill-${now.toISOString().sli
 fs.writeFileSync(reportPath, JSON.stringify(evidence, null, 2), 'utf8')
 console.log(`\n  Evidence: reports/db/restore-drill-${now.toISOString().slice(0, 7)}.json`)
 
+// ── Auto-update maturity.json on successful live execute ──────────────────────
+
+if (mode === 'execute' && failCount === 0 && rtoActual) {
+  const maturityPath = path.join(ROOT, 'apps', 'union-eyes', 'maturity.json')
+  try {
+    const maturity = JSON.parse(fs.readFileSync(maturityPath, 'utf8'))
+    if (maturity.maturity_gaps?.backup_restore) {
+      maturity.backup_restore = 'complete'
+      maturity.maturity_gaps.backup_restore.status = 'closed'
+      maturity.maturity_gaps.backup_restore.blocker =
+        `Live staging drill completed ${now.toISOString().slice(0, 10)}. ` +
+        `Measured RTO: ${rtoActual}. Evidence: ${reportPath.replace(ROOT + '/', '')}`
+      maturity.maturity_gaps.backup_restore.severity = 'none'
+      maturity.maturity_gaps.backup_restore.rtoActual = rtoActual
+      maturity.maturity_gaps.backup_restore.drillDate = now.toISOString().slice(0, 10)
+      fs.writeFileSync(maturityPath, JSON.stringify(maturity, null, 2) + '\n', 'utf8')
+      console.log(`  Maturity updated: backup_restore → complete (RTO: ${rtoActual})`)
+    }
+  } catch {
+    console.warn('  WARN: Could not update apps/union-eyes/maturity.json — update manually.')
+  }
+}
+
 process.exit(failCount > 0 ? 1 : 0)

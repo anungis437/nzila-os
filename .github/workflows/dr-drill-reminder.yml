@@ -1,0 +1,151 @@
+##
+# DR Drill Reminder — Quarterly automation for Union Eyes restore drills.
+#
+# Schedule:
+#   - Opens a GitHub Issue reminder on the first Monday of each quarter
+#     (Jan, Apr, Jul, Oct) at 09:00 UTC.
+#   - Manual dispatch available to trigger immediately.
+#
+# Purpose:
+#   Close maturity gap: backup_restore.status — ensures quarterly cadence
+#   is operationally enforced, not just documented.
+#
+# Related docs:
+#   docs/union-eyes/dr/restore-drill-runbook.md
+#   reports/dr/
+##
+
+name: DR Drill Reminder
+
+on:
+  schedule:
+    # First Monday of Jan, Apr, Jul, Oct at 09:00 UTC
+    # (GitHub Actions doesn't support "first Monday" directly;
+    #  this fires every Monday and a step filters to first-of-quarter months)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_issue:
+        description: 'Force create issue even if not first-of-quarter'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  drill-reminder:
+    runs-on: ubuntu-latest
+    name: DR Drill Quarterly Reminder
+
+    steps:
+      - name: Check if first week of quarter month
+        id: quarter-check
+        run: |
+          MONTH=$(date +%-m)
+          DAY=$(date +%-d)
+          FORCE="${{ github.event.inputs.force_issue || 'false' }}"
+
+          # Quarter start months: 1, 4, 7, 10
+          if [[ "$MONTH" == "1" || "$MONTH" == "4" || "$MONTH" == "7" || "$MONTH" == "10" ]]; then
+            IS_QUARTER_MONTH="true"
+          else
+            IS_QUARTER_MONTH="false"
+          fi
+
+          # First week = day 1-7
+          if [[ "$DAY" -ge 1 && "$DAY" -le 7 ]]; then
+            IS_FIRST_WEEK="true"
+          else
+            IS_FIRST_WEEK="false"
+          fi
+
+          if [[ "$IS_QUARTER_MONTH" == "true" && "$IS_FIRST_WEEK" == "true" ]] || [[ "$FORCE" == "true" ]]; then
+            echo "should_create=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_create=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          QUARTER="Q$((( (MONTH - 1) / 3 ) + 1))-$(date +%Y)"
+          echo "quarter=$QUARTER" >> "$GITHUB_OUTPUT"
+          echo "date=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.quarter-check.outputs.should_create == 'true'
+
+      - name: Create quarterly DR drill issue
+        if: steps.quarter-check.outputs.should_create == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const quarter = '${{ steps.quarter-check.outputs.quarter }}';
+            const drillDate = '${{ steps.quarter-check.outputs.date }}';
+
+            const body = `## Union Eyes — Quarterly DR Restore Drill
+
+            **Quarter:** ${quarter}
+            **Due by:** End of this quarter
+            **Controls:** DR-01, DR-02
+
+            ---
+
+            ### What needs to happen
+
+            Execute the Union Eyes quarterly restore drill to measure actual RTO and
+            produce a reproducible evidence artifact for procurement and IT governance.
+
+            ### Commands
+
+            \`\`\`bash
+            # Step 1: Pre-flight check
+            pnpm dr:drill:checklist
+
+            # Step 2: Dry-run (no live restore)
+            pnpm db:restore-drill
+
+            # Step 3: Live staging restore (measures actual RTO)
+            pnpm db:restore-drill:execute
+
+            # Step 4: Generate evidence report
+            pnpm dr:drill:report
+
+            # Step 5: Commit evidence artifacts
+            git add reports/dr/ reports/db/
+            git commit -m "chore: ${quarter} DR restore drill evidence"
+            \`\`\`
+
+            ### Acceptance Criteria
+
+            - [ ] \`pnpm dr:drill:checklist\` passes
+            - [ ] \`pnpm db:restore-drill:execute\` completes without error
+            - [ ] RTO actual recorded in \`reports/dr/restore-drill-${drillDate}.json\`
+            - [ ] Evidence artifacts committed and pushed
+            - [ ] \`apps/union-eyes/maturity.json\` updated with measured RTO
+            - [ ] SRE operator sign-off added to evidence report
+
+            ### References
+
+            - [Restore Drill Runbook](docs/union-eyes/dr/restore-drill-runbook.md)
+            - [Database Restore Runbook](docs/union-eyes/dr/database-restore.md)
+            - [Evidence Reports](reports/dr/)
+            - [Platform DR Plan](docs/ops/disaster-recovery.md)
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[DR] ${quarter} Union Eyes Restore Drill`,
+              body,
+              labels: ['dr', 'compliance', 'sre'],
+            });
+
+            core.info(`Created DR drill reminder issue for ${quarter}`);
+
+      - name: Skip — not first week of quarter month
+        if: steps.quarter-check.outputs.should_create == 'false'
+        run: |
+          echo "Not first week of a quarter month — skipping issue creation."
+          echo "Month: $(date +%-m), Day: $(date +%-d)"
+          echo "To force: use workflow_dispatch with force_issue=true"

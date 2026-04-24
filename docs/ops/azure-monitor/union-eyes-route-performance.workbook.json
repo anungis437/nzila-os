@@ -1,0 +1,146 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Union Eyes — Route Performance Dashboard\n\n**App:** Union Eyes  \n**Region:** Azure Canada Central  \n**Source:** Application Insights + OpenTelemetry  \n\nThis workbook tracks p50/p95 latency, error rate, and volume for priority routes.  \nThresholds: Green ≤ 500ms p95 · Yellow 500ms–2s · Red > 2s  "
+      },
+      "name": "header"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "timeRange",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000, "label": "Last 1 hour" },
+                { "durationMs": 86400000, "label": "Last 24 hours" },
+                { "durationMs": 604800000, "label": "Last 7 days" },
+                { "durationMs": 2592000000, "label": "Last 30 days" }
+              ]
+            },
+            "label": "Time Range"
+          }
+        ]
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp {TimeRange}\n| where name in (\n    'GET /dashboard/leadership',\n    'GET /dashboard/work',\n    'GET /grievances/new',\n    'POST /api/cases',\n    'POST /api/workflow/transition',\n    'POST /api/pilot/onboarding'\n)\n| summarize\n    RequestCount = count(),\n    ErrorRate = round(100.0 * countif(success == false) / count(), 2),\n    P50Ms = round(percentile(duration, 50), 0),\n    P95Ms = round(percentile(duration, 95), 0)\n  by name\n| order by P95Ms desc",
+        "size": 0,
+        "title": "Priority Route — P50 / P95 Latency",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "P95Ms",
+              "formatter": 18,
+              "numberFormat": { "unit": 23, "options": {} },
+              "thresholdsSettings": {
+                "steps": [
+                  { "threshold": 500, "color": "green" },
+                  { "threshold": 2000, "color": "yellow" },
+                  { "threshold": null, "color": "red" }
+                ]
+              }
+            },
+            {
+              "columnMatch": "ErrorRate",
+              "formatter": 18,
+              "thresholdsSettings": {
+                "steps": [
+                  { "threshold": 1, "color": "green" },
+                  { "threshold": 5, "color": "yellow" },
+                  { "threshold": null, "color": "red" }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "name": "route-latency"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp {TimeRange}\n| where name in (\n    'POST /api/cases',\n    'POST /api/workflow/transition',\n    'GET /api/cases'\n)\n| make-series RequestsPerHour = count() on timestamp from ago(24h) to now() step 1h by name",
+        "size": 0,
+        "title": "Request Volume — 24-hour Trend",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "linechart"
+      },
+      "name": "volume-trend"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp {TimeRange}\n| where success == false\n| summarize ErrorCount = count() by name, bin(timestamp, 1h)\n| order by ErrorCount desc\n| take 20",
+        "size": 0,
+        "title": "Top Error Routes (last window)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "error-routes"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| where timestamp between (ago(7d) .. ago(1d))\n| summarize P95_7d = round(percentile(duration, 95), 0) by name\n| join kind=inner (\n    requests\n    | where timestamp > ago(1d)\n    | summarize P95_1d = round(percentile(duration, 95), 0) by name\n) on name\n| extend DeltaMs = P95_1d - P95_7d\n| where DeltaMs > 200\n| order by DeltaMs desc",
+        "size": 0,
+        "title": "Route Regressions (p95 delta 7d vs 24h, > 200ms worse)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "regressions"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "union-eyes-route-performance",
+  "_meta": {
+    "description": "Union Eyes — Route Performance Azure Monitor Workbook",
+    "version": "1.0",
+    "app": "union-eyes",
+    "owner": "platform-engineering",
+    "routes": [
+      "GET /dashboard/leadership",
+      "GET /dashboard/work",
+      "GET /grievances/new",
+      "POST /api/cases",
+      "POST /api/workflow/transition",
+      "POST /api/pilot/onboarding"
+    ],
+    "thresholds": {
+      "p95GreenMs": 500,
+      "p95YellowMs": 2000,
+      "errorRateGreenPct": 1,
+      "errorRateYellowPct": 5
+    }
+  }
+}
