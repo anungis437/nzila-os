@@ -59,6 +59,10 @@ function unionEyesScale(profile: SeedProfile): UnionEyesScale {
       return { members: 2500, stewards: 100, worksites: 12, grievances: 280, claims: 420, duesInvoices: 2500, cbaCount: 2, notifications: 1800, activityLogs: 4000 }
     case 'investor-showcase':
       return { members: 6000, stewards: 240, worksites: 24, grievances: 600, claims: 900, duesInvoices: 6000, cbaCount: 3, notifications: 4200, activityLogs: 9000 }
+    default: {
+      const _exhaustive: never = profile
+      throw new Error(`Unsupported seed profile: ${String(_exhaustive)}`)
+    }
   }
 }
 

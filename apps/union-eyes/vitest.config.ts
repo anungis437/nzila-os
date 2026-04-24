@@ -17,6 +17,8 @@ export default defineProject({
     exclude: [
       "**/node_modules/**",
       "**/.git/**",
+      "**/.next/**",
+      "**/dist/**",
       "e2e/**",
       "services/financial-service/**",
     ],
