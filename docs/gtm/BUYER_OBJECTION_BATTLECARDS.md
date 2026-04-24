@@ -12,6 +12,7 @@
 Every objection has a real meaning underneath it. The surface objection is rarely the real blocker. Diagnose the real blocker first, then respond.
 
 **Two-step rule:**
+
 1. Acknowledge — "That's fair / I hear you / That's a common concern."
 2. Reframe — Pivot to value, evidence, or scope reduction. Never capitulate on price first.
 
@@ -26,6 +27,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "That's exactly why the pilot is structured the way it is — it's not a full commitment, it's a controlled test with a defined exit. If Union Eyes doesn't produce the outcomes we scope together, you stop. There's no long-term contract until you've seen real results. The risk is bounded by design."
 
 **Evidence to show:**
+
 - Pilot tier overview (`docs/gtm/ue-pilot-tiers.md`) — show the defined exit gates
 - Deployment model (`docs/buyers/deployment-models.md`) — show the 5-day provisioning standard
 - Security and governance pack (`docs/buyers/SECURITY_SUMMARY.md`) — show this is production-hardened infrastructure, not a startup prototype
@@ -52,6 +54,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "Who would need to approve this? Is there anything I can prepare that would help make the case internally — a scoped proposal, a ROI estimate, a vendor brief?"
 
 **Evidence to show:**
+
 - ROI indicators (`docs/gtm/ue-executive-one-pager.md` — ROI section) — SLA breach avoidance, arbitration evidence quality, staff time recovery
 - Pricing tiers — the Discovery Sprint at $7K–15K is a low-barrier entry
 
@@ -72,6 +75,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "Spreadsheets work until they don't. The risk with grievance management specifically is that the failure shows up at the worst possible moment — when you're in front of an arbitrator and you can't produce a clean timeline or a complete evidence trail. Has that happened? Or do you have an upcoming arbitration cycle where you'd rather not find out?"
 
 **Evidence to show:**
+
 - Pilot KPIs (`docs/union-eyes/pilot-kpis.md`) — "Evidence pack exports" and "response time SLA compliance" are things you can't get from spreadsheets
 - Executive one-pager (`docs/gtm/ue-executive-one-pager.md`) — "Why now" section
 
@@ -92,6 +96,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "What does your current system do well? And where does it fall short on the governance and audit side — specifically, can it produce a case evidence pack automatically, and can leadership see SLA status in real time?"
 
 **Evidence to show:**
+
 - Product capability matrix (`docs/buyers/product-capability-matrix.md`) — show what Union Eyes does that generic systems don't
 - Deployment model — show no massive migration required to pilot
 
@@ -112,6 +117,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "Great — this is exactly where we've invested heavily. Let me send you our full vendor qualification package. It covers infrastructure, access controls, data residency, breach response, audit logging, and our third-party testing posture."
 
 **Evidence to show (immediately):**
+
 - Security summary (`docs/buyers/SECURITY_SUMMARY.md`) — Argon2id, Trivy, OWASP ZAP, Gitleaks, SBOM, SOC2-aligned controls
 - Deployment model (`docs/buyers/deployment-models.md`) — Azure Canada Central, org isolation, no cross-tenant data, automated backups
 - SLA + support model (`docs/buyers/sla-support-model.md`) — DR, RTO/RPO commitments
@@ -133,6 +139,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "Let's scope the migration before we price it. In almost every case, we start new cases in Union Eyes from day one and migrate historical data in a second phase, after the team is comfortable. The Controlled Pilot is designed exactly for this — no historical migration required, just new cases from go-live."
 
 **Evidence to show:**
+
 - Pilot tiers (`docs/gtm/ue-pilot-tiers.md`) — "Included: new cases from go-live date OR scoped historical import" — framing that makes this feel controllable
 - Deployment model — 5-day provisioning means they can start without any migration at all
 
@@ -153,6 +160,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "That makes complete sense. Let me help you make the internal case. I can prepare a board-ready summary, a scoped pilot proposal, and a vendor brief that answers the questions your board will have — security, cost, risk, and outcomes. What does your approval timeline look like?"
 
 **Evidence to show:**
+
 - All of `docs/buyers/` — this is your complete vendor qualification package
 - Pilot proposal template with explicit scope, fixed fee, defined exit gate
 
@@ -173,6 +181,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "That's the most common concern we hear, and it's the reason we run the pilot as a managed delivery, not a self-serve installation. We handle provisioning, training, and weekly reporting. Your team runs cases — we handle the platform."
 
 **Evidence to show:**
+
 - Deployment model (`docs/buyers/deployment-models.md`) — 5-day provisioning, no internal IT required
 - SLA support model (`docs/buyers/sla-support-model.md`) — ongoing support included
 - Pilot deliverables in offer stack — "training included, weekly KPI reports delivered by us"
@@ -194,6 +203,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "That's a real risk. Most pilots fail because the KPIs aren't locked at the start and there's no executive accountability for acting on the outcome. We build that in by design — KPIs agreed at kickoff, weekly reports, and a formal outcome report with a conversion proposal in the final week. The pilot is designed to force a decision, not defer one."
 
 **Evidence to show:**
+
 - Pilot KPIs (`docs/union-eyes/pilot-kpis.md`) — show them the specific metrics that get tracked
 - Pilot-to-paid playbook framework (`docs/gtm/PILOT_TO_PAID_CONVERSION_PLAYBOOK.md`) — show the conversion sequence is built in, not bolted on
 
@@ -214,6 +224,7 @@ Every objection has a real meaning underneath it. The surface objection is rarel
 > "Let me understand what's driving that. Is it the absolute number, or uncertainty about what you'd get for it? If it's the value, let me walk you through what's included and what the typical outcomes look like for an organization your size. If it's the absolute number, we have entry points starting at $7K for a Discovery Sprint."
 
 **Evidence to show:**
+
 - Year 1 total value summary (from `docs/gtm/PRICING_STRATEGY_V2.md`) — what they get for the money
 - ROI indicators (`docs/gtm/ue-executive-one-pager.md`) — SLA breach cost, arbitration preparation time, staff hours recovered
 - Competitor context: no purpose-built alternative exists — the comparison is "spreadsheets + legal exposure" vs. "governed platform + evidence trail"

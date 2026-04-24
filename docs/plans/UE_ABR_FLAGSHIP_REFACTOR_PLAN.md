@@ -234,6 +234,7 @@ nzila-abr-insights/
 | User metadata in Supabase `auth.users` | User metadata in Clerk + Django User model | Migrate user data |
 
 **Risk mitigations:**
+
 - Run parallel auth (Supabase + Clerk) during transition
 - Migrate users in batches with rollback capability
 - E2E test every auth flow before cutover
@@ -251,6 +252,7 @@ nzila-abr-insights/
 ### 4.3 Frontend Cleanup
 
 **UE Frontend:**
+
 - Remove `supabase/` directory entirely
 - Remove Supabase client code from `lib/`
 - Replace direct DB calls with Backbone API client calls
@@ -258,6 +260,7 @@ nzila-abr-insights/
 - Audit and prune unused 130+ API routes → consolidate to BFF pattern
 
 **ABR Frontend:**
+
 - Downgrade Next.js 16.1 → 15.x (stable, aligned with UE)
 - Remove all `@supabase/*` packages
 - Replace Supabase Auth with Clerk

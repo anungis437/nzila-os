@@ -11,36 +11,43 @@ Purpose: Explicit go/no-go checklist for production release
 ## Mandatory Prerequisites
 
 1. Infrastructure and topology
+
 - Dedicated staging and production runtime boundaries proven.
 - Production hostnames mapped only to production app.
 - Staging hostnames mapped only to staging app.
 - Health/readiness endpoints green on both surfaces.
 
 2. Auth and access
+
 - Local auth, invite, magic-link, and policy endpoints validated.
 - MFA enrollment/challenge flows verified for required roles.
 - Admin lifecycle controls verified.
 
 3. Data and migration
+
 - Drizzle and Django migration states are current.
 - Required table families verified in production DB.
 - Backup and restore procedure validated and timestamped.
 
 4. Integrations
+
 - Production-contracted integrations are live-tested.
 - Fallback behavior tested for non-critical dependencies.
 - Integration ownership and escalation path documented.
 
 5. AI controls
+
 - AI endpoints are advisory-only and review-required.
 - Global or org-level AI disable path documented and tested.
 - AI observability/audit metadata captured in production logs.
 
 6. Mobile and UX
+
 - Critical mobile workflows tested with production-like data.
 - Desktop-preferred pages documented to avoid unsupported claims.
 
 7. Marketing/copy alignment
+
 - No unsupported certification/integration/mobile/AI claims.
 - Slogan approved and correctly represented:
   - Global vision, local action

@@ -19,11 +19,13 @@ Secondary CTA: `View Trust Center`
 Title: `Why teams trust Nzila`
 
 Bullets:
+
 - `Live production services with visible status and release evidence.`
 - `Security and diligence documentation ready for procurement review.`
 - `Operational metrics published with source transparency.`
 
 Links:
+
 - `Trust Center`
 - `System Status`
 - `Security Overview`

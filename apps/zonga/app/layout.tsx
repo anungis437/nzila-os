@@ -3,6 +3,7 @@ import { NzilaAppShell } from "@nzila/platform-shell";
 import type { Metadata } from "next";
 import { Poppins } from 'next/font/google';
 import { initializeBrands } from '@/lib/branding/brand-config';
+import { ServiceWorkerRegister } from './sw-register';
 import './globals.css';
 
 // Register deployment brands (idempotent — safe across concurrent requests)
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <AuthProvider>
+          <ServiceWorkerRegister />
           <NzilaAppShell moduleId="zonga">
             {children}
           </NzilaAppShell>

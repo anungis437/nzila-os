@@ -20,6 +20,7 @@
 | Two-line meeting recap | Three things they said, one specific commitment from us, one ask from them |
 
 **Email template:**
+
 ```
 Subject: Union Eyes — pilot package and 3 things from today
 
@@ -63,6 +64,7 @@ Day 10 target signature.
 | DPA + subprocessor list | From [vendor-risk-pack/](../vendor-risk-pack/) |
 
 **Email template:**
+
 ```
 Subject: Union Eyes — procurement pre-pack (most boxes pre-checked)
 
@@ -99,6 +101,7 @@ Happy to jump on a 20-minute call to walk through anything ambiguous.
 | Honesty footnote | Conservative vs. expected vs. high — show the range |
 
 **Email template:**
+
 ```
 Subject: Union Eyes — your pilot ROI numbers
 
@@ -130,6 +133,7 @@ Day 7 stakeholder call still on?
 **Length:** 45 minutes. **Owner:** account executive. **Co-pilot:** solutions engineer.
 
 **Agenda:**
+
 | Time | Topic | Who |
 |---|---|---|
 | 0:00 | Recap commitments + state of the pre-pack | AE |
@@ -140,6 +144,7 @@ Day 7 stakeholder call still on?
 | 0:40 | Confirm signature path + Day 10 target | Sponsor + AE |
 
 **Outcomes to capture (mandatory):**
+
 - Confirmed signature target date
 - Named pilot coordinator on customer side
 - Confirmed go-live date
@@ -154,11 +159,13 @@ Day 7 stakeholder call still on?
 **Goal:** signature on the pilot agreement.
 
 **Pre-call (1 hour before):**
+
 - Send updated pilot agreement reflecting any commercial nuances from Day 7
 - Confirm the buyer's e-signature platform (DocuSign, Adobe Sign, internal tool)
 - Reconfirm the meeting attendees are decision-makers
 
 **Call structure (30 minutes):**
+
 | Time | Topic |
 |---|---|
 | 0:00 | Confirm everyone is on, recap path to here |
@@ -168,6 +175,7 @@ Day 7 stakeholder call still on?
 | 0:25 | Confirm kickoff: tenant provisioning starts today, data-import template sent today, go-live in 14 days |
 
 **Post-call (within 1 hour):**
+
 - Send signed agreement to all parties
 - Email kickoff plan with Day +1 / Day +5 / Day +14 milestones
 - Internal: kick off Azure tenant provisioning runbook

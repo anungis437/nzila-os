@@ -17,7 +17,7 @@ Cut over authoritative DNS with no customer-visible downtime and no loss of stag
 1. Reduce TTL to 300 at current authoritative DNS.
 2. Verify Azure hostname bindings and cert state for:
    - unioneyes.app
-   - www.unioneyes.app
+   - <www.unioneyes.app>
    - app.unioneyes.app
    - staging.unioneyes.app
    - staging-app.unioneyes.app

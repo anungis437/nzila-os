@@ -48,6 +48,7 @@ pnpm deploy:evidence
 ```
 
 Reports are written to:
+
 - `ops/drift/version-drift-staging-latest.json`
 - `ops/drift/env-drift-staging-latest.json`
 - `ops/smoke/smoke-staging-latest.json`
@@ -92,6 +93,7 @@ az containerapp logs show \
 ```
 
 Look for:
+
 - `Error: Missing required environment variable`
 - `Error: connect ECONNREFUSED` (DATABASE_URL not reachable)
 - `TypeError: Cannot read properties of undefined` (missing module initialization)
@@ -108,6 +110,7 @@ az containerapp show \
 ```
 
 Required vars for `console`:
+
 - `NODE_ENV` — should be `production`
 - `NEXT_PUBLIC_APP_ENV` — should be `staging`
 - `AUTH_SECRET` — must be a secretRef
@@ -245,6 +248,7 @@ If `gitSha` is a short prefix that matches HEAD SHA, the app is current.
 ## Alerting and Promotion Gates
 
 The `gitops-deploy.yml` workflow:
+
 1. Fails hard if **any** app fails to deploy (exits 1 — no silent partial failures)
 2. Probes canonical health endpoints from `governance/release/deployment-inventory.json` (not `/`)
 3. Runs full smoke (`run-smoke.ts`) post-deploy
@@ -252,6 +256,7 @@ The `gitops-deploy.yml` workflow:
 5. Generates deployment evidence pack and uploads as artifact
 
 A deployment is only considered **promotion-ready** when:
+
 - ✅ All required apps return 200 on canonical health endpoint
 - ✅ All required apps return 200 on canonical ready endpoint
 - ✅ `drift:version:staging` score = 100%

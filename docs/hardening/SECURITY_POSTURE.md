@@ -21,6 +21,7 @@ and operational safety.
 actor's role is in the allowed set before any protected operation.
 
 Workflow transitions define `requiredRole` on sensitive transitions:
+
 - `finance` — payout approval, manual review, write-off
 - `admin` — artist approval, moderation resolution, rights update approval
 - `moderator` — content review decisions
@@ -30,6 +31,7 @@ Workflow transitions define `requiredRole` on sensitive transitions:
 
 `guardAdminActionReason(reason, minLength)` requires a minimum 10-character
 reason for all admin/governance actions. Applied to:
+
 - Moderation case resolution
 - Content takedown
 
@@ -64,6 +66,7 @@ Resolution checks remaining disputes and only unfreezes when all are resolved.
 ## Audit Trail
 
 Every critical mutation writes to `audit_log` with:
+
 - Org ID, actor ID, action name, entity reference, metadata, timestamp
 - Compensation events recorded with original error context
 - Command blocks recorded with guard name and reason

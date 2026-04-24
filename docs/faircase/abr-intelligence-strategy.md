@@ -1,4 +1,5 @@
 # FairCase — ABR Intelligence & Investigations Strategy
+
 ## Anchored on the FPSLREB 4% Signal
 
 > **Version:** 1.0 — April 2026
@@ -77,6 +78,7 @@ Three forces have converged to create an urgent, funded, unsolved problem:
 The FPSLREB finding is one data point in a pattern: institutions don't know what they don't measure. Race-coded data is absent from most HR systems. Without it, accountability is impossible.
 
 **Force 2 — The Legal Escalation**
+
 - Ontario's *Anti-Racism Act* (2017) established institutional accountability mandates.
 - Treasury Board's *Call to Action on Anti-Racism, Equity and Inclusion* (2020) established federal employer obligations.
 - Human Rights Tribunal caseload involving racialized complainants has grown materially.
@@ -118,6 +120,7 @@ Public institutions face growing pressure — from boards, oversight bodies, med
 Applies AI-assisted classification to inbound complaints and existing case records to detect probable ABR indicators — even when cases were not explicitly coded as ABR at intake.
 
 **What the buyer gets:**
+
 - A "classification confidence score" for each case (Low / Medium / High ABR signal)
 - Automated flagging of cases meeting ABR pattern thresholds for human review
 - Retrospective classification analysis across historical case archives
@@ -136,6 +139,7 @@ Without this, institutions either miss ABR cases entirely or manually review tho
 Aggregates case data across an institution to surface ABR patterns that are invisible at the individual case level.
 
 **Key views:**
+
 - Department-level ABR incidence heat map
 - Comparator benchmarks (sector peers, tribunal averages)
 - Chronology clustering (spikes aligned with leadership changes, policy gaps, organizational events)
@@ -157,6 +161,7 @@ This is the board report and the audit response. No institution can credibly cla
 Evaluates the quality and completeness of active investigations against ABR-specific standards. Flags gaps that create tribunal exposure before investigations close.
 
 **Scored dimensions:**
+
 - Intake quality (protected grounds documented, timeline captured, comparator context gathered)
 - Evidence completeness (documents collected, witness statements structured, chain of custody)
 - Procedural fairness record (notification, response opportunities, accommodation)
@@ -177,6 +182,7 @@ The most expensive outcome in ABR investigations is not finding the problem — 
 Converts case closures into structured remediation records with owners, due dates, evidence requirements, and outcome verification.
 
 **Tracked remediation types:**
+
 - Policy changes (named policy, approval path, effective date)
 - Training interventions (linked to FairCase/ABR learning modules, completion rates)
 - Management accountability actions (performance interventions, oversight measures)
@@ -184,6 +190,7 @@ Converts case closures into structured remediation records with owners, due date
 - Systemic reviews (audit scope, timeline, governance)
 
 **Executive view:**
+
 - Remediation aging tracker (overdue actions by department and owner)
 - Completion rate trends over time
 - "Remediation credibility score" — the ratio of completed-verified remediation to closed cases
@@ -199,6 +206,7 @@ Commitments without follow-through are the second most common basis for repeat A
 Generates structured, evidence-backed equity reports for boards, oversight bodies, collective agreement obligations, and public accountability commitments.
 
 **Report types:**
+
 - Annual ABR accountability report (board-ready, EN/FR)
 - Equity-on-demand snapshot (for C-suite and trustees)
 - Labour relations transparency report (formatted for union joint committee review)
@@ -225,36 +233,42 @@ Intake → Classification → Mandate → Investigation → Closure → Remediat
 ### 4.2 Workflow Stages
 
 **Stage 1: Intake**
+
 - Structured intake form with ABR-specific ground capture (mandatory, not optional)
 - Identity vault: complainant identity stored with differential access controls
 - Automated classification pre-score generated at intake
 - Acknowledgment SLA timer starts
 
 **Stage 2: Classification and Triage**
+
 - Investigator reviews AI classification recommendation
 - Override requires documented justification (creates accountability record)
 - Priority tier assigned: P1 (immediate risk), P2 (standard track), P3 (monitoring)
 - Case team assigned with need-to-know access controls
 
 **Stage 3: Investigation Mandate**
+
 - Investigation scope defined and recorded
 - Evidence collection checklist generated (ABR-pattern-specific)
 - Timeline documented with SLA milestones
 - Complainant and respondent rights disclosure logged
 
 **Stage 4: Active Investigation**
+
 - Chronological evidence log with tamper-evident timestamps
 - Role-scoped notes (investigator-only, legal-only, shared)
 - Document versioning and chain of custody
 - Readiness score surfaced continuously during investigation
 
 **Stage 5: Findings and Closure**
+
 - Dual-control closure: findings require second reviewer confirmation for high-severity ABR cases
 - Finding categorization: substantiated / unsubstantiated / inconclusive with documented basis
 - Remedy specification required before case can close
 - Sealed evidence export for legal hold or tribunal proceedings
 
 **Stage 6: Remediation**
+
 - Remediation plan entered with owner, due date, evidence requirement
 - Progress tracked with automated escalation on overdue items
 - Completion verification gates (evidence-required, not self-reported)
@@ -263,6 +277,7 @@ Intake → Classification → Mandate → Investigation → Closure → Remediat
 ### 4.3 The Dual-Control Principle
 
 For any ABR case classified at High severity:
+
 - Case closure requires two independent reviewers
 - Severity downgrade requires documented justification and second sign-off
 - Identity unmask requires compliance-officer authorization plus access log entry
@@ -276,6 +291,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### Tier 1: Federal and Provincial Public Sector Employers
 
 **Why they are the best first buyers:**
+
 - The FPSLREB finding is literally their data. The exposure is documented against their own sector.
 - Treasury Board's Call to Action creates a funded mandate with accountability teeth.
 - Collective agreement obligations (PSAC, PIPSC, CAPE) are creating joint labour-management equity review requirements.
@@ -283,6 +299,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 - Public-sector procurement is slow but deals are large, sticky, and expandable.
 
 **Target institutions:**
+
 - Treasury Board Secretariat (direct purchaser and standard-setter for 100+ departments)
 - Large federal departments: IRCC, CRA, Employment and Social Development, Health Canada, National Defence
 - Provincial ministries with equity mandates: Ontario (ANTI_RACISM_ACT obligations), BC (anti-racism data law), Quebec (Plan d'action gouvernemental pour contrer le racisme)
@@ -297,6 +314,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### Tier 2: National and Regional Unions
 
 **Why they are the second-best buyers:**
+
 - Unions are the constituency most directly harmed by the 4% classification failure — their members' cases are the ones being under-recorded.
 - Unions have a fiduciary duty of fair representation that creates legal exposure when they don't adequately document and pursue ABR grievances.
 - PSAC, CUPE, SEIU, and OPSEU all have active anti-racism committees with program budgets.
@@ -304,6 +322,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 - Unions are faster buying decisions than government: executive director approval, not multi-layer procurement.
 
 **Target unions:**
+
 - PSAC (500,000+ federal public sector members — directly intersects FPSLREB finding)
 - CUPE (700,000+ members in health, education, municipalities)
 - OPSEU/SEFPO (Ontario public sector)
@@ -321,12 +340,14 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### Tier 3: Universities and Colleges
 
 **Why they are compelling:**
+
 - Post-secondary institutions are among the highest-profile sites of documented ABR: BHER (Black Higher Education Report) findings, individual institutional audits, and major tribunal decisions.
 - Most universities have an Equity Office and a Human Rights Office — two budget holders.
 - Ontario universities face obligations under *Equity, Diversity and Inclusion Action Plans* required by the Ministry of Colleges and Universities.
 - High reputational stakes: one high-profile ABR case is front-page news.
 
 **Target institutions:**
+
 - U of T, York, Ryerson/TMU, Carleton, U of Ottawa, UBC, Concordia, Dalhousie
 - Ontario college system (24 colleges under a central mandate creates a multi-institution sell)
 - Community colleges with high racialized student and staff populations
@@ -340,6 +361,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### Tier 4: Human Rights and Oversight Bodies
 
 **Why they are strategic (not always revenue):**
+
 - Human Rights Commissions (CHRC, OHRC, BCHRT) are not buyers — they are partners and validators.
 - A CHRC partnership, pilot, or letter of support is worth more than a mid-market deal. It de-risks every enterprise sale that follows.
 - National oversight bodies (Accessibility Commissioner, Pay Equity Commissioner) are actively building data infrastructure and may be direct buyers.
@@ -352,6 +374,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### Tier 5: Large Private Sector Employers with Equity Mandates
 
 **Why they are late-stage, not first-stage:**
+
 - Large financial institutions (RBC, TD, BMO), telecoms (Bell, Rogers), and professional services firms (Deloitte, KPMG, Accenture) all have published ABR commitments following 2020.
 - They have HR budget and procurement infrastructure.
 - BUT: they will not buy without social proof from public sector reference customers.
@@ -364,6 +387,7 @@ This mirrors the evidence-grade protocols that make FairCase defensible at tribu
 ### 6.1 Context
 
 Michel is speaking to [insert audience: labour relations professionals / HR leaders / equity advocates / union executives] in May 2026. The goal is to:
+
 1. Establish FairCase's authority as the category-defining platform for ABR governance.
 2. Introduce the FPSLREB finding as the central evidence anchor.
 3. Create demand for a diagnostic conversation.
@@ -414,6 +438,7 @@ Demo one screen. One. The pattern dashboard — showing ABR classification rates
 **Section 4 (8 min): What We've Found in the Data**
 
 Use the FairCase intelligence module's demo data (or real pilot data if available by May):
+
 - Simulated institutional scan showing classification distribution
 - What the "dark matter" score looks like for a 5,000-person organization
 - What the first 90 days of a FairCase implementation typically surfaces
@@ -443,15 +468,18 @@ Michel is a technology builder and institutional strategist who understands both
 ### 7.2 Authority building blocks
 
 **Evidence base:**
+
 - FairCase is built on 10,000+ CanLII-analyzed ABR-adjacent tribunal decisions.
 - The FPSLREB 4% finding is the evidential anchor for every institutional conversation.
 - The platform's architecture reflects deep knowledge of how ABR cases actually move through Canadian institutions.
 
 **Operational credibility:**
+
 - Michel built the investigative workflow, the classification architecture, and the evidence-sealing protocols — not a generic software team.
 - FairCase's dual-control case closure and identity-vault architecture reflect tribunal experience, not just compliance checkbox thinking.
 
 **Intellectual frame:**
+
 - Michel introduces concepts that buyers don't have language for yet: "classification failure," "dark matter in equity data," "the accountability gap between intent and infrastructure."
 - This is the mark of a category-creator: you give the audience new vocabulary for a problem they already have.
 
@@ -499,6 +527,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 1–2: Foundation and Signal Launch
 
 **Actions:**
+
 - Publish the FPSLREB analysis as a white paper (anchor content asset): *"The Accountability Gap: Anti-Black Racism Classification in Canadian Institutions"*
 - Launch Michel's LinkedIn and Substack content cadence (Section 7.3)
 - Deliver the May talk at one high-signal event (labour relations conference, equity leadership roundtable, or university equity network)
@@ -514,6 +543,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 3–4: First Diagnostics and Pilot Conversion
 
 **Actions:**
+
 - Run diagnostics with 4–6 institutions
 - Present findings in structured readout sessions (each readout surfaces real data — converts curiosity into urgency)
 - Convert 2–3 diagnostics into paid pilots (using the existing pilot-plan structure)
@@ -528,6 +558,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 5–6: Pilot Delivery and Reference Account Development
 
 **Actions:**
+
 - Deliver pilot 1 and pilot 2 with weekly governance touchpoints
 - Produce mid-pilot governance readout for each buyer (board-ready summary of findings to date)
 - Begin case study development with buyer consent at week 4 of each pilot
@@ -543,6 +574,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 7–8: Proof and Expansion
 
 **Actions:**
+
 - Publish first case study (anonymized, with buyer approval): "What 90 Days of FairCase Found at [Institution Type]"
 - Begin expansion motion at pilot customers: adjacent departments, additional use cases
 - Activate Treasury Board Secretariat conversation (most important long-term account — takes 6+ months)
@@ -558,6 +590,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 9–10: Segment Depth
 
 **Actions:**
+
 - Run buyer-specific outbound campaigns by segment (public sector, union, university — separate collateral, separate sequences)
 - Close PSAC or CUPE national-level deal (target: $48K–$84K/year)
 - Secure one university anchor account (target: $48K–$120K/year)
@@ -571,6 +604,7 @@ With three reference accounts across public sector, union, and university segmen
 #### Months 11–12: Scale Readiness
 
 **Actions:**
+
 - Hire first commercial resource (sales or customer success) funded by ARR achieved
 - Submit proposal to Treasury Board Secretariat (takes 6–12 months in federal procurement; start early)
 - Publish Annual Accountability Report template as open-source asset (creates ecosystem gravity)

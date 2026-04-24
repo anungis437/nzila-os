@@ -13,6 +13,7 @@ This runbook is for the sales/ops person managing the Union Eyes outbound pipeli
 Open the console at `[console URL]/ue-pipeline`.
 
 Review in order:
+
 1. **Dormant deals** — any deal in `dormant` should either be enrolled in the Re-Engagement sequence or marked `lost`
 2. **Active sequences** — are any contacts at step 3+ without a reply? They may need a manual personal touch
 3. **Demos completed without proposals sent** — deal should move to `pilot_proposed` within 5 days of demo
@@ -124,6 +125,7 @@ The `nextStepAt` field on the instance tells you when to send the next touch.
 The deal-engine FSM governs all stage transitions. Do not move deals backward.
 
 Valid transitions (extract):
+
 ```
 lead → qualified → demo_scheduled → demo_completed → pilot_proposed
      → pilot_active → data_received → ingestion_running → pilot_review
@@ -147,6 +149,7 @@ When a pilot is proposed, immediately trigger the `procurement` sequence.
 | C (< 0.40) | Weak signal | Do not cold outreach. Enrich first or wait for inbound/conference signal. |
 
 To re-score a target after enrichment:
+
 ```typescript
 icp.enrichTargetOrg(orgId, { sector: 'healthcare', memberCount: 850 })
 ```

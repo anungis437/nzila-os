@@ -73,6 +73,7 @@
 | orchestrator-api | ⚠️ Exempt | Fastify pattern (non-Next.js) |
 
 Special configurations:
+
 - `web`: `createAppBoot('web', { skipMetrics: true, skipBootAssert: true })`
 - `flow`: `createAppBoot('flow')` + custom `initEventPersistence` addon
 - `zonga`: `createAppBoot('zonga')` + Sentry addon + `onRequestError` export
@@ -124,6 +125,7 @@ Wired into `pnpm architecture:check` composite. Fail-closed — any regression
 blocks deployment.
 
 Checks per app (4):
+
 1. Shell import from `@nzila/platform-shell`
 2. `@nzila/schema-core` in dependencies
 3. `@nzila/governed-workflow` in dependencies

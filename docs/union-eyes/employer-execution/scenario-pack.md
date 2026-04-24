@@ -1,9 +1,11 @@
 # Employer Execution Scenario Pack
 
 ## Coverage goal
+
 The scenario pack validates deterministic behavior for payroll execution, replay attribution, lifecycle governance, and evidence-chain continuity.
 
 ## Scenarios
+
 1. `A1 standard payroll run with no overrides`
 2. `A2 overtime + double time threshold behavior`
 3. `B3 classification override replaces base rate`
@@ -21,12 +23,14 @@ The scenario pack validates deterministic behavior for payroll execution, replay
 15. `E15 broken evidence chain verification failure`
 
 ## Required assertions
+
 - Composition model (`replace`, `augment`, `stack`, `suppress`) changes outcomes deterministically.
 - Replay output emits deterministic `changed` state and cause details.
 - Lifecycle control enforcement blocks invalid transitions.
 - Evidence chain verification succeeds for valid lineage and fails on parent seal mismatch.
 
 ## Execution notes
+
 - Scenarios run in `execution-scenario-pack.test.ts`.
 - Assertions should remain deterministic and avoid network/external dependencies.
 - Add new scenarios with stable names and fixed inputs.

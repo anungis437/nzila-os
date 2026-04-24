@@ -39,7 +39,7 @@ export default function OnboardingPage() {
             Week<span className="text-electric">One</span>
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your founder operating system
+            Your founder operating system in under 3 minutes
           </p>
         </div>
 

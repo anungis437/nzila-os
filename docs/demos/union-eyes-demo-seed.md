@@ -53,11 +53,13 @@
 ### Documents (Pre-loaded per Case)
 
 **GRV-2026-001 (Robert Kim — Suspension)**:
+
 - `suspension-letter-kim-2026-03-15.pdf` — employer suspension letter
 - `shift-schedule-march-2026.pdf` — shows Kim's shifts before incident
 - `witness-statement-santos.pdf` — witness account from Maria Santos
 
 **GRV-2026-005 (David Chen — Arbitration)**:
+
 - `employer-response-chen.pdf`
 - `evidence-package-chen-v2.pdf` — HMAC-sealed export (show this as the outcome)
 
@@ -76,20 +78,24 @@
 **Step 1**: Log in as Alex Martins (steward account)
 
 **Step 2**: Show the case dashboard  
+
 - Point out: 12 active cases, 2 urgent (red deadline indicators)
 - **Key line**: "Before Union Eyes, Alex had a shared Google Sheet. Deadlines were missed. Now the dashboard is the first thing Alex checks every morning."
 
 **Step 3**: Open GRV-2026-001 (Robert Kim — Suspension, 3-day deadline)
+
 - Show the case timeline: filed → employer notified → response window ticking
 - Show uploaded documents (suspension letter, shift schedule)
 - **Key line**: "All documents are in one place. No more emailing back and forth with HR."
 
 **Step 4**: Generate an evidence package for GRV-2026-005 (Arbitration prep)
+
 - Click "Export Evidence Package"
 - Show the PDF bundle preview: sealed with HMAC hash, case timeline, all documents
 - **Key line**: "What used to take Alex a half-day — pulling documents, writing a summary, printing everything — now takes 90 seconds. And the PDF includes a cryptographic seal that proves the logs haven't been tampered with."
 
 **Step 5**: Show the AI case summary (if enabled in demo env)
+
 - Open GRV-2026-001 → "Summarize Case"
 - Show the AI output with confidence indicators
 - **Key line**: "The AI summarizes the key facts and flags risks. It's advisory — Alex still makes the call. But it cuts meeting prep time by 45 minutes."
@@ -101,15 +107,18 @@
 **Step 6**: Switch to Diane Okafor account (executive director)
 
 **Step 7**: Show executive dashboard
+
 - Caseload by steward: Alex (5 cases), Steward B (3), Steward C (4)
 - Type breakdown: 6 unjust suspension, 3 scheduling, 2 overtime, 1 accommodation
 - **Key line**: "Diane has 12 stewards and 87 cases in a real local. This view replaces a manual report that took two days to compile before every board meeting."
 
 **Step 8**: Show the pattern alert  
+
 - "6 Article 12.3 cases in the last 90 days — all from Public Works"
 - **Key line**: "This is intelligence. Diane's board had never seen a pattern like this before. It changes negotiation strategy."
 
 **Step 9**: Show role isolation  
+
 - "Diane sees all cases for CUPE Demo Local 99. But she cannot see cases from any other local."
 - Open browser devtools → show network request returns only org-scoped results
 - **Key line**: "Row-Level Security at the database level. Not just an application rule — a database enforced rule. One organization cannot see another's data, even on shared infrastructure."
@@ -119,23 +128,28 @@
 ### Act 3: James the IT Director (8 min)
 
 **Step 10**: Open the Trust page (`/trust`)
+
 - Walk through the controls table row by row
 - Point at: Data residency ✅ Canadian, Encryption ✅ AES-256, Audit logging ✅ HMAC-sealed
 - **Key line**: "Every row in this table has a proof path. We're not just saying it — we can show you the infrastructure."
 
 **Step 11**: Show the HMAC-sealed audit log entry
+
 - Navigate to audit log for GRV-2026-001
 - Show the hash, timestamp, and event chain
 - **Key line**: "Even Nzila can't delete a log entry without breaking the chain. That's what makes these admissible in arbitration."
 
 **Step 12**: Share the vendor questionnaire
+
 - "Here's our pre-filled security questionnaire. Your IT team can validate each answer."
 - Hand off `docs/procurement/vendor-questionnaire.md`
 
 **Step 13**: Handle SOC 2 / pen test question
+
 - "We don't have SOC 2 yet — it's on our roadmap, and I won't pretend otherwise. We have continuous CI vulnerability scanning, but we're a startup and we're being honest with you. We're happy to book an architectural review with your team."
 
 **Step 14**: Share the DPA  
+
 - "The Data Processing Agreement is ready for your legal team to redline. One round of edits is typical."
 - Hand off `docs/procurement/dpa.md`
 

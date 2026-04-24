@@ -51,6 +51,7 @@ Flow is the SMB ops platform that runs a complete commercial operation — from 
 ### What This Means
 
 Flow is not a CRM with some invoicing bolted on. It has:
+
 - A full purchase-order → production → supplier → inventory → order → invoice → payment chain
 - A quote-to-proposal flow with a public signing URL
 - Analytics across all commercial activity
@@ -69,6 +70,7 @@ Flow is not a CRM with some invoicing bolted on. It has:
 | Wave / FreshBooks | Invoice-only; no CRM, no pipeline, no ops chain |
 
 **Flow unique moat:**
+
 1. Full ops chain from quote → purchase order → production → invoice → payment — not just CRM + billing
 2. Revenue events governed by `@nzila/platform-revenue` — auditable commercial trail built-in
 3. Africa/diaspora SMB operator as primary segment — underserved by every major player
@@ -105,6 +107,7 @@ Flow is not a CRM with some invoicing bolted on. It has:
 
 **Geography:** Canada, West Africa (ShopMoiCa-type operators)  
 **Trigger events:**
+
 - Missed invoice = missed rent
 - Losing deals because follow-up was manual
 - Owner doesn't know what's closing this month

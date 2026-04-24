@@ -57,33 +57,40 @@ health checks available for dashboarding.
 ## Log Attributes
 
 ### `buildPayoutLogAttrs(payout)`
+
 Returns: `{ payoutId, creatorId, amount, rail, status }`
 
 ### `buildStreamLogAttrs(stream)`
+
 Returns: `{ streamId, trackId, listenerId, platform }`
 
 ### `buildGovernanceLogAttrs(action, actor)`
+
 Returns: `{ action, actorId, timestamp, orgId }`
 
 ## Recommended Dashboards
 
 ### 1. Financial Health
+
 - `payout.executed` rate (per hour)
 - `payout.frozen` count (should be near 0)
 - `oversell.blocked` count (capacity issues)
 - Compensation events (`audit_log WHERE action LIKE '%.compensated'`)
 
 ### 2. Content Pipeline
+
 - Release publish rate
 - Moderation flagged/approved ratio
 - Track upload processing pipeline throughput
 
 ### 3. Ticketing Operations
+
 - Ticket purchase rate
 - Oversell block rate (T1 violations caught)
 - Refund request rate
 
 ### 4. System Integrity
+
 - `invariant.checked` pass/fail ratio
 - `command.blocked` rate by guard name
 - Compensation event rate (should trend toward 0)

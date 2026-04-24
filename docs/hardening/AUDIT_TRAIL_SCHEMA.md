@@ -23,6 +23,7 @@ CREATE TABLE audit_log (
 ## Audit Actions by Domain
 
 ### Payout Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `payout.executed` | Successful payout | `{ amount, stripeTransferId }` |
@@ -30,6 +31,7 @@ CREATE TABLE audit_log (
 | `payout.compensated` | Post-payout failure recovery | `{ error, correlationId }` |
 
 ### Rights Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `rights.dispute.filed` | Dispute created | `{ releaseId, reason }` |
@@ -38,11 +40,13 @@ CREATE TABLE audit_log (
 | `rights.dispute.payout_unfreeze` | Payouts unfrozen — no remaining disputes | `{ releaseId }` |
 
 ### Revenue Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `ledger.revenue.entry` | Revenue event recorded | `{ revenueEventId, amount, source }` |
 
 ### Moderation Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `moderation.case.created` | New moderation case opened | `{ contentId, reason }` |
@@ -50,6 +54,7 @@ CREATE TABLE audit_log (
 | `moderation.case.resolved` | Case resolved/escalated | `{ caseId, resolution, notes }` |
 
 ### Release Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `release.created` | New release in DRAFT | `{ releaseId, title }` |
@@ -57,17 +62,20 @@ CREATE TABLE audit_log (
 | `release.transition.compensated` | Transition rollback | `{ error, previousStatus }` |
 
 ### Ticketing Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `ticket.purchased` | Ticket purchase confirmed | `{ eventId, ticketId }` |
 | `ticket.purchase.compensated` | Purchase rollback | `{ error }` |
 
 ### Creator Domain
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `creator.registered` | New creator registered | `{ creatorId }` |
 
 ### Command Bus
+
 | Action | Trigger | Metadata |
 |--------|---------|----------|
 | `command.blocked` | Pre-execution guard blocked command | `{ guard, reason }` |

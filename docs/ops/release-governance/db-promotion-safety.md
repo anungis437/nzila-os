@@ -25,6 +25,7 @@ db:doctor → db:migration:safety → db:drift:check
 ## What Each Check Does
 
 ### db:doctor
+
 1. **Migration ordering** — detects gaps and duplicates in numbered prefixes
 2. **Destructive DDL** — flags DROP TABLE, TRUNCATE, ALTER TYPE
 3. **Required extensions** — verifies uuid-ossp, pgcrypto referenced
@@ -33,6 +34,7 @@ db:doctor → db:migration:safety → db:drift:check
 6. **Credential scan** — no passwords/connection strings in SQL
 
 ### db:migration:safety
+
 10 rules with severity levels:
 
 | Rule | Severity | Pattern |
@@ -49,10 +51,12 @@ db:doctor → db:migration:safety → db:drift:check
 | LOCK_TABLE | block | Explicit `LOCK TABLE` |
 
 Additional checks:
+
 - **NO_TRANSACTION** — destructive ops without BEGIN/COMMIT
 - **INDEX_NOT_CONCURRENT** — CREATE INDEX without CONCURRENTLY
 
 ### db:drift:check
+
 1. Journal entry count vs SQL file count
 2. Journal tag ↔ filename consistency
 3. Snapshot freshness (latest snapshot matches latest journal)
@@ -62,18 +66,21 @@ Additional checks:
 ## Safe Migration Patterns
 
 ### Adding a column
+
 ```sql
 ALTER TABLE my_table ADD COLUMN new_col TEXT DEFAULT '';
 -- Always include DEFAULT for NOT NULL columns
 ```
 
 ### Creating an index (zero-downtime)
+
 ```sql
 CREATE INDEX CONCURRENTLY idx_my_table_col ON my_table (col);
 -- CONCURRENTLY avoids exclusive lock
 ```
 
 ### Removing a column (two-phase)
+
 ```sql
 -- Phase 1: Deploy code that doesn't read the column
 -- Phase 2 (next release): DROP COLUMN
@@ -81,6 +88,7 @@ ALTER TABLE my_table DROP COLUMN old_col;
 ```
 
 ### Rollback script pattern
+
 ```sql
 -- File: rollback/0022_undo_add_notifications.sql
 BEGIN;

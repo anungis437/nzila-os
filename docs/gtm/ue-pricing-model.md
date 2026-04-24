@@ -39,6 +39,7 @@
 | Large / federation | 50+ | $36,000–$40,000+ |
 
 Upward adjustments apply for:
+
 - Historical data import (adds $3,000–$8,000 depending on volume and source system)
 - Integration with existing HR, document management, or CRM system (scoped separately)
 - Extended training beyond standard admin + end-user sessions (billed as services)
@@ -48,6 +49,7 @@ Upward adjustments apply for:
 Base range: $50,000–$75,000 for a single department of 20–80 users with standard data migration.
 
 Adjustments:
+
 - Each additional 50 users: +$8,000–$12,000
 - Complex legacy migration (manual records, multiple source systems): +$10,000–$25,000
 - Each custom integration: +$5,000–$15,000 (scoped separately)
@@ -161,6 +163,7 @@ This is directional. Actual results depend on prospect quality and sales velocit
 ## Pricing Review Cadence
 
 Pricing is reviewed quarterly. Changes require:
+
 - Written approval from Platform Owner
 - Update to this document with version and date
 - No retroactive changes to active pilot agreements

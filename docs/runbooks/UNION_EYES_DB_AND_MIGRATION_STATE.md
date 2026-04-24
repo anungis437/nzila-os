@@ -32,10 +32,12 @@ Based on schema exports and route usage, Union Eyes expects at least:
 Status: PASS WITH CONDITIONS
 
 What is solid:
+
 - Drizzle wrapper baselines existing DBs before applying migrations.
 - Django container startup applies pending migrations with lock-aware migrate behavior.
 
 What is risky:
+
 - Dual ORM/migration planes raise drift risk if table ownership is unclear.
 - This audit did not directly introspect production DB table parity.
 
@@ -45,6 +47,7 @@ What is risky:
 - DB safe for production: FAIL (insufficient direct parity proof)
 
 Reason production is FAIL:
+
 - No direct, environment-targeted DB introspection evidence was collected in this pass to prove all required table families exist in the live production database.
 
 ## Manual/Operational Steps Still Required
@@ -67,14 +70,17 @@ Reason production is FAIL:
 Use both app-level and DB-level checks in each target environment.
 
 1. Application health:
+
 - `GET /api/health`
 - `GET /api/version`
 
 2. Migration state:
+
 - Drizzle wrapper execution logs from `pnpm --filter @nzila/union-eyes db:migrate`
 - Django migration logs from backend container startup
 
 3. DB parity SQL (example checks):
+
 - Claims/grievance core tables present
 - Member/steward tables present
 - Governance/elections tables present

@@ -46,6 +46,7 @@
 **Title:** Union Eyes runs on Microsoft Azure Canada Central with controls scoped to each tenant.
 
 **Bullets:**
+
 - Single-region: Canada Central, Toronto. Failover Canada East (Quebec).
 - Network: private vNet, app-to-DB on private endpoint, no public PG.
 - Secrets: Azure Key Vault, customer-specific MEK on the federation/national plan.
@@ -58,6 +59,7 @@
 **Title:** Per-organisation admin policy, enforced server-side.
 
 **Bullets:**
+
 - Methods: password (Argon2id), magic-link, Entra SSO. Enable/disable per org.
 - MFA: TOTP self-enrol; required-by-role; recovery codes (Argon2id-hashed).
 - Account lockout: 5 failed attempts → 15-min lockout. Risk-based step-up.
@@ -71,6 +73,7 @@
 **Title:** Canadian data, encrypted in transit and at rest, with a published data flow.
 
 **Bullets:**
+
 - Member data: Canada Central only. Backups: Canada Central + Canada East PITR.
 - Encryption: TLS 1.2+, AES-256.
 - Subprocessors: Azure (CA), Resend (email; PII = email address only).
@@ -84,6 +87,7 @@
 **Title:** Backups, monitoring, incident response — published SLAs.
 
 **Bullets:**
+
 - Backups: daily PITR (7-day window), quarterly restore drill.
 - Monitoring: 24×7 automated + business-hours human on-call.
 - Incident severity: Critical 1h ack / 24h resolve · High 4h / 5d · Medium 1bd / 30d · Low 5bd / best-effort.
@@ -96,6 +100,7 @@
 **Title:** What's shipped vs. what's roadmap. On the record.
 
 **Bullets:**
+
 - ✅ Today: encryption, MFA, SSO (Entra), lifecycle, audit, Canadian hosting.
 - ⏳ Roadmap: SOC 2 audit, ISO 27001, independent pen test, WebAuthn, public SCIM, SAML SSO.
 - 🚫 Not in scope (Phase 1): cross-org analytics, automated outreach, biometric auth.

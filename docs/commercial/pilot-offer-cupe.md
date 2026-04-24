@@ -11,6 +11,7 @@ A fully operational deployment of Union Eyes — configured for your collective 
 ### Included in the 90-Day Pilot
 
 **Track A — Grievance Management & Case Intelligence**
+
 - Grievance intake form configured to your CA step structure
 - Automated deadline tracking with rep notifications
 - Case file management with document upload and version history
@@ -20,11 +21,13 @@ A fully operational deployment of Union Eyes — configured for your collective 
 
 **Track B — Member Communications + Governance**
 *(Optional add-on — may run concurrently with Track A or in month 2)*
+
 - Member communication hub: announcements, targeted messages, push notifications
 - Governance module: motion tracking, meeting minutes, voting records
 - Elections administration: nomination management, secure balloting, result certification
 
 ### Pilot Configuration
+
 - Up to 5,000 members
 - Up to 20 rep/steward user accounts
 - 2 executive/administrator accounts

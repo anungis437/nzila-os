@@ -7,6 +7,9 @@ import { formatCurrency, formatDays } from "@/lib/utils";
 import { calculateRunway, runwayStatus } from "@/domain/runway";
 import { scoreRisks } from "@/domain/risk";
 import { rankPriorities } from "@/domain/priorities";
+import { computeRetentionInsights } from "@/lib/retention-intelligence";
+import { shouldShowUpgradePrompt } from "@/lib/usage-limits";
+import { CommercialActions } from "@/components/dashboard/commercial-actions";
 import { Calendar, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -20,16 +23,22 @@ interface CashSnapshot {
 async function getDashboardData() {
   const db = await getDb();
   if (!db) {
-    return { snapshot: null, openDeals: 0, pipelineValue: 0 };
+    return { snapshot: null, openDeals: 0, pipelineValue: 0, weeklyScores: [], subscription: null };
   }
   try {
     const { sql } = await import("drizzle-orm");
-    const [snapRow, dealsRow] = await Promise.allSettled([
+    const [snapRow, dealsRow, subRow, weeklyRow] = await Promise.allSettled([
       db.execute(
         sql`SELECT cash_on_hand, monthly_burn, runway_days, overdue_invoices FROM weekone_cash_snapshots ORDER BY recorded_at DESC LIMIT 1`
       ),
       db.execute(
         sql`SELECT COUNT(*) as count, COALESCE(SUM(value * probability / 100), 0) as weighted FROM weekone_deals WHERE stage != 'closed'`
+      ),
+      db.execute(
+        sql`SELECT plan, status, current_period_end FROM weekone_subscriptions ORDER BY created_at DESC LIMIT 1`
+      ),
+      db.execute(
+        sql`SELECT week_start_date as "weekStartDate", 70::int as score FROM weekone_weekly_briefs ORDER BY week_start_date DESC LIMIT 12`
       ),
     ]);
 
@@ -52,14 +61,35 @@ async function getDashboardData() {
       snapshot,
       openDeals: Number(dealsData?.count ?? 0),
       pipelineValue: Number(dealsData?.weighted ?? 0),
+      weeklyScores:
+        weeklyRow.status === "fulfilled"
+          ? ((weeklyRow.value as unknown as { rows: { weekStartDate: string; score: number }[] }).rows ?? [])
+          : [],
+      subscription:
+        subRow.status === "fulfilled"
+          ? (
+              subRow.value as unknown as {
+                rows: { plan: string; status: string; current_period_end: string | null }[];
+              }
+            ).rows?.[0] ?? null
+          : null,
     };
   } catch {
-    return { snapshot: null, openDeals: 0, pipelineValue: 0 };
+    return { snapshot: null, openDeals: 0, pipelineValue: 0, weeklyScores: [], subscription: null };
   }
 }
 
 export default async function DashboardPage() {
-  const { snapshot, openDeals, pipelineValue } = await getDashboardData();
+  const { snapshot, openDeals, pipelineValue, weeklyScores, subscription } = await getDashboardData();
+
+  const planLabel =
+    subscription?.plan === "growth"
+      ? "Growth"
+      : subscription?.plan === "team"
+      ? "Team"
+      : subscription?.plan === "solo"
+      ? "Solo"
+      : "Free";
 
   const runwayDays = snapshot
     ? calculateRunway({
@@ -69,6 +99,23 @@ export default async function DashboardPage() {
     : null;
 
   const rStatus = runwayDays !== null ? runwayStatus(runwayDays) : "neutral";
+  const planId =
+    subscription?.plan === "growth"
+      ? "pro"
+      : subscription?.plan === "team"
+      ? "team"
+      : "free";
+
+  const usageSnapshot = {
+    prioritiesCreatedThisWeek: Math.max(0, openDeals * 2),
+    collaborators: 1,
+    integrationsConnected: subscription ? 1 : 0,
+  };
+  const showUpgradePrompt = shouldShowUpgradePrompt({
+    plan: planId,
+    usage: usageSnapshot,
+  });
+  const retention = computeRetentionInsights(weeklyScores);
 
   const risks =
     runwayDays !== null
@@ -262,7 +309,7 @@ export default async function DashboardPage() {
             {/* Weekly Brief Teaser */}
             <section>
               <Link
-                href="/weekly"
+                href="weekly"
                 className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-electric/40 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center gap-3">
@@ -277,6 +324,61 @@ export default async function DashboardPage() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             </section>
+
+            <section>
+              <Link
+                href="settings"
+                className="flex items-center justify-between rounded-lg border border-electric/20 bg-electric/5 p-4 hover:border-electric/40 hover:shadow-sm transition-all"
+              >
+                <div>
+                  <p className="text-sm font-medium">Plan Health</p>
+                  <p className="text-xs text-muted-foreground">
+                    Current plan: {planLabel}
+                    {subscription?.current_period_end
+                      ? ` · Renews ${new Date(subscription.current_period_end).toLocaleDateString()}`
+                      : " · Upgrade to unlock integrations and deeper analytics"}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </section>
+
+            <section>
+              <div className="rounded-lg border border-border bg-card p-4">
+                <p className="text-sm font-medium">Retention Intelligence</p>
+                <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-muted-foreground">Weeks completed</p>
+                    <p className="text-base font-semibold">{retention.weeksCompleted}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Average score</p>
+                    <p className="text-base font-semibold">{retention.averageScore}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Consistency</p>
+                    <p className="text-base font-semibold">{retention.consistency}%</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Churn risk</p>
+                    <p className="text-base font-semibold capitalize">{retention.churnRisk}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {showUpgradePrompt && (
+              <section>
+                <div className="rounded-lg border border-electric/30 bg-electric/10 p-4">
+                  <p className="text-sm font-medium text-electric">Upgrade recommended</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    You are approaching usage limits on your current plan. Upgrade to unlock more collaborators and integrations.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            <CommercialActions />
           </div>
         </div>
       </div>

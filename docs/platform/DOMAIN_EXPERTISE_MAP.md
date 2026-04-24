@@ -13,6 +13,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 ## Domain Teams
 
 ### Commerce Domain
+
 **Apps**: `flow`, `trade`, `zonga`, `agrimo`
 **Primary owner**: Commerce team
 **Deputy**: Platform Engineering (escalation)
@@ -20,6 +21,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Bus factor risk**: Trade order processing and DAPL ledger logic — high complexity, document in ADRs
 
 ### Union Domain
+
 **Apps**: `union-eyes`
 **Primary owner**: Union team
 **Deputy**: Platform Engineering (for DB schema changes)
@@ -27,6 +29,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Bus factor risk**: Shamir threshold implementation — requires 2-person knowledge minimum
 
 ### Finance Domain
+
 **Apps**: `cfo`, `abr`
 **Primary owner**: Finance team
 **Deputy**: Commerce team (shared ledger concepts)
@@ -34,6 +37,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Bus factor risk**: ABR audit pipeline — single-engineer domain today, cross-training target for Q3 2026
 
 ### Identity & Platform Domain
+
 **Apps**: `console`, `web`, `platform-admin`, `partners`
 **Primary owner**: Platform Engineering
 **Deputy**: Any senior engineer
@@ -41,6 +45,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Bus factor risk**: Auth middleware and org resolver — well-documented in `ARCHITECTURE.md`
 
 ### AI & Intelligence Domain
+
 **Apps**: `control-plane`, `orchestrator-api`, `cora`
 **Primary owner**: AI/ML team
 **Deputy**: Platform Engineering
@@ -48,6 +53,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Bus factor risk**: Prompt template security review — must involve both AI and Security teams
 
 ### Mobility & Exams Domain
+
 **Apps**: `mobility`, `mobility-client-portal`, `nacp-exams`
 **Primary owner**: Mobility team
 **Deputy**: Finance team (shared compliance patterns)
@@ -85,6 +91,7 @@ Missed targets require a remediation plan in the next sprint.
 Each domain contributes to the platform-wide on-call rotation. Engineers must be cross-trained before taking on-call coverage outside their primary domain.
 
 **Requirements before cross-domain on-call**:
+
 1. Shadow the primary domain engineer for one sprint
 2. Walk through a simulated incident using the relevant AI incident playbook or SLO runbook
 3. Approved by domain tech lead in writing (Slack or GitHub issue)

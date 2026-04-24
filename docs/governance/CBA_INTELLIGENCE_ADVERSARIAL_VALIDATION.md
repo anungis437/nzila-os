@@ -175,6 +175,7 @@ The CBA Intelligence platform has advanced from **complete but unexecuted** to *
 | Test against real docs | ❌ Never executed against real CBA text |
 
 **Evidence:** `extraction-orchestrator.ts` implements a 4-stage pipeline:
+
 1. **Normalization** — strips HTML, collapses whitespace
 2. **Metadata extraction** — regex for employer/union names ("between X and Y"), 14 Canadian jurisdiction codes, 20+ sector keywords, date extraction with term computation
 3. **Clause classification** — splits document into sections, scores each against 26 keyword maps (wages, hours, benefits, grievance, seniority, etc.), assigns confidence 0–1 based on keyword density
@@ -248,6 +249,7 @@ The pipeline persists results via `createExtractionRun()`, `createFindingsBatch(
 | Review metrics wired | ❌ `review_queue_depth` and `review_decisions_total` not yet emitted |
 
 **Evidence:** Metrics are now emitted in production code paths:
+
 - `ingestion-orchestrator.ts` — `cbaIntelIngestionJobsTotal.inc({status, source_type})` on every job completion/failure, `cbaIntelIngestionDuration.observe()` for job duration, `cbaIntelDocumentsIngested.inc()` for new/updated documents
 - `extraction-orchestrator.ts` — `cbaIntelExtractionConfidence.observe({clause_family}, confidence)` for every classified clause
 - `ingestion-scheduler.ts` — `cbaIntelSourceFreshness.set({source_slug}, value)` mapping freshness status to numeric gauge (1=fresh, 2=aging, 3=stale, 4=expired)

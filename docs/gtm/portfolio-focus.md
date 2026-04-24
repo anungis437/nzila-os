@@ -29,6 +29,7 @@ This is not a 30-day sprint. This is the commercial foundation window. The first
 This is the product that is ready. It has a governed evidence model, instrumented KPIs, a buyer-ready one-pager, tiered pilot options, and pricing. The work now is **not building** — it is **selling**.
 
 Actions that are allowed without question:
+
 - Outreach to prospects
 - Readiness briefings and sales calls
 - Pilot provisioning and delivery
@@ -37,6 +38,7 @@ Actions that are allowed without question:
 - Enhancements directly requested by a live pilot organization (as a scoped services item)
 
 Actions that require Platform Owner sign-off before starting:
+
 - Any new Union Eyes feature not requested by an active buyer
 - Changes to the Union Eyes data model that affect current schema
 - New integrations not part of an active pilot scope
@@ -51,11 +53,13 @@ Actions that require Platform Owner sign-off before starting:
 Flow is the next commercial product after Union Eyes reaches its first conversion. It is not being pitched in parallel — it supports the narrative that the platform has breadth.
 
 Actions that are allowed:
+
 - Maintenance and test coverage
 - Documentation of what Flow can do (capability matrix, buyer pack)
 - Responding to inbound questions about Flow from prospects already engaged on Union Eyes
 
 Actions that are not allowed without explicit re-prioritization:
+
 - Active outreach for Flow-only engagements
 - New feature development on Flow while Union Eyes has no signed pilots
 
@@ -69,11 +73,13 @@ Actions that are not allowed without explicit re-prioritization:
 These products exist. They will not receive attention during this focus period.
 
 Actions that are allowed:
+
 - Passing automated tests and keeping lint clean
 - Dependency security patches
 - Architecture maintenance that is part of a monorepo-wide change
 
 Actions that are explicitly not allowed during the focus period:
+
 - New feature work
 - New pages, new routes, new APIs
 - New integrations

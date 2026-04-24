@@ -73,6 +73,7 @@ are made by reversals (negative entries referencing the original).
 ### Why 7 allocation methods?
 
 Different union structures need different fairness models:
+
 - Large unions with many locals → per_member_count
 - Tech-forward unions → per_active_user
 - Grievance-heavy environments → per_case_volume

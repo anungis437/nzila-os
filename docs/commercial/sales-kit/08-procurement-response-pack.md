@@ -13,15 +13,19 @@
 ## Standard Procurement Questions and Responses
 
 ### Where is data hosted?
+
 Current operating environment uses Azure Canada Central for primary staging production-like deployment.
 
 ### How are secrets handled?
+
 Runtime-only secret injection is the target and build-flow secret argument risk was hardened in this pass.
 
 ### Do you provide incident notifications?
+
 Yes, under contractual obligations and established incident process.
 
 ### Is there a trust package?
+
 Yes. See `docs/commercial/trust-center`.
 
 ## Response SLA

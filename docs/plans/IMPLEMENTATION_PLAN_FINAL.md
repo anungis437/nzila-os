@@ -27,6 +27,7 @@
 **Goal:** Canonical domain event envelope + typed bus for all verticals.
 
 ### Files to Create
+
 - `packages/platform-events/package.json`
 - `packages/platform-events/tsconfig.json`
 - `packages/platform-events/vitest.config.ts`
@@ -40,9 +41,11 @@
 - `packages/platform-events/src/__tests__/store.test.ts`
 
 ### DB Schema Addition
+
 - Add `platformEvents` table to `packages/db/src/schema/platform.ts`
 
 ### Design Decisions
+
 - Extends `DomainEvent` pattern from commerce-events but adds: `source`, `schemaVersion`, `traceId`, `causationId`
 - Compatible with existing `InMemoryEventBus` — same subscribe/emit pattern
 - Port pattern for persistence (inject store or use in-memory)
@@ -54,6 +57,7 @@
 **Goal:** Admin/ops surface over the existing integrations infrastructure.
 
 ### Files to Create
+
 - `packages/platform-integrations-control-plane/package.json`
 - `packages/platform-integrations-control-plane/tsconfig.json`
 - `packages/platform-integrations-control-plane/vitest.config.ts`
@@ -69,10 +73,12 @@
 - `packages/platform-integrations-control-plane/src/__tests__/dlq.test.ts`
 
 ### Console Surfaces
+
 - `apps/console/app/(dashboard)/integrations-control-plane/page.tsx`
 - `apps/console/app/(dashboard)/integrations-control-plane/dlq/page.tsx`
 
 ### Dependencies
+
 - `@nzila/integrations-core`, `@nzila/integrations-runtime`, `@nzila/integrations-db`, `@nzila/db`, `zod`
 
 ---
@@ -82,6 +88,7 @@
 **Goal:** Correlation IDs, structured tracing, metrics endpoint.
 
 ### Files to Create
+
 - `packages/platform-observability/package.json`
 - `packages/platform-observability/tsconfig.json`
 - `packages/platform-observability/vitest.config.ts`
@@ -96,6 +103,7 @@
 - `packages/platform-observability/src/__tests__/span.test.ts`
 
 ### Integration Points
+
 - Works with existing `@nzila/os-core/telemetry` logger (injects traceId/requestId)
 - Works with existing `@nzila/platform-ops` health-digest
 
@@ -106,6 +114,7 @@
 **Goal:** Orchestrated evidence pack export with tamper-verification.
 
 ### Files to Create
+
 - `packages/platform-evidence-pack/package.json`
 - `packages/platform-evidence-pack/tsconfig.json`
 - `packages/platform-evidence-pack/vitest.config.ts`
@@ -119,9 +128,11 @@
 - `packages/platform-evidence-pack/src/__tests__/verifier.test.ts`
 
 ### Console Surfaces
+
 - `apps/console/app/(dashboard)/evidence-packs/page.tsx`
 
 ### Dependencies
+
 - `@nzila/os-core` (evidence seal, logger), `@nzila/db` (evidence_packs, evidence_pack_artifacts), `zod`
 
 ---
@@ -131,6 +142,7 @@
 **Goal:** Immutable, chained compliance snapshots for audit readiness.
 
 ### Files to Create
+
 - `packages/platform-compliance-snapshots/package.json`
 - `packages/platform-compliance-snapshots/tsconfig.json`
 - `packages/platform-compliance-snapshots/vitest.config.ts`
@@ -146,9 +158,11 @@
 - `packages/platform-compliance-snapshots/src/__tests__/verifier.test.ts`
 
 ### DB Schema Addition
+
 - Add `platformComplianceSnapshots` table to `packages/db/src/schema/platform.ts`
 
 ### Console Surfaces
+
 - `apps/console/app/(dashboard)/compliance-snapshots/page.tsx`
 
 ---
@@ -156,6 +170,7 @@
 ## Phase G: Contract Tests
 
 ### New Contract Test Files
+
 - `tooling/contract-tests/platform-events-invariants.test.ts`
 - `tooling/contract-tests/platform-control-plane-invariants.test.ts`
 - `tooling/contract-tests/platform-observability-invariants.test.ts`
@@ -163,6 +178,7 @@
 - `tooling/contract-tests/platform-compliance-invariants.test.ts`
 
 ### Invariants Enforced
+
 1. All platform packages have `package.json`, `tsconfig.json`, `vitest.config.ts`
 2. No `console.*` in source files (must use structured logger)
 3. No `any` type assertions in source files

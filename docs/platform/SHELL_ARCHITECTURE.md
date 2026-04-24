@@ -39,6 +39,7 @@ registry.registerAll(DEFAULT_MODULES);
 ### Resolution
 
 The registry resolves modules into manifests based on:
+
 1. **Role check** — Does the user have a required role?
 2. **Entitlement check** — Does the org's plan include required features?
 3. **Feature flag check** — Is the feature flag enabled?

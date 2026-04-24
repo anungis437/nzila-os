@@ -30,15 +30,15 @@ export default async function DemoPage() {
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <ol className="space-y-6 text-gray-700">
           <li className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">1</span>
+            <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">1</span>
             <p>{isFr ? 'Écrivez à' : 'Email'} <a className="text-electric underline" href="mailto:hello@nzila.ca">hello@nzila.ca</a> {isFr ? 'avec votre cas d usage' : 'with your use case'}.</p>
           </li>
           <li className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">2</span>
+            <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">2</span>
             <p>{isFr ? 'Nous planifions un atelier de 45 min sur le produit le plus pertinent.' : 'We schedule a 45-min workshop on the most relevant product.'}</p>
           </li>
           <li className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">3</span>
+            <span className="shrink-0 w-8 h-8 rounded-full bg-electric text-white font-bold flex items-center justify-center">3</span>
             <p>{isFr ? 'Si pertinent, nous lançons un pilote en 2 semaines.' : 'If it fits, we launch a pilot within 2 weeks.'}</p>
           </li>
         </ol>

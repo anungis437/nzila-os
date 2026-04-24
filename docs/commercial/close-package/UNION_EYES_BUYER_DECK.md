@@ -15,6 +15,7 @@
 **Title:** Union Eyes — the operating system for modern Canadian unions
 
 **Bullets:**
+
 - Purpose-built for the work: grievance, governance, communications, member engagement
 - Canadian-hosted, bilingual, governed AI
 - 90-day pilot. No multi-year commitment.
@@ -28,6 +29,7 @@
 **Title:** Six predictable failures we see in every union we meet
 
 **Bullets:**
+
 - Missed contractual deadlines because nobody noticed a step-2 window expired
 - Steward burnout: top 20% carry 60% of files
 - Members drift away between contract cycles — no one saw the silence
@@ -44,6 +46,7 @@
 **Title:** The tools you have were not built for unions
 
 **Bullets:**
+
 - Email + spreadsheets: no deadline awareness, no precedent search
 - Generic CRM: doesn't understand "Step 3" or "ULP" or "duty of fair representation"
 - Microsoft 365 / Google Workspace: storage, not workflow
@@ -59,6 +62,7 @@
 **Title:** A purpose-built union OS, in production today
 
 **Bullets:**
+
 - Grievance + case workflow that knows your contract steps
 - Governance, motions, elections — built-in
 - Member portal + bilingual communications
@@ -75,6 +79,7 @@
 **Title:** Six modules. One platform. No feature tiering.
 
 **Bullets:**
+
 - **Grievance & case management** — intake, timelines, evidence bundles, arbitration export
 - **Cognition workbench** — 5 advisory modules, published KPIs (slide 6)
 - **Governance** — motions, meeting minutes, voting records
@@ -91,6 +96,7 @@
 **Title:** Five intelligence modules. Ten KPIs with published formulas.
 
 **Bullets:**
+
 - **Grievance trajectory:** risk score + top-3 factors + recommended action
 - **Steward workload balancer:** utilisation + fairness score + reassignment recs
 - **Member disengagement risk:** tier + outreach channel + timing window
@@ -106,6 +112,7 @@
 **Title:** Procurement-defensible from day one
 
 **Bullets:**
+
 - Microsoft Azure Canada Central — member data does not leave Canada
 - Encryption: TLS 1.2+ / AES-256
 - Identity: password (Argon2id) + magic-link + Microsoft Entra SSO
@@ -124,6 +131,7 @@
 **Title:** Pilot in 14 days. Real outcomes in 90.
 
 **Bullets:**
+
 - Week 1: contract signed, data import template shared, Azure tenant provisioned
 - Week 2: configured, accounts created, **go-live**
 - Weeks 3–4: steward onboarding (2 × 90-min sessions, recorded)
@@ -140,6 +148,7 @@
 **Title:** A typical 15-steward / 800-member local
 
 **Bullets:**
+
 - Precedent retrievals: 4/wk × 1.5h × 4w = **24h/month saved**
 - Early-warning interventions: 6/wk × 0.75h × 4w = **18h/month saved**
 - Accepted reassignments: 2/wk × 1.0h × 4w = **8h/month saved**
@@ -155,6 +164,7 @@
 **Title:** What we provide. What you provide.
 
 **Bullets:**
+
 - **We provide:** Azure tenant, configured workflow, steward onboarding (2 × 90 min), weekly check-ins, ROI report, 5-business-day data export on exit
 - **You provide:** active grievance list (CSV — we provide the template), CA step structure, list of rep/steward users, 1 pilot coordinator (~2h/week)
 - IT lift: SSO config (optional, ~2 hours) + add domain to email allowlist
@@ -169,6 +179,7 @@
 **Title:** Pilot-first. Membership-based. No hidden costs.
 
 **Bullets:**
+
 - Pilot: $12,000 CAD / 90 days (Local tier, ≤5,000 members) — fully credited on conversion
 - Local subscription: $18K–$52K/year, scaled by membership band
 - Council subscription: $72K–$96K/year for 5K–25K members
@@ -184,6 +195,7 @@
 **Title:** Five reasons that hold up under board scrutiny
 
 **Bullets:**
+
 - **Purpose-built**: knows the work, not a CRM with union labels
 - **Canadian-hosted**: PIPEDA-aligned, no US data transit
 - **Governed AI**: advisory only, every recommendation overridable
@@ -199,6 +211,7 @@
 **Title:** From here to go-live
 
 **Bullets:**
+
 - **Today:** receive this deck + Trust Pack + Pilot Outline (Day 0)
 - **Day 2:** Procurement Checklist for your Legal/IT/Ops/Finance leads
 - **Day 5:** ROI Calculator with your assumptions plugged in

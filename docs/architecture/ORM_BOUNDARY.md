@@ -29,6 +29,7 @@
 ## PK Convention
 
 Every table inherits `BaseModel` which adds:
+
 - `id` — UUID, primary key, auto-generated
 - `created_at` — timestamp, auto-set on insert
 - `updated_at` — timestamp, auto-set on update

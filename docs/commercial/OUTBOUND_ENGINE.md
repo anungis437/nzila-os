@@ -92,10 +92,12 @@ Modules follow the Phase-1 file-backed pattern. Data is stored in `ops/growth-{e
 **Purpose:** Real-time operator view of the full UE pipeline.
 
 **Data sources:**
+
 - `@nzila/deal-engine` seed data (union-eyes product filter)
 - `@nzila/platform-growth-os` icp, unionMap, sequences modules
 
 **Sections (all null-hidden):**
+
 1. Top-of-funnel: ICP targets, active sequences, contact rate
 2. Mid-funnel: demos scheduled/completed, proposals sent
 3. Bottom-of-funnel: active pilots, conversions, dormant

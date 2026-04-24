@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import type { OnboardingData } from "./page";
+import { trackClientEvent, WEEKONE_ANALYTICS_EVENTS } from "@/lib/analytics/track";
 
 const TOOLS = [
   { key: "stripe", label: "Stripe", description: "Payments & revenue" },
@@ -14,7 +16,47 @@ interface Props {
   onBack: () => void;
 }
 
-export function Step5({ onBack }: Props) {
+export function Step5({ data, onBack }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [submitting, setSubmitting] = useState<"complete" | "skip" | null>(null);
+
+  const dashboardHref = useMemo(() => {
+    const segments = pathname.split("/").filter(Boolean);
+    const locale = segments[0] ?? "en";
+    return `/${locale}/dashboard`;
+  }, [pathname]);
+
+  async function emitActivation(action: "complete" | "skip") {
+    await fetch("/api/onboarding/activation", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        action,
+        step: "tool_connect",
+        data,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  }
+
+  async function handleContinue(action: "complete" | "skip") {
+    setSubmitting(action);
+    try {
+      await emitActivation(action);
+      if (action === "complete") {
+        await trackClientEvent({
+          eventName: WEEKONE_ANALYTICS_EVENTS.SIGNUP_COMPLETE,
+          context: { source: "onboarding_step_5" },
+        });
+      }
+    } catch {
+      // Activation logging should never block user progression.
+    } finally {
+      router.push(dashboardHref);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -43,24 +85,27 @@ export function Step5({ onBack }: Props) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <Link
-          href="/dashboard"
-          className="w-full rounded-lg bg-electric py-2.5 text-center text-sm font-semibold text-white hover:bg-electric/90"
+        <button
+          onClick={() => handleContinue("complete")}
+          disabled={submitting !== null}
+          className="w-full rounded-lg bg-electric py-2.5 text-center text-sm font-semibold text-white hover:bg-electric/90 disabled:opacity-60"
         >
-          Get Started
-        </Link>
+          {submitting === "complete" ? "Finishing setup..." : "Get Started"}
+        </button>
         <button
           onClick={onBack}
+          disabled={submitting !== null}
           className="rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-muted"
         >
           Back
         </button>
-        <Link
-          href="/dashboard"
-          className="text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
+        <button
+          onClick={() => handleContinue("skip")}
+          disabled={submitting !== null}
+          className="text-center text-xs text-muted-foreground hover:text-foreground hover:underline disabled:opacity-60"
         >
-          Skip for now, start manually
-        </Link>
+          {submitting === "skip" ? "Skipping..." : "Skip for now, start manually"}
+        </button>
       </div>
     </div>
   );

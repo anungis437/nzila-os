@@ -92,8 +92,6 @@ Target: ≥ 3× (i.e., revenue ≥ 3× the opportunity cost of founder time to c
 | Outreach drought | < 3 outreach messages sent in any 7-day window | — |
 | Proposal delay | Demo completed > 3 days ago, no proposal sent | — |
 
-
-
 ---
 
 ## Tab 1 — Active Pilots
@@ -142,6 +140,7 @@ Target: ≥ 3× (i.e., revenue ≥ 3× the opportunity cost of founder time to c
 | `9-PAUSED` | Timing issue; follow-up date set |
 
 **Risk flags to use:**
+
 - `Long procurement cycle` — public sector / large national body
 - `No champion identified` — executive contact missing
 - `Competing vendor` — known existing system in place

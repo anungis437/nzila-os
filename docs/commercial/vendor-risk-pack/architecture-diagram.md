@@ -14,5 +14,6 @@ flowchart LR
 ```
 
 Reference architecture details:
+
 - ARCHITECTURE.md
 - docs/platform/platform-boundaries.md

@@ -28,15 +28,16 @@ cannot demonstrate.
 - Access modes (commercial-friendly): [`UNION_EYES_ACCESS_MODES.md`](../UNION_EYES_ACCESS_MODES.md)
 - Internal runbooks: [`docs/runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md), [`docs/runbooks/union-eyes-identity-lifecycle.md`](../../runbooks/union-eyes-identity-lifecycle.md)
 
-_Last revised: 2026-04-24._
-# Trust Center Package
+*Last revised: 2026-04-24.*
+
+## Trust Center Package
 
 Date: 2026-04-22  
 Audience: Security, procurement, legal, and IT diligence teams.
 
 This package includes only claims with a traceable source in repository artifacts or live infrastructure checks.
 
-## Contents
+## Package Contents
 
 1. `01-security-overview.md`
 2. `02-data-residency.md`

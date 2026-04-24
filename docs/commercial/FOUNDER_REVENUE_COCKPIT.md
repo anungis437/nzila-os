@@ -100,7 +100,9 @@
 ### 2E — Focus Panel Logic
 
 #### Next 5 Must-Contact
+
 Ranked by combined urgency score:
+
 1. Deals in `demo_completed` stage (proposal overdue if > 5 days since demo)
 2. Deals in `pilot_proposed` with no reply in > 7 days
 3. Top-15 Tier-1 targets with no deal record (completely untouched)
@@ -108,16 +110,20 @@ Ranked by combined urgency score:
 5. Deals where `daysInStage > 21` (stalled — need a re-engagement touch)
 
 #### Deals at Risk
+
 A deal is **at risk** if it meets any of:
+
 - `conversionRisk === 'high'` (explicit flag in seed data)
 - `stage === 'dormant'`
 - `daysInStage > 21` with no logged touch in that period
 - No `nextAction` defined
 
 #### Overdue Follow-Ups
+
 Any deal where a follow-up was scheduled (via sequence event `follow_up_scheduled`) and the target date has passed without a `call_completed` or `email_sent` event.
 
 #### Warm Intros Available
+
 Cross-reference `TargetOrganisation.introPaths` (from ICP data) against founder's network nodes in `unionMap`. Surface the shortest-path intro that hasn't been activated yet.
 
 ---
@@ -143,6 +149,7 @@ The page surfaces the top 3 from this ranked list.
 Defined as: **at least one deal advances one stage this week.**
 
 Stage advancement examples:
+
 - `lead` → `qualified` (qualification call completed)
 - `demo_completed` → `pilot_proposed` (proposal sent)
 - `pilot_proposed` → `pilot_active` (agreement signed)
@@ -162,6 +169,7 @@ Win condition resets each Monday. The cockpit page renders the current week's wi
 | Auth | `@nzila/platform-auth/entra/server` | Session validation, `userId` |
 
 **Bootstrapping:** Before first render, call:
+
 ```typescript
 await Promise.all([
   icp.bootstrapIcpSegments(),
@@ -169,6 +177,7 @@ await Promise.all([
   unionMap.bootstrapUnionMap(),
 ])
 ```
+
 These are idempotent — safe to call on every cold start.
 
 ---

@@ -38,7 +38,16 @@ import { OrganizationMembers } from "@/components/organization/organization-memb
 import { OrganizationTree } from "@/components/admin/organization-tree";
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => {
+  if (!url.startsWith('/')) {
+    throw new Error('Invalid fetch URL');
+  }
+  const parsed = new URL(url, window.location.origin);
+  if (parsed.origin !== window.location.origin) {
+    throw new Error('Cross-origin fetch is not allowed');
+  }
+  return fetch(parsed.toString(), { mode: 'same-origin', credentials: 'same-origin' }).then(res => res.json());
+};
 
 // Organization type configurations
 const typeConfig: Record<OrganizationType, { label: string; icon: React.ReactElement; color: string }> = {

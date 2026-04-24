@@ -27,7 +27,7 @@ We say so explicitly so you do not have to ask.
 
 ---
 
-# Expanded version
+## Expanded version
 
 ## 1. Canadian hosting + encryption
 

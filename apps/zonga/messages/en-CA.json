@@ -218,6 +218,41 @@
       "instant": "Instant",
       "ownership": "Ownership"
     },
+    "waitlist": {
+      "badge": "Beta Access",
+      "title": "Join the Zonga",
+      "titleAccent": "Beta Waitlist",
+      "description": "Get early access to diaspora picks, event ticketing upgrades, and artist growth tools before public rollout.",
+      "benefits": [
+        "Priority invites for creators, labels, and promoters",
+        "Early access to recommendation and sharing features",
+        "Faster onboarding support during beta"
+      ],
+      "roles": {
+        "artist": "Artist",
+        "label": "Label",
+        "promoter": "Promoter",
+        "fan": "Listener",
+        "other": "Other"
+      },
+      "interestOptions": {
+        "streaming": "Streaming",
+        "events": "Events",
+        "artist_tools": "Artist Tools",
+        "label_ops": "Label Operations",
+        "diaspora_discovery": "Diaspora Discovery"
+      },
+      "form": {
+        "firstName": "First name",
+        "email": "Email",
+        "city": "City",
+        "interests": "Top interests",
+        "submit": "Join Waitlist",
+        "submitting": "Submitting...",
+        "success": "You are on the list. We will send your beta invite soon.",
+        "error": "Could not submit waitlist request. Please retry."
+      }
+    },
     "cta": {
       "title": "Ready to Join the",
       "titleAccent": "Movement?",

@@ -43,16 +43,19 @@ During the pilot phase, Nzila commits to the following response and resolution t
 ## 4. Incident Response Process
 
 ### Detection
+
 - Platform health endpoints are monitored by Nzila ops team
 - Container Apps availability tracked via Azure Monitor
 - Critical error rates trigger internal alerts
 
 ### Response
+
 1. **P0**: Immediate Slack/call escalation to platform-core-lead + on-call engineer
 2. **P1**: Platform-core-lead notified within 1 hour; triage begins
 3. **P2/P3**: Logged in backlog; triaged in next planning session
 
 ### Communication
+
 - Pilot customers receive incident updates via their dedicated Slack channel
 - Post-incident summary provided within 48 hours for P0/P1 events
 

@@ -42,11 +42,13 @@
 ### Phase 8 — Dashboard Integration (THIS SESSION)
 
 **billing-service.ts** — Added 3 admin cross-org query functions:
+
 - `getAdminSubscriptions()` — orgSubscriptions JOIN subscriptionPlans + organizations
 - `getAdminInvoices()` — platformInvoices JOIN organizations
 - `getAdminPayments()` — platformPayments JOIN organizations
 
 **billing-admin/page.tsx** — Migrated from legacy to MIL:
+
 - Removed raw SQL on `billing_subscriptions`, `billing_invoices`, `billing_payments`
 - Now imports `getAdminSubscriptions`, `getAdminInvoices`, `getAdminPayments` from `@/services/platform-economics`
 - Updated interfaces for canonical column names (baseFee, totalAmount, taxAmount, etc.)
@@ -56,6 +58,7 @@
 ### Phase 9 — Certification Upgrade
 
 **mil-integration.test.ts** — 34 contract tests across 5 invariant groups:
+
 - MIL-INT-001: Billing admin dashboard imports from platform-economics (5 tests)
 - MIL-INT-002: Billing service admin functions present (5 tests)
 - MIL-INT-003: Core billing routes use withApi, not crudRoutes (11 tests)
@@ -63,12 +66,14 @@
 - MIL-INT-005: Webhook routes use structured logger (4 tests)
 
 **Entitlement enforcement added to 9 routes (13 withApi calls):**
+
 - `financial_intelligence_suite`: dues/balance, dues/late-fees, dues/ledger, dues/reconcile, dues/payment-plans, billing/send-invoice, billing/subscriptions
 - `commercial_reporting`: contracts, reconciliation/process
 
 ### Phase 10 — Deprecation Pass
 
 **mil-deprecation-guard.test.ts** — 2 enforcement tests:
+
 - MIL-DEP-001: No app/action files reference legacy billing tables
 - MIL-DEP-002: No dashboard pages use raw SQL on legacy billing tables
 

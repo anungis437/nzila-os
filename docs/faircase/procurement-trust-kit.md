@@ -1,4 +1,5 @@
 # FairCase — Procurement Trust Kit
+
 ## For Institutional Buyers, Vendor Risk Teams, and Procurement Officers
 
 > **Version:** 1.0 — April 2026
@@ -13,7 +14,7 @@
 **Product:** FairCase — Equity Intelligence Platform
 **Headquarters:** Canada
 **Website:** faircase.ca
-**Primary contact:** Michel Nungisa, Founder (michel@nzila.ca)
+**Primary contact:** Michel Nungisa, Founder (<michel@nzila.ca>)
 
 **What FairCase does:** FairCase is an equity intelligence platform for Canadian institutions — providing AI-assisted protected grounds classification, pattern analysis, investigation workflow management, and equity accountability reporting. It is purpose-built for Anti-Black Racism and protected grounds governance.
 
@@ -130,6 +131,7 @@ FairCase's classification intelligence is an AI-assisted tool. This section desc
 **No FairCase classification output is a final determination.**
 
 Every Medium and High confidence classification recommendation requires review and confirmation by a designated human reviewer at the institution before any institutional action is taken. The human reviewer can:
+
 - Accept the classification (with their name and timestamp logged)
 - Modify the classification (with documented rationale logged)
 - Override the classification entirely (with documented rationale logged)
@@ -139,6 +141,7 @@ This design is not optional — it is structurally enforced in the platform. Cas
 ### 5.2 Explainability
 
 Every classification recommendation includes:
+
 - The confidence level (Low / Medium / High)
 - The specific factual patterns that contributed to the score
 - The CanLII case references most relevant to the classification basis
@@ -149,6 +152,7 @@ Reviewers can see exactly why the model flagged a case. They are not asked to ac
 ### 5.3 Model documentation
 
 FairCase maintains a model card for its classification model documenting:
+
 - Training corpus (CanLII ABR-adjacent decisions, jurisdiction coverage, date range)
 - Known limitations and edge cases
 - Accuracy metrics on held-out test set
@@ -168,6 +172,7 @@ Model cards are available to institutional buyers on request.
 ### 5.5 Alignment with emerging AI governance standards
 
 FairCase's AI governance approach is designed to be consistent with:
+
 - Canada's *Directive on Automated Decision-Making* (TBS, 2019) — human oversight requirements for federal public sector AI use
 - The *Artificial Intelligence and Data Act* (AIDA) framework as it develops
 - Ontario's emerging AI use guidance for public institutions
@@ -210,6 +215,7 @@ FairCase will provide written notice of any material change to subprocessor arra
 FairCase will provide reference contacts from pilot institutions upon request after pilot completion. Reference contacts will be from organizations in the same sector as the prospective buyer (union → union reference; public sector → public sector reference).
 
 Reference information available:
+
 - Named contact at the reference institution
 - Brief description of engagement scope
 - Dates of engagement
@@ -244,8 +250,8 @@ FairCase will support institutional procurement processes with:
 - Canadian business registration documentation
 - Privacy impact assessment support for institutions with PIA requirements
 
-Contact Michel Nungisa (michel@nzila.ca) to initiate procurement documentation.
+Contact Michel Nungisa (<michel@nzila.ca>) to initiate procurement documentation.
 
 ---
 
-*FairCase Trust Kit v1.0 — April 2026. Subject to revision as certifications are completed. For the most current version, contact michel@nzila.ca.*
+*FairCase Trust Kit v1.0 — April 2026. Subject to revision as certifications are completed. For the most current version, contact <michel@nzila.ca>.*

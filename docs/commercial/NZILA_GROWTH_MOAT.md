@@ -5,6 +5,7 @@
 ## The five compounding assets
 
 ### 1. Campaign memory
+
 Every campaign, every asset, every run, every result is stored with the
 brand voice it was checked against and the version of the lead-score model
 that scored its targets. **In 18 months we will know which messaging
@@ -15,6 +16,7 @@ Competitors using off-the-shelf marketing automation lose this because their
 state lives in vendor SaaS. Ours lives in our repo.
 
 ### 2. Trust-aware messaging
+
 `brand_voice.forbiddenPhrases` and `brand_voice.requiredDisclosures` are
 machine-enforced before any asset can ship. **It is impossible for an
 operator to publish a piece that violates a brand commitment** because
@@ -25,6 +27,7 @@ This compounds because every disclosure we add (PIPEDA, accessibility, AI
 provenance, sector-specific) becomes a permanent floor. We never regress.
 
 ### 3. Partner GTM intelligence
+
 The lead-score model has `partnerInfluenced` as a feature. The NBA rules
 have a dedicated `partner_co_sell` action with a 48h SLA when a qualified
 deal is partner-influenced. The cockpit surfaces partner pipeline alongside
@@ -35,6 +38,7 @@ This is structural alignment with the existing `apps/partners/` system
 replicate it without rebuilding our partner program from scratch.
 
 ### 4. Proof-capture lifecycle
+
 Most B2B SaaS publishes case studies that are 60% true. GrowthOS makes
 fabricating one hard:
 
@@ -48,6 +52,7 @@ fabricating one hard:
 **defensible** proof — every claim has an audit trail.
 
 ### 5. Founder narrative as governed cadence
+
 `founder_topics` makes the founder's strategic narrative a tracked,
 overdue-aware queue rather than a vague intent. The cockpit will tell the
 founder which themes are +Nd overdue, ranked.

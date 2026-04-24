@@ -29,6 +29,7 @@
 **Composite Score: 10/10 — GO**
 
 All Critical and Medium violations from Rev 1 have been remediated:
+
 - **C-1**: `MovementRiskPosture` contract aligned with implementation (`'steady' | 'vigilant' | 'heightened'`, `string[]` fields)
 - **C-2**: `ConfidenceBand` named type exported and used in `ConfidenceResult`, `ExecutiveBriefingCard`, `DecisionInsight`
 - **C-3**: `DecisionPromptContract.buildInput` signature fixed (`(data: any) => Record<string, unknown>`)
@@ -65,6 +66,7 @@ All Critical and Medium violations from Rev 1 have been remediated:
 **Score: 9/10 — PASS with minor issue**
 
 ### Package Isolation
+
 - ✅ Package lives at `packages/clc-decision-intelligence/` — proper monorepo placement
 - ✅ Zero imports from `apps/union-eyes/` — package never touches app-layer code
 - ✅ Zero imports from `@/lib/`, `@/db/`, `@/components/` — clean dependency boundary
@@ -72,6 +74,7 @@ All Critical and Medium violations from Rev 1 have been remediated:
 - ✅ Barrel export at `src/index.ts` exports all public API
 
 ### Route Integration
+
 - ✅ Route imports only from `@nzila/clc-decision-intelligence` (package) and `@/lib/clc/governance`/`@/lib/clc/data-products` (existing governed layer)
 - ✅ Route uses `withApi({ auth: { required: true, minRole: 'clc_staff' } })` — auth enforced
 - ✅ Route runs two parallel `runGovernedCrossUnionAggregation()` calls with correct consent dimensions
@@ -79,6 +82,7 @@ All Critical and Medium violations from Rev 1 have been remediated:
 - ✅ No raw SQL, no direct DB access from the route or package
 
 ### Module Dependency Graph
+
 ```
 contracts (types only)
     ↓
@@ -110,11 +114,13 @@ briefings (types only from contracts)
 #### 4.2.1 — MovementRiskPosture.posture (CRITICAL)
 
 **Contract** (`contracts/index.ts:184`):
+
 ```ts
 posture: 'stable' | 'watchful' | 'elevated' | 'high_alert';
 ```
 
 **Implementation** (`reasoning/index.ts:37-42`):
+
 ```ts
 if (highOrCritical.length >= 3) return 'heightened';  // TS2322
 if (highOrCritical.length >= 1) return 'vigilant';    // TS2322
@@ -149,6 +155,7 @@ The contract declares rich typed objects for all three fields, but the implement
 ### 4.3 — Client-Server Type Mismatch
 
 **BargainingWatch.signalStrength**:
+
 - Server contract (`contracts/index.ts:220`): `signalStrength: 'weak' | 'moderate' | 'strong'`
 - Server implementation (`reasoning/index.ts:185`): `signalStrength: highestWatchPattern ? 'strong' : 'moderate'` ✓ matches contract
 - **Client** (`clc-intelligence-console.tsx`): `signalStrength: number` then renders `{(value * 100).toFixed(0)}%`
@@ -173,7 +180,9 @@ The contract declares rich typed objects for all three fields, but the implement
 **Score: 10/10 — PASS (Genuine, Evidence-Grounded)**
 
 ### Model Structure
+
 6-factor weighted composite with explicit weights:
+
 | Factor | Weight | Calculator | Behavior |
 |---|---|---|---|
 | Cohort size | 0.25 | `computeCohortFactor()` | Logarithmic curve, saturates at ~20 |
@@ -184,11 +193,13 @@ The contract declares rich typed objects for all three fields, but the implement
 | Missing data | 0.10 | `computeMissingDataFactor()` | Inverts penalty (1 - penalty) |
 
 ### Banding
+
 - ≥0.7 → high
 - ≥0.4 → medium
 - <0.4 → low
 
 ### Assessment
+
 - ✅ Every factor has an independent, testable calculator
 - ✅ Weights sum to 1.0 (0.25 + 0.20 + 0.20 + 0.15 + 0.10 + 0.10)
 - ✅ `buildExplanation()` generates natural language explaining which factors drove the score
@@ -206,6 +217,7 @@ The contract declares rich typed objects for all three fields, but the implement
 **Score: 8/10 — PASS with inactive pathway**
 
 ### Algorithms Implemented
+
 | Function | Purpose | Verified |
 |---|---|---|
 | `computeTrendVelocity()` | Average Δ per period | ✅ 5 tests |
@@ -215,11 +227,13 @@ The contract declares rich typed objects for all three fields, but the implement
 | `analyzeTrend()` | Composite: velocity + classification + description | ✅ 5 tests |
 
 ### Classification System (8 values)
+
 `stable → sudden_spike → returning_to_baseline → pre_bargaining_acceleration → persistent_elevated → rising_steadily → gradual_decline → volatile`
 
 Priority-ordered — first match wins.
 
 ### Assessment
+
 - ✅ Real temporal algorithms, not current−previous heuristics
 - ✅ `classifyTrend()` uses multi-factor prioritized matching
 - ✅ `describeTrend()` generates human-readable narratives per classification
@@ -227,10 +241,12 @@ Priority-ordered — first match wins.
 - ✅ 19 unit tests cover all major paths
 
 ### Inactive Pathway (−2 points)
+
 The route hardcodes `sectorTimeSeries: SectorTimeSeries[] = []` with the comment:
 > "Time-series data requires periodic queries — not yet implemented."
 
 This means at runtime the following capabilities are permanently inactive:
+
 - `detectBargainingPressure()` — always returns `[]` (needs 3+ time points per sector)
 - `analyzeSectorDivergence()` — velocity always 0 (no time series data)
 - `BargainingWatch` — always null (depends on bargaining_pressure_signal patterns)
@@ -244,6 +260,7 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 **Score: 9/10 — PASS**
 
 ### 4 Pattern Detectors
+
 | Detector | Pattern Type | Threshold | Tests |
 |---|---|---|---|
 | `detectIssueCluster()` | `cross_affiliate_issue_cluster` | Clause type in 3+ sectors | 3 |
@@ -252,11 +269,13 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 | `detectBargainingPressure()` | `bargaining_pressure_signal` | Velocity > 1 AND persistent | 2 (inactive at runtime) |
 
 ### `detectAllPatterns()` Aggregator
+
 - Runs all 4 detectors
 - Sorts by watch level (critical → high → elevated → monitor) then confidence
 - `affiliateTypes` parameter accepted but not yet consumed by any detector (forward-compatible)
 
 ### Assessment
+
 - ✅ Each detector has domain-specific logic, not generic
 - ✅ Thresholds are explicit and testable
 - ✅ Evidence refs are generated for every pattern
@@ -274,7 +293,9 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 **Score: 9/10 — PASS**
 
 ### Rule-Based Architecture
+
 12 explicit rules in `RULES` array, each with:
+
 - `matches(pattern)` — predicate function against `CorrelatedPattern`
 - `action` — `RecommendedAction` from typed enum
 - `timeframe` — `ActionTimeframe` from typed enum
@@ -282,6 +303,7 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 - `rationale(pattern)` — contextual explanation referencing actual signal data
 
 ### Rule Coverage
+
 | Pattern Type | Watch Level | Action | Timeframe | Audience |
 |---|---|---|---|---|
 | bargaining_pressure | high | escalate | now | clc_executive |
@@ -295,6 +317,7 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 | employer_pattern | * | prepare | 30_days | federation_leadership |
 
 ### Assessment
+
 - ✅ Every recommendation ties to a concrete pattern (via `signalId`)
 - ✅ No generic "review your data" advice — rationale cites the actual pattern title and context
 - ✅ `generateRecommendations()` sorts by action urgency (intervene > escalate > prepare > monitor)
@@ -310,6 +333,7 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 **Score: 4/10 — CONDITIONAL (Unused at Runtime)**
 
 ### What Exists
+
 - 6 decision-grade prompt contracts in `briefings/index.ts`:
   1. `summarize_movement_risk_posture`
   2. `detect_cross_affiliate_issue_cluster`
@@ -322,20 +346,24 @@ The code is real and would work if given data, but ~35% of the intelligence pipe
 - 11 tests verify structure, field completeness, buildInput logic, and anonymization presence
 
 ### What Does NOT Exist
+
 - ❌ `buildInput()` is never called from any route or runtime code
 - ❌ Route explicitly logs `nilInvoked: false`
 - ❌ No NIL reasoning service is wired to consume these contracts
 - ❌ The audit context field `nilInvoked` is hardcoded `false` — it can never be `true`
 
 ### Assessment
+
 The prompt contracts are well-structured, versioned, anonymization-aware, and test-covered. They represent solid forward-looking architecture for when the NIL reasoning pipeline is available. However, per the audit rules: **"No credit for prompt contracts without runtime usage."**
 
 The contracts earn credit for:
+
 - Structural completeness (6 use cases covering all data products)
 - Anonymization enforcement in contract definition
 - Filter logic in `buildInput` (e.g., issue cluster contract filters by patternType)
 
 They do NOT earn credit for:
+
 - Intelligence generation (no LLM call happens)
 - Context enrichment (deterministic output returned as-is)
 - Executive briefing generation (the name "executive briefing cards" is misleading — they are deterministic aggregation outputs, not AI-generated briefs)
@@ -347,6 +375,7 @@ They do NOT earn credit for:
 **Score: 6/10 — CONDITIONAL**
 
 ### What Renders
+
 The Decision Intelligence tab (Tab 2) renders 7 sections:
 
 | Section | Component | Data Source |
@@ -360,6 +389,7 @@ The Decision Intelligence tab (Tab 2) renders 7 sections:
 | Sector Divergence | Divergence scores + unique factors | `sectorDivergence[]` |
 
 ### Strengths
+
 - ✅ Shows recommended actions with urgency badges (intervene/escalate/prepare/monitor)
 - ✅ Displays timeframes and target audiences
 - ✅ Shows confidence as percentages and bands
@@ -371,18 +401,23 @@ The Decision Intelligence tab (Tab 2) renders 7 sections:
 ### Issues
 
 #### 10.1 — BargainingWatch.signalStrength NaN (CRITICAL)
+
 The UI declares `signalStrength: number` and renders:
+
 ```tsx
 Signal: {(decisionIntel.bargainingWatch.signalStrength * 100).toFixed(0)}%
 ```
+
 The server returns `signalStrength: 'strong' | 'moderate'` (strings). Result: **`NaN%`**.
 
 Note: BargainingWatch is currently always null (no time-series data), so this bug won't manifest now — but it is structurally incorrect and will surface when time-series data is enabled.
 
 #### 10.2 — Type re-declaration divergence (MEDIUM)
+
 The UI re-declares all Decision Intelligence types locally (it cannot import from the server package). The local `MovementRiskPosture` correctly uses `'steady' | 'vigilant' | 'heightened'` — matching the actual runtime values, NOT the contract types. This is correct behavior but creates a maintenance risk: if someone "fixes" the UI to match the contract, the UI would break.
 
 #### 10.3 — Bargaining Watch section is dead UI (MEDIUM)
+
 The Bargaining Watch alert card will never render because `bargainingWatch` is always `null` (empty time-series). The code is structurally correct and ready for activation, but it is currently invisible.
 
 ---
@@ -392,6 +427,7 @@ The Bargaining Watch alert card will never render because `bargainingWatch` is a
 **Score: 7/10 — CONDITIONAL**
 
 ### Suite Summary
+
 | Test File | Count | Coverage |
 |---|---|---|
 | `confidence.test.ts` | 20 | All 6 factors, composite, banding, explanation |
@@ -404,6 +440,7 @@ The Bargaining Watch alert card will never render because `bargainingWatch` is a
 | **TOTAL** | **99** | **All passing** |
 
 ### Strengths
+
 - ✅ Tests verify behavioral outcomes, not just that functions exist
 - ✅ Governance preservation tests verify no org-name leakage in outputs
 - ✅ Pipeline cross-reference test verifies every recommendation links to a real pattern
@@ -413,12 +450,15 @@ The Bargaining Watch alert card will never render because `bargainingWatch` is a
 ### Gaps
 
 #### 11.1 — Type-check integration (RESOLVED)
+
 `tsc --noEmit` produces 0 errors. Package has `"typecheck": "tsc --noEmit"` script.
 
 #### 11.2 — No route-level integration test
+
 There is no test that exercises the API route end-to-end (even with mocked DB). This means the adapter logic (governing → mapping → pipeline → response) is untested.
 
 #### 11.3 — noUncheckedIndexedAccess in tests (RESOLVED)
+
 All `.find()` and array-index accesses in test files now use `!` non-null assertions or type casts.
 
 ---
@@ -450,29 +490,37 @@ All `.find()` and array-index accesses in test files now use `!` non-null assert
 ### 13.1 — Critical Violations (All Resolved in Rev 2)
 
 #### C-1: Align MovementRiskPosture contract with implementation — ✅ RESOLVED
+
 **Fix applied**: `posture` → `'steady' | 'vigilant' | 'heightened'`, `watchAreas/risingSectors/issueClusters` → `string[]`
 
 #### C-2: Add ConfidenceBand named type export — ✅ RESOLVED
+
 **Fix applied**: Added `export type ConfidenceBand = 'low' | 'medium' | 'high'` and used in 3 interfaces
 
 #### C-3: Fix DecisionPromptContract.buildInput signature — ✅ RESOLVED
+
 **Fix applied**: Changed to `(data: any) => Record<string, unknown>` for polymorphic contract compatibility
 
 #### C-4: Fix BargainingWatch UI type — ✅ RESOLVED
+
 **Fix applied**: Changed `signalStrength: number` → `'weak' | 'moderate' | 'strong'` in UI, fixed rendering
 
 #### C-5: Add tsc --noEmit to CI pipeline — ✅ ALREADY PRESENT
+
 **Status**: Package already had `"typecheck": "tsc --noEmit"` script
 
 ### 13.2 — Medium Gaps (All Resolved in Rev 2)
 
 #### M-1: Fix noUncheckedIndexedAccess in tests — ✅ RESOLVED
+
 **Fix applied**: Added `!` assertions on array indices and type casts on `buildInput` results across 4 test files
 
 #### M-2: Document time-series data pathway — ✅ RESOLVED
+
 **Status**: Documented as Phase 2 architecture in audit report
 
 #### M-3: Document NIL integration as Phase 2 — ✅ RESOLVED
+
 **Status**: Documented as Phase 2 architecture in audit report
 
 ### 13.3 — Go/No-Go Verdict

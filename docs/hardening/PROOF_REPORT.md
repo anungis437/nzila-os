@@ -113,6 +113,7 @@ enforcement gaps identified in the initial audit have been resolved.
 ### Workflow Invariants Validated
 
 For all 12 Flow-orchestrated workflows:
+
 - ✅ At least one state and transition
 - ✅ At least one terminal state with zero outgoing transitions
 - ✅ Every non-terminal state has outgoing transitions

@@ -22,6 +22,14 @@ import { getInvoicesAction } from '@/app/actions/invoices'
 import { getCustomersAction } from '@/app/actions/customers'
 import { getProductsAction } from '@/app/actions/products'
 import { getLowStockAction } from '@/app/actions/inventory'
+import { db, commerceQuoteLines, commerceQuotes } from '@nzila/db'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
+import {
+  calculateAverageQuoteSize,
+  calculateCloseRateTrend,
+  calculateEstimatedMrr,
+  estimateCustomerLifetimeValue,
+} from '@/lib/commercial-insights'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -86,6 +94,53 @@ export default async function DashboardPage({
       getLowStockAction(),
     ])
 
+  const [quoteOutcomeResult, topWonSkuResult] = await Promise.allSettled([
+    (async () => {
+      const ctx = await getReadContext()
+      const [wonRow, lostRow] = await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(commerceQuotes)
+          .where(and(eq(commerceQuotes.orgId, ctx.orgId), eq(commerceQuotes.status, 'accepted'))),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(commerceQuotes)
+          .where(
+            and(
+              eq(commerceQuotes.orgId, ctx.orgId),
+              inArray(commerceQuotes.status, ['declined', 'expired', 'cancelled']),
+            ),
+          ),
+      ])
+
+      return {
+        won: Number(wonRow[0]?.count ?? 0),
+        lost: Number(lostRow[0]?.count ?? 0),
+      }
+    })(),
+    (async () => {
+      const ctx = await getReadContext()
+      return db
+        .select({
+          sku: commerceQuoteLines.sku,
+          units: sql<number>`coalesce(sum(${commerceQuoteLines.quantity}), 0)`,
+          lineValue: sql<number>`coalesce(sum(${commerceQuoteLines.lineTotal}), 0)`,
+        })
+        .from(commerceQuoteLines)
+        .innerJoin(commerceQuotes, eq(commerceQuoteLines.quoteId, commerceQuotes.id))
+        .where(
+          and(
+            eq(commerceQuotes.orgId, ctx.orgId),
+            eq(commerceQuotes.status, 'accepted'),
+            sql`${commerceQuoteLines.sku} is not null`,
+          ),
+        )
+        .groupBy(commerceQuoteLines.sku)
+        .orderBy(desc(sql`coalesce(sum(${commerceQuoteLines.lineTotal}), 0)`))
+        .limit(5)
+    })(),
+  ])
+
   type OrderRow = Awaited<ReturnType<typeof getOrdersAction>>['rows'][number]
   type InvoiceRow = Awaited<ReturnType<typeof getInvoicesAction>>['rows'][number]
   type CustomerRow = Awaited<ReturnType<typeof getCustomersAction>>['rows'][number]
@@ -105,6 +160,7 @@ export default async function DashboardPage({
 
   const activeQuotes = quotes.filter((q) => norm(q.status) === 'DRAFT' || ACTIVE_Q.includes(norm(q.status))).length
   const wonQuotes = quotes.filter((q) => WON.includes(norm(q.status))).length
+  const lostQuotes = quotes.filter((q) => ['DECLINED', 'EXPIRED', 'CANCELLED'].includes(norm(q.status))).length
   const winRate = quotes.length > 0 ? Math.round((wonQuotes / quotes.length) * 100) : 0
   const quotePipeline = quotes
     .filter((q) => !['CLOSED', 'EXPIRED', 'CANCELLED'].includes(norm(q.status)))
@@ -123,8 +179,28 @@ export default async function DashboardPage({
     .reduce((s: number, inv) => s + Number(inv.amountDue ?? inv.total ?? 0), 0)
   const overdueInvoices = invoices.filter((inv) => inv.status === 'overdue').length
 
+  const quotesSent = quotes.filter((q) => ['sent', 'reviewing', 'revised'].includes((q.status ?? '').toLowerCase())).length
+  const ordersFromQuotes = orders.filter((o) => Boolean(o.quoteId)).length
+  const paidInvoices = invoices.filter((inv) => inv.status === 'paid').length
+
+  const agingBuckets = {
+    under7: 0,
+    between8And14: 0,
+    over14: 0,
+  }
+  for (const quote of quotes.filter((q) => ['draft', 'pricing', 'ready', 'sent', 'reviewing', 'revised'].includes((q.status ?? '').toLowerCase()))) {
+    const ageDays = Math.floor((Date.now() - new Date(quote.createdAt).getTime()) / 86_400_000)
+    if (ageDays <= 7) agingBuckets.under7 += 1
+    else if (ageDays <= 14) agingBuckets.between8And14 += 1
+    else agingBuckets.over14 += 1
+  }
+
   // Recent quotes (last 5)
   const recentQuotes = quotes.slice(0, 5)
+  const quoteOutcome = quoteOutcomeResult.status === 'fulfilled'
+    ? quoteOutcomeResult.value
+    : { won: wonQuotes, lost: lostQuotes }
+  const topWonSkus = topWonSkuResult.status === 'fulfilled' ? topWonSkuResult.value : []
 
   // Order pipeline counts
   const orderStages = [
@@ -147,7 +223,25 @@ export default async function DashboardPage({
     { label: 'Quote Request', href: `${base}/quotes/request`, icon: SparklesIcon, color: 'bg-violet-600 text-white' },
     { label: 'View Analytics', href: `${base}/analytics`, icon: ChartBarIcon, color: 'bg-emerald-600 text-white' },
     { label: 'Manage Clients', href: `${base}/clients`, icon: UserGroupIcon, color: 'bg-amber-500 text-white' },
+    { label: 'Billing', href: `${base}/settings/billing`, icon: CurrencyDollarIcon, color: 'bg-gray-900 text-white' },
   ]
+
+  const averageQuoteSize = calculateAverageQuoteSize(
+    quotes.map((quote) => ({ total: Number(quote.total ?? 0), status: quote.status, createdAt: quote.createdAt })),
+  )
+  const estimatedMrr = calculateEstimatedMrr(
+    invoices.map((invoice) => ({ total: Number(invoice.total ?? 0), status: invoice.status, issuedAt: invoice.issuedAt ?? invoice.createdAt })),
+  )
+  const closeTrend = calculateCloseRateTrend(
+    quotes.map((quote) => ({ total: Number(quote.total ?? 0), status: quote.status, createdAt: quote.createdAt })),
+  )
+  const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0
+  const ordersPerCustomer = totalClients > 0 ? orders.length / totalClients : 0
+  const estimatedClv = estimateCustomerLifetimeValue({
+    averageOrderValue,
+    ordersPerMonth: ordersPerCustomer / 6,
+    averageLifetimeMonths: 18,
+  })
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -195,7 +289,7 @@ export default async function DashboardPage({
           {
             label: 'Win Rate',
             value: `${winRate}%`,
-            sub: `${wonQuotes} of ${quotes.length} quotes`,
+            sub: `${quoteOutcome.won} won • ${quoteOutcome.lost} lost`,
             icon: ArrowTrendingUpIcon,
             accent: 'text-amber-600',
             bg: 'bg-amber-50',
@@ -221,6 +315,26 @@ export default async function DashboardPage({
               <p className="text-xs text-gray-500 mt-0.5">{k.label}</p>
               <p className="text-[11px] text-gray-400 mt-0.5">{k.sub}</p>
             </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          { label: 'MRR Estimate', value: fmtCompact(estimatedMrr), sub: 'Last 3 months paid invoices' },
+          { label: 'Avg Quote Size', value: fmtCompact(averageQuoteSize), sub: `${quotes.length} quotes sampled` },
+          {
+            label: 'Close Trend',
+            value: `${closeTrend.recentCloseRate}%`,
+            sub: `${closeTrend.deltaPoints >= 0 ? '+' : ''}${closeTrend.deltaPoints} pts vs prior 30d`,
+          },
+          { label: 'Overdue Invoices', value: String(overdueInvoices), sub: 'Collections risk signal' },
+          { label: 'CLV Estimate', value: fmtCompact(estimatedClv), sub: 'Based on order velocity' },
+        ].map((metric) => (
+          <div key={metric.label} className="bg-white rounded-xl border border-gray-200 p-4">
+            <p className="text-[11px] uppercase tracking-wider text-gray-500">{metric.label}</p>
+            <p className="mt-1 text-xl font-bold text-navy">{metric.value}</p>
+            <p className="mt-0.5 text-xs text-gray-400">{metric.sub}</p>
           </div>
         ))}
       </div>
@@ -400,6 +514,88 @@ export default async function DashboardPage({
             )}
           </div>
         </div>
+      </div>
+
+      {/* ── Funnel + Aging ──────────────────────────────────────── */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-navy">Quote-to-Cash Funnel</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Current conversion across quote, order, and invoice stages</p>
+          <div className="mt-4 space-y-3">
+            {[
+              { label: 'Quotes Created', value: quotes.length },
+              { label: 'Quotes Sent', value: quotesSent },
+              { label: 'Quotes Won', value: quoteOutcome.won },
+              { label: 'Orders Created', value: ordersFromQuotes },
+              { label: 'Invoices Paid', value: paidInvoices },
+            ].map((stage, index, all) => {
+              const baseCount = all[0]?.value || 1
+              const width = Math.max(6, Math.round((stage.value / baseCount) * 100))
+              return (
+                <div key={stage.label}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-gray-600">{stage.label}</span>
+                    <span className="font-semibold text-navy">{stage.value}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className={`h-full rounded-full ${index < 2 ? 'bg-electric' : index < 4 ? 'bg-violet-500' : 'bg-emerald-500'}`} style={{ width: `${width}%` }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-navy">Quote Aging</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Open quote workload by age bucket</p>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="rounded-lg border border-gray-100 p-3">
+              <p className="text-[11px] text-gray-500">0-7 days</p>
+              <p className="text-xl font-bold text-navy mt-1">{agingBuckets.under7}</p>
+            </div>
+            <div className="rounded-lg border border-amber-100 bg-amber-50 p-3">
+              <p className="text-[11px] text-amber-700">8-14 days</p>
+              <p className="text-xl font-bold text-amber-700 mt-1">{agingBuckets.between8And14}</p>
+            </div>
+            <div className="rounded-lg border border-red-100 bg-red-50 p-3">
+              <p className="text-[11px] text-red-700">15+ days</p>
+              <p className="text-xl font-bold text-red-700 mt-1">{agingBuckets.over14}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-gray-500">
+            {agingBuckets.over14 > 0 ? 'Prioritize >14 day quotes to reduce leakage.' : 'No stale quotes currently in pipeline.'}
+          </p>
+        </div>
+      </div>
+
+      {/* ── SKU Insights ───────────────────────────────────────────── */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-navy">Top Won SKUs</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Based on accepted quote lines</p>
+          </div>
+          <Link href={`${base}/products`} className="text-xs font-medium text-electric hover:text-electric-light transition-colors">
+            View catalog →
+          </Link>
+        </div>
+
+        {topWonSkus.length > 0 ? (
+          <div className="space-y-2.5">
+            {topWonSkus.map((row, index) => (
+              <div key={`${row.sku}-${index}`} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2">
+                <div>
+                  <p className="text-sm font-semibold text-navy">{row.sku}</p>
+                  <p className="text-xs text-gray-500">{Number(row.units ?? 0)} units quoted</p>
+                </div>
+                <p className="text-sm font-bold text-emerald-600">{fmt(Number(row.lineValue ?? 0))}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 py-3">No accepted quote SKUs yet.</p>
+        )}
       </div>
     </div>
   )

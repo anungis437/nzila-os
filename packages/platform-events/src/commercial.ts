@@ -54,7 +54,7 @@ export interface LeadCreatedPayload {
   firstName?: string
   company?: string
   source: string
-  appId: 'union-eyes' | 'flow' | 'zonga' | 'control-plane'
+  appId: 'union-eyes' | 'flow' | 'zonga' | 'weekone' | 'control-plane'
   inquiryType?: string
   estimatedArrUsd?: number
 }

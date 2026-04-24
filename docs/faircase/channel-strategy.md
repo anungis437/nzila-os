@@ -1,6 +1,7 @@
 # FAIRCASE Partner Channel Strategy
 
 ## Channel Priorities
+
 1. HR consultants
 2. Labour lawyers and firms
 3. Workplace investigators
@@ -9,6 +10,7 @@
 6. Governance and compliance consultancies
 
 ## Channel Roles
+
 - Referral partners:
   - Introduce qualified buyers.
   - Stay involved as trusted advisor.
@@ -21,6 +23,7 @@
 ## Commercial Structures
 
 ## Referral Model
+
 - Fee: 10%-15% of first-year subscription ARR.
 - Trigger: Paid annual contract execution and first payment received.
 - Conditions:
@@ -28,6 +31,7 @@
   - Partner must support at least one joint selling motion.
 
 ## Co-Sell Model
+
 - Fee: 15%-22% of first-year ARR based on contribution.
 - Contribution criteria:
   - Access to economic buyer.
@@ -35,11 +39,13 @@
   - Pilot sponsorship support.
 
 ## Services Attachment Model
+
 - Partner can attach implementation/change services.
 - FAIRCASE product subscription remains direct with customer.
 - Delivery quality governed by partner enablement checklist.
 
 ## Channel Governance
+
 - Register deals to prevent channel conflict.
 - Define account ownership and handoff rules before proposal stage.
 - Quarterly partner scorecard:
@@ -48,6 +54,7 @@
   - Pilot conversion contribution.
 
 ## 90-Day Channel Actions
+
 - Recruit first 6-10 high-fit partners.
 - Run one partner enablement session every two weeks.
 - Launch partner toolkit:

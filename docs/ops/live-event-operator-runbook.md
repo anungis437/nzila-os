@@ -21,6 +21,7 @@ curl -X POST https://<zonga-host>/api/live \
 ```
 
 **Response** includes:
+
 - `stream.id` — Stream UUID for all subsequent API calls
 - `ingest.rtmpUrl` — Full RTMPS URL for OBS
 - `ingest.streamKeyArn` — Reference to the active stream key
@@ -87,6 +88,7 @@ curl -X PATCH https://<zonga-host>/api/live/<streamId> \
 ```
 
 This will:
+
 1. Stop the IVS stream (if still broadcasting)
 2. Record `ended_at` and final `viewer_count_peak`
 3. Emit `stream.ended` audit event
@@ -112,6 +114,7 @@ curl -X POST https://<zonga-host>/api/live/<streamId>/ingest \
 ```
 
 This:
+
 1. Deactivates the current stream key in IVS
 2. Creates a new stream key
 3. Returns the new credentials
@@ -128,6 +131,7 @@ GET /api/live/<streamId>/playback
 ```
 
 The endpoint:
+
 - Checks the viewer's subscription tier (free vs. premium listener)
 - Returns an HLS playback URL for authorized viewers
 - Returns `425 Too Early` for scheduled-but-not-live streams
@@ -142,6 +146,7 @@ The endpoint:
 **Cause**: Creator hasn't started OBS, or RTMP ingest failed.
 
 **Fix**:
+
 1. Verify OBS settings (server URL, stream key)
 2. Check IVS console for ingest errors
 3. Try `GET /api/live/<streamId>` to sync status from IVS
@@ -162,6 +167,7 @@ The endpoint:
 ### High latency (> 5 seconds)
 
 **Checks**:
+
 1. Verify `ZONGA_IVS_LATENCY_MODE` is set to `LOW` (not `NORMAL`)
 2. Check OBS keyframe interval is 2 seconds
 3. Check viewer network conditions
@@ -172,6 +178,7 @@ The endpoint:
 **Cause**: IVS detected a critical error (encoder disconnect, invalid input, resource limits).
 
 **Recovery**:
+
 1. Check stream event log in Control Plane for the `stream.failed` event payload
 2. Fix the root cause (OBS config, network, etc.)
 3. Create a **new** live stream — failed streams cannot be restarted

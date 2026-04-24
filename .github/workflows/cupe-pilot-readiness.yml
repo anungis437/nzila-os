@@ -231,7 +231,7 @@ jobs:
           EOF
 
       - name: Upload Evidence Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: cupe-pilot-evidence-${{ github.sha }}
           path: apps/union-eyes/evidence-artifacts/
@@ -242,7 +242,7 @@ jobs:
           sha256sum apps/union-eyes/evidence-artifacts/manifest-$GITHUB_SHA.json > apps/union-eyes/evidence-artifacts/manifest-$GITHUB_SHA.sha256
 
       - name: Upload Evidence Checksum
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: cupe-pilot-evidence-checksum-${{ github.sha }}
           path: apps/union-eyes/evidence-artifacts/*.sha256

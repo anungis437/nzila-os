@@ -4,6 +4,7 @@ Date: 2026-04-23
 Scope: Marketing/commercial copy alignment to shipped reality
 
 Official slogan:
+
 - EN: Global vision, local action
 - FR: Vision globale, action locale
 
@@ -17,6 +18,7 @@ Status: PASS WITH CONDITIONS
 ## Audit Coverage
 
 Reviewed in this pass:
+
 - Marketing trust page
 - AI workbench feature page
 - Public routes and redirects (`/pricing`, `/trust`, `/status`, pilot request flows)
@@ -24,12 +26,14 @@ Reviewed in this pass:
 ## Corrections Applied
 
 1. Trust/security copy adjusted to avoid unverifiable absolutes:
+
 - Removed hard claim that all processing is exclusively Canada Central in every case.
 - Replaced strict TLS version/key-vault absolutes with policy-based language.
 - Reframed audit immutability claim to reflect implemented tamper-evident controls varying by flow.
 - Reframed AI handling claim to advisory/provider-governed language.
 
 2. AI workbench copy adjusted:
+
 - Replaced "every AI decision includes a reasoning chain" with "confidence/rationale where available".
 - Replaced broad pilot market claim with controlled-pilot language.
 
@@ -41,6 +45,7 @@ Use these exact lines in commercial assets where tagline is shown:
 - Vision globale, action locale
 
 Recommended insertion points:
+
 - Buyer deck title/footer
 - Pilot offer page
 - Security/trust one-pager footer
@@ -56,11 +61,13 @@ Recommended insertion points:
 Before publishing any Union Eyes marketing update:
 
 1. Confirm claim is evidenced by:
+
 - runtime endpoint proof,
 - code path proof,
 - or signed runbook proof.
 
 2. Reject claims that imply:
+
 - universal certifications not held,
 - universal mobile readiness,
 - universal AI explainability across all endpoints,

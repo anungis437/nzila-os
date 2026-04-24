@@ -20,14 +20,17 @@
 ## Notes
 
 ### Build-Baseline Profiling
+
 The `build:baseline` script timed out during the local sweep due to Turborepo attempting to clean build artefacts across workspace paths with special characters (brackets in `app/[locale]/`). This is a known Windows PowerShell wildcard expansion issue documented in user memory — not a regression in build logic. The build itself compiles cleanly (`pnpm build` exits 0 in CI). Profiling baseline will be captured in the next scheduled CI pipeline run where the clean step is skipped.
 
 ### Metadata Generator Patch
+
 The metadata generator was patched to emit safe fallback ownership metadata (`owner: "platform-team"`, `tier: "internal"`, `lifecycle: "active"`) for packages not explicitly listed in the ownership map. This unblocked 55 packages from failing the governance ownership gate without masking real unmaintained packages — each entry is explicitly flagged as `source: "fallback"` in the generated manifest.
 
 ---
 
 ## References
+
 - Ownership metadata generator: `scripts/generate-metadata.ts` (or equivalent)
 - Supply-chain policy: `tooling/security/supply-chain-policy.ts`
 - Phase 7 parent plan: dominance-train execution checklist

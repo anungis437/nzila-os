@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getDb } from "@/lib/db";
+import Link from "next/link";
 import { CheckCircle, Circle } from "lucide-react";
 
 interface OrgProfile {
@@ -205,9 +206,12 @@ export default async function SettingsPage() {
                       : ""}
                   </p>
                 </div>
-                <button className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                <Link
+                  href="billing"
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                >
                   Manage Billing
-                </button>
+                </Link>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">

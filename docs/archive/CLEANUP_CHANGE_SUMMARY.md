@@ -9,6 +9,7 @@
 **Problem:** 24+ debug/log files and 7 audit reports committed directly to the repository root.
 
 **Actions:**
+
 - Moved 7 audit report MDs → `docs/archive/audit-reports/`
 - Moved 23 debug/log files (ue-*.txt, pytest-*.txt, vitest-output.txt, etc.) → `docs/archive/debug-logs/`
 - Moved `DEFERRED_ITEMS.md`, `TENANT_INVENTORY.md` → `docs/reference/`
@@ -23,6 +24,7 @@
 **Problem:** All docs referenced "Clerk" as the auth provider. Auth was migrated to `@nzila/platform-auth` with email/password (Argon2id + PG sessions) as DEFAULT and Microsoft Entra External ID SSO as OPTIONAL.
 
 **Actions — CRITICAL (public-facing or user-facing):**
+
 - `content/public/platform-architecture.md` — Auth section rewritten
 - `content/internal/rbac-permissions.md` — Full auth section rewritten (dual role resolution)
 - `content/internal/console-quickstart.md` — Prerequisites updated
@@ -30,6 +32,7 @@
 - `README.business.md` — Auth line updated
 
 **Actions — HIGH (developer docs):**
+
 - Created `docs/architecture/AUTH_ARCHITECTURE.md` — NEW canonical auth reference
 - `docs/deploy/data-residency-audit.md` — Clerk data processor section replaced
 - `apps/union-eyes/docs/cba-intelligence-openapi.yaml` — Security scheme renamed from clerk → platformAuth
@@ -38,6 +41,7 @@
 - App pilot/demo docs (cfo, partners, flow, zonga) — Auth references corrected
 
 **Actions — MEDIUM (internal tooling/scaffold):**
+
 - `packages/scripts-book/README.md` — Added LEGACY label, profiles table updated with status column
 
 **Files affected:** ~20 documents corrected
@@ -49,6 +53,7 @@
 **Problem:** Most apps had no README or only a Next.js boilerplate README.
 
 **Actions:**
+
 - Created READMEs for: abr, agrimo, cfo, console, control-plane, cora, flow, mobility, mobility-client-portal, nacp-exams, orchestrator-api, partners, platform-admin, trade, zonga
 - Rewrote web's boilerplate README to proper format
 - union-eyes already had a quality README (no changes)
@@ -64,6 +69,7 @@
 **Problem:** `apps/flow/docs/` had 38 files dumped flat in the root with no organization.
 
 **Actions:**
+
 - Created subdirectories: `architecture/`, `runbooks/`, `reference/`, `pilots/`, `archive/transcripts/`, `archive/assets/`
 - Moved 9 files → architecture/
 - Moved 6 files → runbooks/
@@ -82,6 +88,7 @@
 **Problem:** WhatsApp PTT transcript and stale historical docs mixed with active docs.
 
 **Actions:**
+
 - WhatsApp PTT transcript → `archive/`
 - `TS_ERROR_INVENTORY.md` (historical) → `archive/`
 - `WORLD_CLASS_PLAN.md` (superseded) → `archive/`
@@ -96,6 +103,7 @@
 **Problem:** `scripts/` (100+ files), `tooling/` (20+ subdirs), `reports/` (25 files) had no README or index.
 
 **Actions:**
+
 - Created `scripts/README.md` — categorized by: Build/CI, Database, Auth Provisioning, Analysis, Deployment, Utilities, Proof
 - Created `tooling/README.md` — categorized by: CI/Automation, Security, Analysis, Governance, Utility
 - Created `reports/README.md` — categorized by: Audit Reports, Scorecards, Analysis
@@ -109,6 +117,7 @@
 **Problem:** `packages/scripts-book` profiles, modules, and docs all reference Clerk auth.
 
 **Actions:**
+
 - Added LEGACY banner and auth migration note to `README.md`
 - Added Status column to Stack Profiles table marking Clerk profiles as **LEGACY**
 - `django-aca-azurepg` profile marked as **Current**
@@ -122,6 +131,7 @@
 **Problem:** `docs/index/doc-map.md` only listed ~44 of ~200 documents. Major sections completely missing.
 
 **Actions:**
+
 - Expanded from 8 sections → 25 sections
 - Added: Architecture (39 files), Governance (24 files), Hardening (17 files), Platform (15 files), Agri (12 files), Commerce, Decision Layer, Deploy, Migration, Risk, GA, Stress Test, Plans, Explanation, Repo Contract, Reference, Archive, App-Level Docs
 - Added Auth Architecture to docs/README.md platform section
@@ -136,6 +146,7 @@
 **Problem:** Root README contained hardcoded repository-scale count claims and an incomplete business domains table.
 
 **Actions:**
+
 - Replaced hardcoded count claims with canonical inventory references
 - Updated README architecture wording to avoid fixed app/package totals
 - Added missing apps to business domains table: ABR, Flow, Mobility, Mobility Client Portal, Zonga, Control Plane, Platform Admin, Orchestrator API

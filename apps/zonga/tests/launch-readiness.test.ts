@@ -24,12 +24,71 @@ import { resolve } from 'node:path'
 
 const ROOT = resolve(__dirname, '..')
 
-function readSource(relPath: string): string {
-  return readFileSync(resolve(ROOT, relPath), 'utf-8')
+type ReportPath =
+  | '../../reports/zonga-admin-gap-audit.md'
+  | '../../reports/zonga-auth-rbac-audit.md'
+  | '../../reports/zonga-backup-ir-plan.md'
+  | '../../reports/zonga-billing-payouts-readiness.md'
+  | '../../reports/zonga-client-onboarding-script.md'
+  | '../../reports/zonga-go-live-decision.md'
+  | '../../reports/zonga-launch-readiness.md'
+  | '../../reports/zonga-legal-launch-pack.md'
+  | '../../reports/zonga-streaming-readiness.md'
+
+type ReadSourcePath =
+  | 'app/api/payouts/route.ts'
+  | 'features/media/playback-service.ts'
+  | 'features/media/resilience.ts'
+  | 'features/media/types.ts'
+  | 'features/media/upload-service.ts'
+  | 'features/payouts/payout-service.ts'
+  | 'features/payouts/revenue-split.ts'
+  | 'features/payouts/types.ts'
+  | 'lib/api-guards.ts'
+  | 'maturity.json'
+
+const SOURCE_TEXT: Record<ReadSourcePath, string> = {
+  'app/api/payouts/route.ts': readFileSync(resolve(ROOT, 'app/api/payouts/route.ts'), 'utf-8'),
+  'features/media/playback-service.ts': readFileSync(resolve(ROOT, 'features/media/playback-service.ts'), 'utf-8'),
+  'features/media/resilience.ts': readFileSync(resolve(ROOT, 'features/media/resilience.ts'), 'utf-8'),
+  'features/media/types.ts': readFileSync(resolve(ROOT, 'features/media/types.ts'), 'utf-8'),
+  'features/media/upload-service.ts': readFileSync(resolve(ROOT, 'features/media/upload-service.ts'), 'utf-8'),
+  'features/payouts/payout-service.ts': readFileSync(resolve(ROOT, 'features/payouts/payout-service.ts'), 'utf-8'),
+  'features/payouts/revenue-split.ts': readFileSync(resolve(ROOT, 'features/payouts/revenue-split.ts'), 'utf-8'),
+  'features/payouts/types.ts': readFileSync(resolve(ROOT, 'features/payouts/types.ts'), 'utf-8'),
+  'lib/api-guards.ts': readFileSync(resolve(ROOT, 'lib/api-guards.ts'), 'utf-8'),
+  'maturity.json': readFileSync(resolve(ROOT, 'maturity.json'), 'utf-8'),
 }
 
-function fileExists(relPath: string): boolean {
-  return existsSync(resolve(ROOT, relPath))
+function readSource(relPath: ReadSourcePath): string {
+  return SOURCE_TEXT[relPath]
+}
+
+function fileExists(relPath: ReportPath | 'maturity.json'): boolean {
+  switch (relPath) {
+    case '../../reports/zonga-admin-gap-audit.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-admin-gap-audit.md'))
+    case '../../reports/zonga-auth-rbac-audit.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-auth-rbac-audit.md'))
+    case '../../reports/zonga-backup-ir-plan.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-backup-ir-plan.md'))
+    case '../../reports/zonga-billing-payouts-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-billing-payouts-readiness.md'))
+    case '../../reports/zonga-client-onboarding-script.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-client-onboarding-script.md'))
+    case '../../reports/zonga-go-live-decision.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-go-live-decision.md'))
+    case '../../reports/zonga-launch-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-launch-readiness.md'))
+    case '../../reports/zonga-legal-launch-pack.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-legal-launch-pack.md'))
+    case '../../reports/zonga-streaming-readiness.md':
+      return existsSync(resolve(ROOT, '../../reports/zonga-streaming-readiness.md'))
+    case 'maturity.json':
+      return existsSync(resolve(ROOT, 'maturity.json'))
+    default:
+      return false
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

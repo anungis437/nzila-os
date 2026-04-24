@@ -9,6 +9,7 @@
 Turborepo hashes task inputs (source files + env vars) to produce a cache key. If the same key is found in the remote cache, the task output is restored instead of re-running.
 
 The cache key includes:
+
 1. All files listed in `tasks.<task>.inputs`
 2. All environment variables listed in `tasks.<task>.env`
 3. **All environment variables NOT listed in `globalPassThroughEnv`** (they are hashed but not passed through to the task)
@@ -59,6 +60,7 @@ In `turbo.json`:
 `remoteCache.signature: true` is enabled. This means every cached artifact is signed with `TURBO_REMOTE_CACHE_SIGNATURE_KEY`. This prevents cache poisoning attacks where a malicious actor uploads tampered build outputs.
 
 **Required secret**: `TURBO_REMOTE_CACHE_SIGNATURE_KEY` must be set in:
+
 - Local `.env.local` (dev)  
 - GitHub Actions secrets (CI)
 
@@ -79,6 +81,7 @@ Check cache effectiveness in CI:
 ```
 
 Expected behaviour after this fix:
+
 - First CI run after a Windows dev build: **cache hit** on unchanged packages
 - Cold CI run (no prior cache): cache miss (expected)
 - After code change: targeted cache miss only on affected packages

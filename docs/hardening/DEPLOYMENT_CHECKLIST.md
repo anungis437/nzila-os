@@ -5,6 +5,7 @@ Pre-deployment verification for the Zonga platform after hardening.
 ## Pre-Deployment
 
 ### Code Quality
+
 - [ ] All TypeScript compiles: `pnpm turbo build --filter=zonga`
 - [ ] Lint passes with zero warnings: `pnpm turbo lint --filter=zonga`
 - [ ] All tests pass: `pnpm turbo test --filter=zonga`
@@ -14,6 +15,7 @@ Pre-deployment verification for the Zonga platform after hardening.
   - Existing workflow transition tests
 
 ### Security
+
 - [ ] Snyk scan: `snyk test --all-projects --severity-threshold=high`
 - [ ] Trivy Dockerfile scan: passes with zero CRITICAL
 - [ ] Dependency audit: `node tooling/security/supply-chain-policy.ts check-vulns`
@@ -21,6 +23,7 @@ Pre-deployment verification for the Zonga platform after hardening.
 - [ ] SBOM generated and current
 
 ### Database
+
 - [ ] All referenced tables exist: `audit_log`, `payouts`, `tickets`, `releases`,
       `events`, `revenue_events`, `rights_disputes`, `royalty_splits`,
       `moderation_cases`
@@ -29,6 +32,7 @@ Pre-deployment verification for the Zonga platform after hardening.
 - [ ] Indexes on `audit_log(action)`, `audit_log(org_id)`, `audit_log(created_at)`
 
 ### Environment Variables
+
 - [ ] `DATABASE_URL` — PostgreSQL connection string
 - [ ] `STRIPE_SECRET_KEY` — Stripe API key
 - [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — Clerk publishable key
@@ -39,11 +43,13 @@ Pre-deployment verification for the Zonga platform after hardening.
 ## Deployment
 
 ### Docker Build
+
 - [ ] `docker build -t nzila/zonga .` succeeds
 - [ ] Image size within expected bounds
 - [ ] Health check endpoint responds: `GET /api/health`
 
 ### Container App Update
+
 ```bash
 az containerapp update \
   --name nzila-os-web \
@@ -53,6 +59,7 @@ az containerapp update \
 ```
 
 ### Post-Deployment Verification
+
 - [ ] Health check: `curl https://<app-url>/api/health` returns 200
 - [ ] Smoke test: Create release (DRAFT), transition to SUBMITTED
 - [ ] Verify audit_log entries appear for smoke test operations

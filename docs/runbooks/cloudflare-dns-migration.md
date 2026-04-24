@@ -7,7 +7,7 @@ Move authoritative DNS for unioneyes.app from registrar-managed DNS to Cloudflar
 ## Scope
 
 - Zone: unioneyes.app
-- Production hosts: unioneyes.app, www.unioneyes.app, app.unioneyes.app
+- Production hosts: unioneyes.app, <www.unioneyes.app>, app.unioneyes.app
 - Staging hosts: staging.unioneyes.app, staging-app.unioneyes.app
 - Origin targets:
   - nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io

@@ -8,8 +8,8 @@ Defines production and staging domain topology for Union Eyes on Azure Container
 
 | Environment | Branch trigger | Container App | Marketing URL | App URL |
 |---|---|---|---|---|
-| production | main | nzila-os-union-eyes | https://unioneyes.app | https://app.unioneyes.app |
-| staging | develop | nzila-os-union-eyes-staging | https://staging.unioneyes.app | https://staging-app.unioneyes.app |
+| production | main | nzila-os-union-eyes | <https://unioneyes.app> | <https://app.unioneyes.app> |
+| staging | develop | nzila-os-union-eyes-staging | <https://staging.unioneyes.app> | <https://staging-app.unioneyes.app> |
 
 ## Azure Resource Map
 
@@ -23,8 +23,8 @@ Defines production and staging domain topology for Union Eyes on Azure Container
 
 ## Default Azure Hostnames
 
-- https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
-- https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+- <https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io>
+- <https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io>
 
 Keep both default hostnames reachable as break-glass fallback.
 

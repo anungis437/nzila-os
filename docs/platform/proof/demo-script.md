@@ -23,6 +23,7 @@ pnpm proof:run
 ```
 
 **What to show:**
+
 - 4 scenario suites execute
 - 36 assertions pass
 - Artifacts are generated in `proof-artifacts/`
@@ -40,6 +41,7 @@ cat proof-artifacts/ue-governed-mutation/governance.json
 ```
 
 **What to highlight:**
+
 - `outcome: "allow"` — the governance engine evaluated and permitted
 - `matchedRuleId` — which specific policy rule authorized the action
 - `evaluatedAt` — timestamp of evaluation
@@ -57,6 +59,7 @@ cat proof-artifacts/ue-governed-mutation/audit-chain.json
 ```
 
 **What to highlight:**
+
 - `valid: true` — the hash chain is cryptographically intact
 - `entriesChecked` — number of audit entries verified
 - Each entry has a `hash` and `prevHash` forming an immutable chain
@@ -74,6 +77,7 @@ cat proof-artifacts/compliance-sensitive-action/governance.json
 ```
 
 **What to highlight:**
+
 - `denyDecision` — viewer was blocked with explicit reason
 - `allowDecision` — compliance officer was permitted
 - Both decisions are linked by trace ID

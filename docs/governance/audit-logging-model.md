@@ -7,14 +7,17 @@ Explain how Nzila OS produces traceable operational and governance records.
 ## Logging Domains
 
 1. Workflow Execution Logs
+
 - Source: orchestrator command and event lifecycle tables
 - Use: track dispatch, state transitions, failures, retries, and completion
 
 2. Pilot and Commercial Metrics Logs
+
 - Source: pilot metric events and rollups
 - Use: adoption, health scoring, and conversion signals
 
 3. Application and API Logs
+
 - Source: app-level telemetry and request logging
 - Use: debugging, operational diagnostics, and trend analysis
 

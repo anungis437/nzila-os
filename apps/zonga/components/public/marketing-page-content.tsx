@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import ScrollReveal from '@/components/public/scroll-reveal';
+import WaitlistSignup from '@/components/public/waitlist-signup';
 import { PartnershipAttribution, TrustStrip } from '@/components/branding';
 import type { BrandAsset } from '@/lib/branding/types';
 import type { BrandingFeatureFlags } from '@/lib/branding/types';
@@ -290,6 +291,8 @@ export default function MarketingPageContent({ flags, client, partner }: Marketi
           </div>
         </section>
       )}
+
+      <WaitlistSignup />
 
       {/* ═══════════════════════ MISSION ═══════════════════════ */}
       <section className="py-24 bg-gray-50">

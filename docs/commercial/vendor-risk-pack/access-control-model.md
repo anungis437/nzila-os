@@ -60,6 +60,7 @@ in metadata.
 
 Service functions: `suspendUser`, `reactivateUser`, `deprovisionUser`.
 Each call atomically:
+
 1. Updates `users.lifecycle_state`.
 2. Nullifies `auth_user_sessions.expires_at` for that user.
 3. Writes an audit row.
@@ -104,19 +105,3 @@ Every row carries `actor_user_id`, `target_user_id` (when applicable),
 | Lifecycle | `packages/platform-auth/src/lifecycle/service.ts` |
 | Demo seed | `apps/union-eyes/scripts/seed-union-eyes-demo.ts` |
 | Auth audit table | `user_management.auth_audit_log` |
-# Access Control Model
-
-Primary roles in Union Eyes procurement demos:
-- steward
-- grievance_officer
-- executive
-- read-only/support roles as configured
-
-Control posture:
-- Role-based authorization at service layer.
-- Organization scoping on all case/member surfaces.
-- Account lockout and session hardening in platform-auth.
-
-Evidence pointers:
-- apps/union-eyes/scripts/seed-union-eyes-demo.ts
-- docs/commercial/security-one-pager.md

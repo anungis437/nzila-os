@@ -27,12 +27,14 @@ Create a repeatable system to capture credible social proof from pilots without 
 ## 3) KPI Capture During Pilots
 
 Required KPI set:
+
 - cycle time
 - admin effort hours
 - reporting turnaround
 - user adoption by role
 
 Rules:
+
 - baseline captured before launch
 - weekly measurement cadence
 - one owner per KPI
@@ -55,10 +57,12 @@ Rules:
 ## 6) Renewal Evidence Loop
 
 At renewal checkpoints, collect:
+
 - KPI trend continuation
 - business-owner sentiment
 - security/ops confidence signals
 - expansion readiness indicators
 
 Output artifact:
+
 - renewal evidence memo per account, linked to next contract cycle.

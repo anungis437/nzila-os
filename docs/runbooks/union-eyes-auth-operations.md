@@ -185,6 +185,7 @@ for the full runbook. Quick reference:
 | Deprovision | `deprovisionUser({targetUserId, actorUserId, reason})` | Terminal off-boarding; soft-delete |
 
 All three:
+
 1. Flip `users.lifecycle_state`.
 2. Null out `auth_user_sessions.expires_at` (immediate session kill).
 3. Write an audit event.

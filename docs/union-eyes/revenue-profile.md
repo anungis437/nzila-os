@@ -59,6 +59,7 @@ UnionEyes is a governed SaaS platform that manages the full union representation
 | Union-specific tools (legacy) | On-prem, no AI, outdated UX, no real-time analytics |
 
 **UnionEyes unique moat:**
+
 1. Hash-sealed evidence trails built into every case action — unique in market
 2. Purpose-built role model: member / steward / LRO / officer / federation admin
 3. AI sidecar wired to Django backend for case pattern intelligence
@@ -115,6 +116,7 @@ The CUPE pilot is the current live engagement. All artifacts are in `docs/pilot/
 **Segment:** CUPE locals → national federation → provincial bodies  
 **Geography:** Canada (primary), North America, anglophone Africa  
 **Trigger events:**
+
 - Grievance arbitration loss due to poor documentation
 - New ED or National Rep inheriting chaos
 - Contract renewal year (union wants to show operational credibility to members)

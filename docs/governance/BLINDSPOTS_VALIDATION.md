@@ -1,4 +1,5 @@
 # Blindspots Validation Report — Nzila OS
+
 **Date**: 2026-04-14  
 **Scope**: Code audit against 7 strategic blindspots assessment  
 **Classification**: Internal | Strategic Planning
@@ -28,6 +29,7 @@
 **Claim**: "No visible rollback plans or A/B testing for African markets."
 
 **Evidence**:
+
 - ✅ **Canary deployment workflow EXISTS**: `.github/workflows/canary-deploy.yml` implements progressive rollout (10% → 50% → 100%) with automated rollback on SLO breach (configurable error threshold).
 - ✅ **Feature flags platform INTEGRATED**: `packages/platform-feature-flags` wired into test suite; Console UI has feature flag management strings (en-CA.json: "Feature Flags").
 - ✅ **Chaos engineering scheduled**: `.github/workflows/game-day.yml` runs weekly resilience experiments + quarterly manual game days.
@@ -37,6 +39,7 @@
 **Assessment**: **OVERSTATED**. Rollback & A/B testing ARE implemented. Gap: Feature flag coverage metrics not visible in audit; unclear which apps actively use platform-feature-flags beyond Console.
 
 **Residual Risk**:
+
 - Feature flag adoption may be incomplete across all targeted apps.
 - African market-specific A/B testing (e.g., SME-vs-enterprise pricing) not explicitly visible.
 
@@ -49,6 +52,7 @@
 **Claim**: "Untested at 100K+ users; database sharding and blob storage may bottleneck."
 
 **Evidence**:
+
 - ✅ **Load testing framework active**: `.github/workflows/ci.yml` installs k6, runs baseline smoke test (10s, 1 VU), stores results as artifacts.
 - ✅ **SLO gating in place**: `packages/otel-core/src/slo.ts` + CI gate prevents regression on latency/error benchmarks.
 - ✅ **OTel instrumentation**: Compliance workflow collects monitoring evidence; structured metrics for APM.
@@ -59,6 +63,7 @@
 **Assessment**: **VALID BUT INCOMPLETE**. Monitoring foundation (SLO, OTel, k6) exists; actual 10x projection testing and sharding strategy not visible in code.
 
 **Residual Risk** (HIGH):
+
 - SLO thresholds not reviewed (may be set too loose or tight).
 - No evidence of regional replication strategy (single region = single point of failure).
 - Blob storage redundancy not explicitly enforced in IaC.
@@ -72,6 +77,7 @@
 **Claim**: "Models drift undetected; no fallback for AI failures in critical paths (audit sealing)."
 
 **Evidence**:
+
 - ✅ **Drift detection implemented**: `packages/ai-core/src/evaluation.ts` exports `LlmEvalRun` with `regressionDetected: boolean` field; CI compliance workflow includes schema drift reporting.
 - ✅ **Config drift detection**: `.github/workflows/control-tests.yml` includes CT-08 "Config Drift Detection" (weekly).
 - ✅ **Compliance drift workflow**: `.github/workflows/compliance-drift.yml` detects governance drift across target apps.
@@ -84,6 +90,7 @@
 **Critical Clarification**: Audit sealing (hash chains) is **NOT at risk** from AI failures because it's a local cryptographic operation, not AI-dependent. The conflation in the assessment is misleading.
 
 **Residual Risk** (MEDIUM):
+
 - If AI inference fails (provider downtime, quota), behavior unclear. Likely hard error vs. graceful fallback unknown.
 - No circuit breaker or bulkhead pattern visible for high-risk AI calls.
 - Evaluation framework is POST-deployment diagnostic, not LIVE failover guard.
@@ -99,6 +106,7 @@
 **Assessment**: **OUT OF SCOPE FOR CODE AUDIT**. This is market/ops risk, not technical. Cannot validate from codebase.
 
 **Code-visible signals** (informational only):
+
 - Apps target Canadian unions (UE), agriculture (Agrimo), cooperatives (Cora) — mixed geography.
 - No market segmentation visible in app-level feature flags (e.g., "Africa-only", "North America-only").
 - RFP answers emphasize Canada compliance (PIPEDA, Québec Law 25) heavily; Africa positioning less visible.
@@ -112,6 +120,7 @@
 **Claim**: "Africa-first apps face instability; Canada needs PIPEDA alignment; global unions vary by jurisdiction."
 
 **Evidence**:
+
 - ✅ **PIPEDA alignment documented**: `demo-output/rfp-answers.md` explicitly states PIPEDA + Québec Law 25 (Bill 64) compliance with data residency enforcement, consent management, DSAR support.
 - ✅ **Data residency enforced**: Canada Central deployment; cross-border transfer disabled by default.
 - ✅ **Compliance audit trail**: Hash-chained compliance snapshots (tamper-evident).
@@ -123,6 +132,7 @@
 **Assessment**: **VALID**. Canadian compliance structured; African & global union compliance incomplete.
 
 **Residual Risk** (HIGH for Africa expansion):
+
 - No multi-jurisdiction compliance framework (similar to app-tier feature flags for legal/tax/labor code).
 - Agrimo/NACP may face regulatory delays if deployed without local legal review.
 - No audit trail of jurisdiction-specific policy versions.
@@ -136,6 +146,7 @@
 **Claim**: "No visible user research or localization (e.g., Swahili for Agrimo)."
 
 **Evidence**:
+
 - ✅ **i18n framework active**: Console supports en-CA, fr-CA, en, fr; Quebec taxonomy fixture shows fr-CA localization (`locale: "fr-CA"`).
 - ❌ **Swahili NOT found**: No .json message files for Swahili, Arabic, or other African languages.
 - ❌ **User research artifacts**: No visible PRD, survey results, or user interview notes in codebase.
@@ -144,6 +155,7 @@
 **Assessment**: **VALID**. Localization partial (Canada-centric); African languages missing.
 
 **Residual Risk** (MEDIUM):
+
 - Agrimo may face low adoption in non-English, non-French African markets without Swahili, Hausa, Amharic, etc.
 - No A/B testing framework visible for market segment variants (SME vs. enterprise pricing/UX).
 
@@ -156,6 +168,7 @@
 **Claim**: "159 shared packages; updates risk breaking apps; no automated migration scripts visible."
 
 **Evidence**:
+
 - ✅ **Contract tests extensive**: 5k+ architectural invariants prevent breaking changes; flagged in CI as `contract-tests` project.
 - ✅ **Drizzle schema migrations**: `@nzila/db` package.json exports db:generate, db:migrate, db:push scripts.
 - ✅ **Changeset versioning**: Root package.json contains `release` and `version-packages` scripts (uses `@changesets/cli` convention).
@@ -166,6 +179,7 @@
 **Assessment**: **OVERSTATED**. Package debt is actively managed; controls are strong.
 
 **Actual Risk Level** (LOW–MEDIUM):
+
 - Contract tests are the primary guard; they work well.
 - Semantic versioning not strictly enforced; could allow accidental minor breaking changes if maintainer is careless.
 - Pack API migration (e.g., renamed exports) still requires manual app updates.
@@ -177,6 +191,7 @@
 ## Cross-Cutting Assessment
 
 ### Controls Present (Strong Signal)
+
 1. **Progressive Deployment**: Canary with traffic splitting + automatic rollback.
 2. **Invariant Enforcement**: 5k+ contract tests prevent breaking changes.
 3. **Observability**: k6 load test, OTel instrumentation, SLO gating, drift detection.
@@ -184,6 +199,7 @@
 5. **Data Residency**: Canada-only by default; PIPEDA alignment documented.
 
 ### Genuine Gaps (Medium Priority)
+
 1. **AI Graceful Degradation**: No visible fallback chains for provider downtime or quota exhaustion.
 2. **Durable Governance Store**: In-memory backend; no persistent backend for runtime governance decisions.
 3. **100K+ Projection Testing**: k6 baseline present; 10x simulation not found.
@@ -194,11 +210,13 @@
 ### Assessment Insights
 
 **Why Overstated?**
+
 - Assessment lacks **implementation detail**. It describes risks as if controls don't exist when they do (canary, feature flags, contract tests).
 - Conflates **strategic market risk** (Africa adoption, SME penetration) with **technical debt**, muddying priorities.
 - Misattributes AI risk to audit sealing, which is cryptographically independent.
 
 **Why Some Valid?**
+
 - **Scaling**: K6 baseline is solid; projecting to 100K coherently requires explicit load simulations (missing).
 - **Localization**: i18n scaffold exists but doesn't span African languages; effort remains.
 - **Compliance**: Africa-first expansion without region-specific frameworks (tax, data residency, labor law) is genuine risk.
@@ -223,15 +241,17 @@
 
 **Overall Assessment: 60% Valid, 40% Overstated**
 
-The blindspots assessment conflates **governance maturity** (which is strong) with **execution completeness** (which is partial in specific domains). 
+The blindspots assessment conflates **governance maturity** (which is strong) with **execution completeness** (which is partial in specific domains).
 
 **Strengths**:
+
 - Canary deployment + rollback are production-ready.
 - Contract tests prevent breaking changes.
 - Compliance audit trail is tamper-evident.
 - PIPEDA alignment documented.
 
 **Real Gaps**:
+
 - AI graceful degradation untested (critical for reliability).
 - Governance persistence not durable (audit compliance risk).
 - African compliance frameworks missing (launch blocker for Agrimo/NACP).

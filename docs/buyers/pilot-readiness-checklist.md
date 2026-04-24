@@ -91,6 +91,7 @@
 ## Summary Scorecard
 
 For a product to enter pilot:
+
 - **Gates 1–4**: All items ✅ (required)
 - **Gate 5–6**: All items ✅ (required)
 - **Gate 7**: Minimum `evidence_status: "partial"` and `proof_status: "internal-proof"` (required)

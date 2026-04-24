@@ -15,6 +15,7 @@ Nzila is a governed multi-product software group operating on one shared executi
 ## What monetizes now
 
 SELL NOW focus:
+
 - Union Eyes
 - Flow
 
@@ -34,6 +35,7 @@ INCUBATE/HOLD portfolio remains visible but de-prioritized until proof and ROI i
 ## Allocation discipline
 
 Products are explicitly classified as:
+
 - DOUBLE DOWN
 - MAINTAIN
 - HOLD

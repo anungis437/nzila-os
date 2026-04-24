@@ -1,29 +1,30 @@
 import Link from 'next/link'
+import { RoiCalculator } from './roi-calculator'
 
 const plans = [
   {
-    name: 'Team',
-    price: '$0',
-    note: 'Up to 5 users',
-    features: ['1 workflow', 'Basic analytics', 'Email support'],
-    cta: 'Start Free',
+    name: 'Starter',
+    price: '$39',
+    note: 'per workspace / month',
+    features: ['Up to 5 users', 'Quote + invoice essentials', 'Email support'],
+    cta: 'Start Starter',
     href: '/trial',
   },
   {
     name: 'Growth',
-    price: '$249',
-    note: 'per org / month',
-    features: ['Unlimited workflows', 'Approvals + SLA tracking', 'Revenue analytics', 'Priority support'],
-    cta: 'Start 14-day trial',
+    price: '$149',
+    note: 'per workspace / month',
+    features: ['Unlimited workflows', 'Approvals + SLA tracking', 'Owner intelligence metrics', 'Priority support'],
+    cta: 'Choose Growth',
     href: '/trial',
   },
   {
-    name: 'Enterprise',
-    price: 'Custom',
-    note: 'multi-org + SSO',
-    features: ['Advanced governance', 'Custom integrations', 'Dedicated success manager', 'SLA guarantees'],
-    cta: 'Contact sales',
-    href: '/contact',
+    name: 'Pro',
+    price: '$329',
+    note: 'per workspace / month',
+    features: ['Advanced governance', 'API + webhooks', 'Audit trail + exports', 'Dedicated success manager'],
+    cta: 'Choose Pro',
+    href: '/trial',
   },
 ]
 
@@ -47,6 +48,22 @@ export default function PricingPage() {
             <Link href={plan.href} className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-electric px-5 py-3 text-sm font-bold text-white hover:bg-blue-700 transition-colors">{plan.cta}</Link>
           </div>
         ))}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-12">
+        <RoiCalculator />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+          <h2 className="text-xl font-bold text-navy">Customer Proof</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Testimonial CMS block placeholder. Connect your content source to rotate vertical-specific proof here.
+          </p>
+          <div className="mt-4 rounded-xl border border-dashed border-gray-300 bg-white p-4 text-sm text-gray-500">
+            Example: &quot;Flow reduced quote response time by 42% in our first 30 days.&quot;
+          </div>
+        </div>
       </section>
     </main>
   )

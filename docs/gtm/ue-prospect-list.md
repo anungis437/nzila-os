@@ -9,6 +9,7 @@
 ## Outreach Formula
 
 Every first message should answer these three things in under 100 words:
+
 1. What the platform is (one sentence, no jargon)
 2. Why it is relevant to them specifically (one phrase)
 3. What we are asking for (a 20-minute conversation, no pressure)

@@ -26,6 +26,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `IntakeSubmission` and `OfficialWorkItem` are separate interfaces in [types.ts](packages/workload-intelligence/src/models/types.ts) ✅
 - `IntakeSubmission` has: `submittedByMemberId`, correct status set (new/under_review/awaiting_member_info/converted/closed_no_case) ✅
 - `OfficialWorkItem` has: `createdByRepId`, `sourceIntakeId?`, separate status set (active/waiting/closed) ✅
@@ -41,6 +42,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `POST /api/cases` requires `minRole: 'steward'` — [cases/route.ts](apps/union-eyes/app/api/cases/route.ts) ✅
 - `POST /api/claims` requires `writeRole: 'steward'`, `minRole: 'steward'` — [claims/route.ts](apps/union-eyes/app/api/claims/route.ts) ✅
 - `POST /api/grievances` has dual-mode: members submit intakes (`createOfficialCase: false`), steward+ creates cases (`createOfficialCase: true`) with `AUTHORITY_VIOLATION` logging — [route.ts](apps/union-eyes/app/api/grievances/route.ts) ✅
@@ -56,6 +58,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `GrievanceLifecycleStatus` includes `"draft"`, `"converted"`, `"closed_no_case"` in [grievance-state-machine.ts](apps/union-eyes/lib/workflows/grievance-state-machine.ts) ✅
 - Transition matrix: `draft → [converted, closed_no_case]` (union_staff gated), both terminal ✅
 - Conversion endpoint `POST /api/grievances/[id]/convert` exists — [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts) ✅
@@ -76,6 +79,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `PrioritizedIntake` uses `reviewUrgency` (not `priorityLevel`) — [prioritizationEngine.ts](packages/workload-intelligence/src/engine/prioritizationEngine.ts) ✅
 - `prioritizeIntakes()` scores intakes with lower confidence baseline (0.5 vs 0.6) ✅
 - `prioritizeBucketed()` produces separate `intake_review` and `active_cases` buckets ✅
@@ -90,6 +94,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `IntakePromptFamilies` (4 prompts) and `CasePromptFamilies` (5 prompts) are versioned `{ family, version }` objects — [promptRegistry.ts](packages/workload-intelligence/src/prompts/promptRegistry.ts) ✅
 - All 9 families have SemVer `'1.0.0'` ✅
 - `buildRequest()` injects `promptVersion` into NIL request input ✅
@@ -105,6 +110,7 @@
 **Verdict: PASS**
 
 **Evidence — Member-Facing (Clean):**
+
 - Grievance intake form: "Submit Intake", "Your intake has been submitted" ✅
 - Intake stepper: "Grievance intake progress" ✅
 - Intake review (member): "your intake will be reviewed by a steward" ✅
@@ -122,10 +128,12 @@
 - Sector analytics: "Active Cases" ✅
 
 **Evidence — Steward-Facing (Appropriately uses "Create Case"):**
+
 - Steward onboarding wizard: "Create Case" (step 4 for stewards) — acceptable ✅
 - Tour steps: "Create Case — Click here to create a new case on behalf of a member" — steward tour ✅
 
 **Evidence — Code Comments Only (Not User-Facing):**
+
 - `pilot-dashboard.tsx` L148,180: HTML comments ✅
 - `sidebar.tsx` L413: code comment ✅
 
@@ -160,6 +168,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - `POST /api/grievances/[id]/priority-override` exists — [priority-override/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/priority-override/route.ts) ✅
 - Requires `chief_steward+` (`hasMinRole("chief_steward")`) ✅
 - Reason validation: min 10 characters via Zod ✅
@@ -195,6 +204,7 @@
 **Verdict: PASS**
 
 **Evidence:**
+
 - Row-level ownership check on `GET /api/grievances/[id]` — members can only view own submissions; steward+ can view any — [route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/route.ts) ✅
 - `POST /api/cases` requires `steward+` — no member bypass ✅
 - `POST /api/claims` requires `steward+` — no member bypass ✅

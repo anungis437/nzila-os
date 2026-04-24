@@ -169,6 +169,7 @@ Federation executives can see cross-union trends but cannot access CLC-exclusive
 **Verdict: ✅ PASS**
 
 CLC intelligence routes are cleanly namespaced under `/api/v2/analytics/clc/`:
+
 - `/api/v2/analytics/clc/sector-signals`
 - `/api/v2/analytics/clc/affiliate-trends`
 - `/api/v2/analytics/clc/knowledge-index`
@@ -181,6 +182,7 @@ No leakage into the existing `/api/v2/analytics/` namespace that serves legacy r
 **Verdict: ✅ PASS — MG-001 REMEDIATED**
 
 A governed federation-scoped route exists at `/api/v2/analytics/federation/overview`:
+
 - Scoped to `fed_staff` minRole + `view_cross_union_analytics` permission
 - Resolves federation affiliates via `parentOrganizationId` match (only affiliated children)
 - Queries clause/precedent/access counts scoped to federation's own affiliates
@@ -425,6 +427,7 @@ Four well-structured NIL prompt contracts exist in `lib/clc/nil-prompts.ts`:
 A rule-based NIL briefing service (`lib/clc/nil-briefing.ts`) generates structured `IntelligenceBriefing` objects from CLC data products. Each briefing includes typed `BriefingFinding[]` with confidence scores (0–1) and severity levels (`info`, `advisory`, `action-required`).
 
 All four CLC API routes accept `?briefing=true` query parameter:
+
 - `sector-signals` → `generateSectorSignalsBriefing(signals)` — top sectors, precedent density, cross-sector growth
 - `affiliate-trends` → `generateAffiliateEngagementBriefing(trends)` — adoption rates, zero-contribution detection
 - `knowledge-index` → `generateKnowledgeIndexBriefing(index)` — base size, most-cited resource, contributor diversity
@@ -441,6 +444,7 @@ All four CLC API routes accept `?briefing=true` query parameter:
 **Verdict: ✅ PASS**
 
 The governance tab shows:
+
 - Per-dimension consent counts (X / 5 minimum)
 - CohortBadge with traffic-light coloring
 - Clear messaging: *"Minimum 5 consenting affiliates required per dimension"*
@@ -470,6 +474,7 @@ The `BriefingPanel` component renders `BriefingFinding[]` with severity-colored 
 `runGovernedCrossUnionAggregation()` logs both successful accesses and denials:
 
 **Success log:**
+
 ```typescript
 auditLog({
   eventType: AuditEventType.DATA_ACCESS,
@@ -484,6 +489,7 @@ auditLog({
 ```
 
 **Denial log:**
+
 ```typescript
 auditLog({
   eventType: AuditEventType.DATA_ACCESS,
@@ -511,6 +517,7 @@ All three legacy analytics routes (`clause-stats`, `precedent-stats`, `org-activ
 **Verdict: ⚠️ LOW**
 
 CLC audit logs could be enhanced with:
+
 - `scope`: 'clc' | 'federation' | 'local' — distinguishes analytics tier
 - `filtersApplied`: query parameters used for the request
 - `nilUsage`: whether NIL prompts were invoked for the response (future)
@@ -556,6 +563,7 @@ The cross-union analytics page continues to use `view_cross_union_analytics` per
 | `clc-partnership-service.test.ts` | 6 | ✅ All passing |
 
 Tests cover:
+
 - Consent registry CRUD operations ✅
 - `getConsentedOrgIds()` per-dimension filtering ✅
 - `checkGovernedAggregation()` — allowed, denied (below threshold), denied (no consent) ✅

@@ -27,6 +27,7 @@ A structured operating cadence prevents the CEO/COO from operating in reactive m
 | Blocked initiatives | `/execution` page | Unblock by EOD |
 
 #### Output
+
 - Top 3 decisions or unblocks logged in Founder Priorities
 - Any critical alerts marked resolved or escalated
 
@@ -49,6 +50,7 @@ A structured operating cadence prevents the CEO/COO from operating in reactive m
 | Team Load | Overloaded vs idle members | Do we need to rebalance? |
 
 #### Output
+
 - Written summary of weekly movement (WoW metrics captured)
 - Renewal calls booked for any client within 60-day window
 - Product reliability issues assigned to product owner with deadline
@@ -73,6 +75,7 @@ A structured operating cadence prevents the CEO/COO from operating in reactive m
 | Roadmap Delivery | % of committed roadmap items shipped | ≥ 70% delivery rate |
 
 #### Output
+
 - Board update email sent ≤ 48 hours after session
 - Risks logged with owners and deadlines
 - Roadmap items updated in Execution tracker
@@ -94,6 +97,7 @@ A structured operating cadence prevents the CEO/COO from operating in reactive m
 ## Implementation Notes
 
 The `/weekly-review` page is a `'use client'` component because it uses `useState` for cadence tab switching:
+
 - `'daily'` → DailyOpsView
 - `'weekly'` → WeeklyExecView
 - `'monthly'` → MonthlyBoardView

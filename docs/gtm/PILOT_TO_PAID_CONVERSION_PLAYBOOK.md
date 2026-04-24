@@ -10,6 +10,7 @@
 ## The Problem This Solves
 
 Pilots fail to convert for one of three reasons:
+
 1. KPIs weren't locked at kickoff, so there's no objective basis for a "yes"
 2. No exec-level touchpoints during the pilot — the decision-maker drifts out of the process
 3. The conversion ask comes at the end, as a surprise, instead of being built into the structure
@@ -20,7 +21,7 @@ This playbook eliminates all three.
 
 ## Pre-Pilot: Foundation Work
 
-### Before provisioning, get three things in writing:
+### Before provisioning, get three things in writing
 
 **1. KPIs — locked, agreed, measurable**
 
@@ -57,6 +58,7 @@ Write down their answer verbatim. This becomes the final slide of the outcome re
 **Duration:** 60 minutes  
 **Attendees:** Executive sponsor + pilot admin + founder  
 **Agenda:**
+
 - Environment walkthrough (5 min)
 - Confirm KPIs, lock baselines (10 min)
 - User onboarding plan (10 min)
@@ -65,9 +67,10 @@ Write down their answer verbatim. This becomes the final slide of the outcome re
 - Confirm: "We will send a renewal proposal in Week 6 — that gives us two weeks to finalize before the pilot ends."
 
 **What you send within 24 hours of kickoff:**
+
 - KPI baseline document (email or shared doc)
 - Week 1 check-in calendar invite
-- Platform support contact (platform-support@nzila.com)
+- Platform support contact (<platform-support@nzila.com>)
 
 ---
 
@@ -76,6 +79,7 @@ Write down their answer verbatim. This becomes the final slide of the outcome re
 **Format:** 20-minute call or async email  
 **Owner:** Founder  
 **Agenda:**
+
 - Usage check: how many cases entered? How many users active?
 - Any friction or questions?
 - One feature they haven't used yet → proactive demo
@@ -89,6 +93,7 @@ Write down their answer verbatim. This becomes the final slide of the outcome re
 **Duration:** 30 minutes  
 **Attendees:** Executive sponsor + pilot admin + founder  
 **Agenda:**
+
 - KPI midpoint update (10 min) — compare to baseline
 - Workflow questions or gaps (10 min)
 - **Expansion ask (5 min):** "We're seeing good usage in this cohort. Would it be valuable to loop in [other department / additional stewards] in the second half of the pilot?"
@@ -105,6 +110,7 @@ If they name a concern here, you have two weeks to address it before the convers
 
 **Deliver:** Written conversion proposal — Annual Platform Plan  
 **Include:**
+
 - KPI progress (Week 1–6 data)
 - Recommended SaaS tier (based on actual user count and org size)
 - Annual pricing (from `docs/gtm/PRICING_STRATEGY_V2.md`)
@@ -122,6 +128,7 @@ If they name a concern here, you have two weeks to address it before the convers
 **Goal:** Address any objections to the proposal. Use `docs/gtm/BUYER_OBJECTION_BATTLECARDS.md`.
 
 **Questions to ask:**
+
 1. "Does the pricing work for your budget cycle?"
 2. "Is there anything in the scope that isn't what you expected?"
 3. "Who else needs to be part of the final approval?"
@@ -133,6 +140,7 @@ If they name a concern here, you have two weeks to address it before the convers
 **Deliver on the last day of the pilot (or earlier if conversion is already signed):**
 
 **Outcome Report contents:**
+
 1. KPIs: baseline vs. final vs. target — in a clean table
 2. Cases processed during the pilot — volume, resolution rate, SLA compliance
 3. Evidence packs generated — count, quality
@@ -147,14 +155,16 @@ If they name a concern here, you have two weeks to address it before the convers
 
 ## Post-Pilot: Conversion Sequence
 
-### If signed:
+### If signed
+
 1. Send congratulations + next steps email
 2. Confirm SaaS environment provisioning (same environment, just renewed)
 3. Invoice immediately
 4. Book 30-day post-launch check-in
 5. Ask: "Would you be open to being listed as a reference customer?" (see Reference Request sequence below)
 
-### If undecided (most common):
+### If undecided (most common)
+
 **Day 1 after pilot end:**
 > "Thank you for [X] weeks on the platform. I've attached the outcome report. I'd like to get 20 minutes this week to walk through it together and confirm where you are on the annual plan."
 
@@ -170,7 +180,8 @@ If they name a concern here, you have two weeks to address it before the convers
 **Day 21 (final decision):**
 > "I'll keep the environment available through [date]. After that, I'll need to proceed with deprovisioning to free up capacity. If the timing isn't right this cycle, I'd like to book a conversation for [month] when your next budget window opens."
 
-### If declined:
+### If declined
+
 - Log reason verbatim
 - Ask: "Is there a specific reason that would help us improve the pilot for future organizations?"
 - Confirm: "When would be the right time to revisit this — is it purely a budget cycle issue, or was there something about the product or outcome that didn't meet the threshold?"

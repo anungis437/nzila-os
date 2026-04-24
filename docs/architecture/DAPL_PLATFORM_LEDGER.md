@@ -93,6 +93,7 @@ Immutability enforced by `prevent_ledger_mutation` trigger.
 ### Layer 4 — Dues Alignment (read-only)
 
 No new tables. Queries existing dues domain:
+
 - `member_dues_ledger` — member counts
 - `employer_remittances` — remittance totals
 - `member_arrears` — arrears tracking
@@ -100,6 +101,7 @@ No new tables. Queries existing dues domain:
 ### Layer 5 — Finance Outputs
 
 No new tables. Generates exports from DAPL data:
+
 - Master invoices (PDF-ready JSON)
 - Allocation statements
 - Chargeback reports
@@ -152,6 +154,7 @@ All under `/finance/`:
 Tests: `lib/__tests__/dapl-platform-economics.test.ts`
 
 Coverage areas:
+
 - All 7 allocation methods (per_member_count, per_active_user, etc.)
 - Rounding reconciliation (sum always equals pool)
 - CAD precision (2 decimal places)

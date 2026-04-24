@@ -206,6 +206,7 @@ This plan is founder-executed until the hiring gate is reached. The table below 
 | **Total** | **36–50 hrs/week** | Sustainable; at 5 pilots, hire CS |
 
 **Hiring triggers:**
+
 - 3+ SaaS customers: hire Customer Success Manager
 - $500K ARR: hire first Sales Development Rep (SDR) for outreach volume
 - $1M ARR: hire Head of Sales to own pipeline; founder shifts to product strategy
@@ -242,6 +243,7 @@ This is pure pilot fee revenue before any SaaS conversion. The fastest path to $
 **Timeline:** Q3 2027 (18 months from market engagement start)
 
 **What needs to be true:**
+
 - 15–20 proposals sent in Year 1
 - 9–10 pilots signed in Year 1
 - 7 SaaS conversions in Year 1

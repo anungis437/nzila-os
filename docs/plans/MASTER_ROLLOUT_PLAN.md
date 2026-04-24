@@ -47,8 +47,8 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 1.1 | Select and record the Wave 1 deployment model (Managed Cloud / Canada Central is the current canonical option) | `docs/buyers/deployment-models.md` | Platform Owner | Decision recorded in `docs/deploy/active-profile.md` | Written record committed to `main` |
-| 1.2 | Confirm infrastructure is provisioned and healthy (ACR, Container Apps env, DB, Key Vault, Blob) | `docs/buyers/deployment-models.md` § Infrastructure Stack | team-platform-ops@nzila.ai | All 5 Container Apps return HTTP 200 | `pnpm release:smoke` passes for `web,console,union-eyes` |
-| 1.3 | Confirm Entra auth and session model is live for all pilot-eligible apps | `docs/platform/auth-migration-final.md` | team-platform-admin@nzila.ai | Auth health check passes on staging | `pnpm sre:health:contract` passes |
+| 1.2 | Confirm infrastructure is provisioned and healthy (ACR, Container Apps env, DB, Key Vault, Blob) | `docs/buyers/deployment-models.md` § Infrastructure Stack | <team-platform-ops@nzila.ai> | All 5 Container Apps return HTTP 200 | `pnpm release:smoke` passes for `web,console,union-eyes` |
+| 1.3 | Confirm Entra auth and session model is live for all pilot-eligible apps | `docs/platform/auth-migration-final.md` | <team-platform-admin@nzila.ai> | Auth health check passes on staging | `pnpm sre:health:contract` passes |
 
 ### Track 1B — Environment Model Freeze
 
@@ -56,15 +56,15 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 |---|------|-----------|-------|--------|------|
 | 1.4 | Document the environment set in use: `local → staging → production` | `docs/ops/ENVIRONMENT_OPERATIONS.md` | Platform Owner | Env model confirmed, no preview layer needed for Wave 1 | Written in ops register |
 | 1.5 | Freeze the pilot-approved app list: Wave 1–4 classification above is the record | `docs/governance/APP_LIFECYCLE_MATRIX.md` | Platform Owner | `platform/registry/apps.json` updated to reflect wave assignment | `pnpm app:lifecycle:check` passes |
-| 1.6 | Confirm staging drift is clean before any pilot onboarding | `docs/ops/staging-runtime-drift-runbook.md` | team-platform-ops@nzila.ai | Zero version and env drift on staging | `pnpm drift:full:staging` passes |
+| 1.6 | Confirm staging drift is clean before any pilot onboarding | `docs/ops/staging-runtime-drift-runbook.md` | <team-platform-ops@nzila.ai> | Zero version and env drift on staging | `pnpm drift:full:staging` passes |
 
 ### Track 1C — Release Gate Freeze
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 1.7 | Ratify the mandatory pre-pilot release gate set (see table below) | `docs/ops/release-governance/release-governance.md` | Platform Owner | Gate sequence documented; no bypasses permitted | Reviewed and signed by platform owner |
-| 1.8 | Confirm all gates currently pass on `main` | Multiple scripts (see gate set below) | team-platform-admin@nzila.ai | All gates green on `main` | CI clean; gate run logged |
-| 1.9 | Confirm signed tag policy is enforced | `docs/ops/release-governance/release-governance.md` § Signed Tags | team-platform-admin@nzila.ai | GPG or SSH signing configured; `pnpm release:verify-signature` passes | `pnpm release:verify-signature` passes |
+| 1.8 | Confirm all gates currently pass on `main` | Multiple scripts (see gate set below) | <team-platform-admin@nzila.ai> | All gates green on `main` | CI clean; gate run logged |
+| 1.9 | Confirm signed tag policy is enforced | `docs/ops/release-governance/release-governance.md` § Signed Tags | <team-platform-admin@nzila.ai> | GPG or SSH signing configured; `pnpm release:verify-signature` passes | `pnpm release:verify-signature` passes |
 
 **Mandatory Release Gate Set (frozen at Phase 1)**
 
@@ -92,26 +92,26 @@ Derived from `docs/governance/APP_LIFECYCLE_MATRIX.md` and `docs/ops/ownership-r
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 2.1 | Define and document the canonical org provisioning sequence (8 steps) | `docs/pilot/01-scope-checklist.md` § Customer & Org Setup | team-platform-admin@nzila.ai | SOP written and linked from pilot checklist | SOP committed and reviewed |
-| 2.2 | Walk through org creation end-to-end in staging Console | `apps/console` · `apps/control-plane` | team-platform-admin@nzila.ai | Org provisioned, isolated, admin user active | Console → Isolation check passes |
-| 2.3 | Verify org isolation runtime invariants | `tooling/contract-tests/org-isolation-runtime.test.ts` · `tooling/contract-tests/org-isolation-stress.test.ts` | team-platform-admin@nzila.ai | Zero cross-org leaks recorded in stress run | Both contract tests green |
-| 2.4 | Confirm proof pack generation works for a new org | `apps/console` → Proof Pack · `scripts/proof/generate-runtime-proof.ts` | team-platform-admin@nzila.ai | Proof pack PDF/JSON generated and sealed for demo org | `pnpm proof:runtime` exits clean; artifact in blob storage |
+| 2.1 | Define and document the canonical org provisioning sequence (8 steps) | `docs/pilot/01-scope-checklist.md` § Customer & Org Setup | <team-platform-admin@nzila.ai> | SOP written and linked from pilot checklist | SOP committed and reviewed |
+| 2.2 | Walk through org creation end-to-end in staging Console | `apps/console` · `apps/control-plane` | <team-platform-admin@nzila.ai> | Org provisioned, isolated, admin user active | Console → Isolation check passes |
+| 2.3 | Verify org isolation runtime invariants | `tooling/contract-tests/org-isolation-runtime.test.ts` · `tooling/contract-tests/org-isolation-stress.test.ts` | <team-platform-admin@nzila.ai> | Zero cross-org leaks recorded in stress run | Both contract tests green |
+| 2.4 | Confirm proof pack generation works for a new org | `apps/console` → Proof Pack · `scripts/proof/generate-runtime-proof.ts` | <team-platform-admin@nzila.ai> | Proof pack PDF/JSON generated and sealed for demo org | `pnpm proof:runtime` exits clean; artifact in blob storage |
 
 ### Track 2B — Pilot Metrics Activation
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 2.5 | Confirm `@nzila/platform-pilot-metrics` is emitting for `union-eyes` in staging | `docs/control-plane/pilot-metrics-operator-guide.md` · `apps/control-plane` | team-union-eyes-engineering@nzila.ai | Pilot metric events appear in Control Plane `/pilots` dashboard | Dashboard non-empty for demo org |
-| 2.6 | Confirm alert routing is functional for pilot org signals | `docs/platform/ALERTING_RUNBOOK.md` · `pnpm sre:alerts:dry-run` | team-platform-ops@nzila.ai | Alert routes confirmed for: adoption low, SLA spike, error spike, dead letters high | `pnpm sre:alerts:dry-run` passes |
-| 2.7 | Confirm pilot metrics export works for a demo org | Control Plane `/api/control-plane/pilot-metrics/{pilotId}/export` | team-platform-admin@nzila.ai | Export returns valid JSON and Markdown for demo pilot | Export endpoint returns 200 with valid payload |
+| 2.5 | Confirm `@nzila/platform-pilot-metrics` is emitting for `union-eyes` in staging | `docs/control-plane/pilot-metrics-operator-guide.md` · `apps/control-plane` | <team-union-eyes-engineering@nzila.ai> | Pilot metric events appear in Control Plane `/pilots` dashboard | Dashboard non-empty for demo org |
+| 2.6 | Confirm alert routing is functional for pilot org signals | `docs/platform/ALERTING_RUNBOOK.md` · `pnpm sre:alerts:dry-run` | <team-platform-ops@nzila.ai> | Alert routes confirmed for: adoption low, SLA spike, error spike, dead letters high | `pnpm sre:alerts:dry-run` passes |
+| 2.7 | Confirm pilot metrics export works for a demo org | Control Plane `/api/control-plane/pilot-metrics/{pilotId}/export` | <team-platform-admin@nzila.ai> | Export returns valid JSON and Markdown for demo pilot | Export endpoint returns 200 with valid payload |
 
 ### Track 2C — Governance Snapshot Baseline
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 2.8 | Run full governance audit and record as the Phase 2 baseline | `pnpm governance:audit` | team-platform-admin@nzila.ai | Governance audit output committed to `ops/governance-snapshots/` | `pnpm governance:audit` exits 0 |
-| 2.9 | Run architecture checks to confirm no boundary violations | `pnpm architecture:check` | team-platform-admin@nzila.ai | All architecture checks pass | `pnpm architecture:check` exits 0 |
-| 2.10 | Confirm app lifecycle registry is accurate | `pnpm app:lifecycle:check` · `pnpm registry:check` | team-platform-admin@nzila.ai | Registry is consistent with code reality | Both checks exit 0 |
+| 2.8 | Run full governance audit and record as the Phase 2 baseline | `pnpm governance:audit` | <team-platform-admin@nzila.ai> | Governance audit output committed to `ops/governance-snapshots/` | `pnpm governance:audit` exits 0 |
+| 2.9 | Run architecture checks to confirm no boundary violations | `pnpm architecture:check` | <team-platform-admin@nzila.ai> | All architecture checks pass | `pnpm architecture:check` exits 0 |
+| 2.10 | Confirm app lifecycle registry is accurate | `pnpm app:lifecycle:check` · `pnpm registry:check` | <team-platform-admin@nzila.ai> | Registry is consistent with code reality | Both checks exit 0 |
 
 ---
 
@@ -151,7 +151,7 @@ This is compulsory. No external pilot launches without a completed internal dry 
 **Calendar:** Weeks 4–14
 
 **Deployment model for this pilot:** Managed Cloud (Canada Central) — org-level isolation, no dedicated infrastructure.
-**Ownership:** team-union-eyes-engineering@nzila.ai (Technical) · team-union-eyes-business@nzila.ai (Business) · Pilot Captain (named)
+**Ownership:** <team-union-eyes-engineering@nzila.ai> (Technical) · <team-union-eyes-business@nzila.ai> (Business) · Pilot Captain (named)
 
 ### Track 4A — Pre-Launch (Weeks 4–5)
 
@@ -159,19 +159,19 @@ This is compulsory. No external pilot launches without a completed internal dry 
 |---|------|-----------|-------|--------|------|
 | 4.1 | Complete all 7 gates in pilot readiness checklist for union-eyes | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain | All gates checked ✅; checklist committed | `pnpm pilot:check` passes for `union-eyes` |
 | 4.2 | Deliver security and privacy packet to buyer | `docs/pilot/03-security-privacy-packet.md` · `docs/governance/security-overview.md` · `docs/governance/procurement-pack.md` | CISO / Platform Owner | Packet delivered and acknowledged by buyer | Buyer sign-off recorded |
-| 4.3 | Confirm SLO policy and perf budgets are acceptable for pilot duration | `docs/pilot/04-monitoring-and-slos.md` · `ops/perf-budgets.yml` · `docs/platform/SLO_ERROR_BUDGET_POLICY.md` | team-platform-ops@nzila.ai | SLO thresholds reviewed and acknowledged | SLO review written record |
-| 4.4 | Provision pilot org, roles, and admin user | `docs/pilot/01-scope-checklist.md` §1 | team-platform-admin@nzila.ai | Org active in Console; buyer admin user confirmed | Console → Isolation check passes for pilot org |
-| 4.5 | Run release gate set (Phase 1 frozen gates) against current `main` | All gates in Phase 1 gate set | team-platform-admin@nzila.ai | All 10 gates pass | CI log and `pnpm deploy:evidence` artifact recorded |
-| 4.6 | Execute on-call rotation check — pilot org is covered | `docs/ops/on-call.md` | team-platform-ops@nzila.ai | On-call schedule confirmed; escalation path tested | oncall-union-eyes@nzila.ai paged successfully in test |
+| 4.3 | Confirm SLO policy and perf budgets are acceptable for pilot duration | `docs/pilot/04-monitoring-and-slos.md` · `ops/perf-budgets.yml` · `docs/platform/SLO_ERROR_BUDGET_POLICY.md` | <team-platform-ops@nzila.ai> | SLO thresholds reviewed and acknowledged | SLO review written record |
+| 4.4 | Provision pilot org, roles, and admin user | `docs/pilot/01-scope-checklist.md` §1 | <team-platform-admin@nzila.ai> | Org active in Console; buyer admin user confirmed | Console → Isolation check passes for pilot org |
+| 4.5 | Run release gate set (Phase 1 frozen gates) against current `main` | All gates in Phase 1 gate set | <team-platform-admin@nzila.ai> | All 10 gates pass | CI log and `pnpm deploy:evidence` artifact recorded |
+| 4.6 | Execute on-call rotation check — pilot org is covered | `docs/ops/on-call.md` | <team-platform-ops@nzila.ai> | On-call schedule confirmed; escalation path tested | <oncall-union-eyes@nzila.ai> paged successfully in test |
 
 ### Track 4B — Data Onboarding (Weeks 5–6)
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 4.7 | Complete data inventory and PII handling classification | `docs/pilot/02-data-onboarding.md` §1 | Pilot Captain + Legal | Data inventory doc committed | Legal sign-off |
-| 4.8 | Execute data import using documented method; sample-validate records | `docs/pilot/02-data-onboarding.md` §3–4 | team-union-eyes-engineering@nzila.ai | Import complete; validation sampling logged | ≥ 95% sample validation pass rate |
-| 4.9 | Verify org isolation post-import (no cross-org data visible) | `tooling/contract-tests/org-isolation-runtime.test.ts` | team-union-eyes-engineering@nzila.ai | Zero isolation violations recorded | Contract test passes post-import |
-| 4.10 | Confirm rollback / data removal path for this pilot | `docs/pilot/02-data-onboarding.md` §5 | team-union-eyes-engineering@nzila.ai | Rollback procedure documented and tested | Rollback dry-run passes |
+| 4.8 | Execute data import using documented method; sample-validate records | `docs/pilot/02-data-onboarding.md` §3–4 | <team-union-eyes-engineering@nzila.ai> | Import complete; validation sampling logged | ≥ 95% sample validation pass rate |
+| 4.9 | Verify org isolation post-import (no cross-org data visible) | `tooling/contract-tests/org-isolation-runtime.test.ts` | <team-union-eyes-engineering@nzila.ai> | Zero isolation violations recorded | Contract test passes post-import |
+| 4.10 | Confirm rollback / data removal path for this pilot | `docs/pilot/02-data-onboarding.md` §5 | <team-union-eyes-engineering@nzila.ai> | Rollback procedure documented and tested | Rollback dry-run passes |
 
 ### Track 4C — Soft Launch (Weeks 6–7)
 
@@ -188,14 +188,14 @@ This is compulsory. No external pilot launches without a completed internal dry 
 |---|------|-----------|-------|--------|------|
 | 4.15 | Daily: review Control Plane pilot health dashboard | `docs/control-plane/pilot-metrics-operator-guide.md` § Daily Operator Workflow | Pilot Captain | No unresolved P0 alerts | Daily log maintained |
 | 4.16 | Weekly: produce KPI review memo from pilot metrics export | Control Plane `/api/control-plane/pilot-metrics/{pilotId}/export` | Pilot Captain | Weekly memo committed to `docs/ops/pilots/ue-pilot/weekly/` | Memo produced every Friday |
-| 4.17 | Resolve all P0/P1 issues within 24h SLA | `docs/ops/incident-response.md` | oncall-union-eyes@nzila.ai | Incidents resolved; post-mortems filed for any P0 | P0 TTR ≤ 24h; P1 TTR ≤ 72h |
+| 4.17 | Resolve all P0/P1 issues within 24h SLA | `docs/ops/incident-response.md` | <oncall-union-eyes@nzila.ai> | Incidents resolved; post-mortems filed for any P0 | P0 TTR ≤ 24h; P1 TTR ≤ 72h |
 | 4.18 | Track conversion readiness score weekly using pilot metrics | `@nzila/platform-pilot-metrics` | Pilot Captain | Score trend recorded; drops investigated | Score ≥ 60 before exit decision |
 
 ### Track 4E — Pilot Exit (Weeks 12–14)
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 4.19 | Generate final evidence pack and proof pack for pilot org | `pnpm proof:runtime` · `pnpm evidence:pack:monthly` | team-platform-admin@nzila.ai | Evidence pack sealed and stored in blob | SHA-256 hash recorded in pilot ledger |
+| 4.19 | Generate final evidence pack and proof pack for pilot org | `pnpm proof:runtime` · `pnpm evidence:pack:monthly` | <team-platform-admin@nzila.ai> | Evidence pack sealed and stored in blob | SHA-256 hash recorded in pilot ledger |
 | 4.20 | Produce pilot outcome memo | (New file: `docs/ops/pilots/ue-pilot/outcome-memo.md`) | Pilot Captain | Memo covers: KPIs vs targets, friction log, incident count, conversion recommendation | Memo committed before exit decision |
 | 4.21 | Make the exit decision: convert / extend / pause / reshape | `docs/buyers/union-eyes-revenue-playbook.md` | Platform Owner + Business Owner | Decision documented with rationale | Decision recorded and communicated to buyer |
 
@@ -210,9 +210,9 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 5.1 | Confirm the artifact immutability policy is enforced | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | team-platform-admin@nzila.ai | Artifact digest verification passes on last staging deploy | `pnpm release:verify-signature` and digest check pass |
-| 5.2 | Confirm SBOM and attestation exist for all Wave 1–2 images | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` § Artifact Manifest | team-platform-admin@nzila.ai | SBOM and attestation references recorded in artifact manifests | `ops/artifacts/*.json` all have `sbom_hash` and `attestation_ref` |
-| 5.3 | Validate DB promotion safety for any pending migrations | `docs/ops/release-governance/db-promotion-safety.md` · `pnpm db:doctor:strict` | team-platform-admin@nzila.ai | No unsafe migrations pending | `pnpm db:migration:safety` exits 0 |
+| 5.1 | Confirm the artifact immutability policy is enforced | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | <team-platform-admin@nzila.ai> | Artifact digest verification passes on last staging deploy | `pnpm release:verify-signature` and digest check pass |
+| 5.2 | Confirm SBOM and attestation exist for all Wave 1–2 images | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` § Artifact Manifest | <team-platform-admin@nzila.ai> | SBOM and attestation references recorded in artifact manifests | `ops/artifacts/*.json` all have `sbom_hash` and `attestation_ref` |
+| 5.3 | Validate DB promotion safety for any pending migrations | `docs/ops/release-governance/db-promotion-safety.md` · `pnpm db:doctor:strict` | <team-platform-admin@nzila.ai> | No unsafe migrations pending | `pnpm db:migration:safety` exits 0 |
 | 5.4 | Document the production promotion sequence as a named SOP | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | Platform Owner | SOP: 9-step production promotion sequence committed | SOP reviewed and approved |
 
 **Canonical Production Promotion Sequence (frozen)**
@@ -241,8 +241,8 @@ This is compulsory. No external pilot launches without a completed internal dry 
 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
-| 5.5 | Confirm on-call coverage exists for every Wave 1–2 app | `docs/ops/on-call.md` · `docs/ops/ownership-registry.md` | team-platform-ops@nzila.ai | All pilot apps have named on-call and escalation path | Ownership registry 100% coverage (already at 100%) |
-| 5.6 | Schedule quarterly DR drill | `docs/ops/disaster-recovery.md` · `pnpm db:restore-drill` | team-platform-ops@nzila.ai | DR drill scheduled; runbook accessible | First drill date committed in ops calendar |
+| 5.5 | Confirm on-call coverage exists for every Wave 1–2 app | `docs/ops/on-call.md` · `docs/ops/ownership-registry.md` | <team-platform-ops@nzila.ai> | All pilot apps have named on-call and escalation path | Ownership registry 100% coverage (already at 100%) |
+| 5.6 | Schedule quarterly DR drill | `docs/ops/disaster-recovery.md` · `pnpm db:restore-drill` | <team-platform-ops@nzila.ai> | DR drill scheduled; runbook accessible | First drill date committed in ops calendar |
 | 5.7 | Confirm SLA tiers are defined and communicated to pilot buyers | `docs/buyers/sla-support-model.md` | Platform Owner + Business | SLA tier doc delivered to buyer | Buyer acknowledgement on file |
 
 ---
@@ -258,9 +258,9 @@ This is compulsory. No external pilot launches without a completed internal dry 
 |---|------|-----------|-------|--------|------|
 | 6.1 | Confirm `flow` meets pilot readiness gates | `docs/buyers/pilot-readiness-checklist.md` | Pilot Captain (Flow) | All 7 checklist gates pass | `pnpm pilot:check` passes for `flow` |
 | 6.2 | Deliver flow buyer pack and security packet | `docs/buyers/flow-buyer-pack.md` · `docs/pilot/03-security-privacy-packet.md` | CISO / Platform Owner | Packet delivered and acknowledged | Buyer sign-off |
-| 6.3 | Provision flow org through same Console provisioning SOP | Org provisioning SOP (from Task 2.1) | team-platform-admin@nzila.ai | Org active; roles assigned | Console shows org isolated |
+| 6.3 | Provision flow org through same Console provisioning SOP | Org provisioning SOP (from Task 2.1) | <team-platform-admin@nzila.ai> | Org active; roles assigned | Console shows org isolated |
 | 6.4 | Execute same 4-track pilot motion (pre-launch → data → soft-launch → operations) | All `docs/pilot/*` assets | Pilot Captain (Flow) | Flow pilot running with daily monitoring | Daily health green |
-| 6.5 | Maintain shared services discipline — do not let flow bypass platform packages | `docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md` · `pnpm platform:adoption:check` | team-platform-admin@nzila.ai | Platform adoption check passes | `pnpm platform:adoption:check` exits 0 |
+| 6.5 | Maintain shared services discipline — do not let flow bypass platform packages | `docs/platform/WHEN_TO_USE_PLATFORM_PACKAGES.md` · `pnpm platform:adoption:check` | <team-platform-admin@nzila.ai> | Platform adoption check passes | `pnpm platform:adoption:check` exits 0 |
 | 6.6 | Produce flow pilot outcome memo | (New file: `docs/ops/pilots/flow-pilot/outcome-memo.md`) | Pilot Captain (Flow) | Exit decision documented | Decision recorded and communicated |
 
 ---
@@ -275,8 +275,8 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 7.1 | Confirm `zonga` has graduated from INCUBATING to PILOT tier | `docs/governance/APP_LIFECYCLE_MATRIX.md` § Tier Graduation | Platform Owner | `app:lifecycle:check` shows `zonga` at PILOT or higher | `pnpm app:lifecycle:check` passes |
-| 7.2 | Confirm billing and payout integrity is validated | `docs/platform/revenue-architecture.md` · `docs/platform/revenue-system.md` | team-zonga-engineering@nzila.ai | Billing pipeline test passes; no revenue attribution gaps | Billing contract test passes |
-| 7.3 | Confirm media pipeline reliability meets perf budgets | `ops/perf-budgets.yml` · `pnpm sre:validate` | team-zonga-engineering@nzila.ai | Perf budget check passes for zonga | `pnpm sre:validate` passes for `zonga` |
+| 7.2 | Confirm billing and payout integrity is validated | `docs/platform/revenue-architecture.md` · `docs/platform/revenue-system.md` | <team-zonga-engineering@nzila.ai> | Billing pipeline test passes; no revenue attribution gaps | Billing contract test passes |
+| 7.3 | Confirm media pipeline reliability meets perf budgets | `ops/perf-budgets.yml` · `pnpm sre:validate` | <team-zonga-engineering@nzila.ai> | Perf budget check passes for zonga | `pnpm sre:validate` passes for `zonga` |
 | 7.4 | Execute pilot motion (same 4-track pattern) | All `docs/pilot/*` assets | Pilot Captain (Zonga) | Zonga pilot running with daily monitoring | Daily health green |
 
 ---
@@ -289,7 +289,7 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | # | Task | Repo Asset | Owner | Output | Gate |
 |---|------|-----------|-------|--------|------|
 | 8.1 | Consolidate all pilot assets into one canonical Pilot Kit directory | `docs/pilot/*` · `docs/buyers/*` · `docs/ops/on-call.md` · `docs/ops/incident-response.md` | Platform Owner | `docs/pilot/PILOT_KIT.md` index committed | Index reviewed; all links resolve |
-| 8.2 | Write the org provisioning SOP as a standalone runbook | Output from Task 2.1 | team-platform-admin@nzila.ai | `docs/ops/runbooks/org-provisioning.md` committed | Reviewed by ops and engineering |
+| 8.2 | Write the org provisioning SOP as a standalone runbook | Output from Task 2.1 | <team-platform-admin@nzila.ai> | `docs/ops/runbooks/org-provisioning.md` committed | Reviewed by ops and engineering |
 | 8.3 | Write the training deck for pilot admins and end-users | `docs/platform/APP_ADOPTION_GUIDE.md` · `docs/platform/ONBOARDING.md` | Platform Owner | Training deck (slides or markdown) committed | Used in and validated against UE pilot |
 | 8.4 | Define and record the weekly pilot review template | Control Plane pilot metrics export | Pilot Captain | Template committed to `docs/ops/pilots/weekly-review-template.md` | Used in first weekly UE pilot review |
 | 8.5 | Define the exit decision memo template | Output from UE pilot outcome memo (Task 4.20) | Platform Owner | Template committed to `docs/ops/pilots/exit-decision-template.md` | Reviewed before Flow pilot exit |
@@ -324,7 +324,7 @@ The following roles must be named before Phase 3 begins. These are not code cons
 | **Pilot Captain — UE** | End-to-end UE pilot execution, daily ops, weekly memos, friction log | TBD |
 | **Pilot Captain — Flow** | Same scope for Flow | TBD |
 | **Pilot Captain — Zonga** | Same scope for Zonga | TBD |
-| **On-Call Lead** | On-call schedule, incident triage, DR drills | team-platform-ops@nzila.ai (from registry) |
+| **On-Call Lead** | On-call schedule, incident triage, DR drills | <team-platform-ops@nzila.ai> (from registry) |
 | **CISO / Security Owner** | Security packet delivery, pentest scheduling, OWASP review | TBD |
 | **Customer Success Owner** | Buyer communications, training, conversion recommendation | TBD |
 

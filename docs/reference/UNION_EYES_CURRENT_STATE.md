@@ -57,7 +57,8 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 | **Case Reopen** | ❌ Missing | — | No reverse transitions (closed → reopened) |
 
 **Pilot Fit:** ⚠️ Partial. FSM transitions defined but **not server-enforced**.  
-**Gaps to Fill:** 
+**Gaps to Fill:**
+
 - PR-022: Server-side FSM enforcement
 - PR-023: Case detail shows SLA deadline; hide invalid action buttons
 
@@ -78,6 +79,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ⚠️ Partial. Audit schema ready, but hash-chaining + verification missing.  
 **Gaps to Fill:**
+
 - PR-030: Wrap mutations with `auditedCaseMutation()` + hash chaining
 - PR-031: Build case-timeline component + audit viewer API
 - PR-070: Structured logging + correlation ID propagation
@@ -100,6 +102,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ⚠️ Partial. Storage ready; malware scanning + export manifest needed.  
 **Gaps to Fill:**
+
 - PR-040: Signed URL API route + org isolation RLS check
 - PR-042: ClamAV integration
 - PR-041: Attachment manifest in evidence export
@@ -121,6 +124,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ⚠️ Partial. Dashboard structure exists; metrics + filtering + workbench need hardening.  
 **Gaps to Fill:**
+
 - PR-021: Case workbench with queues
 - PR-023: Case detail with SLA + notes + timeline
 - PR-050: Leadership dashboard completion (filters, caching)
@@ -142,6 +146,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ❌ Critical Gap. Evidence export required for legal defensibility.  
 **Gaps to Fill:**
+
 - PR-032: Build evidence exporter + seal verification
 - PR-041: Attachment manifest support
 - PR-071: Add evidence export test to CI
@@ -162,6 +167,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ⚠️ Partial. Admin shell exists; config surfaces missing.  
 **Gaps to Fill:**
+
 - PR-010–011: Vocabulary + taxonomy layer
 - PR-060: Admin console completions
 - PR-061: Setup checklist + first-run UX
@@ -197,6 +203,7 @@ UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exist
 
 **Pilot Fit:** ⚠️ Partial. Infrastructure available; structured logs + ops docs missing.  
 **Gaps to Fill:**
+
 - PR-070: Structured loggers + correlation IDs across all routes + DB
 - PR-062: Admin, support, release runbooks
 

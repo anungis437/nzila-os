@@ -19,6 +19,7 @@ and produce auditable artifacts.
 pipeline.
 
 **Controls exercised:**
+
 - `@nzila/observability` — distributed trace context generated
 - `@nzila/enforcement` — `traceLayer` → `authLayer` → `rateLimitLayer` →
   `governanceLayer` → `auditLayer` → handler
@@ -36,6 +37,7 @@ verification result, and full request/response trace.
 classification controls.
 
 **Controls exercised:**
+
 - `@nzila/ai-control` — `AIPolicyRegistry` enforces data and model policies
 - `@nzila/ai-control` — `checkBudget()` validates tenant spend limits
 - `@nzila/ai-control` — `runAI()` invokes provider with full control chain
@@ -50,6 +52,7 @@ AI response classification.
 against registered contracts.
 
 **Controls exercised:**
+
 - `@nzila/contracts` — `ContractRegistry.validate()` checks payloads against
   Zod schemas (OrderCreated_v1, PaymentProcessed_v1)
 - `@nzila/events` — `EventEmitter.emitEvent()` validates before emission
@@ -66,6 +69,7 @@ an authorized compliance officer, with both outcomes recorded in an auditable
 chain.
 
 **Controls exercised:**
+
 - `@nzila/governance` — policy denies `viewer` role, allows
   `compliance-officer` role
 - `@nzila/enforcement` — governance layer short-circuits on deny (403)
@@ -122,6 +126,7 @@ pnpm proof:verify
 ```
 
 Checks:
+
 - All expected artifact files exist
 - All files are valid JSON
 - Summary files contain required fields (`scenario`, `status`, `timestamp`,

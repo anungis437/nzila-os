@@ -5,6 +5,7 @@
 **Usage:** Personalized first-touch. Send from founder email. One account per send session. No bulk tools.
 
 **Ground rules:**
+
 - Swap `[NAME]` for the actual contact's first name before sending
 - Confirm the contact's title before using "Executive Director" vs "President"
 - Version A = short, punchy, founder voice. Version B = slightly more formal for senior executives / legal counsel recipients
@@ -18,6 +19,7 @@
 > **Note:** Greg Phillips has already completed a demo. This is NOT a first-touch account. These are deal-advance templates for moving from `demo_completed` to `pilot proposal`.
 
 **Subject Lines (Proposal Advance)**
+
 1. "Following up — your pilot proposal is ready"
 2. "CAPE-ACEP pilot: 3 docs attached, one decision needed"
 3. "Ready to start in 14 days — here's what we need from you"
@@ -29,6 +31,7 @@ Hi Greg,
 Really appreciated the time last week. Based on our conversation, I've put together the pilot outline for CAPE-ACEP.
 
 What this covers:
+
 - 90-day pilot, up to 500 members and 20 steward accounts
 - $12,000 CAD, fully credited to Year 1 if you proceed
 - Go-live in 14 days from your side's confirmation
@@ -56,6 +59,7 @@ Hi Greg — just checking in to make sure the attachments came through cleanly. 
 **Context:** 22,000 City of Toronto inside workers; 600+ stewards; largest CUPE inside local in Canada
 
 **Subject Lines**
+
 1. "Your stewards are managing 600 grievances — in email threads"
 2. "CUPE Local 79: a different way to handle the backlog"
 3. "14 days to a faster grievance process — worth 15 minutes?"
@@ -99,6 +103,7 @@ Hi [NAME] — I work on Union Eyes, a grievance management platform for large Ca
 Hi [NAME] — following up on my note from earlier this week. I know your inbox is full. If grievance administration isn't on your agenda right now, no problem — happy to reconnect when the timing is right. If it is, 15 minutes this week would be plenty to see if there's a fit.
 
 **Warm Intro Categories**
+
 - CUPE National Research Department (Toronto-based)
 - CUPE Ontario Regional Council staff
 - OFL Executive contacts
@@ -113,6 +118,7 @@ Hi [NAME] — following up on my note from earlier this week. I know your inbox 
 **Context:** 68,000 RNs; sophisticated legal department; post-COVID workload grievance backlog; high arbitration win rate
 
 **Subject Lines**
+
 1. "ONA wins more arbitrations when documentation is tighter"
 2. "Your advocates are taking twice the cases — the paperwork hasn't kept up"
 3. "Post-COVID nursing grievances: the case documentation problem"
@@ -152,6 +158,7 @@ Hi [NAME] — I work on Union Eyes, a grievance management platform for healthca
 Hi [NAME] — I realize my original note was brief. If the documentation burden on your advocates team isn't a current priority, I understand completely. If it is, I'm happy to share a 10-minute product walkthrough — no pitch, just the actual tool. Worth a quick call?
 
 **Warm Intro Categories**
+
 - CFNU (Canadian Federation of Nurses Unions — ONA is a key member)
 - Ursel Phillips / Cavalluzzo labour counsel (work with ONA regularly)
 - OHA contacts who interact with ONA counterparts
@@ -166,6 +173,7 @@ Hi [NAME] — I realize my original note was brief. If the documentation burden 
 **Context:** 12,000 TTC workers; 24/7 operations; high discipline-grievance density; multi-classification (operators, mechanics, subway, cleaners)
 
 **Subject Lines**
+
 1. "Every TTC safety incident generates a paper trail — here's a better one"
 2. "ATU 113: faster discipline defence from incident to Step 3"
 3. "Your operators deserve faster grievance support"
@@ -207,6 +215,7 @@ Hi [NAME] — I work on Union Eyes, a grievance management platform built for hi
 Hi [NAME] — just wanted to follow up on my note earlier this week. If discipline and grievance documentation isn't a current pressure for your team, I completely understand. If it is — even 10 minutes would let me show you what the tool looks like in practice.
 
 **Warm Intro Categories**
+
 - ATU Canada national office (Ottawa)
 - CLC (Canadian Labour Congress) — ATU is an affiliate
 - OFL contacts
@@ -221,6 +230,7 @@ Hi [NAME] — just wanted to follow up on my note earlier this week. If discipli
 **Context:** 12,000 TDSB support workers (ECEs, caretakers, office staff); post-Bill 28 political energy; 584 school sites; annual school-year cycle
 
 **Subject Lines**
+
 1. "After Bill 28 — your members need better tools, not better spreadsheets"
 2. "TDSB support workers: 584 school sites, one set of rights"
 3. "Before September: a 90-day pilot that pays for itself"
@@ -260,6 +270,7 @@ Hi [NAME] — I work on Union Eyes, a platform built for large education support
 Hi [NAME] — following up on my earlier note. If spring isn't the right moment to look at new tools, I understand — but if you're thinking about what your members need heading into September, I'd love to show you what Union Eyes looks like for a local your size.
 
 **Warm Intro Categories**
+
 - CUPE National Ontario region
 - CUPE Ontario Regional Council staff
 - ETFO / OSSTF (parallel education sector unions, conference contacts)
@@ -274,6 +285,7 @@ Hi [NAME] — following up on my earlier note. If spring isn't the right moment 
 **Context:** 6,000 Toronto outside workers (parks, garbage, roads, water, TTC cleaners); geographic twin of CUPE 79; strong on discipline and attendance grievances
 
 **Subject Lines**
+
 1. "CUPE 416: discipline defence built for an outdoor workforce"
 2. "Your members work in all conditions — their grievance files shouldn't"
 3. "Grievance management for Toronto's outdoor workers"
@@ -313,6 +325,7 @@ Hi [NAME] — working on Union Eyes, a grievance management platform built for l
 Hi [NAME] — following up briefly. If timing isn't right, no problem. When you're next reviewing how your team handles the grievance administration workload, I'd appreciate a conversation.
 
 **Warm Intro Categories**
+
 - CUPE Local 79 (same city/employer — key warm path once 79 is engaged)
 - CUPE National (Toronto-area regional staff)
 - Toronto Labour Council
@@ -326,6 +339,7 @@ Hi [NAME] — following up briefly. If timing isn't right, no problem. When you'
 **Context:** 12,000 MB nurses; Shared Health Authority consolidation; mandatory overtime, burnout grievances; activist union
 
 **Subject Lines**
+
 1. "Manitoba nurses are filing more grievances — and the paperwork hasn't kept up"
 2. "Shared Health changed everything — your grievance process hasn't"
 3. "MNU: better case documentation for the next arbitration season"
@@ -363,6 +377,7 @@ Hi [NAME] — I work on Union Eyes, a grievance management platform built for Ca
 Hi [NAME] — just following up. If now isn't the right time for a conversation about grievance administration tools, I understand. When the timing is better, I'd love to show you what this looks like in practice.
 
 **Warm Intro Categories**
+
 - CFNU (Canadian Federation of Nurses Unions — MNU is a member)
 - Manitoba Federation of Labour (MFL)
 - CUPE Manitoba healthcare locals (lateral)
@@ -376,6 +391,7 @@ Hi [NAME] — just following up. If now isn't the right time for a conversation 
 **Context:** 11,000 SK nurses; SHA merger (11 regional HAs → 1); site-specific CA provisions still unresolved; classification/seniority dispute backlog
 
 **Subject Lines**
+
 1. "Eleven agreements. One authority. The grievances are still coming."
 2. "SUN: the SHA merger is still generating caseload — your tools should handle it"
 3. "Classification disputes from day one of SHA — Union Eyes was built for this"
@@ -413,6 +429,7 @@ Hi [NAME] — Union Eyes is a grievance management platform built for nursing un
 Hi [NAME] — just a brief follow-up. If the SHA classification backlog isn't a current pain point for your team, I understand. If it is — I'd love to show you a better way to track it.
 
 **Warm Intro Categories**
+
 - CFNU (SUN is a founding member)
 - Saskatchewan Federation of Labour (SFL)
 - CUPE Saskatchewan healthcare locals
@@ -426,6 +443,7 @@ Hi [NAME] — just a brief follow-up. If the SHA classification backlog isn't a 
 **Context:** 18,000 allied health professionals (physio, lab, pharmacy, social work, diagnostic imaging); credential-heavy; BC Health Authorities
 
 **Subject Lines**
+
 1. "HSA members' credentials are the foundation of every grievance — are they tracked properly?"
 2. "Allied health credentials + grievance management: HSA BC"
 3. "Scope-of-practice disputes need better documentation than a PDF"
@@ -463,6 +481,7 @@ Hi [NAME] — I work on Union Eyes, a grievance and credential management platfo
 Hi [NAME] — following up briefly. If the credential-to-grievance documentation gap isn't a current concern for your team, that's fine. When it becomes one — I'd love to show you what Union Eyes does with allied health professional records.
 
 **Warm Intro Categories**
+
 - BCFED (BC Federation of Labour)
 - Hospital Employees' Union (HEU) — lateral BC health connection
 - BCNU (BC Nurses' Union) — allied health overlap
@@ -477,6 +496,7 @@ Hi [NAME] — following up briefly. If the credential-to-grievance documentation
 **Context:** 4,000 NS nurses; Bill 1/148 wage cap; NS Health Authority province-wide; smaller org = faster close; leadership is publicly vocal
 
 **Subject Lines**
+
 1. "Nova Scotia nurses need their rights documented — faster than Bill 148 can move"
 2. "NSNU: one health authority, one chance to get documentation right"
 3. "Your members fought hard — their case files should reflect it"
@@ -516,6 +536,7 @@ Hi [NAME] — I work on Union Eyes, a grievance and member advocacy platform for
 Hi [NAME] — just following up on my previous note. I know advocacy season is never quiet for NSNU. When there's a moment, I'd love to show you a better way to track the caseload your members are generating.
 
 **Warm Intro Categories**
+
 - CFNU (NSNU is a founding member)
 - Nova Scotia Federation of Labour (NSFL)
 - NSGEU (NS Government Employees Union — sister public sector union)
@@ -530,6 +551,7 @@ Hi [NAME] — just following up on my previous note. I know advocacy season is n
 **Context:** 7,500 Vancouver civic workers (parks, libraries, community centres, engineering); BC public sector digital push; CUPE BC anchor
 
 **Subject Lines**
+
 1. "Vancouver civic workers: grievance management for a multi-site workforce"
 2. "CUPE Local 15 — built for a workforce spread across every corner of Vancouver"
 3. "Parks, libraries, community centres — one grievance platform"
@@ -567,6 +589,7 @@ Hi [NAME] — Union Eyes is a grievance management platform for BC municipal uni
 Hi [NAME] — quick follow-up on my earlier note. If the timing isn't right, no problem. Happy to reconnect when you're next looking at how your stewards are managing the caseload.
 
 **Warm Intro Categories**
+
 - CUPE BC (provincial council)
 - BCFED
 - Metro Vancouver municipal union contacts (CUPE 402 Surrey, CUPE 23 Burnaby)
@@ -582,6 +605,7 @@ Hi [NAME] — quick follow-up on my earlier note. If the timing isn't right, no 
 > **Note:** Offer subject lines in both English and French where possible.
 
 **Subject Lines**
+
 1. "Ottawa's bilingual workforce needs bilingual grievance tools"
 2. "CUPE 503: gestion des griefs pour une ville bilingue" *(Grievance management for a bilingual city)*
 3. "City of Ottawa workers deserve a platform that works in both languages"
@@ -631,6 +655,7 @@ Hi [NAME] — working on Union Eyes, a bilingual grievance management platform f
 Bonjour/Hi [NAME] — just following up on my earlier note. If now isn't the right moment to look at grievance management tools, no problem. When the timing is better, I'd welcome a conversation.
 
 **Warm Intro Categories**
+
 - CUPE National (Ottawa HQ — geographic proximity)
 - CUPE Ontario Regional Council
 - Ottawa Labour Council
@@ -645,6 +670,7 @@ Bonjour/Hi [NAME] — just following up on my earlier note. If now isn't the rig
 **Context:** 4,500 NB nurses; Vitalité (Francophone) + Horizon (Anglophone) dual-employer; bilingual province; unique complexity
 
 **Subject Lines**
+
 1. "Your nurses work for two employers — their rights should be equally protected"
 2. "Vitalité et Horizon: une convention collective, deux réalités"
 3. "NBNU: dual-employer complexity needs better documentation"
@@ -694,6 +720,7 @@ Hi [NAME] — Union Eyes is a bilingual grievance management platform for Canadi
 Bonjour/Hi [NAME] — just a brief follow-up. If the dual-employer complexity isn't a current pain point, that's fine. When it becomes one, I'd love to show you what Union Eyes does with multi-employer case tracking.
 
 **Warm Intro Categories**
+
 - CFNU (NBNU is a member)
 - New Brunswick Federation of Labour (NBFL)
 - NSNU (Atlantic sister — warm intro potential)
@@ -708,6 +735,7 @@ Bonjour/Hi [NAME] — just a brief follow-up. If the dual-employer complexity is
 **Context:** 8,000+ members across 5 units; frequent rolling bargaining; sophisticated academic membership; complex multi-unit governance
 
 **Subject Lines**
+
 1. "Five collective agreements, one administrative team — there's a better way"
 2. "CUPE 3902: governance tools built for rolling bargaining"
 3. "Your members teach critical thinking — your grievance tools should match"
@@ -745,6 +773,7 @@ Hi [NAME] — I work on Union Eyes, a multi-unit governance platform for Canadia
 Hi [NAME] — following up on my earlier note. I know bargaining season changes the bandwidth picture significantly. Happy to connect whenever the timing is right for a 15-minute conversation.
 
 **Warm Intro Categories**
+
 - CUPE National University sector council
 - OCUFA (Ontario Confederation of University Faculty Associations)
 - CUPE Ontario
@@ -759,6 +788,7 @@ Hi [NAME] — following up on my earlier note. I know bargaining season changes 
 **Context:** 7,000+ NB provincial government workers (social services, corrections, highways); bilingual; complex multi-classification CA
 
 **Subject Lines**
+
 1. "NB government workers: one platform for a diverse provincial membership"
 2. "From corrections to highways — your members' rights should be equally accessible"
 3. "CUPE 1190: collective agreement management for a complex provincial workforce"
@@ -808,6 +838,7 @@ Hi [NAME] — Union Eyes is a bilingual grievance management platform for Canadi
 Bonjour/Hi [NAME] — just a brief follow-up on my earlier note. If the timing isn't right, no problem. When you're next looking at how your administrative team handles grievance management, I'd welcome a conversation.
 
 **Warm Intro Categories**
+
 - CUPE NB Regional Council
 - CUPE National
 - NB Federation of Labour

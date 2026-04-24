@@ -30,18 +30,21 @@
 **Purpose**: Canonical entities, invariants, domain types, and source-of-truth state concepts.
 
 **Contains**:
+
 - Entity type definitions (`claim.ts`, `quote.ts`, `release.ts`)
 - Domain invariants and validation rules
 - Value objects and domain enums
 - Aggregate root definitions
 
 **Rules**:
+
 - No side effects — pure types and validation
 - No imports from `services/`, `workflows/`, or `ui/`
 - Source of truth for business terminology
 - Shared across the app
 
 **Example**:
+
 ```typescript
 // domain/claim.ts
 export interface Claim {
@@ -64,18 +67,21 @@ export type ClaimStatus = 'draft' | 'filed' | 'assigned' | 'investigating' | 're
 **Purpose**: Business actions, orchestration, and side-effect coordination.
 
 **Contains**:
+
 - Business logic that operates on domain entities
 - Orchestration of multiple domain operations
 - External service integration coordination
 - Transaction boundaries
 
 **Rules**:
+
 - May import from `domain/` and `queries/`
 - May emit events via `events/`
 - Must use `workflows/` for state transitions (not bypass them)
 - No UI dependencies
 
 **Example**:
+
 ```typescript
 // services/claims-service.ts
 export async function fileClaim(input: FileClaimInput): Promise<Claim> {
@@ -94,18 +100,21 @@ export async function fileClaim(input: FileClaimInput): Promise<Claim> {
 **Purpose**: State machines, lifecycle transitions, and gating rules.
 
 **Contains**:
+
 - Finite state machines (FSMs)
 - Lifecycle transition definitions
 - Transition guard/gating logic
 - Workflow templates
 
 **Rules**:
+
 - Source of truth for lifecycle state
 - All state transitions must go through workflow layer
 - Services must call workflows, not directly mutate state
 - Guards are pure functions — no side effects
 
 **Example**:
+
 ```typescript
 // workflows/claim-fsm.ts
 export const CLAIM_TRANSITIONS: Record<ClaimStatus, ClaimStatus[]> = {
@@ -123,18 +132,21 @@ export const CLAIM_TRANSITIONS: Record<ClaimStatus, ClaimStatus[]> = {
 **Purpose**: Read models, projections, and reporting-oriented data fetches.
 
 **Contains**:
+
 - Database queries optimized for reading
 - Aggregation and reporting logic
 - Dashboard data projections
 - List/search/filter operations
 
 **Rules**:
+
 - Read-only — never mutate state
 - May import from `domain/` for types
 - Must not call `services/` or `workflows/`
 - Optimized for the consumer (UI, API, reports)
 
 **Example**:
+
 ```typescript
 // queries/claim-queries.ts
 export async function getClaimsByOrganization(orgId: string): Promise<ClaimSummary[]> {
@@ -149,18 +161,21 @@ export async function getClaimsByOrganization(orgId: string): Promise<ClaimSumma
 **Purpose**: Domain events emitted by the app and event schemas.
 
 **Contains**:
+
 - Event type definitions
 - Event emission helpers
 - Event schemas for validation
 - Event bus integration
 
 **Rules**:
+
 - Events are facts — immutable records of what happened
 - Event names follow `<entity>.<past-tense-verb>` pattern
 - Events must include `organizationId` for multi-org isolation
 - App-local events may be promoted to platform events via `@nzila/platform-events`
 
 **Example**:
+
 ```typescript
 // events/claim-events.ts
 export type ClaimEvent =
@@ -176,12 +191,14 @@ export type ClaimEvent =
 **Purpose**: Presentation layer — route, page, and component organization.
 
 **Contains**:
+
 - Page components (typically in `app/` for Next.js)
 - Reusable UI components (typically in `components/`)
 - Layout and navigation
 - Form handling and user interaction
 
 **Rules**:
+
 - No hidden business logic — delegate to `services/`
 - No direct database queries — use `queries/` or API routes
 - No state machine transitions — call `services/` which use `workflows/`

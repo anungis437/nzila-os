@@ -101,6 +101,7 @@ await suspendUser({
 ```
 
 Effect:
+
 - User's existing sessions are terminated.
 - Next login attempt returns a generic "contact your administrator" error.
 - Org member list shows them as suspended (UI surface TBD).
@@ -129,6 +130,7 @@ await deprovisionUser({
 ```
 
 Effect:
+
 - All sessions terminated.
 - `lifecycle_state = 'deprovisioned'`, `deleted_at = now()`.
 - Row is excluded from org-scoped queries that filter on `deleted_at IS NULL`.

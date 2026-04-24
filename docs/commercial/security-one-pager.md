@@ -9,6 +9,7 @@
 All member data — grievance files, case notes, member records, communications, election data — is stored in **Microsoft Azure Canada Central (Toronto)** by default.
 
 Cross-border residency transfer is disabled in the production data plane by policy. This supports:
+
 - Canada's *Personal Information Protection and Electronic Documents Act* (PIPEDA)
 - Ontario FIPPA / provincial privacy programs
 - CBA and CUPE data-sovereignty requirements

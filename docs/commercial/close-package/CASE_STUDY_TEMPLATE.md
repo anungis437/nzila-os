@@ -53,6 +53,7 @@ What's next
 ### Page 1 — The Situation
 
 **Sections:**
+
 1. **Customer profile** (5 bullets: type, membership, stewards, sector, prior tooling)
 2. **Operational pain** (3 specific failures the customer chose to solve — quote the customer)
 3. **Why they evaluated Union Eyes** (3 reasons — the bullets that landed in the demo)
@@ -63,6 +64,7 @@ What's next
 ### Page 2 — The Implementation
 
 **Sections:**
+
 1. **Timeline actually delivered** (compare planned vs. actual — be honest about delays)
 2. **What we provisioned** (Azure tenant, modules turned on, integrations)
 3. **What the buyer provided** (data, users, decisions)
@@ -74,6 +76,7 @@ What's next
 ### Page 3 — The Outcome
 
 **Sections:**
+
 1. **Quantified outcomes** (3–5 KPIs from the buyer's success criteria — show baseline → current)
 2. **Operational impact** (the human consequence — burned-out stewards, missed deadlines, etc.)
 3. **Procurement / IT impact** (audit-log usage, MFA enrolment %, SSO uptake)
@@ -105,6 +108,7 @@ Expires: [date or "indefinite until withdrawn"]
 ```
 
 **Quote selection rules:**
+
 - Must reference a specific operational outcome, not a vague feeling
 - Must be sourceable to a named role inside the customer org
 - Must not contain claims the product cannot defend

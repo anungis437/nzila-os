@@ -69,7 +69,7 @@ function SummaryCard({ icon, title, value, subtext }: {
   return (
     <Card>
       <div className="flex items-center gap-3 p-4">
-        <div className="flex-shrink-0 rounded-lg bg-indigo-50 p-3">{icon}</div>
+        <div className="shrink-0 rounded-lg bg-indigo-50 p-3">{icon}</div>
         <div>
           <p className="text-sm text-gray-500">{title}</p>
           <p className="text-2xl font-bold">{value}</p>

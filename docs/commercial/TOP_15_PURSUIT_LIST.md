@@ -47,6 +47,7 @@
 ---
 
 ### #1 — CAPE-ACEP *(Federal)*
+
 **Score: 0.88 | Tier A | ⚡ ACTIVE DEAL — deal-002**
 
 | Dimension | Raw | Weighted |
@@ -73,6 +74,7 @@
 ---
 
 ### #2 — CUPE Local 79 *(Toronto, ON)*
+
 **Score: 0.87 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -99,6 +101,7 @@
 ---
 
 ### #3 — ONA — Ontario Nurses' Association *(ON)*
+
 **Score: 0.86 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -125,6 +128,7 @@
 ---
 
 ### #4 — ATU Local 113 *(Toronto Transit Commission, ON)*
+
 **Score: 0.84 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -149,6 +153,7 @@
 ---
 
 ### #5 — CUPE Local 4400 *(TDSB Education Support, ON)*
+
 **Score: 0.82 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -173,6 +178,7 @@
 ---
 
 ### #6 — CUPE Local 416 *(City of Toronto Outside Workers, ON)*
+
 **Score: 0.82 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -197,6 +203,7 @@
 ---
 
 ### #7 — MNU — Manitoba Nurses Union *(MB)*
+
 **Score: 0.79 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -221,6 +228,7 @@
 ---
 
 ### #8 — SUN — Saskatchewan Union of Nurses *(SK)*
+
 **Score: 0.79 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -245,6 +253,7 @@
 ---
 
 ### #9 — HSA BC — Health Sciences Association *(BC)*
+
 **Score: 0.78 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -269,6 +278,7 @@
 ---
 
 ### #10 — NSNU — Nova Scotia Nurses' Union *(NS)*
+
 **Score: 0.77 | Tier A | Cold**
 
 | Dimension | Raw | Weighted |
@@ -293,6 +303,7 @@
 ---
 
 ### #11 — CUPE Local 15 *(City of Vancouver, BC)*
+
 **Score: 0.75 | Tier B | Cold**
 
 | Dimension | Raw | Weighted |
@@ -317,6 +328,7 @@
 ---
 
 ### #12 — CUPE Local 503 *(City of Ottawa, ON)*
+
 **Score: 0.74 | Tier B | Cold**
 
 | Dimension | Raw | Weighted |
@@ -343,6 +355,7 @@
 ---
 
 ### #13 — NBNU — New Brunswick Nurses Union *(NB)*
+
 **Score: 0.74 | Tier B | Cold**
 
 | Dimension | Raw | Weighted |
@@ -367,6 +380,7 @@
 ---
 
 ### #14 — CUPE Local 3902 *(University of Toronto Contract Academic Staff, ON)*
+
 **Score: 0.74 | Tier B | Cold**
 
 | Dimension | Raw | Weighted |
@@ -391,6 +405,7 @@
 ---
 
 ### #15 — CUPE Local 1190 *(NB Government Employees, NB)*
+
 **Score: 0.68 | Tier B | Cold**
 
 | Dimension | Raw | Weighted |
@@ -417,21 +432,25 @@
 ## Founder Action Plan — Next 7 Days
 
 ### Today (Day 1)
+
 1. **CAPE-ACEP (deal-002):** Send pilot proposal to Greg Phillips. This is money on the table.
 2. **CUPE Local 79:** Research current Executive Director name. Draft cold email v1.
 3. **ONA:** Research Executive Director and Director of Negotiations.
 
 ### Day 2
+
 4. Send CUPE 79 cold email (Email A).
 5. Send ONA cold email (Email A).
 6. LinkedIn connect to ATU 113 business agent.
 
 ### Day 3–4
+
 7. Send ATU 113 cold email.
 8. Send CUPE 4400 cold email.
 9. CAPE-ACEP: if no reply, send Day-2 procurement checklist follow-up.
 
 ### Day 5–7
+
 10. Send MNU cold email.
 11. Send SUN cold email.
 12. Send NSNU cold email (fast close opportunity).

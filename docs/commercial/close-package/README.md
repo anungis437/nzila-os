@@ -19,6 +19,7 @@
 ## Source-of-truth pointers
 
 Every claim in this package traces to:
+
 - [`docs/commercial/trust-center/`](../trust-center/) — security posture
 - [`docs/commercial/sales-kit/`](../sales-kit/) — demo + procurement Q&A
 - [`docs/commercial/UNION_EYES_COGNITION_ROI.md`](../UNION_EYES_COGNITION_ROI.md) — KPI formulas
@@ -31,6 +32,7 @@ Every claim in this package traces to:
 The deck ([UNION_EYES_BUYER_DECK.md](./UNION_EYES_BUYER_DECK.md)) is authored in Markdown and exported to a branded PPTX via `python-pptx`.
 
 **Quick export (PPTX only):**
+
 ```powershell
 # From repo root — venv must exist (.venv/)
 .\scripts\Export-BuyerDeck.ps1
@@ -38,22 +40,26 @@ The deck ([UNION_EYES_BUYER_DECK.md](./UNION_EYES_BUYER_DECK.md)) is authored in
 ```
 
 **Export with PDF (requires LibreOffice or Microsoft Office):**
+
 ```powershell
 .\scripts\Export-BuyerDeck.ps1 -Pdf
 ```
 
 **Custom output path:**
+
 ```powershell
 .\scripts\Export-BuyerDeck.ps1 -Out "C:\Presentations\union-eyes-Q2-2026.pptx" -Pdf
 ```
 
 **If you don't have the repo venv:**
+
 ```powershell
 pip install python-pptx
 python scripts/export_buyer_deck.py --out demo-output/union-eyes-buyer-deck.pptx
 ```
 
 **Install LibreOffice (free PDF conversion):**
+
 ```powershell
 winget install TheDocumentFoundation.LibreOffice
 ```

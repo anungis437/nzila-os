@@ -6,19 +6,23 @@ Audience: Delivery, platform ops, product owner, pilot customer admin
 ## Pilot Prerequisites
 
 1. Runtime:
+
 - App endpoints healthy (`/api/health` = 200).
 - Domain endpoints reachable for pilot hostnames.
 
 2. Auth:
+
 - Local auth working for pilot org users.
 - Invite and magic-link tested for pilot tenant.
 - Admin role assignment validated.
 
 3. Data:
+
 - Required claims/member/governance tables present in pilot DB.
 - Seed/demo data policy confirmed.
 
 4. Integrations (pilot scope only):
+
 - Required integrations configured and tested.
 - Non-required integrations explicitly disabled or out-of-scope.
 
@@ -53,6 +57,7 @@ Audience: Delivery, platform ops, product owner, pilot customer admin
 - L3: Database/infra support for migration or data integrity issues.
 
 SLA suggestion during pilot:
+
 - Critical: acknowledge within 1 hour, workaround within 4 hours.
 - High: acknowledge same business day.
 
