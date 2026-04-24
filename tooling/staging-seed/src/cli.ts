@@ -175,6 +175,8 @@ async function loadAppSeeders(): Promise<void> {
     { app: 'agrimo', load: () => import('./seeders/agrimo') },
     { app: 'cora', load: () => import('./seeders/cora') },
     { app: 'faircase', load: () => import('./seeders/faircase') },
+    { app: 'console', load: () => import('./seeders/console') },
+    { app: 'control-plane', load: () => import('./seeders/control-plane') },
   ]
   for (const { app, load } of loaders) {
     try {
