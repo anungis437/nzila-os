@@ -162,8 +162,23 @@ function formatLog(level: string, msg: string, fields?: Record<string, unknown>)
 }
 
 async function loadAppSeeders(): Promise<void> {
-  // Phase 1: empty by design.
-  // Each follow-up PR adds: `await import('@nzila/<app>/lib/staging-seed')`
+  // Each per-app seeder registers itself on import via `registerSeeder(...)`.
+  // Per-app seeder modules live inside this package (under `./seeders/`) so
+  // they share a single registry instance — pnpm symlinks would otherwise
+  // produce two distinct module instances when seeders import the package
+  // from outside. New apps add an entry below.
+  const loaders: readonly { app: string; load: () => Promise<unknown> }[] = [
+    { app: 'union-eyes', load: () => import('./seeders/union-eyes') },
+  ]
+  for (const { app, load } of loaders) {
+    try {
+      await load()
+    } catch (err) {
+      process.stderr.write(
+        `[staging-seed] failed to load seeder for "${app}": ${(err as Error).message}\n`,
+      )
+    }
+  }
 }
 
 function writeReport(reportPath: string, payload: unknown): void {

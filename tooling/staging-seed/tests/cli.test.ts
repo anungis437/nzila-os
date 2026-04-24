@@ -24,13 +24,21 @@ describe('cli.main', () => {
     expect(code).toBe(2)
   })
 
-  it('seed succeeds with no registered seeders and writes a placeholder report', async () => {
+  it('seed runs the union-eyes seeder by default and writes a per-app report', async () => {
     const out = tmpReport()
-    const code = await main(['seed', `--report=${out}`])
+    const code = await main(['seed', `--report=${out}`, '--profile=demo-light'])
     expect(code).toBe(0)
-    const payload = JSON.parse(fs.readFileSync(out, 'utf-8')) as { note?: string; command: string }
+    const payload = JSON.parse(fs.readFileSync(out, 'utf-8')) as {
+      command: string
+      apps: Array<{ app: string; totalRecords: number }>
+      skippedApps: Array<{ app: string; reason: string }>
+      note?: string
+    }
     expect(payload.command).toBe('seed')
-    expect(payload.note).toMatch(/Phase 1/)
+    expect(payload.note).toBeUndefined()
+    const ue = payload.apps.find((a) => a.app === 'union-eyes')
+    expect(ue, 'union-eyes seeder should run by default').toBeDefined()
+    expect(ue!.totalRecords).toBeGreaterThan(0)
     fs.unlinkSync(out)
   })
 
