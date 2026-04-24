@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Bars3Icon, XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 import TrackedLink from './TrackedLink';
 import { locales, type Locale } from '@/lib/locales';
@@ -16,9 +15,7 @@ const navigation = [
   { key: 'about', href: '/about' },
   { key: 'platform', href: '/platform' },
   { key: 'products', href: '/products' },
-  { key: 'verticals', href: '/verticals' },
-  { key: 'investors', href: '/investors' },
-  { key: 'resources', href: '/resources' },
+  { key: 'contact', href: '/contact' },
 ] as const;
 
 const appLinks = [
@@ -104,17 +101,14 @@ export default function Navigation() {
                 >
                   {t(item.key)}
                   {isActive && (
-                    <motion.div
-                      layoutId="nav-indicator"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-electric rounded-full"
-                    />
+                    <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-electric rounded-full" />
                   )}
                 </Link>
               );
             })}
             <TrackedLink
               href="/contact"
-              eventName="cta_request_demo"
+              eventName="book_demo_click"
               eventProps={{ source: 'navigation_desktop' }}
               className="px-5 py-2.5 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-electric/25"
             >
@@ -192,15 +186,15 @@ export default function Navigation() {
       </div>
 
       {/* Mobile Navigation */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            id="mobile-navigation-menu"
-            className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100"
-          >
+      {mobileMenuOpen && (
+        <div
+          id="mobile-navigation-menu"
+          className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 transition-all duration-300 overflow-hidden"
+          style={{
+            maxHeight: mobileMenuOpen ? '1000px' : '0',
+            opacity: mobileMenuOpen ? 1 : 0,
+          }}
+        >
             <div className="px-4 pt-2 pb-4 space-y-1">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
@@ -221,7 +215,7 @@ export default function Navigation() {
               })}
               <TrackedLink
                 href="/contact"
-                eventName="cta_request_demo"
+                eventName="book_demo_click"
                 eventProps={{ source: 'navigation_mobile' }}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 bg-electric text-white rounded-xl text-base font-semibold text-center mt-2"
@@ -274,9 +268,8 @@ export default function Navigation() {
                 </div>
               </div>
             </div>
-          </motion.div>
+        </div>
         )}
-      </AnimatePresence>
     </nav>
   );
 }
