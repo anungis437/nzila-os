@@ -2,8 +2,8 @@
 
 > **Document type:** Procurement Pack  
 > **Generated from:** `apps/union-eyes/maturity.json`, `reports/dr/`  
-> **Generated:** 2026-04-24 13:12:22 UTC  
-> **Git SHA:** 376b2bca  
+> **Generated:** 2026-04-24 14:11:11 UTC  
+> **Git SHA:** 824058d5  
 > **Classification:** Buyer-shareable (sanitized)
 
 ---
@@ -151,4 +151,4 @@ We publish our gaps and closure targets. We do not overclaim.
 
 ---
 
-_Generated from source-of-truth on 2026-04-24 13:12:22 UTC · Git SHA 376b2bca_
+_Generated from source-of-truth on 2026-04-24 14:11:11 UTC · Git SHA 824058d5_
