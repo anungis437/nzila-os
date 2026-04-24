@@ -164,6 +164,14 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/telemetry',                      // Public marketing telemetry (anonymous page events)
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
+    '/api/waitlist',                       // Public beta waitlist signup (zonga, weekone)
+    '/api/newsletter',                     // Public newsletter signup (weekone)
+    '/api/referrals',                      // Public referral submission (weekone)
+    '/api/analytics',                      // Public anonymous page-event telemetry (weekone)
+    '/api/billing/checkout',               // Pre-auth Stripe checkout for plan signup (weekone)
+    '/api/collaborators/invite',           // Pre-auth invite stub (weekone, INCUBATING)
+    '/api/monday-reset',                   // Static Monday checklist, no PII (weekone)
+    '/api/templates/download',             // Lead-gen public template download (weekone)
   ]
 
   for (const appDir of appDirs) {

@@ -136,6 +136,17 @@ const EXEMPT_PATTERNS = [
   '**/api/health/**',
   // Cron endpoints are idempotent by definition (system-triggered)
   '**/api/cron/**',
+  // Public anonymous telemetry — fire-and-forget, allowlist enforced via WEEKONE_ANALYTICS_EVENT_SET
+  '**/api/analytics/**',
+  // Public marketing forms — low-risk, no per-request idempotency required
+  '**/api/waitlist/**',
+  '**/api/newsletter/**',
+  '**/api/referrals/**',
+  '**/api/templates/download/**',
+  '**/api/monday-reset/**',
+  '**/api/billing/checkout/**',         // Pre-auth Stripe checkout (Stripe session id is the dedup key)
+  '**/api/collaborators/invite/**',     // Pre-auth invite stub (weekone, INCUBATING)
+  '**/api/onboarding/activation/**',    // Onboarding step write (weekone, INCUBATING)
 ]
 
 function isExempt(routeRelPath: string): boolean {

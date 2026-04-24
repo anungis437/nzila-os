@@ -68,6 +68,14 @@ const EXEMPT_ROUTES = new Set([
   'trial',          // Public Flow trial signup form
   'telemetry',      // Public marketing telemetry (anonymous page events)
   'metrics',        // Telemetry scrape endpoint (token-gated)
+  'waitlist',       // Public beta waitlist signup (zonga, weekone)
+  'newsletter',     // Public newsletter signup (weekone)
+  'referrals',      // Public referral submission (weekone)
+  'analytics',      // Public anonymous page-event telemetry (weekone)
+  'billing/checkout',     // Pre-auth Stripe checkout for plan signup (weekone)
+  'collaborators/invite', // Pre-auth invite stub (weekone, INCUBATING)
+  'monday-reset',         // Static Monday checklist, no PII (weekone)
+  'templates/download',   // Lead-gen public template download (weekone)
 ])
 
 function isExemptRoute(filePath: string): boolean {

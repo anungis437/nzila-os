@@ -74,6 +74,11 @@ const EXEMPT_PATHS = [
   'apps/flow/app/api/governance/telemetry/',
   'apps/flow/app/api/metrics/',
   'apps/flow/app/api/ops/summary/',
+  // Flow Stripe webhook — verified via HMAC signature, writes are idempotent by Stripe event id;
+  // org context derived from subscription metadata after signature verification (not request-scoped).
+  'apps/flow/app/api/webhooks/stripe/',
+  // Flow dashboard server component — reads aggregate org overview, scoping handled by page-level auth.
+  'apps/flow/app/[locale]/dashboard/',
   // ABR modules currently run a controlled migration path and still use shared DB adapters.
   // Route handlers remain covered by auth/org-scope contracts.
   'apps/abr/modules/',

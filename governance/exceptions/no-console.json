@@ -4,6 +4,36 @@
   "description": "Allowed exceptions to the no-console runtime invariant",
   "entries": [
     {
+      "path": "apps/weekone/app/api/analytics/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only). Public anonymous page-event telemetry intentionally writes to console.info as the structured sink until @nzila/observability is wired. Allowlist gated via WEEKONE_ANALYTICS_EVENT_SET.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/weekone/app/api/newsletter/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only). Public newsletter submission logs via console.info as the structured sink until @nzila/observability is wired.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/weekone/app/api/templates/download/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only). Public template download lead-gen logs via console.info as the structured sink until @nzila/observability is wired.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/weekone/app/api/waitlist/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only). Public waitlist submission logs via console.info as the structured sink until @nzila/observability is wired.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/weekone/app/api/onboarding/activation/route.ts",
+      "owner": "platform-core",
+      "justification": "WeekOne is INCUBATING (founder-internal only). Onboarding activation event logs via console.info as the structured sink until @nzila/observability is wired.",
+      "expiresOn": "2026-09-01"
+    },
+    {
       "path": "apps/union-eyes/db/seeds/**",
       "owner": "union-eyes-team",
       "justification": "Seed scripts are CLI programs — console output is appropriate for development tooling.",

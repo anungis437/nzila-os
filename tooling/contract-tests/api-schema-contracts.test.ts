@@ -50,6 +50,7 @@ const SCHEMA_EXEMPT_PATHS = [
   'whop/create-checkout',       // Payment initiation — minimal body (planId only)
   'whop/unauthenticated',       // Unauthenticated payment checkout (pay-first flow)
   'shopify/webhook',            // Shopify webhook — verified via HMAC signature (createHmac)
+  'webhooks/stripe',            // Stripe webhook — verified via HMAC (verifyWebhookSignature), event types from Stripe SDK
 ]
 
 function findRouteFiles(app: string): string[] {

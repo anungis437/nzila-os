@@ -71,6 +71,14 @@ const OTEL_EXEMPT_ROUTE_PATTERNS = [
   '/api/contact/',             // Public contact/demo-request forms
   '/api/telemetry/',           // Public marketing telemetry (anonymous page events)
   '/api/metrics/',             // Telemetry scrape endpoint (token-gated)
+  '/api/waitlist/',            // Public beta waitlist signup (zonga, weekone)
+  '/api/newsletter/',          // Public newsletter signup (weekone)
+  '/api/referrals/',           // Public referral submission (weekone)
+  '/api/analytics/',           // Public anonymous page-event telemetry (weekone)
+  '/api/monday-reset/',        // Static Monday checklist, no PII (weekone)
+  '/api/templates/download/',  // Lead-gen public template download (weekone)
+  '/api/collaborators/invite/',// Pre-auth invite stub (weekone, INCUBATING)
+  '/api/billing/checkout/',    // Pre-auth Stripe checkout for plan signup (weekone)
 ]
 
 function isOtelExempt(routePath: string): boolean {
