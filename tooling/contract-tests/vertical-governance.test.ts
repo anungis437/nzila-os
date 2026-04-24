@@ -162,6 +162,13 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/control-plane/architecture',     // Internal diagnostics (GET-only)
     '/api/contact',                        // Public contact/demo-request form (marketing)
     '/api/telemetry',                      // Public marketing telemetry (anonymous page events)
+    '/api/waitlist',                       // Public marketing waitlist signup
+    '/api/newsletter',                     // Public marketing newsletter signup
+    '/api/referrals',                      // Public referral signup
+    '/api/templates/download',             // Public template download lead capture
+    '/api/analytics',                      // Public marketing analytics events (anonymous)
+    '/api/monday-reset',                   // Public weekly checklist (static content)
+    '/api/billing/checkout',               // Public SaaS checkout (Stripe-hosted)
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
   ]

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { auth } from '@nzila/platform-auth/entra/server'
 
 const COMMERCIAL_ANALYTICS_EVENTS = {
   WEEKONE_INVITE_SENT: 'weekone.invite.sent',
@@ -11,6 +12,11 @@ const inviteSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
+  }
+
   const body = await request.json().catch(() => null)
   const parsed = inviteSchema.safeParse(body)
 

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createLogger } from '@nzila/os-core/telemetry'
+
+const log = createLogger('weekone.template_download')
 
 const schema = z.object({
   email: z.string().email(),
@@ -14,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Invalid template payload' }, { status: 400 })
   }
 
-  console.info('[weekone.template_download]', {
+  log.info('download_requested', {
     email: parsed.data.email,
     source: parsed.data.source,
     occurredAt: new Date().toISOString(),

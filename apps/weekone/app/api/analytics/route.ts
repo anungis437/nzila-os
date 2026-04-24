@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createLogger } from '@nzila/os-core/telemetry'
 import { WEEKONE_ANALYTICS_EVENT_SET } from '@/lib/analytics/events'
+
+const log = createLogger('weekone.analytics')
 
 const schema = z.object({
   eventName: z.string().min(1),
@@ -19,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Unknown analytics event' }, { status: 400 })
   }
 
-  console.info('[weekone.analytics]', {
+  log.info('event_received', {
     eventName: parsed.data.eventName,
     context: parsed.data.context ?? {},
     occurredAt: new Date().toISOString(),

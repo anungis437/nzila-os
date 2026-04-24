@@ -22,8 +22,7 @@ import { getInvoicesAction } from '@/app/actions/invoices'
 import { getCustomersAction } from '@/app/actions/customers'
 import { getProductsAction } from '@/app/actions/products'
 import { getLowStockAction } from '@/app/actions/inventory'
-import { db, commerceQuoteLines, commerceQuotes } from '@nzila/db'
-import { and, desc, eq, inArray, sql } from 'drizzle-orm'
+import { getQuoteOutcomeCounts, getTopWonSkus } from '@/lib/dashboard-aggregates'
 import {
   calculateAverageQuoteSize,
   calculateCloseRateTrend,
@@ -97,47 +96,11 @@ export default async function DashboardPage({
   const [quoteOutcomeResult, topWonSkuResult] = await Promise.allSettled([
     (async () => {
       const ctx = await getReadContext()
-      const [wonRow, lostRow] = await Promise.all([
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(commerceQuotes)
-          .where(and(eq(commerceQuotes.orgId, ctx.orgId), eq(commerceQuotes.status, 'accepted'))),
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(commerceQuotes)
-          .where(
-            and(
-              eq(commerceQuotes.orgId, ctx.orgId),
-              inArray(commerceQuotes.status, ['declined', 'expired', 'cancelled']),
-            ),
-          ),
-      ])
-
-      return {
-        won: Number(wonRow[0]?.count ?? 0),
-        lost: Number(lostRow[0]?.count ?? 0),
-      }
+      return getQuoteOutcomeCounts(ctx.orgId)
     })(),
     (async () => {
       const ctx = await getReadContext()
-      return db
-        .select({
-          sku: commerceQuoteLines.sku,
-          units: sql<number>`coalesce(sum(${commerceQuoteLines.quantity}), 0)`,
-          lineValue: sql<number>`coalesce(sum(${commerceQuoteLines.lineTotal}), 0)`,
-        })
-        .from(commerceQuoteLines)
-        .innerJoin(commerceQuotes, eq(commerceQuoteLines.quoteId, commerceQuotes.id))
-        .where(
-          and(
-            eq(commerceQuotes.orgId, ctx.orgId),
-            eq(commerceQuotes.status, 'accepted'),
-            sql`${commerceQuoteLines.sku} is not null`,
-          ),
-        )
-        .groupBy(commerceQuoteLines.sku)
-        .orderBy(desc(sql`coalesce(sum(${commerceQuoteLines.lineTotal}), 0)`))
-        .limit(5)
+      return getTopWonSkus(ctx.orgId)
     })(),
   ])
 
