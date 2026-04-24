@@ -171,6 +171,10 @@ async function loadAppSeeders(): Promise<void> {
     { app: 'union-eyes', load: () => import('./seeders/union-eyes') },
     { app: 'flow', load: () => import('./seeders/flow') },
     { app: 'zonga', load: () => import('./seeders/zonga') },
+    { app: 'weekone', load: () => import('./seeders/weekone') },
+    { app: 'agrimo', load: () => import('./seeders/agrimo') },
+    { app: 'cora', load: () => import('./seeders/cora') },
+    { app: 'faircase', load: () => import('./seeders/faircase') },
   ]
   for (const { app, load } of loaders) {
     try {
