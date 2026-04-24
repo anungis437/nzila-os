@@ -304,6 +304,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'data-source/page.tsx',                        minRole: 'integration_manager',  description: 'Data source dashboard' },
   { path: 'integrations/page.tsx',                       minRole: 'integration_manager',  description: 'Integrations dashboard' },
   { path: 'operations/page.tsx',                         minRole: 'platform_lead',        description: 'Platform operations' },
+  { path: 'ops/performance/page.tsx',                    minRole: 'platform_lead',        description: 'Route performance dashboard (per-route latency, error rate, volume)' },
   { path: 'sector-analytics/page.tsx',                   minRole: 'platform_lead',        description: 'Sector analytics' },
   { path: 'security/page.tsx',                           minRole: 'security_manager',     description: 'Security events dashboard' },
   { path: 'settings/integrations/page.tsx',              minRole: 'integration_manager',  description: 'Enterprise integration settings' },
