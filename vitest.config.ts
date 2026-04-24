@@ -136,6 +136,7 @@ export default defineConfig({
       'packages/platform-validation',
       // Tooling
       'tooling/openapi-gen',
+      'tooling/staging-seed',
       // Contract tests (architectural invariants)
       'tooling/contract-tests',
       // Governance & AI intelligence packages

@@ -1,0 +1,26 @@
+{
+  "name": "@nzila/staging-seed",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared staging-seed framework: profiles, deterministic fakers, and CLI.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./profiles": "./src/core/profiles.ts",
+    "./shared": "./src/shared/index.ts"
+  },
+  "scripts": {
+    "seed": "tsx src/cli.ts seed",
+    "reseed": "tsx src/cli.ts reseed",
+    "reset": "tsx src/cli.ts reset",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "tsx": "^4",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

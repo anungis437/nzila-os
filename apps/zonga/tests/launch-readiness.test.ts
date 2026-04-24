@@ -276,7 +276,7 @@ describe('Platform Maturity Tracking', () => {
       '../../reports/zonga-client-onboarding-script.md',
       '../../reports/zonga-go-live-decision.md',
       '../../reports/zonga-launch-readiness.md',
-    ]
+    ] as const
 
     for (const report of reports) {
       expect(fileExists(report), `Missing report: ${report}`).toBe(true)
