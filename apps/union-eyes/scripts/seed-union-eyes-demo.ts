@@ -6,9 +6,20 @@
  *
  * Idempotent: checks for existing records before inserting.
  *
+ * @deprecated Since 2026-04 — prefer the unified `@nzila/staging-seed`
+ *   framework: `pnpm seed:staging --app=union-eyes --profile=demo-standard`.
+ *   This script is kept for sales-kit demo runbooks (see
+ *   `docs/commercial/sales-kit/02-45-minute-demo-script.md`).
+ *
  * Usage:
  *   npx tsx scripts/seed-union-eyes-demo.ts
  */
+
+// eslint-disable-next-line no-console
+console.warn(
+  '[seed-union-eyes-demo] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes`. ' +
+    'This script is retained for sales-kit demo runbooks only.',
+)
 
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'

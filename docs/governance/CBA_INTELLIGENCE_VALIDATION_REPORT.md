@@ -362,7 +362,7 @@ All 5 unsupported claims identified in the original audit have been corrected:
 | **pgvector Migration** | `db/migrations/20260402_pgvector_embeddings.sql` — pgvector extension, vector(1536) columns, HNSW indexes, content_hash column |
 | **Audit Immutability** | `db/migrations/20260402_audit_immutability.sql` — deny mutation trigger, SHA-256 hash chain on review_decisions |
 | **OpenAPI Spec** | `docs/cba-intelligence-openapi.yaml` — OpenAPI 3.0.3, all 9 routes, Clerk JWT security |
-| **Seed Data** | `scripts/seed-cba-intelligence.ts` — 4 sources, 3 documents, 3 findings, 1 review decision |
+| **Seed Data** | `scripts/seed-cba-intelligence.ts` (legacy; prefer `pnpm seed:staging --app=union-eyes` once CBA Intelligence shapes land in `tooling/staging-seed/`) — 4 sources, 3 documents, 3 findings, 1 review decision |
 | **Content Dedup** | `lib/services/ai/clause-extraction-service.ts` — SHA-256 content hashing, batch dedup on save |
 | **Sidebar Navigation** | `components/sidebar.tsx` — CBA Intelligence nav item in Representative Tools section |
 | **Alert Routing** | `ops/oncall/alert-routing.ts` — ALT-070 through ALT-075 (6 CBA Intelligence alert rules) |

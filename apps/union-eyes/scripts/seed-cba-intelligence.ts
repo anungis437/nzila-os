@@ -6,9 +6,20 @@
  *
  * Idempotent: checks for existing records before inserting.
  *
+ * @deprecated Since 2026-04 — prefer the unified `@nzila/staging-seed`
+ *   framework once it covers CBA Intelligence shapes. This script is
+ *   retained for `docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md`
+ *   record-count parity (4 sources, 3 documents, 3 findings, 1 review).
+ *
  * Usage:
  *   npx tsx apps/union-eyes/scripts/seed-cba-intelligence.ts
  */
+
+// eslint-disable-next-line no-console
+console.warn(
+  '[seed-cba-intelligence] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes` ' +
+    'once CBA Intelligence coverage lands in the framework. Retained for validation parity.',
+);
 
 import { db } from "../db/db";
 import {

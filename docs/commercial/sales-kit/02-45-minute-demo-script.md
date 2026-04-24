@@ -111,7 +111,7 @@ Use the procurement Q&A pack as the answer source:
 
 ## Demo prep checklist
 
-- [ ] Demo seed loaded (`pnpm tsx apps/union-eyes/scripts/seed-union-eyes-demo.ts`)
+- [ ] Demo seed loaded — preferred: `pnpm seed:staging --app=union-eyes --profile=demo-standard` (legacy fallback: `pnpm tsx apps/union-eyes/scripts/seed-union-eyes-demo.ts`)
 - [ ] Tab 1: chief steward, dashboard cognition view open
 - [ ] Tab 2: org admin, `/admin/auth-policy` open
 - [ ] Tab 3: terminal with `psql` connected to the demo DB, audit-log query pre-pasted

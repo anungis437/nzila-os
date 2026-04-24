@@ -103,5 +103,5 @@ Every row carries `actor_user_id`, `target_user_id` (when applicable),
 | TOTP MFA | `packages/platform-auth/src/mfa/{totp,service,handlers}.ts` |
 | Risk assessor | `packages/platform-auth/src/risk/assess.ts` |
 | Lifecycle | `packages/platform-auth/src/lifecycle/service.ts` |
-| Demo seed | `apps/union-eyes/scripts/seed-union-eyes-demo.ts` |
+| Demo seed | `pnpm seed:staging --app=union-eyes` (`tooling/staging-seed/`); legacy: `apps/union-eyes/scripts/seed-union-eyes-demo.ts` |
 | Auth audit table | `user_management.auth_audit_log` |

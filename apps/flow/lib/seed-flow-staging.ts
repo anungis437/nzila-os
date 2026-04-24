@@ -8,7 +8,13 @@
  *
  * This proves the command bus is operationally complete and auditable.
  *
- * Usage: tsx lib/seed-flow-staging.ts
+ * NOTE: This is NOT the same as the unified `@nzila/staging-seed` framework
+ * (`pnpm seed:staging --app=flow`). This script's purpose is to **exercise
+ * the Flow command-bus** end-to-end (a runtime contract test), not to
+ * generate synthetic staging data. Both can coexist. For pure data seeding,
+ * prefer the framework.
+ *
+ * Usage: tsx lib/seed-flow-staging.ts (or `pnpm --filter @nzila/flow seed:staging`)
  */
 import { randomUUID } from 'node:crypto'
 import { logger } from '@/lib/logger'

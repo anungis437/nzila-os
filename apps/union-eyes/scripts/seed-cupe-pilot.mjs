@@ -2,18 +2,25 @@
 
 /**
  * Seed Script: Load CUPE Pilot Fixtures
- * 
+ *
+ * @deprecated Since 2026-04 — prefer the unified `@nzila/staging-seed`
+ *   framework: `pnpm seed:staging --app=union-eyes --profile=demo-light`.
+ *   This script is retained for the admin LoadCUPEPilotForm + the
+ *   `fixtures/cupe/README.md` Method 2 path.
+ *
  * Usage:
  *   node scripts/seed-cupe-pilot.mjs [--reset]
- * 
+ *
  * Loads:
  * - CUPE pilot org (Local 123) with 3 worksites
  * - 7 demo members (6 union + 1 admin) with various roles
  * - 5 demo cases (3 open, 1 in-progress, 1 settled)
- * 
- * v0.1: SQL insert statements (idempotent via upsert)
- * v0.2+: Admin form-based seeding (per user requirements)
  */
+
+console.warn(
+  '[seed-cupe-pilot] DEPRECATED: prefer `pnpm seed:staging --app=union-eyes`. ' +
+    'This script is retained for fixture-based admin-form seeding.',
+);
 
 import { exec } from 'child_process';
 import { promisify } from 'util';

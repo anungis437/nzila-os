@@ -38,7 +38,7 @@ preparing a buyer pack.
 ### Prerequisites
 
 - Local dev stack running: `pnpm dev:union-eyes` (or `pnpm dev`).
-- Demo seed loaded: `pnpm tsx apps/union-eyes/scripts/seed-union-eyes-demo.ts`.
+- Demo seed loaded \u2014 preferred: `pnpm seed:staging --app=union-eyes` (legacy fallback: `pnpm tsx apps/union-eyes/scripts/seed-union-eyes-demo.ts`).
 - Test org admin: `demo-admin@unioneyes.app` / password from `.env.local` `DEMO_ADMIN_PASSWORD`.
 - Test member with MFA enabled: `demo-mfa@unioneyes.app`.
 

@@ -1,6 +1,12 @@
 /**
  * Seed: Employer Execution Marathon Pilot
  *
+ * Seeds the canonical employer-execution pipeline (timesheets → payroll →
+ * remittance → compliance) for the Marathon employer-focused offering.
+ * This is a first-class product seeder, NOT legacy demo scaffolding —
+ * it backs the marathon pilot runbook
+ * (`docs/union-eyes/employer-execution/marathon-pilot.md`).
+ *
  * Usage:
  *   npx tsx apps/union-eyes/scripts/seed-employer-execution-marathon.ts
  */
