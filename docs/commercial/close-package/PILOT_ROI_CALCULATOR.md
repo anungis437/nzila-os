@@ -47,7 +47,7 @@
 | Reassignments accepted / month | 4 | 8 | 16 |
 | **Monthly hours saved** | **30** | **50** | **80** |
 
-Multiplier source: published in [`UNION_EYES_COGNITION_ROI.md`](../UNION_EYES_COGNITION_ROI.md#pricing--roi-break-even).
+Multiplier source: published in [`UNION_EYES_COGNITION_ROI.md`](../UNION_EYES_COGNITION_ROI.md#pricing-roi-break-even).
 
 ### 2. Faster grievance cycle time
 

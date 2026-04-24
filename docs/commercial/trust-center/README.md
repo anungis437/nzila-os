@@ -11,12 +11,12 @@ cannot demonstrate.
 
 1. [Security overview](./01-security-overview.md)
 2. [Data residency and processing](./02-data-residency.md) *(see vendor-risk-pack)*
-3. [Encryption and key management](./03-encryption.md) *(see one-pager)*
+3. [Incident response summary](./03-incident-response-summary.md) *(see one-pager)*
 4. [Access control model](./04-access-control-model.md)
-5. [Audit and evidence trail](./05-audit-trail.md) *(see vendor-risk-pack)*
-6. [Vulnerability and patch management](./06-vuln-mgmt.md) *(see SECURITY.md)*
-7. [Backup and restore](./07-backup-restore.md) *(see vendor-risk-pack)*
-8. [Incident response](./08-incident-response.md) *(see vendor-risk-pack)*
+5. [Backup and restore policy](./05-backup-restore-policy.md) *(see vendor-risk-pack)*
+6. [Vulnerability management](./06-vulnerability-management.md) *(see SECURITY.md)*
+7. [Responsible AI controls](./07-responsible-ai-controls.md) *(see vendor-risk-pack)*
+8. [Subprocessors](./08-subprocessors.md) *(see vendor-risk-pack)*
 9. [Contact and SLA](./09-contact-and-sla.md)
 10. [FAQ](./10-faq.md)
 11. [Identity and access management](./11-identity-and-access-management.md)

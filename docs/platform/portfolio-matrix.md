@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-23
+> Generated: 2026-04-24
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -49,3 +49,4 @@
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Platform Admin | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Test Scaffold GP | DEPRECATED | internal-only | internal | SUNSET |
+
