@@ -1,17 +1,17 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-23 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-24 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Apps | 19 |
-| Packages (packages/*) | 170 |
-| Workspace Packages (apps|packages|services|tooling) | 193 |
-| GitHub Workflows | 43 |
+| Packages (packages/*) | 173 |
+| Workspace Packages (apps|packages|services|tooling) | 196 |
+| GitHub Workflows | 45 |
 | Contract Test Files | 220 |
-| TS/JS Test Files | 1218 |
+| TS/JS Test Files | 1232 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -21,10 +21,10 @@
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 310 | Internal operations console — platform governance, compliance, analytics, integr |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 313 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 213 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
-| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 333 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
+| flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 38 | Investment migration advisory platform — case management, program intelligence,  |
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
 | nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 61 | National Anti-Corruption Programme examination and assessment platform. |
@@ -33,13 +33,14 @@
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3153 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3180 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 46 |  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 434 | Africa-first music distribution, streaming, and royalty management platform. |
+| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 81 |  |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 446 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 
+- access-review-gate.yml
 - agri-core-check.yml
 - ai-governance.yml
 - app-floor-check.yml
@@ -63,6 +64,7 @@
 - deploy-union-eyes.yml
 - deploy-web.yml
 - doc-hygiene.yml
+- dr-drill-reminder.yml
 - e2e.yml
 - game-day.yml
 - gitops-deploy.yml

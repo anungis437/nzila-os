@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-23T00:00:00.000Z",
+  "generatedAt": "2026-04-24T00:00:00.000Z",
   "appCount": 19,
-  "packageCount": 170,
-  "workspacePackageCount": 193,
-  "workflowCount": 43,
+  "packageCount": 173,
+  "workspacePackageCount": 196,
+  "workflowCount": 45,
   "contractTestCount": 220,
-  "tsTestFileCount": 1218,
+  "tsTestFileCount": 1232,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -131,6 +131,7 @@
         "config",
         "crm-hubspot",
         "db",
+        "deal-engine",
         "executive-os",
         "governed-workflow",
         "itsm-core",
@@ -144,6 +145,7 @@
         "platform-events",
         "platform-evidence-pack",
         "platform-export",
+        "platform-growth-os",
         "platform-integrations-control-plane",
         "platform-intelligence-home",
         "platform-marketplace",
@@ -161,7 +163,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 310
+      "codeFileCount": 313
     },
     {
       "name": "control-plane",
@@ -279,7 +281,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 333
+      "codeFileCount": 346
     },
     {
       "name": "mobility",
@@ -518,13 +520,15 @@
         "os-core",
         "payments-stripe",
         "platform-auth",
+        "platform-cognition-core",
         "platform-pilot-metrics",
         "platform-shell",
+        "ue-cognition",
         "ui",
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3153
+      "codeFileCount": 3180
     },
     {
       "name": "web",
@@ -570,7 +574,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 46
+      "codeFileCount": 81
     },
     {
       "name": "zonga",
@@ -611,10 +615,11 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 434
+      "codeFileCount": 446
     }
   ],
   "workflows": [
+    "access-review-gate.yml",
     "agri-core-check.yml",
     "ai-governance.yml",
     "app-floor-check.yml",
@@ -638,6 +643,7 @@
     "deploy-union-eyes.yml",
     "deploy-web.yml",
     "doc-hygiene.yml",
+    "dr-drill-reminder.yml",
     "e2e.yml",
     "game-day.yml",
     "gitops-deploy.yml",
