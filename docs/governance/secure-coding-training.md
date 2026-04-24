@@ -50,11 +50,11 @@ for occasional contributors.
 
 | Resource                                | URL                                           |
 |-----------------------------------------|-----------------------------------------------|
-| OWASP Web Security Testing Guide        | https://owasp.org/www-project-web-security-testing-guide/ |
-| OWASP Cheat Sheet Series                | https://cheatsheetseries.owasp.org/           |
-| OWASP LLM AI Security                   | https://owasp.org/www-project-top-10-for-large-language-model-applications/ |
-| Microsoft Learn: Azure Security          | https://learn.microsoft.com/en-us/training/paths/az-500/ |
-| Node.js Security Best Practices          | https://nodejs.org/en/docs/guides/security/  |
+| OWASP Web Security Testing Guide        | <https://owasp.org/www-project-web-security-testing-guide/> |
+| OWASP Cheat Sheet Series                | <https://cheatsheetseries.owasp.org/>           |
+| OWASP LLM AI Security                   | <https://owasp.org/www-project-top-10-for-large-language-model-applications/> |
+| Microsoft Learn: Azure Security          | <https://learn.microsoft.com/en-us/training/paths/az-500/> |
+| Node.js Security Best Practices          | <https://nodejs.org/en/docs/guides/security/>  |
 
 ### 2.2 Internal Resources
 
@@ -86,6 +86,7 @@ for occasional contributors.
 ### 3.3 Verification
 
 Training completion evidenced by:
+
 1. Certificate of completion (external courses) → uploaded to `proof-artifacts/training/`
 2. PR demonstrating security fix (internal exercises) → linked in training log
 3. Red team test contribution → new test case in `security/redteam/`
@@ -97,6 +98,7 @@ Training completion evidenced by:
 ### 4.1 Role
 
 Each product team designates one **Security Champion** who:
+
 - Completes all 3 tracks
 - Conducts threat modeling for team features
 - Reviews PRs for security-sensitive paths

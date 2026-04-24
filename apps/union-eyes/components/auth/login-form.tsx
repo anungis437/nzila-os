@@ -222,7 +222,7 @@ export function LoginForm() {
         <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
       )}
       {info && (
-        <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 break-words">{info}</div>
+        <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 wrap-break-word">{info}</div>
       )}
 
       {methods.ssoRequired ? (

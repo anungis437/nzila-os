@@ -19,6 +19,7 @@ This is not a product for market release. This is the machine we run on.
 ## Module Adoption Sequence
 
 ### Step 1 — Support Desk (Immediate)
+
 Start logging all client support requests as tickets. Assign an owner. Track resolution time.  
 Route: Console → Support Desk
 
@@ -26,6 +27,7 @@ Route: Console → Support Desk
 
 Navigate to Platform Admin → ITSM Config → Queue Manager.  
 Create at least one queue with:
+
 - Name (e.g., "General IT Support")
 - Responsible team
 - Working hours and timezone
@@ -57,15 +59,19 @@ Agents start creating tickets via the **+ New Ticket** button.
 ## Messaging by Persona
 
 ### IT Manager
+>
 > "Get full visibility into your team's workload, SLA attainment, and MTTR — all in one place, without leaving NzilaOS."
 
 ### Service Desk Agent
+>
 > "One inbox for every ticket type — incidents, service requests, access, and changes — with AI that triages for you."
 
 ### Platform Admin
+>
 > "Configure queues, SLA profiles, and automation rules in minutes from Platform Admin. No IT-ITSM tool subscription required."
 
 ### MSP / Managed Services
+>
 > "Bundle service tiers with custom SLA contracts and give clients a read-only view of their tickets and contract health."
 
 ---

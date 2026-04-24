@@ -14,6 +14,7 @@
 **Target**: `/platform-health` should be configuration-only (threshold management, alerting rules). Runtime health monitoring belongs exclusively in Control Plane.
 
 **Migration plan**:
+
 - Audit the current `/platform-health` page content
 - Extract any runtime monitoring into Control Plane if not already present
 - Retain only configuration UI (thresholds, alert rules, health check schedules)
@@ -30,6 +31,7 @@
 **Target**: Console evidence tools are platform-level cross-app evidence assembly. App-level evidence exports feed into them but are not duplicates.
 
 **Migration plan**:
+
 - No route movement needed — this is architectural alignment, not duplication
 - Ensure app-level evidence routes use `@nzila/platform-evidence-pack` contracts
 - Console evidence tools should aggregate from app adapters

@@ -6,6 +6,7 @@ Scope: Mobile readiness for pilot-critical Union Eyes workflows
 ## Reality Snapshot
 
 What is implemented:
+
 - Dedicated mobile layout and navigation:
   - `apps/union-eyes/app/[locale]/mobile/layout.tsx`
   - `apps/union-eyes/app/[locale]/mobile/page.tsx`
@@ -13,6 +14,7 @@ What is implemented:
 - Mobile routes are live and return HTTP 200 on app host.
 
 What was runtime-validated in this pass:
+
 - `/en-CA/mobile` -> 200
 - `/en-CA/mobile/claims` -> 200
 - `/en-CA/dashboard/claims` -> 307 (auth/redirect behavior expected for protected dashboard route)
@@ -31,16 +33,19 @@ What was runtime-validated in this pass:
 ## Pilot Guidance
 
 Pilot-safe mobile scope:
+
 - Member and steward lightweight interactions on dedicated mobile pages.
 - Login entry and claim list/detail interactions verified during pilot onboarding.
 
 Pilot exclusions (desktop-preferred):
+
 - Deep admin/settings/configuration surfaces.
 - Table-heavy operational screens without mobile-specific variants.
 
 ## Required Hardening Before Production
 
 1. Add Playwright mobile viewport suite for:
+
 - login,
 - claims list/detail,
 - one end-to-end core case workflow,

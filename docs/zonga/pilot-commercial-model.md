@@ -1,6 +1,7 @@
 # Zonga Pilot Commercial Model (MS Celebrations)
 
 ## Commercial Terms (Pilot Baseline)
+
 - Ownership: Content ownership remains with label/artist unless a separate written agreement states otherwise.
 - Pilot term: 90 days from activation date.
 - Rev share: Default pilot rev share is negotiated per revenue stream; if not specified, existing platform fee schedule applies.
@@ -14,11 +15,13 @@
 - Termination: Either party may terminate with written notice per agreement; unresolved rights obligations survive termination.
 
 ## In-Product Trust Surfaces
+
 - Rights summary panel: [apps/zonga/components/dashboard/rights-terms-panel.tsx](../../apps/zonga/components/dashboard/rights-terms-panel.tsx)
 - Terms acceptance log API: [apps/zonga/app/api/rights/terms/route.ts](../../apps/zonga/app/api/rights/terms/route.ts)
 - Downloadable agreement copy: [apps/zonga/app/api/rights/terms/agreement/route.ts](../../apps/zonga/app/api/rights/terms/agreement/route.ts)
 
 ## Governance Notes
+
 - All acceptance actions are logged to audit trail for accountability.
 - Rights disputes and moderation queues are separated but cross-referenced by operators.
 - Default stance is clarity over aggressive lock-in during founding-partner pilot.

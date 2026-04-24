@@ -1,6 +1,8 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { SectionHeader } from "@/components/ui/section-header";
 import { GenerateBriefButton } from "@/components/weekly/generate-brief-button";
+import { MondayResetButton } from "@/components/weekly/monday-reset-button";
+import { TemplatePresets } from "@/components/weekly/template-presets";
 import { getDb } from "@/lib/db";
 
 interface WeeklyBrief {
@@ -45,8 +47,10 @@ export default async function WeeklyPage() {
         </div>
 
         {/* Generate Button */}
-        <div className="flex">
+        <div className="flex flex-col gap-4">
           <GenerateBriefButton />
+          <MondayResetButton />
+          <TemplatePresets />
         </div>
 
         {briefs.length === 0 ? (

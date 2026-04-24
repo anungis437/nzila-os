@@ -28,6 +28,7 @@ All pilot fees credited in full to Year 1 subscription on conversion.
 ## Annual Subscription (Post-Pilot)
 
 ### Local Plan
+
 *For single locals, 100–5,000 members*
 
 | Members | Annual Fee (CAD) |
@@ -40,6 +41,7 @@ All pilot fees credited in full to Year 1 subscription on conversion.
 Includes: All modules (grievance, governance, elections, communications, case intelligence), unlimited steward accounts, bilingual, Canadian hosting.
 
 ### Council Plan
+
 *For regional councils, joint boards, multi-local structures, 5,001–25,000 members*
 
 | Members | Annual Fee (CAD) |
@@ -51,6 +53,7 @@ Includes: All modules (grievance, governance, elections, communications, case in
 Includes: Multi-local management, cross-unit analytics, consolidated reporting, dedicated onboarding support.
 
 ### Federation / National
+
 *Custom pricing for national unions, large federations, public service bargaining units*
 
 Includes: Dedicated Azure subscription (full tenant isolation), custom integrations, SLA guarantees, quarterly business reviews, named account manager.
@@ -114,7 +117,7 @@ For reference — comparable tools in the Canadian market:
 - Lead with the pilot — no organization should be asked to commit to a subscription before seeing the tool in their context
 - The $12,000 pilot fee is not discountable (it represents real provisioning cost); the annual subscription is where negotiation happens
 - For CUPE National discussions, the 10% CUPE discount is pre-authorized — no approval needed
-- For federations >25,000 members, escalate to commercial@unioneyes.app before quoting
+- For federations >25,000 members, escalate to <commercial@unioneyes.app> before quoting
 
 ---
 

@@ -8,30 +8,39 @@ Source: `packages/db/src/schema/itsm.ts`
 ## Enums
 
 ### `ticket_type`
+
 `incident` | `service_request` | `change` | `problem` | `question` | `maintenance` | `access` | `security` | `procurement` | `other`
 
 ### `ticket_status`
+
 `new` | `triaged` | `assigned` | `in_progress` | `pending_user` | `pending_third_party` | `resolved` | `closed` | `cancelled`
 
 ### `priority`
+
 `p1_critical` | `p2_high` | `p3_medium` | `p4_low`
 
 ### `change_type`
+
 `standard` | `normal` | `emergency`
 
 ### `problem_status`
+
 `open` | `under_investigation` | `root_cause_identified` | `fix_in_progress` | `resolved` | `closed`
 
 ### `asset_type`
+
 `server` | `workstation` | `laptop` | `mobile` | `network_device` | `software` | `license` | `database` | `service` | `other`
 
 ### `asset_status`
+
 `in_use` | `spare` | `decommissioned` | `maintenance`
 
 ### `change_approval_status`
+
 `pending` | `approved` | `rejected` | `withdrawn`
 
 ### `kb_status`
+
 `draft` | `review` | `published` | `archived`
 
 ---
@@ -39,6 +48,7 @@ Source: `packages/db/src/schema/itsm.ts`
 ## Tables
 
 ### `itsm_queues`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK, default gen_random_uuid() |
@@ -54,6 +64,7 @@ Source: `packages/db/src/schema/itsm.ts`
 | updated_at | timestamptz | DEFAULT now() |
 
 ### `itsm_slas`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -65,6 +76,7 @@ Source: `packages/db/src/schema/itsm.ts`
 | updated_at | timestamptz | |
 
 ### `itsm_contracts`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -81,6 +93,7 @@ Source: `packages/db/src/schema/itsm.ts`
 | created_at / updated_at | timestamptz | |
 
 ### `itsm_tickets`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -110,6 +123,7 @@ Source: `packages/db/src/schema/itsm.ts`
 **Indexes**: `org_id`, `status`, `priority`, `assignee_id`, `queue_id`, `sla_resolution_due`
 
 ### `itsm_ticket_events`
+
 Immutable append-only event log.
 
 | Column | Type | Notes |
@@ -122,6 +136,7 @@ Immutable append-only event log.
 | created_at | timestamptz | DEFAULT now() — immutable |
 
 ### `itsm_assets`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -139,6 +154,7 @@ Immutable append-only event log.
 | created_at / updated_at | timestamptz | |
 
 ### `itsm_problems`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -154,6 +170,7 @@ Immutable append-only event log.
 | created_at / updated_at | timestamptz | |
 
 ### `itsm_changes`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -175,6 +192,7 @@ Immutable append-only event log.
 | created_at / updated_at | timestamptz | |
 
 ### `itsm_approvals`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
@@ -187,6 +205,7 @@ Immutable append-only event log.
 | created_at | timestamptz | |
 
 ### `itsm_kb_articles`
+
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | PK |

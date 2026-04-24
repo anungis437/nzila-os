@@ -81,6 +81,7 @@ Django backends validate JWT tokens via JWKS endpoint. The auth classes have bac
 ## Migration History
 
 The platform migrated from Clerk to `@nzila/platform-auth` in early 2026. Legacy Clerk references may exist in:
+
 - CSP headers in `next.config.ts` (non-functional, can be cleaned up)
 - Code comments and function names (backward-compat aliases)
 - Archived docs under `*/docs/archive/`

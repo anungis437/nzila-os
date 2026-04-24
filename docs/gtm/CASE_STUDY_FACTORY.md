@@ -20,6 +20,7 @@ These are two different jobs. Capture is operational. Factory is commercial.
 ## Why This Matters
 
 In a trust-heavy, relationship-driven market like labour organizations:
+
 - A named peer reference beats any product feature
 - A specific outcome ("reduced arbitration prep time by 40 hours per case") beats a generic claim
 - A case study that a buyer can share internally is worth more than a pitch deck they'll delete
@@ -53,6 +54,7 @@ Schedule the interview within 2 weeks of pilot end, while outcomes are fresh. Th
 ### Interview Questions
 
 **Context:**
+
 1. "Before Union Eyes, walk me through how you handled a typical grievance from filing to resolution."
 2. "What was the most frustrating part of that process for your team?"
 3. "What triggered you to look for a new approach?"
@@ -164,6 +166,7 @@ Some organizations won't want to be named publicly but will consent to an anonym
 [2 sentences on challenge]
 
 **Results:**
+
 - [Result 1]
 - [Result 2]
 - [Result 3]
@@ -196,6 +199,7 @@ Once you have a case study from a specific segment:
 **Adaptation rule:** When sending to a different segment, edit the opening 2 sentences to reflect their context. The results table stays the same.
 
 Example:
+
 - Original: "A large local union in Ontario with 4,500 members..."
 - For professional association audience: "A professional association with comparable governance structure and member representation requirements..."
 

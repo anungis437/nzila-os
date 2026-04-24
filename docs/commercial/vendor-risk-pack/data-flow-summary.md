@@ -7,5 +7,6 @@
 5. Exports are generated for grievance/evidence workflows.
 
 Control notes:
+
 - AI outputs are advisory and human-reviewed.
 - Cross-organization reads are prohibited by design constraints and tests.

@@ -1,4 +1,5 @@
 # FairCase — Methodology Memo
+
 ## The FPSLREB Classification Signal: What It Is, What It Isn't, and What It Means
 
 > **Version:** 1.0 — April 2026
@@ -34,6 +35,7 @@ The ~4% figure reflects the proportion of FPSLREB case records that carry **expl
 **It measures:** The explicit labeling rate in the formal adjudication record.
 
 **It does not measure:**
+
 - The proportion of cases where race-based workplace harm actually occurred
 - The proportion of Black federal employees who experienced discrimination
 - The proportion of cases where ABR was a relevant but uncoded factor
@@ -58,6 +60,7 @@ Black-Led Advisory Committees (BLACs) established by federal departments under T
 ### 3.3 Racialized complaint under-filing: documented in the research literature
 
 The academic literature on racialized workplace complaint behavior in Canada consistently documents that Black employees file formal complaints at lower rates than the experienced harm rate. Reasons include:
+
 - Fear of retaliation or increased scrutiny
 - Distrust of institutional complaint processes
 - Prior experience of complaints being minimized
@@ -114,6 +117,7 @@ FairCase's classification intelligence is trained on a corpus of 10,000+ CanLII 
 **What it requires:** Every Medium and High confidence classification is reviewed by a designated human reviewer at the institution before any action is taken. Classification outputs are recommendations, not determinations. Human override is always available and is logged with the reviewer's documented rationale (which itself becomes part of the accountability record).
 
 **What it cannot do:**
+
 - Make findings of fact
 - Determine credibility of witness evidence
 - Apply the full adjudication framework of a specific tribunal

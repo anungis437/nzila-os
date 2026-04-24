@@ -8,18 +8,21 @@ It does not claim architecture capabilities beyond current implementation eviden
 ## Diagram Set
 
 1. Product and Platform Context
+
 - Shows top-level products and shared platform services.
 - Source references:
   - governance/portfolio/product-catalog.json
   - nzila-truth-manifest.json
 
 2. Identity and Access Architecture
+
 - Shows @nzila/platform-auth, Argon2id session model, and optional Entra SSO path.
 - Source references:
   - docs/governance/enterprise-readiness.md
   - docs/governance/security-overview.md
 
 3. Workflow and Orchestration Architecture
+
 - Shows application workflow dispatch to orchestrator-api and execution lifecycle.
 - Source references:
   - apps/orchestrator-api/src/contract.ts
@@ -27,12 +30,14 @@ It does not claim architecture capabilities beyond current implementation eviden
   - apps/flow/lib/orchestrator-dispatch.ts
 
 4. Data and Audit Architecture
+
 - Shows operational DB tables, event trails, and evidence-pack outputs.
 - Source references:
   - packages/db/src/schema/
   - docs/governance/audit-logging-model.md
 
 5. Deployment and Operations Architecture
+
 - Shows managed cloud deployment model and operational governance boundaries.
 - Source references:
   - docs/buyers/deployment-models.md
@@ -41,6 +46,7 @@ It does not claim architecture capabilities beyond current implementation eviden
 ## Required Diagram Metadata
 
 Each diagram must include:
+
 - Date and version
 - Author/owner
 - Source-of-truth files

@@ -37,6 +37,7 @@ Removing them would destroy audit trail integrity.
 | Django migration files | Various | Immutable migration history |
 
 **Service-layer aliases** exist so application code uses `userId`/`orgId`:
+
 - `getOrganizationIdForUser()` — resolves app-level org from platform auth
 - `auth().userId` — returns platform user ID (not Clerk ID)
 

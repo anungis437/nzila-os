@@ -1,7 +1,7 @@
 # Documentation Map
 
 > Every document in the Nzila OS documentation, organized by section.
-> 
+>
 > See also: [Glossary](glossary.md) · [Root README](../../README.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md)
 
 ---

@@ -1,6 +1,7 @@
 # FAIRCASE Offer Stack
 
 ## 1) Discovery Call (Free)
+
 - Duration: 45 minutes.
 - Outcome:
   - Confirm complaint and investigation workflow maturity.
@@ -9,6 +10,7 @@
 - Deliverable: 1-page call summary with next-step recommendation.
 
 ## 2) Paid Diagnostic ($2,000-$7,000)
+
 - Scope:
   - Process mapping across intake, triage, investigation, and closure.
   - Evidence and audit posture review.
@@ -21,6 +23,7 @@
   - Enterprise multi-department: $5,000-$7,000.
 
 ## 3) 8-Week Paid Pilot
+
 - Scope:
   - Live complaint intake and workflow activation.
   - SLA and assignment governance.
@@ -34,6 +37,7 @@
   - Annual contract recommendation.
 
 ## 4) Annual SaaS Contract
+
 - Packaging:
   - Foundation, Growth, Enterprise tiers.
 - Terms:
@@ -44,6 +48,7 @@
   - Start with one department and expand by policy domain or geography.
 
 ## 5) Enterprise Multi-Department Rollout
+
 - Trigger:
   - Pilot hits defined success metrics and sponsor confirms expansion.
 - Scope:
@@ -55,6 +60,7 @@
   - Optional managed services for governance operations.
 
 ## Deal Qualification Rules
+
 - Minimum pilot sponsor level: director or above.
 - Must have at least one measurable problem metric (cycle time, backlog, SLA misses, reporting burden).
 - Annual contract path must be discussed before pilot week 4.

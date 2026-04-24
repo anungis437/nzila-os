@@ -59,6 +59,7 @@ Every revenue record carries:
 | `metadata` | Extensible context (Stripe charge ID, invoice ref, etc.) |
 
 These fields enable:
+
 - **Export** — CFO can export all revenue events for a period as evidence pack artifacts.
 - **Audit Trail** — Every event is time-stamped and linked to a governance audit timeline entry.
 - **Compliance Reporting** — Revenue summaries feed into `GovernanceStatusReport.findings`.

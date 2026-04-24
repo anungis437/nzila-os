@@ -177,15 +177,19 @@ and summary leak detection. No regressions found.
 ## 4. Critical Violations — ALL RESOLVED
 
 ### CV-1: NIL Never Invoked at Runtime — **RESOLVED**
+
 - **Fix:** Created `nil-executive-service.ts` with Azure OpenAI NIL service factory (`AzureNilReasoningService`). Environment-gated via `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_KEY`. Wired `getNilReasoningService()` in API route. All 5 prompt contracts activated in pipeline.
 
 ### CV-2: Time-Series Hardcoded Empty — **RESOLVED**
+
 - **Fix:** Created `querySectorTimeSeries()` in `data-products.ts`. Queries monthly clause creation counts per sector for the last 12 months. Wired as governed aggregation in API route. Results mapped to `SectorTimeSeries[]` format.
 
 ### CV-3: Snapshot Persistence Missing — **RESOLVED**
+
 - **Fix:** Created `executive-snapshot-store.ts` with `saveExecutiveSnapshot()` and `loadLatestExecutiveSnapshot()`. PostgreSQL-backed via `clc_executive_snapshots` table (migration provided). 30-snapshot-per-org retention policy. Graceful degradation if table doesn't exist.
 
 ### CV-4: Zero Executive UI — **RESOLVED**
+
 - **Fix:** Created `executive-intelligence.tsx` with 4 components: `ExecutiveSummaryBanner`, `ExecutivePriorityList`, `WhatChangedPanel`, `ExecutiveActionBriefCard`. Added "Executive Brief" tab to CLC Intelligence Console (7th tab). Full data fetching from `/api/v2/analytics/clc/executive-brief`.
 
 ---
@@ -193,18 +197,23 @@ and summary leak detection. No regressions found.
 ## 5. Medium Gaps — ALL RESOLVED
 
 ### MG-1: 3 of 5 Prompt Contracts Unused — **RESOLVED**
+
 - **Fix:** Wired all 5 contracts in pipeline: `summarize_movement_posture_for_executives`, `rank_top_executive_priorities`, `explain_why_now`, `summarize_changes_since_last_snapshot`, `generate_executive_action_brief`.
 
 ### MG-2: `TIMEFRAME_URGENCY_SCORES` Defined but Unused — **RESOLVED**
+
 - **Fix:** Integrated timeframe into `computeExecutivePriorityScore()` with 10% weight. Weight redistribution: watchLevel 0.20, actionUrgency 0.15, timeframe 0.10, confidence 0.15, breadth 0.15, velocity 0.10, novelty 0.15.
 
 ### MG-3: Audit Log Missing 2 Fields — **RESOLVED**
+
 - **Fix:** API route now spreads full `result.auditContext` in auditLog() details, including `executiveSummaryGenerated` and `previousSnapshotId`.
 
 ### MG-4: De-escalation Not Tested — **RESOLVED**
+
 - **Fix:** Added dedicated de-escalation test in `comparisons.test.ts` — verifies watch level decrease from `critical` to `elevated` produces `direction: 'down'` delta.
 
 ### MG-5: No Velocity Isolation Test — **RESOLVED**
+
 - **Fix:** Added velocity isolation test in `prioritization.test.ts` — proves higher velocity gives higher score with all else equal. Also added timeframe isolation test.
 
 ---
@@ -212,12 +221,15 @@ and summary leak detection. No regressions found.
 ## 6. Post-Production Items — ALL RESOLVED
 
 ### PP-1: NIL Output Schema Validation — **RESOLVED**
+
 - **Fix:** Added `validateNilOutput()` function in `narrative/index.ts`. Validates NIL refinement against contract `requiredOutputFields`. Integrated into `attemptNilRefinement()`. 4 dedicated tests cover valid, invalid, additionalFields, and empty cases.
 
 ### PP-2: Dead Parameter Cleanup — **RESOLVED**
+
 - **Fix:** Removed unused `priorities` parameter from `classifyMovementPosture()` in `summaries/index.ts`. Updated all call sites and tests.
 
 ### PP-3: Snapshot Retention Policy — **RESOLVED**
+
 - **Fix:** `MAX_SNAPSHOTS_PER_ORG = 30` in `executive-snapshot-store.ts`. Oldest snapshots deleted after each save via `DELETE WHERE id NOT IN (SELECT id ... ORDER BY generated_at DESC LIMIT 30)`.
 
 ---
@@ -298,6 +310,7 @@ have been resolved. The system is fully operational across all four executive qu
 | "Can leadership see this?" | **YES** | 4 UI components in Executive Brief tab |
 
 **Evidence:**
+
 - 86/86 tests passing (7 new tests added in Rev 2)
 - 0 TypeScript errors
 - All prompt contracts wired

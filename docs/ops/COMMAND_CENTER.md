@@ -24,6 +24,7 @@ Not vanity analytics. Not random charts. Every metric is tied to a decision.
 ## Six Sections
 
 ### Section A — Revenue Pulse
+
 Six KPI cards covering the full commercial picture:
 
 | Metric | Formula | Decision It Drives |
@@ -36,6 +37,7 @@ Six KPI cards covering the full commercial picture:
 | Open Tickets | `COUNT(itsmTickets WHERE resolvedAt IS NULL)` | Team load signal |
 
 ### Section B — Smart Alerts
+
 AI-derived or rule-based alerts from the `commandAlerts` table. Four alert types:
 
 - `renewal_risk`: Renewal approaching without confirmed call booked
@@ -48,7 +50,9 @@ Severity: `critical` (red) > `high` (orange) > `medium` (amber)
 Each alert links directly to the relevant client account page.
 
 ### Section C — Client Health Grid
+
 One card per client, color-coded by health status:
+
 - 🟢 `healthy` (emerald) — health score ≥ 80
 - 🟡 `needs_attention` (amber) — health score 60–79
 - 🟠 `at_risk` (orange) — health score < 60
@@ -57,7 +61,9 @@ One card per client, color-coded by health status:
 Cards show: company name, product, health label, health score out of 100, open ticket count, onboarding stage.
 
 ### Section D — Product Health
+
 Per-product row showing four monthly signals:
+
 - **Incidents**: Production incidents this month (red if ≥ 3)
 - **Support Load**: Open tickets attributed to this product (amber if ≥ 4)
 - **Deployments Shipped**: Features/fixes deployed this month (positive signal)
@@ -66,7 +72,9 @@ Per-product row showing four monthly signals:
 Color signal: 🔴 red (incidents ≥ 3 OR bugs ≥ 5), 🟡 amber (any incident or support load ≥ 4), 🟢 green (clean).
 
 ### Section E — Founder Priorities Today
+
 The 5–7 most important open actions for the CEO/COO. Pulled from `founderPriorities` table. Five priority types:
+
 - 🔄 `renewal` — Client renewal action required
 - 🔥 `incident` — Active product incident needs founder attention
 - 📋 `proposal` — Proposal or contract awaiting approval
@@ -74,7 +82,9 @@ The 5–7 most important open actions for the CEO/COO. Pulled from `founderPrior
 - ⚙️ `ops` — Operational unblock (e.g., kickoff stalled)
 
 ### Section F — Team Load
+
 Per team member view of open and overdue tickets. Visual load bar. Badges for:
+
 - **Overloaded**: ≥ 10 open tickets → red card
 - **Idle**: ≤ 1 open ticket → slate card
 - **Normal**: 2–9 open tickets → default card

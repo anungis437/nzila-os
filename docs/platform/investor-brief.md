@@ -12,5 +12,6 @@ This brief is superseded by the final concise one-pager:
 - Portfolio allocation follows DOUBLE DOWN / MAINTAIN / HOLD / CUT / INTERNAL ONLY discipline.
 
 For proof and buyer evidence, use:
+
 - [Proof Center](../proof-center/portfolio-proof-index.md)
 - [Buyer Packs](../buyers/union-eyes-buyer-pack.md)

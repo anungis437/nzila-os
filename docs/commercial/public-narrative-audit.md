@@ -2,9 +2,10 @@
 
 Date: 2026-04-22  
 Properties audited:
-- https://nzilaventures.com
-- https://unioneyes.app
-- https://partners.nzilaventures.com
+
+- <https://nzilaventures.com>
+- <https://unioneyes.app>
+- <https://partners.nzilaventures.com>
 
 ## Nzila Ventures (nzilaventures.com)
 

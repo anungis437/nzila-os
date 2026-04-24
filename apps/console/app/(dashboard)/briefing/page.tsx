@@ -105,7 +105,7 @@ export default async function BriefingPage() {
       </div>
 
       {digest && (digest.topPriorities.length > 0 || digest.diff.droppedFromTop.length > 0) && (
-        <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-6 space-y-5">
+        <div className="rounded-2xl border border-indigo-200 bg-linear-to-br from-indigo-50 to-white p-6 space-y-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <SparklesIcon className="h-5 w-5 text-indigo-500" />

@@ -1,4 +1,5 @@
 # FairCase — Landing Page Copy
+
 ## faircase.ca | Equity Intelligence Platform
 
 > **Version:** 1.0 — April 2026

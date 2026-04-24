@@ -6,7 +6,7 @@ This runbook covers dual-environment topology with separate production and stagi
 
 - Production marketing: unioneyes.app
 - Production web app: app.unioneyes.app
-- Production redirect host: www.unioneyes.app -> unioneyes.app
+- Production redirect host: `www.unioneyes.app` -> `unioneyes.app`
 - Staging marketing: staging.unioneyes.app
 - Staging web app: staging-app.unioneyes.app
 
@@ -151,6 +151,7 @@ Enable custom-domain smoke checks after DNS and certs are active:
 ```bash
 gh secret set UE_CUSTOM_DOMAIN_ACTIVE --env production --body "true" --repo anungis437/nzila-os
 gh secret set UE_CUSTOM_DOMAIN_ACTIVE --env staging --body "true" --repo anungis437/nzila-os
+```
 
 Set DNS automation values in GitHub environments:
 
@@ -165,7 +166,6 @@ gh variable set DNS_ZONE_ID --env production --body "<cloudflare-zone-id>" --rep
 gh variable set DNS_ZONE_ID --env staging --body "<cloudflare-zone-id>" --repo anungis437/nzila-os
 gh secret set DNS_API_TOKEN --env production --body "<cloudflare-token>" --repo anungis437/nzila-os
 gh secret set DNS_API_TOKEN --env staging --body "<cloudflare-token>" --repo anungis437/nzila-os
-```
 ```
 
 ## Rollback

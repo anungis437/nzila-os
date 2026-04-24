@@ -61,3 +61,20 @@ export type {
   SubscriptionCancelledPayload,
   ExpansionClosedPayload,
 } from './commercial'
+
+export {
+  sharedLeadCaptureSchema,
+  sharedCrmEventSchema,
+  sharedReferralAttributionSchema,
+  sharedAnalyticsDashboardRowSchema,
+  COMMERCIAL_ANALYTICS_EVENTS,
+  SHARED_NOTIFICATION_CHANNELS,
+} from './commercial-layer'
+export type {
+  SharedLeadCaptureInput,
+  SharedCrmEventInput,
+  SharedReferralAttribution,
+  SharedAnalyticsDashboardRow,
+  CommercialAnalyticsEventName,
+  SharedNotificationChannel,
+} from './commercial-layer'

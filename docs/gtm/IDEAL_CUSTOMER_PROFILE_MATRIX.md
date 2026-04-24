@@ -10,6 +10,7 @@
 ## How to Use This Document
 
 Every prospect before outreach should be mapped to a segment here. The segment determines:
+
 - Which pilot tier to lead with
 - Approximate sales cycle
 - Likely objections
@@ -192,6 +193,7 @@ If a prospect does not fit any segment, it is not a qualified prospect.
 | 10 | Law Society of Ontario | UE-4 | $96K–144K | Medium-High | Medium | **Tier 3** |
 
 **How to read priority:**
+
 - Start here = reach out this week
 - Tier 1 = reach out this month
 - Tier 2 = reach out within 60 days

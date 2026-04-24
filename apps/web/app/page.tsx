@@ -140,26 +140,6 @@ export default async function Home() {
             </p>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.3}>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <TrackedLink
-                href="/portfolio"
-                eventName="cta_portfolio"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
-              >
-                {isFr ? 'Explorer notre portefeuille' : 'Explore Our Portfolio'}
-              </TrackedLink>
-              <TrackedLink
-                href="/investors"
-                eventName="cta_investors"
-                eventProps={{ source: 'home_hero' }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
-              >
-                {isFr ? 'Pour les investisseurs' : 'For Investors'}
-              </TrackedLink>
-            </div>
-          </ScrollReveal>
         </div>
 
         {/* Scroll indicator */}
@@ -257,6 +237,27 @@ export default async function Home() {
               </div>
             </ScrollReveal>
           </div>
+
+          <ScrollReveal className="mt-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <TrackedLink
+                href="/portfolio"
+                eventName="cta_portfolio"
+                eventProps={{ source: 'home_mission' }}
+                className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
+              >
+                {isFr ? 'Explorer notre portefeuille' : 'Explore Our Portfolio'}
+              </TrackedLink>
+              <TrackedLink
+                href="/investors"
+                eventName="cta_investors"
+                eventProps={{ source: 'home_mission' }}
+                className="inline-flex items-center justify-center px-8 py-4 bg-navy text-white font-bold rounded-xl border border-navy hover:bg-navy-light transition-all text-lg btn-press"
+              >
+                {isFr ? 'Pour les investisseurs' : 'For Investors'}
+              </TrackedLink>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

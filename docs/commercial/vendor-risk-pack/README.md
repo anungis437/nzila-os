@@ -16,6 +16,7 @@ Canonical buyer package for security, privacy, and procurement diligence.
 10. export-offboarding-process.md
 
 All claims in this pack must remain consistent with:
+
 - reports/union-eyes/claims-ledger.md
 - docs/commercial/claims-ledger.md
 - reports/ops/snapshot.json

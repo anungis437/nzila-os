@@ -20,6 +20,7 @@ The platform unification introduces shared infrastructure packages that replace 
 ### Step 1: Replace bespoke auth guards
 
 **Before** (app-local):
+
 ```typescript
 // apps/console/lib/api-guards.ts
 import { auth } from '@clerk/nextjs/server';
@@ -32,6 +33,7 @@ export async function requireOrgAccess() {
 ```
 
 **After** (shared):
+
 ```typescript
 import { requireAuth, requireOrgScopeGuard } from '@nzila/platform-auth';
 
@@ -45,11 +47,13 @@ export async function handleAction() {
 ### Step 2: Replace bespoke error responses
 
 **Before**:
+
 ```typescript
 return Response.json({ error: 'Not found' }, { status: 404 });
 ```
 
 **After**:
+
 ```typescript
 import { createPlatformError, getHttpStatus } from '@nzila/platform-contracts/error';
 
@@ -60,11 +64,13 @@ return Response.json(error, { status: getHttpStatus('NOT_FOUND') });
 ### Step 3: Replace bespoke mutation responses
 
 **Before**:
+
 ```typescript
 return { success: true, data: result };
 ```
 
 **After**:
+
 ```typescript
 import { ok, fail } from '@nzila/platform-contracts/mutation';
 

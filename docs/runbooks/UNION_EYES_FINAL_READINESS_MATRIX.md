@@ -10,6 +10,7 @@ Method: Repo + Azure runtime + live URL validation
 - Production readiness: FAIL
 
 Critical reason for production FAIL:
+
 - Staging hostnames are live but currently resolve to a production-configured runtime (`/api/version` returns `environment: production` on staging domains).
 
 ## Dimension Scoring

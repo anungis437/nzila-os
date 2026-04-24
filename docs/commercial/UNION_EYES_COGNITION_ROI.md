@@ -17,6 +17,7 @@ These are not technology problems. They are **operational visibility** problems.
 ## What Union Eyes Cognition Delivers (5 Modules, 10 KPIs)
 
 ### 1. Grievance Trajectory Intelligence
+
 For every active grievance, a transparent **risk score** (low / medium / high / critical) plus **top-3 contributing factors** plus **one recommended next action** (hold steady, request status update, reassign to specialist, escalate to chief steward, prepare arbitration, request documentation).
 
 | KPI | Formula |
@@ -26,6 +27,7 @@ For every active grievance, a transparent **risk score** (low / medium / high / 
 | **High-risk cases surfaced early** | Cases scored ≥0.6 probability while still within SLA |
 
 ### 2. Steward Workload Balancer
+
 For every active steward, a **utilisation ratio**, a **status pill** (idle / balanced / busy / overloaded), an **at-risk-case count**, and an **SLA-risk score**. At the team level, a **fairness score** (1 − coefficient-of-variation of utilisation).
 
 | KPI | Formula |
@@ -34,6 +36,7 @@ For every active steward, a **utilisation ratio**, a **status pill** (idle / bal
 | **Cases reassigned before overload** | Operator-accepted reassignment recommendations |
 
 ### 3. Member Disengagement Risk
+
 For every member with recent activity, a **disengagement probability**, an **engagement tier** (engaged / at-risk / disengaged / lost), a **recommended outreach channel** (member preference honoured first), and a **timing window**.
 
 | KPI | Formula |
@@ -42,6 +45,7 @@ For every member with recent activity, a **disengagement probability**, an **eng
 | **Disengaged member count** | Snapshot count of tier ∈ {disengaged, lost} |
 
 ### 4. Precedent Memory Engine
+
 Given a new case, surfaces the **top-N similar past cases** (jaccard tag overlap × 0.6 + type match × 0.25 + successful-resolution bonus × 0.15) — **org-scoped only**; cross-org leakage is a runtime error.
 
 | KPI | Formula |
@@ -49,6 +53,7 @@ Given a new case, surfaces the **top-N similar past cases** (jaccard tag overlap
 | **Similar-case retrieval time saved (hours)** | `precedent_retrievals × 1.5h` (assumption surfaced to operator) |
 
 ### 5. Executive Health Summary
+
 One screen for the executive board: backlog by tier, fairness score, disengaged count, top recommended interventions.
 
 | KPI | Formula |

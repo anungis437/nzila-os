@@ -1,4 +1,5 @@
 # FairCase — Commercial Execution Plan
+
 ## Path to First $250K ARR
 
 > **Version:** 1.0 — April 2026
@@ -118,6 +119,7 @@ Pause. Let them answer.
 **What to show:** The ABR Classification Intelligence module showing a simulated institutional scan — 2,400 historical cases processed over 90 days.
 
 **Key callout:**
+
 - Of 2,400 cases, 94 (3.9%) were explicitly coded with race or ABR.
 - FairCase classification identified 287 cases (11.9%) with medium-to-high ABR signal confidence.
 - Gap: 193 cases that may have a race component — but the institution's systems don't show it.
@@ -306,6 +308,7 @@ Priority-ranked. Each entry includes the hook, the right door, and the deal para
 Michel's personal brand is the commercial asset. He is not an SDR. Every outreach message should read as if a thoughtful peer reached out — not as if a sales sequence was triggered.
 
 Rules:
+
 - Never pitch in the first message
 - Lead with a specific observation about the recipient's institution or role — not a generic compliment
 - Reference real institutional context (tribunal decision, published report, CBA clause, public commitment)

@@ -37,4 +37,3 @@ This matrix summarizes package ownership expectations from `CODEOWNERS` and plat
 - `pnpm package:ownership:check`
 - `pnpm platform:authority:check`
 - `pnpm platform:adoption:check`
-

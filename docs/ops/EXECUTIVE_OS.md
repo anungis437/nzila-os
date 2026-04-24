@@ -153,6 +153,6 @@ Track on every approved action:
 ## 9. Final standard
 
 When Aubert logs in, NzilaOS should feel like a CFO + COO + RevOps lead
-+ PMO + platform team + legal ops analyst + strategy office working in
+- PMO + platform team + legal ops analyst + strategy office working in
 sync. ExecutiveOS is the substrate that makes that feasible without
 hiring an executive team.

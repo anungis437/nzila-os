@@ -3,6 +3,7 @@
 All 41 GitHub Actions workflows classified by category, trigger, and canonical status.
 
 > **Legend:**
+>
 > - **CANONICAL** — Primary path. Used in production promotion flow.
 > - **ACTIVE** — Runs regularly on schedule/PR/push. Well-maintained.
 > - **EMERGENCY** — Manual-only, requires explicit ack. Not part of normal flow.

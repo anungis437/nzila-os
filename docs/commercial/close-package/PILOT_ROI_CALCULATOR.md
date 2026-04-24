@@ -7,6 +7,7 @@
 **Source formulas:** [`UNION_EYES_COGNITION_ROI.md`](../UNION_EYES_COGNITION_ROI.md) — every KPI is backed by a published formula.
 
 **Honesty rules:**
+
 - No "industry average" numbers. If the buyer has no data, we show the formula with placeholder assumptions and flag them.
 - All time-saved assumptions are conservative ends of the range.
 - The model produces ranges (low / expected / high), not single-point fantasy numbers.

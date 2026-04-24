@@ -57,6 +57,7 @@ An error budget is the allowable amount of unreliability for a 30-day rolling wi
 $$\text{Error Budget} = 1 - \text{SLO target}$$
 
 Example for `trade` (error rate SLO = 0.5%):
+
 - Error budget = 0.5% of all requests over 30 days
 - At 1000 req/min → 43.2M requests/month → budget = 216,000 failed requests
 

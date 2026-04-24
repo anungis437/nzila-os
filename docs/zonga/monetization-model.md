@@ -74,14 +74,17 @@ RevenueRecord {
 ## Integration Points
 
 ### Zonga Backend → Monetization
+
 - Every streaming play, ticket sale, and fan payment generates a `RevenueRecord`
 - Django signals emit events that TypeScript processes via the monetization package
 
 ### Monetization → Payouts
+
 - `generateCreatorPayouts()` batches pending revenue into payout instructions
 - Delegates to `@nzila/zonga-payments` for mobile-money / Stripe disbursement
 
 ### Monetization → Platform Revenue
+
 - Revenue events are forwarded to `@nzila/platform-revenue` for CFO visibility
 - CFO app ingests platform-wide revenue data for financial reporting
 

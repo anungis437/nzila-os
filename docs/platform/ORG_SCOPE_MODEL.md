@@ -102,6 +102,7 @@ const orgId = extractOrgIdFromLegacy(legacyRequest);
 ## Cross-Org Access (Invariant CROSS_ORG_DENY_001)
 
 Cross-org data access is **always denied** unless:
+
 1. The actor has `platform_admin` role
 2. A specific federated data-sharing agreement exists
 3. The access goes through the audited federation layer

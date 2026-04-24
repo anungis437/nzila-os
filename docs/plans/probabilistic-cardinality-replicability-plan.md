@@ -9,10 +9,13 @@ After analyzing your Nzila Business OS ecosystem, I found no existing implementa
 ## 1. Probabilistic Cardinality
 
 ### What It Is
+
 Probabilistic cardinality estimates the number of distinct elements in a dataset without storing all elements. The most common algorithm is **HyperLogLog (HLL)**, which can count billions of unique items using minimal memory (~12KB for 2^64 elements with <2% error).
 
 ### Current Analytics Gaps
+
 From examining [`packages/analytics/portfolio/entity_consolidation.py`](../../packages/analytics/portfolio/entity_consolidation.py), your portfolio tracks:
+
 - 4,773 entities in UnionEyes
 - 132 entities in ABR Insights
 - Cross-platform entity type mapping
@@ -20,6 +23,7 @@ From examining [`packages/analytics/portfolio/entity_consolidation.py`](../../pa
 ### Use Cases in Your Ecosystem
 
 #### A. Entity & Shareholder Counting
+
 | Current Approach | Probabilistic Enhancement |
 |------------------|---------------------------|
 | `SELECT COUNT(DISTINCT shareholder_id) FROM holdings` | HyperLogLog for O(1) memory across millions of shareholders |
@@ -28,13 +32,17 @@ From examining [`packages/analytics/portfolio/entity_consolidation.py`](../../pa
 **Implementation Location**: [`apps/console/lib/equity/models.ts`](../../apps/console/lib/equity/models.ts) - extend equity models with cardinality estimators
 
 #### B. Portfolio Analytics (Existing Dashboards)
+
 Your [`PORTFOLIO_HEALTH.json`](../../packages/analytics/dashboards/PORTFOLIO_HEALTH.json) tracks entity counts per platform. HLL would enable:
+
 - Real-time unique user counts across all verticals
 - Distinct shareholder deduplication across entities
 - Memory-efficientrollups for dashboards
 
 #### C. Automation Systems
+
 In [`packages/automation/orchestrator.py`](../../packages/automation/orchestrator.py), HLL could track:
+
 - Unique service dependencies across migrations
 - Distinct API endpoints consumed
 - Cross-platform entity reuse detection
@@ -66,13 +74,17 @@ console.log(`Unique shareholders: ${Math.round(shareholderHLL.count())}`);
 ## 2. Replicability Notation
 
 ### What It Is
+
 Replicability notation is a formal system for describing how data, templates, and processes can be consistently reproduced across entities. It includes:
+
 - Versioned templates with change tracking
 - Provenance chains (origin → copies)
 - Reproducibility metadata
 
 ### Current State
+
 Your governance system already has:
+
 - [`governance/workflows.ts`](../../apps/console/lib/governance/workflows.ts) - ApprovalWorkflowSchema
 - [`governance/policy-engine.ts`](../../apps/console/lib/governance/policy-engine.ts) - Policy evaluation
 - Runbooks in [`ops/runbooks/`](../../ops/runbooks/README.md) - SOC-style operational procedures
@@ -80,6 +92,7 @@ Your governance system already has:
 ### Use Cases in Your Ecosystem
 
 #### A. Governance Template Replication
+
 ```mermaid
 graph LR
     A[Master Entity Governance] -->|clone| B[Subsidiary A]
@@ -92,6 +105,7 @@ graph LR
 ```
 
 **Implementation**: Extend [`ApprovalWorkflowSchema`](../../apps/console/lib/governance/workflows.ts) with replication metadata:
+
 ```typescript
 const ReplicableWorkflowSchema = z.object({
   ...ApprovalWorkflowSchema.shape,
@@ -109,22 +123,29 @@ const ReplicableWorkflowSchema = z.object({
 ```
 
 #### B. Equity Structure Templates
+
 Your [`equity/models.ts`](../../apps/console/lib/equity/models.ts) defines ShareClass enums. Replicability would enable:
+
 - Cloning share class structures between entities
 - Tracking template lineage (which entity was the "template")
 - Auditing divergence from standard structures
 
 #### C. Runbook Replication Across Entities
+
 From [`ops/compliance/Required-Evidence-Map.md`](../../ops/compliance/Required-Evidence-Map.md), you capture evidence metadata:
+
 - `org_id`, `artifact_id`, `blob_path`, `sha256`
 
 Replicability notation would add:
+
 - `template_source_id` - which runbook this was cloned from
 - `replication_version` - template version at clone time
 - `customization_delta` - what was modified
 
 #### D. Automation Orchestrator
+
 Your [`MigrationOrchestrator`](../../packages/automation/orchestrator.py) could use replicability to:
+
 - Track which migration templates are "blessed" (replication sources)
 - Audit which entities used which template versions
 - Enable "template updates" that propagate to child entities
@@ -178,18 +199,21 @@ flowchart TB
 ## 4. Implementation Roadmap
 
 ### Phase 1: Probabilistic Cardinality
+
 - [ ] Add `hyperloglog` dependency to [`apps/console/package.json`](../../apps/console/package.json)
 - [ ] Create `packages/analytics/src/cardinality` module
 - [ ] Implement shareholder uniqueness estimator
 - [ ] Add HLL metrics to portfolio dashboards
 
 ### Phase 2: Replicability Notation
+
 - [ ] Extend governance schemas with replication metadata
 - [ ] Create template registry in database
 - [ ] Implement clone/copy operations for workflows
 - [ ] Add divergence tracking
 
 ### Phase 3: Automation Integration
+
 - [ ] Add template versioning to orchestrator
 - [ ] Implement runbook templating system
 - [ ] Add replication audit trails

@@ -96,10 +96,12 @@
 **10 States:** `draft` → `submitted` → `triage` → `investigation` → `pending_docs` → `negotiation` → `mediation` → `arbitration` → `resolved` → `closed`
 
 **Transition Matrix:**
+
 - Enforced at API layer — invalid transitions rejected
 - Role-per-transition enforcement (member can submit; steward+ for triage; admin for close; system_admin to reopen)
 
 **Guard Conditions:**
+
 - Must assign steward before investigation
 - Must have docs before resolution
 - 7-day cooling-off period for reopen

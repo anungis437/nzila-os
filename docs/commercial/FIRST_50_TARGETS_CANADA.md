@@ -257,6 +257,7 @@ If you'd like to see a 30-minute demo with real numbers from a comparable local,
 > "Hi [First name] — I emailed you last week about Union Eyes, a grievance ops platform for Canadian unions. CUPE locals in Ontario and BC are in pilot now. Happy to share a 2-pager if useful."
 
 *Email (same day):*
+
 ```
 Subject: Re: [Union name] — 2-pager + a specific question
 

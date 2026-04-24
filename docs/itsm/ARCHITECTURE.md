@@ -121,6 +121,7 @@ Priority targets (default profile):
 | P4 Low | 8 hr | 7 days |
 
 Key functions:
+
 - `computeSlaDueDates(createdAt, priority, targets)` → `{ firstResponseDue, resolutionDue }`
 - `isSlaBreached(ticket, now)` → `boolean`
 - `minutesUntilBreach(ticket, now)` → `number`

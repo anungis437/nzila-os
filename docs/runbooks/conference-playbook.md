@@ -3,6 +3,7 @@
 ## Objective
 
 Convert conference attendance into enrolled pipeline. Every event should end with:
+
 - All booth conversations logged as EventLeads
 - Tier A/B leads enrolled in the Post-Conference sequence before end of Day 0
 - At least one demo booked per 5 leads captured
@@ -25,11 +26,13 @@ Convert conference attendance into enrolled pipeline. Every event should end wit
 ## Pre-Event Preparation (7–14 Days Before)
 
 1. **Build target list** from union map seed data filtered by event location + sector
+
    ```typescript
    unionMap.listUnionNodes().filter(n => n.province === 'QC' && n.sector === 'municipal')
    ```
 
 2. **Create ConferenceEvent record**
+
    ```typescript
    events.createConferenceEvent({ name, eventType, location, province, startDate, endDate, attendanceCount })
    ```
@@ -47,7 +50,7 @@ Convert conference attendance into enrolled pipeline. Every event should end wit
 
 ## At-Event Lead Capture (Day 0)
 
-### For every booth conversation (≥ 5 min):
+### For every booth conversation (≥ 5 min)
 
 ```typescript
 events.captureEventLead({
@@ -64,7 +67,7 @@ events.captureEventLead({
 })
 ```
 
-### Conversation prompts:
+### Conversation prompts
 
 - "How do you currently track open grievances?"
 - "How many active files do you have right now?"
@@ -80,6 +83,7 @@ If they answer "spreadsheets" or "we have a system but it's old" → `techMaturi
 Within 4 hours of meeting:
 
 1. Score all captured leads:
+
    ```typescript
    icp.createTargetOrg({ ...resolved org from lead data })
    ```

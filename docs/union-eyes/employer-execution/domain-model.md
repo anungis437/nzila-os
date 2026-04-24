@@ -1,6 +1,7 @@
 # Employer Execution Domain Model
 
 ## Primary Tables
+
 - employer_execution_profiles
 - employer_timesheet_batches
 - employer_timesheet_entries
@@ -16,16 +17,19 @@
 - employer_execution_replays
 
 ## Foreign Key Anchors
+
 - organization_id on all tables for strict org scoping.
 - member_employment_id, job_classification_id for labor context reuse.
 - collective_agreement_id + cba_rule_version_id for executable CBA lineage.
 - employer/worksite/bargaining_unit references for operational scoping.
 
 ## Immutability Pattern
+
 - Official payroll and remittance runs set immutable_snapshot_locked=true.
 - Snapshots/traces/artifacts are append-only and hash-addressed.
 
 ## Hashes
+
 - source_file_hash on batches.
 - source_row_hash on entries.
 - calc_trace_hash on payroll runs.

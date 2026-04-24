@@ -79,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={poppins.className} suppressHydrationWarning>
         {site.isStaging ? (
-          <div className="sticky top-0 z-[100] border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
+          <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
             Staging environment. Pre-production data and behavior may change without notice.
           </div>
         ) : null}

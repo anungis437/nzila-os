@@ -48,6 +48,7 @@ automated gates pass with zero errors.
 ## Files Changed
 
 ### Modified (6 files)
+
 | File | Change |
 |------|--------|
 | `apps/union-eyes/app/api/cases/[caseId]/transition/route.ts` | Dynamic role resolution via `getUserRoleInOrganization` |
@@ -107,6 +108,7 @@ automated gates pass with zero errors.
 | `apps/union-eyes/app/api/social-media/posts/route.ts` | Removed `details` field from 2 error responses |
 
 ### Created (4 files)
+
 | File | Purpose |
 |------|---------|
 | `apps/console/lib/qbo-token-crypto.ts` | AES-256-GCM envelope encryption for QBO OAuth tokens |
@@ -114,6 +116,7 @@ automated gates pass with zero errors.
 | `apps/console/app/api/cron/key-rotation-check/route.ts` | Key rotation monitoring cron endpoint |
 
 ### Snapshot Updated (1 file)
+
 | File | Change |
 |------|--------|
 | `tooling/db/schema-snapshot.json` | Timestamp refreshed (hash unchanged) |

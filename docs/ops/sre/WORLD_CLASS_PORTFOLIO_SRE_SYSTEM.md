@@ -1,7 +1,9 @@
 # World-Class Portfolio SRE and Reliability System
 
 ## Scope
+
 Nzila OS shared reliability layer for:
+
 - uptime
 - monitoring
 - alerting
@@ -16,11 +18,13 @@ Nzila OS shared reliability layer for:
 - executive dashboards
 
 ## Portfolio Tiers
+
 - Tier 1: Union Eyes, FairCase, Flow, Web, Partners, CFO
 - Tier 2: Zonga, Agrimo, Cora, Trade, Mobility
 - Internal: Console, Control Plane, Orchestrator API
 
 ## Policy Sources
+
 - Service tiers: governance/sre/service-tiers.json
 - Synthetic probes: governance/sre/synthetic-checks.json
 - Alert policy: governance/sre/alert-policy.json
@@ -34,6 +38,7 @@ Nzila OS shared reliability layer for:
 - Zonga special rules: governance/sre/zonga-special-rules.json
 
 ## Enforcement Commands
+
 - pnpm sre:health:contract
 - pnpm sre:synthetic:dry-run
 - pnpm sre:alerts:dry-run
@@ -42,10 +47,13 @@ Nzila OS shared reliability layer for:
 - pnpm sre:validate
 
 ## Reliability Workflow Gate
+
 CI workflow: .github/workflows/reliability-guard.yml
 
 ## Incident System
+
 Templates under docs/ops/incidents:
+
 - sev1-runbook.md
 - sev2-runbook.md
 - communication-template.md
@@ -53,4 +61,5 @@ Templates under docs/ops/incidents:
 - postmortem-template.md
 
 ## Game Day
+
 Quarterly scenarios and measures are defined in governance/sre/gameday-program.json and docs/ops/gameday-chaos-readiness.md.

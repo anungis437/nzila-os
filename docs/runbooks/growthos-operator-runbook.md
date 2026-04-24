@@ -41,10 +41,12 @@
    model version is recorded on each record so historical scores stay
    attributable.
 2. **Run an attribution pass** on every `deal_closed_won` of the month:
+
    ```ts
    import { attribution } from '@nzila/platform-growth-os'
    attribution.computeAttribution({ scope, subjectId, model: 'time_decay' })
    ```
+
    Save the output (it's already persisted as `attribution_results`
    conceptually — currently inferred on-demand from events).
 3. **Founder narrative review**: list all topics with `listFounderTopics`,

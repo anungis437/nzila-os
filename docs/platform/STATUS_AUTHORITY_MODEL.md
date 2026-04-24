@@ -12,25 +12,30 @@ This prevents contradictory statements such as claiming `PRODUCTION` in a portfo
 ### 1. Product Tier (registry axis)
 
 Authoritative source:
+
 - `packages/platform-contracts/src/registry.ts`
 
 Allowed values:
+
 - `PRODUCTION`
 - `PILOT`
 - `INCUBATING`
 - `EXPERIMENTAL`
 
 Meaning:
+
 - Portfolio classification, strategic positioning, and product-line governance.
 - Does not, by itself, certify operational deployment readiness.
 
 ### 2. Deployment Status (runtime axis)
 
 Authoritative sources:
+
 - `apps/*/maturity.json` (per-app declaration)
 - `nzila-truth-manifest.json` (repo-level aggregate)
 
 Allowed values:
+
 - `production`
 - `pilot`
 - `internal`
@@ -38,15 +43,18 @@ Allowed values:
 - `deprecated`
 
 Meaning:
+
 - Current runtime maturity and deployability state.
 - Used by fail-closed governance and release-readiness gates.
 
 ### 3. Readiness Tier (platform aggregate axis)
 
 Authoritative source:
+
 - `nzila-truth-manifest.json`
 
 Allowed values:
+
 - `production-ready`
 - `pilot-safe`
 - `internal-only`
@@ -54,6 +62,7 @@ Allowed values:
 - `deprecated`
 
 Meaning:
+
 - Normalized label used for executive/procurement communication.
 
 ## Required alignment rules

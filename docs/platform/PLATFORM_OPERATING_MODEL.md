@@ -62,6 +62,7 @@ Every app follows a defined lifecycle tier:
 ## Multi-Tenancy
 
 All platform data is scoped by `orgId`. The `@nzila/org` package provides:
+
 - `OrgContext<R>` — the canonical context type with orgId, userId, role, permissions
 - `requireOrgScope()` — fail-closed guard
 - `assertSameOrg()` — cross-org access prevention

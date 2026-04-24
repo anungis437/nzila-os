@@ -79,7 +79,7 @@ export default function WorkflowSection() {
                 <step.icon className="h-7 w-7 text-navy" />
               </div>
               <h3 className="text-lg font-bold text-navy mb-1">{step.name}</h3>
-              <p className="text-sm text-gray-600 max-w-[180px]">{step.description}</p>
+              <p className="text-sm text-gray-600 max-w-45">{step.description}</p>
             </div>
             {i < steps.length - 1 && (
               <ArrowRight className="hidden md:block h-5 w-5 text-gray-300 shrink-0" />

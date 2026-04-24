@@ -13,7 +13,35 @@ const trialSchema = z.object({
   company: z.string().min(1),
   teamSize: z.string().optional(),
   primaryUseCase: z.string().optional(),
+  industry: z.string().optional(),
+  website: z.string().optional(),
+  brandName: z.string().optional(),
+  primaryColor: z.string().optional(),
+  logoUrl: z.string().optional(),
+  currency: z.string().optional(),
+  taxRegion: z.string().optional(),
+  taxId: z.string().optional(),
+  defaultTaxRate: z.string().optional(),
+  products: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        sku: z.string().min(1),
+        unitPrice: z.string().optional(),
+      }),
+    )
+    .optional(),
 })
+
+function estimateArrFromTeamSize(teamSize?: string): string {
+  if (!teamSize) return '3000'
+  if (teamSize === '100+') return '24000'
+
+  const [min] = teamSize.split('-').map((part) => Number(part))
+  if (Number.isFinite(min) && min >= 21) return '12000'
+  if (Number.isFinite(min) && min >= 6) return '6000'
+  return '3000'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +56,26 @@ export async function POST(request: NextRequest) {
         company: body.company,
         ...(body.teamSize ? { flow_team_size: body.teamSize } : {}),
         ...(body.primaryUseCase ? { flow_primary_use_case: body.primaryUseCase } : {}),
+        ...(body.industry ? { flow_industry: body.industry } : {}),
+        ...(body.website ? { website: body.website } : {}),
+        ...(body.brandName ? { flow_brand_name: body.brandName } : {}),
+        ...(body.primaryColor ? { flow_brand_primary_color: body.primaryColor } : {}),
+        ...(body.logoUrl ? { flow_logo_url: body.logoUrl } : {}),
+        ...(body.currency ? { flow_currency: body.currency } : {}),
+        ...(body.taxRegion ? { flow_tax_region: body.taxRegion } : {}),
+        ...(body.taxId ? { flow_tax_id: body.taxId } : {}),
+        ...(body.defaultTaxRate ? { flow_default_tax_rate: body.defaultTaxRate } : {}),
+        ...(body.products?.length
+          ? {
+              flow_seed_products: JSON.stringify(
+                body.products.map((product) => ({
+                  name: product.name,
+                  sku: product.sku,
+                  unitPrice: product.unitPrice ?? '',
+                })),
+              ),
+            }
+          : {}),
         flow_source: 'flow-trial-signup',
         flow_trial_status: 'trialing',
         flow_trial_ends_at: trialEndsAt,
@@ -40,9 +88,12 @@ export async function POST(request: NextRequest) {
         stage: 'trial_active',
         contactId,
         properties: {
-          flow_arr_estimate: body.teamSize && Number(body.teamSize) > 10 ? '12000' : '3000',
+          flow_arr_estimate: estimateArrFromTeamSize(body.teamSize),
           flow_trial_ends_at: trialEndsAt,
           flow_close_probability: '0.25',
+          ...(body.primaryUseCase ? { flow_primary_use_case: body.primaryUseCase } : {}),
+          ...(body.taxRegion ? { flow_tax_region: body.taxRegion } : {}),
+          ...(body.currency ? { flow_currency: body.currency } : {}),
         },
       })
     }

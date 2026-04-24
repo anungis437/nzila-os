@@ -3,6 +3,7 @@
 ## What Is the Union Eyes ICP?
 
 The ideal Union Eyes customer is a **Canadian union or federation** that experiences:
+
 1. High grievance volume relative to administrative capacity
 2. Manual, paper-based, or spreadsheet-driven case management
 3. Regulatory or contractual pressure for accurate record-keeping
@@ -103,6 +104,7 @@ Note: capped at 1.0.
 ## Minimum Data for Scoring
 
 Before scoring, at least one of the following must be known:
+
 - `sector` (any non-other)
 - `memberCount` (non-null, non-zero)
 - `governanceComplexity` (> 0)

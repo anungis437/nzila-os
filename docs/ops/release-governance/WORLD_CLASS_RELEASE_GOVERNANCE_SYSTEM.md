@@ -14,6 +14,7 @@
 - Frozen/legacy: mobility-client-portal, platform-admin
 
 Source files:
+
 - governance/release/deployment-inventory.json
 - governance/release/app-ownership.json
 - governance/release/domain-routing-registry.json
@@ -26,6 +27,7 @@ Source files:
 ## Required Gates
 
 Before staging deploy:
+
 - lint
 - typecheck
 - test:fast
@@ -33,6 +35,7 @@ Before staging deploy:
 - governance checks
 
 Before production deploy:
+
 - artifact provenance validation (staging run artifact)
 - governance gate
 - contract tests
@@ -50,6 +53,7 @@ Before production deploy:
 ## Release Evidence Pack
 
 Each release should include:
+
 - artifact manifest and digest
 - SBOM hash
 - attestation reference

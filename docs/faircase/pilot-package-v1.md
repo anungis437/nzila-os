@@ -1,4 +1,5 @@
 # FairCase — Pilot Package
+
 ## Equity Classification Readiness Review
 
 > **Version:** 1.0 — April 2026
@@ -43,6 +44,7 @@ Your members file grievances. Some of those grievances involve race-based workpl
 | 11–12 | Findings readout and handoff — 2-hour governance session with your leadership | Final report + platform recommendation |
 
 **What you receive at 90 days:**
+
 - Classification baseline report: your case data's protected grounds profile
 - Pattern brief: where ABR signals cluster across your member base
 - Investigation quality review: how your current grievance documentation compares to investigation-grade standards
@@ -73,6 +75,7 @@ Your institution has equity commitments — in collective agreements, in action 
 | 12 | Findings readout — board-ready summary + 2-hour governance session with CHRO and equity leadership | Final report + board summary draft |
 
 **What you receive at 90 days:**
+
 - Classification baseline: your institution's protected grounds case profile for the past 3 years
 - Pattern brief: where ABR signals concentrate, with trend direction
 - Investigation readiness gap analysis: where your current investigation process creates tribunal exposure
@@ -99,6 +102,7 @@ Every classification output is a **recommendation for human review**, not an aut
 Your case data is among the most sensitive information your institution holds. FairCase's handling reflects that.
 
 **What we protect:**
+
 - All data is processed and stored in Canada (Microsoft Azure Canada Central)
 - Complainant identities are stored in an identity vault with differential access controls — they are never exposed to the classification AI
 - Cases are analyzed using anonymized case records; identity is accessible only to authorized designated reviewers
@@ -107,6 +111,7 @@ Your case data is among the most sensitive information your institution holds. F
 - Full data deletion upon pilot completion if you do not proceed to annual subscription
 
 **What you control:**
+
 - You designate which team members can access which data views
 - You control which cases enter the classification review
 - You review and override any classification recommendation

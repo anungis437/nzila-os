@@ -26,6 +26,7 @@ Total elapsed time from "contract signed" to "first live grievance in the system
 | Day 5 | Staging environment handed to pilot coordinator for acceptance testing |
 
 **What we need from you (before Day 1)**
+
 - Signed pilot agreement
 - CA step structure document or description (email is fine)
 - Historical grievance export or list (we provide the import template)
@@ -39,16 +40,18 @@ Total elapsed time from "contract signed" to "first live grievance in the system
 **Day 6–7**: Issues from acceptance testing resolved; production environment promoted  
 **Day 8**: **Go-live** — system is live, all accounts active  
 **Day 9–10**: Steward onboarding session 1 (90 min, recorded)  
-  - Grievance intake walkthrough  
-  - Case file management  
-  - Deadline dashboard  
-  - Q&A
+
+- Grievance intake walkthrough  
+- Case file management  
+- Deadline dashboard  
+- Q&A
 
 **Day 11–12**: Steward onboarding session 2 (90 min, recorded)  
-  - Advanced case management  
-  - Evidence bundle export  
-  - Reporting dashboard  
-  - Communications module (if Track B included)
+
+- Advanced case management  
+- Evidence bundle export  
+- Reporting dashboard  
+- Communications module (if Track B included)
 
 ---
 
@@ -60,9 +63,10 @@ Total elapsed time from "contract signed" to "first live grievance in the system
 **Week 5**: First pattern report available (requires minimum 10 active cases)  
 **Week 6**: Mid-pilot check-in — issue log reviewed, any workflow adjustments  
 **Week 8**: Mid-pilot review meeting (1 hour):
-  - Metrics reviewed: cycle time, case volume, rep utilization
-  - Feature requests logged and prioritized
-  - Renewal decision preview
+
+- Metrics reviewed: cycle time, case volume, rep utilization
+- Feature requests logged and prioritized
+- Renewal decision preview
 
 **Ongoing**: Issue log monitored, patches applied without downtime, feature releases deployed automatically
 
@@ -71,6 +75,7 @@ Total elapsed time from "contract signed" to "first live grievance in the system
 ## Phase 4: Evaluation & Decision (Weeks 11–12)
 
 **Week 11**: Pilot close-out report prepared by Union Eyes team:
+
 - Grievance cycle time comparison (before/after)
 - Case volume handled during pilot
 - Rep utilization and adoption metrics
@@ -78,6 +83,7 @@ Total elapsed time from "contract signed" to "first live grievance in the system
 - Feature roadmap preview
 
 **Week 12**: Decision meeting (1 hour):
+
 - Review pilot report
 - Commercial proposal for annual subscription
 - If converting: transition to subscription pricing, pilot fee credited

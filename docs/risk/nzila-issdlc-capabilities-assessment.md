@@ -217,7 +217,7 @@ Top 3 threats most relevant to Nzila:
 | Pre-push contract tests | `lefthook.yml` |
 | SARIF upload (Trivy + CodeQL) to GitHub Security tab | `.github/workflows/trivy.yml` |
 
-**Gap:** Verify `codeql.yml` exists as a standalone workflow (may be merged into another workflow). 
+**Gap:** Verify `codeql.yml` exists as a standalone workflow (may be merged into another workflow).
 **Initiative:** Wave 0 (in flight) — Verify and document CodeQL workflow location.
 
 ---

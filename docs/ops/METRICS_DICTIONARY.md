@@ -7,6 +7,7 @@
 ## Revenue Pulse Metrics
 
 ### Active Clients
+
 - **Display**: Count of active client accounts
 - **Formula**: `COUNT(opsClients) WHERE onboardingStage = 'live'`
 - **Data Source**: `opsClients.onboardingStage`
@@ -16,6 +17,7 @@
 ---
 
 ### ARR Proxy
+
 - **Display**: ZAR annual sum (e.g., R 1.2M)
 - **Formula**: `SUM(opsClients.contractValue)` across active clients
 - **Data Source**: `opsClients.contractValue`
@@ -25,6 +27,7 @@
 ---
 
 ### MRR Proxy
+
 - **Display**: ZAR monthly equivalent
 - **Formula**: `ARR_Proxy / 12`
 - **Data Source**: Derived from `opsClients.contractValue`
@@ -34,6 +37,7 @@
 ---
 
 ### Renewals (90 Days)
+
 - **Display**: Count of clients with renewal in next 90 days
 - **Formula**: `COUNT(opsClients) WHERE renewalDate BETWEEN NOW() AND NOW() + INTERVAL '90 days'`
 - **Data Source**: `opsClients.renewalDate`
@@ -43,6 +47,7 @@
 ---
 
 ### Churn Risk
+
 - **Display**: Count of at-risk clients
 - **Formula**: `COUNT(opsClients) WHERE health IN ('at_risk', 'churned')`
 - **Data Source**: `opsClients.health`
@@ -52,6 +57,7 @@
 ---
 
 ### Open Tickets
+
 - **Display**: Count of unresolved support tickets
 - **Formula**: `COUNT(itsmTickets) WHERE resolvedAt IS NULL`
 - **Data Source**: `itsmTickets.resolvedAt`
@@ -63,6 +69,7 @@
 ## Smart Alert Metrics
 
 ### Alert Volume by Type
+
 - **Display**: Grouped count of active (unresolved) alerts
 - **Formula**: `COUNT(commandAlerts) WHERE resolvedAt IS NULL GROUP BY type`
 - **Data Source**: `commandAlerts`
@@ -72,6 +79,7 @@
 ---
 
 ### Alert Severity Breakdown
+
 - **Display**: Count by severity (critical / high / medium)
 - **Data Source**: `commandAlerts.severity`
 - **Why It Matters**: Severity determines urgency of response — critical = same day, high = 48h, medium = weekly review
@@ -82,6 +90,7 @@
 ## Client Health Metrics
 
 ### Health Score (per client)
+
 - **Display**: 0–100 composite score
 - **Formula**: Internal scoring from `opsClients.healthScore` (set by CS team or automated rule)
 - **Data Source**: `opsClients.healthScore`
@@ -91,6 +100,7 @@
 ---
 
 ### Health Status
+
 - **Display**: Label (Healthy / Needs Attention / At Risk / Churned)
 - **Formula**: Thresholds: Healthy ≥ 80, Needs Attention 60–79, At Risk < 60
 - **Data Source**: `opsClients.health`
@@ -100,6 +110,7 @@
 ---
 
 ### Open Ticket Count (per client)
+
 - **Display**: Integer count per client card
 - **Formula**: `COUNT(itsmTickets) WHERE clientId = :clientId AND resolvedAt IS NULL`
 - **Data Source**: `itsmTickets`
@@ -111,6 +122,7 @@
 ## Product Health Metrics
 
 ### Incidents This Month
+
 - **Display**: Integer per product
 - **Source**: `productHealthSnapshots.incidentsThisMonth`
 - **Why It Matters**: Direct product quality signal. SLA compliance is at risk if incidents ≥ 3/month
@@ -120,6 +132,7 @@
 ---
 
 ### Support Load (Open Tickets per Product)
+
 - **Display**: Integer per product
 - **Source**: `productHealthSnapshots.supportLoad`
 - **Why It Matters**: High support load signals product UX gaps or missing documentation
@@ -129,6 +142,7 @@
 ---
 
 ### Deployments Shipped
+
 - **Display**: Integer per product
 - **Source**: `productHealthSnapshots.deploymentsShipped`
 - **Why It Matters**: Positive velocity signal — are we shipping improvements to clients?
@@ -137,6 +151,7 @@
 ---
 
 ### Open Bugs
+
 - **Display**: Integer per product
 - **Source**: `productHealthSnapshots.openBugs`
 - **Why It Matters**: Accumulating tech debt erodes client trust and increases support load
@@ -148,6 +163,7 @@
 ## Founder Priority Metrics
 
 ### Priority Type Distribution
+
 - **Display**: Icon + label per item (Renewal / Incident / Proposal / Risk / Ops)
 - **Source**: `founderPriorities.type`
 - **Why It Matters**: Mix of priority types reveals where the founder's time is being spent
@@ -156,6 +172,7 @@
 ---
 
 ### Priority Due Date
+
 - **Display**: Relative date ("today", "3 days", "overdue")
 - **Source**: `founderPriorities.dueDate`
 - **Why It Matters**: Time pressure on CEO actions can delay client value delivery
@@ -166,6 +183,7 @@
 ## Team Load Metrics
 
 ### Open Ticket Count (per team member)
+
 - **Display**: Integer + visual load bar per member
 - **Formula**: `COUNT(itsmTickets) WHERE assignedTo = :memberId AND resolvedAt IS NULL`
 - **Data Source**: `itsmTickets.assignedTo`
@@ -175,6 +193,7 @@
 ---
 
 ### Overloaded Threshold
+
 - **Display**: "Overloaded" badge on member card
 - **Threshold**: ≥ 10 open tickets
 - **Decision It Drives**: Immediate redistribution or escalation
@@ -182,6 +201,7 @@
 ---
 
 ### Overdue Tickets (per team member)
+
 - **Display**: "X overdue" badge
 - **Formula**: `COUNT(itsmTickets) WHERE assignedTo = :memberId AND dueDate < NOW() AND resolvedAt IS NULL`
 - **Data Source**: `itsmTickets.dueDate`
@@ -205,6 +225,7 @@ All sourced from `productHealthSnapshots` and internal scoring in the portfolio 
 | Strategic Fit | Higher = better | ≥ 80 |
 
 **Recommendation Engine**:
+
 - `double_down`: All key dimensions strong, high strategic fit
 - `maintain`: Stable but not prioritized for heavy investment
 - `incubate`: Early-stage, high upside, needs structured milestones
@@ -215,22 +236,27 @@ All sourced from `productHealthSnapshots` and internal scoring in the portfolio 
 ## Weekly Review Metrics
 
 ### WoW MRR Change
+
 - **Formula**: `(currentMonthMRR - previousMonthMRR) / previousMonthMRR * 100`
 - **Decision**: Is the business growing week-over-week?
 
 ### WoW Active Client Change
+
 - **Formula**: `currentActiveClients - previousWeekActiveClients`
 - **Decision**: Gross adds vs churns this week
 
 ### Pipeline Movement
+
 - **Display**: Count of deals advanced + proposals sent this week
 - **Decision**: Is the sales process moving?
 
 ### Churn Risk Watch
+
 - **Display**: Clients with health declining + no engagement in 14 days
 - **Decision**: Which clients need a founder call this week?
 
 ### Product Reliability Score
+
 - **Formula**: `100 - (incidents * 10) - (openBugs * 2)`
 - **Decision**: Gate to deploy new features; signals investment priority
 

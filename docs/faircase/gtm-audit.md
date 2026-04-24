@@ -1,9 +1,11 @@
 # FAIRCASE GTM Audit (90-Day Revenue Readiness)
 
 ## Scope
+
 Audit completed across FAIRCASE market surfaces, commercial collateral, portfolio truth sources, and revenue instrumentation in the monorepo.
 
 ## Existing Assets Found
+
 - FAIRCASE landing surface in app marketing UI.
 - Buyer pack: docs/faircase/buyer-pack.md.
 - Pricing model: docs/faircase/pricing-model.md.
@@ -17,6 +19,7 @@ Audit completed across FAIRCASE market surfaces, commercial collateral, portfoli
 - Revenue command center available in Console: apps/console/app/(dashboard)/revenue/page.tsx.
 
 ## Revenue Blockers (Current)
+
 1. FAIRCASE conversion page did not fully align with enterprise buying journey (limited procurement and pilot conversion structure).
 2. No FAIRCASE-specific funnel dashboard for leads -> demo -> proposal -> pilot -> close.
 3. Outbound sequencing and copy existed in fragments but not as a dedicated FAIRCASE machine.
@@ -27,6 +30,7 @@ Audit completed across FAIRCASE market surfaces, commercial collateral, portfoli
 8. Pricing pressure tests by buyer profile were not documented in one place.
 
 ## Readiness Score (0-10)
+
 - Traffic readiness: 7.4
 - Conversion readiness: 6.8
 - Demo readiness: 7.2
@@ -35,7 +39,9 @@ Audit completed across FAIRCASE market surfaces, commercial collateral, portfoli
 - Onboarding readiness: 7.6
 
 ## Weighted Revenue Readiness
+
 Formula:
+
 - traffic 15%
 - conversion 25%
 - demo 15%
@@ -46,6 +52,7 @@ Formula:
 Current weighted score: 7.01 / 10
 
 ## Target After This Build
+
 - Traffic readiness: 8.0
 - Conversion readiness: 8.8
 - Demo readiness: 8.6
@@ -56,4 +63,5 @@ Current weighted score: 7.01 / 10
 Projected weighted score: 8.53 / 10
 
 ## Operating Principle
+
 No fake traction claims. All pipeline and ARR scenarios in this package are operating targets and scenario models, not represented as booked revenue.

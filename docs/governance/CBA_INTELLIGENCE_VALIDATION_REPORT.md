@@ -66,6 +66,7 @@ The system now has:
 ### Confirmed in Repository (Code, Not Docs)
 
 **Schema (Real, Migrated)**
+
 - `collective_agreements` table — 30+ columns, 8 indexes, version chain (`superseded_by`, `precedes_id`)
 - `cba_clauses` table — 19 clause types enum, confidence score, embeddings, hierarchical structure
 - `cba_version_history` — Full change audit trail with previous/new data JSON
@@ -81,6 +82,7 @@ The system now has:
 - `shared_clause_library` — Inter-union clause sharing with anonymization
 
 **Services (Real, Tested)**
+
 - `cba-service.ts` — CRUD: create, read, list (with filters), update, soft/hard delete
 - `clause-extraction-service.ts` — PDF extraction via GPT-4 Vision, batch processing, confidence scoring
 - `clause-reasoning.ts` — AI-powered clause suggestion for grievances with strength assessment
@@ -91,6 +93,7 @@ The system now has:
 - `ai-feature-guard.ts` — Feature gating with audit logging for all AI calls
 
 **API Routes (Real)**
+
 - `GET/PATCH/DELETE /api/cba/[id]` — CBA CRUD
 - `GET/POST /api/cba/search` — Filtered CBA search
 - `POST /api/ai/extract-clauses` — PDF clause extraction (rate limited, entitlement gated)
@@ -100,6 +103,7 @@ The system now has:
 - `/api/cron/external-data-sync` — Monthly StatCan sync cron
 
 **UI Components (Real Rendering)**
+
 - `CBAClauseAnalyticsDashboard` — Clause distribution charts
 - `CBAExpiryTracker` — Expiring agreement list
 - `WageBenchmarking` — Wage comparison visualization
@@ -110,6 +114,7 @@ The system now has:
 - `NegotiationDashboard` — Active negotiations overview
 
 **Governance (Real)**
+
 - 30+ audit event types with severity classification
 - SHA-256 hash chain evidence packs with integrity verification
 - AI response envelope with confidence, model version, disclaimer, audit reference
@@ -117,9 +122,11 @@ The system now has:
 - Feature entitlement gating per tier
 
 **i18n (Real)**
+
 - EN-CA and FR-CA message files with CBA terminology ("Conventions collectives actives", etc.)
 
 **Tests (Real, Mocked)**
+
 - `cba-service.test.ts` — CRUD operations
 - `clause-extraction-service.test.ts` — 5+ test cases for PDF extraction
 - `vector-search-service.test.ts` — Embedding cache, search filtering
@@ -132,32 +139,38 @@ The system now has:
 ## 4. Critical Gaps
 
 ### GAP-1: No Operational External Data Ingestion → **PARTIALLY RESOLVED**
+
 **Severity:** BLOCKING → **MEDIUM**  
 **Original Evidence:** `lrb-unified-service.ts` lines 82-105 (Ontario) and 130-155 (BC) return hardcoded arrays; Federal, CNESST, CanLII — zero code.  
 **Remediation:** Full ingestion infrastructure built: `IngestionService` with job lifecycle (pending→running→completed/failed/partial), `BaseAdapter` with retry/timeout, `HtmlBulletinAdapter` for web sources, adapter registry pattern. Document service with content-hash deduplication and versioning. API endpoints for triggering and monitoring ingestion jobs.  
 **Remaining:** Replace LRB placeholder clients with real HTTP fetchers. Implement CNESST and CanLII adapters. Execute end-to-end ingestion against live Canadian sources.
 
 ### GAP-2: No Source Registry → **RESOLVED**
+
 **Severity:** BLOCKING → **CLOSED**  
 **Original Evidence:** No `sources` table.  
 **Remediation:** `cba_intel_sources` table with 30+ columns: nameEn/Fr, sourceType (9 types), formatTypes, collectionMethod, trustTier (4 levels), jurisdictions, healthStatus, lastCheckedAt, lastSuccessAt, consecutiveFailures, robotsNotes, termsUrl, redistributionNotes, provenanceRules, adapterKey, config. Full CRUD service + API endpoints + Source Registry UI with health badges, trust tiers, and filters.
 
 ### GAP-3: No Benchmark Engine → **RESOLVED**
+
 **Severity:** HIGH → **CLOSED**  
 **Original Evidence:** No `BenchmarkService` class.  
 **Remediation:** `benchmark-service.ts` with `findComparableAgreements()` — matches by jurisdiction/sector/union/employerClass, computes wage percentile (P25/P50/P75), clause family coverage, median wage increase, avg term months. Benchmark snapshot persistence with versioning. API endpoint with save/history support. BenchmarkView UI with percentile cards, clause coverage bar chart (recharts), comparable agreements table.
 
 ### GAP-4: No Extraction Review Workflow → **RESOLVED**
+
 **Severity:** HIGH → **CLOSED**  
 **Original Evidence:** All extracted clauses saved regardless of confidence.  
 **Remediation:** Full review domain: `reviewStatusEnum` (pending/approved/rejected/needs_revision/auto_approved), `cba_intel_review_decisions` table with audit trail (reviewerId, role, previousStatus, decision, reason, comment). `review-service.ts` with queue management, filtered by target type/confidence/clauseFamily. Review Queue UI with tabbed interface (findings/agreements/wages/clauses), inline approve/reject/needs-revision actions, queue counts badge. Review status tracked on findings, agreements, wage adjustments, and clauses.
 
 ### GAP-5: No Freshness Enforcement → **RESOLVED**
+
 **Severity:** HIGH → **CLOSED**  
 **Original Evidence:** No staleness detection, no freshness badges.  
 **Remediation:** `computeFreshnessStatus()` pure function with configurable thresholds (default: aging=14d, stale=30d, expired=90d). `computeSourceFreshness()` for single-source analysis. `getFreshnessOverview()` across all active sources with summary counts. `cba_intel_freshness_log` table for history. API endpoint with configurable thresholds. FreshnessDashboard UI with summary cards, pie chart distribution, per-source status table with color-coded badges. 11 unit tests for boundary conditions. `cbaIntelSourceFreshness` Prometheus gauge per source.
 
 ### GAP-6: No Operator Ingestion Dashboard → **RESOLVED**
+
 **Severity:** HIGH → **CLOSED**  
 **Original Evidence:** Zero matches for SourceHealth, IngestionStatus, SyncMonitor.  
 **Remediation:** 6 UI components on tabbed CBA Intelligence page: SourceRegistryTable (health badges, trust tiers, consecutive failures), IngestionMonitor (job list with status, doc counts, duration, error messages, 10s polling), AgreementExplorer (search, filters, detail view), ReviewQueue (queue counts per target type), BenchmarkView (percentile analysis), FreshnessDashboard (source freshness overview). 8 Prometheus metrics for CBA-specific observability.
@@ -167,32 +180,39 @@ The system now has:
 ## 5. Hidden Weaknesses
 
 ### HW-1: Embeddings Stored as TEXT, Not pgvector → **RESOLVED**
+
 **Location:** `cba_clauses.embedding` column defined as `text("embedding")` in schema.ts  
 **Problem:** Every semantic search query must cast `embedding::vector` at runtime. No HNSW/IVFFlat index possible. Approximately 100x slower than proper pgvector column.  
 **Remediation:** Migration `20260402_pgvector_embeddings.sql` enables pgvector extension, converts 6 TEXT embedding columns to `vector(1536)`, creates HNSW indexes with `vector_cosine_ops` for cosine similarity. Tables: collective_agreements, cba_clauses, arbitration_decisions, bargaining_notes, clause_embeddings, lrb_agreements.
 
 ### HW-2: Deduplication Class Not Wired Into Extraction → **RESOLVED**
+
 **Location:** `data-ingestion.ts` has `Deduplicator` class with SHA-256 hashing. `clause-extraction-service.ts` did NOT call it.  
 **Remediation:** `saveExtractedClauses()` in `clause-extraction-service.ts` now computes SHA-256 content hash for each clause, pre-fetches existing hashes for the CBA, and skips duplicates. Added `contentHash` column to both `cba_clauses` Drizzle schema files. Dedup stats logged via `logger.info`. Batch insert (50 per batch) for remaining non-duplicate clauses.
 
 ### HW-3: CBA Number Uniqueness Is Global, Not Tenant-Scoped → **RESOLVED**
+
 **Location:** `collective_agreements_cba_number_unique` constraint in schema.ts  
 **Problem:** Two different tenants cannot store a CBA with the same number.  
 **Remediation:** New `cbaIntelAgreements` table uses composite uniqueness (organizationId + sourceId + employer + union + jurisdiction) instead of a single global CBA number. This is tenant-scoped by design.
 
 ### HW-4: `listCBAs` Advanced Queries Exist Only in Test Mocks → **RESOLVED**
+
 **Location:** `cba-service.test.ts` mocks `getCBAsExpiringSoon()`, `getCBAStatistics()`, `searchCBAs()`, `updateCBAStatus()`.  
 **Remediation:** Confirmed NO mismatch — `cba-service.ts` actually exports all 11 functions that the test imports (createCBA, getCBAById, listCBAs, updateCBA, softDeleteCBA, hardDeleteCBA, getCBA, getCBAsExpiringSoon, getCBAStatistics, searchCBAs, updateCBAStatus). The original audit finding was incorrect. New CBA Intelligence API also provides `listAgreements` with ILIKE search, jurisdiction/sector filters, and pagination.
 
 ### HW-5: Analytics API Endpoints May Not Exist → **RESOLVED (NON-ISSUE)**
+
 **Location:** Legacy UI components appeared to reference `/api/analytics/cba/*` endpoints.  
 **Status:** Confirmed non-issue — all CBA Intelligence UI components fetch from `/api/cba-intelligence/*` (correctly implemented routes), not from legacy analytics paths. The original finding was based on incorrect path assumptions.
 
 ### HW-6: No Clause Content Hash for Integrity → **RESOLVED**
+
 **Location:** `cba_clauses` lacks `content_hash` column.  
 **Remediation:** New `cbaIntelClauses` table includes `contentHash` column (SHA-256). Similarly, `cbaIntelFindings` has `contentHash`. `cbaIntelDocuments` uses content hashing for dedup via `computeContentHash()` in `document-service.ts`.
 
 ### HW-7: Date Serialization Pattern in Drizzle SQL Templates → **DOCUMENTED**
+
 **Location:** Known codebase-wide issue (documented in memory).  
 **Problem:** Any CBA query using `db.execute(sql\`...WHERE date = ${jsDate}\`)` will fail silently with unparseable date strings. Must always use `.toISOString()` + `::timestamptz` cast.  
 **Status:** All new CBA Intelligence services use `.toISOString()` for date parameters. Documented in developer memory for ongoing awareness.

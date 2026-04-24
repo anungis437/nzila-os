@@ -34,4 +34,3 @@ Generated: 2026-04-20T04:21:27.344Z
 - Pilot profitability classification and underpriced pilot flagging.
 - Pricing recommendations tied to margin, support burden, and payback.
 - Capital allocation recommendation for the next 100k deployment.
-

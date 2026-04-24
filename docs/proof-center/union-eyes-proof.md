@@ -32,6 +32,7 @@ Labour unions and labour organizations that need governed grievance and represen
 ## 5) Reliability and confidence
 
 Freshness status by key signal:
+
 - product maturity: live
 - pilot operations docs: daily sync
 - commercial outcomes: manual

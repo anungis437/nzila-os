@@ -90,6 +90,7 @@ The $100K cash threshold is crossed by Month 3–4 in the Base scenario. It does
 **Base scenario: Q3 2027 (18 months)**
 
 **What needs to be true:**
+
 1. 7 organizations on SaaS plans averaging $78K ARR each
 2. < 1 customer churned in Year 1
 3. At least one expansion module activated in Q2 2027

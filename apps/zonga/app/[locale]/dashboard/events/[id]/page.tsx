@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { getEventDetail, getPublishedEventDetail } from '@/lib/actions/event-actions'
 import { formatCurrencyAmount } from '@/lib/stripe'
+import { CheckInConsole } from '@/components/events/checkin-console'
 import { Calendar, MapPin, Clock, Mic2, ArrowLeft } from 'lucide-react'
 
 export default async function EventDetailPage({
@@ -341,6 +342,8 @@ function CreatorEventDetail({
 
         {/* Sidebar */}
         <div className="space-y-6">
+          <CheckInConsole eventId={eventId} />
+
           <Card>
             <div className="p-5">
               <h2 className="mb-3 text-sm font-semibold text-foreground">📋 Event Info</h2>

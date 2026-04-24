@@ -26,11 +26,11 @@ database with full configuration, customers, and example quotes.
 | Supplier Strategy | BALANCED (quality 0.3, lead 0.3, cost 0.4) |
 | Markup | FIXED_PERCENT 40% |
 | Brand Colour | `#ef4444` (red) |
-| Users | admin@shopmoica.demo, sales@shopmoica.demo, finance@shopmoica.demo, viewer@shopmoica.demo |
+| Users | <admin@shopmoica.demo>, <sales@shopmoica.demo>, <finance@shopmoica.demo>, <viewer@shopmoica.demo> |
 | Customers | 5 (Acme, Maple, Pinnacle, Echo, Atlas) |
 | Quotes | 7 (DRAFT through CLOSED with full lifecycle) |
 
-### PromoNorth Inc.
+### PromoNorth Inc
 
 | Attribute | Value |
 |-----------|-------|
@@ -43,7 +43,7 @@ database with full configuration, customers, and example quotes.
 | Supplier Strategy | LOWEST_COST (cost weight 0.6) |
 | Markup | TIERED (budget 1.25×, standard 1.5×, premium 2.0×) |
 | Brand Colour | `#0ea5e9` (blue) |
-| Users | admin@promonorth.com, sales@promonorth.com |
+| Users | <admin@promonorth.com>, <sales@promonorth.com> |
 | Customers | 3 (Acme Corp, GlobalTech, NYC Design Co) |
 | Quotes | 3 (DRAFT, SENT_TO_CLIENT, ACCEPTED) |
 

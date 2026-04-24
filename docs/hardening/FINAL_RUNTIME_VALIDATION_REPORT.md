@@ -77,6 +77,7 @@ All 28 proof targets from `PROOF_TARGET_MATRIX.md` are verified:
 ## 3. Cross-Cutting Property Validation (28 tests)
 
 ### Determinism (5 tests)
+
 - Invariant checker: 100 runs, identical results
 - Ledger integrity: 50 runs, identical results
 - Governance policy: 50 runs, identical violation counts
@@ -84,12 +85,15 @@ All 28 proof targets from `PROOF_TARGET_MATRIX.md` are verified:
 - Dispute impact: 50 runs, identical frozen amounts and payout lists
 
 ### Idempotency (3 tests)
+
 - Admin action guard: consistent allow/deny on retry, unique audit events per call
 - Reconciliation: same data produces same discrepancies
 - Dispute freeze resolution: consistent unfreeze decisions
 
 ### Audit Completeness (8 tests)
+
 Every critical path emits a system event:
+
 - Governance violation → `POLICY_VIOLATION_DETECTED`
 - Admin action (allowed) → `ADMIN_ACTION_EXECUTED`
 - Admin action (denied) → `ADMIN_ACTION_EXECUTED` with `denied: true`
@@ -100,12 +104,14 @@ Every critical path emits a system event:
 - AI inference → `AI_INFERENCE_COMPLETED`
 
 ### Observability Coverage (4 tests)
+
 - Fraud check records `FRAUD_SIGNALS_DETECTED` metric
 - AI inference records `AI_INFERENCE_LATENCY_MS` and `AI_INFERENCE_TOTAL` metrics
 - MetricName enum has ≥ 20 definitions (verified)
 - All metric names follow `zonga.*` naming convention
 
 ### Module Integration (8 tests)
+
 - Economic enforcer + invariant checker agree on balanced/imbalanced ledger
 - Governance + `canExecutePayout` both block disputed payouts
 - Full lifecycle: dispute freeze → governance blocks → dispute resolve → governance allows

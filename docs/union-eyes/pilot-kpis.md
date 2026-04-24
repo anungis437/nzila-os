@@ -1,6 +1,7 @@
 # Union Eyes Pilot KPIs
 
 ## KPI Focus
+
 - cases_created
 - cases_acknowledged
 - avg_time_to_first_response
@@ -14,6 +15,7 @@
 - per_rep_case_load
 
 ## Instrumentation Points
+
 - `POST /api/cases` -> `cases_created`
 - `POST /api/cases/[caseId]/assign` -> `assignment_efficiency`
 - `POST /api/workflow/transition` -> `workflow_transition_success_rate`, `workflow_failures`, `cases_acknowledged`, `avg_time_to_first_response`, `avg_time_to_resolution`
@@ -23,6 +25,7 @@
 All metric writes are auditable and require trace + actor/system identity in the platform metrics service.
 
 ## Interpretation
+
 - Operations improving when response/resolution times trend down and transitions stay successful.
 - Risk increases when SLA breaches rise and overdue case counts grow.
 - Adoption health improves with sustained role-based case activity.

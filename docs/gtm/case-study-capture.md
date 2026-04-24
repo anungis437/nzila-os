@@ -17,6 +17,7 @@ docs/gtm/case-studies/[org-slug]-[year].md
 Example: `docs/gtm/case-studies/cupe-local-2026.md`
 
 Fill in each section progressively:
+
 - **Before** section: completed during Week 1 intake call
 - **During** section: updated weekly throughout the pilot
 - **After** section: completed within 5 days of pilot close
@@ -66,6 +67,7 @@ Qualitative data (stakeholder quotes, satisfaction scores) must be collected via
 *Capture during Week 1 intake call. This is the "before" story.*
 
 **Current workflow:**
+
 - How does a grievance enter the system today? (email, paper form, verbal, other)
 - Who receives it first? (steward, admin, officer?)
 - Where is it tracked? (spreadsheet, shared drive, email thread, system name?)
@@ -73,6 +75,7 @@ Qualitative data (stakeholder quotes, satisfaction scores) must be collected via
 - How does a member find out the status of their case?
 
 **Pain points (in their own words):**
+
 - Primary complaint #1:
 - Primary complaint #2:
 - Primary complaint #3:
@@ -89,17 +92,20 @@ Qualitative data (stakeholder quotes, satisfaction scores) must be collected via
 | Hours per arbitration to prep evidence | — | LRO estimate |
 
 **Reported frustrations:**
+
 - Executive perspective:
 - Rep/steward perspective:
 - Admin perspective:
 - Member perspective (if available):
 
 **Data fragmentation:**
+
 - Where does case data currently live? (list all systems and tools)
 - Are there cases with no digital record?
 - Is evidence stored in a defensible, retrievable way?
 
 **Reporting gaps:**
+
 - Can the executive team see case status in real time?
 - Is SLA compliance tracked?
 - Is there a process for escalation that leaves a traceable record?
@@ -130,16 +136,19 @@ Qualitative data (stakeholder quotes, satisfaction scores) must be collected via
 - What support requests were opened (count and category)?
 
 **Workflow completion:**
+
 - % of cases progressing through full lifecycle:
 - % of cases stalled at which stage:
 
 **Stakeholder feedback (collected mid-pilot — Week 3–4 call):**
+
 - Executive sponsor: "..."
 - Lead steward/rep: "..."
 - Admin: "..."
 - Member (if accessible): "..."
 
 **Issues / incidents:**
+
 | Date | Issue | Severity | Resolution | Time to Resolve |
 |------|-------|---------|-----------|----------------|
 | — | — | — | — | — |
@@ -163,23 +172,28 @@ Qualitative data (stakeholder quotes, satisfaction scores) must be collected via
 | Hours to prep for one arbitration | — | — | — | — |
 
 **Leadership visibility:**
+
 - Before: [Description of executive visibility into case status]
 - After: [Description of executive access during pilot — real-time dashboard, weekly reports, etc.]
 
 **Time saved:**
+
 - Total estimated rep-hours saved during pilot period:
 - Methodology: [how calculated]
 
 **Incidents reduced:**
+
 - Were any governance failures, escalation failures, or compliance risks surfaced and addressed?
 - Were any cases that would have been lost documented and resolved?
 
 **Readiness to expand:**
+
 - Is the organization ready to move to SaaS?
 - What modules or features were not included in the pilot that would add additional value?
 - What integrations would unlock additional workflow improvement?
 
 **Conversion decision:**
+
 - Outcome: Converted to SaaS / Extended pilot / Paused / Declined
 - If converted: SaaS tier selected, contract value, start date
 - If paused or declined: reason noted, follow-up date set

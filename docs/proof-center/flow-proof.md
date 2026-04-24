@@ -32,6 +32,7 @@ SMB operators that need one governed operating stack for CRM, pipeline, invoicin
 ## 5) Reliability and confidence
 
 Freshness status by key signal:
+
 - product maturity: live
 - proposal counts: weekly sync
 - revenue outcomes: manual

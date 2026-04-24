@@ -1,7 +1,9 @@
 # FAIRCASE Outbound Engine (90 Days)
 
 ## Operating Targets
+
 Weekly KPIs:
+
 - 75 outbound touches
 - 15 follow-ups
 - 8 live conversations
@@ -9,9 +11,11 @@ Weekly KPIs:
 - 2 proposals sent
 
 Monthly target:
+
 - 1 pilot launch
 
 ## Channel Mix
+
 - LinkedIn
 - Email
 - Conferences and sector events
@@ -22,18 +26,21 @@ Monthly target:
 ## 90-Day Plan
 
 ### Days 1-30: Foundation + Signal Capture
+
 - Build target account list by ICP and province/state.
 - Launch first-touch messaging for HR, union, and university buyers.
 - Run weekly founder-led outreach review.
 - Capture response patterns and objections in one tracker.
 
 ### Days 31-60: Conversion Push
+
 - Focus sequences on responders and warm accounts.
 - Increase follow-up density and referral asks.
 - Publish one trust-focused thought leadership asset every 2 weeks.
 - Push paid diagnostic as default next step when pain is clear.
 
 ### Days 61-90: Pilot Close Sprint
+
 - Priority pipeline reviews every Monday and Thursday.
 - Multi-thread each active opportunity (sponsor, operator, procurement).
 - Launch procurement/security packs early.
@@ -42,6 +49,7 @@ Monthly target:
 ## Copy Bank
 
 ## Cold Email (10)
+
 1. Subject: Complaint workflows under pressure?
 Body: Hi {{Name}}, many teams are handling sensitive cases across email, spreadsheets, and ad hoc notes. FAIRCASE gives structured intake, workflow accountability, and defensible reporting. Open to a 20-minute fit call?
 
@@ -73,6 +81,7 @@ Body: Hi {{Name}}, we run focused pilots that prove cycle-time and reporting imp
 Body: Hi {{Name}}, FAIRCASE is built for organizations that need complaint operations to be consistent, auditable, and trusted. Open to a brief discovery call?
 
 ## LinkedIn Outreach (10)
+
 1. Hi {{Name}}, noticed your work in {{Org/Function}}. We help teams modernize trust-sensitive complaint and investigation workflows. Open to connect?
 2. We are seeing many organizations struggle with case accountability and reporting burden. Happy to share practical patterns if useful.
 3. Curious: where does your team feel the most friction today, intake quality or closure reporting?
@@ -85,6 +94,7 @@ Body: Hi {{Name}}, FAIRCASE is built for organizations that need complaint opera
 10. Open to a short conversation next week on case workflow modernization?
 
 ## Follow-Up (10)
+
 1. Circling back in case this slipped. Worth 20 minutes to see if FAIRCASE fits your current priorities?
 2. Sharing this again because your team likely faces reporting pressure around sensitive cases.
 3. Quick check: is this a now, later, or not a fit discussion?
@@ -97,6 +107,7 @@ Body: Hi {{Name}}, FAIRCASE is built for organizations that need complaint opera
 10. Should I close the loop for now, or keep this open for a short discovery call?
 
 ## No-Response Bump (5)
+
 1. Last nudge from me, then I will close this out.
 2. Reaching out one final time in case complaint workflow modernization is still on your roadmap.
 3. I know priorities shift. If useful later, I can reconnect in {{Month}}.
@@ -104,6 +115,7 @@ Body: Hi {{Name}}, FAIRCASE is built for organizations that need complaint opera
 5. If this is better for someone else on your team, happy to route appropriately.
 
 ## Referral Ask (5)
+
 1. If this is not your lane, who owns complaint and investigation operations today?
 2. Would you be open to introducing me to your HR operations or compliance lead?
 3. Is there a colleague handling policy execution/reporting modernization this quarter?

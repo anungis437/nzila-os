@@ -76,6 +76,7 @@ Implemented in `tooling/contract-tests/phantom-deps.test.ts`:
 > For every `@nzila/*` in an app's `dependencies`, at least one `.ts/.tsx` file must contain `from '@nzila/PACKAGE'`. Fail otherwise.
 
 Also added:
+
 - `tooling/contract-tests/dead-deps.test.ts` — checks ALL production deps (not just @nzila/*)
 - `tooling/contract-tests/db-real.test.ts` — no in-memory Map stores as persistence
 - `tooling/contract-tests/dashboard-no-hardcode.test.ts` — no hardcoded stat values
@@ -108,6 +109,7 @@ This prevents future regression — no app can list a platform package without a
 **Per-app action**:
 
 For **cfo, nacp-exams, zonga, shop-quoter, abr**:
+
 1. Create `lib/logger.ts` → `import { createLogger } from '@nzila/os-core/telemetry'`
 2. Create `lib/env.ts` → Zod schema for all env vars, validated at import time
 3. Update `middleware.ts` → add `createRequestContext()` + `checkRateLimit()`
@@ -120,12 +122,14 @@ For **cfo, nacp-exams, zonga, shop-quoter, abr**:
 These three apps list `@nzila/db` but never import it. They show hardcoded stats.
 
 **Per-app action**:
+
 1. Create `lib/db.ts` → `import { platformDb } from '@nzila/db'` (or scoped DAL)
 2. Replace hardcoded stat cards with real DB queries (server components)
 3. Create API routes for CRUD operations needed by the domain
 4. Add `DATABASE_URL` to env schema
 
 For **shop-quoter** specifically:
+
 1. Replace `Map<string, Quote>` in-memory store with `@nzila/db` Drizzle queries
 2. Wire `quoteRepo` / `customerRepo` to real persistence
 3. This is critical — the app has working server actions that create quotes, but they're lost on restart
@@ -220,6 +224,7 @@ NACP has `@nzila/nacp-core` with state machines (`examSessionMachine`), integrit
 | **abr** | ✅ FULL (classify + extract + similar) | ✅ FULL (outcome + risk) | lib/actions/ai-legal-actions.ts |
 
 Enhancements delivered:
+
 - All 7 app `ai-client.ts` files: fixed `apiKey` → `getToken`, added `APP_KEY`, added `runAICompletion`, `runAIEmbed`, `runAIExtraction` convenience wrappers
 - All 7 app `ml-client.ts` files: fixed `apiKey` → `getToken`, added `runPrediction` convenience wrapper
 - UE `ml-client.ts`: rewritten with `getMlClient()` singleton + `makeMlClient()` client-side factory + `runPrediction()`
@@ -257,28 +262,33 @@ export const aiClient = createAiClient({
 #### 3.3 — AI integration per app (detailed)
 
 **CFO AI features** (4 integration points):
+
 1. `aiClient.chat()` → Financial advisor chatbot for cash flow questions
 2. `aiClient.extract()` → Auto-categorize bank transactions from QBO data
 3. `aiClient.generate()` → Narrative generation for quarterly financial reports
 4. RAG pipeline → Tax rule Q&A over `@nzila/tax` governance documents
 
 **ABR AI features** (4 integration points):
+
 1. RAG pipeline → Legal research over CanLII case law (embeddings exist in Django `ai_core` models)
 2. `aiClient.extract()` → Document extraction from legal filings
 3. `aiClient.generate()` → Automated compliance report drafting
 4. `aiClient.chat()` → Legal research assistant with citation grounding
 
 **Shop-Quoter AI features** (3 integration points):
+
 1. `aiClient.generate()` → Smart pricing recommendations based on client history
 2. `aiClient.embed()` → Product similarity for "similar gift boxes" suggestions
 3. `aiClient.extract()` → Auto-populate quote from unstructured client RFP emails
 
 **NACP AI features** (3 integration points):
+
 1. `aiClient.embed()` → Submission similarity detection (plagiarism)
 2. `aiClient.generate()` → Question generation assistance for exam authors
 3. `aiClient.extract()` → OCR/handwriting recognition for paper exam submissions
 
 **Zonga AI features** (2 integration points):
+
 1. `aiClient.embed()` → Music similarity for recommendation engine
 2. `aiClient.generate()` → Automated content descriptions and tags
 
@@ -324,7 +334,6 @@ export const mlClient = createMlClient({
 **Status**: 8/8 business apps have `lib/evidence.ts` wired to `@nzila/os-core/evidence`
 or `@nzila/commerce-audit`. Union-Eyes evidence bridge added. Contract test enforces.
 
-
 #### 5.1 — Evidence integration pattern (from console reference)
 
 ```typescript
@@ -356,6 +365,7 @@ const result = await processEvidencePack(pack);
 #### 5.3 — Commerce audit integration
 
 For commerce apps (shop-quoter, zonga, nacp-exams), use `@nzila/commerce-audit`:
+
 ```typescript
 import { buildTransitionAuditEntry, buildCommerceEvidencePack } from '@nzila/commerce-audit';
 
@@ -382,6 +392,7 @@ now blocks raw `stripe` and `@stripe/stripe-js` imports.
 #### 6.1 — Stripe migration (18 sites) → Actual: 5 residual fixes
 
 Union-Eyes has 18 direct `import Stripe from 'stripe'` sites. The code itself acknowledges this:
+
 ```
 // eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/payments-stripe
 ```
@@ -401,6 +412,7 @@ Union-Eyes has 18 direct `import Stripe from 'stripe'` sites. The code itself ac
 #### 6.2 — Blob migration
 
 Replace `@vercel/blob` with `@nzila/blob` (Azure Blob Storage abstraction):
+
 - `uploadBuffer()`, `downloadBuffer()`, `generateSasUrl()` — same API shape, different provider
 
 #### 6.3 — UI standardization
@@ -430,6 +442,7 @@ Union-Eyes builds its own component library instead of using `@nzila/ui`. This i
 
 Added `'studio-maturity'` category (F) to `tooling/ga-check/ga-check.ts` with 3 new
 checks (22 total, up from 19):
+
 - **STUDIO-PLATFORM-SCORE**: Every app scores ≥ 7/10 on platform integration (10 signals: ai-client, ml-client, evidence, api-guards, otel, health-route, @nzila/db, @nzila/os-core, @nzila/config, env-validation)
 - **STUDIO-AI-CLAIMS**: No app has "AI" in marketing copy without ai-sdk runtime wiring
 - **STUDIO-NO-INMEM**: No module-level `new Map()` stores used as primary persistence
@@ -453,6 +466,7 @@ All 7 Next.js apps have `initOtel()` in `instrumentation.ts`. Orchestrator-api h
 
 All 7 Next.js apps have `/api/health` routes checking DB + blob connectivity.
 Orchestrator-api has `/health` checking DB + GitHub token. All return 200/503.
+
 - `commerceMetrics.recordTransition()`
 - `commerceMetrics.recordSagaExecution()`
 - `logTransition()`, `logSagaExecution()`
@@ -481,6 +495,7 @@ Week 12: Phase 8 — Observability + production hardening
 ## Per-App Target State (10/10)
 
 ### CFO (1/10 → 10/10)
+
 - [x] os-core: logger, rateLimit, requestContext, authorize, initOtel, bootAssert
 - [x] db: real Drizzle queries replacing hardcoded stats
 - [x] payments-stripe: Stripe client, revenue data, checkout flows
@@ -496,6 +511,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [x] Tests (6 smoke tests: api-guards, evidence, commerce-telemetry, AI, ML, env)
 
 ### ABR (2.5/10 → 10/10)
+
 - [x] os-core: full wiring (logger, instrumentation, rateLimit, x-request-id)
 - [ ] db: connect frontend to Django backend API (or migrate to Drizzle)
 - [x] ai-sdk: legal RAG, document extraction, compliance report gen, research assistant
@@ -507,6 +523,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [x] Tests (6 smoke tests: AI legal actions, AI client, ML client, evidence, api-guards, OTel)
 
 ### Shop-Quoter (3.5/10 → 10/10)
+
 - [x] commerce-core: replace inline types with domain types
 - [x] commerce-services: createQuoteService, createOrderService, sagas
 - [x] commerce-state: quoteMachine lifecycle enforcement
@@ -522,6 +539,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [x] os-core: full wiring (logger, rateLimit, instrumentation, x-request-id)
 
 ### NACP-Exams (1/10 → 10/10)
+
 - [x] nacp-core: wire ALL schemas + state machine (examSessionMachine)
 - [ ] db: real persistence for exams, sessions, candidates, submissions
 - [x] os-core: full wiring (logger, instrumentation, x-request-id)
@@ -534,6 +552,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [ ] Build session management, candidate registration, submission, results pages
 
 ### Zonga (1/10 → 10/10)
+
 - [x] zonga-core: wire ALL schemas + services (computePayoutPreview, buildZongaAuditEvent)
 - [ ] db: real persistence for creators, assets, releases, revenue, payouts
 - [x] os-core: full wiring (logger, instrumentation, x-request-id)
@@ -547,6 +566,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [ ] Build catalog, releases, payouts, analytics pages
 
 ### Partners (8/10 → 10/10)
+
 - [x] payments-stripe: wire partner payment flows
 - [ ] blob: wire document/asset storage (listed but unused)
 - [ ] ui: standardize on @nzila/ui (listed but unused)
@@ -558,6 +578,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [x] Tests (5 smoke tests: api-guards, evidence, AI+ML, OTel, env)
 
 ### Union-Eyes (9/10 → 10/10)
+
 - [x] payments-stripe: migrate 18 direct Stripe import sites
 - [x] blob: migrate from @vercel/blob to @nzila/blob (putBlob/deleteBlob bridge)
 - [ ] ui: incremental adoption of @nzila/ui (lib/shared-ui.ts bridge created)
@@ -568,6 +589,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [ ] Remove `services/financial-service/` sub-service divergence (align with monorepo pattern)
 
 ### Orchestrator-API (6/10 → 8/10) ✅ DONE
+
 - [x] Add authentication (API key via Bearer token or x-api-key header)
 - [x] Add env validation via os-core validateEnv()
 - [x] Add structured logging via os-core createLogger
@@ -583,6 +605,7 @@ Week 12: Phase 8 — Observability + production hardening
 - [x] Add health check that validates GitHub token + DB connectivity
 
 ### Web (stays N/A — appropriately thin)
+
 - Marketing site. No intelligence needed.
 - Only ensure: CSP headers, OTEL page timing (client-side), no leaked secrets.
 

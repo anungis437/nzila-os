@@ -79,6 +79,36 @@ export default async function Portfolio() {
   const locale = (await getLocale()) as Locale;
   const isFr = locale === 'fr-CA';
 
+  const guidedPaths = [
+    {
+      title: isFr ? 'J evalue les produits' : 'I am Evaluating Products',
+      description: isFr
+        ? 'Commencez par la grille pour comparer verticale, maturite et disponibilite production.'
+        : 'Start with the platform grid to compare vertical, readiness, and production status.',
+      href: '#platform-grid',
+      eventName: 'portfolio_start_here_products',
+      cta: isFr ? 'Voir la grille des plateformes' : 'View Platform Grid',
+    },
+    {
+      title: isFr ? 'J explore l impact et la mission' : 'I am Exploring Mission and Impact',
+      description: isFr
+        ? 'Consultez les verticales, cas d usage et preuve d impact social par secteur.'
+        : 'See how each vertical ties to social outcomes, practical deployment, and measurable change.',
+      href: '/verticals',
+      eventName: 'portfolio_start_here_impact',
+      cta: isFr ? 'Explorer les verticales' : 'Explore Verticals',
+    },
+    {
+      title: isFr ? 'J envisage un investissement' : 'I am Considering Investment',
+      description: isFr
+        ? 'Accedez directement a la these investisseur, metriques cles et feuille de route de croissance.'
+        : 'Go directly to investor thesis, market metrics, and the scaling roadmap.',
+      href: '/investors',
+      eventName: 'portfolio_start_here_invest',
+      cta: isFr ? 'Voir la page investisseurs' : 'View Investors Page',
+    },
+  ];
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -128,6 +158,48 @@ export default async function Portfolio() {
         </div>
       </section>
 
+      {/* ═══════════════════════ START HERE ═══════════════════════ */}
+      <section className="py-12 bg-white border-b border-gray-100" id="start-here">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="rounded-2xl border border-electric/20 bg-electric/5 p-6 md:p-8 mb-6">
+              <p className="text-xs font-semibold tracking-widest uppercase text-electric mb-3">
+                {isFr ? 'Commencer ici' : 'Start Here'}
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold text-navy mb-3">
+                {isFr
+                  ? 'Vue rapide pour vous orienter en moins de 60 secondes'
+                  : 'Quick orientation in under 60 seconds'}
+              </h2>
+              <p className="text-gray-700 max-w-4xl">
+                {isFr
+                  ? 'Ce portefeuille rassemble des produits a differents niveaux de maturite. Choisissez votre parcours ci-dessous pour acceder directement aux informations qui correspondent a votre objectif.'
+                  : 'This portfolio combines platforms at different maturity levels. Choose a path below to jump directly to the information that matches your goal.'}
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {guidedPaths.map((path, index) => (
+              <ScrollReveal key={path.title} delay={index * 0.08}>
+                <div className="h-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <h3 className="text-lg font-bold text-navy mb-2">{path.title}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{path.description}</p>
+                  <TrackedLink
+                    href={path.href}
+                    eventName={path.eventName}
+                    eventProps={{ source: 'portfolio_start_here' }}
+                    className="inline-flex items-center text-electric font-semibold hover:text-blue-700"
+                  >
+                    {path.cta}{' ->'}
+                  </TrackedLink>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════════════ COMPLEXITY LEGEND ═══════════════════════ */}
       <section className="py-6 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -148,7 +220,7 @@ export default async function Portfolio() {
       </section>
 
       {/* ═══════════════════════ PLATFORM GRID ═══════════════════════ */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50" id="platform-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {platforms.map((platform, i) => (

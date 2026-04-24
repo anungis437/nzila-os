@@ -12,6 +12,7 @@ Union teams lose time and credibility when case intake, representation, reportin
 ## The Solution
 
 UnionEyes unifies intake-to-outcome workflows in one system built for:
+
 - grievance and case operations
 - leadership visibility
 - evidence-ready reporting
@@ -42,4 +43,4 @@ Start with a 90-day pilot, baseline current operations, define success KPIs, and
 
 ## CTA
 
-Book a pilot planning call: hello@unioneyes.com
+Book a pilot planning call: <hello@unioneyes.com>

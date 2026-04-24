@@ -60,6 +60,7 @@ Yes. One-click evidence packages are exportable as PDF bundles suitable for OLRB
 
 **Q13. What vulnerability scanning do you perform?**  
 Every CI/CD pipeline run includes:
+
 - Dependency audit (pnpm audit / Snyk)
 - Container image scanning (Trivy, CRITICAL severity threshold)
 - Secret scanning (Gitleaks / TruffleHog)
@@ -112,5 +113,5 @@ We run on Azure Container Apps in Canada Central with Azure's built-in redundanc
 
 ---
 
-*For follow-up questions, contact: security@nzila.ca*  
+*For follow-up questions, contact: <security@nzila.ca>*  
 *Claims cross-reference: [docs/commercial/claims-ledger.md](../commercial/claims-ledger.md)*

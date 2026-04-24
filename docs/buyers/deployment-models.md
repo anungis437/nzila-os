@@ -68,11 +68,13 @@ No infrastructure changes are needed per pilot customer — isolation is achieve
 ### Required Environment Variables Per App
 
 All apps require:
+
 - `AUTH_SECRET` — session signing key
 - `AZURE_AD_CLIENT_ID` / `AZURE_AD_CLIENT_SECRET` / `AZURE_AD_TENANT_ID` — Entra SSO
 - `DATABASE_URL` — PostgreSQL connection string
 
 Apps with orchestrator integration additionally require:
+
 - `ORCHESTRATOR_API_URL` — defaults to `http://localhost:4000` in development
 - `ORCHESTRATOR_API_KEY` — API key for orchestrator authentication
 

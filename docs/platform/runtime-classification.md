@@ -169,11 +169,13 @@ Major P0 clusters:
 ## Framework-Specific Notes
 
 ### Next.js Apps (16)
+
 - API routes at `app/api/*/route.ts`
 - Each `route.ts` can export `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
 - Enforcement wrapping: `createEnforcedHandler` around each handler export
 
 ### Fastify App (orchestrator-api)
+
 - Route modules registered via plugin pattern
 - Enforcement wrapping: Fastify `preHandler` hook with enforcement pipeline
 

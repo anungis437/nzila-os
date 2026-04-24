@@ -218,6 +218,41 @@
       "instant": "Instantané",
       "ownership": "Propriété"
     },
+    "waitlist": {
+      "badge": "Acces beta",
+      "title": "Rejoignez la",
+      "titleAccent": "liste d attente beta",
+      "description": "Obtenez un acces anticipe aux recommandations diaspora, aux evolutions billetterie et aux outils de croissance artistes avant le lancement public.",
+      "benefits": [
+        "Invitations prioritaires pour artistes, labels et promoteurs",
+        "Acces anticipe aux fonctions de recommandation et de partage",
+        "Accompagnement onboarding accelere pendant la beta"
+      ],
+      "roles": {
+        "artist": "Artiste",
+        "label": "Label",
+        "promoter": "Promoteur",
+        "fan": "Auditeur",
+        "other": "Autre"
+      },
+      "interestOptions": {
+        "streaming": "Streaming",
+        "events": "Evenements",
+        "artist_tools": "Outils artistes",
+        "label_ops": "Operations label",
+        "diaspora_discovery": "Decouverte diaspora"
+      },
+      "form": {
+        "firstName": "Prenom",
+        "email": "Courriel",
+        "city": "Ville",
+        "interests": "Interets principaux",
+        "submit": "Rejoindre la liste",
+        "submitting": "Envoi en cours...",
+        "success": "Vous etes inscrit. Nous vous enverrons bientot votre invitation beta.",
+        "error": "Impossible d envoyer la demande. Veuillez reessayer."
+      }
+    },
     "cta": {
       "title": "Prêt à rejoindre le",
       "titleAccent": "mouvement ?",

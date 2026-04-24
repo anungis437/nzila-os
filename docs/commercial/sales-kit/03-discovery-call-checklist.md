@@ -27,6 +27,7 @@
 ## Exit Criteria
 
 Call is successful when:
+
 - a pilot hypothesis is agreed
 - diligence package handoff is accepted
 - next meeting is scheduled

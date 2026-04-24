@@ -116,6 +116,7 @@ import { createPayment } from '@nzila/payments-stripe'
 ## Waiver Process
 
 Temporary waivers can be filed in `governance/exceptions/` with:
+
 - `control`: The violated control ID
 - `reason`: Business justification
 - `expiresOn`: ISO date (max 90 days)

@@ -34,6 +34,7 @@ All three environment files target Canadian regions:
 | Production | `infrastructure/gitops/environments/production.yml` | canadacentral | canadaeast |
 
 Production environment includes `data_residency` enforcement block:
+
 ```yaml
 data_residency:
   enforce: true
@@ -49,6 +50,7 @@ data_residency:
 ## 4. Third-Party Data Processors
 
 ### 4.1 Authentication (`@nzila/platform-auth`)
+
 - **Primary auth:** Email/password — all data stays in Azure Canada Central PostgreSQL
 - **Optional SSO:** Microsoft Entra External ID — data subject to Microsoft DPA + Azure data residency commitments (Canada Central)
 - **Legacy note:** Clerk was previously used for auth. The migration to `@nzila/platform-auth` (email/password + Entra SSO) is complete. Clerk CSP references may remain in some `next.config.ts` files but are non-functional.
@@ -58,6 +60,7 @@ data_residency:
 See `governance/business/verticals/uniontech/strategy/compliance-privacy.md` §8 for full assessment.
 
 ### 4.2 Azure (Microsoft)
+
 - **Data location:** Canada Central (primary) + Canada East (DR)
 - **Canadian data residency:** ✅ Contractually guaranteed via Microsoft DPA and Azure data residency commitments
 - **All sensitive union PII resides here exclusively**

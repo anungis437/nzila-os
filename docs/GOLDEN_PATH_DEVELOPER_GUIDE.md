@@ -93,6 +93,7 @@ auditLayer({
 ## Adding to CI
 
 Your app is automatically covered by:
+
 - **Contract tests** — `pnpm contract-tests` validates structural invariants
 - **Control manifest validation** — `pnpm validate:control:manifests` checks CM-001..CM-009
 - **Governance gates** — CI runs `pnpm validate:governance:gate` with fail-closed checks

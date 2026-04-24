@@ -13,6 +13,7 @@ for forensic traceability.
 **Trigger:** Stripe call succeeds but post-payout audit/evidence fails.
 
 **Actions:**
+
 1. UPDATE `payouts` → `status = 'failed'`, `failed_at = NOW()`
 2. INSERT `audit_log` → `action = 'payout.compensated'` with error detail and correlation ID
 
@@ -24,6 +25,7 @@ in try/catch; on failure, calls this compensator and returns `POST_EXECUTION_FAI
 **Trigger:** Payment confirmed but ticket record creation fails.
 
 **Actions:**
+
 1. UPDATE `tickets` → `status = 'cancelled'`, `cancelled_at = NOW()`
 2. INSERT `audit_log` → `action = 'ticket.purchase.compensated'`
 
@@ -32,6 +34,7 @@ in try/catch; on failure, calls this compensator and returns `POST_EXECUTION_FAI
 **Trigger:** Status transition persists but downstream effects (distribution, notifications) fail.
 
 **Actions:**
+
 1. UPDATE `releases` → `status = previousStatus` (revert)
 2. INSERT `audit_log` → `action = 'release.transition.compensated'`
 

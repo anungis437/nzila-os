@@ -49,6 +49,7 @@ interface EconomicGuardInput {
 ### `guards/rights-guards.ts`
 
 Individual functions with focused signatures:
+
 - `guardSplitsSum100(splits: readonly { sharePercent: number }[])`
 - `guardNoPayoutOnDisputedRelease(hasActiveDispute: boolean, releaseId: string)`
 - `guardSplitsHaveValidCreators(splits: readonly { creatorId: string; creatorName: string }[])`
@@ -58,6 +59,7 @@ Individual functions with focused signatures:
 ### `guards/ticketing-guards.ts`
 
 Functions for ticketing concurrency:
+
 - `guardNoOversell(sold, available)` — T1
 - `guardAtomicReservation(insertedCount)` — T2
 - `guardRefundEligibility(purchasedAt, status, cutoffHours)` — T3
@@ -68,6 +70,7 @@ Functions for ticketing concurrency:
 ### `guards/governance-guards.ts`
 
 Security and governance validation:
+
 - `guardAdminActionReason(reason, minLength)` — G1
 - `guardRoleAuthorization(userRole, requiredRoles)` — G2
 - `guardRateLimit(actionCount, maxActions, windowMs, windowStart)` — G3
@@ -77,6 +80,7 @@ Security and governance validation:
 ### `guards/compensation.ts`
 
 Failure recovery utilities (async — write to DB):
+
 - `compensateFailedPayout(db, payoutId, error, correlationId)`
 - `compensateFailedTicketPurchase(db, ticketId, error)`
 - `compensateReleaseTransition(db, releaseId, previousStatus, error)`
@@ -97,6 +101,7 @@ if (!gateResult.allowed) {
 ## Testing
 
 Each guard module has a corresponding test file in `__tests__/`:
+
 - `economic-guards.test.ts` — 18 tests
 - `rights-guards.test.ts` — 12 tests
 - `ticketing-guards.test.ts` — 20 tests

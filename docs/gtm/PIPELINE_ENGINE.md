@@ -28,11 +28,13 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **What it means:** This organization fits the ICP (`docs/gtm/IDEAL_CUSTOMER_PROFILE_MATRIX.md`) and has been logged as a prospect.
 
 **Entry criteria:**
+
 - Named organization
 - Fits a defined ICP segment
 - At least one known contact or entry path
 
 **Exit criteria:**
+
 - Outreach has been sent (email, LinkedIn, warm intro request, or conference contact)
 - Contact has been logged
 
@@ -50,6 +52,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Outreach message delivered
 
 **Exit criteria:**
+
 - Positive response received (they want to learn more)
 - OR 3 follow-ups sent with no response → Stage 0-Paused (log reason)
 
@@ -67,17 +70,20 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Calendar invite accepted
 
 **Exit criteria:**
+
 - Meeting completed
 - Notes logged (their operation, pain, team, timeline, decision process)
 
 **Close probability:** 15–25%  
 **Avg days in stage:** 3–10  
 **Founder action:**
+
 1. Send pre-meeting brief (1-pager or link to `docs/gtm/ue-executive-one-pager.md`)
 2. Prepare 5 discovery questions (see Stage 3)
 3. Do NOT demo at first meeting
 
 **First meeting agenda (30 min):**
+
 1. 2 min — intro and agenda
 2. 10 min — their current workflow, team, pain
 3. 8 min — brief context on what NzilaOS is (NOT a demo)
@@ -93,6 +99,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** First meeting completed, notes logged
 
 **Exit criteria:**
+
 - We can write a proposal without asking clarifying questions
 - Internal champion identified
 - Decision process and timeline understood
@@ -100,12 +107,14 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Close probability:** 30–45%  
 **Avg days in stage:** 3–14  
 **Founder action:**
+
 1. Complete discovery call or async questionnaire
 2. Map to ICP segment and identify correct offer
 3. Confirm budget conversation ("Is there a budget allocated for this?")
 4. Identify internal champion vs. decision-maker (they may be different people)
 
 **Discovery questions:**
+
 1. "Walk me through how you handle a grievance today — from filing to resolution."
 2. "Where does that process break down most often?"
 3. "How do you know if a case is at risk of SLA breach?"
@@ -121,6 +130,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Discovery complete. We know enough to tailor the demo.
 
 **Exit criteria:**
+
 - Demo completed
 - Their reaction captured (positive, hesitant, specific objections)
 - Next step agreed (proposal, reference check, additional stakeholder meeting)
@@ -128,6 +138,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Close probability:** 45–65%  
 **Avg days in stage:** 1–7 (demo itself is same-week from discovery)  
 **Founder action:**
+
 1. Build demo scenario using their terminology, not generic
 2. Show only what's relevant to their pain (don't show everything)
 3. Address the one specific concern they raised in discovery
@@ -143,6 +154,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Demo completed, positive signal received
 
 **Exit criteria:**
+
 - Proposal reviewed by buyer
 - Verbal agreement or countersignature requested
 - OR rejection received (log reason, move to Stage 0-Paused)
@@ -150,12 +162,14 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Close probability:** 55–70%  
 **Avg days in stage:** 3–14  
 **Founder action:**
+
 1. Proposal sent within 24 hours of demo
 2. Follow up if no response in 3 days
 3. Book a "proposal review" call if there are questions
 4. Be prepared for: price objection, scope question, procurement process trigger
 
 **Proposal must contain:**
+
 - Selected offer (from `docs/gtm/OFFER_STACK_AND_PACKAGING.md`)
 - Specific pilot scope (dates, users, KPIs)
 - Deliverables list
@@ -172,12 +186,14 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Buyer verbally indicated they want to proceed
 
 **Exit criteria:**
+
 - Signed pilot agreement
 - Invoiced (or purchase order issued)
 
 **Close probability:** 75–90%  
 **Avg days in stage:** 5–21  
 **Founder action:**
+
 1. Move fast — momentum is at its peak here
 2. Have MSA template ready (`docs/governance/` or legal template)
 3. Do not discount scope or price unless the buyer's need is genuinely different
@@ -193,6 +209,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Executed agreement + invoice issued
 
 **Exit criteria:**
+
 - Pilot is provisioned (`docs/buyers/deployment-models.md` — 5-step provisioning)
 - Kickoff meeting complete
 - KPIs locked (per `docs/union-eyes/pilot-kpis.md`)
@@ -201,6 +218,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Close probability:** 100% (committed)  
 **Avg days in stage:** 3–7 (provisioning)  
 **Founder action:**
+
 1. Provision org environment
 2. Run kickoff meeting: review KPIs, set reporting cadence, confirm executive sponsor
 3. Hand off to delivery process (`docs/gtm/PILOT_TO_PAID_CONVERSION_PLAYBOOK.md`)
@@ -215,6 +233,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 **Entry criteria:** Provisioned, KPIs locked, kickoff done
 
 **Exit criteria:**
+
 - Pilot end date reached
 - Outcome report delivered
 - Conversion proposal sent (≥ 2 weeks before pilot end date)
@@ -236,6 +255,7 @@ Tracking location: `docs/gtm/rollout-command-center.md` → Sales Pipeline tab.
 
 **Avg days in stage:** Ongoing  
 **Founder action:**
+
 1. Renewal conversation starts 60 days before expiry
 2. Expansion conversation starts at quarterly business review
 3. Reference customer ask: confirm willingness to speak with prospects at 3-month mark

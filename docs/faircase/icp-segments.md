@@ -1,6 +1,7 @@
 # FAIRCASE ICP Segments
 
 ## ICP Priority Ranking
+
 1. HR leaders at 200-5000 employee organizations
 2. Unions and associations with grievance volume
 3. Universities and colleges with misconduct and ombuds workflows
@@ -8,6 +9,7 @@
 5. Healthcare networks and hospitals
 
 ## ICP #1: HR Leaders (200-5000 employees)
+
 - Pains:
   - Case handling is inconsistent across HRBPs and legal teams.
   - Investigations are slow and hard to audit.
@@ -25,6 +27,7 @@
 - Sales cycle estimate: 70-110 days.
 
 ## ICP #2: Unions and Associations
+
 - Pains:
   - Grievances and representation records are fragmented.
   - Evidence quality varies by steward and region.
@@ -42,6 +45,7 @@
 - Sales cycle estimate: 60-120 days.
 
 ## ICP #3: Universities and Colleges
+
 - Pains:
   - Misconduct, ombuds, and policy workflows are siloed.
   - Investigations need strict confidentiality and defensibility.
@@ -59,6 +63,7 @@
 - Sales cycle estimate: 90-150 days.
 
 ## ICP #4: Municipal and Public Institutions
+
 - Pains:
   - Public trust risk from unresolved complaints.
   - Audit trails and policy evidence are inconsistent.
@@ -76,6 +81,7 @@
 - Sales cycle estimate: 120-210 days.
 
 ## ICP #5: Healthcare Networks
+
 - Pains:
   - Complaint and incident workflows cross multiple facilities.
   - Documentation quality and timeliness vary by site.

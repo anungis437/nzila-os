@@ -14,20 +14,24 @@ Main risk removed: runtime auth secrets were being passed as Docker build args i
 
 Severity: High  
 Evidence:
+
 - `.github/workflows/gitops-deploy.yml` previously added `--build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }}`.
 - `.github/workflows/deploy-web.yml` previously added `--build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }}`.
 - Root `Dockerfile` declared `ARG AUTH_SECRET`.
 
 Risk:
+
 - Build args can leak via builder metadata, logs, or accidental debug output.
 - Violates runtime-only secret injection principle.
 
 Fix implemented:
+
 - Replaced secret build arg flow with non-sensitive placeholder build arg `BUILD_AUTH_PLACEHOLDER`.
 - Updated root `Dockerfile` to remove `ARG AUTH_SECRET` and consume `BUILD_AUTH_PLACEHOLDER` only for build-time requirements.
 - Updated both workflows to stop reading/propagating runtime auth secret into docker build.
 
 Changed files:
+
 - `Dockerfile`
 - `.github/workflows/gitops-deploy.yml`
 - `.github/workflows/deploy-web.yml`
@@ -36,16 +40,20 @@ Changed files:
 
 Severity: Medium  
 Evidence:
+
 - Workflows use `azure/login@v3` with `creds: ${{ secrets.AZURE_CREDENTIALS }}`.
 
 Risk:
+
 - Long-lived JSON credential remains a privileged secret.
 
 Current state:
+
 - OIDC-first login path is now implemented in `gitops-deploy.yml`, `deploy-web.yml`, `deploy-console.yml`, `deploy-partners.yml`, and `deploy-union-eyes.yml`.
 - Credential-json auth remains as explicit fallback when OIDC secrets are not configured.
 
 Next hardening target:
+
 - Remove `AZURE_CREDENTIALS` fallback once OIDC variables are present in all required environments.
 - Enforce OIDC-only policy on protected branches/environments.
 
@@ -53,26 +61,32 @@ Next hardening target:
 
 Severity: Medium  
 Evidence:
+
 - Staging Container Apps show secret stores configured (`secrets` count > 0 per app).
 - Existing pattern includes `secretref:` usage (e.g., `SENTRY_DSN=secretref:sentry-dsn`).
 
 Risk:
+
 - Inconsistent secretref adoption can leave plain env var drift across apps.
 
 Action:
+
 - Keep runtime-only posture and standardize all sensitive variables to `secretref:` in app-by-app rollout.
 
 ### Finding 4: Local plaintext `.env` with real-looking values exists (untracked)
 
 Severity: Medium  
 Evidence:
+
 - `.env` contains API key-like values.
 - `git ls-files` confirms `.env` is not tracked; `.env.example` is tracked.
 
 Risk:
+
 - Local compromise risk; accidental copy/paste risk.
 
 Action:
+
 - Keep `.env` untracked.
 - Rotate any real credentials that were ever placed in local `.env`.
 - Continue using `.env.example` with blanks/placeholders only.

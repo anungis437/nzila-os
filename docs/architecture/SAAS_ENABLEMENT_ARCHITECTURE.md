@@ -127,6 +127,7 @@ evaluation and audit trail.
 | PromoNorth Inc. | `22222222-…-222…` | USD | en-US | 50% | LOWEST_COST |
 
 Each org receives:
+
 - Full 7-table config insertion via `seedOrgConfig()`
 - Demo customers (5 + 3)
 - Demo quotes with lines (7 + 3)

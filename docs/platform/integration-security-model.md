@@ -140,6 +140,7 @@ The idempotency store prevents duplicate processing of the same event:
 - After successful completion, the key is recorded with the run result
 
 This prevents issues like:
+
 - Webhook retries causing duplicate case creation
 - Network timeouts leading to repeated outbound deliveries
 

@@ -19,6 +19,8 @@ export function QuoteApprovalForm({ token, quoteRef, displayName }: QuoteApprova
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
+  const [signatureName, setSignatureName] = useState('')
+  const [paymentPreference, setPaymentPreference] = useState<'full' | 'deposit'>('full')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,6 +34,14 @@ export function QuoteApprovalForm({ token, quoteRef, displayName }: QuoteApprova
     setError(null)
 
     try {
+      const composedMessage = [
+        message.trim(),
+        action === 'ACCEPT' && signatureName.trim() ? `Signature: ${signatureName.trim()}` : '',
+        action === 'ACCEPT' ? `Payment preference: ${paymentPreference}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n')
+
       const res = await fetch(`/api/quote/${token}/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +49,7 @@ export function QuoteApprovalForm({ token, quoteRef, displayName }: QuoteApprova
           action,
           customerName: name.trim(),
           customerEmail: email.trim(),
-          message: message.trim(),
+          message: composedMessage,
         }),
       })
 
@@ -141,6 +151,40 @@ export function QuoteApprovalForm({ token, quoteRef, displayName }: QuoteApprova
       {/* Mode: accept confirmation */}
       {mode === 'accept' && (
         <div className="space-y-4">
+          <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+            Speed-to-close options: add an e-signature placeholder and preferred payment structure.
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="signature-name" className="block text-sm font-medium text-gray-700 mb-1">
+                E-signature name
+              </label>
+              <input
+                id="signature-name"
+                type="text"
+                value={signatureName}
+                onChange={(e) => setSignatureName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Type legal name"
+                disabled={submitting}
+              />
+            </div>
+            <div>
+              <label htmlFor="payment-preference" className="block text-sm font-medium text-gray-700 mb-1">
+                Payment preference
+              </label>
+              <select
+                id="payment-preference"
+                value={paymentPreference}
+                onChange={(e) => setPaymentPreference(e.target.value as 'full' | 'deposit')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                disabled={submitting}
+              >
+                <option value="full">Pay full amount on acceptance</option>
+                <option value="deposit">Pay 50% deposit, remainder on completion</option>
+              </select>
+            </div>
+          </div>
           <div>
             <label htmlFor="accept-message" className="block text-sm font-medium text-gray-700 mb-1">
               Message (optional)
@@ -154,6 +198,15 @@ export function QuoteApprovalForm({ token, quoteRef, displayName }: QuoteApprova
               placeholder="Any additional notes..."
               disabled={submitting}
             />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 text-xs text-gray-600">
+            <span>Download branded PDF contract</span>
+            <a
+              href={`#quote-${quoteRef}-pdf`}
+              className="text-purple-700 font-medium hover:underline"
+            >
+              Generate PDF
+            </a>
           </div>
           <div className="flex gap-3">
             <button

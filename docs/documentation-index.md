@@ -442,4 +442,3 @@ Stale documents (>90 days since repo validation): 0
 | [docs/zonga/pilot-readiness-audit.md](docs/zonga/pilot-readiness-audit.md) | zonga | 2026-04-20 | current |
 | [README.md](README.md) | root | 2026-04-20 | current |
 | [SECURITY.md](SECURITY.md) | root | 2026-02-20 | current |
-
