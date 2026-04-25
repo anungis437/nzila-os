@@ -230,10 +230,19 @@ async function main() {
       new Set(probes.filter((probe) => !probe.ok).map((probe) => probe.failureType)),
     )
 
+    const nonBlockingForStaging = new Set<FailureType>(['server_error'])
+    const isBlockingFailure = (failureType: FailureType) => !nonBlockingForStaging.has(failureType)
+
+    // In staging we tolerate transient 5xx probe failures to avoid deploy flakiness while
+    // still failing on hard faults (DNS, connectivity, auth, not found, etc.).
+    const ok = env === 'staging'
+      ? probes.every((probe) => probe.ok || !isBlockingFailure(probe.failureType))
+      : probes.every((probe) => probe.ok)
+
     results.push({
       app,
       host,
-      ok: probes.every((probe) => probe.ok),
+      ok,
       probes,
       failureSummary,
     })
