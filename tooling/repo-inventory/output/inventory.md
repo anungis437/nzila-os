@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-24 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-25 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -18,10 +18,10 @@
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 313 | Internal operations console — platform governance, compliance, analytics, integr |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 318 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 213 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
@@ -34,8 +34,8 @@
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
 | union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3180 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
-| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 81 |  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 446 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
