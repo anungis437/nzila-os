@@ -72,7 +72,7 @@ jobs:
           echo "quarter=$QUARTER" >> "$GITHUB_OUTPUT"
           echo "date=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.quarter-check.outputs.should_create == 'true'
 
       - name: Create quarterly DR drill issue

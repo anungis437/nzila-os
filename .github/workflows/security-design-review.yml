@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Security Design Review Required
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check for security-design-reviewed label
         id: label_check
