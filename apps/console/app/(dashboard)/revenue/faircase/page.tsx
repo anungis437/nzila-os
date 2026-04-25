@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import fs from 'node:fs'
 import path from 'node:path'
+import { CommandPageShell } from '@/components/command-page-shell'
 import { ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
@@ -76,11 +77,11 @@ export default async function FaircaseRevenuePage() {
 
   if (!data) {
     return (
-      <div className="p-8 max-w-5xl mx-auto space-y-6">
+      <CommandPageShell className="space-y-6">
         <h1 className="text-3xl font-bold text-gray-900">FAIRCASE Revenue Dashboard</h1>
         <p className="text-sm text-gray-500">Unable to load governance/commercial/faircase-funnel.json.</p>
         <Link href="/revenue" className="text-sm text-blue-600 hover:underline">Back to Revenue</Link>
-      </div>
+      </CommandPageShell>
     )
   }
 
@@ -88,7 +89,7 @@ export default async function FaircaseRevenuePage() {
   const weightedPipeline = data.deal_register.reduce((sum, deal) => sum + deal.value * deal.probability, 0)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <CommandPageShell className="space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
@@ -223,6 +224,6 @@ export default async function FaircaseRevenuePage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

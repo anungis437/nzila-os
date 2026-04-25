@@ -1,0 +1,24 @@
+{
+  "id": "seed-opseu",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "OPSEU",
+  "fullName": "Ontario Public Service Employees Union",
+  "unionScope": "provincial",
+  "parentId": "seed-clc",
+  "sector": "provincial",
+  "province": "CA-ON",
+  "memberCount": 180000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://opseu.org",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier A. Large provincial public service union. Multiple bargaining units with differing needs.",
+  "createdAt": "2026-04-25T04:18:06.632Z",
+  "updatedAt": "2026-04-25T04:18:06.632Z"
+}

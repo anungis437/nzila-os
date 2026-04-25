@@ -5,6 +5,10 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { TICKET_TYPES, TICKET_STATUSES, PRIORITIES } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmTickets } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, desc, eq, ilike, or } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +25,9 @@ export default async function TicketListPage({
   if (!userId) redirect('/sign-in')
 
   const params = await searchParams
-  // TODO: query DB with filters scoped to orgId
+  const orgId = await getExecutiveOrgId()
 
-  const tickets: Array<{
+  let tickets: Array<{
     id: string
     ticketNumber: string
     type: string
@@ -34,6 +38,46 @@ export default async function TicketListPage({
     slaBreached: boolean
     createdAt: string
   }> = []
+
+  if (orgId) {
+    const whereParts = [eq(itsmTickets.orgId, orgId)]
+    if (params.status && TICKET_STATUSES.includes(params.status as (typeof TICKET_STATUSES)[number])) {
+      whereParts.push(eq(itsmTickets.status, params.status as (typeof TICKET_STATUSES)[number]))
+    }
+    if (params.type && TICKET_TYPES.includes(params.type as (typeof TICKET_TYPES)[number])) {
+      whereParts.push(eq(itsmTickets.type, params.type as (typeof TICKET_TYPES)[number]))
+    }
+    if (params.priority && PRIORITIES.includes(params.priority as (typeof PRIORITIES)[number])) {
+      whereParts.push(eq(itsmTickets.priority, params.priority as (typeof PRIORITIES)[number]))
+    }
+    if (params.q?.trim()) {
+      const q = `%${params.q.trim()}%`
+      whereParts.push(or(ilike(itsmTickets.title, q), ilike(itsmTickets.ticketNumber, q))!)
+    }
+
+    const rows = await platformDb
+      .select({
+        id: itsmTickets.id,
+        ticketNumber: itsmTickets.ticketNumber,
+        type: itsmTickets.type,
+        status: itsmTickets.status,
+        priority: itsmTickets.priority,
+        title: itsmTickets.title,
+        assignedToId: itsmTickets.assignedToId,
+        slaBreached: itsmTickets.slaBreached,
+        createdAt: itsmTickets.createdAt,
+      })
+      .from(itsmTickets)
+      .where(and(...whereParts))
+      .orderBy(desc(itsmTickets.createdAt))
+      .limit(250)
+      .catch(() => [])
+
+    tickets = rows.map((row) => ({
+      ...row,
+      createdAt: row.createdAt?.toISOString().slice(0, 10) ?? '—',
+    }))
+  }
 
   const PRIORITY_LABEL: Record<string, string> = {
     p1_critical: 'P1',

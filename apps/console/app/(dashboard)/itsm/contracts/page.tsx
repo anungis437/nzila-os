@@ -3,6 +3,10 @@
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import { platformDb } from '@nzila/db/platform'
+import { itsmContracts, itsmSlas } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,8 +26,9 @@ export default async function ClientContractsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch contracts from DB scoped by orgId
-  const contracts: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let contracts: Array<{
     id: string
     contractNumber: string
     clientName: string
@@ -34,6 +39,46 @@ export default async function ClientContractsPage() {
     serviceScope: string[]
     slaProfileName: string | null
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmContracts.id,
+        clientName: itsmContracts.clientName,
+        status: itsmContracts.status,
+        startDate: itsmContracts.startDate,
+        endDate: itsmContracts.endDate,
+        metadata: itsmContracts.metadata,
+        slaName: itsmSlas.name,
+      })
+      .from(itsmContracts)
+      .leftJoin(itsmSlas, eq(itsmContracts.slaId, itsmSlas.id))
+      .where(eq(itsmContracts.orgId, orgId))
+      .orderBy(desc(itsmContracts.createdAt))
+      .limit(200)
+      .catch(() => [])
+
+    contracts = rows.map((row) => {
+      const metadata = row.metadata && typeof row.metadata === 'object'
+        ? row.metadata as Record<string, unknown>
+        : {}
+      const serviceScope = Array.isArray(metadata.serviceScope)
+        ? metadata.serviceScope.filter((v): v is string => typeof v === 'string')
+        : []
+
+      return {
+        id: row.id,
+        contractNumber: `CTR-${row.id.slice(0, 8).toUpperCase()}`,
+        clientName: row.clientName,
+        status: row.status,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        value: typeof metadata.contractValue === 'string' ? metadata.contractValue : null,
+        serviceScope,
+        slaProfileName: row.slaName ?? null,
+      }
+    })
+  }
 
   const activeCount = contracts.filter((c) => c.status === 'active').length
   const expiringSoonCount = contracts.filter((c) => c.status === 'expiring_soon').length

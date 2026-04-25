@@ -1,0 +1,24 @@
+{
+  "id": "seed-atu-113",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "ATU Local 113",
+  "fullName": "Amalgamated Transit Union Local 113 — TTC Workers",
+  "unionScope": "local",
+  "parentId": null,
+  "sector": "transit",
+  "province": "CA-ON",
+  "memberCount": 12000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://atu113.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier B. Transit sector. Safety grievances + scheduling disputes. Strong warm path via city union connections.",
+  "createdAt": "2026-04-25T04:18:06.635Z",
+  "updatedAt": "2026-04-25T04:18:06.635Z"
+}

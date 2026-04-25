@@ -8,6 +8,10 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { platformDb } from '@nzila/db/platform'
+import { opsClients } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 import {
   ONBOARDING_STAGE_LABELS,
   CLIENT_HEALTH_LABELS,
@@ -75,8 +79,9 @@ export default async function ClientAccountsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: load from DB — `db.select().from(opsClients).where(eq(opsClients.orgId, orgId))`
-  const clients: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let clients: Array<{
     id: string
     companyName: string
     product: NzilaProduct
@@ -87,6 +92,38 @@ export default async function ClientAccountsPage() {
     renewalDate: string | null
     openTickets: number
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: opsClients.id,
+        companyName: opsClients.companyName,
+        product: opsClients.product,
+        onboardingStage: opsClients.onboardingStage,
+        health: opsClients.health,
+        accountOwnerId: opsClients.accountOwnerId,
+        goLiveDate: opsClients.goLiveDate,
+        renewalDate: opsClients.renewalDate,
+        openTickets: opsClients.openTickets,
+      })
+      .from(opsClients)
+      .where(eq(opsClients.orgId, orgId))
+      .orderBy(desc(opsClients.updatedAt))
+      .limit(500)
+      .catch(() => [])
+
+    clients = rows.map((row) => ({
+      id: row.id,
+      companyName: row.companyName,
+      product: (row.product || 'other') as NzilaProduct,
+      onboardingStage: row.onboardingStage as OnboardingStage,
+      health: row.health as ClientHealth,
+      accountOwnerName: row.accountOwnerId,
+      goLiveDate: row.goLiveDate,
+      renewalDate: row.renewalDate,
+      openTickets: row.openTickets ?? 0,
+    }))
+  }
 
   const byHealth = {
     healthy: clients.filter((c) => c.health === 'healthy').length,

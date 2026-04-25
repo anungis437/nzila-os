@@ -1,38 +1,26 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
 import { ExitIntentCta } from '@/components/marketing/exit-intent-cta'
 import { NewsletterSignup, TemplateDownloadCta, WaitlistSignup } from '@/components/marketing/lead-forms'
-import { StickyCtaHeader } from '@/components/marketing/sticky-cta-header'
 import { TrackedCtaLink } from '@/components/marketing/tracked-cta-link'
+import { MarketingSiteFooter } from '@/components/marketing/site-footer'
+import { MarketingSiteNavigation } from '@/components/marketing/site-navigation'
 import { WEEKONE_ANALYTICS_EVENTS } from '@/lib/analytics/track'
 
 export const metadata: Metadata = {
-  title: 'WeekOne | Weekly execution system for founders and operators',
+  title: 'WeekOne | Startup operating baseline for founders',
   description:
-    'Turn chaotic weeks into consistent execution with one weekly system for priorities, scorecards, and accountability.',
+    'The founder baseline for your first operating system: priorities, cash, clients, execution, and governance in one practical weekly rhythm.',
   openGraph: {
-    title: 'WeekOne | Weekly execution system',
+    title: 'WeekOne | Startup Operating Baseline',
     description:
-      'A world-class micro SaaS for founders and operators who want focus, momentum, and less drift.',
+      'A practical Light Corp Services framework for founders who just started and need structure fast.',
     type: 'website',
   },
 }
 
-const logos = ['Northline Studio', 'Horizon Labs', 'Operator Union', 'Daily Build Co', 'Early Stage Ops']
-
-const faq = [
-  {
-    q: 'Who is WeekOne for?',
-    a: 'Founders and operators who want one weekly execution system, not fragmented tools.',
-  },
-  {
-    q: 'Can I start free?',
-    a: 'Yes. Start with Free and upgrade when you need analytics, templates, and team controls.',
-  },
-  {
-    q: 'How long does setup take?',
-    a: 'Most teams set up their first weekly cycle in under 3 minutes.',
-  },
-]
+const logos = ['SaaS Operators', 'Service Firms', 'Product Studios', 'Marketplace Teams', 'Venture Builders', 'Scale Studios']
 
 export default async function LocalePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -46,195 +34,237 @@ export default async function LocalePage({ params }: { params: Promise<{ locale:
     operatingSystem: 'Web',
     description: 'Weekly execution system for founders and operators',
     offers: [
-      { '@type': 'Offer', price: '0', priceCurrency: 'USD', name: 'Free' },
-      { '@type': 'Offer', price: '29', priceCurrency: 'USD', name: 'Pro' },
-      { '@type': 'Offer', price: '79', priceCurrency: 'USD', name: 'Team' },
+      { '@type': 'Offer', price: '0', priceCurrency: 'CAD', name: 'Free' },
+      { '@type': 'Offer', price: '39', priceCurrency: 'CAD', name: 'Pro' },
+      { '@type': 'Offer', price: '99', priceCurrency: 'CAD', name: 'Team' },
     ],
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white text-slate-900">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
-      <StickyCtaHeader locale={locale} waitlistMode={waitlistMode} />
+      <MarketingSiteNavigation locale={locale} />
 
-      <section className="mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-14">
-        <p className="text-xs font-semibold uppercase tracking-wider text-electric">Weekly execution system for founders and operators</p>
-        <h1 className="mt-3 text-4xl font-bold leading-tight text-navy sm:text-6xl">
-          End weekly chaos. Run your company with calm execution.
-        </h1>
-        <p className="mt-4 max-w-3xl text-base text-muted-foreground sm:text-lg">
-          WeekOne gives founders and operators one trusted weekly system for priorities, scorecards, accountability, and momentum.
-        </p>
+      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 text-white">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-blue-500/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-amber-300/20 blur-3xl" />
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <TrackedCtaLink
-            href={waitlistMode ? `/${locale}/#waitlist` : `/${locale}/onboarding`}
-            eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
-            context={{ source: 'hero_primary' }}
-            className="inline-flex items-center justify-center rounded-xl bg-electric px-6 py-3 text-sm font-bold text-white sm:text-base"
-          >
-            {waitlistMode ? 'Join waitlist' : 'Start free'}
-          </TrackedCtaLink>
-          <TrackedCtaLink
-            href={`/${locale}/pricing`}
-            eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
-            context={{ source: 'hero_secondary' }}
-            className="inline-flex items-center justify-center rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground sm:text-base"
-          >
-            View pricing
-          </TrackedCtaLink>
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+          <div className="grid gap-10 md:grid-cols-2 md:items-center">
+            <div>
+              <p className="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-blue-100">
+                Light Corp Services for founder-led teams
+              </p>
+              <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-6xl">
+                Just started your startup? <span className="text-amber-200">Here is what to run first.</span>
+              </h1>
+              <p className="mt-5 max-w-xl text-base text-blue-100 sm:text-lg">
+                WeekOne gives you a startup operating baseline so you can run like a company before you can afford one: clear priorities, cash discipline, client pipeline, execution cadence, and lightweight governance.
+              </p>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <TrackedCtaLink
+                  href={waitlistMode ? `/${locale}/#waitlist` : `/${locale}/onboarding`}
+                  eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
+                  context={{ source: 'hero_primary' }}
+                  className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-200 sm:text-base"
+                >
+                  {waitlistMode ? 'Join waitlist' : 'Start free'}
+                </TrackedCtaLink>
+                <TrackedCtaLink
+                  href={`/${locale}/pricing`}
+                  eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
+                  context={{ source: 'hero_secondary' }}
+                  className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:text-base"
+                >
+                  View pricing
+                </TrackedCtaLink>
+              </div>
+
+              <div className="mt-8 grid max-w-lg grid-cols-3 gap-3 text-center">
+                {[
+                  { value: '5 lanes', label: 'Baseline system' },
+                  { value: '30 days', label: 'Founder ramp' },
+                  { value: 'Every week', label: 'Execution rhythm' },
+                ].map((metric) => (
+                  <div key={metric.label} className="rounded-xl border border-white/20 bg-white/10 px-3 py-3 backdrop-blur">
+                    <p className="text-sm font-bold text-white sm:text-base">{metric.value}</p>
+                    <p className="text-[11px] text-blue-100">{metric.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 p-3 shadow-2xl backdrop-blur">
+                <div className="overflow-hidden rounded-2xl border border-white/15 bg-slate-900">
+                  <Image
+                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=80"
+                    alt="Founder team planning weekly execution"
+                    width={1400}
+                    height={560}
+                    className="h-48 w-full object-cover sm:h-56"
+                    priority
+                  />
+                  <div className="grid gap-3 p-4">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-xs uppercase tracking-wider text-blue-100">This week</p>
+                      <p className="mt-1 text-sm font-semibold text-white">Baseline active: cash, clients, execution, and risk reviewed.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-[11px] text-blue-100">Runway</p>
+                        <p className="mt-1 text-lg font-bold text-white">14.2 months</p>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-[11px] text-blue-100">Pipeline confidence</p>
+                        <p className="mt-1 text-lg font-bold text-amber-200">Strong</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -bottom-5 -left-5 hidden rounded-xl border border-white/20 bg-white/90 p-3 text-slate-900 shadow-xl sm:block">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-600">Operator note</p>
+                <p className="mt-1 text-xs">Our first founder meeting now ends with decisions, not confusion.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="border-y border-border bg-gray-50 py-6">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 text-center sm:grid-cols-5 sm:px-6">
+      <section className="border-y border-slate-200 bg-gradient-to-r from-blue-50 via-white to-amber-100/40 py-7">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 text-center sm:grid-cols-3 sm:px-6 lg:grid-cols-6">
           {logos.map((logo) => (
-            <div key={logo} className="rounded-lg border border-border bg-white px-3 py-2 text-xs font-semibold text-muted-foreground">
+            <div key={logo} className="rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-600 backdrop-blur">
               {logo}
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2 className="text-2xl font-bold text-navy sm:text-3xl">Pain points founders tell us every week</h2>
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Startup baseline framework</p>
+          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">The Light Corp Services stack for your first 30 days</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 sm:text-base">
+            Most early teams are not missing ideas. They are missing operating scaffolding. WeekOne gives SMB founders a practical framework to run core company services without heavy overhead.
+          </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {[
+              {
+                title: '1. Direction',
+                body: 'Lock the top three outcomes for the week and define what done means.',
+              },
+              {
+                title: '2. Cash',
+                body: 'Track runway, upcoming obligations, and confidence before spending decisions.',
+              },
+              {
+                title: '3. Clients',
+                body: 'Keep pipeline, pilots, and renewals visible so growth is not guesswork.',
+              },
+              {
+                title: '4. Delivery',
+                body: 'Assign owners, run checkpoints, and close the week with shipped evidence.',
+              },
+              {
+                title: '5. Governance',
+                body: 'Capture decisions, risks, and commitments so stakeholder trust compounds.',
+              },
+            ].map((lane) => (
+              <article key={lane.title} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 className="text-sm font-semibold text-slate-900">{lane.title}</h3>
+                <p className="mt-2 text-xs leading-6 text-slate-600">{lane.body}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-blue-200 bg-white p-5">
+            <p className="text-sm font-semibold text-slate-900">First 30 days in WeekOne</p>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              {[
+                {
+                  title: 'Days 1-7: Baseline setup',
+                  body: 'Define outcomes, map cash commitments, and align your first operating rhythm.',
+                },
+                {
+                  title: 'Days 8-21: Weekly discipline',
+                  body: 'Run two full weekly loops with checkpoint and closeout evidence.',
+                },
+                {
+                  title: 'Days 22-30: Stakeholder story',
+                  body: 'Package runway, pipeline, risks, and shipped outcomes into one credible narrative.',
+                },
+              ].map((phase) => (
+                <article key={phase.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="text-sm font-semibold text-slate-900">{phase.title}</h3>
+                  <p className="mt-2 text-xs leading-6 text-slate-600">{phase.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-10 text-center">
+          <p className="mt-12 text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Operational guidance by page</p>
+          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-5xl">Use the right page for the right founder question</h2>
+        </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {[
-            'Chaos: too many tools, no weekly source of truth.',
-            'Lack of focus: urgent tasks replace strategic moves.',
-            'Inconsistent execution: momentum resets every Monday.',
-          ].map((pain) => (
-            <article key={pain} className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-sm text-muted-foreground">{pain}</p>
+            {
+              title: 'Platform',
+              body: 'Deep dive into planning, scorecards, runway, and accountability architecture.',
+              href: `/${locale}/platform`,
+            },
+            {
+              title: 'How it works',
+              body: 'See the weekly operating loop and how teams sustain it without process fatigue.',
+              href: `/${locale}/how-it-works`,
+            },
+            {
+              title: 'Outcomes',
+              body: 'Review execution results and stakeholder-facing proof points from operating teams.',
+              href: `/${locale}/outcomes`,
+            },
+            {
+              title: 'Pricing',
+              body: 'Choose the plan that fits your stage and rollout scope.',
+              href: `/${locale}/pricing`,
+            },
+            {
+              title: 'FAQ',
+              body: 'Get implementation, reporting, and deployment answers in one place.',
+              href: `/${locale}/faq`,
+            },
+            {
+              title: 'Resources',
+              body: 'Access guides, changelog updates, and trust/security information.',
+              href: `/${locale}/resources`,
+            },
+          ].map((item) => (
+            <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
+              <p className="mt-2 text-sm text-slate-600">{item.body}</p>
+              <Link href={item.href} className="mt-4 inline-flex text-sm font-semibold text-blue-600 hover:text-blue-700">
+                Visit page
+              </Link>
             </article>
           ))}
         </div>
 
-        <div className="mt-8 rounded-2xl border border-electric/20 bg-electric/5 p-5">
-          <p className="text-sm font-semibold text-navy">Simple systems beat chaos.</p>
-          <p className="mt-1 text-sm text-muted-foreground">WeekOne is opinionated on weekly execution so your team ships consistently.</p>
+        <div className="mt-8 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-amber-50 p-5">
+          <p className="text-sm font-semibold text-slate-900">Built for operators, founders, and small-team leadership.</p>
+          <p className="mt-1 text-sm text-slate-600">WeekOne acts as your light corporate services layer: it guides what to run, when to review, and how to explain progress with confidence.</p>
           <TrackedCtaLink
             href={waitlistMode ? `/${locale}/#waitlist` : `/${locale}/onboarding`}
             eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
-            context={{ source: 'inline_pain_to_signup' }}
-            className="mt-3 inline-flex rounded-lg bg-electric px-4 py-2 text-sm font-bold text-white"
+            context={{ source: 'home_multiplace_signup' }}
+            className="mt-3 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700"
           >
-            Start your first week
+            Start my baseline
           </TrackedCtaLink>
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-gray-50 py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">How it works</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[
-              { step: '1', title: 'Plan the week', text: 'Set your top outcomes and focus lanes.' },
-              { step: '2', title: 'Run scorecards', text: 'Track runway, pipeline, and risks in one view.' },
-              { step: '3', title: 'Close with accountability', text: 'Ship, review, reset, repeat.' },
-            ].map((item) => (
-              <article key={item.step} className="rounded-2xl border border-border bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-electric">Step {item.step}</p>
-                <h3 className="mt-1 text-lg font-semibold text-navy">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2 className="text-2xl font-bold text-navy sm:text-3xl">Product snapshots</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          {['Weekly dashboard', 'Monday reset template', 'Founder scorecard panel'].map((shot) => (
-            <div key={shot} className="aspect-video rounded-2xl border border-dashed border-border bg-gray-50 p-4">
-              <p className="text-sm font-semibold text-navy">{shot}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Screenshot placeholder</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-gray-50 py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">Outcomes teams report</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[
-              'More focus on high-impact work',
-              'More shipped outcomes each week',
-              'Less operational drift and rework',
-            ].map((item) => (
-              <div key={item} className="rounded-2xl border border-border bg-white p-5">
-                <p className="text-sm font-semibold text-navy">{item}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                quote: 'WeekOne gave us one weekly language for execution.',
-                by: 'Founder, services startup',
-              },
-              {
-                quote: 'Our Monday planning time dropped while weekly output improved.',
-                by: 'Operator, agency team',
-              },
-              {
-                quote: 'The dashboard made risks obvious before they became fires.',
-                by: 'COO, early-stage SaaS',
-              },
-            ].map((item) => (
-              <blockquote key={item.quote} className="rounded-2xl border border-border bg-card p-5">
-                <p className="text-sm text-foreground">&quot;{item.quote}&quot;</p>
-                <footer className="mt-2 text-xs text-muted-foreground">{item.by}</footer>
-              </blockquote>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2 className="text-2xl font-bold text-navy sm:text-3xl">Pricing preview</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</p>
-            <p className="mt-2 text-3xl font-bold text-navy">$0</p>
-            <p className="mt-2 text-sm text-muted-foreground">Weekly planner and basic dashboard.</p>
-          </div>
-          <div className="rounded-2xl border border-electric bg-electric/5 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-electric">Pro</p>
-            <p className="mt-2 text-3xl font-bold text-navy">$29</p>
-            <p className="mt-2 text-sm text-muted-foreground">Streaks, analytics, integrations, templates.</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Team</p>
-            <p className="mt-2 text-3xl font-bold text-navy">$79</p>
-            <p className="mt-2 text-sm text-muted-foreground">Collaborators, shared boards, admin controls.</p>
-          </div>
-        </div>
-
-        <TrackedCtaLink
-          href={`/${locale}/pricing`}
-          eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
-          context={{ source: 'pricing_preview' }}
-          className="mt-5 inline-flex rounded-lg bg-electric px-4 py-2 text-sm font-bold text-white"
-        >
-          Compare plans
-        </TrackedCtaLink>
-      </section>
-
-      <section className="border-y border-border bg-gray-50 py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">FAQ</h2>
-          <div className="mt-5 space-y-3">
-            {faq.map((item) => (
-              <article key={item.q} className="rounded-xl border border-border bg-white p-4">
-                <h3 className="text-sm font-semibold text-navy">{item.q}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{item.a}</p>
-              </article>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -246,59 +276,53 @@ export default async function LocalePage({ params }: { params: Promise<{ locale:
 
         {waitlistMode && <div className="mt-4"><WaitlistSignup /></div>}
 
-        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm font-semibold text-navy">Referral: invite a founder, get 1 month Pro.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Share WeekOne with another founder and unlock one month of Pro when they activate.</p>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm font-semibold text-slate-900">Referral: invite a founder, get 1 month Pro.</p>
+          <p className="mt-1 text-sm text-slate-600">Share WeekOne with another founder and unlock one month of Pro when they activate.</p>
           <TrackedCtaLink
             href={`/${locale}/dashboard`}
             eventName={WEEKONE_ANALYTICS_EVENTS.REFERRAL_SHARE}
             context={{ source: 'landing_referral' }}
-            className="mt-3 inline-flex rounded-lg border border-border px-4 py-2 text-sm font-semibold"
+            className="mt-3 inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             Open referral center
           </TrackedCtaLink>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-border bg-gray-50 p-5">
-          <p className="text-sm font-semibold text-navy">Live chat</p>
-          <p className="mt-1 text-xs text-muted-foreground">Live chat widget placeholder. Connect your provider here for launch support.</p>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <p className="text-sm font-semibold text-slate-900">Founder support</p>
+          <p className="mt-1 text-xs text-slate-600">Launch support includes baseline setup coaching and weekly rhythm guidance for early SMB teams.</p>
         </div>
       </section>
 
-      <section className="border-t border-border bg-navy py-12 text-white sm:py-16">
+      <section className="border-t border-slate-200 bg-slate-900 py-14 text-white sm:py-18">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <h2 className="text-3xl font-bold sm:text-4xl">Ready for your calmest Monday yet?</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-blue-100 sm:text-base">
-            Start your first WeekOne cycle today and run your company with focus, accountability, and momentum.
+          <h2 className="text-3xl font-bold sm:text-4xl">Ready for your calmest operating week yet?</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-200 sm:text-base">
+            Launch WeekOne and turn startup uncertainty into an operating system your team and stakeholders can trust.
           </p>
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
             <TrackedCtaLink
               href={waitlistMode ? `/${locale}/#waitlist` : `/${locale}/onboarding`}
               eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
               context={{ source: 'final_cta_primary' }}
-              className="inline-flex items-center justify-center rounded-xl bg-electric px-6 py-3 text-sm font-bold text-white"
+              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
             >
               {waitlistMode ? 'Join waitlist' : 'Start free'}
             </TrackedCtaLink>
             <TrackedCtaLink
-              href={`/${locale}/pricing`}
+              href={`/${locale}/resources`}
               eventName={WEEKONE_ANALYTICS_EVENTS.LANDING_CTA_CLICK}
               context={{ source: 'final_cta_secondary' }}
               className="inline-flex items-center justify-center rounded-xl border border-white/20 px-6 py-3 text-sm font-semibold text-white"
             >
-              See pricing
+              Explore resources
             </TrackedCtaLink>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-blue-200">
-            <a href={`/${locale}/about`} className="hover:text-white">About</a>
-            <a href={`/${locale}/changelog`} className="hover:text-white">Changelog</a>
-            <a href={`/${locale}/privacy`} className="hover:text-white">Privacy</a>
-            <a href={`/${locale}/terms`} className="hover:text-white">Terms</a>
-            <a href={`/${locale}/blog`} className="hover:text-white">Blog</a>
           </div>
         </div>
       </section>
+
+      <MarketingSiteFooter locale={locale} />
 
       <ExitIntentCta locale={locale} />
     </main>

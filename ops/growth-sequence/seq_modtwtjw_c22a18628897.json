@@ -1,0 +1,47 @@
+{
+  "id": "seq_modtwtjw_c22a18628897",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Procurement Track",
+  "kind": "procurement",
+  "description": "For deals that enter a formal IT procurement or vendor assessment process. Proactively supplies all required documentation to reduce cycle time.",
+  "targetTiers": [
+    "A"
+  ],
+  "triggerStage": "pilot_proposed",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 0,
+      "channel": "email",
+      "templateId": "procurement-intake-email",
+      "personalisationFields": [
+        "contactFirstName",
+        "procurementContactName",
+        "itContactName"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": null,
+      "goal": "Send full vendor documentation package: security brief, SLA, pricing, SOC note."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 120,
+      "channel": "email",
+      "templateId": "procurement-follow-email",
+      "personalisationFields": [
+        "contactFirstName",
+        "outstandingDocuments"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": null,
+      "goal": "Check on missing docs. Offer a procurement call to answer IT questions directly."
+    }
+  ],
+  "benchmarkReplyRate": null,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

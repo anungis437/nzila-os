@@ -25,6 +25,8 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const activeLocale = pathSegments[0] ?? "en-CA";
 
   return (
     <aside className="flex h-full w-56 flex-col border-r border-border bg-sidebar">
@@ -35,12 +37,13 @@ export function Sidebar() {
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map(({ href, label, icon: Icon }) => {
+          const localizedHref = `/${activeLocale}${href}`;
           const isActive =
-            pathname === href || pathname.startsWith(`${href}/`);
+            pathname === localizedHref || pathname.startsWith(`${localizedHref}/`);
           return (
             <Link
               key={href}
-              href={href}
+              href={localizedHref}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive

@@ -1,0 +1,24 @@
+{
+  "id": "seed-cupe-local-3902",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CUPE Local 3902",
+  "fullName": "CUPE Local 3902 — University of Toronto Contract Academic Staff",
+  "unionScope": "local",
+  "parentId": "seed-cupe-national",
+  "sector": "education",
+  "province": "CA-ON",
+  "memberCount": 8000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://www.cupe3902.org",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier B. Post-secondary education. High grievance rate during contract disputes.",
+  "createdAt": "2026-04-25T04:18:06.629Z",
+  "updatedAt": "2026-04-25T04:18:06.629Z"
+}

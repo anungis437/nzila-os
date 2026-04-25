@@ -1,0 +1,24 @@
+{
+  "id": "seed-clc",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CLC",
+  "fullName": "Canadian Labour Congress",
+  "unionScope": "national",
+  "parentId": null,
+  "sector": "federal",
+  "province": null,
+  "memberCount": 3000000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://canadianlabour.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "National federation; not a direct target but warm paths through affiliates.",
+  "createdAt": "2026-04-25T04:18:06.622Z",
+  "updatedAt": "2026-04-25T04:18:06.622Z"
+}

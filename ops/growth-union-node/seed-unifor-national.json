@@ -1,0 +1,24 @@
+{
+  "id": "seed-unifor-national",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "Unifor",
+  "fullName": "Unifor — Canada's largest private sector union",
+  "unionScope": "national",
+  "parentId": "seed-clc",
+  "sector": "trades",
+  "province": null,
+  "memberCount": 315000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://www.unifor.org",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier B at national level; individual locals could be Tier A. Approach via local referral.",
+  "createdAt": "2026-04-25T04:18:06.636Z",
+  "updatedAt": "2026-04-25T04:18:06.636Z"
+}

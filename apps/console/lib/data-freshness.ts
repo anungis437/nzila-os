@@ -3,6 +3,7 @@ import 'server-only'
 import fs from 'node:fs'
 import path from 'node:path'
 import { platformDb } from '@nzila/db/platform'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   auditEvents,
   commerceQuotes,
@@ -15,6 +16,8 @@ import {
   treasurySnapshots,
 } from '@nzila/db/schema'
 import { and, desc, eq } from 'drizzle-orm'
+
+const logger = createLogger('console.data-freshness')
 
 export interface FreshnessModule {
   module: string
@@ -80,7 +83,77 @@ function readGaTimestamp(): Date | null {
   }
 }
 
+function isMissingColumnError(error: unknown, columnName: string): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42703') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes(`column \"${columnName}\" does not exist`)
+}
+
+function isMissingRelationError(error: unknown, relationName: string): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42P01') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes(`relation \"${relationName}\" does not exist`)
+}
+
 export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
+  const stripeFreshnessPromise = platformDb
+    .select({ last: stripeConnections.lastEventAt, connectedAt: stripeConnections.connectedAt })
+    .from(stripeConnections)
+    .orderBy(desc(stripeConnections.updatedAt))
+    .limit(1)
+    .catch(async (error) => {
+      if (isMissingColumnError(error, 'last_event_at')) {
+        // Legacy schema compatibility: use connected_at when last_event_at is absent.
+        const fallback = await platformDb
+          .select({ connectedAt: stripeConnections.connectedAt })
+          .from(stripeConnections)
+          .orderBy(desc(stripeConnections.updatedAt))
+          .limit(1)
+        return fallback.map((row) => ({ last: null, connectedAt: row.connectedAt }))
+      }
+      throw error
+    })
+
+  const m365ValidationPromise = platformDb
+    .select({ last: platformIntegrationConnections.lastValidatedAt })
+    .from(platformIntegrationConnections)
+    .where(
+      and(
+        eq(platformIntegrationConnections.provider, 'm365'),
+        eq(platformIntegrationConnections.status, 'connected'),
+      ),
+    )
+    .orderBy(desc(platformIntegrationConnections.lastValidatedAt))
+    .limit(1)
+    .catch((error) => {
+      if (isMissingRelationError(error, 'platform_integration_connections')) {
+        logger.warn('platform_integration_connections missing; using unknown state for M365 validation')
+        return []
+      }
+      throw error
+    })
+
+  const googleValidationPromise = platformDb
+    .select({ last: platformIntegrationConnections.lastValidatedAt })
+    .from(platformIntegrationConnections)
+    .where(
+      and(
+        eq(platformIntegrationConnections.provider, 'google-workspace'),
+        eq(platformIntegrationConnections.status, 'connected'),
+      ),
+    )
+    .orderBy(desc(platformIntegrationConnections.lastValidatedAt))
+    .limit(1)
+    .catch((error) => {
+      if (isMissingRelationError(error, 'platform_integration_connections')) {
+        logger.warn('platform_integration_connections missing; using unknown state for Google validation')
+        return []
+      }
+      throw error
+    })
+
   const [
     latestCost,
     latestTreasury,
@@ -109,33 +182,9 @@ export async function getDataFreshnessSummary(): Promise<DataFreshnessSummary> {
       .from(qboSyncRuns)
       .orderBy(desc(qboSyncRuns.completedAt))
       .limit(1),
-    platformDb
-      .select({ last: stripeConnections.lastEventAt, connectedAt: stripeConnections.connectedAt })
-      .from(stripeConnections)
-      .orderBy(desc(stripeConnections.updatedAt))
-      .limit(1),
-    platformDb
-      .select({ last: platformIntegrationConnections.lastValidatedAt })
-      .from(platformIntegrationConnections)
-      .where(
-        and(
-          eq(platformIntegrationConnections.provider, 'm365'),
-          eq(platformIntegrationConnections.status, 'connected'),
-        ),
-      )
-      .orderBy(desc(platformIntegrationConnections.lastValidatedAt))
-      .limit(1),
-    platformDb
-      .select({ last: platformIntegrationConnections.lastValidatedAt })
-      .from(platformIntegrationConnections)
-      .where(
-        and(
-          eq(platformIntegrationConnections.provider, 'google-workspace'),
-          eq(platformIntegrationConnections.status, 'connected'),
-        ),
-      )
-      .orderBy(desc(platformIntegrationConnections.lastValidatedAt))
-      .limit(1),
+    stripeFreshnessPromise,
+    m365ValidationPromise,
+    googleValidationPromise,
   ])
 
   const gaDate = readGaTimestamp()

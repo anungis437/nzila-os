@@ -25,6 +25,7 @@ import {
 import { getCapitalPriorityRows } from '@/lib/executive-intelligence'
 import { PRODUCT_SCORE_LABELS } from '@nzila/itsm-core'
 import type { PortfolioProduct, ProductScoreCategory } from '@nzila/itsm-core'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -183,7 +184,7 @@ export default async function PortfolioPage() {
   ]
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <CommandPageShell as="div" className="space-y-8">
 
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -419,6 +420,6 @@ export default async function PortfolioPage() {
           Revenue pipeline →
         </Link>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

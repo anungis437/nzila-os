@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const SIZES = [
   { value: "1", label: "Solo founder", sub: "Just me" },
@@ -20,7 +21,13 @@ export function Step3({ value, onChange, onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold">How big is your team?</h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold">How big is your team?</h2>
+          <HelpTooltip
+            label="Why we ask team size"
+            content="Team size helps us shape a realistic weekly workflow and accountability load."
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Including co-founders and contractors.
         </p>

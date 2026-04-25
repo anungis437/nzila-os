@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/locales';
 
 export const metadata: Metadata = {
   title: 'About Us — Nzila Ventures',
-  description: 'Technology with soul. We build generational AI-powered ventures across care, learning, and decision-making — rooted in Congolese heritage and Pan-African values.',
+  description: 'Technology with soul. We build generational AI-powered ventures across care, learning, and decision-making — Canada-based, globally built, and shaped by Congolese heritage.',
   openGraph: {
     title: 'About Nzila Ventures',
     description: 'A venture studio building ethical, human-centered technology for generational impact across healthcare, education, and justice.',
@@ -52,10 +52,9 @@ const values = [
 ];
 
 const timeline = [
-  { year: '2019–2024', title: 'Building Toward a Question', description: 'From early ventures to decision libraries, we built the pieces. But we saw fragmentation. Single products couldn\'t hold the whole story — care needs memory, learning needs consent, decisions need wisdom.' },
-  { year: 'January 2025', title: 'Nzila is Born', description: 'From the Kikongo concept of Nzila — "path" — we consolidate into a studio model. Eight ventures unified. One ethical core. A new name. A chosen way forward.' },
-  { year: '2025–2026', title: 'Walking the Path', description: 'Memora, NeuroBridge, MyLearning Companion, OptivaCare, and more. Each venture speaks with the others. Each voice carries memory, consent, and care for users across all ages.' },
-  { year: '2025+', title: 'Generational Impact', description: 'From Congo to Cloud — our dream: an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Not just an app. A new operating system for dignity.' },
+  { year: '2025', title: 'Nzila is Born', description: 'From the Kikongo concept of Nzila — "path" — we consolidate into a studio model. Eight ventures unified. One ethical core. A new name. A chosen way forward.' },
+  { year: '2025–2026', title: 'Walking the Path', description: 'UnionEyes, Zonga, Flow, FAIRCASE, and more. Each platform speaks with the others. Each voice carries memory, consent, and governance for builders and communities across all sectors.' },
+  { year: '2025+', title: 'Generational Impact', description: 'From Canada to Global Impact — our dream: an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Not just an app. A new operating system for dignity.' },
 ];
 
 const valuesFr: Record<string, { title: string; description: string }> = {
@@ -82,21 +81,17 @@ const valuesFr: Record<string, { title: string; description: string }> = {
 };
 
 const timelineFr: Record<string, { title: string; description: string }> = {
-  'Building Toward a Question': {
-    title: 'Construire vers une question',
-    description: 'Des premiers projets aux bibliothèques de décisions, nous avons construit les pièces. Mais nous avons vu la fragmentation. Les produits seuls ne pouvaient pas tenir toute l\'histoire — les soins ont besoin de mémoire, l\'apprentissage a besoin de consentement, les décisions ont besoin de sagesse.',
-  },
   'Nzila is Born': {
     title: 'Nzila naît',
     description: 'Du concept kikongo de Nzila — « chemin » — nous consolidons en un modèle de studio. Huit projets unifiés. Un noyau éthique. Un nouveau nom. Une manière choisie d\'avancer.',
   },
   'Walking the Path': {
     title: 'Marcher le chemin',
-    description: 'Memora, NeuroBridge, MyLearning Companion, OptivaCare, et plus. Chaque projet parle avec les autres. Chaque voix porte la mémoire, le consentement et le soin pour les utilisateurs de tous âges.',
+    description: 'UnionEyes, Zonga, Flow, FAIRCASE, et plus. Chaque plateforme parle avec les autres. Chaque voix porte la mémoire, le consentement et la gouvernance pour les constructeurs et les communautés de tous les secteurs.',
   },
   'Generational Impact': {
     title: 'Impact générationnel',
-    description: 'Du Congo au cloud — notre rêve : un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Pas seulement une application. Un nouveau système d\'exploitation pour la dignité.',
+    description: 'Du Canada à l\'impact mondial — notre rêve : un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Pas seulement une application. Un nouveau système d\'exploitation pour la dignité.',
   },
 };
 
@@ -176,8 +171,8 @@ export default async function About() {
                   </h2>
                   <p className="text-lg text-gray-600 leading-relaxed">
                     {isFr
-                      ? 'Du Congo au cloud — un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Weaving a new operating system for dignity — in health, learning, and human systems — with memory, care, and the soul of Nzila.'
-                      : 'From Congo to Cloud — an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Weaving a new operating system for dignity in health, learning, and human systems, with memory, care, and the soul of Nzila.'}
+                      ? 'Du Canada à l\'impact mondial — un écosystème où la technologie se souvient de qui nous sommes et nous aide à devenir ce que nous sommes destinés à être. Inspiré par l\'héritage congolais, nous tissons un nouveau système d\'exploitation pour la dignité — dans le travail, l\'apprentissage et les systèmes du quotidien — avec mémoire, soin et l\'âme de Nzila.'
+                      : 'From Canada to Global Impact — an ecosystem where technology remembers who we are and helps us become who we\'re meant to be. Inspired by Congolese heritage, we are weaving a new operating system for dignity in work, learning, and everyday systems, with memory, care, and the soul of Nzila.'}
                   </p>
                 </div>
               </div>
@@ -215,8 +210,8 @@ export default async function About() {
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge={isFr ? 'Chemin' : 'Journey'}
-            title={isFr ? 'Du Congo au cloud' : 'From Congo to Cloud'}
-            subtitle={isFr ? 'Comment Nzila a marché le sentier depuis une question jusqu\'à un studio d\'impact intégré' : 'How Nzila has walked the path from a question to an integrated studio of impact'}
+            title={isFr ? 'Du Canada à l\'impact mondial' : 'From Canada to Global Impact'}
+            subtitle={isFr ? 'Comment Nzila a marché le sentier depuis une question jusqu\'à un studio d\'impact intégré, enraciné au Canada et ouvert au monde' : 'How Nzila has walked the path from a question to an integrated studio of impact, rooted in Canada and built for the world'}
             light
           />
 
@@ -275,8 +270,8 @@ export default async function About() {
             </h2>
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               {isFr
-                ? 'C\'est un système. Nous tissons un nouveau système d\'exploitation pour la dignité — dans la santé, l\'apprentissage et les systèmes humains. Avec mémoire. Avec soin. Comme Nzila.'
-                : 'It\'s a system. We are weaving a new operating system for dignity — in health, learning, and human systems. With memory. With care. As Nzila.'}
+                ? 'C\'est un système. Nous tissons un nouveau système d\'exploitation pour la dignité — dans le commerce, le travail et l\'apprentissage. Avec mémoire. Avec soin. Comme Nzila.'
+                : 'It\'s a system. We are weaving a new operating system for dignity — in commerce, work, and learning. With memory. With care. As Nzila.'}
             </p>
             <div className="inline-flex items-center gap-3 bg-emerald/5 border border-emerald/20 rounded-xl px-6 py-4 mb-10">
               <span className="text-2xl">🛤️</span>

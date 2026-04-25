@@ -8,6 +8,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { NZILA_PRODUCTS, ONBOARDING_STAGES, ONBOARDING_STAGE_LABELS } from '@nzila/itsm-core'
 
 const PRODUCT_LABELS: Record<string, string> = {
@@ -21,8 +22,10 @@ const PRODUCT_LABELS: Record<string, string> = {
 }
 
 export default function OnboardClientPage() {
+  const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     companyName: '',
     contactName: '',
@@ -41,10 +44,23 @@ export default function OnboardClientPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    // TODO: POST to /api/itsm/clients or orchestrator-api
-    await new Promise((r) => setTimeout(r, 600))
+    setError(null)
+
+    const response = await fetch('/api/itsm/clients', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(form),
+    }).catch(() => null)
+
     setSaving(false)
+
+    if (!response || !response.ok) {
+      setError('Unable to create client account right now. Please try again.')
+      return
+    }
+
     setSaved(true)
+    router.refresh()
   }
 
   return (
@@ -71,6 +87,12 @@ export default function OnboardClientPage() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="rounded-xl border border-gray-200 bg-white p-6 space-y-5">
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* Company */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

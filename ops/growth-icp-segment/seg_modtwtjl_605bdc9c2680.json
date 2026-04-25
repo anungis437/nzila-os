@@ -1,0 +1,30 @@
+{
+  "id": "seg_modtwtjl_605bdc9c2680",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Small Local — Tier C",
+  "description": "Smaller locals (<500 members, any sector) without dedicated staff rep infrastructure. Long sales cycle; lower pilot value. Include only with strong warm path.",
+  "sectors": [
+    "municipal",
+    "healthcare",
+    "education",
+    "federal",
+    "provincial",
+    "transit",
+    "utilities",
+    "trades",
+    "hospitality",
+    "legal_professional",
+    "other"
+  ],
+  "minMembers": 0,
+  "maxMembers": 499,
+  "minGovernanceComplexity": 0,
+  "tier": "C",
+  "tierRationale": "Smaller locals often lack budget authority and IT infrastructure for onboarding. Only pursue with a strong warm introduction or conference relationship.",
+  "createdAt": "2026-04-25T04:18:06.609Z",
+  "updatedAt": "2026-04-25T04:18:06.609Z"
+}

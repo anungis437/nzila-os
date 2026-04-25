@@ -79,7 +79,12 @@ async function getDashboardData() {
   }
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const { snapshot, openDeals, pipelineValue, weeklyScores, subscription } = await getDashboardData();
 
   const planLabel =
@@ -153,9 +158,38 @@ export default async function DashboardPage() {
             Good morning, Founder.
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Here&apos;s what matters this week.
+            Here is your startup baseline for this week.
           </p>
         </div>
+
+        <section className="rounded-xl border border-border bg-card p-4">
+          <SectionHeader
+            title="Founder Workflow"
+            subtitle="Run this order every week"
+            helpContent="This is the minimum operating sequence for early teams: cash first, then growth, execution focus, risk checks, and weekly closeout."
+            className="mb-3"
+          />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+            {[
+              { step: "1", label: "Cash", href: `/${locale}/money` },
+              { step: "2", label: "Growth", href: `/${locale}/growth` },
+              { step: "3", label: "Focus", href: `/${locale}/focus` },
+              { step: "4", label: "Risks", href: `/${locale}/risks` },
+              { step: "5", label: "Weekly Close", href: `/${locale}/weekly` },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:border-electric/40 hover:bg-muted/40"
+              >
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-electric/10 text-xs font-semibold text-electric">
+                  {item.step}
+                </span>
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         {/* Top Metrics */}
         <section>
@@ -206,7 +240,8 @@ export default async function DashboardPage() {
           <section>
             <SectionHeader
               title="This Week's Priorities"
-              subtitle="Ranked by impact"
+              subtitle="Ranked by founder impact"
+              helpContent="Priorities are sorted to protect runway, revenue momentum, and delivery speed in that order."
               className="mb-4"
             />
             {priorities.length === 0 ? (
@@ -244,9 +279,10 @@ export default async function DashboardPage() {
             <section>
               <SectionHeader
                 title="Risk Radar"
+                helpContent="Review this before committing spend or timelines. High risk here means adjust your week plan now."
                 action={
                   <Link
-                    href="/risks"
+                    href={`/${locale}/risks`}
                     className="flex items-center gap-1 text-xs text-electric hover:underline"
                   >
                     View all <ChevronRight className="h-3 w-3" />
@@ -282,9 +318,10 @@ export default async function DashboardPage() {
             <section>
               <SectionHeader
                 title="Pipeline"
+                helpContent="Pipeline is your next 30-90 day cash confidence signal, not just a sales metric."
                 action={
                   <Link
-                    href="/growth"
+                    href={`/${locale}/growth`}
                     className="flex items-center gap-1 text-xs text-electric hover:underline"
                   >
                     View all <ChevronRight className="h-3 w-3" />
@@ -309,7 +346,7 @@ export default async function DashboardPage() {
             {/* Weekly Brief Teaser */}
             <section>
               <Link
-                href="weekly"
+                href={`/${locale}/weekly`}
                 className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-electric/40 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center gap-3">
@@ -317,7 +354,7 @@ export default async function DashboardPage() {
                   <div>
                     <p className="text-sm font-medium">Weekly Brief</p>
                     <p className="text-xs text-muted-foreground">
-                      View your latest founder memo
+                      Close the loop with your latest founder baseline memo
                     </p>
                   </div>
                 </div>
@@ -327,7 +364,7 @@ export default async function DashboardPage() {
 
             <section>
               <Link
-                href="settings"
+                href={`/${locale}/settings`}
                 className="flex items-center justify-between rounded-lg border border-electric/20 bg-electric/5 p-4 hover:border-electric/40 hover:shadow-sm transition-all"
               >
                 <div>

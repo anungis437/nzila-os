@@ -8,6 +8,10 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { platformDb } from '@nzila/db/platform'
+import { itsmTickets } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,7 +41,8 @@ export default async function QueueBoardPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch real tickets from DB scoped by orgId
+  const orgId = await getExecutiveOrgId()
+
   const ticketsByStatus: Record<string, Array<{ id: string; ticketNumber: string; title: string; priority: string; assignedToId: string | null; updatedAt: string }>> = {
     new: [],
     triage: [],
@@ -46,6 +51,36 @@ export default async function QueueBoardPage() {
     waiting_user: [],
     waiting_vendor: [],
     resolved: [],
+  }
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmTickets.id,
+        ticketNumber: itsmTickets.ticketNumber,
+        title: itsmTickets.title,
+        priority: itsmTickets.priority,
+        assignedToId: itsmTickets.assignedToId,
+        status: itsmTickets.status,
+        updatedAt: itsmTickets.updatedAt,
+      })
+      .from(itsmTickets)
+      .where(eq(itsmTickets.orgId, orgId))
+      .orderBy(desc(itsmTickets.updatedAt))
+      .limit(500)
+      .catch(() => [])
+
+    for (const row of rows) {
+      if (!ticketsByStatus[row.status]) continue
+      ticketsByStatus[row.status].push({
+        id: row.id,
+        ticketNumber: row.ticketNumber,
+        title: row.title,
+        priority: row.priority,
+        assignedToId: row.assignedToId,
+        updatedAt: row.updatedAt?.toISOString() ?? '',
+      })
+    }
   }
 
   const totalOpen = Object.values(ticketsByStatus).flat().length

@@ -1,0 +1,24 @@
+{
+  "id": "seed-cupe-national",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CUPE",
+  "fullName": "Canadian Union of Public Employees",
+  "unionScope": "national",
+  "parentId": "seed-clc",
+  "sector": "municipal",
+  "province": null,
+  "memberCount": 715000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://cupe.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Canada's largest union. Primary target via locals.",
+  "createdAt": "2026-04-25T04:18:06.624Z",
+  "updatedAt": "2026-04-25T04:18:06.624Z"
+}

@@ -16,6 +16,10 @@ import {
   type TrendInput,
   type TrendResult,
 } from '@nzila/platform-ops'
+import { platformDb } from '@nzila/db/platform'
+import { platformIntegrationConnections, platformRequestMetrics } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, desc, eq, gte } from 'drizzle-orm'
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -54,57 +58,96 @@ function directionBadge(result: TrendResult) {
   )
 }
 
-// ── Sample Data (in production, from metrics DB) ───────────────────────────
-
-function getSampleTrendInputs(): TrendInput[] {
+function getLastSevenDays(): string[] {
   const today = new Date()
-  const days = Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today)
     d.setDate(d.getDate() - (6 - i))
     return d.toISOString().slice(0, 10)
   })
+}
+
+function percentile95(values: number[]): number {
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const idx = Math.max(0, Math.ceil(sorted.length * 0.95) - 1)
+  return sorted[idx]
+}
+
+async function getTrendInputs(orgId: string): Promise<TrendInput[]> {
+  const days = getLastSevenDays()
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  const [requestRows, integrationRows] = await Promise.all([
+    platformDb
+      .select({
+        route: platformRequestMetrics.route,
+        latencyMs: platformRequestMetrics.latencyMs,
+        statusCode: platformRequestMetrics.statusCode,
+        recordedAt: platformRequestMetrics.recordedAt,
+      })
+      .from(platformRequestMetrics)
+      .where(and(eq(platformRequestMetrics.orgId, orgId), gte(platformRequestMetrics.recordedAt, sevenDaysAgo)))
+      .orderBy(desc(platformRequestMetrics.recordedAt))
+      .limit(5000)
+      .catch(() => []),
+    platformDb
+      .select({
+        provider: platformIntegrationConnections.provider,
+        status: platformIntegrationConnections.status,
+        lastValidationOk: platformIntegrationConnections.lastValidationOk,
+      })
+      .from(platformIntegrationConnections)
+      .where(eq(platformIntegrationConnections.orgId, orgId))
+      .catch(() => []),
+  ])
+
+  const perDay = new Map<string, { latencies: number[]; total: number; errors: number }>()
+  for (const day of days) {
+    perDay.set(day, { latencies: [], total: 0, errors: 0 })
+  }
+
+  for (const row of requestRows) {
+    const day = row.recordedAt?.toISOString().slice(0, 10)
+    if (!day || !perDay.has(day)) continue
+    const bucket = perDay.get(day)!
+    bucket.total += 1
+    bucket.latencies.push(row.latencyMs)
+    if (row.statusCode >= 500) bucket.errors += 1
+  }
+
+  const p95Points = days.map((day) => ({
+    date: day,
+    value: percentile95(perDay.get(day)?.latencies ?? []),
+  }))
+  const errorRatePoints = days.map((day) => {
+    const bucket = perDay.get(day)
+    const value = bucket && bucket.total > 0 ? (bucket.errors / bucket.total) * 100 : 0
+    return { date: day, value }
+  })
+
+  const integrationInputs: TrendInput[] = integrationRows.map((row) => {
+    const base =
+      row.status === 'connected'
+        ? (row.lastValidationOk ? 99.9 : 98.5)
+        : row.status === 'degraded'
+          ? 96
+          : row.status === 'error'
+            ? 90
+            : 85
+
+    return {
+      metric: 'integration_sla',
+      scope: row.provider,
+      dataPoints: days.map((date) => ({ date, value: base })),
+    }
+  })
 
   return [
-    {
-      metric: 'p95_latency',
-      scope: 'web',
-      dataPoints: days.map((date, i) => ({
-        date,
-        value: 180 + i * 3 + Math.round(Math.random() * 10),
-      })),
-    },
-    {
-      metric: 'p95_latency',
-      scope: 'abr',
-      dataPoints: days.map((date, i) => ({
-        date,
-        value: 220 + i * 8 + Math.round(Math.random() * 15),
-      })),
-    },
-    {
-      metric: 'error_rate',
-      scope: 'web',
-      dataPoints: days.map((date) => ({
-        date,
-        value: 0.3 + Math.random() * 0.2,
-      })),
-    },
-    {
-      metric: 'integration_sla',
-      scope: 'stripe',
-      dataPoints: days.map((date) => ({
-        date,
-        value: 99.5 + Math.random() * 0.4,
-      })),
-    },
-    {
-      metric: 'integration_sla',
-      scope: 'hubspot',
-      dataPoints: days.map((date, i) => ({
-        date,
-        value: 99.8 - i * 0.3 - Math.random() * 0.2,
-      })),
-    },
+    { metric: 'p95_latency', scope: 'platform', dataPoints: p95Points },
+    { metric: 'error_rate', scope: 'platform', dataPoints: errorRatePoints },
+    ...integrationInputs,
   ]
 }
 
@@ -113,7 +156,8 @@ function getSampleTrendInputs(): TrendInput[] {
 export default async function TrendDetectionPage() {
   await requireRole('platform_admin', 'studio_admin', 'ops')
 
-  const inputs = getSampleTrendInputs()
+  const orgId = await getExecutiveOrgId()
+  const inputs = orgId ? await getTrendInputs(orgId) : []
   const results = analyseTrends(inputs)
   const warningEvent = buildTrendWarningEvent(results)
 

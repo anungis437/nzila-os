@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { getWeeklyBriefingData } from '@/lib/executive-intelligence'
 import { loadIntelligenceDigest } from '@/lib/executive-intelligence-digest'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,7 +94,7 @@ export default async function BriefingPage() {
     : []
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <CommandPageShell as="div" className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Weekly CEO Briefing</h1>
         <p className="text-sm text-gray-400 mt-1">Blunt, concise, and decision-oriented. Read in under 5 minutes.</p>
@@ -358,6 +359,6 @@ export default async function BriefingPage() {
           )) : <p className="text-gray-400 italic">No approved decisions captured yet.</p>}
         </div>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

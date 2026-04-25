@@ -1,0 +1,20 @@
+{
+  "id": "seg_modtwtji_b67035bf3fcd",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Education — Tier B",
+  "description": "Education sector unions (elementary, secondary, post-secondary). Seasonal governance cycles; moderate tech maturity.",
+  "sectors": [
+    "education"
+  ],
+  "minMembers": 150,
+  "maxMembers": null,
+  "minGovernanceComplexity": 0.4,
+  "tier": "B",
+  "tierRationale": "Good member engagement use case (teacher associations + faculty unions). Tech maturity is often low (spreadsheets). Budget cycles tied to school year.",
+  "createdAt": "2026-04-25T04:18:06.606Z",
+  "updatedAt": "2026-04-25T04:18:06.606Z"
+}

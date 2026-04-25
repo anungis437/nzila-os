@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { OnboardingData } from "./page";
 import { trackClientEvent, WEEKONE_ANALYTICS_EVENTS } from "@/lib/analytics/track";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const TOOLS = [
   { key: "stripe", label: "Stripe", description: "Payments & revenue" },
@@ -60,9 +61,15 @@ export function Step5({ data, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold">Connect your tools</h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold">Connect your tools</h2>
+          <HelpTooltip
+            label="Why connect tools"
+            content="Connections reduce manual updates so your weekly baseline stays current with less admin."
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Or start manually — you can always connect later.
+          Or start manually. You can run your first baseline week now and connect later.
         </p>
       </div>
 

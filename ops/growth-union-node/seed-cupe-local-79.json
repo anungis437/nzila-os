@@ -1,0 +1,24 @@
+{
+  "id": "seed-cupe-local-79",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CUPE Local 79",
+  "fullName": "CUPE Local 79 — City of Toronto Inside Workers",
+  "unionScope": "local",
+  "parentId": "seed-cupe-national",
+  "sector": "municipal",
+  "province": "CA-ON",
+  "memberCount": 20000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://cupe79.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier A. Largest CUPE local in Ontario. Major expansion target if 416 converts.",
+  "createdAt": "2026-04-25T04:18:06.627Z",
+  "updatedAt": "2026-04-25T04:18:06.627Z"
+}

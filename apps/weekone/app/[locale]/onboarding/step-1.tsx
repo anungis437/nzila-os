@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const TYPES = [
   { value: "saas", label: "SaaS", emoji: "🚀" },
@@ -21,11 +22,17 @@ export function Step1({ value, onChange, onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold">
-          What type of company are you building?
-        </h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold">
+            What type of company are you building?
+          </h2>
+          <HelpTooltip
+            label="Why we ask company type"
+            content="This tunes your first baseline workflow, examples, and weekly recommendations."
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          This helps us tailor your dashboard.
+          This helps us tailor your startup baseline.
         </p>
       </div>
 

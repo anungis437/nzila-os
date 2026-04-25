@@ -1,0 +1,21 @@
+{
+  "id": "seg_modtwtjk_d15e8040fff6",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Transit / Utilities — Tier B",
+  "description": "Transit and utilities unions with safety-critical grievances and shift-based member communication needs.",
+  "sectors": [
+    "transit",
+    "utilities"
+  ],
+  "minMembers": 200,
+  "maxMembers": null,
+  "minGovernanceComplexity": 0.45,
+  "tier": "B",
+  "tierRationale": "ATU locals, IBEW locals in utilities. Strong operations case but procurement takes longer. Often require IT security review before adoption.",
+  "createdAt": "2026-04-25T04:18:06.607Z",
+  "updatedAt": "2026-04-25T04:18:06.607Z"
+}

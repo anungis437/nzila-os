@@ -1,0 +1,189 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "noData": "No data yet",
+    "empty": "—",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "dismiss": "Dismiss",
+    "connect": "Connect",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "lastUpdated": "Last updated"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "money": "Money",
+    "growth": "Growth",
+    "focus": "Focus",
+    "risks": "Risks",
+    "weekly": "Weekly",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "dashboard": {
+    "title": "WeekOne",
+    "greeting": "Good morning",
+    "subheading": "Here's what matters this week.",
+    "cashOnHand": "Cash on Hand",
+    "runway": "Runway",
+    "monthlyBurn": "Monthly Burn",
+    "overdueInvoices": "Overdue Invoices",
+    "priorities": "This Week's Priorities",
+    "riskRadar": "Risk Radar",
+    "pipeline": "Pipeline",
+    "openDeals": "Open Deals",
+    "weightedValue": "Weighted Value",
+    "weeklyBrief": "Weekly Brief",
+    "viewBrief": "View latest brief"
+  },
+  "money": {
+    "title": "Money",
+    "subtitle": "Cash position and runway",
+    "runwayDays": "Runway Days",
+    "cashOnHand": "Cash on Hand",
+    "monthlyBurn": "Monthly Burn",
+    "overdueInvoices": "Overdue Invoices",
+    "upcomingBills": "Upcoming Bills",
+    "hiringAffordability": "Hiring Affordability",
+    "canAffordHires": "You can afford approximately {count} hire(s) at $5k/mo burn each.",
+    "addSnapshot": "Add Snapshot",
+    "invoices": "Invoices",
+    "invoiceClient": "Client",
+    "invoiceAmount": "Amount",
+    "invoiceDue": "Due",
+    "invoiceStatus": "Status",
+    "noInvoices": "No invoices yet",
+    "noSnapshots": "No cash snapshots yet. Add your first snapshot to start tracking."
+  },
+  "growth": {
+    "title": "Growth",
+    "subtitle": "Pipeline and revenue",
+    "pipelineByStage": "Pipeline by Stage",
+    "weightedValue": "Weighted Value",
+    "discovery": "Discovery",
+    "proposal": "Proposal",
+    "negotiation": "Negotiation",
+    "closed": "Closed",
+    "addDeal": "Add Deal",
+    "dealName": "Deal Name",
+    "dealValue": "Value",
+    "dealStage": "Stage",
+    "dealProbability": "Probability",
+    "dealClose": "Expected Close",
+    "noDeals": "No deals in pipeline yet.",
+    "proposalsAging": "Aging Proposals",
+    "noAgingProposals": "No aging proposals."
+  },
+  "focus": {
+    "title": "Focus",
+    "subtitle": "Your weekly priorities",
+    "thiswWeek": "This Week",
+    "recommendation": "This week's recommendation",
+    "whatToIgnore": "What to ignore this week",
+    "ignoreDescription": "Stop doing these to protect your time.",
+    "noPriorities": "No priorities generated yet.",
+    "categories": {
+      "revenue": "Revenue",
+      "risk": "Risk",
+      "delegation": "Delegation",
+      "stop": "Stop"
+    }
+  },
+  "risks": {
+    "title": "Risk Radar",
+    "subtitle": "Active risks requiring attention",
+    "noRisks": "No active risks detected. Keep it up.",
+    "levels": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "factors": {
+      "lowRunway": "Low Runway",
+      "overdueReceivables": "Overdue Receivables",
+      "silentPipeline": "Silent Pipeline",
+      "founderOverload": "Founder Overload",
+      "pipelineInactive": "Pipeline Inactive"
+    }
+  },
+  "weekly": {
+    "title": "Weekly Briefs",
+    "subtitle": "Your founder memo archive",
+    "latestBrief": "Latest Brief",
+    "weekOf": "Week of",
+    "summary": "Summary",
+    "priorities": "Priorities",
+    "moneyWatch": "Money Watch",
+    "pipelineWatch": "Pipeline Watch",
+    "riskWatch": "Risk Watch",
+    "founderRecommendation": "Founder Recommendation",
+    "noBriefs": "No weekly briefs yet.",
+    "generate": "Generate Brief"
+  },
+  "settings": {
+    "title": "Settings",
+    "companyProfile": "Company Profile",
+    "companyType": "Company Type",
+    "revenueStage": "Revenue Stage",
+    "teamSize": "Team Size",
+    "integrations": "Integrations",
+    "plan": "Plan",
+    "billing": "Billing",
+    "currentPlan": "Current Plan",
+    "manageBilling": "Manage Billing",
+    "types": {
+      "saas": "SaaS",
+      "agency": "Agency",
+      "studio": "Studio",
+      "ecommerce": "Ecommerce",
+      "services": "Services",
+      "other": "Other"
+    },
+    "plans": {
+      "solo": "Solo",
+      "team": "Team",
+      "growth": "Growth"
+    }
+  },
+  "onboarding": {
+    "title": "Welcome to WeekOne",
+    "subtitle": "Your founder operating system",
+    "step": "Step {current} of {total}",
+    "next": "Continue",
+    "back": "Back",
+    "finish": "Get Started",
+    "step1": {
+      "title": "What type of company are you building?",
+      "subtitle": "This helps us tailor your dashboard."
+    },
+    "step2": {
+      "title": "What's your revenue stage?",
+      "subtitle": "Be honest — we're here to help, not judge."
+    },
+    "step3": {
+      "title": "How big is your team?",
+      "subtitle": "Including co-founders and contractors."
+    },
+    "step4": {
+      "title": "What's your biggest pain right now?",
+      "subtitle": "We'll focus your first week on this."
+    },
+    "step5": {
+      "title": "Connect your tools",
+      "subtitle": "Or start manually — you can always connect later.",
+      "skipForNow": "Skip for now, start manually"
+    }
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Get started",
+    "signInSubtitle": "Welcome back to WeekOne",
+    "signUpSubtitle": "Start your founder operating system"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "seg_modtwtjb_9c9151caefca",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Large Municipal — Tier A",
+  "description": "Large municipal unions (500–10,000 members) with complex grievance/arbitration workflows. Highest UE design fit; budget authority typically with elected executive board.",
+  "sectors": [
+    "municipal"
+  ],
+  "minMembers": 500,
+  "maxMembers": null,
+  "minGovernanceComplexity": 0.6,
+  "tier": "A",
+  "tierRationale": "Municipal unions have the highest grievance volume, steward networks, and documented case management needs. CUPE Local 416 (Toronto), CUPE Local 79 (Toronto) are prototypical.",
+  "createdAt": "2026-04-25T04:18:06.598Z",
+  "updatedAt": "2026-04-25T04:18:06.598Z"
+}

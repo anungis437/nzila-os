@@ -1,0 +1,24 @@
+{
+  "id": "seed-ona",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "ONA",
+  "fullName": "Ontario Nurses Association",
+  "unionScope": "provincial",
+  "parentId": null,
+  "sector": "healthcare",
+  "province": "CA-ON",
+  "memberCount": 68000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://ona.org",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier A. Healthcare sector. Patient care + labour rights complexity ideal for UE.",
+  "createdAt": "2026-04-25T04:18:06.631Z",
+  "updatedAt": "2026-04-25T04:18:06.631Z"
+}

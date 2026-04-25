@@ -1,0 +1,21 @@
+{
+  "id": "seg_modtwtjh_053dff3127cf",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Federal / Provincial Public Service — Tier A",
+  "description": "Federal or provincial public service unions with formal grievance adjudication, legislative compliance, and complex collective agreement structures.",
+  "sectors": [
+    "federal",
+    "provincial"
+  ],
+  "minMembers": 200,
+  "maxMembers": null,
+  "minGovernanceComplexity": 0.6,
+  "tier": "A",
+  "tierRationale": "CAPE-ACEP, PSAC locals, OPSEU operate in highly regulated environments with strong documentation need. Procurement cycles are longer but deal sizes are larger.",
+  "createdAt": "2026-04-25T04:18:06.605Z",
+  "updatedAt": "2026-04-25T04:18:06.605Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "seed-teamsters-938",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "Teamsters Local 938",
+  "fullName": "Teamsters Canada Local 938",
+  "unionScope": "local",
+  "parentId": null,
+  "sector": "trades",
+  "province": "CA-ON",
+  "memberCount": 3500,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": null,
+  "inPipeline": true,
+  "dealEngineId": "deal-003",
+  "notes": "In pipeline. Tier B prospect. Transport/trades sector.",
+  "createdAt": "2026-04-25T04:18:06.634Z",
+  "updatedAt": "2026-04-25T04:18:06.634Z"
+}

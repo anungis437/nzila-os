@@ -15,6 +15,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
+import { CommandPageShell } from '@/components/command-page-shell'
 import {
   commerceQuotes,
   pilotDefinitions,
@@ -193,8 +194,7 @@ export default async function RevenuePage() {
       : 'daily sync'
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
-
+    <CommandPageShell className="space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -419,6 +419,6 @@ export default async function RevenuePage() {
         <Link href="/revenue/faircase" className="text-sm text-blue-600 hover:text-blue-800">FAIRCASE funnel →</Link>
         <Link href="/capital" className="text-sm text-blue-600 hover:text-blue-800">Capital →</Link>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

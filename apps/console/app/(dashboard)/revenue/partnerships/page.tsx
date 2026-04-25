@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { and, eq, desc, ne } from 'drizzle-orm'
 import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
+import { CommandPageShell } from '@/components/command-page-shell'
 import {
   deals,
   commissions,
@@ -123,7 +124,7 @@ export default async function PartnershipsPage() {
   const data = orgId ? await lastInsights(orgId) : { run: null, insights: [] }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <CommandPageShell className="space-y-6">
       <header className="mb-4">
         <h1 className="text-3xl font-semibold text-slate-900">Partnerships</h1>
         <p className="mt-2 text-sm text-slate-600">
@@ -197,6 +198,6 @@ export default async function PartnershipsPage() {
           ))}
         </ul>
       </section>
-    </main>
+    </CommandPageShell>
   )
 }

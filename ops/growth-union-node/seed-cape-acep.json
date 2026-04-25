@@ -1,0 +1,24 @@
+{
+  "id": "seed-cape-acep",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CAPE-ACEP",
+  "fullName": "Canadian Association of Professional Employees",
+  "unionScope": "national",
+  "parentId": null,
+  "sector": "federal",
+  "province": "CA-ON",
+  "memberCount": 22000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://acep-cape.ca",
+  "inPipeline": true,
+  "dealEngineId": "deal-002",
+  "notes": "Tier A. Federal public service. Complex grievance adjudication. Strong procurement path.",
+  "createdAt": "2026-04-25T04:18:06.630Z",
+  "updatedAt": "2026-04-25T04:18:06.630Z"
+}

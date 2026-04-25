@@ -4,6 +4,10 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { PROBLEM_STATUSES } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmProblems } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,8 +28,9 @@ export default async function ProblemRegisterPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch problems from DB scoped by orgId
-  const problems: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let problems: Array<{
     id: string
     status: string
     priority: string
@@ -35,6 +40,38 @@ export default async function ProblemRegisterPage() {
     affectedServices: string[]
     createdAt: string
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmProblems.id,
+        status: itsmProblems.status,
+        priority: itsmProblems.priority,
+        title: itsmProblems.title,
+        rootCause: itsmProblems.rootCause,
+        linkedIncidentIds: itsmProblems.linkedIncidentIds,
+        createdAt: itsmProblems.createdAt,
+      })
+      .from(itsmProblems)
+      .where(eq(itsmProblems.orgId, orgId))
+      .orderBy(desc(itsmProblems.createdAt))
+      .limit(200)
+      .catch(() => [])
+
+    problems = rows.map((row) => {
+      const linked = Array.isArray(row.linkedIncidentIds) ? row.linkedIncidentIds : []
+      return {
+        id: row.id,
+        status: row.status,
+        priority: row.priority,
+        title: row.title,
+        rootCause: row.rootCause,
+        linkedTicketCount: linked.length,
+        affectedServices: [],
+        createdAt: row.createdAt?.toISOString().slice(0, 10) ?? '—',
+      }
+    })
+  }
 
   return (
     <div className="p-6 space-y-4">

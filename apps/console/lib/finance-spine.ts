@@ -3,6 +3,7 @@ import 'server-only'
 import fs from 'node:fs'
 import path from 'node:path'
 import { platformDb } from '@nzila/db/platform'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   commerceInvoices,
   commerceQuotes,
@@ -12,6 +13,8 @@ import {
   zongaRevenueEvents,
 } from '@nzila/db/schema'
 import { desc, eq, gte } from 'drizzle-orm'
+
+const logger = createLogger('console.finance-spine')
 
 interface CatalogProduct {
   id: string
@@ -50,6 +53,13 @@ function daysAgo(date: Date | null): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86400000)
 }
 
+function isMissingRelationError(error: unknown, relationName: string): boolean {
+  if (!error || typeof error !== 'object') return false
+  const maybePg = error as { code?: string; message?: string }
+  if (maybePg.code === '42P01') return true
+  return typeof maybePg.message === 'string' && maybePg.message.includes(`relation \"${relationName}\" does not exist`)
+}
+
 function loadCatalogProducts(): CatalogProduct[] {
   try {
     const catalogPath = path.join(process.cwd(), '../../governance/portfolio/product-catalog.json')
@@ -82,59 +92,113 @@ export async function getFinanceSpineSnapshot(): Promise<FinanceSpineSnapshot> {
   const products = loadCatalogProducts()
   const knownVentures = new Set(products.map((product) => normalizeValue(product.id ?? product.name)))
 
+  const treasuryPromise = platformDb
+    .select({
+      cashOnHand: treasurySnapshots.cashOnHand,
+      restrictedCash: treasurySnapshots.restrictedCash,
+      liabilitiesDue30d: treasurySnapshots.liabilitiesDue30d,
+    })
+    .from(treasurySnapshots)
+    .orderBy(desc(treasurySnapshots.date))
+    .limit(1)
+    .catch((error) => {
+      if (isMissingRelationError(error, 'treasury_snapshots')) {
+        logger.warn('treasury_snapshots missing; falling back to environment treasury values')
+        return []
+      }
+      throw error
+    })
+
+  const invoicePromise = platformDb
+    .select({
+      id: commerceInvoices.id,
+      ref: commerceInvoices.ref,
+      status: commerceInvoices.status,
+      total: commerceInvoices.total,
+      amountDue: commerceInvoices.amountDue,
+      dueDate: commerceInvoices.dueDate,
+      metadata: commerceInvoices.metadata,
+    })
+    .from(commerceInvoices)
+    .where(gte(commerceInvoices.createdAt, since365))
+    .catch((error) => {
+      if (isMissingRelationError(error, 'commerce_invoices')) {
+        logger.warn('commerce_invoices missing; using empty receivables')
+        return []
+      }
+      throw error
+    })
+
+  const quotePromise = platformDb
+    .select({
+      ref: commerceQuotes.ref,
+      status: commerceQuotes.status,
+      total: commerceQuotes.total,
+      metadata: commerceQuotes.metadata,
+    })
+    .from(commerceQuotes)
+    .where(gte(commerceQuotes.createdAt, since30))
+    .catch((error) => {
+      if (isMissingRelationError(error, 'commerce_quotes')) {
+        logger.warn('commerce_quotes missing; using empty pipeline snapshot')
+        return []
+      }
+      throw error
+    })
+
+  const revenuePromise = platformDb
+    .select({
+      amount: zongaRevenueEvents.amount,
+      occurredAt: zongaRevenueEvents.occurredAt,
+    })
+    .from(zongaRevenueEvents)
+    .where(gte(zongaRevenueEvents.occurredAt, since365))
+    .catch((error) => {
+      if (isMissingRelationError(error, 'zonga_revenue_events')) {
+        logger.warn('zonga_revenue_events missing; using zero external revenue events')
+        return []
+      }
+      throw error
+    })
+
+  const burnPromise = platformDb
+    .select({
+      appId: platformCostRollups.appId,
+      total: platformCostRollups.totalEstCostUsd,
+    })
+    .from(platformCostRollups)
+    .where(gte(platformCostRollups.day, since30.toISOString().slice(0, 10)))
+    .catch((error) => {
+      if (isMissingRelationError(error, 'platform_cost_rollups')) {
+        logger.warn('platform_cost_rollups missing; using zero platform burn rows')
+        return []
+      }
+      throw error
+    })
+
+  const subscriptionPromise = platformDb
+    .select({
+      status: stripeSubscriptions.status,
+      amountCents: stripeSubscriptions.amountCents,
+      interval: stripeSubscriptions.planInterval,
+    })
+    .from(stripeSubscriptions)
+    .where(eq(stripeSubscriptions.cancelAtPeriodEnd, false))
+    .catch((error) => {
+      if (isMissingRelationError(error, 'stripe_subscriptions')) {
+        logger.warn('stripe_subscriptions missing; using zero active subscriptions')
+        return []
+      }
+      throw error
+    })
+
   const [latestTreasury, invoiceRows, quoteRows, revenueRows, burnRows, subscriptionRows] = await Promise.all([
-    platformDb
-      .select({
-        cashOnHand: treasurySnapshots.cashOnHand,
-        restrictedCash: treasurySnapshots.restrictedCash,
-        liabilitiesDue30d: treasurySnapshots.liabilitiesDue30d,
-      })
-      .from(treasurySnapshots)
-      .orderBy(desc(treasurySnapshots.date))
-      .limit(1),
-    platformDb
-      .select({
-        id: commerceInvoices.id,
-        ref: commerceInvoices.ref,
-        status: commerceInvoices.status,
-        total: commerceInvoices.total,
-        amountDue: commerceInvoices.amountDue,
-        dueDate: commerceInvoices.dueDate,
-        metadata: commerceInvoices.metadata,
-      })
-      .from(commerceInvoices)
-      .where(gte(commerceInvoices.createdAt, since365)),
-    platformDb
-      .select({
-        ref: commerceQuotes.ref,
-        status: commerceQuotes.status,
-        total: commerceQuotes.total,
-        metadata: commerceQuotes.metadata,
-      })
-      .from(commerceQuotes)
-      .where(gte(commerceQuotes.createdAt, since30)),
-    platformDb
-      .select({
-        amount: zongaRevenueEvents.amount,
-        occurredAt: zongaRevenueEvents.occurredAt,
-      })
-      .from(zongaRevenueEvents)
-      .where(gte(zongaRevenueEvents.occurredAt, since365)),
-    platformDb
-      .select({
-        appId: platformCostRollups.appId,
-        total: platformCostRollups.totalEstCostUsd,
-      })
-      .from(platformCostRollups)
-      .where(gte(platformCostRollups.day, since30.toISOString().slice(0, 10))),
-    platformDb
-      .select({
-        status: stripeSubscriptions.status,
-        amountCents: stripeSubscriptions.amountCents,
-        interval: stripeSubscriptions.planInterval,
-      })
-      .from(stripeSubscriptions)
-      .where(eq(stripeSubscriptions.cancelAtPeriodEnd, false)),
+    treasuryPromise,
+    invoicePromise,
+    quotePromise,
+    revenuePromise,
+    burnPromise,
+    subscriptionPromise,
   ])
 
   const fixedBurnUsd =

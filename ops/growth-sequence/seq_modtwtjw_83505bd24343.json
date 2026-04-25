@@ -1,0 +1,47 @@
+{
+  "id": "seq_modtwtjw_83505bd24343",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Re-Engagement (Dormant)",
+  "kind": "re_engagement",
+  "description": "For deals dormant >45 days or leads that went cold. Opens with a genuine value-add (new feature, new case study, or relevant sector news) — never a generic \"checking in.\"",
+  "targetTiers": [
+    "A",
+    "B"
+  ],
+  "triggerStage": "dormant",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 0,
+      "channel": "email",
+      "templateId": "re-engagement-email",
+      "personalisationFields": [
+        "contactFirstName",
+        "newRelevantDevelopment",
+        "lastTouchDate"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Re-open with genuine value: a new case study, feature, or sector development relevant to them."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 168,
+      "channel": "linkedin_message",
+      "templateId": "linkedin-connection-note",
+      "personalisationFields": [
+        "contactFirstName"
+      ],
+      "sendCondition": "no_reply_to_step_1",
+      "stopOnEvent": "replied",
+      "goal": "LinkedIn follow-up. If no response, mark dormant and remove from active sequence."
+    }
+  ],
+  "benchmarkReplyRate": 0.06,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}
