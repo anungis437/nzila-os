@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-24T00:00:00.000Z",
+  "generatedAt": "2026-04-25T00:00:00.000Z",
   "appCount": 19,
   "packageCount": 173,
   "workspacePackageCount": 196,
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 248
+      "codeFileCount": 247
     },
     {
       "name": "agrimo",
@@ -163,7 +163,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 313
+      "codeFileCount": 318
     },
     {
       "name": "control-plane",
@@ -552,7 +552,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 82
     },
     {
       "name": "weekone",
@@ -574,7 +574,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 81
+      "codeFileCount": 97
     },
     {
       "name": "zonga",
