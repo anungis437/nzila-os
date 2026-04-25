@@ -18,6 +18,16 @@ import {
   CLIENT_HEALTH_LABELS,
   ALERT_TYPE_LABELS,
 } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import {
+  commandAlerts,
+  founderPriorities,
+  itsmTickets,
+  opsClients,
+  productHealthSnapshots,
+} from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, desc, eq, isNull, ne, sql } from 'drizzle-orm'
 import type {
   NzilaProduct,
   OnboardingStage,
@@ -26,6 +36,7 @@ import type {
   AlertSeverity,
   FounderPriorityType,
 } from '@nzila/itsm-core'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +44,7 @@ export const metadata = {
   title: 'Command Center — Nzila OS',
 }
 
-// ── Placeholder data types ────────────────────────────────────────────────────
+// ── View models ───────────────────────────────────────────────────────────────
 
 type ClientRow = {
   id: string
@@ -135,52 +146,152 @@ function productLabel(product: NzilaProduct): string {
 export default async function CommandCenterPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
+  const orgId = await getExecutiveOrgId()
 
-  // ── Placeholder data (replace with live DB queries)
-  const clients = null as ClientRow[] | null
-  const alerts = null as AlertRow[] | null
-  const productHealthList = null as ProductHealth[] | null
-  const priorities = null as PriorityRow[] | null
-  const teamMembers = null as TeamMember[] | null
+  let clientList: ClientRow[] = []
+  let alertList: AlertRow[] = []
+  let productList: ProductHealth[] = []
+  let priorityList: PriorityRow[] = []
+  let teamList: TeamMember[] = []
 
-  const clientList: ClientRow[] = clients ?? [
-    { id: '1', companyName: 'Cosatu HQ', product: 'union_eyes', health: 'healthy', healthScore: 92, openTickets: 1, onboardingStage: 'live', contractValue: '180000', renewalDate: '2025-12-01' },
-    { id: '2', companyName: 'Thabo Legal', product: 'faircase', health: 'needs_attention', healthScore: 64, openTickets: 4, onboardingStage: 'live', contractValue: '96000', renewalDate: '2025-09-15' },
-    { id: '3', companyName: 'AgriCo ZA', product: 'agrimo', health: 'at_risk', healthScore: 38, openTickets: 7, onboardingStage: 'training_complete', contractValue: '144000', renewalDate: '2025-08-01' },
-    { id: '4', companyName: 'Cape Logistics', product: 'flow', health: 'healthy', healthScore: 88, openTickets: 0, onboardingStage: 'live', contractValue: '120000', renewalDate: '2025-11-30' },
-    { id: '5', companyName: 'Zonga Pilot A', product: 'zonga', health: 'needs_attention', healthScore: 71, openTickets: 2, onboardingStage: 'kickoff_booked', contractValue: '60000', renewalDate: '2026-01-15' },
-  ]
+  if (orgId) {
+    const [clientRows, alertRows, productRows, priorityRows, teamRows] = await Promise.all([
+      platformDb
+        .select({
+          id: opsClients.id,
+          companyName: opsClients.companyName,
+          product: opsClients.product,
+          health: opsClients.health,
+          healthScore: opsClients.healthScore,
+          openTickets: opsClients.openTickets,
+          onboardingStage: opsClients.onboardingStage,
+          contractValue: opsClients.contractValue,
+          renewalDate: opsClients.renewalDate,
+        })
+        .from(opsClients)
+        .where(eq(opsClients.orgId, orgId))
+        .orderBy(desc(opsClients.updatedAt))
+        .limit(100)
+        .catch(() => []),
+      platformDb
+        .select({
+          id: commandAlerts.id,
+          type: commandAlerts.type,
+          severity: commandAlerts.severity,
+          title: commandAlerts.title,
+          body: commandAlerts.body,
+          clientId: commandAlerts.clientId,
+          productKey: commandAlerts.productKey,
+        })
+        .from(commandAlerts)
+        .where(and(eq(commandAlerts.orgId, orgId), isNull(commandAlerts.resolvedAt)))
+        .orderBy(desc(commandAlerts.createdAt))
+        .limit(50)
+        .catch(() => []),
+      platformDb
+        .select({
+          id: productHealthSnapshots.id,
+          product: productHealthSnapshots.product,
+          incidentsThisMonth: productHealthSnapshots.incidentsThisMonth,
+          supportLoad: productHealthSnapshots.supportLoad,
+          deploymentsShipped: productHealthSnapshots.deploymentsShipped,
+          openBugs: productHealthSnapshots.openBugs,
+          createdAt: productHealthSnapshots.createdAt,
+        })
+        .from(productHealthSnapshots)
+        .where(eq(productHealthSnapshots.orgId, orgId))
+        .orderBy(desc(productHealthSnapshots.createdAt))
+        .limit(300)
+        .catch(() => []),
+      platformDb
+        .select({
+          id: founderPriorities.id,
+          title: founderPriorities.title,
+          type: founderPriorities.type,
+          dueDate: founderPriorities.dueDate,
+          done: founderPriorities.done,
+          linkedEntityType: founderPriorities.linkedEntityType,
+        })
+        .from(founderPriorities)
+        .where(eq(founderPriorities.orgId, orgId))
+        .orderBy(desc(founderPriorities.createdAt))
+        .limit(100)
+        .catch(() => []),
+      platformDb
+        .select({
+          assignee: itsmTickets.assignedToId,
+          openCount: sql<number>`count(*)::int`,
+          overdueCount: sql<number>`count(*) filter (where ${itsmTickets.slaResolutionDue}::timestamptz < now())::int`,
+        })
+        .from(itsmTickets)
+        .where(and(eq(itsmTickets.orgId, orgId), ne(itsmTickets.status, 'resolved'), ne(itsmTickets.status, 'closed')))
+        .groupBy(itsmTickets.assignedToId)
+        .orderBy(sql`count(*) desc`)
+        .limit(12)
+        .catch(() => []),
+    ])
 
-  const alertList: AlertRow[] = alerts ?? [
-    { id: 'a1', type: 'renewal_risk', severity: 'critical', title: 'AgriCo ZA renewal in 32 days — no renewal call booked', body: 'Contract value R144k. Owner not assigned.', clientId: '3', productKey: 'agrimo' },
-    { id: 'a2', type: 'onboarding_stall', severity: 'high', title: 'Zonga Pilot A stuck at Kickoff Booked for 14 days', body: 'No activity since contract signed.', clientId: '5', productKey: 'zonga' },
-    { id: 'a3', type: 'product_spike', severity: 'high', title: 'FairCase: 4 open P2 tickets this week', body: 'Above normal support load. Possible product regression.', clientId: null, productKey: 'faircase' },
-    { id: 'a4', type: 'churn_signal', severity: 'medium', title: 'Thabo Legal: 4 open tickets + negative sentiment note', body: 'Last engagement 18 days ago.', clientId: '2', productKey: 'faircase' },
-  ]
+    clientList = clientRows.map((row) => ({
+      id: row.id,
+      companyName: row.companyName,
+      product: (row.product || 'other') as NzilaProduct,
+      health: row.health as ClientHealth,
+      healthScore: row.healthScore ?? 100,
+      openTickets: row.openTickets ?? 0,
+      onboardingStage: row.onboardingStage as OnboardingStage,
+      contractValue: row.contractValue,
+      renewalDate: row.renewalDate,
+    }))
 
-  const productList: ProductHealth[] = productHealthList ?? [
-    { product: 'union_eyes', label: 'Union Eyes', incidentsThisMonth: 1, supportLoad: 3, deploymentsShipped: 2, openBugs: 2 },
-    { product: 'faircase', label: 'FairCase', incidentsThisMonth: 3, supportLoad: 7, deploymentsShipped: 1, openBugs: 6 },
-    { product: 'flow', label: 'Flow', incidentsThisMonth: 0, supportLoad: 1, deploymentsShipped: 3, openBugs: 1 },
-    { product: 'zonga', label: 'Zonga', incidentsThisMonth: 2, supportLoad: 4, deploymentsShipped: 0, openBugs: 4 },
-    { product: 'agrimo', label: 'Agrimo', incidentsThisMonth: 1, supportLoad: 5, deploymentsShipped: 1, openBugs: 3 },
-    { product: 'platform', label: 'Platform', incidentsThisMonth: 0, supportLoad: 0, deploymentsShipped: 4, openBugs: 0 },
-  ]
+    alertList = alertRows.map((row) => ({
+      id: row.id,
+      type: row.type as AlertType,
+      severity: row.severity as AlertSeverity,
+      title: row.title,
+      body: row.body,
+      clientId: row.clientId,
+      productKey: row.productKey,
+    }))
 
-  const priorityList: PriorityRow[] = priorities ?? [
-    { id: 'p1', title: 'Call AgriCo — renewal at risk in 32 days', type: 'renewal', dueDate: '2025-08-01', done: false, linkedEntityType: 'client' },
-    { id: 'p2', title: 'Review FairCase P2 cluster — possible regression', type: 'incident', dueDate: null, done: false, linkedEntityType: 'ticket' },
-    { id: 'p3', title: 'Send Thabo Legal re-engagement note', type: 'risk', dueDate: '2025-07-20', done: false, linkedEntityType: 'client' },
-    { id: 'p4', title: 'Unblock Zonga Pilot A kickoff', type: 'ops', dueDate: '2025-07-18', done: false, linkedEntityType: 'client' },
-    { id: 'p5', title: 'Approve Q3 infrastructure proposal', type: 'proposal', dueDate: '2025-07-25', done: false, linkedEntityType: null },
-  ]
+    const latestByProduct = new Map<string, { incidentsThisMonth: number; supportLoad: number; deploymentsShipped: number; openBugs: number }>()
+    for (const row of productRows) {
+      if (!latestByProduct.has(row.product)) {
+        latestByProduct.set(row.product, {
+          incidentsThisMonth: row.incidentsThisMonth,
+          supportLoad: row.supportLoad,
+          deploymentsShipped: row.deploymentsShipped,
+          openBugs: row.openBugs,
+        })
+      }
+    }
+    productList = Array.from(latestByProduct.entries()).map(([product, metrics]) => ({
+      product: product as NzilaProduct,
+      label: productLabel(product as NzilaProduct),
+      incidentsThisMonth: metrics.incidentsThisMonth,
+      supportLoad: metrics.supportLoad,
+      deploymentsShipped: metrics.deploymentsShipped,
+      openBugs: metrics.openBugs,
+    }))
 
-  const teamList: TeamMember[] = teamMembers ?? [
-    { name: 'Lerato M.', openTickets: 12, overdueTickets: 3, status: 'overloaded' },
-    { name: 'Sipho D.', openTickets: 6, overdueTickets: 0, status: 'normal' },
-    { name: 'Ayanda K.', openTickets: 4, overdueTickets: 1, status: 'normal' },
-    { name: 'Nomsa T.', openTickets: 1, overdueTickets: 0, status: 'idle' },
-  ]
+    priorityList = priorityRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      type: row.type as FounderPriorityType,
+      dueDate: row.dueDate,
+      done: row.done,
+      linkedEntityType: row.linkedEntityType,
+    }))
+
+    teamList = teamRows.map((row) => {
+      const openTickets = row.openCount ?? 0
+      return {
+        name: row.assignee || 'Unassigned',
+        openTickets,
+        overdueTickets: row.overdueCount ?? 0,
+        status: openTickets >= 10 ? 'overloaded' : openTickets <= 1 ? 'idle' : 'normal',
+      }
+    })
+  }
 
   // Aggregate metrics
   const totalClients = clientList.length
@@ -198,12 +309,12 @@ export default async function CommandCenterPage() {
   const totalOpenTickets = clientList.reduce((sum, c) => sum + c.openTickets, 0)
 
   return (
-    <main className="p-6 space-y-8 max-w-screen-2xl mx-auto">
+    <CommandPageShell className="space-y-8 text-slate-100">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white">Command Center</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-slate-300 mt-0.5">
             Running Nzila like a R25M ARR company before it is one — every metric tied to a decision.
           </p>
         </div>
@@ -227,17 +338,17 @@ export default async function CommandCenterPage() {
 
       {/* ── Section A: Revenue Pulse ───────────────────────────────────────── */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
           Revenue Pulse
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Active Clients</p>
+            <p className="text-xs text-slate-400 mb-1">Active Clients</p>
             <p className="text-2xl font-bold text-white">{totalClients}</p>
-            <p className="text-xs text-slate-400 mt-1">{liveClients} live</p>
+            <p className="text-xs text-slate-300 mt-1">{liveClients} live</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">ARR Proxy</p>
+            <p className="text-xs text-slate-400 mb-1">ARR Proxy</p>
             <p className="text-2xl font-bold text-white">
               R{(totalContractValue / 1000).toFixed(0)}k
             </p>
@@ -246,28 +357,28 @@ export default async function CommandCenterPage() {
             </p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">MRR Proxy</p>
+            <p className="text-xs text-slate-400 mb-1">MRR Proxy</p>
             <p className="text-2xl font-bold text-white">
               R{(totalContractValue / 12 / 1000).toFixed(0)}k
             </p>
-            <p className="text-xs text-slate-400 mt-1">Avg across clients</p>
+            <p className="text-xs text-slate-300 mt-1">Avg across clients</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Renewals (90d)</p>
+            <p className="text-xs text-slate-400 mb-1">Renewals (90d)</p>
             <p className="text-2xl font-bold text-white">{renewalNext90}</p>
             <p className="text-xs text-amber-400 mt-1 flex items-center gap-0.5">
               <ClockIcon className="h-3 w-3" /> Upcoming
             </p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Churn Risk</p>
+            <p className="text-xs text-slate-400 mb-1">Churn Risk</p>
             <p className={`text-2xl font-bold ${atRiskClients > 0 ? 'text-red-400' : 'text-white'}`}>
               {atRiskClients}
             </p>
-            <p className="text-xs text-slate-400 mt-1">at_risk + churned</p>
+            <p className="text-xs text-slate-300 mt-1">at_risk + churned</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <p className="text-xs text-slate-500 mb-1">Open Tickets</p>
+            <p className="text-xs text-slate-400 mb-1">Open Tickets</p>
             <p className="text-2xl font-bold text-white">{totalOpenTickets}</p>
             <Link href="/itsm/queue" className="text-xs text-blue-400 mt-1 flex items-center gap-0.5 hover:text-blue-300">
               View queue <ArrowRightIcon className="h-3 w-3" />
@@ -280,7 +391,7 @@ export default async function CommandCenterPage() {
       {alertList.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
               Smart Alerts
               {criticalAlerts > 0 && (
                 <span className="ml-2 inline-flex items-center bg-red-900/60 text-red-300 text-xs px-1.5 py-0.5 rounded">
@@ -288,7 +399,7 @@ export default async function CommandCenterPage() {
                 </span>
               )}
             </h2>
-            <Link href="/itsm/dashboard" className="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+            <Link href="/itsm/dashboard" className="text-xs text-slate-300 hover:text-white flex items-center gap-1">
               View all <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </div>
@@ -300,13 +411,13 @@ export default async function CommandCenterPage() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`h-2 w-2 rounded-full ${severityDot(alert.severity)}`} />
-                  <span className="text-xs font-medium text-slate-300">
+                  <span className="text-xs font-medium text-slate-200">
                     {ALERT_TYPE_LABELS[alert.type]}
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-white leading-snug">{alert.title}</p>
                 {alert.body && (
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{alert.body}</p>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">{alert.body}</p>
                 )}
                 {alert.clientId && (
                   <Link
@@ -325,10 +436,10 @@ export default async function CommandCenterPage() {
       {/* ── Section C: Client Health Grid ─────────────────────────────────── */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
             Client Health Grid
           </h2>
-          <Link href="/itsm/clients" className="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+          <Link href="/itsm/clients" className="text-xs text-slate-300 hover:text-white flex items-center gap-1">
             All accounts <ArrowRightIcon className="h-3 w-3" />
           </Link>
         </div>
@@ -342,7 +453,7 @@ export default async function CommandCenterPage() {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="text-sm font-semibold text-white leading-snug">{client.companyName}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{productLabel(client.product)}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{productLabel(client.product)}</p>
                 </div>
                 <span className={`h-2.5 w-2.5 rounded-full mt-0.5 ${healthColor(client.health)}`} />
               </div>
@@ -524,6 +635,6 @@ export default async function CommandCenterPage() {
           </Link>
         </div>
       </section>
-    </main>
+    </CommandPageShell>
   )
 }

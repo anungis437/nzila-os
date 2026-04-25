@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { HelpTooltip } from '@/components/help-tooltip'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -90,6 +91,8 @@ export interface NavItem {
   name: string
   href: string
   icon: string
+  description?: string
+  badge?: string
 }
 
 export interface NavGroup {
@@ -148,7 +151,19 @@ function NavSection({ group, pathname }: { group: NavGroup; pathname: string }) 
                 }`}
               >
                 {Icon && <Icon className="h-5 w-5 shrink-0" />}
-                {item.name}
+                <span className="min-w-0 flex-1 flex items-center gap-2">
+                  <span className="truncate">{item.name}</span>
+                  {item.badge && (
+                    <span className="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                      {item.badge}
+                    </span>
+                  )}
+                </span>
+                {item.description && (
+                  <span className="shrink-0" onClick={(event) => event.preventDefault()}>
+                    <HelpTooltip label={`Explain ${item.name}`} content={item.description} side="right" />
+                  </span>
+                )}
               </Link>
             )
           })}

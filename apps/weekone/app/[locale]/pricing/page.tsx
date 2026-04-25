@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MarketingSiteFooter } from '@/components/marketing/site-footer'
+import { MarketingSiteNavigation } from '@/components/marketing/site-navigation'
 import { PricingClient } from './pricing-client'
 
 export const metadata: Metadata = {
@@ -17,6 +19,8 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
 
   return (
     <main className="min-h-screen bg-white">
+      <MarketingSiteNavigation locale={locale} />
+
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <p className="text-xs font-semibold uppercase tracking-wider text-electric">Pricing</p>
         <h1 className="mt-3 text-3xl font-bold text-navy sm:text-5xl">Pick the plan that matches your operating cadence.</h1>
@@ -35,6 +39,8 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
           </Link>
         </div>
       </section>
+
+      <MarketingSiteFooter locale={locale} />
     </main>
   )
 }

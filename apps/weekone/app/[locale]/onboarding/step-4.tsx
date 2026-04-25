@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const PAINS = [
   { value: "cash-flow", label: "Cash flow anxiety", sub: "I don't know if I'll make it 6 months" },
@@ -21,9 +22,15 @@ export function Step4({ value, onChange, onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold">
-          What&apos;s your biggest pain right now?
-        </h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold">
+            What&apos;s your biggest pain right now?
+          </h2>
+          <HelpTooltip
+            label="Why we ask biggest pain"
+            content="We use this to prioritize your first operating week so you get an immediate win."
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           We&apos;ll focus your first week on this.
         </p>

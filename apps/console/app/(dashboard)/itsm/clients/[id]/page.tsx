@@ -7,6 +7,10 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { platformDb } from '@nzila/db/platform'
+import { opsClients, itsmTickets } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, eq, sql } from 'drizzle-orm'
 import {
   ONBOARDING_STAGE_LABELS,
   CLIENT_HEALTH_LABELS,
@@ -44,12 +48,9 @@ export default async function ClientDetailPage({
   if (!userId) redirect('/sign-in')
 
   const { id } = await params
+  const orgId = await getExecutiveOrgId()
+  if (!id || !orgId) notFound()
 
-  // TODO: fetch from DB — `db.select().from(opsClients).where(and(eq(opsClients.id, id), eq(opsClients.orgId, orgId)))`
-  // Return 404 if not found / wrong org
-  if (!id) notFound()
-
-  // Placeholder shape — replace with real DB row
   type ClientRow = {
     id: string
     companyName: string
@@ -81,7 +82,83 @@ export default async function ClientDetailPage({
     expansionMap: string | null
   }
 
-  const client = null as ClientRow | null // null = not found yet (DB not wired)
+  const row = await platformDb
+    .select({
+      id: opsClients.id,
+      companyName: opsClients.companyName,
+      contactName: opsClients.contactName,
+      contactEmail: opsClients.contactEmail,
+      product: opsClients.product,
+      onboardingStage: opsClients.onboardingStage,
+      health: opsClients.health,
+      healthScore: opsClients.healthScore,
+      accountOwnerId: opsClients.accountOwnerId,
+      goLiveDate: opsClients.goLiveDate,
+      renewalDate: opsClients.renewalDate,
+      contractValue: opsClients.contractValue,
+      notes: opsClients.notes,
+      expansionNotes: opsClients.expansionNotes,
+      openTickets: opsClients.openTickets,
+      createdAt: opsClients.createdAt,
+      updatedAt: opsClients.updatedAt,
+    })
+    .from(opsClients)
+    .where(and(eq(opsClients.id, id), eq(opsClients.orgId, orgId)))
+    .limit(1)
+    .then((rows) => rows[0] ?? null)
+    .catch(() => null)
+
+  const ticketStats = await platformDb
+    .select({
+      incidentCount: sql<number>`count(*) filter (where ${itsmTickets.type} = 'incident')::int`,
+      totalTickets: sql<number>`count(*)::int`,
+      closedTickets: sql<number>`count(*) filter (where ${itsmTickets.status} in ('resolved', 'closed'))::int`,
+    })
+    .from(itsmTickets)
+    .where(eq(itsmTickets.orgId, orgId))
+    .then((rows) => rows[0] ?? { incidentCount: 0, totalTickets: 0, closedTickets: 0 })
+    .catch(() => ({ incidentCount: 0, totalTickets: 0, closedTickets: 0 }))
+
+  const client: ClientRow | null = row
+    ? {
+        id: row.id,
+        companyName: row.companyName,
+        contactName: row.contactName,
+        contactEmail: row.contactEmail,
+        product: (row.product || 'other') as NzilaProduct,
+        onboardingStage: row.onboardingStage as OnboardingStage,
+        health: row.health as ClientHealth,
+        healthScore: row.healthScore ?? 100,
+        accountOwnerName: row.accountOwnerId,
+        goLiveDate: row.goLiveDate,
+        renewalDate: row.renewalDate,
+        contractValue: row.contractValue,
+        notes: row.notes,
+        expansionNotes: row.expansionNotes,
+        openTickets: row.openTickets ?? 0,
+        createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
+        paymentStatus:
+          row.health === 'at_risk' || row.health === 'churned'
+            ? 'at_risk'
+            : 'current',
+        productsSubscribed: [row.product || 'other'],
+        upsellCandidates: row.expansionNotes ? ['cross-sell review'] : null,
+        lastMeetingDate: row.updatedAt?.toISOString().slice(0, 10) ?? null,
+        sentimentNote: row.notes ?? null,
+        riskFlags: [
+          ...(row.health === 'at_risk' || row.health === 'churned' ? ['Client health flagged'] : []),
+          ...((row.openTickets ?? 0) >= 4 ? ['High open ticket load'] : []),
+        ],
+        slaAttainment:
+          ticketStats.totalTickets > 0
+            ? Math.round((ticketStats.closedTickets / ticketStats.totalTickets) * 100)
+            : null,
+        incidentCount: ticketStats.incidentCount,
+        referralPotential: row.health === 'healthy' ? 'high' : row.health === 'needs_attention' ? 'medium' : 'low',
+        caseStudyCandidate: row.health === 'healthy' && (row.openTickets ?? 0) <= 1,
+        expansionMap: row.expansionNotes,
+      }
+    : null
 
   if (!client) {
     return (
@@ -211,7 +288,7 @@ export default async function ClientDetailPage({
             View in Support Desk →
           </Link>
         </div>
-        <p className="text-xs text-gray-400 italic">Ticket linking available once DB service layer is wired.</p>
+        <p className="text-xs text-gray-400 italic">Ticket history is available in the support queue for this org.</p>
       </div>
 
       {/* ── Account 360: Commercial ───────────────────────────────────────── */}

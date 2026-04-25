@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { and, eq, desc, asc } from 'drizzle-orm'
 import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
+import { CommandPageShell } from '@/components/command-page-shell'
 import {
   executiveAgentRuns,
   executiveAgentInsights,
@@ -118,7 +119,7 @@ export default async function RenewalsPage() {
   ).length
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <CommandPageShell className="space-y-6">
       <header className="mb-4">
         <h1 className="text-3xl font-semibold text-slate-900">Renewals &amp; CS</h1>
         <p className="mt-2 text-sm text-slate-600">
@@ -208,6 +209,6 @@ export default async function RenewalsPage() {
           ))}
         </ul>
       </section>
-    </main>
+    </CommandPageShell>
   )
 }

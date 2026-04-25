@@ -9,6 +9,10 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { type Priority } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmTickets } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, desc, eq, or } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,9 +67,9 @@ export default async function IncidentsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch incidents from DB
-  // SELECT * FROM itsm_tickets WHERE type = 'incident' AND org_id = $orgId ORDER BY created_at DESC
-  const incidents: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let incidents: Array<{
     id: string
     ticketNumber: string
     title: string
@@ -77,6 +81,53 @@ export default async function IncidentsPage() {
     resolvedAt: string | null
     hasRca: boolean
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmTickets.id,
+        ticketNumber: itsmTickets.ticketNumber,
+        title: itsmTickets.title,
+        priority: itsmTickets.priority,
+        status: itsmTickets.status,
+        assignedToId: itsmTickets.assignedToId,
+        createdAt: itsmTickets.createdAt,
+        resolvedAt: itsmTickets.resolvedAt,
+        closedAt: itsmTickets.closedAt,
+        metadata: itsmTickets.metadata,
+      })
+      .from(itsmTickets)
+      .where(and(eq(itsmTickets.orgId, orgId), eq(itsmTickets.type, 'incident')))
+      .orderBy(desc(itsmTickets.createdAt))
+      .limit(200)
+      .catch(() => [])
+
+    incidents = rows.map((row) => {
+      const meta = (row.metadata && typeof row.metadata === 'object') ? (row.metadata as Record<string, unknown>) : {}
+      const ticketStatus = row.status
+      const incidentStatus: IncidentStatus =
+        ticketStatus === 'resolved' || ticketStatus === 'closed'
+          ? 'resolved'
+          : ticketStatus === 'in_progress' || ticketStatus === 'assigned' || ticketStatus === 'triage'
+            ? 'investigating'
+            : ticketStatus === 'waiting_user' || ticketStatus === 'waiting_vendor'
+              ? 'mitigated'
+              : 'open'
+
+      return {
+        id: row.id,
+        ticketNumber: row.ticketNumber,
+        title: row.title,
+        severity: row.priority as Priority,
+        status: incidentStatus,
+        product: typeof meta.product === 'string' ? meta.product : 'platform',
+        ownerName: row.assignedToId,
+        openedAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
+        resolvedAt: row.resolvedAt?.toISOString() ?? row.closedAt?.toISOString() ?? null,
+        hasRca: Boolean(meta.rcaCompleted),
+      }
+    })
+  }
 
   const active = incidents.filter((i) => i.status !== 'resolved')
   const p1Open = active.filter((i) => i.severity === 'p1_critical').length

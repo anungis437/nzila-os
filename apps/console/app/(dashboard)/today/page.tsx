@@ -40,6 +40,7 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline'
 import { getTodayExecutiveSummary, getTopExecutionActions } from '@/lib/executive-intelligence'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -275,7 +276,7 @@ export default async function TodayPage() {
       : 'weekly sync'
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <CommandPageShell as="div" className="space-y-8">
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
@@ -416,13 +417,14 @@ export default async function TodayPage() {
             ))}
           </div>
         </Link>
-        <Link href="/portfolio" className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-400 transition">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Ranking Shifts</p>
+        <Link href="/portfolio" className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 hover:border-blue-300 transition">
+          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Portfolio Ranking</p>
           <div className="space-y-1.5">
             {executiveSummary.rankingShifts.slice(0, 2).map((item) => (
-              <p key={item} className="text-sm text-gray-700 line-clamp-2">{item}</p>
+              <p key={item} className="text-sm text-gray-800 line-clamp-2">{item}</p>
             ))}
           </div>
+          <p className="text-xs text-blue-600 font-semibold mt-3 inline-flex items-center gap-1">View full portfolio →</p>
         </Link>
       </div>
 
@@ -520,6 +522,6 @@ export default async function TodayPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

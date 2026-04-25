@@ -9,7 +9,7 @@ As of 2026-04-19. This report separates evidence (pipeline, pilot and retention 
 - Best Product Pull Signal: union-eyes (strong pull, score 80).
 - Founder Time Highest ROI Lane: warm_intros.
 - Weakest Funnel Leak: Largest leak is proposal stage friction (volume and dwell time)..
-- Which Product Deserves More Sales Attention Immediately: flow.
+- Which Product Deserves More Sales Attention Immediately: weekone.
 
 ## Connector Status
 

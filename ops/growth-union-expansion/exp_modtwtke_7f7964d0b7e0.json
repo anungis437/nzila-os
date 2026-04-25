@@ -1,0 +1,9 @@
+{
+  "id": "exp_modtwtke_7f7964d0b7e0",
+  "sourceId": "seed-cupe-local-416",
+  "targetId": "seed-cupe-local-79",
+  "relationType": "same_parent",
+  "adjacencyScore": 0.9,
+  "notes": "Both are major CUPE Toronto municipal locals. Converting 416 creates direct warm path to 79.",
+  "createdAt": "2026-04-25T04:18:06.638Z"
+}

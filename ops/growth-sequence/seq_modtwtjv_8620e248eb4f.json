@@ -1,0 +1,87 @@
+{
+  "id": "seq_modtwtjv_8620e248eb4f",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Demo Follow-Up (Day 0→10)",
+  "kind": "demo_followup",
+  "description": "Post-demo close sequence implementing ENTERPRISE_CLOSE_SEQUENCE.md. Sends trust pack (Day 0), ROI summary (Day 2), pilot proposal (Day 5), procurement kit (Day 7), final ask (Day 10).",
+  "targetTiers": [
+    "A",
+    "B"
+  ],
+  "triggerStage": "demo_completed",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 2,
+      "channel": "email",
+      "templateId": "demo-followup-email-day0",
+      "personalisationFields": [
+        "contactFirstName",
+        "demoHighlights",
+        "nextStepAsk"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Day 0: send within 2 hours. Recap demo highlights. Share trust pack link. Propose pilot."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 48,
+      "channel": "email",
+      "templateId": "demo-followup-email-day2",
+      "personalisationFields": [
+        "contactFirstName",
+        "estimatedAnnualSavings"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": null,
+      "goal": "Day 2: ROI summary specific to their member count and sector. Add case study."
+    },
+    {
+      "stepNumber": 3,
+      "delayHours": 72,
+      "channel": "email",
+      "templateId": "demo-followup-email-day5",
+      "personalisationFields": [
+        "contactFirstName",
+        "localName",
+        "pilotTerms"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Day 5: attach pilot proposal (no-risk 90-day terms). Explicit conversion ask."
+    },
+    {
+      "stepNumber": 4,
+      "delayHours": 48,
+      "channel": "email",
+      "templateId": "demo-followup-email-day7",
+      "personalisationFields": [
+        "contactFirstName",
+        "procurementContactName"
+      ],
+      "sendCondition": "no_reply_to_step_3",
+      "stopOnEvent": "replied",
+      "goal": "Day 7: send procurement checklist + vendor assessment pack. Reduce IT/procurement friction."
+    },
+    {
+      "stepNumber": 5,
+      "delayHours": 72,
+      "channel": "email",
+      "templateId": "demo-followup-email-day10",
+      "personalisationFields": [
+        "contactFirstName"
+      ],
+      "sendCondition": "no_reply_to_step_4",
+      "stopOnEvent": "replied",
+      "goal": "Day 10: final ask. Time-boxed offer. Honest break-up if no response."
+    }
+  ],
+  "benchmarkReplyRate": 0.45,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

@@ -3,6 +3,10 @@
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import { platformDb } from '@nzila/db/platform'
+import { itsmKbArticles } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { and, desc, eq, ilike, or } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,8 +33,8 @@ export default async function KnowledgeBasePage({
 
   const params = await searchParams
 
-  // TODO: search KB articles from DB scoped by orgId
-  const articles: Array<{
+  const orgId = await getExecutiveOrgId()
+  let articles: Array<{
     id: string
     title: string
     category: string | null
@@ -39,6 +43,38 @@ export default async function KnowledgeBasePage({
     helpfulCount: number
     updatedAt: string
   }> = []
+
+  if (orgId) {
+    const whereParts = [eq(itsmKbArticles.orgId, orgId)]
+    if (params.category?.trim()) {
+      whereParts.push(eq(itsmKbArticles.category, params.category.trim()))
+    }
+    if (params.q?.trim()) {
+      const q = `%${params.q.trim()}%`
+      whereParts.push(or(ilike(itsmKbArticles.title, q), ilike(itsmKbArticles.body, q))!)
+    }
+
+    const rows = await platformDb
+      .select({
+        id: itsmKbArticles.id,
+        title: itsmKbArticles.title,
+        category: itsmKbArticles.category,
+        status: itsmKbArticles.status,
+        viewCount: itsmKbArticles.viewCount,
+        helpfulCount: itsmKbArticles.helpfulCount,
+        updatedAt: itsmKbArticles.updatedAt,
+      })
+      .from(itsmKbArticles)
+      .where(and(...whereParts))
+      .orderBy(desc(itsmKbArticles.updatedAt))
+      .limit(300)
+      .catch(() => [])
+
+    articles = rows.map((row) => ({
+      ...row,
+      updatedAt: row.updatedAt?.toISOString().slice(0, 10) ?? '—',
+    }))
+  }
 
   return (
     <div className="p-6 space-y-4">

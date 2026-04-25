@@ -1053,7 +1053,7 @@ export default async function IntelligencePage({
         </div>
       )}
 
-      <div className="px-6 py-6 max-w-screen-2xl mx-auto">
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
         {section === 'overview' && (
           <OverviewSection
             briefing={briefing}

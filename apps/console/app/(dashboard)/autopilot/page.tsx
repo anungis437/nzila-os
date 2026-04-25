@@ -12,6 +12,7 @@ import {
 import { generateAutopilotRecommendations } from '@/lib/autopilot-engine'
 import { getWeeklyBriefingData } from '@/lib/executive-intelligence'
 import { getDataFreshnessSummary } from '@/lib/data-freshness'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -109,7 +110,7 @@ export default async function AutopilotPage() {
   ])
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <CommandPageShell as="div" className="space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Autopilot</h1>
@@ -199,6 +200,6 @@ export default async function AutopilotPage() {
           </div>
         </div>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

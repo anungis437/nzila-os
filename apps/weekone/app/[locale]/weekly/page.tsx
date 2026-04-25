@@ -42,7 +42,7 @@ export default async function WeeklyPage() {
         <div>
           <h1 className="text-2xl font-semibold">Weekly Briefs</h1>
           <p className="mt-1 text-muted-foreground">
-            Your founder memo archive
+            Your baseline closeout archive
           </p>
         </div>
 
@@ -67,6 +67,7 @@ export default async function WeeklyPage() {
                 <SectionHeader
                   title="Latest Brief"
                   subtitle={`Week of ${new Date(latest.weekStartDate).toLocaleDateString()}`}
+                  helpContent="This is your weekly operating closeout: what happened, what changed, and what to run next."
                   className="mb-4"
                 />
                 <div className="rounded-xl border border-border bg-card p-6 space-y-5">
@@ -129,7 +130,11 @@ export default async function WeeklyPage() {
             {/* Archive */}
             {archive.length > 0 && (
               <section>
-                <SectionHeader title="Archive" className="mb-4" />
+                <SectionHeader
+                  title="Archive"
+                  helpContent="Use archive trends to spot repeated misses and improve your baseline cadence each month."
+                  className="mb-4"
+                />
                 <div className="space-y-2">
                   {archive.map((b) => (
                     <div

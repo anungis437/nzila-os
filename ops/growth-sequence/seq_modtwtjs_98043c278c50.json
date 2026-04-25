@@ -1,0 +1,62 @@
+{
+  "id": "seq_modtwtjs_98043c278c50",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Warm Introduction",
+  "kind": "warm_intro",
+  "description": "For targets with a mutual connection (partner, conference, CLC affiliate). Opens with the mutual reference. Moves faster than cold.",
+  "targetTiers": [
+    "A",
+    "B",
+    "C"
+  ],
+  "triggerStage": "lead",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 0,
+      "channel": "email",
+      "templateId": "warm-intro-email",
+      "personalisationFields": [
+        "contactFirstName",
+        "mutualConnectionName",
+        "mutualConnectionContext"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Lead with the warm reference. One ask: 20-min exploratory call."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 96,
+      "channel": "linkedin_message",
+      "templateId": "linkedin-connection-note",
+      "personalisationFields": [
+        "contactFirstName",
+        "mutualConnectionName"
+      ],
+      "sendCondition": "no_reply_to_step_1",
+      "stopOnEvent": "replied",
+      "goal": "Secondary touch via LinkedIn referencing the email."
+    },
+    {
+      "stepNumber": 3,
+      "delayHours": 72,
+      "channel": "email",
+      "templateId": "case-study-share",
+      "personalisationFields": [
+        "contactFirstName",
+        "sectorMatchedCaseStudy"
+      ],
+      "sendCondition": "no_reply_to_step_2",
+      "stopOnEvent": "replied",
+      "goal": "Share sector-relevant case study to surface buying intent."
+    }
+  ],
+  "benchmarkReplyRate": 0.28,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

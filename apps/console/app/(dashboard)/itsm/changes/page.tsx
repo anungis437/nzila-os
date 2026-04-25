@@ -4,6 +4,10 @@
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { CHANGE_TYPES } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmChanges } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,8 +32,9 @@ export default async function ChangeCalendarPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch changes from DB scoped by orgId
-  const changes: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let changes: Array<{
     id: string
     rfcNumber: string
     type: string
@@ -39,6 +44,36 @@ export default async function ChangeCalendarPage() {
     scheduledEnd: string | null
     riskLevel: string
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmChanges.id,
+        changeNumber: itsmChanges.changeNumber,
+        type: itsmChanges.type,
+        status: itsmChanges.status,
+        title: itsmChanges.title,
+        scheduledStart: itsmChanges.scheduledStart,
+        scheduledEnd: itsmChanges.scheduledEnd,
+        riskLevel: itsmChanges.riskLevel,
+      })
+      .from(itsmChanges)
+      .where(eq(itsmChanges.orgId, orgId))
+      .orderBy(desc(itsmChanges.createdAt))
+      .limit(200)
+      .catch(() => [])
+
+    changes = rows.map((row) => ({
+      id: row.id,
+      rfcNumber: row.changeNumber,
+      type: row.type,
+      status: row.status,
+      title: row.title,
+      scheduledStart: row.scheduledStart,
+      scheduledEnd: row.scheduledEnd,
+      riskLevel: row.riskLevel,
+    }))
+  }
 
   return (
     <div className="p-6 space-y-4">

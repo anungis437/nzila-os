@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const STAGES = [
   { value: "pre-revenue", label: "Pre-revenue", sub: "No paying customers yet" },
@@ -20,9 +21,15 @@ export function Step2({ value, onChange, onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-semibold">
-          What&apos;s your revenue stage?
-        </h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-xl font-semibold">
+            What&apos;s your revenue stage?
+          </h2>
+          <HelpTooltip
+            label="Why we ask revenue stage"
+            content="Revenue stage sets cash and pipeline expectations in your first weekly operating loop."
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Be honest — we&apos;re here to help, not judge.
         </p>

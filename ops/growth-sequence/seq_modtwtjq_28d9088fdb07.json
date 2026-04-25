@@ -1,0 +1,76 @@
+{
+  "id": "seq_modtwtjq_28d9088fdb07",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Cold Outbound",
+  "kind": "cold",
+  "description": "For Tier A/B targets with no prior relationship. 4-touch, 2-week cadence. Opens with a pain-hook specific to the sector, closes with ROI calculator share.",
+  "targetTiers": [
+    "A",
+    "B"
+  ],
+  "triggerStage": "lead",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 0,
+      "channel": "email",
+      "templateId": "cold-email-ue-pain-hook",
+      "personalisationFields": [
+        "contactFirstName",
+        "localName",
+        "sector",
+        "memberCount"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Open the conversation with a concrete pain point. One ask: 15-min call."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 72,
+      "channel": "linkedin_connection",
+      "templateId": "linkedin-connection-note",
+      "personalisationFields": [
+        "contactFirstName",
+        "localName"
+      ],
+      "sendCondition": "no_reply_to_step_1",
+      "stopOnEvent": "replied",
+      "goal": "Reinforce sender credibility via LinkedIn. Low friction secondary touch."
+    },
+    {
+      "stepNumber": 3,
+      "delayHours": 96,
+      "channel": "email",
+      "templateId": "roi-calculator-share",
+      "personalisationFields": [
+        "contactFirstName",
+        "localName",
+        "memberCount",
+        "estimatedHoursPerGrievance"
+      ],
+      "sendCondition": "no_reply_to_step_1",
+      "stopOnEvent": "replied",
+      "goal": "Send ROI calculator pre-filled with their public member count. Concrete value signal."
+    },
+    {
+      "stepNumber": 4,
+      "delayHours": 120,
+      "channel": "email",
+      "templateId": "cold-email-ue-intro",
+      "personalisationFields": [
+        "contactFirstName"
+      ],
+      "sendCondition": "no_reply_to_step_3",
+      "stopOnEvent": "replied",
+      "goal": "Final touch. Explicit break-up line. Easy opt-out."
+    }
+  ],
+  "benchmarkReplyRate": 0.08,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

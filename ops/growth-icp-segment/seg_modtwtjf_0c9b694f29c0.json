@@ -1,0 +1,20 @@
+{
+  "id": "seg_modtwtjf_0c9b694f29c0",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Healthcare Union — Tier A",
+  "description": "Healthcare-sector unions with credential tracking, shift scheduling grievances, and high arbitration rates.",
+  "sectors": [
+    "healthcare"
+  ],
+  "minMembers": 300,
+  "maxMembers": null,
+  "minGovernanceComplexity": 0.55,
+  "tier": "A",
+  "tierRationale": "Healthcare unions face highest grievance complexity (patient care + labour rights). ONA, CUPE health locals, and SEIU Healthcare are prototypical.",
+  "createdAt": "2026-04-25T04:18:06.603Z",
+  "updatedAt": "2026-04-25T04:18:06.603Z"
+}

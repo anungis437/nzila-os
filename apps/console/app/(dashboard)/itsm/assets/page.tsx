@@ -5,6 +5,10 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ASSET_TYPES } from '@nzila/itsm-core'
+import { platformDb } from '@nzila/db/platform'
+import { itsmAssets } from '@nzila/db/schema'
+import { getExecutiveOrgId } from '@/lib/executive-os'
+import { desc, eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,8 +29,9 @@ export default async function AssetsPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  // TODO: fetch assets from DB scoped by orgId
-  const assets: Array<{
+  const orgId = await getExecutiveOrgId()
+
+  let assets: Array<{
     id: string
     type: string
     name: string
@@ -37,6 +42,31 @@ export default async function AssetsPage() {
     riskScore: number
     warrantyExpiry: string | null
   }> = []
+
+  if (orgId) {
+    const rows = await platformDb
+      .select({
+        id: itsmAssets.id,
+        type: itsmAssets.type,
+        name: itsmAssets.name,
+        manufacturer: itsmAssets.manufacturer,
+        model: itsmAssets.model,
+        ownerId: itsmAssets.ownerId,
+        lifecycle: itsmAssets.lifecycle,
+        riskScore: itsmAssets.riskScore,
+        warrantyExpiry: itsmAssets.warrantyExpiry,
+      })
+      .from(itsmAssets)
+      .where(eq(itsmAssets.orgId, orgId))
+      .orderBy(desc(itsmAssets.updatedAt))
+      .limit(500)
+      .catch(() => [])
+
+    assets = rows.map((row) => ({
+      ...row,
+      riskScore: row.riskScore ?? 0,
+    }))
+  }
 
   return (
     <div className="p-6 space-y-4">

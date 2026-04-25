@@ -3,6 +3,7 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { getRunwayData, getFounderFocusData, getWeeklyBriefingData } from '@/lib/executive-intelligence'
 import { getDataFreshnessSummary } from '@/lib/data-freshness'
 import { generateAutopilotRecommendations } from '@/lib/autopilot-engine'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +23,7 @@ export default async function CEODashboardPage() {
   const topThree = autopilot.slice(0, 3)
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
+    <CommandPageShell as="div" className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">CEO One-Screen</h1>
         <p className="text-sm text-gray-500 mt-1">A 60-second truth snapshot: cash, decisions, risks, opportunities, and founder focus.</p>
@@ -74,6 +75,6 @@ export default async function CEODashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </CommandPageShell>
   )
 }

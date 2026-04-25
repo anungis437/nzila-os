@@ -12,6 +12,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 import { getFounderFocusData } from '@/lib/executive-intelligence'
+import { CommandPageShell } from '@/components/command-page-shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,7 +112,7 @@ export default async function FocusPage() {
   const today = new Date().toISOString().slice(0, 10)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <CommandPageShell as="div" className="space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Founder Focus</h1>
@@ -315,6 +316,6 @@ export default async function FocusPage() {
           </div>
         </div>
       )}
-    </div>
+    </CommandPageShell>
   )
 }

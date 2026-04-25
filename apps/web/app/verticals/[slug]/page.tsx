@@ -28,7 +28,7 @@ const verticalData: Record<string, {
 }> = {
   fintech: {
     name: 'Fintech',
-    tagline: 'Inclusive Finance for Diaspora Communities & Underserved Markets',
+    tagline: 'Financial Infrastructure for Diaspora Communities & Global Markets',
     description: 'Banking, payments, stress testing, and virtual CFO services for individuals and enterprises.',
     hero: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1920',
     heroAlt: 'Financial trading screens displaying market data and candlestick charts',
@@ -38,7 +38,7 @@ const verticalData: Record<string, {
     status: '2 Platforms',
     color: 'from-electric to-violet',
     overview:
-      'Our Fintech vertical is built on the insight that legacy banking systems exclude millions of diaspora and underbanked individuals. Nzila\'s stack closes that gap through compliant, multi-currency, community-led financial infrastructure.',
+      'Our Fintech vertical builds compliant, multi-currency financial infrastructure designed from the ground up for diaspora communities and global markets. We recognise diaspora and emerging economies as primary markets — not afterthoughts — and design accordingly: compliance, transparency, and community financial models like tontines and chamas built in from day one.',
     capabilities: [
       {
         title: 'KYC / AML Compliance Engine',
@@ -77,9 +77,9 @@ const verticalData: Record<string, {
       { scenario: 'An SME without a dedicated finance team', outcome: 'AI-generated CFO dashboards and cash-flow alerts' },
     ],
     differentiators: [
-      'Designed explicitly for diaspora and underbanked communities',
+      'Purpose-built for diaspora and emerging economies — not adapted from legacy platforms',
       'Regulatory-grade KYC/AML from day one',
-      'Supports community financial models like tontines and chamas',
+      'Supports community financial models like tontines and chamas as primary features',
       'Integrated stress-testing for portfolio resilience',
     ],
   },
@@ -410,7 +410,7 @@ const verticalData: Record<string, {
       },
     ],
     useCases: [
-      { scenario: 'An independent Congolese artist releasing their first EP', outcome: 'Global distribution with transparent royalty tracking from day one' },
+      { scenario: 'An independent artist from the African diaspora releasing their first EP', outcome: 'Global distribution with transparent royalty tracking and equal rates from day one' },
       { scenario: 'A promoter running a diaspora concert series', outcome: 'Branded ticketing portal with live check-in and revenue dashboards' },
       { scenario: 'A label managing 20 artists across 3 continents', outcome: 'Unified rights management and royalty automation' },
     ],

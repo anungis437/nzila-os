@@ -1,0 +1,24 @@
+{
+  "id": "seed-cupe-local-4400",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "CUPE Local 4400",
+  "fullName": "CUPE Local 4400 — Toronto District School Board",
+  "unionScope": "local",
+  "parentId": "seed-cupe-national",
+  "sector": "education",
+  "province": "CA-ON",
+  "memberCount": 12000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://cupelocal4400.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier B. Education sector. Large member base. Budget cycles are school-year aligned.",
+  "createdAt": "2026-04-25T04:18:06.628Z",
+  "updatedAt": "2026-04-25T04:18:06.628Z"
+}

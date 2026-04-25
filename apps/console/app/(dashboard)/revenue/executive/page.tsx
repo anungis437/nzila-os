@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { and, eq, gte, lte, ne, desc } from 'drizzle-orm'
 import { currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
+import { CommandPageShell } from '@/components/command-page-shell'
 import {
   commerceOpportunities,
   executiveAgentRuns,
@@ -111,7 +112,7 @@ export default async function RevenueExecutivePage() {
   const data = orgId ? await lastInsights(orgId, 'revops') : { run: null, insights: [] }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <CommandPageShell className="space-y-6">
       <header className="mb-6">
         <h1 className="text-3xl font-semibold text-slate-900">Revenue · ExecutiveOS</h1>
         <p className="mt-2 text-sm text-slate-600">
@@ -194,6 +195,6 @@ export default async function RevenueExecutivePage() {
           ))}
         </ul>
       </section>
-    </main>
+    </CommandPageShell>
   )
 }

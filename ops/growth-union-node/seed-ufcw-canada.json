@@ -1,0 +1,24 @@
+{
+  "id": "seed-ufcw-canada",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "name": "UFCW Canada",
+  "fullName": "United Food and Commercial Workers Canada",
+  "unionScope": "national",
+  "parentId": "seed-clc",
+  "sector": "hospitality",
+  "province": null,
+  "memberCount": 250000,
+  "primaryContactName": null,
+  "primaryContactTitle": null,
+  "primaryContactEmail": null,
+  "websiteUrl": "https://www.ufcw.ca",
+  "inPipeline": false,
+  "dealEngineId": null,
+  "notes": "Tier C at national level. Hospitality/food sector has lower UE fit. Include if warm path available.",
+  "createdAt": "2026-04-25T04:18:06.637Z",
+  "updatedAt": "2026-04-25T04:18:06.637Z"
+}

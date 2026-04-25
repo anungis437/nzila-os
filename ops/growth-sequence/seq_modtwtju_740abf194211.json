@@ -1,0 +1,76 @@
+{
+  "id": "seq_modtwtju_740abf194211",
+  "scope": {
+    "tenantId": "nzila-os",
+    "orgId": "platform",
+    "product": "union-eyes"
+  },
+  "label": "Union Eyes — Post-Conference Follow-Up",
+  "kind": "post_event",
+  "description": "For leads captured at CUPE Congress, HRPA, CLC conventions, or other events. Day 0 = day of/after event. Aggressive first 5 days while interest is warm.",
+  "targetTiers": [
+    "A",
+    "B",
+    "C"
+  ],
+  "triggerStage": "lead",
+  "steps": [
+    {
+      "stepNumber": 1,
+      "delayHours": 4,
+      "channel": "email",
+      "templateId": "post-event-email-day0",
+      "personalisationFields": [
+        "contactFirstName",
+        "eventName",
+        "conversationTopic"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": "replied",
+      "goal": "Day 0: same-day follow-up referencing your specific conversation. Fast while memory is fresh."
+    },
+    {
+      "stepNumber": 2,
+      "delayHours": 48,
+      "channel": "linkedin_connection",
+      "templateId": "linkedin-connection-note",
+      "personalisationFields": [
+        "contactFirstName",
+        "eventName"
+      ],
+      "sendCondition": null,
+      "stopOnEvent": null,
+      "goal": "Day 2: connect on LinkedIn. Reinforce the relationship."
+    },
+    {
+      "stepNumber": 3,
+      "delayHours": 48,
+      "channel": "email",
+      "templateId": "post-event-email-day2",
+      "personalisationFields": [
+        "contactFirstName",
+        "localName",
+        "painPointDiscussed"
+      ],
+      "sendCondition": "no_reply_to_step_1",
+      "stopOnEvent": "replied",
+      "goal": "Day 4: value-add email referencing specific pain point from event conversation."
+    },
+    {
+      "stepNumber": 4,
+      "delayHours": 48,
+      "channel": "email",
+      "templateId": "post-event-email-day5",
+      "personalisationFields": [
+        "contactFirstName",
+        "memberCount"
+      ],
+      "sendCondition": "no_reply_to_step_3",
+      "stopOnEvent": "replied",
+      "goal": "Day 6: send ROI calculator + case study bundle. Clear ask: 30-min demo."
+    }
+  ],
+  "benchmarkReplyRate": 0.22,
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}
