@@ -44,11 +44,11 @@ jobs:
       github.event.inputs.report_type == 'evidence-collection' ||
       github.event.inputs.report_type == 'full-audit'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     name: OPA Policy Validation
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install OPA
         run: |
@@ -214,11 +214,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Secret Hygiene Audit
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -270,7 +270,7 @@ jobs:
         github.event.inputs.report_type == 'full-audit'
       )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate compliance dashboard
         run: |

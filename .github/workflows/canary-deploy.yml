@@ -52,9 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Pre-Canary Gates
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -75,7 +75,7 @@ jobs:
       canary_revision: ${{ steps.deploy.outputs.revision }}
       stable_revision: ${{ steps.baseline.outputs.revision }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure login
         uses: azure/login@v3
@@ -144,7 +144,7 @@ jobs:
     outputs:
       healthy: ${{ steps.health.outputs.healthy }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Azure login
         uses: azure/login@v3

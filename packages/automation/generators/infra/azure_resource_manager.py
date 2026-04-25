@@ -269,7 +269,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: Azure Login (OIDC)
         uses: azure/login@v1
