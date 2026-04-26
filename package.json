@@ -52,6 +52,8 @@
     "redteam:core": "tsx security/redteam/profile-runner.ts --profile core",
     "redteam:abr": "tsx security/redteam/profile-runner.ts --profile abr-insights",
     "pilot:check": "tsx scripts/pilot-check.ts",
+    "flow:shopmoica:cutover:check": "tsx scripts/flow-shopmoica-cutover-check.ts",
+    "flow:shopmoica:cutover:check:enforce": "tsx scripts/flow-shopmoica-cutover-check.ts --enforce",
     "rfp:generate": "tsx scripts/rfp-generate.ts --out docs/rfp/answers.md",
     "demo:golden": "tsx scripts/demo-golden-path.ts",
     "demo:seed": "pnpm --filter @nzila/flow demo:seed && pnpm --filter @nzila/cfo demo:seed && pnpm --filter @nzila/partners demo:seed && pnpm --filter @nzila/web demo:seed",

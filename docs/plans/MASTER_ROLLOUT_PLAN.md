@@ -308,7 +308,7 @@ This is compulsory. No external pilot launches without a completed internal dry 
 | Phase 3 — Internal Mock Pilot | ⬜ Not Started | Internal | — | 2026-04-20 |
 | Phase 4 — UE Lighthouse Pilot | ⬜ Not Started | union-eyes | Blocked on Phase 3 | 2026-04-20 |
 | Phase 5 — Production Promotion Path | ⬜ Not Started | Platform | — | 2026-04-20 |
-| Phase 6 — Flow Pilot | ⬜ Not Started | flow | Blocked on Phase 4 | 2026-04-20 |
+| Phase 6 — Flow Pilot | 🟡 In Progress | flow | Production cutover pending domain, provisioning, and sign-offs | 2026-04-26 |
 | Phase 7 — Zonga Pilot | ⬜ Not Started | zonga | Blocked on Phase 6 | 2026-04-20 |
 | Phase 8 — Industrialization | ⬜ Not Started | Platform | — | 2026-04-20 |
 
