@@ -1,0 +1,78 @@
+{
+  "domain": "shopmoica.ca",
+  "updatedAt": "2026-04-26T00:00:00.000Z",
+  "checks": [
+    {
+      "id": "dns_records",
+      "title": "DNS records mapped to production ingress",
+      "owner": "team-platform-ops@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending production DNS record confirmation"
+    },
+    {
+      "id": "dns_health",
+      "title": "DNS health verification passes",
+      "owner": "team-platform-ops@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Run pnpm dns:verify with production DNS credentials"
+    },
+    {
+      "id": "tls_certificate",
+      "title": "TLS certificate valid for apex and app host",
+      "owner": "team-platform-ops@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending post-cutover TLS verification"
+    },
+    {
+      "id": "env_parity",
+      "title": "Production environment parity verified",
+      "owner": "team-platform-admin@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending production environment parity review"
+    },
+    {
+      "id": "org_provisioning",
+      "title": "Production org provisioning and RBAC verified",
+      "owner": "team-platform-admin@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending console provisioning sign-off"
+    },
+    {
+      "id": "security_packet_ack",
+      "title": "Security and privacy packet acknowledged",
+      "owner": "ciso@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending buyer security acknowledgement"
+    },
+    {
+      "id": "buyer_signoff",
+      "title": "Buyer go-live sign-off recorded",
+      "owner": "pilot-captain-flow@nzila.ai",
+      "status": "pending",
+      "required": true,
+      "evidence": "Pending commercial go-live approval"
+    },
+    {
+      "id": "pilot_check_pass",
+      "title": "Repository pilot readiness gate passes",
+      "owner": "team-platform-admin@nzila.ai",
+      "status": "complete",
+      "required": true,
+      "evidence": "Validated via pnpm pilot:check"
+    },
+    {
+      "id": "flow_lockdown_pass",
+      "title": "Flow lockdown integrity check passes",
+      "owner": "team-flow-engineering@nzila.ai",
+      "status": "complete",
+      "required": true,
+      "evidence": "Validated via pnpm --filter @nzila/flow lockdown:check"
+    }
+  ]
+}

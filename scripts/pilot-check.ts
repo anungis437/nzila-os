@@ -22,6 +22,7 @@ import { execSync } from 'node:child_process'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
+import { fileURLToPath } from 'node:url'
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,8 @@ interface CheckResult {
   error?: string
 }
 
-const ROOT = join(import.meta.dirname, '..')
+const SCRIPT_DIR = fileURLToPath(new URL('.', import.meta.url))
+const ROOT = join(SCRIPT_DIR, '..')
 const ATTESTATION_DIR = join(ROOT, '.pilot-check')
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

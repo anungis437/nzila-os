@@ -4,6 +4,16 @@
 **Pass:** Zero-Bypass Refactor (active)  
 **Result:** 🟡 PARTIALLY COMPLETE — hardening in progress
 
+## Validation Snapshot (2026-04-26)
+
+- `pnpm pilot:check` at repository root: PASS
+- `pnpm --filter @nzila/flow typecheck`: PASS
+- `pnpm --filter @nzila/flow lint`: PASS
+- `pnpm --filter @nzila/flow test`: PASS
+- `pnpm --filter @nzila/flow lockdown:check`: PASS (0 violations)
+
+This confirms current technical gate health while Phase 6/9 documentation tasks in this file remain open.
+
 ---
 
 ## Phase Summary
