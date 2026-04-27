@@ -95,7 +95,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Run Trivy (filesystem mode) [BLOCKING]
-        uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
+        uses: aquasecurity/trivy-action@v0.36.0 # pin to release tag, not mutable @master
         with:
           scan-type: fs
           scan-ref: '.'
@@ -106,7 +106,7 @@ jobs:
           trivyignores: .trivyignore
 
       - name: Run Trivy (filesystem mode) — SARIF (non-blocking)
-        uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
+        uses: aquasecurity/trivy-action@v0.36.0 # pin to release tag, not mutable @master
         if: always()
         continue-on-error: true
         with:
@@ -134,7 +134,7 @@ jobs:
       # Generate CycloneDX SBOM using Trivy — works natively with pnpm workspaces
       # (unlike @cyclonedx/cyclonedx-npm which requires npm's `npm ls`)
       - name: Generate CycloneDX SBOM
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: '.'
@@ -263,7 +263,7 @@ jobs:
             --skip-editable || true
 
       - name: Run Trivy FS scan on ABR scaffold [BLOCKING — CRITICAL only]
-        uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
+        uses: aquasecurity/trivy-action@v0.36.0 # pin to release tag, not mutable @master
         with:
           scan-type: fs
           scan-ref: tech-repo-scaffold/django-backbone
@@ -272,7 +272,7 @@ jobs:
           format: table
 
       - name: Run Trivy FS scan — SARIF upload (non-blocking)
-        uses: aquasecurity/trivy-action@0.35.0 # pin to release tag, not mutable @master
+        uses: aquasecurity/trivy-action@v0.36.0 # pin to release tag, not mutable @master
         if: always()
         continue-on-error: true
         with:

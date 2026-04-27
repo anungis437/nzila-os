@@ -52,7 +52,7 @@ jobs:
             .
 
       - name: Run Trivy (table output — blocks on CRITICAL)
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ matrix.image }}:scan
           format: table
@@ -63,7 +63,7 @@ jobs:
           severity: CRITICAL
 
       - name: Run Trivy (SARIF — GitHub Security tab)
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true  # always produce SARIF even when criticals found
         with:
           image-ref: ${{ matrix.image }}:scan
@@ -93,7 +93,7 @@ jobs:
 
       # ── Step 1: Blocking table-output scan (exit 1 on CRITICAL) ──────────
       - name: Run Trivy filesystem scan (blocking — CRITICAL)
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -107,7 +107,7 @@ jobs:
       # ── Step 2: SARIF upload for GitHub Security tab (non-blocking) ──────
       - name: Run Trivy filesystem scan (SARIF — for Security tab)
         if: always()
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true  # non-blocking: only produces SARIF report
         with:
           scan-type: fs
