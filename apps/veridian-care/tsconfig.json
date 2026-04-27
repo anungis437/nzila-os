@@ -1,0 +1,19 @@
+{
+  "extends": "@nzila/config/tsconfig/nextjs",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@nzila/os-core": ["../../packages/os-core/src/index.ts"],
+      "@nzila/os-core/health": ["../../packages/os-core/src/health.ts"],
+      "@nzila/health-ui": ["../../packages/health-ui/src/index.ts"],
+      "@nzila/consent-engine": ["../../packages/consent-engine/src/index.ts"],
+      "@nzila/patient-identity": ["../../packages/patient-identity/src/index.ts"],
+      "@nzila/clinical-timeline": ["../../packages/clinical-timeline/src/index.ts"],
+      "@nzila/health-analytics": ["../../packages/health-analytics/src/index.ts"],
+      "@nzila/health-governance": ["../../packages/health-governance/src/index.ts"],
+      "@nzila/health-connectors": ["../../packages/health-connectors/src/index.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", ".turbo"]
+}

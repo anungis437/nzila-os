@@ -1,0 +1,30 @@
+{
+  "name": "@nzila/veridian-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3010",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/health-ui": "workspace:*",
+    "next": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "typescript": "workspace:*",
+    "eslint": "workspace:*",
+    "eslint-config-next": "workspace:*",
+    "vitest": "workspace:*",
+    "@vitejs/plugin-react": "workspace:*"
+  }
+}
