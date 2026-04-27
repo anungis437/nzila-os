@@ -75,9 +75,10 @@ const ContentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://login.microsoftonline.com",
   
   // Scripts: SECURITY HARDENED - Removed 'unsafe-eval' (Feb 2026)
+  // DEV ONLY: React + Turbopack require eval for source-mapped callstacks.
   // 'unsafe-inline' required for NextAuth/Entra redirect flows
   // js.stripe.com required for Stripe.js payment elements
-  "script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com`,
   
   // Connections: SECURITY TRADEOFF - Permissive for dynamic integrations
   // Core domains whitelisted; https:/wss: required for user-configured webhooks

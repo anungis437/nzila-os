@@ -13,6 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -63,6 +64,7 @@ interface Campaign {
 
 export default function CampaignsPage() {
   const router = useRouter();
+  const t = useTranslations('communicationsCampaignsPage');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export default function CampaignsPage() {
       const response = await fetch(`/api/communications/campaigns?${params}`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch campaigns');
+        throw new Error(t('failedToFetchCampaigns'));
       }
 
       const json = await response.json();
@@ -106,7 +108,7 @@ export default function CampaignsPage() {
       setCampaigns(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
       setTotalPages(payload.pagination?.totalPages ?? 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch campaigns');
+      setError(err instanceof Error ? err.message : t('failedToFetchCampaigns'));
     } finally {
       setLoading(false);
     }
@@ -143,14 +145,14 @@ export default function CampaignsPage() {
 
     return (
       <Badge variant={variants[status] || 'default'}>
-        {status}
+        {t(`status.${status}`)}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return t('naLabel');
+    return new Date(dateString).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -185,14 +187,14 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Campaigns</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Manage and track your communication campaigns
+            {t('subtitle')}
           </p>
         </div>
         <Button onClick={() => router.push('/dashboard/communications/campaigns/new')}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Campaign
+          {t('createCampaignButton')}
         </Button>
       </div>
 
@@ -200,7 +202,7 @@ export default function CampaignsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalCampaignsTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{campaigns.length}</div>
@@ -209,7 +211,7 @@ export default function CampaignsPage() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -220,7 +222,7 @@ export default function CampaignsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Draft</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('draftTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -231,7 +233,7 @@ export default function CampaignsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('completedTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -244,7 +246,7 @@ export default function CampaignsPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t('filtersTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4">
@@ -252,7 +254,7 @@ export default function CampaignsPage() {
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search campaigns..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8"
@@ -262,30 +264,30 @@ export default function CampaignsPage() {
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full md:w-45">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-                <SelectItem value="sending">Sending</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="paused">Paused</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="all">{t('statusAll')}</SelectItem>
+                <SelectItem value="draft">{t('status.draft')}</SelectItem>
+                <SelectItem value="scheduled">{t('status.scheduled')}</SelectItem>
+                <SelectItem value="sending">{t('status.sending')}</SelectItem>
+                <SelectItem value="sent">{t('status.sent')}</SelectItem>
+                <SelectItem value="paused">{t('status.paused')}</SelectItem>
+                <SelectItem value="cancelled">{t('status.cancelled')}</SelectItem>
+                <SelectItem value="failed">{t('status.failed')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={channelFilter} onValueChange={setChannelFilter}>
               <SelectTrigger className="w-full md:w-45">
-                <SelectValue placeholder="Channel" />
+                <SelectValue placeholder={t('channelPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Channels</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="sms">SMS</SelectItem>
-                <SelectItem value="push">Push</SelectItem>
-                <SelectItem value="multi_channel">Multi-Channel</SelectItem>
+                <SelectItem value="all">{t('channelAll')}</SelectItem>
+                <SelectItem value="email">{t('channel.email')}</SelectItem>
+                <SelectItem value="sms">{t('channel.sms')}</SelectItem>
+                <SelectItem value="push">{t('channel.push')}</SelectItem>
+                <SelectItem value="multi_channel">{t('channel.multi_channel')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -299,29 +301,29 @@ export default function CampaignsPage() {
       {/* Campaigns Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Campaigns</CardTitle>
+          <CardTitle>{t('allCampaignsTitle')}</CardTitle>
           <CardDescription>
-            {filteredCampaigns.length} campaign(s) found
+            {t('campaignsFound', { count: filteredCampaigns.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-              <p className="mt-2 text-muted-foreground">Loading campaigns...</p>
+              <p className="mt-2 text-muted-foreground">{t('loadingCampaigns')}</p>
             </div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">
               <p>{error}</p>
               <Button variant="outline" onClick={fetchCampaigns} className="mt-4">
-                Try Again
+                {t('tryAgainButton')}
               </Button>
             </div>
           ) : filteredCampaigns.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No campaigns found</p>
+              <p className="text-muted-foreground">{t('noCampaignsFound')}</p>
               <Button onClick={() => router.push('/dashboard/communications/campaigns/new')} className="mt-4">
-                Create Your First Campaign
+                {t('createFirstCampaignButton')}
               </Button>
             </div>
           ) : (
@@ -329,16 +331,16 @@ export default function CampaignsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Campaign</TableHead>
-                    <TableHead>Channel</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Audience</TableHead>
-                    <TableHead>Sent</TableHead>
-                    <TableHead>Delivered</TableHead>
-                    <TableHead>Opened</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('columnCampaign')}</TableHead>
+                    <TableHead>{t('columnChannel')}</TableHead>
+                    <TableHead>{t('columnType')}</TableHead>
+                    <TableHead>{t('columnStatus')}</TableHead>
+                    <TableHead>{t('columnAudience')}</TableHead>
+                    <TableHead>{t('columnSent')}</TableHead>
+                    <TableHead>{t('columnDelivered')}</TableHead>
+                    <TableHead>{t('columnOpened')}</TableHead>
+                    <TableHead>{t('columnDate')}</TableHead>
+                    <TableHead>{t('columnActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -363,10 +365,10 @@ export default function CampaignsPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getChannelIcon(campaign.channel)}
-                            <span className="capitalize">{campaign.channel}</span>
+                            <span>{t(`channel.${campaign.channel}`)}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="capitalize">{campaign.type}</TableCell>
+                        <TableCell>{t(`type.${campaign.type}`)}</TableCell>
                         <TableCell>{getStatusBadge(campaign.status)}</TableCell>
                         <TableCell>{campaign.audienceCount || 0}</TableCell>
                         <TableCell>{campaign.stats.sent || 0}</TableCell>
@@ -398,7 +400,7 @@ export default function CampaignsPage() {
                               router.push(`/dashboard/communications/campaigns/${campaign.id}`);
                             }}
                           >
-                            View
+                            {t('viewButton')}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -411,7 +413,7 @@ export default function CampaignsPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-sm text-muted-foreground">
-                    Page {page} of {totalPages}
+                    {t('pageInfo', { page, totalPages })}
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -420,7 +422,7 @@ export default function CampaignsPage() {
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                     >
-                      Previous
+                      {t('previousButton')}
                     </Button>
                     <Button
                       variant="outline"
@@ -428,7 +430,7 @@ export default function CampaignsPage() {
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                     >
-                      Next
+                      {t('nextButton')}
                     </Button>
                   </div>
                 </div>

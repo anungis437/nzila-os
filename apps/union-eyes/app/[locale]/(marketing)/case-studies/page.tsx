@@ -15,11 +15,68 @@ import { CaseStudyGrid } from '@/components/marketing/case-study-card';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
 
+const CASE_STUDIES_COPY: Record<string, {
+  loading: string;
+  category: string;
+  sector: string;
+  orgType: string;
+  jurisdiction: string;
+  all: string;
+  empty: string;
+  ctaBody: string;
+  ctaButton: string;
+}> = {
+  'en-CA': {
+    loading: 'Loading case studies...',
+    category: 'Category',
+    sector: 'Sector',
+    orgType: 'Org type',
+    jurisdiction: 'Jurisdiction',
+    all: 'All',
+    empty: 'No case studies match your filters. Try adjusting your selections.',
+    ctaBody: 'Your organization could be the next controlled deployment.',
+    ctaButton: 'Start a Controlled Pilot',
+  },
+  'fr-CA': {
+    loading: 'Chargement des etudes de cas...',
+    category: 'Categorie',
+    sector: 'Secteur',
+    orgType: "Type d'organisation",
+    jurisdiction: 'Juridiction',
+    all: 'Toutes',
+    empty: 'Aucune etude de cas ne correspond a vos filtres. Essayez dajuster vos selections.',
+    ctaBody: 'Votre organisation pourrait etre le prochain deploiement controle.',
+    ctaButton: 'Demarrer un pilote controle',
+  },
+  it: {
+    loading: 'Caricamento dei casi studio...',
+    category: 'Categoria',
+    sector: 'Settore',
+    orgType: 'Tipo di organizzazione',
+    jurisdiction: 'Giurisdizione',
+    all: 'Tutte',
+    empty: 'Nessun caso studio corrisponde ai filtri selezionati. Prova a modificarli.',
+    ctaBody: 'La tua organizzazione potrebbe essere il prossimo deployment controllato.',
+    ctaButton: 'Avvia un pilota controllato',
+  },
+  pt: {
+    loading: 'Carregando estudos de caso...',
+    category: 'Categoria',
+    sector: 'Setor',
+    orgType: 'Tipo de organizacao',
+    jurisdiction: 'Jurisdicao',
+    all: 'Todas',
+    empty: 'Nenhum estudo de caso corresponde aos filtros selecionados. Tente ajusta-los.',
+    ctaBody: 'Sua organizacao pode ser a proxima implantacao controlada.',
+    ctaButton: 'Iniciar um piloto controlado',
+  },
+};
+
 export default function LocaleCaseStudiesPage() {
   const params = useParams();
   const locale = (params.locale as string) ?? 'en-CA';
   const t = useTranslations('marketing.caseStudies');
-  const isFr = locale === 'fr-CA';
+  const copy = CASE_STUDIES_COPY[locale] ?? CASE_STUDIES_COPY['en-CA'];
 
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
   const [filteredStudies, setFilteredStudies] = useState<CaseStudy[]>([]);
@@ -65,7 +122,7 @@ export default function LocaleCaseStudiesPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-600">{isFr ? 'Chargement des études de cas…' : 'Loading case studies…'}</p>
+          <p className="text-gray-600">{copy.loading}</p>
         </div>
       </div>
     );
@@ -83,27 +140,31 @@ export default function LocaleCaseStudiesPage() {
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <FilterSelect
-            label={isFr ? 'Catégorie' : 'Category'}
+            label={copy.category}
             value={selectedCategory}
             options={categories}
+            allLabel={copy.all}
             onChange={setSelectedCategory}
           />
           <FilterSelect
-            label={isFr ? 'Secteur' : 'Sector'}
+            label={copy.sector}
             value={selectedSector}
             options={sectors}
+            allLabel={copy.all}
             onChange={setSelectedSector}
           />
           <FilterSelect
-            label={isFr ? "Type d'organisation" : 'Org type'}
+            label={copy.orgType}
             value={selectedOrgType}
             options={orgTypes}
+            allLabel={copy.all}
             onChange={setSelectedOrgType}
           />
           <FilterSelect
-            label={isFr ? 'Juridiction' : 'Jurisdiction'}
+            label={copy.jurisdiction}
             value={selectedJurisdiction}
             options={jurisdictions}
+            allLabel={copy.all}
             onChange={setSelectedJurisdiction}
           />
         </div>
@@ -111,11 +172,7 @@ export default function LocaleCaseStudiesPage() {
         {/* Results */}
         {filteredStudies.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">
-              {isFr
-                ? "Aucune étude de cas ne correspond à vos filtres. Essayez d'ajuster vos sélections."
-                : 'No case studies match your filters. Try adjusting your selections.'}
-            </p>
+            <p className="text-gray-600">{copy.empty}</p>
           </div>
         ) : (
           <CaseStudyGrid caseStudies={filteredStudies} />
@@ -129,13 +186,13 @@ export default function LocaleCaseStudiesPage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-lg text-gray-600 mb-4">
-            {isFr ? 'Votre organisation pourrait \u00eatre le prochain d\u00e9ploiement contr\u00f4l\u00e9.' : 'Your organization could be the next controlled deployment.'}
+            {copy.ctaBody}
           </p>
           <Link
             href={`/${locale}/pilot-request`}
             className="inline-flex items-center px-6 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors"
           >
-            {isFr ? 'D\u00e9marrer un pilote contr\u00f4l\u00e9' : 'Start a Controlled Pilot'}
+            {copy.ctaButton}
           </Link>
         </div>
       </div>
@@ -147,11 +204,13 @@ function FilterSelect({
   label,
   value,
   options,
+  allLabel,
   onChange,
 }: {
   label: string;
   value: string;
   options: string[];
+  allLabel: string;
   onChange: (v: string) => void;
 }) {
   if (options.length <= 1) return null;
@@ -165,7 +224,7 @@ function FilterSelect({
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>
-            {opt === 'all' ? (label === 'Catégorie' || label === 'Category' ? (label === 'Catégorie' ? 'Toutes' : 'All') : 'All') : opt}
+            {opt === 'all' ? allLabel : opt}
           </option>
         ))}
       </select>

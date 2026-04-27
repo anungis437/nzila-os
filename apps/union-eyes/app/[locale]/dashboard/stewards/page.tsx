@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from "next";
+import { getTranslations } from 'next-intl/server';
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { db } from '@/db/db';
@@ -50,6 +51,7 @@ function serializeUnknownError(error: unknown) {
 }
 
 export default async function StewardsDashboardPage() {
+  const t = await getTranslations("stewardsDashboardPage");
   const user = await requireUser();
   const resolvedOrgId = await getOrganizationIdForUser(user.userId);
   const orgId = resolvedOrgId || user.organizationId;
@@ -279,9 +281,9 @@ export default async function StewardsDashboardPage() {
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Chief Steward Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("pageTitle")}</h1>
         <p className="text-muted-foreground mt-2">
-          Supervise stewards and manage case escalations
+          {t("pageSubtitle")}
         </p>
       </div>
 
@@ -289,67 +291,67 @@ export default async function StewardsDashboardPage() {
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stewards</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stewardsLabel")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.totalStewards}</div>
-            <p className="text-xs text-muted-foreground">Active stewards</p>
+            <p className="text-xs text-muted-foreground">{t("activeStewards")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("activeCases")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.activeCases}</div>
-            <p className="text-xs text-muted-foreground">In progress</p>
+            <p className="text-xs text-muted-foreground">{t("inProgress")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Escalations</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("escalations")}</CardTitle>
             <AlertCircle className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.pendingEscalations}</div>
-            <p className="text-xs text-amber-500">Require review</p>
+            <p className="text-xs text-amber-500">{t("requireReview")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("completed")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.completedThisMonth}</div>
-            <p className="text-xs text-muted-foreground">This month</p>
+            <p className="text-xs text-muted-foreground">{t("thisMonth")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("successRate")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.successRate}%</div>
-            <p className="text-xs text-green-500">+5% vs last month</p>
+            <p className="text-xs text-green-500">{t("successRateTrend")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Training</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("training")}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stewardStats.upcomingTraining}</div>
-            <p className="text-xs text-muted-foreground">Upcoming sessions</p>
+            <p className="text-xs text-muted-foreground">{t("upcomingSessions")}</p>
           </CardContent>
         </Card>
       </div>
@@ -359,8 +361,8 @@ export default async function StewardsDashboardPage() {
         {/* Steward Workload & Wellbeing */}
         <Card>
           <CardHeader>
-            <CardTitle>Steward Workload Overview</CardTitle>
-            <CardDescription>Caseload distribution and capacity check — ensuring no steward is overburdened</CardDescription>
+            <CardTitle>{t("stewardWorkloadTitle")}</CardTitle>
+            <CardDescription>{t("stewardWorkloadDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -369,11 +371,11 @@ export default async function StewardsDashboardPage() {
                   <div>
                     <div className="font-medium">{steward.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {steward.active} active cases
+                      {t("activeCasesLabel", { count: steward.active })}
                     </div>
                   </div>
                   <Badge variant="outline" className="bg-green-500/10 text-green-700">
-                    {steward.successRate}% capacity free
+                    {t("capacityFreeLabel", { percent: steward.successRate })}
                   </Badge>
                 </div>
               ))}
@@ -384,8 +386,8 @@ export default async function StewardsDashboardPage() {
         {/* Pending Escalations */}
         <Card>
           <CardHeader>
-            <CardTitle>Pending Escalations</CardTitle>
-            <CardDescription>Cases requiring chief steward review</CardDescription>
+            <CardTitle>{t("pendingEscalations")}</CardTitle>
+            <CardDescription>{t("pendingEscalationsDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -393,12 +395,12 @@ export default async function StewardsDashboardPage() {
                 <div key={idx} className="p-3 border rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline">{escalation.id}</Badge>
-                    <Badge variant="secondary" className="text-amber-700">Escalated</Badge>
+                    <Badge variant="secondary" className="text-amber-700">{t("escalatedBadge")}</Badge>
                   </div>
                   <div>
-                    <div className="font-medium">Member: {escalation.member}</div>
+                    <div className="font-medium">{t("memberLabel", { name: escalation.member })}</div>
                     <div className="text-sm text-muted-foreground">
-                      Steward: {escalation.steward}
+                      {t("stewardLabel", { name: escalation.steward })}
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">
                       {escalation.reason}

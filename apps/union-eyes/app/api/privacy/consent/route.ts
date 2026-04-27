@@ -15,7 +15,7 @@ const consentSchema = z.object({
   consentType: z.string().min(1, 'Consent type is required'),
   consentGiven: z.boolean(),
   consentText: z.string().min(10, 'Consent text must be at least 10 characters'),
-  consentLanguage: z.enum(['en', 'fr']).default('en'),
+  consentLanguage: z.enum(['en', 'fr', 'it', 'pt']).default('en'),
   consentMethod: z.enum(['explicit_checkbox', 'opt_in', 'opt_out', 'implicit']).default('explicit_checkbox'),
 });
 /**
@@ -45,6 +45,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { province, consentType, consentGiven, consentText, consentLanguage, consentMethod } = validation.data;
+
+    if (province === 'QC' && consentLanguage !== 'fr') {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Quebec consent records must be submitted in French (consentLanguage=fr).'
+      );
+    }
 
     // Get user IP and user agent for audit trail
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined;

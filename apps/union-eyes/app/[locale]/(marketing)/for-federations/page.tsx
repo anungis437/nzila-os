@@ -1,18 +1,20 @@
 /**
- * Locale-aware For Federations page
- * Accessible at /{locale}/for-federations
+ * Locale-aware For Federations page.
  */
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
-import RolePageContent from '@/app/(marketing)/components/role-page-content';
+import { getTranslations } from 'next-intl/server';
+import LocaleRolePageContent from '../locale-role-page-content';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'For Federations | UnionEyes',
-    description:
-      'UnionEyes gives federations and national unions cross-local visibility into casework, resources, and outcomes — coordinate effectively and support locals that need it most.',
-  };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.rolePages.federations' });
+  return { title: t('pageTitle'), description: t('pageDescription') };
 }
 
 export default async function LocaleForFederationsPage({
@@ -20,6 +22,6 @@ export default async function LocaleForFederationsPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  await params;
-  return <RolePageContent role="federations" />;
+  const { locale } = await params;
+  return <LocaleRolePageContent role="federations" locale={locale} />;
 }

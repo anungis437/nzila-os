@@ -10,9 +10,11 @@
 
 export const dynamic = "force-dynamic";
 
+import { Metadata } from "next";
 import { requireUser, getUserRole } from "@/lib/api-auth-guard";
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import PlatformSettingsContent from "./_components/platform-settings-content";
 import OrgSettingsContent from "./_components/org-settings-content";
@@ -102,6 +104,19 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
     apiKeys: keyRows,
     integrations: serviceRows,
     featuresEnabled,
+  };
+}
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboardSettingsPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
   };
 }
 

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,6 +50,7 @@ interface ListForm {
 export default function NewDistributionListPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('newDistributionListPage');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,7 +67,7 @@ export default function NewDistributionListPage() {
       setError(null);
 
       if (!formData.name.trim()) {
-        throw new Error('List name is required');
+        throw new Error(t('errors.nameRequired'));
       }
 
       const response = await fetch('/api/communications/distribution-lists', {
@@ -77,14 +78,14 @@ export default function NewDistributionListPage() {
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error || 'Failed to create distribution list');
+        throw new Error(err.error || t('errors.createFailed'));
       }
 
       const json = await response.json();
       const created = json.data ?? json;
       router.push(`/${locale}/dashboard/communications/distribution-lists/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create distribution list');
+      setError(err instanceof Error ? err.message : t('errors.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -102,9 +103,9 @@ export default function NewDistributionListPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Create Distribution List</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Create a new subscriber group for targeted communications
+            {t('subtitle')}
           </p>
         </div>
       </div>
@@ -118,27 +119,27 @@ export default function NewDistributionListPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>List Details</CardTitle>
+          <CardTitle>{t('form.title')}</CardTitle>
           <CardDescription>
-            Define the basic information for this distribution list
+            {t('form.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">{t('form.nameLabel')}</Label>
             <Input
               id="name"
-              placeholder="e.g. All Active Members"
+              placeholder={t('form.namePlaceholder')}
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('form.descriptionLabel')}</Label>
             <Textarea
               id="description"
-              placeholder="Describe who should be on this list..."
+              placeholder={t('form.descriptionPlaceholder')}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
@@ -146,18 +147,18 @@ export default function NewDistributionListPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="listType">List Type</Label>
+            <Label htmlFor="listType">{t('form.listTypeLabel')}</Label>
             <Select
               value={formData.listType}
               onValueChange={(value) => setFormData(prev => ({ ...prev, listType: value }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder={t('form.listTypePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="manual">Manual</SelectItem>
-                <SelectItem value="dynamic">Dynamic (rule-based)</SelectItem>
-                <SelectItem value="imported">Imported</SelectItem>
+                <SelectItem value="manual">{t('form.listTypes.manual')}</SelectItem>
+                <SelectItem value="dynamic">{t('form.listTypes.dynamic')}</SelectItem>
+                <SelectItem value="imported">{t('form.listTypes.imported')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -167,7 +168,7 @@ export default function NewDistributionListPage() {
               checked={formData.isActive}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
             />
-            <Label>Active</Label>
+            <Label>{t('form.activeLabel')}</Label>
           </div>
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
@@ -175,11 +176,11 @@ export default function NewDistributionListPage() {
             variant="outline"
             onClick={() => router.push(`/${locale}/dashboard/communications/distribution-lists`)}
           >
-            Cancel
+            {t('actions.cancel')}
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Create List
+            {t('actions.create')}
           </Button>
         </CardFooter>
       </Card>

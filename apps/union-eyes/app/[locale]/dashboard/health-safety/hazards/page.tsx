@@ -16,6 +16,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,6 +58,7 @@ type HazardStatus = "reported" | "assessed" | "in-progress" | "resolved" | "clos
 type HazardPriority = "low" | "medium" | "high" | "critical";
 
 export default function HazardsPage() {
+  const t = useTranslations("healthSafetyHazardsPage");
   const router = useRouter();
   const organizationId = useOrganizationId();
   
@@ -131,9 +133,9 @@ export default function HazardsPage() {
     return (
       <div className="p-8 text-center">
         <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-2xl font-bold mb-2">No Organization Selected</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("noOrgSelected")}</h2>
         <p className="text-muted-foreground">
-          Please select an organization to view hazard data.
+          {t("noOrgMessage")}
         </p>
       </div>
     );
@@ -155,11 +157,11 @@ export default function HazardsPage() {
               className="gap-2 mb-4"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Hazards
+              {t("backToHazards")}
             </Button>
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <AlertTriangle className="h-8 w-8 text-orange-600" />
-              Report Hazard
+              {t("reportHazardTitle")}
             </h1>
           </motion.div>
 
@@ -186,7 +188,7 @@ export default function HazardsPage() {
             <Link href="/dashboard/health-safety">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {t("back")}
               </Button>
             </Link>
           </div>
@@ -195,10 +197,10 @@ export default function HazardsPage() {
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <AlertTriangle className="h-8 w-8 text-orange-600" />
-                Hazard Management
+                {t("pageTitle")}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Identify, track, and resolve workplace hazards
+                {t("pageSubtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -208,14 +210,14 @@ export default function HazardsPage() {
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export
+                {t("exportButton")}
               </Button>
               <Button
                 onClick={() => setShowReportForm(true)}
                 className="flex items-center gap-2 bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
               >
                 <Plus className="h-4 w-4" />
-                Report Hazard
+                {t("reportHazardButton")}
               </Button>
             </div>
           </div>
@@ -230,52 +232,52 @@ export default function HazardsPage() {
         >
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Hazards</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("totalHazards")}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                All time
+                {t("allTime")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Critical Priority</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("criticalPriority")}</CardTitle>
               <Target className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-red-600">{stats.critical}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Immediate action required
+                {t("immediateActionRequired")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("inProgress")}</CardTitle>
               <Clock className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{stats.inProgress}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Being addressed
+                {t("beingAddressed")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Resolution Time</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("avgResolutionTime")}</CardTitle>
               <TrendingDown className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats.avgResolutionTime}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Days
+                {t("daysUnit")}
               </p>
             </CardContent>
           </Card>
@@ -292,7 +294,7 @@ export default function HazardsPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  Filters
+                  {t("filtersTitle")}
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button
@@ -317,7 +319,7 @@ export default function HazardsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search hazards..."
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9"
@@ -326,28 +328,28 @@ export default function HazardsPage() {
 
                 <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as HazardStatus | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="reported">Reported</SelectItem>
-                    <SelectItem value="assessed">Assessed</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                    <SelectItem value="reported">{t("reported")}</SelectItem>
+                    <SelectItem value="assessed">{t("assessed")}</SelectItem>
+                    <SelectItem value="in-progress">{t("inProgress")}</SelectItem>
+                    <SelectItem value="resolved">{t("resolved")}</SelectItem>
+                    <SelectItem value="closed">{t("closed")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as HazardPriority | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Priority" />
+                    <SelectValue placeholder={t("priorityPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="all">{t("allPriorities")}</SelectItem>
+                    <SelectItem value="low">{t("low")}</SelectItem>
+                    <SelectItem value="medium">{t("medium")}</SelectItem>
+                    <SelectItem value="high">{t("high")}</SelectItem>
+                    <SelectItem value="critical">{t("critical")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -365,20 +367,20 @@ export default function HazardsPage() {
             <TabsList className="grid w-full md:w-auto grid-cols-2">
               <TabsTrigger value="hazards" className="gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Hazard Reports
+                {t("hazardReportsTab")}
               </TabsTrigger>
               <TabsTrigger value="actions" className="gap-2">
                 <CheckCircle2 className="h-4 w-4" />
-                Corrective Actions
+                {t("correctiveActionsTab")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="hazards" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>All Hazards</CardTitle>
+                  <CardTitle>{t("allHazards")}</CardTitle>
                   <CardDescription>
-                    Workplace hazards identified by employees and safety inspections
+                    {t("allHazardsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -393,9 +395,9 @@ export default function HazardsPage() {
             <TabsContent value="actions" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Corrective Actions</CardTitle>
+                  <CardTitle>{t("correctiveActions")}</CardTitle>
                   <CardDescription>
-                    Track corrective actions and preventive measures
+                    {t("correctiveActionsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -13,6 +13,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Star,
   ThumbsUp,
@@ -57,12 +58,12 @@ export interface RepRatingsDashboardProps {
 // ── Metric config ────────────────────────────────────────────────────────────
 
 const METRIC_CONFIG = [
-  { key: "avgCommunication", label: "Communication", icon: MessageSquare, color: "text-blue-500" },
-  { key: "avgResponsiveness", label: "Responsiveness", icon: Clock, color: "text-emerald-500" },
-  { key: "avgKnowledge", label: "Knowledge", icon: BookOpen, color: "text-purple-500" },
-  { key: "avgAdvocacy", label: "Advocacy", icon: Megaphone, color: "text-orange-500" },
-  { key: "avgProfessionalism", label: "Professionalism", icon: Briefcase, color: "text-slate-500" },
-  { key: "avgOutcome", label: "Outcome", icon: Target, color: "text-rose-500" },
+  { key: "avgCommunication", labelKey: "communication", icon: MessageSquare, color: "text-blue-500" },
+  { key: "avgResponsiveness", labelKey: "responsiveness", icon: Clock, color: "text-emerald-500" },
+  { key: "avgKnowledge", labelKey: "knowledge", icon: BookOpen, color: "text-purple-500" },
+  { key: "avgAdvocacy", labelKey: "advocacy", icon: Megaphone, color: "text-orange-500" },
+  { key: "avgProfessionalism", labelKey: "professionalism", icon: Briefcase, color: "text-slate-500" },
+  { key: "avgOutcome", labelKey: "outcome", icon: Target, color: "text-rose-500" },
 ] as const;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,11 +76,11 @@ function ratingColor(score: number): string {
   return "text-red-600";
 }
 
-function ratingBadge(score: number): { label: string; variant: "default" | "secondary" | "destructive" | "outline" } {
-  if (score >= 4.5) return { label: "Exceptional", variant: "default" };
-  if (score >= 3.5) return { label: "Good", variant: "secondary" };
-  if (score >= 2.5) return { label: "Fair", variant: "outline" };
-  return { label: "Needs Improvement", variant: "destructive" };
+function ratingBadge(score: number): { labelKey: "exceptional" | "good" | "fair" | "needsImprovement"; variant: "default" | "secondary" | "destructive" | "outline" } {
+  if (score >= 4.5) return { labelKey: "exceptional", variant: "default" };
+  if (score >= 3.5) return { labelKey: "good", variant: "secondary" };
+  if (score >= 2.5) return { labelKey: "fair", variant: "outline" };
+  return { labelKey: "needsImprovement", variant: "destructive" };
 }
 
 // ── Metric Bar Sub-component ────────────────────────────────────────────────
@@ -128,6 +129,7 @@ function LroCard({
   lro: LroPerformanceData;
   rank: number;
 }) {
+  const t = useTranslations("repRatings");
   const [expanded, setExpanded] = React.useState(false);
   const badge = ratingBadge(lro.overallAverage);
 
@@ -154,10 +156,10 @@ function LroCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold truncate">
-                {lro.lroName || `LRO ${lro.lroId.slice(0, 8)}`}
+                {lro.lroName || t("lro.fallbackName", { idShort: lro.lroId.slice(0, 8) })}
               </h3>
               <Badge variant={badge.variant} className="shrink-0 text-xs">
-                {badge.label}
+                {t(`badges.${badge.labelKey}` as 'badges.good')}
               </Badge>
             </div>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -169,11 +171,11 @@ function LroCard({
               </span>
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
-                {lro.completedSurveys} reviews
+                {t("lro.reviews", { count: lro.completedSurveys })}
               </span>
               <span className="flex items-center gap-1">
                 <ThumbsUp className="h-3.5 w-3.5" />
-                {lro.recommendRate}% recommend
+                {t("lro.recommend", { percent: lro.recommendRate })}
               </span>
             </div>
           </div>
@@ -194,7 +196,7 @@ function LroCard({
             {METRIC_CONFIG.map((metric) => (
               <MetricBar
                 key={metric.key}
-                label={metric.label}
+                label={t(`metrics.${metric.labelKey}` as 'metrics.communication')}
                 value={(lro as unknown as Record<string, number>)[metric.key] ?? 0}
                 icon={metric.icon}
                 color={metric.color}
@@ -213,11 +215,12 @@ export function RepRatingsDashboard({
   rankings,
   isLoading,
 }: RepRatingsDashboardProps) {
+  const t = useTranslations("repRatings");
   if (isLoading) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
-          <div className="animate-pulse">Loading LRO performance data...</div>
+          <div className="animate-pulse">{t("loading")}</div>
         </CardContent>
       </Card>
     );
@@ -228,9 +231,9 @@ export function RepRatingsDashboard({
       <Card>
         <CardContent className="py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold">No Ratings Yet</h3>
+          <h3 className="font-semibold">{t("empty.title")}</h3>
           <p className="text-muted-foreground mt-1">
-            Satisfaction surveys will appear here after cases are closed.
+            {t("empty.description")}
           </p>
         </CardContent>
       </Card>
@@ -256,21 +259,21 @@ export function RepRatingsDashboard({
             <div className={cn("text-3xl font-bold", ratingColor(avgOverall))}>
               {avgOverall.toFixed(1)}
             </div>
-            <p className="text-sm text-muted-foreground">Avg. Overall Rating</p>
+            <p className="text-sm text-muted-foreground">{t("summary.avgOverall")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
             <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
             <div className="text-3xl font-bold">{totalReviews}</div>
-            <p className="text-sm text-muted-foreground">Total Reviews</p>
+            <p className="text-sm text-muted-foreground">{t("summary.totalReviews")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
             <ThumbsUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
             <div className="text-3xl font-bold">{avgRecommend.toFixed(0)}%</div>
-            <p className="text-sm text-muted-foreground">Recommend Rate</p>
+            <p className="text-sm text-muted-foreground">{t("summary.recommendRate")}</p>
           </CardContent>
         </Card>
       </div>
@@ -280,10 +283,10 @@ export function RepRatingsDashboard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5" />
-            LRO Performance Rankings
+            {t("rankings.title")}
           </CardTitle>
           <CardDescription>
-            Based on {totalReviews} satisfaction surveys across {rankings.length} representatives
+            {t("rankings.description", { totalReviews, representatives: rankings.length })}
           </CardDescription>
         </CardHeader>
       </Card>

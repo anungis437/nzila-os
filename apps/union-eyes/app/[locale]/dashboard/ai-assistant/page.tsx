@@ -7,12 +7,27 @@
  * but checking here surfaces a clear "not available" message instead of
  * silent API failures.
  */
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { requireUser } from '@/lib/api-auth-guard';
 import { isFeatureEnabled, AI_FEATURES } from '@/lib/services/feature-flags';
 import { AIChatbot } from '@/components/ai/ai-chatbot';
 
 export const dynamic = 'force-dynamic';
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'aiAssistantPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
+}
 
 export default async function DashboardAIAssistantPage() {
   const user = await requireUser();

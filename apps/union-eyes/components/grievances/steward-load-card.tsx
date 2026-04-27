@@ -17,6 +17,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Briefcase,
   Clock,
@@ -87,8 +88,9 @@ export function StewardLoadCard({
   protocol = PROTOCOL_STEWARD_LED,
   className,
 }: StewardLoadCardProps) {
+  const t = useTranslations("stewardLoad");
   const loadLevel = computeLoadLevel(workload.activeCases);
-  const workloadLabel = `${protocol.representativeLabel} Workload`;
+  const workloadLabel = `${protocol.representativeLabel} ${t("workloadSuffix")}`;
 
   return (
     <Card className={cn("p-4 space-y-4", className)}>
@@ -103,15 +105,15 @@ export function StewardLoadCard({
             LOAD_COLORS[loadLevel]
           )}
         >
-          {loadLevel}
+          {t(`loadLevels.${loadLevel}` as 'loadLevels.light')}
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Metric icon={Briefcase} label="Active Cases" value={workload.activeCases} />
-        <Metric icon={AlertTriangle} label="Overdue" value={workload.overdueCases} alert={workload.overdueCases > 0} />
-        <Metric icon={Clock} label="Avg. Days in State" value={workload.avgDaysInState} suffix="d" />
-        <Metric icon={TrendingUp} label="Assigned This Week" value={workload.casesThisWeek} />
+        <Metric icon={Briefcase} label={t("metrics.activeCases")} value={workload.activeCases} />
+        <Metric icon={AlertTriangle} label={t("metrics.overdue")} value={workload.overdueCases} alert={workload.overdueCases > 0} />
+        <Metric icon={Clock} label={t("metrics.avgDays")} value={workload.avgDaysInState} suffix="d" />
+        <Metric icon={TrendingUp} label={t("metrics.assignedThisWeek")} value={workload.casesThisWeek} />
       </div>
     </Card>
   );
@@ -126,9 +128,10 @@ export function StewardWorkloadList({
   className,
   onSelectSteward,
 }: StewardWorkloadListProps) {
+  const t = useTranslations("stewardLoad");
   const totalActive = stewards.reduce((sum, s) => sum + s.activeCases, 0);
   const totalOverdue = stewards.reduce((sum, s) => sum + s.overdueCases, 0);
-  const workloadLabel = `${protocol.representativeLabel} Workload`;
+  const workloadLabel = `${protocol.representativeLabel} ${t("workloadSuffix")}`;
 
   return (
     <Card className={cn("p-4 space-y-4", className)}>
@@ -138,10 +141,10 @@ export function StewardWorkloadList({
           <h3 className="text-sm font-semibold">{workloadLabel}</h3>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{totalActive} active</span>
+          <span>{t("active", { count: totalActive })}</span>
           {totalOverdue > 0 && (
             <Badge variant="destructive" className="text-[10px] h-5">
-              {totalOverdue} overdue
+              {t("overdueBadge", { count: totalOverdue })}
             </Badge>
           )}
         </div>
@@ -149,7 +152,7 @@ export function StewardWorkloadList({
 
       {stewards.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">
-          No active {protocol.representativeLabel.toLowerCase()} assignments.
+          {t("noAssignments", { role: protocol.representativeLabel.toLowerCase() })}
         </p>
       ) : (
         <div className="space-y-1" role="list">
@@ -170,7 +173,7 @@ export function StewardWorkloadList({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{steward.stewardName}</p>
                   <p className="text-xs text-muted-foreground">
-                    {steward.activeCases} active case{steward.activeCases !== 1 ? "s" : ""}
+                    {t(steward.activeCases === 1 ? 'activeCaseCount' : 'activeCaseCountPlural', { count: steward.activeCases })}
                   </p>
                 </div>
                 {steward.overdueCases > 0 && (
@@ -185,7 +188,7 @@ export function StewardWorkloadList({
                     LOAD_COLORS[level]
                   )}
                 >
-                  {level}
+                  {t(`loadLevels.${level}` as 'loadLevels.light')}
                 </span>
               </button>
             );

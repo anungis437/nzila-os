@@ -18,6 +18,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useAuth } from '@nzila/platform-auth/entra/client';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +90,11 @@ function formatDate(date: string): string {
 // GENERATE BILLING CYCLE DIALOG
 // =============================================================================
 
-function GenerateBillingCycleDialog() {
+function GenerateBillingCycleDialog({
+  t,
+}: {
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
+}) {
   const { orgId } = useAuth();
   const [open, setOpen] = useState(false);
   const [frequency, setFrequency] = useState<string>('monthly');
@@ -111,14 +116,14 @@ function GenerateBillingCycleDialog() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to preview billing cycle');
+        throw new Error(t('failedToPreviewBillingCycle'));
       }
 
       const result = await response.json();
       setPreviewResult(result);
     } catch (error) {
       logger.error('Error previewing billing cycle', { error });
-      alert('Failed to preview billing cycle');
+      alert(t('failedToPreviewBillingCycle'));
     } finally {
       setPreviewing(false);
     }
@@ -139,7 +144,7 @@ function GenerateBillingCycleDialog() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate billing cycle');
+        throw new Error(t('failedToGenerateBillingCycle'));
       }
 
       const result = await response.json();
@@ -147,13 +152,18 @@ function GenerateBillingCycleDialog() {
       if (dryRun) {
         setPreviewResult(result);
       } else {
-        alert(`Billing cycle generated successfully! Created ${result.transactionsCreated} transactions totaling ${formatCurrency(result.totalAmount)}.`);
+        alert(
+          t('billingCycleGeneratedSuccess', {
+            count: result.transactionsCreated,
+            total: formatCurrency(result.totalAmount),
+          })
+        );
         setOpen(false);
         setPreviewResult(null);
       }
     } catch (error) {
       logger.error('Error generating billing cycle', { error });
-      alert('Failed to generate billing cycle');
+      alert(t('failedToGenerateBillingCycle'));
     } finally {
       setGenerating(false);
     }
@@ -164,31 +174,31 @@ function GenerateBillingCycleDialog() {
       <DialogTrigger asChild>
         <Button>
           <PlayCircle className="mr-2 h-4 w-4" />
-          Generate Billing Cycle
+          {t('generateBillingCycleButton')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Generate Billing Cycle</DialogTitle>
+          <DialogTitle>{t('generateBillingCycleTitle')}</DialogTitle>
           <DialogDescription>
-            Create billing transactions for all active members based on their dues rules.
+            {t('generateBillingCycleDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Frequency Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Billing Frequency</label>
+            <label className="text-sm font-medium">{t('billingFrequencyLabel')}</label>
             <Select value={frequency} onValueChange={setFrequency}>
               <SelectTrigger>
-                <SelectValue placeholder="Select frequency" />
+                <SelectValue placeholder={t('selectFrequencyPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
-                <SelectItem value="annual">Annual</SelectItem>
+                <SelectItem value="weekly">{t('frequencyWeekly')}</SelectItem>
+                <SelectItem value="bi_weekly">{t('frequencyBiWeekly')}</SelectItem>
+                <SelectItem value="monthly">{t('frequencyMonthly')}</SelectItem>
+                <SelectItem value="quarterly">{t('frequencyQuarterly')}</SelectItem>
+                <SelectItem value="annual">{t('frequencyAnnual')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -199,35 +209,35 @@ function GenerateBillingCycleDialog() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <Eye className="mr-2 h-5 w-5 text-blue-600" />
-                  Preview Results
+                  {t('previewResultsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <div className="text-muted-foreground">Period</div>
+                    <div className="text-muted-foreground">{t('periodLabel')}</div>
                     <div className="font-medium">
                       {formatDate(previewResult.periodStart)} - {formatDate(previewResult.periodEnd)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Frequency</div>
+                    <div className="text-muted-foreground">{t('frequencyLabel')}</div>
                     <div className="font-medium capitalize">{previewResult.frequency.replace('_', '-')}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Transactions</div>
+                    <div className="text-muted-foreground">{t('transactionsLabel')}</div>
                     <div className="font-bold text-blue-600">{previewResult.transactionsCreated}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Total Amount</div>
+                    <div className="text-muted-foreground">{t('totalAmountLabel')}</div>
                     <div className="font-bold text-green-600">{formatCurrency(previewResult.totalAmount)}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Members Processed</div>
+                    <div className="text-muted-foreground">{t('membersProcessedLabel')}</div>
                     <div className="font-medium">{previewResult.members.processed}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Success Rate</div>
+                    <div className="text-muted-foreground">{t('successRateLabel')}</div>
                     <div className="font-medium">
                       {previewResult.members.processed > 0
                         ? Math.round((previewResult.members.success / previewResult.members.processed) * 100)
@@ -238,27 +248,27 @@ function GenerateBillingCycleDialog() {
 
                 {/* Breakdown */}
                 <div className="pt-3 border-t">
-                  <div className="text-sm font-medium mb-2">Amount Breakdown</div>
+                  <div className="text-sm font-medium mb-2">{t('amountBreakdownTitle')}</div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Dues:</span>
+                      <span className="text-muted-foreground">{t('duesLabel')}:</span>
                       <span>{formatCurrency(previewResult.breakdown.duesAmount)}</span>
                     </div>
                     {previewResult.breakdown.copeAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">COPE:</span>
+                        <span className="text-muted-foreground">{t('copeLabel')}:</span>
                         <span>{formatCurrency(previewResult.breakdown.copeAmount)}</span>
                       </div>
                     )}
                     {previewResult.breakdown.pacAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">PAC:</span>
+                        <span className="text-muted-foreground">{t('pacLabel')}:</span>
                         <span>{formatCurrency(previewResult.breakdown.pacAmount)}</span>
                       </div>
                     )}
                     {previewResult.breakdown.strikeFundAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Strike Fund:</span>
+                        <span className="text-muted-foreground">{t('strikeFundLabel')}:</span>
                         <span>{formatCurrency(previewResult.breakdown.strikeFundAmount)}</span>
                       </div>
                     )}
@@ -276,16 +286,16 @@ function GenerateBillingCycleDialog() {
             disabled={generating || previewing}
           >
             <Eye className="mr-2 h-4 w-4" />
-            {previewing ? 'Previewing...' : 'Preview'}
+            {previewing ? t('previewingButton') : t('previewButton')}
           </Button>
           <Button onClick={() => setOpen(false)} variant="outline">
-            Cancel
+            {t('cancelButton')}
           </Button>
           <Button
             onClick={() => handleGenerate(false)}
             disabled={generating || !previewResult}
           >
-            {generating ? 'Generating...' : 'Generate Billing Cycle'}
+            {generating ? t('generatingButton') : t('generateBillingCycleButton')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -298,51 +308,52 @@ function GenerateBillingCycleDialog() {
 // =============================================================================
 
 export default function BillingCycleManagement() {
+  const t = useTranslations('adminDuesBillingCyclesPage');
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Billing Cycle Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Generate and manage automated billing cycles
+            {t('subtitle')}
           </p>
         </div>
-        <GenerateBillingCycleDialog />
+        <GenerateBillingCycleDialog t={t} />
       </div>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Billing Date</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('nextBillingDateTitle')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">March 1, 2026</div>
-            <p className="text-xs text-muted-foreground mt-1">16 days remaining</p>
+            <div className="text-2xl font-bold">{t('nextBillingDateValue')}</div>
+            <p className="text-xs text-muted-foreground mt-1">{t('nextBillingDateHint')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Last Cycle Total</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('lastCycleTotalTitle')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(125000)}</div>
-            <p className="text-xs text-muted-foreground mt-1">February 2026 cycle</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('lastCycleTotalHint')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Members</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeMembersTitle')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground mt-1">Eligible for billing</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('activeMembersHint')}</p>
           </CardContent>
         </Card>
       </div>
@@ -350,8 +361,8 @@ export default function BillingCycleManagement() {
       {/* Billing Cycle History */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Billing Cycles</CardTitle>
-          <CardDescription>History of executed billing cycles</CardDescription>
+          <CardTitle>{t('recentBillingCyclesTitle')}</CardTitle>
+          <CardDescription>{t('recentBillingCyclesDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -362,16 +373,16 @@ export default function BillingCycleManagement() {
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">February 2026 - Monthly Cycle</h3>
-                  <Badge variant="default">Completed</Badge>
+                  <h3 className="font-semibold">{t('cycle1Title')}</h3>
+                  <Badge variant="default">{t('statusCompleted')}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Executed on Feb 1, 2026 • 1,247 transactions • {formatCurrency(125000)}
+                  {t('cycle1ExecutedLine', { total: formatCurrency(125000) })}
                 </p>
                 <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
-                  <span>Period: Feb 1 - Feb 28, 2026</span>
+                  <span>{t('cycle1Period')}</span>
                   <span>•</span>
-                  <span>Success Rate: 99.2%</span>
+                  <span>{t('cycle1SuccessRate')}</span>
                 </div>
               </div>
             </div>
@@ -383,16 +394,16 @@ export default function BillingCycleManagement() {
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">January 2026 - Monthly Cycle</h3>
-                  <Badge variant="secondary">Completed</Badge>
+                  <h3 className="font-semibold">{t('cycle2Title')}</h3>
+                  <Badge variant="secondary">{t('statusCompleted')}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Executed on Jan 1, 2026 • 1,239 transactions • {formatCurrency(122500)}
+                  {t('cycle2ExecutedLine', { total: formatCurrency(122500) })}
                 </p>
                 <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
-                  <span>Period: Jan 1 - Jan 31, 2026</span>
+                  <span>{t('cycle2Period')}</span>
                   <span>•</span>
-                  <span>Success Rate: 98.8%</span>
+                  <span>{t('cycle2SuccessRate')}</span>
                 </div>
               </div>
             </div>
@@ -404,16 +415,16 @@ export default function BillingCycleManagement() {
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">December 2025 - Monthly Cycle</h3>
-                  <Badge variant="destructive">Partial</Badge>
+                  <h3 className="font-semibold">{t('cycle3Title')}</h3>
+                  <Badge variant="destructive">{t('statusPartial')}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Executed on Dec 1, 2025 • 1,198 transactions • {formatCurrency(118000)}
+                  {t('cycle3ExecutedLine', { total: formatCurrency(118000) })}
                 </p>
-                <div className="flex items-center space-x-4 text-xs textmuted-foreground mt-2">
-                  <span>Period: Dec 1 - Dec 31, 2025</span>
+                <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
+                  <span>{t('cycle3Period')}</span>
                   <span>•</span>
-                  <span className="text-orange-600 font-medium">15 failures</span>
+                  <span className="text-orange-600 font-medium">{t('cycle3Failures')}</span>
                 </div>
               </div>
             </div>

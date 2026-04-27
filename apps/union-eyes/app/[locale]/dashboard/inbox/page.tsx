@@ -11,13 +11,23 @@ export const dynamic = 'force-dynamic';
  */
 
 import { requireUser } from "@/lib/api-auth-guard";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { InboxConsole } from "@/components/inbox/inbox-console";
 
-export const metadata = {
-  title: "Inbox | UnionEyes",
-  description: "Unified signal feed — everything that needs your attention",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "inboxPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function InboxPage() {
   try {

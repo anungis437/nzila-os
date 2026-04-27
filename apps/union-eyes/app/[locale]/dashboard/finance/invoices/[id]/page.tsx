@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -97,19 +98,25 @@ function StatusIcon({ status }: { status: string }) {
   return <Clock className="h-4 w-4 text-muted-foreground" />;
 }
 
-function formatMethod(m: string) {
+function paymentMethodKey(m: string) {
   const map: Record<string, string> = {
-    eft: 'EFT', wire: 'Wire Transfer', cheque: 'Cheque',
-    ach: 'ACH', credit_card: 'Credit Card', pad: 'PAD', other: 'Other',
+    eft: 'paymentMethod.eft',
+    wire: 'paymentMethod.wire',
+    cheque: 'paymentMethod.cheque',
+    ach: 'paymentMethod.ach',
+    credit_card: 'paymentMethod.creditCard',
+    pad: 'paymentMethod.pad',
+    other: 'paymentMethod.other',
   };
-  return map[m] ?? m;
+  return map[m] ?? 'paymentMethod.other';
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function InvoiceDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
-  const { id } = use(params);
+  const { id, locale } = use(params);
   const router = useRouter();
+  const t = useTranslations('financeInvoiceDetailPage');
 
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -130,7 +137,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         fetch(`/api/finance/invoices/${id}`),
         fetch(`/api/finance/invoices/${id}/payments`),
       ]);
-      if (!invRes.ok) throw new Error('Invoice not found');
+      if (!invRes.ok) throw new Error(t('invoiceNotFound'));
       const invJson = await invRes.json();
       setInvoice(invJson.data);
 
@@ -139,11 +146,11 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         setPayments(pmtJson.data ?? []);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load invoice');
+      setError(err instanceof Error ? err.message : t('failedToLoadInvoice'));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -163,13 +170,13 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        throw new Error(json.message ?? 'Failed to record payment');
+        throw new Error(json.message ?? t('failedToRecordPayment'));
       }
       setShowPayForm(false);
       setPayForm({ amount: '', method: 'eft', externalReference: '' });
       await load();
     } catch (err) {
-      setPayError(err instanceof Error ? err.message : 'Error');
+      setPayError(err instanceof Error ? err.message : t('errorLabel'));
     } finally {
       setPaying(false);
     }
@@ -191,9 +198,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       <div className="p-6 max-w-5xl mx-auto">
         <Card className="p-8 text-center">
           <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-          <p className="text-destructive font-medium">{error ?? 'Invoice not found'}</p>
-          <Button variant="outline" className="mt-4" onClick={() => router.push('/finance/invoices')}>
-            Back to Invoices
+          <p className="text-destructive font-medium">{error ?? t('invoiceNotFound')}</p>
+          <Button variant="outline" className="mt-4" onClick={() => router.push(`/${locale}/dashboard/finance/invoices`)}>
+            {t('backToInvoicesButton')}
           </Button>
         </Card>
       </div>
@@ -206,8 +213,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-6 p-6 max-w-5xl mx-auto">
       {/* Nav */}
-      <Button variant="ghost" size="sm" onClick={() => router.push('/finance/invoices')} className="gap-1">
-        <ArrowLeft className="h-4 w-4" /> Invoices
+      <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/dashboard/finance/invoices`)} className="gap-1">
+        <ArrowLeft className="h-4 w-4" /> {t('invoicesLabel')}
       </Button>
 
       {/* Invoice Header */}
@@ -218,15 +225,15 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div>
               <h1 className="text-xl font-bold">{invoice.invoiceNumber}</h1>
               <p className="text-sm text-muted-foreground">
-                Issued {new Date(invoice.issueDate).toLocaleDateString('en-CA')} ·
-                Due {new Date(invoice.dueDate).toLocaleDateString('en-CA')}
+                {t('issuedLabel')} {new Date(invoice.issueDate).toLocaleDateString(locale)} ·
+                {t('dueLabel')} {new Date(invoice.dueDate).toLocaleDateString(locale)}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <StatusIcon status={invoice.status} />
             <Badge variant={statusVariant(invoice.status)} className="capitalize">
-              {invoice.status.replace('_', ' ')}
+              {t(`invoiceStatus.${invoice.status}`)}
             </Badge>
           </div>
         </div>
@@ -234,19 +241,19 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         {/* Amount Summary */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t pt-4">
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Subtotal</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('subtotalLabel')}</p>
             <p className="text-lg font-semibold">{formatCurrency(Number(invoice.subtotal))}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Tax</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('taxLabel')}</p>
             <p className="text-lg font-semibold">{formatCurrency(Number(invoice.taxAmount))}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Total (CAD)</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('totalCadLabel')}</p>
             <p className="text-xl font-bold">{formatCurrency(Number(invoice.totalAmount))}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Balance Due</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">{t('balanceDueLabel')}</p>
             <p className={`text-xl font-bold ${balance > 0 ? 'text-destructive' : 'text-green-600'}`}>
               {formatCurrency(balance)}
             </p>
@@ -261,19 +268,19 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       {/* Line Items */}
       <Card className="p-0 overflow-hidden">
         <div className="px-6 py-4 border-b">
-          <h2 className="font-semibold">Line Items</h2>
+          <h2 className="font-semibold">{t('lineItemsTitle')}</h2>
         </div>
         {invoice.lineItems.length === 0 ? (
-          <p className="p-6 text-sm text-muted-foreground">No line items</p>
+          <p className="p-6 text-sm text-muted-foreground">{t('noLineItems')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Unit Price</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>{t('descriptionColumn')}</TableHead>
+                <TableHead>{t('categoryColumn')}</TableHead>
+                <TableHead className="text-right">{t('qtyColumn')}</TableHead>
+                <TableHead className="text-right">{t('unitPriceColumn')}</TableHead>
+                <TableHead className="text-right">{t('amountColumn')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -291,7 +298,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 </TableRow>
               ))}
               <TableRow className="bg-muted/40 font-semibold">
-                <TableCell colSpan={4} className="text-right">Total</TableCell>
+                <TableCell colSpan={4} className="text-right">{t('totalLabel')}</TableCell>
                 <TableCell className="text-right">{formatCurrency(Number(invoice.totalAmount))}</TableCell>
               </TableRow>
             </TableBody>
@@ -302,10 +309,10 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       {/* Payment History */}
       <Card className="p-0 overflow-hidden">
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="font-semibold">Payment History</h2>
+          <h2 className="font-semibold">{t('paymentHistoryTitle')}</h2>
           {!isPaid && (
             <Button size="sm" onClick={() => setShowPayForm((v) => !v)}>
-              {showPayForm ? 'Cancel' : 'Record Payment'}
+              {showPayForm ? t('cancelButton') : t('recordPaymentButton')}
             </Button>
           )}
         </div>
@@ -313,7 +320,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         {/* Record Payment Form */}
         {showPayForm && (
           <div className="px-6 py-4 border-b bg-muted/30 space-y-3">
-            <p className="text-sm font-medium">Record a payment against this invoice</p>
+            <p className="text-sm font-medium">{t('recordPaymentDescription')}</p>
             {payError && (
               <div className="flex items-center gap-2 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" /> {payError}
@@ -324,64 +331,64 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 type="number"
                 min="0.01"
                 step="0.01"
-                placeholder={`Amount (CAD, max ${balance.toFixed(2)})`}
+                placeholder={t('amountPlaceholder', { max: balance.toFixed(2) })}
                 value={payForm.amount}
                 onChange={(e) => setPayForm((f) => ({ ...f, amount: e.target.value }))}
               />
               <Select value={payForm.method} onValueChange={(v) => setPayForm((f) => ({ ...f, method: v }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Method" />
+                  <SelectValue placeholder={t('methodPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="eft">EFT</SelectItem>
-                  <SelectItem value="wire">Wire Transfer</SelectItem>
-                  <SelectItem value="cheque">Cheque</SelectItem>
-                  <SelectItem value="pad">PAD</SelectItem>
-                  <SelectItem value="ach">ACH</SelectItem>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="eft">{t('paymentMethod.eft')}</SelectItem>
+                  <SelectItem value="wire">{t('paymentMethod.wire')}</SelectItem>
+                  <SelectItem value="cheque">{t('paymentMethod.cheque')}</SelectItem>
+                  <SelectItem value="pad">{t('paymentMethod.pad')}</SelectItem>
+                  <SelectItem value="ach">{t('paymentMethod.ach')}</SelectItem>
+                  <SelectItem value="credit_card">{t('paymentMethod.creditCard')}</SelectItem>
+                  <SelectItem value="other">{t('paymentMethod.other')}</SelectItem>
                 </SelectContent>
               </Select>
               <Input
-                placeholder="Reference # (optional)"
+                placeholder={t('referencePlaceholder')}
                 value={payForm.externalReference}
                 onChange={(e) => setPayForm((f) => ({ ...f, externalReference: e.target.value }))}
               />
             </div>
             <Button size="sm" onClick={handleRecordPayment} disabled={paying || !payForm.amount}>
-              {paying ? 'Saving...' : 'Confirm Payment'}
+              {paying ? t('savingLabel') : t('confirmPaymentButton')}
             </Button>
           </div>
         )}
 
         {payments.length === 0 ? (
-          <p className="p-6 text-sm text-muted-foreground">No payments recorded yet</p>
+          <p className="p-6 text-sm text-muted-foreground">{t('noPaymentsRecorded')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Method</TableHead>
-                <TableHead className="text-right">Amount (CAD)</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Reference</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>{t('methodColumn')}</TableHead>
+                <TableHead className="text-right">{t('amountCadColumn')}</TableHead>
+                <TableHead>{t('statusColumn')}</TableHead>
+                <TableHead>{t('referenceColumn')}</TableHead>
+                <TableHead>{t('dateColumn')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {payments.map((pmt) => (
                 <TableRow key={pmt.id}>
-                  <TableCell>{formatMethod(pmt.method)}</TableCell>
+                  <TableCell>{t(paymentMethodKey(pmt.method))}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(Number(pmt.amount))}</TableCell>
                   <TableCell>
                     <Badge variant={pmt.status === 'completed' ? 'default' : pmt.status === 'failed' ? 'destructive' : 'secondary'}>
-                      {pmt.status}
+                      {t(`paymentStatus.${pmt.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">{pmt.externalReference ?? '—'}</TableCell>
                   <TableCell className="text-sm">
                     {pmt.paidAt
-                      ? new Date(pmt.paidAt).toLocaleDateString('en-CA')
-                      : new Date(pmt.createdAt).toLocaleDateString('en-CA')}
+                      ? new Date(pmt.paidAt).toLocaleDateString(locale)
+                      : new Date(pmt.createdAt).toLocaleDateString(locale)}
                   </TableCell>
                 </TableRow>
               ))}

@@ -4,13 +4,22 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { NegotiationDashboard } from "@/components/bargaining/NegotiationDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = {
-  title: "Bargaining Dashboard | UnionEyes",
-  description: "Manage active negotiations and bargaining activities",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "bargainingPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 async function BargainingDashboardContent() {
   const user = await requireUser();

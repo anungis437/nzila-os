@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
  
 import { RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 interface SyncStatus {
   affiliateId: string;
@@ -22,6 +23,7 @@ interface CLCSyncDashboardProps {
 }
 
 export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardProps) {
+  const t = useTranslations("clcSync");
   const [syncStatuses, setSyncStatuses] = useState<SyncStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -99,47 +101,47 @@ export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardPro
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Affiliates</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalAffiliates")}</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalAffiliates}</div>
-            <p className="text-xs text-muted-foreground">Active sync connections</p>
+            <p className="text-xs text-muted-foreground">{t("activeConnections")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Successful</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("successful")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{successfulSyncs}</div>
             <p className="text-xs text-green-500">
-              {((successfulSyncs / totalAffiliates) * 100).toFixed(0)}% success rate
+              {t("successRate", { rate: ((successfulSyncs / totalAffiliates) * 100).toFixed(0) })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inProgress")}</CardTitle>
             <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgress}</div>
-            <p className="text-xs text-muted-foreground">Currently syncing</p>
+            <p className="text-xs text-muted-foreground">{t("currentlySyncing")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Failed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("failed")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{failedSyncs}</div>
-            <p className="text-xs text-red-500">Requires attention</p>
+            <p className="text-xs text-red-500">{t("requiresAttention")}</p>
           </CardContent>
         </Card>
       </div>
@@ -147,8 +149,8 @@ export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardPro
       {/* Sync Status Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Affiliate Sync Status</CardTitle>
-          <CardDescription>Real-time synchronization status for all CLC affiliates</CardDescription>
+          <CardTitle>{t("tableTitle")}</CardTitle>
+          <CardDescription>{t("tableDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -160,21 +162,21 @@ export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardPro
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium">{sync.affiliateName}</h4>
                         <Badge variant="outline" className={getSyncTypeColor(sync.syncType)}>
-                          {sync.syncType}
+                          {(['full','membership','financial','grievances'] as const).includes(sync.syncType as 'full') ? t(`syncTypes.${sync.syncType}` as 'syncTypes.full') : sync.syncType}
                         </Badge>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        <div>Last sync: {new Date(sync.lastSync).toLocaleString()}</div>
-                        <div>Next sync: {new Date(sync.nextScheduledSync).toLocaleString()}</div>
+                        <div>{t("lastSync", { date: new Date(sync.lastSync).toLocaleString() })}</div>
+                        <div>{t("nextSync", { date: new Date(sync.nextScheduledSync).toLocaleString() })}</div>
                         {sync.recordsSynced > 0 && (
-                          <div>Records processed: {sync.recordsSynced.toLocaleString()}</div>
+                          <div>{t("recordsProcessed", { count: sync.recordsSynced.toLocaleString() })}</div>
                         )}
                       </div>
                       {sync.errors && sync.errors.length > 0 && (
                         <div className="mt-2 p-2 bg-red-500/10 rounded text-sm text-red-700">
                           <div className="font-medium flex items-center gap-1">
                             <AlertTriangle className="h-3 w-3" />
-                            Errors:
+                            {t("errors")}
                           </div>
                           <ul className="list-disc list-inside mt-1">
                             {sync.errors.map((error, idx) => (
@@ -186,7 +188,7 @@ export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardPro
                     </div>
                     <Badge variant="outline" className={`${getStatusColor(sync.status)} flex items-center gap-1`}>
                       {getStatusIcon(sync.status)}
-                      {sync.status}
+                      {(['success','failed','in-progress','pending'] as const).includes(sync.status as 'success') ? t(`status.${sync.status}` as 'status.success') : sync.status}
                     </Badge>
                   </div>
                 </CardContent>

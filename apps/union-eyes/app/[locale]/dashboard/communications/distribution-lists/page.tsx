@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,7 @@ interface DistributionList {
 }
 
 export default function DistributionListsPage() {
+  const t = useTranslations('distributionListsPage');
   const router = useRouter();
   const [lists, setLists] = useState<DistributionList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function DistributionListsPage() {
       const response = await fetch(`/api/communications/distribution-lists?${params}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch distribution lists');
+        throw new Error(t('errors.fetchFailed'));
       }
 
       const json = await response.json();
@@ -75,7 +77,7 @@ export default function DistributionListsPage() {
       setLists(Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : []);
       setTotalPages(payload.pagination?.totalPages ?? 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch distribution lists');
+      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -106,12 +108,12 @@ export default function DistributionListsPage() {
         <div>
           <h1 className="text-3xl font-bold">Distribution Lists</h1>
           <p className="text-muted-foreground">
-            Manage subscriber groups for targeted communications
+            {t('header.description')}
           </p>
         </div>
         <Button onClick={() => router.push('/dashboard/communications/distribution-lists/new')}>
           <Plus className="mr-2 h-4 w-4" />
-          Create List
+          {t('header.createList')}
         </Button>
       </div>
 
@@ -119,7 +121,7 @@ export default function DistributionListsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Lists</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.totalLists')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{lists.length}</div>
@@ -128,7 +130,7 @@ export default function DistributionListsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Lists</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.activeLists')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -139,7 +141,7 @@ export default function DistributionListsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Subscribers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.totalSubscribers')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -156,7 +158,7 @@ export default function DistributionListsPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search distribution lists..."
+                placeholder={t('search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
@@ -172,29 +174,29 @@ export default function DistributionListsPage() {
       {/* Lists Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Distribution Lists</CardTitle>
+          <CardTitle>{t('table.title')}</CardTitle>
           <CardDescription>
-            {filteredLists.length} list(s) found
+            {t('table.foundCount', { count: filteredLists.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-              <p className="mt-2 text-muted-foreground">Loading lists...</p>
+              <p className="mt-2 text-muted-foreground">{t('states.loading')}</p>
             </div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">
               <p>{error}</p>
               <Button variant="outline" onClick={fetchLists} className="mt-4">
-                Try Again
+                {t('states.tryAgain')}
               </Button>
             </div>
           ) : filteredLists.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No distribution lists found</p>
+              <p className="text-muted-foreground">{t('states.empty')}</p>
               <Button onClick={() => router.push('/dashboard/communications/distribution-lists/new')} className="mt-4">
-                Create Your First List
+                {t('states.createFirstList')}
               </Button>
             </div>
           ) : (
@@ -202,11 +204,11 @@ export default function DistributionListsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>List Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Subscribers</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>{t('table.columns.listName')}</TableHead>
+                    <TableHead>{t('table.columns.type')}</TableHead>
+                    <TableHead>{t('table.columns.subscribers')}</TableHead>
+                    <TableHead>{t('table.columns.status')}</TableHead>
+                    <TableHead>{t('table.columns.created')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -228,7 +230,7 @@ export default function DistributionListsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
-                          {list.listType || 'manual'}
+                          {list.listType || t('table.manualFallback')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -239,7 +241,7 @@ export default function DistributionListsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={list.isActive ? 'default' : 'secondary'}>
-                          {list.isActive ? 'Active' : 'Inactive'}
+                          {list.isActive ? t('table.status.active') : t('table.status.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
@@ -259,10 +261,10 @@ export default function DistributionListsPage() {
                     disabled={page <= 1}
                     onClick={() => setPage(p => p - 1)}
                   >
-                    Previous
+                    {t('pagination.previous')}
                   </Button>
                   <span className="flex items-center text-sm text-muted-foreground">
-                    Page {page} of {totalPages}
+                    {t('pagination.pageOf', { page, totalPages })}
                   </span>
                   <Button
                     variant="outline"
@@ -270,7 +272,7 @@ export default function DistributionListsPage() {
                     disabled={page >= totalPages}
                     onClick={() => setPage(p => p + 1)}
                   >
-                    Next
+                    {t('pagination.next')}
                   </Button>
                 </div>
               )}

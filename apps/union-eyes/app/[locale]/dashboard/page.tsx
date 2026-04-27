@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { UserRole } from "@/lib/auth/roles";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
@@ -115,6 +116,7 @@ function orgTypeToDashboardTier(orgType: string | undefined): DashboardTier {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const { user } = useUser();
   const router = useRouter();
   const { organizationId, organization, isLoading: orgLoading } = useOrganization();
@@ -215,8 +217,7 @@ export default function DashboardPage() {
     <div className="mx-6 mt-6 mb-0 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <span>
-        <strong>Platform Admin View</strong> — You are viewing <strong>{organization.name}</strong> as a platform administrator.
-        This is an oversight view, not a membership view.
+        <strong>{t("sidebar.platformAdminView")}</strong> - {t("sidebar.viewingAsAdmin", { orgName: organization.name })}
       </span>
     </div>
   ) : null;

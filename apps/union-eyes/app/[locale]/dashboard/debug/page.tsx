@@ -11,9 +11,17 @@ import { currentUser } from '@nzila/platform-auth/entra/server';
 import { requireUser } from "@/lib/api-auth-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClaimsAssignedToUser } from "@/db/queries/claims-queries";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-export default async function DebugPage() {
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function DebugPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "debugPage" });
+
   // Gate: only available in development
   if (process.env.NODE_ENV === "production") {
     notFound();
@@ -36,39 +44,39 @@ export default async function DebugPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
-      <h1 className="text-3xl font-bold">Debug Information</h1>
+      <h1 className="text-3xl font-bold">{t("title")}</h1>
       
       <Card>
         <CardHeader>
-          <CardTitle>Clerk Authentication</CardTitle>
-          <CardDescription>Current user session information</CardDescription>
+          <CardTitle>{t("authCard.title")}</CardTitle>
+          <CardDescription>{t("authCard.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">User ID</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("authCard.userId")}</p>
             <code className="block mt-1 p-2 bg-muted rounded text-sm font-mono">
-              {userId || "Not authenticated"}
+              {userId || t("authCard.notAuthenticated")}
             </code>
           </div>
           
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Organization ID</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("authCard.organizationId")}</p>
             <code className="block mt-1 p-2 bg-muted rounded text-sm font-mono">
-              {orgId || "No organization"}
+              {orgId || t("authCard.noOrganization")}
             </code>
           </div>
           
           {user && (
             <>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("authCard.email")}</p>
                 <code className="block mt-1 p-2 bg-muted rounded text-sm font-mono">
-                  {user.emailAddresses[0]?.emailAddress || "No email"}
+                  {user.emailAddresses[0]?.emailAddress || t("authCard.noEmail")}
                 </code>
               </div>
               
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("authCard.fullName")}</p>
                 <code className="block mt-1 p-2 bg-muted rounded text-sm font-mono">
                   {user.firstName} {user.lastName}
                 </code>
@@ -80,12 +88,12 @@ export default async function DebugPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Assigned Claims</CardTitle>
-          <CardDescription>Claims currently assigned to this user</CardDescription>
+          <CardTitle>{t("claimsCard.title")}</CardTitle>
+          <CardDescription>{t("claimsCard.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {assignedClaims.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No claims assigned to this user</p>
+            <p className="text-sm text-muted-foreground">{t("claimsCard.none")}</p>
           ) : (
             <div className="space-y-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -102,13 +110,13 @@ export default async function DebugPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Database Integration Steps</CardTitle>
-          <CardDescription>How to link your Clerk user to test data</CardDescription>
+          <CardTitle>{t("dbCard.title")}</CardTitle>
+          <CardDescription>{t("dbCard.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium">1. Copy your User ID from above</p>
-            <p className="text-sm font-medium">2. Update a seed user with your Clerk ID:</p>
+            <p className="text-sm font-medium">{t("dbCard.step1")}</p>
+            <p className="text-sm font-medium">{t("dbCard.step2")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE users 
 SET user_id = 'your_clerk_user_id_here'
@@ -117,7 +125,7 @@ WHERE email = 'your.email@example.com';`}
           </div>
           
           <div className="space-y-2">
-            <p className="text-sm font-medium">3. Assign a test claim to yourself:</p>
+            <p className="text-sm font-medium">{t("dbCard.step3")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE claims 
 SET assigned_to = 'your_clerk_user_id_here'
@@ -127,7 +135,7 @@ WHERE claim_number = 'CLM-2025-004';`}
 
           <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
             <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              ðŸ’¡ After updating the database, refresh this page to see your assigned claims
+              {t("dbCard.tip")}
             </p>
           </div>
         </CardContent>

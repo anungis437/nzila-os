@@ -25,6 +25,7 @@ import {
   MessageSquare,
   BarChart3,
 } from 'lucide-react';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ── Types ── */
 interface OverviewStats {
@@ -288,15 +289,20 @@ function grievanceStatusVariant(s: string) {
 
 /* ── Page ── */
 export default async function SupportDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const { locale: routeLocale } = await paramsPromise;
+  const locale = await getLocale();
+  const t = await getTranslations('supportPage');
   await requireUser();
 
   const hasAccess = await hasMinRole('support_agent');
   if (!hasAccess) {
-    redirect('/dashboard');
+    redirect(`/${routeLocale}/dashboard`);
   }
 
   const params = await searchParams;
@@ -316,19 +322,17 @@ export default async function SupportDashboard({
     );
 
   const tabs = [
-    { key: 'overview', label: 'Overview', icon: BarChart3 },
-    { key: 'tickets', label: 'Tickets', icon: TicketIcon },
-    { key: 'grievances', label: 'Grievances', icon: AlertTriangle },
-    { key: 'organizations', label: 'Organizations', icon: MessageSquare },
+    { key: 'overview', label: t('tabOverview'), icon: BarChart3 },
+    { key: 'tickets', label: t('tabTickets'), icon: TicketIcon },
+    { key: 'grievances', label: t('tabGrievances'), icon: AlertTriangle },
+    { key: 'organizations', label: t('tabOrganizations'), icon: MessageSquare },
   ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Support Operations</h1>
-        <p className="text-muted-foreground mt-1">
-          Help desk tickets, grievance pipeline, and customer satisfaction
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
       </div>
 
       {/* ── Tabs ── */}
@@ -359,14 +363,12 @@ export default async function SupportDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <TicketIcon className="h-4 w-4" />
-                    Open Tickets
+                    {t('openTicketsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{overview.openTickets}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {overview.inProgressTickets} in progress
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('inProgressLabel', { count: overview.inProgressTickets })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -376,14 +378,12 @@ export default async function SupportDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Headphones className="h-4 w-4" />
-                    Active Cases
+                    {t('activeCasesTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{overview.openGrievances}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {overview.highPriorityGrievances} high priority
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('highPriorityLabel', { count: overview.highPriorityGrievances })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -392,12 +392,12 @@ export default async function SupportDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Avg Response Time
+                  {t('avgResponseTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{overview.avgResponseHours}h</div>
-                <p className="text-xs text-muted-foreground">first response</p>
+                <p className="text-xs text-muted-foreground">{t('firstResponseLabel')}</p>
               </CardContent>
             </Card>
 
@@ -405,16 +405,14 @@ export default async function SupportDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  Satisfaction
+                  {t('satisfactionTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
                   {overview.avgSatisfaction}/5
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {overview.resolvedTickets} resolved tickets
-                </p>
+                <p className="text-xs text-muted-foreground">{t('resolvedTicketsLabel', { count: overview.resolvedTickets })}</p>
               </CardContent>
             </Card>
           </div>
@@ -424,15 +422,15 @@ export default async function SupportDashboard({
             {/* Grievance pipeline */}
             <Card>
               <CardHeader>
-                <CardTitle>Grievance Pipeline</CardTitle>
+                <CardTitle>{t('grievancePipelineTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {[
-                    { label: 'High Priority', value: overview.highPriorityGrievances, variant: 'destructive' as const },
-                    { label: 'Open', value: overview.openGrievances, variant: 'secondary' as const },
-                    { label: 'In Arbitration', value: overview.inArbitration, variant: 'outline' as const },
-                    { label: 'Resolved', value: overview.resolvedGrievances, variant: 'default' as const, color: 'text-green-600' },
+                    { label: t('pipelineHighPriority'), value: overview.highPriorityGrievances, variant: 'destructive' as const },
+                    { label: t('pipelineOpen'), value: overview.openGrievances, variant: 'secondary' as const },
+                    { label: t('pipelineArbitration'), value: overview.inArbitration, variant: 'outline' as const },
+                    { label: t('pipelineResolved'), value: overview.resolvedGrievances, variant: 'default' as const, color: 'text-green-600' },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="flex items-center gap-2">
@@ -444,11 +442,11 @@ export default async function SupportDashboard({
                     </div>
                   ))}
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-sm text-muted-foreground">Settlements</span>
+                    <span className="text-sm text-muted-foreground">{t('settlementsLabel')}</span>
                     <span className="text-lg font-bold">
                       {overview.totalSettlements}{' '}
                       <span className="text-sm font-normal text-muted-foreground">
-                        (${overview.totalSettlementValue.toLocaleString()})
+                        ({t('currencyAmount', { value: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })})
                       </span>
                     </span>
                   </div>
@@ -459,11 +457,11 @@ export default async function SupportDashboard({
             {/* Ticket breakdown by category + channel */}
             <Card>
               <CardHeader>
-                <CardTitle>Ticket Breakdown</CardTitle>
+                <CardTitle>{t('ticketBreakdownTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium mb-2">By Category</p>
+                  <p className="text-sm font-medium mb-2">{t('byCategoryTitle')}</p>
                   <div className="space-y-2">
                     {categories.map((c) => (
                       <div key={c.category} className="flex items-center justify-between">
@@ -480,7 +478,7 @@ export default async function SupportDashboard({
                   </div>
                 </div>
                 <div className="border-t pt-4">
-                  <p className="text-sm font-medium mb-2">By Channel</p>
+                  <p className="text-sm font-medium mb-2">{t('byChannelTitle')}</p>
                   <div className="flex gap-3">
                     {channels.map((ch) => (
                       <div key={ch.channel} className="text-center">
@@ -491,14 +489,14 @@ export default async function SupportDashboard({
                   </div>
                 </div>
                 <div className="border-t pt-4">
-                  <p className="text-sm font-medium mb-2">Key Metrics</p>
+                  <p className="text-sm font-medium mb-2">{t('keyMetricsTitle')}</p>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Avg Resolution</span>
+                      <span className="text-muted-foreground">{t('avgResolutionMetric')}</span>
                       <div className="font-bold">{overview.avgResolutionHours}h</div>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Total Grievances</span>
+                      <span className="text-muted-foreground">{t('totalGrievancesMetric')}</span>
                       <div className="font-bold">{overview.totalGrievances}</div>
                     </div>
                   </div>
@@ -520,7 +518,7 @@ export default async function SupportDashboard({
                   variant={ticketFilter === s ? 'default' : 'outline'}
                   className="cursor-pointer capitalize"
                 >
-                  {s === 'all' ? `All (${overview.totalTickets})` : s.replace('-', ' ')}
+                  {s === 'all' ? t('filterAll', { count: overview.totalTickets }) : s === 'in-progress' ? t('statusInProgress') : s === 'open' ? t('statusOpen') : t('statusResolved')}
                 </Badge>
               </Link>
             ))}
@@ -529,9 +527,9 @@ export default async function SupportDashboard({
           <Card>
             <CardHeader>
               <CardTitle>
-                Support Tickets
+                {t('supportTicketsTitle')}
                 <span className="text-sm font-normal text-muted-foreground ml-2">
-                  ({tickets.length} ticket{tickets.length !== 1 ? 's' : ''})
+                  {t('ticketsCount', { count: tickets.length })}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -540,36 +538,36 @@ export default async function SupportDashboard({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">#</th>
-                      <th className="pb-2 font-medium">Subject</th>
-                      <th className="pb-2 font-medium">Organization</th>
-                      <th className="pb-2 font-medium">Category</th>
-                      <th className="pb-2 font-medium">Priority</th>
-                      <th className="pb-2 font-medium">Status</th>
-                      <th className="pb-2 font-medium">Channel</th>
-                      <th className="pb-2 font-medium">Assigned</th>
-                      <th className="pb-2 font-medium">Rating</th>
+                      <th className="pb-2 font-medium">{t('tableNumber')}</th>
+                      <th className="pb-2 font-medium">{t('tableSubject')}</th>
+                      <th className="pb-2 font-medium">{t('tableOrganization')}</th>
+                      <th className="pb-2 font-medium">{t('tableCategory')}</th>
+                      <th className="pb-2 font-medium">{t('tablePriority')}</th>
+                      <th className="pb-2 font-medium">{t('tableStatus')}</th>
+                      <th className="pb-2 font-medium">{t('tableChannel')}</th>
+                      <th className="pb-2 font-medium">{t('tableAssigned')}</th>
+                      <th className="pb-2 font-medium">{t('tableRating')}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {tickets.map((t) => (
-                      <tr key={t.id} className="border-b last:border-0">
-                        <td className="py-2 font-mono text-xs">{t.ticketNumber}</td>
-                        <td className="py-2 max-w-62.5 truncate">{t.subject}</td>
-                        <td className="py-2">{t.orgName}</td>
-                        <td className="py-2 capitalize">{t.category.replace('-', ' ')}</td>
+                    {tickets.map((ticket) => (
+                      <tr key={ticket.id} className="border-b last:border-0">
+                        <td className="py-2 font-mono text-xs">{ticket.ticketNumber}</td>
+                        <td className="py-2 max-w-62.5 truncate">{ticket.subject}</td>
+                        <td className="py-2">{ticket.orgName}</td>
+                        <td className="py-2 capitalize">{ticket.category.replace('-', ' ')}</td>
                         <td className="py-2">
-                          <Badge variant={priorityVariant(t.priority)} className="capitalize">
-                            {t.priority}
+                          <Badge variant={priorityVariant(ticket.priority)} className="capitalize">
+                            {ticket.priority}
                           </Badge>
                         </td>
-                        <td className={`py-2 capitalize font-medium ${statusColor(t.status)}`}>
-                          {t.status.replace('-', ' ')}
+                        <td className={`py-2 capitalize font-medium ${statusColor(ticket.status)}`}>
+                          {ticket.status === 'in-progress' ? t('statusInProgress') : ticket.status === 'open' ? t('statusOpen') : ticket.status === 'resolved' ? t('statusResolved') : ticket.status.replace('-', ' ')}
                         </td>
-                        <td className="py-2 capitalize">{t.channel}</td>
-                        <td className="py-2">{t.assignedTo ?? '—'}</td>
+                        <td className="py-2 capitalize">{ticket.channel}</td>
+                        <td className="py-2">{ticket.assignedTo ?? t('emptyDash')}</td>
                         <td className="py-2">
-                          {t.satisfactionRating ? `${t.satisfactionRating}/5` : '—'}
+                          {ticket.satisfactionRating ? `${ticket.satisfactionRating}/5` : t('emptyDash')}
                         </td>
                       </tr>
                     ))}
@@ -586,9 +584,9 @@ export default async function SupportDashboard({
         <Card>
           <CardHeader>
             <CardTitle>
-              Grievance Pipeline
+              {t('grievancePipelineTitle')}
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({grievances.length} grievance{grievances.length !== 1 ? 's' : ''})
+                {t('grievancesCount', { count: grievances.length })}
               </span>
             </CardTitle>
           </CardHeader>
@@ -597,13 +595,13 @@ export default async function SupportDashboard({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-2 font-medium">#</th>
-                    <th className="pb-2 font-medium">Title</th>
-                    <th className="pb-2 font-medium">Organization</th>
-                    <th className="pb-2 font-medium">Priority</th>
-                    <th className="pb-2 font-medium">Status</th>
-                    <th className="pb-2 font-medium">Settlement</th>
-                    <th className="pb-2 font-medium">Filed</th>
+                    <th className="pb-2 font-medium">{t('tableNumber')}</th>
+                    <th className="pb-2 font-medium">{t('tableTitle')}</th>
+                    <th className="pb-2 font-medium">{t('tableOrganization')}</th>
+                    <th className="pb-2 font-medium">{t('tablePriority')}</th>
+                    <th className="pb-2 font-medium">{t('tableStatus')}</th>
+                    <th className="pb-2 font-medium">{t('tableSettlement')}</th>
+                    <th className="pb-2 font-medium">{t('tableFiled')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -624,11 +622,11 @@ export default async function SupportDashboard({
                       </td>
                       <td className="py-2">
                         {g.monetaryAmount
-                          ? `$${g.monetaryAmount.toLocaleString()} (${g.settlementStatus})`
-                          : '—'}
+                          ? t('settlementValue', { value: new Intl.NumberFormat(locale).format(g.monetaryAmount), status: g.settlementStatus ?? '' })
+                          : t('emptyDash')}
                       </td>
                       <td className="py-2 text-muted-foreground">
-                        {new Date(g.createdAt).toLocaleDateString()}
+                        {new Date(g.createdAt).toLocaleDateString(locale)}
                       </td>
                     </tr>
                   ))}
@@ -643,19 +641,19 @@ export default async function SupportDashboard({
       {tab === 'organizations' && (
         <Card>
           <CardHeader>
-            <CardTitle>Support by Organization</CardTitle>
+            <CardTitle>{t('supportByOrganizationTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-2 font-medium">Organization</th>
-                    <th className="pb-2 font-medium text-right">Open Tickets</th>
-                    <th className="pb-2 font-medium text-right">Resolved Tickets</th>
-                    <th className="pb-2 font-medium text-right">Satisfaction</th>
-                    <th className="pb-2 font-medium text-right">Active Cases</th>
-                    <th className="pb-2 font-medium text-right">Resolved Grievances</th>
+                    <th className="pb-2 font-medium">{t('tableOrganization')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableOpenTickets')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableResolvedTickets')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableSatisfaction')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableActiveCases')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableResolvedGrievances')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -665,7 +663,7 @@ export default async function SupportDashboard({
                       <td className="py-2 text-right">{o.openTickets}</td>
                       <td className="py-2 text-right text-green-600">{o.resolvedTickets}</td>
                       <td className="py-2 text-right">
-                        {o.avgSatisfaction ? `${o.avgSatisfaction}/5` : '—'}
+                        {o.avgSatisfaction ? `${o.avgSatisfaction}/5` : t('emptyDash')}
                       </td>
                       <td className="py-2 text-right">{o.openGrievances}</td>
                       <td className="py-2 text-right text-green-600">{o.resolvedGrievances}</td>

@@ -11,6 +11,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, differenceInDays, isPast } from "date-fns";
 import {
@@ -118,6 +119,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 function DeadlineCell({ deadline }: { deadline: string | null }) {
+  const t = useTranslations("grievanceQueue");
   if (!deadline) return <span className="text-muted-foreground text-xs">—</span>;
   const date = new Date(deadline);
   const isOverdue = isPast(date);
@@ -137,10 +139,10 @@ function DeadlineCell({ deadline }: { deadline: string | null }) {
           {isOverdue ? (
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {Math.abs(daysLeft)}d overdue
+              {t("daysOverdue", { days: Math.abs(daysLeft) })}
             </span>
           ) : (
-            `${daysLeft}d left`
+            t("daysLeft", { days: daysLeft })
           )}
         </span>
       </TooltipTrigger>
@@ -160,11 +162,12 @@ export function GrievanceQueueTable({
   onExport,
   className,
 }: GrievanceQueueTableProps) {
+  const t = useTranslations("grievanceQueue");
   const columns: ColumnDef<GrievanceRow>[] = React.useMemo(
     () => [
       {
         accessorKey: "grievanceNumber",
-        header: "Case #",
+        header: t("columns.caseNumber"),
         cell: ({ row }) => (
           <span className="font-mono text-xs font-medium">{row.original.grievanceNumber}</span>
         ),
@@ -172,7 +175,7 @@ export function GrievanceQueueTable({
       },
       {
         accessorKey: "title",
-        header: "Grievance",
+        header: t("columns.grievance"),
         cell: ({ row }) => (
           <div className="max-w-[240px]">
             <p className="text-sm font-medium truncate">{row.original.title}</p>
@@ -182,19 +185,19 @@ export function GrievanceQueueTable({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t("columns.status"),
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
         size: 130,
       },
       {
         accessorKey: "priority",
-        header: "Priority",
+        header: t("columns.priority"),
         cell: ({ row }) => <PriorityBadge priority={row.original.priority} />,
         size: 100,
       },
       {
         accessorKey: "employerName",
-        header: "Employer",
+        header: t("columns.employer"),
         cell: ({ row }) => (
           <span className="text-sm truncate max-w-[150px] inline-block">
             {row.original.employerName}
@@ -203,26 +206,26 @@ export function GrievanceQueueTable({
       },
       {
         accessorKey: "stewardName",
-        header: "Steward",
+        header: t("columns.steward"),
         cell: ({ row }) =>
           row.original.stewardName ? (
             <span className="text-sm">{row.original.stewardName}</span>
           ) : (
             <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-              Unassigned
+              {t("unassigned")}
             </Badge>
           ),
         size: 130,
       },
       {
         accessorKey: "responseDeadline",
-        header: "Deadline",
+        header: t("columns.deadline"),
         cell: ({ row }) => <DeadlineCell deadline={row.original.responseDeadline} />,
         size: 110,
       },
       {
         accessorKey: "lastUpdated",
-        header: "Updated",
+        header: t("columns.updated"),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground tabular-nums">
             {row.original.lastUpdated ? format(new Date(row.original.lastUpdated), "MMM d") : "—"}
@@ -243,29 +246,29 @@ export function GrievanceQueueTable({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onView?.(row.original)}>
                 <Eye className="h-4 w-4 mr-2" />
-                View Details
+                {t("actions.viewDetails")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onAssign?.(row.original)}>
                 <UserPlus className="h-4 w-4 mr-2" />
-                Assign Steward
+                {t("actions.assignSteward")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Send className="h-4 w-4 mr-2" />
-                Contact Employer
+                {t("actions.contactEmployer")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onEscalate?.(row.original)}>
                 <ArrowUpRight className="h-4 w-4 mr-2" />
-                Escalate
+                {t("actions.escalate")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Scale className="h-4 w-4 mr-2" />
-                Send to Arbitration
+                {t("actions.sendArbitration")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Resolve / Close
+                {t("actions.resolve")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -273,7 +276,7 @@ export function GrievanceQueueTable({
         size: 50,
       },
     ],
-    [onView, onAssign, onEscalate]
+    [onView, onAssign, onEscalate, t]
   );
 
   if (loading) {
@@ -289,7 +292,7 @@ export function GrievanceQueueTable({
   if (data.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No grievances match your filters.</p>
+        <p className="text-muted-foreground">{t("empty")}</p>
       </div>
     );
   }
@@ -299,7 +302,7 @@ export function GrievanceQueueTable({
       columns={columns}
       data={data}
       searchKey="title"
-      searchPlaceholder="Search grievances…"
+      searchPlaceholder={t("searchPlaceholder")}
       onRowClick={(row) => onView?.(row.original)}
       onExport={onExport}
       enableRowSelection

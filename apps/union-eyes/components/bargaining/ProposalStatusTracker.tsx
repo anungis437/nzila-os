@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, AlertTriangle, XCircle } from "lucide-react";
@@ -19,6 +20,7 @@ interface ProposalStatusTrackerProps {
 }
 
 export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps) {
+  const t = useTranslations("proposalStatus");
   const statusCounts = {
     draft: proposals.filter(p => p.status === "draft").length,
     submitted: proposals.filter(p => p.status === "submitted").length,
@@ -36,15 +38,15 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Proposal Status</CardTitle>
-        <CardDescription>Track progress of all proposals</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {/* Progress Bar */}
           <div>
             <div className="flex justify-between mb-2 text-sm">
-              <span>Acceptance Rate</span>
+              <span>{t("acceptanceRate")}</span>
               <span className="font-semibold">{acceptanceRate.toFixed(1)}%</span>
             </div>
             <Progress value={acceptanceRate} className="h-2" />
@@ -55,7 +57,7 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
             <div className="p-3 border rounded-lg bg-green-50/50">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium">Accepted</span>
+                <span className="text-sm font-medium">{t("accepted")}</span>
               </div>
               <p className="text-2xl font-bold text-green-600">{statusCounts.accepted}</p>
             </div>
@@ -63,7 +65,7 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
             <div className="p-3 border rounded-lg bg-yellow-50/50">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm font-medium">Pending</span>
+                <span className="text-sm font-medium">{t("pending")}</span>
               </div>
               <p className="text-2xl font-bold text-yellow-600">
                 {statusCounts.submitted + statusCounts.under_review}
@@ -73,7 +75,7 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
             <div className="p-3 border rounded-lg bg-red-50/50">
               <div className="flex items-center gap-2 mb-1">
                 <XCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm font-medium">Rejected</span>
+                <span className="text-sm font-medium">{t("rejected")}</span>
               </div>
               <p className="text-2xl font-bold text-red-600">{statusCounts.rejected}</p>
             </div>
@@ -81,7 +83,7 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
             <div className="p-3 border rounded-lg bg-blue-50/50">
               <div className="flex items-center gap-2 mb-1">
                 <AlertTriangle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Counter Offered</span>
+                <span className="text-sm font-medium">{t("counterOffered")}</span>
               </div>
               <p className="text-2xl font-bold text-blue-600">{statusCounts.counter_offered}</p>
             </div>
@@ -89,11 +91,11 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
 
           {/* Detailed Breakdown */}
           <div className="space-y-2 pt-2 border-t">
-            <h4 className="text-sm font-semibold">Detailed Breakdown</h4>
+            <h4 className="text-sm font-semibold">{t("detailedBreakdown")}</h4>
             {Object.entries(statusCounts).map(([status, count]) => (
               <div key={status} className="flex justify-between text-sm">
-                <span className="text-muted-foreground capitalize">
-                  {status.replace("_", " ")}
+                <span className="text-muted-foreground">
+                  {t(`statuses.${status}` as 'statuses.draft')}
                 </span>
                 <span className="font-medium">{count}</span>
               </div>

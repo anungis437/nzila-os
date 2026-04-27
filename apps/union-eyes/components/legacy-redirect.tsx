@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Info } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface LegacyRedirectProps {
   /** Human-readable name of the old page (e.g. "Messages") */
@@ -30,6 +31,7 @@ export function LegacyRedirect({
   href,
   delay = 2000,
 }: LegacyRedirectProps) {
+  const t = useTranslations("legacyRedirect");
   const router = useRouter();
   const [countdown, setCountdown] = useState(Math.ceil((delay) / 1000));
 
@@ -45,12 +47,12 @@ export function LegacyRedirect({
         <Info size={20} className="text-blue-600 shrink-0 mt-0.5" />
         <div>
           <p className="font-medium text-gray-900">
-            {oldName} has moved to {newName}
+            {t("movedTo", { oldName, newName })}
           </p>
           <p className="text-sm text-gray-600 mt-1">
-            Redirecting in {countdown}s…{" "}
+            {t("redirectingIn", { countdown })}{" "}
             <Link href={href} className="inline-flex items-center gap-1 text-blue-600 hover:underline font-medium">
-              Go now <ArrowRight size={12} />
+              {t("goNow")} <ArrowRight size={12} />
             </Link>
           </p>
         </div>

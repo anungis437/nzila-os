@@ -1,18 +1,20 @@
 /**
- * Locale-aware For Representatives page
- * Accessible at /{locale}/for-representatives
+ * Locale-aware For Representatives page.
  */
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
-import RolePageContent from '@/app/(marketing)/components/role-page-content';
+import { getTranslations } from 'next-intl/server';
+import LocaleRolePageContent from '../locale-role-page-content';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'For Representatives | UnionEyes',
-    description:
-      'UnionEyes helps stewards and reps move from intake to outcome with confidence — guided workflows, precedent search, and real-time case status.',
-  };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'marketing.rolePages.representatives' });
+  return { title: t('pageTitle'), description: t('pageDescription') };
 }
 
 export default async function LocaleForRepresentativesPage({
@@ -20,6 +22,6 @@ export default async function LocaleForRepresentativesPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  await params;
-  return <RolePageContent role="representatives" />;
+  const { locale } = await params;
+  return <LocaleRolePageContent role="representatives" locale={locale} />;
 }

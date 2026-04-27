@@ -9,6 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +57,7 @@ interface EditForm {
 }
 
 export default function BillingPage() {
+  const t = useTranslations('financeBillingPage');
   const [account, setAccount] = useState<BillingAccount | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,7 +83,7 @@ export default function BillingPage() {
         setAccount(null);
       }
     } catch {
-      setError('Failed to load billing account');
+      setError(t('errorLoadingAccount'));
     } finally {
       setLoading(false);
     }
@@ -173,7 +175,7 @@ export default function BillingPage() {
   if (loading) {
     return (
       <div className="space-y-6 p-6">
-        <h1 className="text-2xl font-bold">Billing</h1>
+        <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
         <Card className="p-6">
           <Skeleton className="h-8 w-64 mb-4" />
           <Skeleton className="h-4 w-48 mb-2" />
@@ -185,7 +187,7 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6 p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold">Billing</h1>
+      <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
 
       {error && (
         <Card className="p-4 border-destructive">
@@ -208,7 +210,7 @@ export default function BillingPage() {
             </div>
             {!editing && (
               <Button variant="outline" size="sm" onClick={openEdit} className="gap-1">
-                <Pencil className="h-3.5 w-3.5" /> Edit
+                <Pencil className="h-3.5 w-3.5" /> {t('editButton')}
               </Button>
             )}
           </div>
@@ -216,15 +218,15 @@ export default function BillingPage() {
           {!editing ? (
             /* ── Read-only view ── */
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <Detail label="Billing Email" value={account.billingEmail} />
-              <Detail label="Contact Name" value={account.billingContactName} />
-              <Detail label="Phone" value={account.billingPhone} />
-              <Detail label="Tax ID" value={account.taxId} />
-              <Detail label="Currency" value={account.currency} />
-              <Detail label="Net Terms" value={`Net ${account.netTermsDays}`} />
+              <Detail label={t('billingEmail')} value={account.billingEmail} />
+              <Detail label={t('contactName')} value={account.billingContactName} />
+              <Detail label={t('phone')} value={account.billingPhone} />
+              <Detail label={t('taxId')} value={account.taxId} />
+              <Detail label={t('currency')} value={account.currency} />
+              <Detail label={t('netTerms')} value={t('netTermsValue', { days: account.netTermsDays })} />
               {account.billingAddress && (
                 <div className="sm:col-span-2">
-                  <p className="text-muted-foreground font-medium">Billing Address</p>
+                  <p className="text-muted-foreground font-medium">{t('billingAddress')}</p>
                   <p>{account.billingAddress.line1}</p>
                   {account.billingAddress.line2 && <p>{account.billingAddress.line2}</p>}
                   <p>{account.billingAddress.city}, {account.billingAddress.province} {account.billingAddress.postalCode}</p>
@@ -233,7 +235,7 @@ export default function BillingPage() {
               )}
               <div className="sm:col-span-2 pt-2 border-t flex items-center gap-2 text-muted-foreground">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                Account created {new Date(account.createdAt).toLocaleDateString('en-CA')}
+                {t('accountCreated', { date: new Date(account.createdAt).toLocaleDateString('en-CA') })}
               </div>
             </div>
           ) : (
@@ -245,45 +247,45 @@ export default function BillingPage() {
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Display Name" required>
+                <Field label={t('displayName')} required>
                   <Input value={editForm.displayName} onChange={(e) => setEditForm((f) => ({ ...f, displayName: e.target.value }))} />
                 </Field>
-                <Field label="Billing Email" required>
+                <Field label={t('billingEmail')} required>
                   <Input type="email" value={editForm.billingEmail} onChange={(e) => setEditForm((f) => ({ ...f, billingEmail: e.target.value }))} />
                 </Field>
-                <Field label="Contact Name">
+                <Field label={t('contactName')}>
                   <Input value={editForm.billingContactName} onChange={(e) => setEditForm((f) => ({ ...f, billingContactName: e.target.value }))} />
                 </Field>
-                <Field label="Phone">
+                <Field label={t('phone')}>
                   <Input value={editForm.billingPhone} onChange={(e) => setEditForm((f) => ({ ...f, billingPhone: e.target.value }))} />
                 </Field>
-                <Field label="Tax ID / BN">
-                  <Input value={editForm.taxId} placeholder="e.g. 123456789 RT0001" onChange={(e) => setEditForm((f) => ({ ...f, taxId: e.target.value }))} />
+                <Field label={t('taxId')}>
+                  <Input value={editForm.taxId} placeholder={t('taxIdPlaceholder')} onChange={(e) => setEditForm((f) => ({ ...f, taxId: e.target.value }))} />
                 </Field>
-                <Field label="Net Terms (days)">
+                <Field label={t('netTermsDays')}>
                   <Input type="number" min={1} max={120} value={editForm.netTermsDays} onChange={(e) => setEditForm((f) => ({ ...f, netTermsDays: e.target.value }))} />
                 </Field>
               </div>
 
               <div className="border-t pt-3">
-                <p className="text-sm font-medium mb-2">Billing Address</p>
+                <p className="text-sm font-medium mb-2">{t('billingAddress')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Street Line 1" className="sm:col-span-2">
+                  <Field label={t('streetLine1')} className="sm:col-span-2">
                     <Input value={editForm.line1} onChange={(e) => setEditForm((f) => ({ ...f, line1: e.target.value }))} />
                   </Field>
-                  <Field label="Street Line 2" className="sm:col-span-2">
+                  <Field label={t('streetLine2')} className="sm:col-span-2">
                     <Input value={editForm.line2} onChange={(e) => setEditForm((f) => ({ ...f, line2: e.target.value }))} />
                   </Field>
-                  <Field label="City">
+                  <Field label={t('city')}>
                     <Input value={editForm.city} onChange={(e) => setEditForm((f) => ({ ...f, city: e.target.value }))} />
                   </Field>
-                  <Field label="Province">
-                    <Input value={editForm.province} placeholder="e.g. ON" onChange={(e) => setEditForm((f) => ({ ...f, province: e.target.value }))} />
+                  <Field label={t('province')}>
+                    <Input value={editForm.province} placeholder={t('provincePlaceholder')} onChange={(e) => setEditForm((f) => ({ ...f, province: e.target.value }))} />
                   </Field>
-                  <Field label="Postal Code">
-                    <Input value={editForm.postalCode} placeholder="e.g. K1A 0A6" onChange={(e) => setEditForm((f) => ({ ...f, postalCode: e.target.value }))} />
+                  <Field label={t('postalCode')}>
+                    <Input value={editForm.postalCode} placeholder={t('postalCodePlaceholder')} onChange={(e) => setEditForm((f) => ({ ...f, postalCode: e.target.value }))} />
                   </Field>
-                  <Field label="Country">
+                  <Field label={t('country')}>
                     <Input value={editForm.country} onChange={(e) => setEditForm((f) => ({ ...f, country: e.target.value }))} />
                   </Field>
                 </div>
@@ -291,10 +293,10 @@ export default function BillingPage() {
 
               <div className="flex gap-2 pt-1">
                 <Button onClick={handleSave} disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? t('savingButton') : t('saveButton')}
                 </Button>
                 <Button variant="outline" onClick={() => setEditing(false)} disabled={saving} className="gap-1">
-                  <X className="h-3.5 w-3.5" /> Cancel
+                  <X className="h-3.5 w-3.5" /> {t('cancelButton')}
                 </Button>
               </div>
             </div>
@@ -302,25 +304,24 @@ export default function BillingPage() {
         </Card>
       ) : (
         <Card className="p-6 max-w-md">
-          <h2 className="text-lg font-semibold mb-2">Set Up Billing Account</h2>
+          <h2 className="text-lg font-semibold mb-2">{t('setupBillingTitle')}</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Create a billing account to enable platform invoicing and cost allocation.
-            All billing is processed in Canadian Dollars (CAD).
+            {t('setupBillingDescription')}
           </p>
           <div className="space-y-3">
             <Input
-              placeholder="Organization display name"
+              placeholder={t('organizationNamePlaceholder')}
               value={createForm.displayName}
               onChange={(e) => setCreateForm((f) => ({ ...f, displayName: e.target.value }))}
             />
             <Input
               type="email"
-              placeholder="Billing email"
+              placeholder={t('billingEmailPlaceholder')}
               value={createForm.billingEmail}
               onChange={(e) => setCreateForm((f) => ({ ...f, billingEmail: e.target.value }))}
             />
             <Button onClick={handleCreate} disabled={creating || !createForm.displayName || !createForm.billingEmail}>
-              {creating ? 'Creating...' : 'Create Billing Account'}
+              {creating ? t('creatingButton') : t('createButton')}
             </Button>
           </div>
         </Card>

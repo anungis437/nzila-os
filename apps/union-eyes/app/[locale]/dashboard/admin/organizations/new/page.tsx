@@ -8,6 +8,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   ArrowLeft,
@@ -32,59 +33,57 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import type { OrganizationType, LabourSector, CAJurisdiction } from "@/types/organization";
 
-// Canadian sectors
-const sectors: { value: LabourSector; label: string }[] = [
-  { value: "healthcare", label: "Healthcare" },
-  { value: "education", label: "Education" },
-  { value: "public_service", label: "Public Service" },
-  { value: "trades", label: "Trades" },
-  { value: "manufacturing", label: "Manufacturing" },
-  { value: "transportation", label: "Transportation" },
-  { value: "retail", label: "Retail" },
-  { value: "hospitality", label: "Hospitality" },
-  { value: "technology", label: "Technology" },
-  { value: "construction", label: "Construction" },
-  { value: "utilities", label: "Utilities" },
-  { value: "telecommunications", label: "Telecommunications" },
-  { value: "financial_services", label: "Financial Services" },
-  { value: "agriculture", label: "Agriculture" },
-  { value: "arts_culture", label: "Arts & Culture" },
-  { value: "other", label: "Other" }
+const sectors: LabourSector[] = [
+  "healthcare",
+  "education",
+  "public_service",
+  "trades",
+  "manufacturing",
+  "transportation",
+  "retail",
+  "hospitality",
+  "technology",
+  "construction",
+  "utilities",
+  "telecommunications",
+  "financial_services",
+  "agriculture",
+  "arts_culture",
+  "other",
 ];
 
-// Canadian jurisdictions
-const jurisdictions: { value: CAJurisdiction; label: string }[] = [
-  { value: "CA-FED", label: "Federal" },
-  { value: "CA-AB", label: "Alberta" },
-  { value: "CA-BC", label: "British Columbia" },
-  { value: "CA-MB", label: "Manitoba" },
-  { value: "CA-NB", label: "New Brunswick" },
-  { value: "CA-NL", label: "Newfoundland and Labrador" },
-  { value: "CA-NS", label: "Nova Scotia" },
-  { value: "CA-NT", label: "Northwest Territories" },
-  { value: "CA-NU", label: "Nunavut" },
-  { value: "CA-ON", label: "Ontario" },
-  { value: "CA-PE", label: "Prince Edward Island" },
-  { value: "CA-QC", label: "Quebec" },
-  { value: "CA-SK", label: "Saskatchewan" },
-  { value: "CA-YT", label: "Yukon" }
+const jurisdictions: CAJurisdiction[] = [
+  "CA-FED",
+  "CA-AB",
+  "CA-BC",
+  "CA-MB",
+  "CA-NB",
+  "CA-NL",
+  "CA-NS",
+  "CA-NT",
+  "CA-NU",
+  "CA-ON",
+  "CA-PE",
+  "CA-QC",
+  "CA-SK",
+  "CA-YT",
 ];
 
-// Organization types
-const orgTypes: { value: OrganizationType; label: string; description: string }[] = [
-  { value: "platform", label: "Platform", description: "SaaS platform provider (Nzila Ventures)" },
-  { value: "congress", label: "Congress", description: "National labour congress (e.g., CLC)" },
-  { value: "federation", label: "Federation", description: "Provincial/territorial federation (e.g., OFL, BCFED)" },
-  { value: "union", label: "Union", description: "National/international union (e.g., CUPE, Unifor)" },
-  { value: "local", label: "Local", description: "Local union or chapter" },
-  { value: "region", label: "Region", description: "Regional council" },
-  { value: "district", label: "District", description: "District labour council" }
+const orgTypes: OrganizationType[] = [
+  "platform",
+  "congress",
+  "federation",
+  "union",
+  "local",
+  "region",
+  "district",
 ];
 
 export default function NewOrganizationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { organizationId } = useOrganization();
+  const t = useTranslations("adminOrganizationsNewPage");
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +98,7 @@ export default function NewOrganizationPage() {
     parentId: searchParams.get("parent") || organizationId || "",
     description: "",
     sector: "other" as LabourSector,
-    jurisdiction: "federal" as CAJurisdiction,
+    jurisdiction: "CA-FED" as CAJurisdiction,
     charterNumber: "",
     affiliationDate: ""
   });
@@ -156,13 +155,13 @@ export default function NewOrganizationPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create organization");
+        throw new Error(errorData.error || t("failedToCreateOrganization"));
       }
 
       const result = await response.json();
       router.push(`/dashboard/admin/organizations/${result.data.id}`);
     } catch (error) {
-      setError(error.message);
+      setError(error instanceof Error ? error.message : t("error"));
       setIsSubmitting(false);
     }
   };
@@ -181,9 +180,9 @@ export default function NewOrganizationPage() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create Organization</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Add a new organization to the hierarchy
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -200,39 +199,39 @@ export default function NewOrganizationPage() {
         {/* Basic Information */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("basicInformationTitle")}</CardTitle>
             <CardDescription>
-              Enter the basic details for the organization
+              {t("basicInformationDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Organization Name *</Label>
+              <Label htmlFor="name">{t("organizationNameLabel")}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g., CUPE Local 1000"
+                placeholder={t("organizationNamePlaceholder")}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
+              <Label htmlFor="slug">{t("slugLabel")}</Label>
               <Input
                 id="slug"
                 value={formData.slug}
                 onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="cupe-local-1000"
+                placeholder={t("slugPlaceholder")}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                URL-friendly identifier (auto-generated from name)
+                {t("slugHelp")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="type">Organization Type *</Label>
+              <Label htmlFor="type">{t("organizationTypeLabel")}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as OrganizationType }))}
@@ -242,10 +241,10 @@ export default function NewOrganizationPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {orgTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type} value={type}>
                       <div>
-                        <div>{type.label}</div>
-                        <div className="text-xs text-muted-foreground">{type.description}</div>
+                        <div>{t(`orgType.${type}`)}</div>
+                        <div className="text-xs text-muted-foreground">{t(`orgTypeDescription.${type}`)}</div>
                       </div>
                     </SelectItem>
                   ))}
@@ -254,12 +253,12 @@ export default function NewOrganizationPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("descriptionLabel")}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Brief description of the organization..."
+                placeholder={t("descriptionPlaceholder")}
                 rows={3}
               />
             </div>
@@ -269,23 +268,23 @@ export default function NewOrganizationPage() {
         {/* Hierarchy */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Hierarchy</CardTitle>
+            <CardTitle>{t("hierarchyTitle")}</CardTitle>
             <CardDescription>
-              Position this organization within the hierarchy
+              {t("hierarchyDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="parent">Parent Organization</Label>
+              <Label htmlFor="parent">{t("parentOrganizationLabel")}</Label>
               <Select
                 value={formData.parentId}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value }))}
               >
                 <SelectTrigger id="parent">
-                  <SelectValue placeholder="No parent (root organization)" />
+                  <SelectValue placeholder={t("noParentOption")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No parent (root organization)</SelectItem>
+                  <SelectItem value="">{t("noParentOption")}</SelectItem>
                   {availableOrganizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
                       {org.name} ({org.type})
@@ -294,14 +293,14 @@ export default function NewOrganizationPage() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Select the parent organization in the hierarchy
+                {t("parentOrganizationHelp")}
               </p>
             </div>
 
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                Child organizations will inherit access permissions from their parent
+                {t("inheritanceNotice")}
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -310,14 +309,14 @@ export default function NewOrganizationPage() {
         {/* Classification */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Classification</CardTitle>
+            <CardTitle>{t("classificationTitle")}</CardTitle>
             <CardDescription>
-              Sector and jurisdiction information
+              {t("classificationDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="sector">Primary Sector</Label>
+              <Label htmlFor="sector">{t("primarySectorLabel")}</Label>
               <Select
                 value={formData.sector}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, sector: value as LabourSector }))}
@@ -327,8 +326,8 @@ export default function NewOrganizationPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {sectors.map(sector => (
-                    <SelectItem key={sector.value} value={sector.value}>
-                      {sector.label}
+                    <SelectItem key={sector} value={sector}>
+                      {t(`sector.${sector}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -336,7 +335,7 @@ export default function NewOrganizationPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="jurisdiction">Jurisdiction</Label>
+              <Label htmlFor="jurisdiction">{t("jurisdictionLabel")}</Label>
               <Select
                 value={formData.jurisdiction}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, jurisdiction: value as CAJurisdiction }))}
@@ -346,8 +345,8 @@ export default function NewOrganizationPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {jurisdictions.map(jurisdiction => (
-                    <SelectItem key={jurisdiction.value} value={jurisdiction.value}>
-                      {jurisdiction.label}
+                    <SelectItem key={jurisdiction} value={jurisdiction}>
+                      {t(`jurisdiction.${jurisdiction}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -359,24 +358,24 @@ export default function NewOrganizationPage() {
         {/* Additional Details */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Additional Details</CardTitle>
+            <CardTitle>{t("additionalDetailsTitle")}</CardTitle>
             <CardDescription>
-              Optional information about the organization
+              {t("additionalDetailsDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="charter">Charter Number</Label>
+              <Label htmlFor="charter">{t("charterNumberLabel")}</Label>
               <Input
                 id="charter"
                 value={formData.charterNumber}
                 onChange={(e) => setFormData(prev => ({ ...prev, charterNumber: e.target.value }))}
-                placeholder="e.g., 1000"
+                placeholder={t("charterNumberPlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="affiliation">Affiliation Date</Label>
+              <Label htmlFor="affiliation">{t("affiliationDateLabel")}</Label>
               <Input
                 id="affiliation"
                 type="date"
@@ -395,7 +394,7 @@ export default function NewOrganizationPage() {
             onClick={() => router.back()}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("cancelButton")}
           </Button>
           <Button
             type="submit"
@@ -405,12 +404,12 @@ export default function NewOrganizationPage() {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Creating...
+                {t("creatingButton")}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                Create Organization
+                {t("createOrganizationButton")}
               </>
             )}
           </Button>

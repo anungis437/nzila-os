@@ -17,6 +17,7 @@ export const dynamic = 'force-dynamic';
  */
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,6 @@ import {
   FileText,
   Users,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -80,22 +80,26 @@ interface OverviewData {
 // UTILITY FUNCTIONS
 // =============================================================================
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-CA', {
+function formatCurrency(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'CAD',
   }).format(amount);
 }
 
-function formatDate(date: string): string {
-  return format(new Date(date), 'MMM dd, yyyy');
+function formatDate(date: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+  }).format(new Date(date));
 }
 
-function getStatusBadge(status: string) {
+function getStatusBadge(status: string, t: (key: string) => string) {
   const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-    paid: { variant: 'default', label: 'Paid' },
-    pending: { variant: 'secondary', label: 'Pending' },
-    overdue: { variant: 'destructive', label: 'Overdue' },
+    paid: { variant: 'default', label: t('status.paid') },
+    pending: { variant: 'secondary', label: t('status.pending') },
+    overdue: { variant: 'destructive', label: t('status.overdue') },
   };
 
   const config = variants[status] || { variant: 'outline' as const, label: status };
@@ -120,6 +124,8 @@ interface KpiCardProps {
 }
 
 function KpiCard({ title, value, change, icon, description }: KpiCardProps) {
+  const t = useTranslations('adminDuesPage');
+  const locale = useLocale();
   const isPositive = change && change > 0;
   const isNegative = change && change < 0;
 
@@ -130,13 +136,13 @@ function KpiCard({ title, value, change, icon, description }: KpiCardProps) {
         <div className="h-4 w-4 text-muted-foreground">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(value)}</div>
+        <div className="text-2xl font-bold">{formatCurrency(value, locale)}</div>
         {change !== undefined && (
           <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
             {isPositive && <TrendingUp className="h-3 w-3 text-green-600" />}
             {isNegative && <TrendingDown className="h-3 w-3 text-red-600" />}
             <span className={isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : ''}>
-              {change > 0 ? '+' : ''}{change.toFixed(1)}% from last month
+              {t('fromLastMonth', { change: `${change > 0 ? '+' : ''}${change.toFixed(1)}` })}
             </span>
           </div>
         )}
@@ -151,6 +157,8 @@ function KpiCard({ title, value, change, icon, description }: KpiCardProps) {
 // =============================================================================
 
 export default function AdminDuesDashboard() {
+  const t = useTranslations('adminDuesPage');
+  const locale = useLocale();
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,14 +171,14 @@ export default function AdminDuesDashboard() {
       const response = await fetch('/api/admin/dues/overview');
 
       if (!response.ok) {
-        throw new Error('Failed to fetch dues overview');
+        throw new Error(t('failedToFetchOverview'));
       }
 
       const result = await response.json();
       setData(result);
     } catch (err) {
-      logger.error('Error fetching admin dues overview', { error: err });
-      setError(err instanceof Error ? err.message : 'Failed to load overview');
+      logger.error(t('errorFetchingOverviewLog'), { error: err });
+      setError(err instanceof Error ? err.message : t('failedToLoadOverview'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -179,7 +187,7 @@ export default function AdminDuesDashboard() {
 
   useEffect(() => {
     fetchOverview();
-  }, []);
+  }, [t]);
 
   // Loading state
   if (loading) {
@@ -232,14 +240,14 @@ export default function AdminDuesDashboard() {
           <CardHeader>
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              <CardTitle>Error Loading Dashboard</CardTitle>
+              <CardTitle>{t('errorLoadingDashboardTitle')}</CardTitle>
             </div>
-            <CardDescription>{error || 'Failed to load dues overview'}</CardDescription>
+            <CardDescription>{error || t('failedToLoadOverview')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={fetchOverview} variant="outline">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t('tryAgainButton')}
             </Button>
           </CardContent>
         </Card>
@@ -262,9 +270,9 @@ export default function AdminDuesDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dues Administration</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Manage dues collection, billing cycles, and payments
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -275,11 +283,11 @@ export default function AdminDuesDashboard() {
             disabled={refreshing}
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('refreshButton')}
           </Button>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t('exportButton')}
           </Button>
         </div>
       </div>
@@ -287,29 +295,29 @@ export default function AdminDuesDashboard() {
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Total Collected"
+          title={t('kpi.totalCollectedTitle')}
           value={data.financialKpis.totalCollected}
           change={collectedChange}
           icon={<DollarSign className="h-4 w-4" />}
-          description="All-time paid transactions"
+          description={t('kpi.totalCollectedDescription')}
         />
         <KpiCard
-          title="Outstanding"
+          title={t('kpi.outstandingTitle')}
           value={data.financialKpis.totalOutstanding}
           icon={<Calendar className="h-4 w-4" />}
-          description="Pending payments"
+          description={t('kpi.outstandingDescription')}
         />
         <KpiCard
-          title="Overdue"
+          title={t('kpi.overdueTitle')}
           value={data.financialKpis.totalOverdue}
           icon={<AlertCircle className="h-4 w-4" />}
-          description="Past due date"
+          description={t('kpi.overdueDescription')}
         />
         <KpiCard
-          title="Current Balance"
+          title={t('kpi.currentBalanceTitle')}
           value={data.financialKpis.currentBalance}
           icon={<TrendingUp className="h-4 w-4" />}
-          description="Outstanding + Overdue"
+          description={t('kpi.currentBalanceDescription')}
         />
       </div>
 
@@ -317,24 +325,24 @@ export default function AdminDuesDashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">This Month</CardTitle>
-            <CardDescription>Current month performance</CardDescription>
+            <CardTitle className="text-lg">{t('thisMonthTitle')}</CardTitle>
+            <CardDescription>{t('thisMonthDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Collected</span>
+              <span className="text-sm text-muted-foreground">{t('collectedLabel')}</span>
               <span className="text-lg font-bold text-green-600">
-                {formatCurrency(data.periodStats.thisMonth.collected)}
+                {formatCurrency(data.periodStats.thisMonth.collected, locale)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Outstanding</span>
+              <span className="text-sm text-muted-foreground">{t('outstandingLabel')}</span>
               <span className="text-lg font-medium">
-                {formatCurrency(data.periodStats.thisMonth.outstanding)}
+                {formatCurrency(data.periodStats.thisMonth.outstanding, locale)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Transactions</span>
+              <span className="text-sm text-muted-foreground">{t('transactionsLabel')}</span>
               <span className="text-lg font-medium">
                 {data.periodStats.thisMonth.transactionCount}
               </span>
@@ -344,24 +352,24 @@ export default function AdminDuesDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Last Month</CardTitle>
-            <CardDescription>Previous month comparison</CardDescription>
+            <CardTitle className="text-lg">{t('lastMonthTitle')}</CardTitle>
+            <CardDescription>{t('lastMonthDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Collected</span>
+              <span className="text-sm text-muted-foreground">{t('collectedLabel')}</span>
               <span className="text-lg font-bold text-green-600">
-                {formatCurrency(data.periodStats.lastMonth.collected)}
+                {formatCurrency(data.periodStats.lastMonth.collected, locale)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Outstanding</span>
+              <span className="text-sm text-muted-foreground">{t('outstandingLabel')}</span>
               <span className="text-lg font-medium">
-                {formatCurrency(data.periodStats.lastMonth.outstanding)}
+                {formatCurrency(data.periodStats.lastMonth.outstanding, locale)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Transactions</span>
+              <span className="text-sm text-muted-foreground">{t('transactionsLabel')}</span>
               <span className="text-lg font-medium">
                 {data.periodStats.lastMonth.transactionCount}
               </span>
@@ -373,26 +381,26 @@ export default function AdminDuesDashboard() {
       {/* Payment Statistics */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment Statistics</CardTitle>
-          <CardDescription>Transaction counts by status</CardDescription>
+          <CardTitle>{t('paymentStatisticsTitle')}</CardTitle>
+          <CardDescription>{t('paymentStatisticsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col space-y-1">
               <span className="text-3xl font-bold text-green-600">{data.paymentStats.paid}</span>
-              <span className="text-sm text-muted-foreground">Paid</span>
+              <span className="text-sm text-muted-foreground">{t('status.paid')}</span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-3xl font-bold text-blue-600">{data.paymentStats.pending}</span>
-              <span className="text-sm text-muted-foreground">Pending</span>
+              <span className="text-sm text-muted-foreground">{t('status.pending')}</span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-3xl font-bold text-red-600">{data.paymentStats.overdue}</span>
-              <span className="text-sm text-muted-foreground">Overdue</span>
+              <span className="text-sm text-muted-foreground">{t('status.overdue')}</span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-3xl font-bold">{data.paymentStats.total}</span>
-              <span className="text-sm text-muted-foreground">Total</span>
+              <span className="text-sm text-muted-foreground">{t('totalLabel')}</span>
             </div>
           </div>
         </CardContent>
@@ -401,26 +409,26 @@ export default function AdminDuesDashboard() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common administrative tasks</CardDescription>
+          <CardTitle>{t('quickActionsTitle')}</CardTitle>
+          <CardDescription>{t('quickActionsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Button className="w-full" variant="outline">
               <PlayCircle className="mr-2 h-4 w-4" />
-              Generate Billing Cycle
+              {t('actions.generateBillingCycle')}
             </Button>
             <Button className="w-full" variant="outline">
               <AlertCircle className="mr-2 h-4 w-4" />
-              Process Late Fees
+              {t('actions.processLateFees')}
             </Button>
             <Button className="w-full" variant="outline">
               <FileText className="mr-2 h-4 w-4" />
-              View Reports
+              {t('actions.viewReports')}
             </Button>
             <Button className="w-full" variant="outline">
               <Users className="mr-2 h-4 w-4" />
-              Manage Members
+              {t('actions.manageMembers')}
             </Button>
           </div>
         </CardContent>
@@ -429,27 +437,27 @@ export default function AdminDuesDashboard() {
       {/* Recent Payments */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Payments</CardTitle>
-          <CardDescription>Last 10 transactions across all members</CardDescription>
+          <CardTitle>{t('recentPaymentsTitle')}</CardTitle>
+          <CardDescription>{t('recentPaymentsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {data.recentPayments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No recent payments</p>
-              <p className="text-sm text-muted-foreground">Payments will appear here once created</p>
+              <p className="text-lg font-medium">{t('noRecentPaymentsTitle')}</p>
+              <p className="text-sm text-muted-foreground">{t('noRecentPaymentsDescription')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead className="hidden sm:table-cell">Due Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead className="hidden md:table-cell">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell">Paid Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('tableMember')}</TableHead>
+                    <TableHead className="hidden sm:table-cell">{t('tableDueDate')}</TableHead>
+                    <TableHead>{t('tableAmount')}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t('tableStatus')}</TableHead>
+                    <TableHead className="hidden lg:table-cell">{t('tablePaidDate')}</TableHead>
+                    <TableHead className="text-right">{t('tableActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -457,25 +465,25 @@ export default function AdminDuesDashboard() {
                     <TableRow key={payment.id}>
                       <TableCell className="font-medium">{payment.memberName}</TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        {formatDate(payment.dueDate)}
+                        {formatDate(payment.dueDate, locale)}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium">{formatCurrency(payment.amount)}</span>
+                          <span className="font-medium">{formatCurrency(payment.amount, locale)}</span>
                           <span className="text-xs text-muted-foreground sm:hidden">
-                            {formatDate(payment.dueDate)}
+                            {formatDate(payment.dueDate, locale)}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        {getStatusBadge(payment.status)}
+                        {getStatusBadge(payment.status, t)}
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        {payment.paidDate ? formatDate(payment.paidDate) : '-'}
+                        {payment.paidDate ? formatDate(payment.paidDate, locale) : t('naLabel')}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm">
-                          View
+                          {t('viewButton')}
                         </Button>
                       </TableCell>
                     </TableRow>

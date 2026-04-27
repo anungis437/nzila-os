@@ -10,6 +10,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Building2, TrendingUp, TrendingDown, Minus, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,10 +48,11 @@ export interface EmployerHotspotsTableProps {
 // ─── Helpers ──────────────────────────────────────────────────
 
 const TrendBadge = ({ trend }: { trend: EmployerHotspot["trend"] }) => {
+  const t = useTranslations("leadershipDashboard.employerHotspots.trend");
   const config = {
-    increasing: { icon: TrendingUp, label: "Increasing", variant: "destructive" as const },
-    decreasing: { icon: TrendingDown, label: "Decreasing", variant: "secondary" as const },
-    stable: { icon: Minus, label: "Stable", variant: "outline" as const },
+    increasing: { icon: TrendingUp, label: t("increasing"), variant: "destructive" as const },
+    decreasing: { icon: TrendingDown, label: t("decreasing"), variant: "secondary" as const },
+    stable: { icon: Minus, label: t("stable"), variant: "outline" as const },
   };
   const { icon: Icon, label, variant } = config[trend];
   return (
@@ -68,35 +70,36 @@ export function EmployerHotspotsTable({
   onViewEmployer,
   className,
 }: EmployerHotspotsTableProps) {
+  const t = useTranslations("leadershipDashboard.employerHotspots");
   const sorted = [...employers].sort((a, b) => b.activeGrievances - a.activeGrievances);
 
   return (
     <Card className={cn("p-4 space-y-3", className)}>
       <div className="flex items-center gap-2">
         <Building2 className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Employer Hotspots</h3>
+        <h3 className="text-sm font-semibold">{t("title")}</h3>
         <span className="text-xs text-muted-foreground ml-auto">
-          {employers.length} employers tracked
+          {t("employersTracked", { count: employers.length })}
         </span>
       </div>
 
       {employers.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">
-          No employer grievance data for this period.
+          {t("noData")}
         </p>
       ) : (
         <div className="overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Employer</TableHead>
-                <TableHead className="text-center">Active</TableHead>
-                <TableHead className="text-center">Overdue</TableHead>
-                <TableHead className="text-center">Resolved (Qtr)</TableHead>
-                <TableHead>Top Category</TableHead>
-                <TableHead className="text-center">Avg. Days</TableHead>
-                <TableHead>Trend</TableHead>
-                <TableHead className="text-right">Last Contact</TableHead>
+                <TableHead className="w-[200px]">{t("columns.employer")}</TableHead>
+                <TableHead className="text-center">{t("columns.active")}</TableHead>
+                <TableHead className="text-center">{t("columns.overdue")}</TableHead>
+                <TableHead className="text-center">{t("columns.resolvedQtr")}</TableHead>
+                <TableHead>{t("columns.topCategory")}</TableHead>
+                <TableHead className="text-center">{t("columns.avgDays")}</TableHead>
+                <TableHead>{t("columns.trend")}</TableHead>
+                <TableHead className="text-right">{t("columns.lastContact")}</TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>

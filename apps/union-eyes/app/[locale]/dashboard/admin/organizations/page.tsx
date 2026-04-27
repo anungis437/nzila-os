@@ -11,6 +11,7 @@ import React from 'react';
 import { useState } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   Building2,
@@ -73,21 +74,21 @@ const fetcher = (url: string) => {
 };
 
 // Organization type configurations
-const typeConfig: Record<OrganizationType, { label: string; icon: React.ReactElement; color: string }> = {
-  platform: { label: "Platform", icon: <Layers className="w-4 h-4" />, color: "text-rose-700 bg-rose-100 border-rose-200" },
-  congress: { label: "Congress", icon: <Globe className="w-4 h-4" />, color: "text-blue-700 bg-blue-100 border-blue-200" },
-  federation: { label: "Federation", icon: <Network className="w-4 h-4" />, color: "text-purple-700 bg-purple-100 border-purple-200" },
-  union: { label: "Union", icon: <Building2 className="w-4 h-4" />, color: "text-green-700 bg-green-100 border-green-200" },
-  local: { label: "Local", icon: <Users className="w-4 h-4" />, color: "text-orange-700 bg-orange-100 border-orange-200" },
-  region: { label: "Region", icon: <MapPin className="w-4 h-4" />, color: "text-teal-700 bg-teal-100 border-teal-200" },
-  district: { label: "District", icon: <GitBranch className="w-4 h-4" />, color: "text-indigo-700 bg-indigo-100 border-indigo-200" }
+const typeConfig: Record<OrganizationType, { icon: React.ReactElement; color: string }> = {
+  platform: { icon: <Layers className="w-4 h-4" />, color: "text-rose-700 bg-rose-100 border-rose-200" },
+  congress: { icon: <Globe className="w-4 h-4" />, color: "text-blue-700 bg-blue-100 border-blue-200" },
+  federation: { icon: <Network className="w-4 h-4" />, color: "text-purple-700 bg-purple-100 border-purple-200" },
+  union: { icon: <Building2 className="w-4 h-4" />, color: "text-green-700 bg-green-100 border-green-200" },
+  local: { icon: <Users className="w-4 h-4" />, color: "text-orange-700 bg-orange-100 border-orange-200" },
+  region: { icon: <MapPin className="w-4 h-4" />, color: "text-teal-700 bg-teal-100 border-teal-200" },
+  district: { icon: <GitBranch className="w-4 h-4" />, color: "text-indigo-700 bg-indigo-100 border-indigo-200" }
 };
 
-const statusConfig: Record<OrganizationStatus, { label: string; color: string; dotColor: string }> = {
-  active: { label: "Active", color: "text-green-700 bg-green-100 border-green-200", dotColor: "bg-green-500" },
-  inactive: { label: "Inactive", color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" },
-  suspended: { label: "Suspended", color: "text-red-700 bg-red-100 border-red-200", dotColor: "bg-red-500" },
-  archived: { label: "Archived", color: "text-slate-700 bg-slate-100 border-slate-200", dotColor: "bg-slate-500" }
+const statusConfig: Record<OrganizationStatus, { color: string; dotColor: string }> = {
+  active: { color: "text-green-700 bg-green-100 border-green-200", dotColor: "bg-green-500" },
+  inactive: { color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" },
+  suspended: { color: "text-red-700 bg-red-100 border-red-200", dotColor: "bg-red-500" },
+  archived: { color: "text-slate-700 bg-slate-100 border-slate-200", dotColor: "bg-slate-500" }
 };
 
 interface OrganizationWithStats extends Organization {
@@ -99,6 +100,7 @@ interface OrganizationWithStats extends Organization {
 
 export default function OrganizationsPage() {
   const router = useRouter();
+  const t = useTranslations('adminOrganizationsPage');
   const { organizationId: _organizationId } = useOrganization();
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,18 +138,18 @@ export default function OrganizationsPage() {
   });
 
   const handleDelete = async (orgId: string) => {
-    if (!confirm("Are you sure you want to archive this organization?")) return;
+    if (!confirm(t('confirmArchiveOrganization'))) return;
     
     try {
       const response = await fetch(`/api/organizations/${orgId}`, {
         method: "DELETE",
       });
       
-      if (!response.ok) throw new Error("Failed to archive organization");
+      if (!response.ok) throw new Error(t('failedToArchiveOrganization'));
       
       mutate();
     } catch (_error) {
-alert("Failed to archive organization");
+      alert(t('failedToArchiveOrganization'));
     }
   };
 
@@ -176,9 +178,9 @@ alert("Failed to archive organization");
         <OrganizationBreadcrumb />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Organizations</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your organizational hierarchy
+              {t('subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -188,14 +190,14 @@ alert("Failed to archive organization");
               className="gap-2"
             >
               <Plus className="w-4 h-4" />
-              Bulk Import
+              {t('bulkImportButton')}
             </Button>
             <Button 
               onClick={() => router.push("/dashboard/admin/organizations/new")}
               className="gap-2"
             >
               <Plus className="w-4 h-4" />
-              Add Organization
+              {t('addOrganizationButton')}
             </Button>
           </div>
         </div>
@@ -207,7 +209,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Organizations</p>
+                <p className="text-sm text-muted-foreground">{t('totalOrganizations')}</p>
                 <p className="text-2xl font-bold">{organizations.length}</p>
               </div>
               <Building className="w-8 h-8 text-muted-foreground" />
@@ -219,7 +221,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-sm text-muted-foreground">{t('activeOrganizations')}</p>
                 <p className="text-2xl font-bold text-green-600">
                   {organizations.filter(o => o.status === 'active').length}
                 </p>
@@ -233,7 +235,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-sm text-muted-foreground">{t('totalMembers')}</p>
                 <p className="text-2xl font-bold">
                   {organizations.reduce((sum, o) => sum + (o.memberCount || 0), 0)}
                 </p>
@@ -247,7 +249,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Claims</p>
+                <p className="text-sm text-muted-foreground">{t('activeClaims')}</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {organizations.reduce((sum, o) => sum + (o.activeClaims || 0), 0)}
                 </p>
@@ -265,7 +267,7 @@ alert("Failed to archive organization");
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search organizations..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -274,29 +276,29 @@ alert("Failed to archive organization");
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-45">
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder={t('typePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="congress">Congress</SelectItem>
-                <SelectItem value="federation">Federation</SelectItem>
-                <SelectItem value="union">Union</SelectItem>
-                <SelectItem value="local">Local</SelectItem>
-                <SelectItem value="region">Region</SelectItem>
-                <SelectItem value="district">District</SelectItem>
+                <SelectItem value="all">{t('allTypes')}</SelectItem>
+                <SelectItem value="congress">{t('type.congress')}</SelectItem>
+                <SelectItem value="federation">{t('type.federation')}</SelectItem>
+                <SelectItem value="union">{t('type.union')}</SelectItem>
+                <SelectItem value="local">{t('type.local')}</SelectItem>
+                <SelectItem value="region">{t('type.region')}</SelectItem>
+                <SelectItem value="district">{t('type.district')}</SelectItem>
               </SelectContent>
             </Select>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-45">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
+                <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                <SelectItem value="active">{t('status.active')}</SelectItem>
+                <SelectItem value="inactive">{t('status.inactive')}</SelectItem>
+                <SelectItem value="suspended">{t('status.suspended')}</SelectItem>
+                <SelectItem value="archived">{t('status.archived')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -306,18 +308,18 @@ alert("Failed to archive organization");
       {/* Organizations View with Tabs */}
       <Card>
         <CardHeader>
-          <CardTitle>Organizations</CardTitle>
+          <CardTitle>{t('organizationsCardTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "table" | "tree")}>
             <TabsList className="mb-4">
               <TabsTrigger value="table" className="gap-2">
                 <Building2 className="w-4 h-4" />
-                Table View
+                {t('tableViewTab')}
               </TabsTrigger>
               <TabsTrigger value="tree" className="gap-2">
                 <Network className="w-4 h-4" />
-                Hierarchy Tree
+                {t('hierarchyTreeTab')}
               </TabsTrigger>
             </TabsList>
 
@@ -330,18 +332,18 @@ alert("Failed to archive organization");
               ) : error ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <AlertCircle className="w-12 h-12 mb-4" />
-                  <p>Failed to load organizations</p>
+                  <p>{t('failedToLoadOrganizations')}</p>
                 </div>
               ) : filteredOrganizations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Building className="w-12 h-12 mb-4" />
-                  <p>No organizations found</p>
+                  <p>{t('noOrganizationsFound')}</p>
                   <Button 
                     variant="outline" 
                     className="mt-4"
                     onClick={() => router.push("/dashboard/admin/organizations/new")}
                   >
-                    Create your first organization
+                    {t('createFirstOrganizationButton')}
                   </Button>
                 </div>
               ) : (
@@ -355,14 +357,14 @@ alert("Failed to archive organization");
                             onCheckedChange={toggleAllOrgs}
                           />
                         </TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Parent</TableHead>
-                        <TableHead className="text-right">Members</TableHead>
-                        <TableHead className="text-right">Children</TableHead>
-                        <TableHead className="text-right">Claims</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('columnName')}</TableHead>
+                        <TableHead>{t('columnType')}</TableHead>
+                        <TableHead>{t('columnStatus')}</TableHead>
+                        <TableHead>{t('columnParent')}</TableHead>
+                        <TableHead className="text-right">{t('columnMembers')}</TableHead>
+                        <TableHead className="text-right">{t('columnChildren')}</TableHead>
+                        <TableHead className="text-right">{t('columnClaims')}</TableHead>
+                        <TableHead className="text-right">{t('columnActions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -393,20 +395,20 @@ alert("Failed to archive organization");
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline" className={typeInfo.color}>
-                                {typeInfo.label}
+                                {t(`type.${org.organization_type}`)}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline" className={statusInfo.color}>
                                 <span className={`w-2 h-2 rounded-full mr-1.5 ${statusInfo.dotColor}`} />
-                                {statusInfo.label}
+                                {t(`status.${org.status}`)}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               {org.parentName ? (
                                 <span className="text-sm text-muted-foreground">{org.parentName}</span>
                               ) : (
-                                <span className="text-xs text-muted-foreground">Root</span>
+                                <span className="text-xs text-muted-foreground">{t('rootLabel')}</span>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
@@ -430,22 +432,22 @@ alert("Failed to archive organization");
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => router.push(`/dashboard/admin/organizations/${org.id}`)}>
                                     <Eye className="w-4 h-4 mr-2" />
-                                    View Details
+                                    {t('viewDetailsAction')}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => router.push(`/dashboard/admin/organizations/${org.id}/edit`)}>
                                     <Edit className="w-4 h-4 mr-2" />
-                                    Edit
+                                    {t('editAction')}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => router.push(`/dashboard/admin/organizations/new?parent=${org.id}`)}>
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Add Child
+                                    {t('addChildAction')}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem 
                                     onClick={() => handleDelete(org.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" />
-                                    Archive
+                                    {t('archiveAction')}
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>

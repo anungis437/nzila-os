@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,7 @@ export default function PaymentMethodManager({
   autoPayEnabled: initialAutoPay,
   onUpdate 
 }: PaymentMethodManagerProps) {
+  const t = useTranslations('dashboard.dues.methods');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [autoPayEnabled, setAutoPayEnabled] = useState(initialAutoPay);
   const [loading, setLoading] = useState(true);
@@ -45,8 +47,8 @@ export default function PaymentMethodManager({
       setPaymentMethods(methods);
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to load payment methods',
+        title: t('errorTitle'),
+        description: t('loadFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -60,8 +62,8 @@ toast({
 
   const handleAddPaymentMethod = async () => {
     toast({
-      title: 'Add Payment Method',
-      description: 'Redirecting to payment setup...',
+      title: t('addToast'),
+      description: t('addToastDescription'),
     });
     // Redirect to Stripe customer portal or inline form
     window.location.href = '/dashboard/dues/payment-methods/new';
@@ -76,15 +78,15 @@ toast({
       if (!response.ok) throw new Error('Failed to delete payment method');
       
       toast({
-        title: 'Success',
-        description: 'Payment method removed',
+        title: t('successTitle'),
+        description: t('removed'),
       });
       
       loadPaymentMethods();
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to delete payment method',
+        title: t('errorTitle'),
+        description: t('removeFailed'),
         variant: 'destructive',
       });
     }
@@ -99,16 +101,16 @@ toast({
       if (!response.ok) throw new Error('Failed to set default payment method');
       
       toast({
-        title: 'Success',
-        description: 'Default payment method updated',
+        title: t('successTitle'),
+        description: t('defaultUpdated'),
       });
       
       loadPaymentMethods();
       onUpdate();
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to update default payment method',
+        title: t('errorTitle'),
+        description: t('defaultUpdateFailed'),
         variant: 'destructive',
       });
     }
@@ -126,22 +128,22 @@ toast({
       
       setAutoPayEnabled(enabled);
       toast({
-        title: 'Success',
-        description: `AutoPay ${enabled ? 'enabled' : 'disabled'}`,
+        title: t('successTitle'),
+        description: enabled ? t('autopayEnabled') : t('autopayDisabled'),
       });
       
       onUpdate();
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to update AutoPay setting',
+        title: t('errorTitle'),
+        description: t('autopayUpdateFailed'),
         variant: 'destructive',
       });
     }
   };
 
   if (loading) {
-    return <div className="text-center p-12">Loading payment methods...</div>;
+    return <div className="text-center p-12">{t('loading')}</div>;
   }
 
   return (
@@ -149,17 +151,15 @@ toast({
       {/* AutoPay Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>AutoPay Settings</CardTitle>
-          <CardDescription>
-            Automatically pay your dues on the due date
-          </CardDescription>
+          <CardTitle>{t('autopayTitle')}</CardTitle>
+          <CardDescription>{t('autopayDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Enable AutoPay</Label>
+              <Label>{t('enableAutopay')}</Label>
               <p className="text-sm text-muted-foreground">
-                Your default payment method will be charged automatically
+                {t('autopayHint')}
               </p>
             </div>
             <Switch
@@ -171,7 +171,7 @@ toast({
           
           {paymentMethods.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Add a payment method to enable AutoPay
+              {t('autopayNeedsMethod')}
             </p>
           )}
         </CardContent>
@@ -181,23 +181,21 @@ toast({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Payment Methods</CardTitle>
-            <CardDescription>
-              Manage your saved payment methods
-            </CardDescription>
+            <CardTitle>{t('title')}</CardTitle>
+            <CardDescription>{t('description')}</CardDescription>
           </div>
           <Button onClick={handleAddPaymentMethod}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Payment Method
+            {t('add')}
           </Button>
         </CardHeader>
         <CardContent>
           {paymentMethods.length === 0 ? (
             <div className="text-center py-12">
               <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No payment methods saved</p>
+              <p className="text-muted-foreground">{t('empty')}</p>
               <Button onClick={handleAddPaymentMethod} variant="outline" className="mt-4">
-                Add Your First Payment Method
+                {t('addFirst')}
               </Button>
             </div>
           ) : (
@@ -218,12 +216,12 @@ toast({
                           }
                         </p>
                         {method.isDefault && (
-                          <Badge variant="secondary">Default</Badge>
+                          <Badge variant="secondary">{t('default')}</Badge>
                         )}
                       </div>
                       {method.type === 'card' && method.expiryMonth && method.expiryYear && (
                         <p className="text-sm text-muted-foreground">
-                          Expires {method.expiryMonth}/{method.expiryYear}
+                          {t('expires', { month: method.expiryMonth, year: method.expiryYear })}
                         </p>
                       )}
                     </div>
@@ -236,7 +234,7 @@ toast({
                         size="sm"
                         onClick={() => handleSetDefault(method.id)}
                       >
-                        Set as Default
+                        {t('setDefault')}
                       </Button>
                     )}
                     <Button

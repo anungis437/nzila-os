@@ -9,21 +9,29 @@ import {
 } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { PayrollRunTracePanel, ReplayDiffViewer } from "@/components/employer-execution";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmployerExecutionPayrollRunDetailPage({ params }: { params: { id: string } }) {
+export default async function EmployerExecutionPayrollRunDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  const { locale, id } = await params;
+  const t = await getTranslations({ locale, namespace: "employerPayrollRunDetailPage" });
+
   const context = await requireUser();
   const organizationId = context.organizationId;
 
   const [run] = await db
     .select()
     .from(employerPayrollRuns)
-    .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, params.id)))
+    .where(and(eq(employerPayrollRuns.organizationId, organizationId), eq(employerPayrollRuns.id, id)))
     .limit(1);
 
   if (!run) {
-    return <div className="p-6 text-sm text-muted-foreground">Payroll run not found.</div>;
+    return <div className="p-6 text-sm text-muted-foreground">{t("notFound")}</div>;
   }
 
   const items = await db
@@ -70,9 +78,10 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
     .filter((value): value is Record<string, unknown> => value !== null);
 
   const chainDepth = chainLinks.reduce((max, link) => Math.max(max, Number(link.chainDepth ?? 0)), 0);
-  const currentSeal = String(chainLinks[0]?.sealHash ?? "n/a");
-  const parentLink = String(chainLinks[0]?.parentLinkId ?? "n/a");
-  const verificationStatus = chainLinks.length > 0 ? "verified" : "unverified";
+  const fallbackValue = t("fallback.na");
+  const currentSeal = String(chainLinks[0]?.sealHash ?? fallbackValue);
+  const parentLink = String(chainLinks[0]?.parentLinkId ?? fallbackValue);
+  const verificationStatus = chainLinks.length > 0 ? t("verification.verified") : t("verification.unverified");
 
   const calcTrace = (run.calcTrace ?? {}) as {
     ruleVersionId?: string;
@@ -82,29 +91,29 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Payroll Run {run.runCode}</h1>
-        <p className="text-sm text-muted-foreground">Status: {run.status}</p>
+        <h1 className="text-2xl font-semibold">{t("title", { runCode: run.runCode })}</h1>
+        <p className="text-sm text-muted-foreground">{t("status", { status: run.status })}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-md border p-4 text-sm">
-          <h2 className="font-medium">Source Snapshot</h2>
-          <p className="mt-1 text-muted-foreground">Batch: {String(run.sourceBatchId ?? "n/a")}</p>
-          <p className="text-muted-foreground">Period: {String(run.periodStart)} to {String(run.periodEnd)}</p>
-          <p className="text-muted-foreground">Engine: {run.engineVersion}</p>
-          <p className="text-muted-foreground">Rule Version: {String(calcTrace.ruleVersionId ?? run.cbaRuleVersionId ?? "n/a")}</p>
-          <p className="text-muted-foreground">Rule Source Hash: {String(calcTrace.sourceHash ?? "n/a")}</p>
+          <h2 className="font-medium">{t("sourceSnapshot.title")}</h2>
+          <p className="mt-1 text-muted-foreground">{t("sourceSnapshot.batch", { value: String(run.sourceBatchId ?? fallbackValue) })}</p>
+          <p className="text-muted-foreground">{t("sourceSnapshot.period", { start: String(run.periodStart), end: String(run.periodEnd) })}</p>
+          <p className="text-muted-foreground">{t("sourceSnapshot.engine", { value: run.engineVersion })}</p>
+          <p className="text-muted-foreground">{t("sourceSnapshot.ruleVersion", { value: String(calcTrace.ruleVersionId ?? run.cbaRuleVersionId ?? fallbackValue) })}</p>
+          <p className="text-muted-foreground">{t("sourceSnapshot.ruleSourceHash", { value: String(calcTrace.sourceHash ?? fallbackValue) })}</p>
         </div>
         <div className="rounded-md border p-4 text-sm">
-          <h2 className="font-medium">Evidence / Seal</h2>
-          <p className="mt-1 text-muted-foreground">Artifacts: {artifacts.length}</p>
-          <p className="text-muted-foreground">Verification: {verificationStatus}</p>
-          <p className="text-muted-foreground">Chain depth: {chainDepth}</p>
-          <p className="text-muted-foreground">Parent link: {parentLink}</p>
-          <p className="text-muted-foreground">Current seal: {currentSeal}</p>
+          <h2 className="font-medium">{t("evidence.title")}</h2>
+          <p className="mt-1 text-muted-foreground">{t("evidence.artifacts", { value: artifacts.length })}</p>
+          <p className="text-muted-foreground">{t("evidence.verification", { value: verificationStatus })}</p>
+          <p className="text-muted-foreground">{t("evidence.chainDepth", { value: chainDepth })}</p>
+          <p className="text-muted-foreground">{t("evidence.parentLink", { value: parentLink })}</p>
+          <p className="text-muted-foreground">{t("evidence.currentSeal", { value: currentSeal })}</p>
           {artifacts.slice(0, 4).map((artifact) => (
             <p key={artifact.id} className="text-muted-foreground">
-              {artifact.artifactType}: {artifact.artifactHash}
+              {t("evidence.artifactRow", { type: artifact.artifactType, hash: artifact.artifactHash })}
             </p>
           ))}
         </div>
@@ -149,8 +158,8 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
       />
 
       <div className="rounded-md border p-4 text-sm">
-        <h2 className="font-medium">Open Compliance Events</h2>
-        {complianceEvents.length === 0 ? <p className="mt-1 text-muted-foreground">No compliance events.</p> : null}
+        <h2 className="font-medium">{t("compliance.title")}</h2>
+        {complianceEvents.length === 0 ? <p className="mt-1 text-muted-foreground">{t("compliance.none")}</p> : null}
         {complianceEvents.map((event) => (
           <p key={event.id} className="mt-1 text-muted-foreground">
             {event.severity} | {event.status} | {event.summary}
@@ -162,12 +171,12 @@ export default async function EmployerExecutionPayrollRunDetailPage({ params }: 
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50 text-left">
             <tr>
-              <th className="px-3 py-2">Employee</th>
-              <th className="px-3 py-2">Gross</th>
-              <th className="px-3 py-2">Net</th>
-              <th className="px-3 py-2">Dues</th>
-              <th className="px-3 py-2">Benefits</th>
-              <th className="px-3 py-2">Pension</th>
+              <th className="px-3 py-2">{t("table.employee")}</th>
+              <th className="px-3 py-2">{t("table.gross")}</th>
+              <th className="px-3 py-2">{t("table.net")}</th>
+              <th className="px-3 py-2">{t("table.dues")}</th>
+              <th className="px-3 py-2">{t("table.benefits")}</th>
+              <th className="px-3 py-2">{t("table.pension")}</th>
             </tr>
           </thead>
           <tbody>

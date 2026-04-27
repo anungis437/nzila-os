@@ -7,7 +7,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ interface NegotiationSessionNotesProps {
 }
 
 export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }: NegotiationSessionNotesProps) {
+  const t = useTranslations("sessionNotes");
   const locale = useLocale();
   const [notes, setNotes] = useState<BargainingNote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,27 +72,27 @@ export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Session Notes</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Detailed notes from bargaining sessions
+              {t("description")}
             </CardDescription>
           </div>
           <Button size="sm" asChild>
             <Link href={`/${locale}/dashboard/bargaining/notes/new`}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Note
+              {t("addNote")}
             </Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <p className="text-center py-8 text-muted-foreground">Loading notes...</p>
+          <p className="text-center py-8 text-muted-foreground">{t("loading")}</p>
         ) : notes.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <FileText className="mx-auto h-12 w-12 mb-4" />
-            <p>No session notes yet</p>
-            <p className="text-sm">Add notes from bargaining sessions to track discussions</p>
+            <p>{t("empty")}</p>
+            <p className="text-sm">{t("emptyHint")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -102,7 +103,7 @@ export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold">{note.title}</h4>
                       <Badge className={sessionTypeColors[note.sessionType] || "bg-gray-500"}>
-                        {note.sessionType}
+                        {(['negotiation','ratification','strategy','grievance_meeting'] as const).includes(note.sessionType as 'negotiation') ? t(`sessionTypes.${note.sessionType}` as 'sessionTypes.negotiation') : note.sessionType}
                       </Badge>
                       {note.confidentialityLevel !== "internal" && (
                         <Badge variant="outline">{note.confidentialityLevel}</Badge>
@@ -119,7 +120,7 @@ export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }
                       {note.attendees && note.attendees.length > 0 && (
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
-                          {note.attendees.length} attendees
+                          {t("attendees", { count: note.attendees.length })}
                         </span>
                       )}
                     </div>
@@ -134,7 +135,7 @@ export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }
                     )}
                   </div>
                   <Button variant="ghost" size="sm">
-                    View
+                    {t("view")}
                   </Button>
                 </div>
               </div>

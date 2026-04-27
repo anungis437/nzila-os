@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import { locales } from '@/i18n';
+import { localeNames } from '@/i18n/config';
 import {
   Select,
   SelectContent,
@@ -16,10 +17,13 @@ export function LanguageSelector() {
   const pathname = usePathname();
 
   const handleLocaleChange = (newLocale: string) => {
-    // Remove current locale from pathname if it exists
-    const pathWithoutLocale = pathname.replace(/^\/(en-CA|fr-CA)/, '');
-    // Navigate to new locale path
-    router.push(`/${newLocale}${pathWithoutLocale}`);
+    const segments = pathname.split('/');
+    const hasLocalePrefix = locales.includes(segments[1] as (typeof locales)[number]);
+    const nextPath = hasLocalePrefix
+      ? `/${newLocale}${segments.slice(2).length > 0 ? `/${segments.slice(2).join('/')}` : ''}`
+      : `/${newLocale}${pathname === '/' ? '' : pathname}`;
+
+    router.push(nextPath);
   };
 
   return (
@@ -30,7 +34,7 @@ export function LanguageSelector() {
       <SelectContent>
         {locales.map((loc) => (
           <SelectItem key={loc} value={loc}>
-            {loc === 'en-CA' ? 'English' : 'Français'}
+            {localeNames[loc]}
           </SelectItem>
         ))}
       </SelectContent>

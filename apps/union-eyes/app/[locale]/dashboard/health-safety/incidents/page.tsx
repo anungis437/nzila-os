@@ -16,6 +16,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -54,6 +55,7 @@ type IncidentStatus = "reported" | "investigating" | "resolved" | "closed";
 type IncidentSeverity = "minor" | "moderate" | "serious" | "critical";
 
 export default function IncidentsPage() {
+  const t = useTranslations("healthSafetyIncidentsPage");
   const router = useRouter();
   const organizationId = useOrganizationId();
   
@@ -112,9 +114,9 @@ export default function IncidentsPage() {
     return (
       <div className="p-8 text-center">
         <FileWarning className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-2xl font-bold mb-2">No Organization Selected</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("noOrgSelected")}</h2>
         <p className="text-muted-foreground">
-          Please select an organization to view incident data.
+          {t("noOrgMessage")}
         </p>
       </div>
     );
@@ -133,7 +135,7 @@ export default function IncidentsPage() {
             <Link href="/dashboard/health-safety">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {t("back")}
               </Button>
             </Link>
           </div>
@@ -142,10 +144,10 @@ export default function IncidentsPage() {
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <FileWarning className="h-8 w-8 text-blue-600" />
-                Incident Management
+                {t("pageTitle")}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Track and manage workplace safety incidents
+                {t("pageSubtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -155,12 +157,12 @@ export default function IncidentsPage() {
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export
+                {t("exportButton")}
               </Button>
               <Link href="/dashboard/health-safety/incidents/new">
                 <Button className="flex items-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                   <Plus className="h-4 w-4" />
-                  Report Incident
+                  {t("reportIncidentButton")}
                 </Button>
               </Link>
             </div>
@@ -176,52 +178,52 @@ export default function IncidentsPage() {
         >
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Incidents</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("totalIncidents")}</CardTitle>
               <BarChart3 className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Last {dateRange}
+                {t("lastPeriod", { period: dateRange })}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Under Investigation</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("underInvestigation")}</CardTitle>
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-orange-600">{stats.investigating}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Active cases
+                {t("activeCases")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("resolved")}</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats.resolved}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                This period
+                {t("thisPeriod")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Resolution Time</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("avgResolutionTime")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.avgResolutionTime}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Days
+                {t("daysUnit")}
               </p>
             </CardContent>
           </Card>
@@ -237,7 +239,7 @@ export default function IncidentsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Filter className="h-5 w-5" />
-                Filters
+                {t("filtersTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -245,7 +247,7 @@ export default function IncidentsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search incidents..."
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9"
@@ -254,39 +256,39 @@ export default function IncidentsPage() {
 
                 <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as IncidentStatus | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="reported">Reported</SelectItem>
-                    <SelectItem value="investigating">Investigating</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                    <SelectItem value="reported">{t("reported")}</SelectItem>
+                    <SelectItem value="investigating">{t("investigating")}</SelectItem>
+                    <SelectItem value="resolved">{t("resolved")}</SelectItem>
+                    <SelectItem value="closed">{t("closed")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as IncidentSeverity | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Severity" />
+                    <SelectValue placeholder={t("severityPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Severities</SelectItem>
-                    <SelectItem value="minor">Minor</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="serious">Serious</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="all">{t("allSeverities")}</SelectItem>
+                    <SelectItem value="minor">{t("minor")}</SelectItem>
+                    <SelectItem value="moderate">{t("moderate")}</SelectItem>
+                    <SelectItem value="serious">{t("serious")}</SelectItem>
+                    <SelectItem value="critical">{t("critical")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={dateRange} onValueChange={(value) => setDateRange(value as "7d" | "30d" | "90d" | "12m")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Date Range" />
+                    <SelectValue placeholder={t("dateRangePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="7d">Last 7 Days</SelectItem>
-                    <SelectItem value="30d">Last 30 Days</SelectItem>
-                    <SelectItem value="90d">Last 90 Days</SelectItem>
-                    <SelectItem value="12m">Last 12 Months</SelectItem>
+                    <SelectItem value="7d">{t("last7Days")}</SelectItem>
+                    <SelectItem value="30d">{t("last30Days")}</SelectItem>
+                    <SelectItem value="90d">{t("last90Days")}</SelectItem>
+                    <SelectItem value="12m">{t("last12Months")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -304,20 +306,20 @@ export default function IncidentsPage() {
             <TabsList className="grid w-full md:w-auto grid-cols-2">
               <TabsTrigger value="list" className="gap-2">
                 <FileWarning className="h-4 w-4" />
-                Incident List
+                {t("incidentListTab")}
               </TabsTrigger>
               <TabsTrigger value="trends" className="gap-2">
                 <TrendingUp className="h-4 w-4" />
-                Trends
+                {t("trendsTab")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="list" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>All Incidents</CardTitle>
+                  <CardTitle>{t("allIncidents")}</CardTitle>
                   <CardDescription>
-                    View and manage reported workplace incidents
+                    {t("allIncidentsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -332,9 +334,9 @@ export default function IncidentsPage() {
             <TabsContent value="trends" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Incident Trends</CardTitle>
+                  <CardTitle>{t("incidentTrends")}</CardTitle>
                   <CardDescription>
-                    Analyze incident patterns and trends over time
+                    {t("incidentTrendsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

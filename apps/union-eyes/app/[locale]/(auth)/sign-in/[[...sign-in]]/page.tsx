@@ -2,25 +2,36 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import AuthPageLayout from '@/components/auth/auth-page-layout'
+import { getTranslations } from 'next-intl/server'
 import { LoginForm } from '@/components/auth/login-form'
 
-export const metadata: Metadata = {
-  title: 'Sign In | UnionEyes',
-  description: 'Sign in to UnionEyes — the intelligent labour relations platform for unions, locals, and federations.',
+type PageProps = {
+  params: Promise<{ locale: string }>
 }
 
-const stats = [
-  { value: '35+', label: 'Union roles' },
-  { value: '6', label: 'Languages' },
-  { value: '99.9%', label: 'Uptime' },
-]
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'signInPage' })
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  }
+}
 
-export default function SignInPage() {
+export default async function SignInPage({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'signInPage' })
+  const stats = [
+    { value: t('stats.rolesValue'), label: t('stats.rolesLabel') },
+    { value: t('stats.languagesValue'), label: t('stats.languagesLabel') },
+    { value: t('stats.uptimeValue'), label: t('stats.uptimeLabel') },
+  ]
+
   return (
     <AuthPageLayout
-      appName="UnionEyes"
-      tagline="Labour Intelligence Made Simple"
-      subtitle="Grievance tracking, arbitration management, collective bargaining analytics, and member services — purpose-built for unions."
+      appName={t('appName')}
+      tagline={t('tagline')}
+      subtitle={t('subtitle')}
       stats={stats}
     >
       <LoginForm />

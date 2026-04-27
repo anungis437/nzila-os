@@ -16,6 +16,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -56,6 +57,7 @@ type InspectionStatus = "scheduled" | "in-progress" | "completed" | "overdue";
 type InspectionType = "routine" | "compliance" | "incident-follow-up" | "spot-check";
 
 export default function InspectionsPage() {
+  const t = useTranslations("healthSafetyInspectionsPage");
   const router = useRouter();
   const organizationId = useOrganizationId();
   
@@ -136,9 +138,9 @@ export default function InspectionsPage() {
     return (
       <div className="p-8 text-center">
         <ClipboardCheck className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-2xl font-bold mb-2">No Organization Selected</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("noOrgSelected")}</h2>
         <p className="text-muted-foreground">
-          Please select an organization to view inspection data.
+          {t("noOrgMessage")}
         </p>
       </div>
     );
@@ -157,7 +159,7 @@ export default function InspectionsPage() {
             <Link href="/dashboard/health-safety">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {t("back")}
               </Button>
             </Link>
           </div>
@@ -166,10 +168,10 @@ export default function InspectionsPage() {
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <ClipboardCheck className="h-8 w-8 text-green-600" />
-                Inspections Management
+                {t("pageTitle")}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Schedule and track workplace safety inspections
+                {t("pageSubtitle")}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -179,14 +181,14 @@ export default function InspectionsPage() {
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export
+                {t("exportButton")}
               </Button>
               <Button
                 onClick={handleScheduleInspection}
                 className="flex items-center gap-2 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
               >
                 <Plus className="h-4 w-4" />
-                Schedule Inspection
+                {t("scheduleInspectionButton")}
               </Button>
             </div>
           </div>
@@ -201,52 +203,52 @@ export default function InspectionsPage() {
         >
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Inspections</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("totalInspections")}</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                This {dateRange}
+                {t("thisPeriod", { period: dateRange })}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("overdue")}</CardTitle>
               <AlertCircle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Requires attention
+                {t("requiresAttention")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("complianceRate")}</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats.complianceRate}%</div>
               <p className="text-xs text-muted-foreground mt-1">
-                On-time completion
+                {t("onTimeCompletion")}
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Score</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("avgScore")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{stats.avgScore}%</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Inspection results
+                {t("inspectionResults")}
               </p>
             </CardContent>
           </Card>
@@ -262,7 +264,7 @@ export default function InspectionsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Filter className="h-5 w-5" />
-                Filters
+                {t("filtersTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -270,7 +272,7 @@ export default function InspectionsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search inspections..."
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9"
@@ -279,38 +281,38 @@ export default function InspectionsPage() {
 
                 <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as InspectionStatus | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
+                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                    <SelectItem value="scheduled">{t("scheduled")}</SelectItem>
+                    <SelectItem value="in-progress">{t("inProgress")}</SelectItem>
+                    <SelectItem value="completed">{t("completed")}</SelectItem>
+                    <SelectItem value="overdue">{t("overdue")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as InspectionType | "all")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Type" />
+                    <SelectValue placeholder={t("typePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="routine">Routine</SelectItem>
-                    <SelectItem value="compliance">Compliance</SelectItem>
-                    <SelectItem value="incident-follow-up">Incident Follow-up</SelectItem>
-                    <SelectItem value="spot-check">Spot Check</SelectItem>
+                    <SelectItem value="all">{t("allTypes")}</SelectItem>
+                    <SelectItem value="routine">{t("routine")}</SelectItem>
+                    <SelectItem value="compliance">{t("compliance")}</SelectItem>
+                    <SelectItem value="incident-follow-up">{t("incidentFollowUp")}</SelectItem>
+                    <SelectItem value="spot-check">{t("spotCheck")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={dateRange} onValueChange={(value) => setDateRange(value as "week" | "month" | "quarter")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Date Range" />
+                    <SelectValue placeholder={t("dateRangePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
+                    <SelectItem value="week">{t("thisWeek")}</SelectItem>
+                    <SelectItem value="month">{t("thisMonth")}</SelectItem>
+                    <SelectItem value="quarter">{t("thisQuarter")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -328,24 +330,24 @@ export default function InspectionsPage() {
             <TabsList className="grid w-full md:w-auto grid-cols-3">
               <TabsTrigger value="calendar" className="gap-2">
                 <Calendar className="h-4 w-4" />
-                Calendar
+                {t("calendarTab")}
               </TabsTrigger>
               <TabsTrigger value="list" className="gap-2">
                 <FileText className="h-4 w-4" />
-                List View
+                {t("listViewTab")}
               </TabsTrigger>
               <TabsTrigger value="findings" className="gap-2">
                 <AlertCircle className="h-4 w-4" />
-                Findings
+                {t("findingsTab")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="calendar" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Inspection Schedule</CardTitle>
+                  <CardTitle>{t("inspectionSchedule")}</CardTitle>
                   <CardDescription>
-                    View and manage scheduled safety inspections
+                    {t("inspectionScheduleDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -360,9 +362,9 @@ export default function InspectionsPage() {
             <TabsContent value="list" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>All Inspections</CardTitle>
+                  <CardTitle>{t("allInspections")}</CardTitle>
                   <CardDescription>
-                    Comprehensive list of workplace safety inspections
+                    {t("allInspectionsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -373,7 +375,7 @@ export default function InspectionsPage() {
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
                       <ClipboardCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Select an inspection to view details</p>
+                      <p>{t("selectInspectionMessage")}</p>
                     </div>
                   )}
                 </CardContent>
@@ -383,9 +385,9 @@ export default function InspectionsPage() {
             <TabsContent value="findings" className="space-y-4">
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Recent Findings</CardTitle>
+                  <CardTitle>{t("recentFindings")}</CardTitle>
                   <CardDescription>
-                    Issues identified during inspections requiring attention
+                    {t("recentFindingsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -396,7 +398,7 @@ export default function InspectionsPage() {
                         finding={finding}
                       />
                     )) : (
-                      <p className="text-center text-gray-500 py-8">No findings recorded</p>
+                      <p className="text-center text-gray-500 py-8">{t("noFindingsMessage")}</p>
                     )}
                   </div>
                 </CardContent>

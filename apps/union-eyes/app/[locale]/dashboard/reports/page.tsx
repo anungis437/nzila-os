@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
  */
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -23,6 +24,7 @@ import { ReportSharingHub } from "@/components/analytics/report-sharing-hub";
 import { DataExportScheduler } from "@/components/analytics/data-export-scheduler";
 
 export default function ReportsPage() {
+  const t = useTranslations("reportsCenter");
   const [showReportBuilder, setShowReportBuilder] = React.useState(false);
 
   return (
@@ -30,28 +32,28 @@ export default function ReportsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Reports</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-gray-600 mt-2">
-            Create custom reports, schedule exports, and share insights
+            {t("subtitle")}
           </p>
         </div>
         <Button onClick={() => setShowReportBuilder(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Create Report
+          {t("createReport")}
         </Button>
       </div>
 
       <Tabs defaultValue="reports">
         <TabsList>
-          <TabsTrigger value="reports">My Reports</TabsTrigger>
-          <TabsTrigger value="sharing">Sharing</TabsTrigger>
-          <TabsTrigger value="exports">Scheduled Exports</TabsTrigger>
+          <TabsTrigger value="reports">{t("tabs.myReports")}</TabsTrigger>
+          <TabsTrigger value="sharing">{t("tabs.sharing")}</TabsTrigger>
+          <TabsTrigger value="exports">{t("tabs.scheduledExports")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reports">
           <div className="space-y-4">
             <p className="text-gray-600">
-              Your saved reports will appear here. Create a new report to get started.
+              {t("savedReportsHint")}
             </p>
             {/* Saved reports list would be implemented here */}
           </div>

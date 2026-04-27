@@ -3,17 +3,28 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Calendar, CheckCircle, AlertCircle } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Audits & Compliance | UnionEyes",
-  description: "Financial audits and compliance tracking",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
 
-export default async function AuditsPage() {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auditsPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
+
+export default async function AuditsPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auditsPage" });
   const _user = await requireUser();
   
   // Require at least officer level (60) to view audits
@@ -55,19 +66,47 @@ export default async function AuditsPage() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "completed":
+        return t("statuses.completed");
+      case "in-progress":
+        return t("statuses.inProgress");
+      case "scheduled":
+        return t("statuses.scheduled");
+      default:
+        return t("statuses.unknown");
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "Financial":
+        return t("types.financial");
+      case "Internal":
+        return t("types.internal");
+      case "Compliance":
+        return t("types.compliance");
+      case "Membership":
+        return t("types.membership");
+      default:
+        return t("types.other");
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Audits & Compliance</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground mt-2">
-            Financial audits, compliance reviews, and organizational oversight
+            {t("subtitle")}
           </p>
         </div>
         <Button>
           <Calendar className="mr-2 h-4 w-4" />
-          Schedule Audit
+          {t("scheduleAudit")}
         </Button>
       </div>
 
@@ -75,51 +114,51 @@ export default async function AuditsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Audits</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("summary.totalAudits")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{audits.length}</div>
-            <p className="text-xs text-muted-foreground">This year</p>
+            <p className="text-xs text-muted-foreground">{t("summary.thisYear")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("summary.completed")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {audits.filter(a => a.status === "completed").length}
             </div>
-            <p className="text-xs text-green-500">All clear</p>
+            <p className="text-xs text-green-500">{t("summary.allClear")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("summary.inProgress")}</CardTitle>
             <AlertCircle className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {audits.filter(a => a.status === "in-progress").length}
             </div>
-            <p className="text-xs text-muted-foreground">Active reviews</p>
+            <p className="text-xs text-muted-foreground">{t("summary.activeReviews")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("summary.scheduled")}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {audits.filter(a => a.status === "scheduled").length}
             </div>
-            <p className="text-xs text-muted-foreground">Upcoming</p>
+            <p className="text-xs text-muted-foreground">{t("summary.upcoming")}</p>
           </CardContent>
         </Card>
       </div>
@@ -134,15 +173,15 @@ export default async function AuditsPage() {
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg">{audit.title}</CardTitle>
                     <Badge variant="outline" className={getTypeColor(audit.type)}>
-                      {audit.type}
+                      {getTypeLabel(audit.type)}
                     </Badge>
                   </div>
                   <CardDescription>
-                    Auditor: {audit.auditor}
+                    {t("auditor", { auditor: audit.auditor })}
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className={getStatusColor(audit.status)}>
-                  {audit.status}
+                  {getStatusLabel(audit.status)}
                 </Badge>
               </div>
             </CardHeader>
@@ -151,20 +190,20 @@ export default async function AuditsPage() {
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {audit.dateCompleted && `Completed: ${new Date(audit.dateCompleted).toLocaleDateString()}`}
-                    {audit.dateScheduled && `Scheduled: ${new Date(audit.dateScheduled).toLocaleDateString()}`}
+                    {audit.dateCompleted && t("completedDate", { value: new Date(audit.dateCompleted).toLocaleDateString() })}
+                    {audit.dateScheduled && t("scheduledDate", { value: new Date(audit.dateScheduled).toLocaleDateString() })}
                   </div>
                   {audit.findings > 0 && (
                     <div className="flex items-center gap-2 text-amber-600">
                       <AlertCircle className="h-4 w-4" />
-                      {audit.findings} finding{audit.findings !== 1 ? 's' : ''}
+                      {t("findings", { count: audit.findings })}
                     </div>
                   )}
                 </div>
                 {audit.hasReport && (
                   <Button variant="outline" size="sm">
                     <Download className="mr-2 h-4 w-4" />
-                    Download Report
+                    {t("downloadReport")}
                   </Button>
                 )}
               </div>

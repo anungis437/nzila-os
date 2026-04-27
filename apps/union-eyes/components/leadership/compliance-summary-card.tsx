@@ -11,6 +11,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Clock, FileText, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +61,7 @@ export function ComplianceSummaryCard({
   alerts,
   className,
 }: ComplianceSummaryCardProps) {
+  const t = useTranslations("leadershipDashboard.compliance");
   const gauges: Array<{
     icon: React.ElementType;
     label: string;
@@ -68,25 +70,25 @@ export function ComplianceSummaryCard({
   }> = [
     {
       icon: Clock,
-      label: "Deadline Adherence",
+      label: t("deadlineAdherence"),
       value: `${metrics.deadlineAdherence}%`,
       color: adherenceColor(metrics.deadlineAdherence),
     },
     {
       icon: ShieldCheck,
-      label: "Avg. Response Time",
+      label: t("avgResponseTime"),
       value: `${metrics.avgResponseTime}d`,
       color: metrics.avgResponseTime <= 5 ? "text-green-600" : "text-amber-600",
     },
     {
       icon: FileText,
-      label: "Documentation Rate",
+      label: t("documentationRate"),
       value: `${metrics.documentationRate}%`,
       color: adherenceColor(metrics.documentationRate),
     },
     {
       icon: AlertTriangle,
-      label: "Open Alerts",
+      label: t("openAlerts"),
       value: String(metrics.openAlerts),
       color: metrics.openAlerts === 0 ? "text-green-600" : "text-red-600",
     },
@@ -96,7 +98,7 @@ export function ComplianceSummaryCard({
     <Card className={cn("p-4 space-y-4", className)}>
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Compliance Summary</h3>
+        <h3 className="text-sm font-semibold">{t("title")}</h3>
       </div>
 
       {/* Metric gauges */}
@@ -122,7 +124,7 @@ export function ComplianceSummaryCard({
       {alerts.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-xs font-medium text-muted-foreground">
-            Recent Compliance Alerts
+            {t("recentAlerts")}
           </h4>
           <div className="space-y-1.5">
             {alerts.slice(0, 5).map((alert) => (

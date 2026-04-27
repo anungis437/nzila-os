@@ -9,6 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { buildCaseTimeline, getCaseJourneySummary, calculateCaseProgress, TimelineContext } from '@/lib/member-experience/timeline-builder';
 import { GrievanceTimeline } from '@/components/marketing/grievance-timeline';
@@ -43,6 +44,7 @@ async function getCaseDetails(caseId: string): Promise<TimelineContext | null> {
 }
 
 export default async function CaseTimelinePage({ params }: TimelinePageProps) {
+  const t = await getTranslations({ locale: params.locale, namespace: 'memberTimelinePage' });
   const caseDetails = await getCaseDetails(params.caseId);
 
   if (!caseDetails) {
@@ -59,17 +61,17 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Your Case Journey
+            {t('header.title')}
           </h1>
           <p className="text-lg text-gray-600">
-            Case #{params.caseId}
+            {t('header.caseNumber', { caseId: params.caseId })}
           </p>
         </div>
 
         <HumanCenteredCallout
           variant="human"
-          title="Your journey in plain language"
-          description="This timeline shows your case's journey in plain language. Every case is different, and we&apos;re here to support you through the entire process."
+          title={t('callout.title')}
+          description={t('callout.description')}
           className="mb-8"
         />
 
@@ -93,7 +95,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Current Stage</p>
+                <p className="text-sm text-gray-600">{t('summary.currentStage')}</p>
                 <p className="font-semibold text-gray-900">{summary.currentStageTitle}</p>
               </div>
             </div>
@@ -117,7 +119,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Days Since Submission</p>
+                <p className="text-sm text-gray-600">{t('summary.daysSinceSubmission')}</p>
                 <p className="font-semibold text-gray-900">{summary.totalDays}</p>
               </div>
             </div>
@@ -145,9 +147,9 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-gray-600">{t('summary.status')}</p>
                 <p className="font-semibold text-gray-900">
-                  {summary.isOnTrack ? 'On Track' : 'In Progress'}
+                  {summary.isOnTrack ? t('summary.onTrack') : t('summary.inProgress')}
                 </p>
               </div>
             </div>
@@ -157,7 +159,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         {/* Timeline */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Detailed Timeline
+            {t('timeline.title')}
           </h2>
           <GrievanceTimeline
             stages={stages}
@@ -170,7 +172,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         {/* Assigned Steward */}
         {caseDetails.assignedSteward && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 mb-3">Your Union Steward</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">{t('steward.title')}</h3>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
@@ -184,7 +186,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
               <div>
                 <p className="font-medium text-gray-900">{caseDetails.assignedSteward.name}</p>
                 <p className="text-sm text-gray-600">
-                  Your steward is handling your case and will contact you if they need anything.
+                  {t('steward.description')}
                 </p>
               </div>
             </div>
@@ -194,37 +196,33 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         {/* Questions Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Questions About Your Case?
+            {t('questions.title')}
           </h3>
           <div className="space-y-4">
             <div>
               <h4 className="font-medium text-gray-900 mb-2">
-                What if I have new information?
+                {t('questions.newInfo.question')}
               </h4>
               <p className="text-gray-700">
-                Contact your steward directly or add a note to your case through the dashboard.
-                New information can help strengthen your case.
+                {t('questions.newInfo.answer')}
               </p>
             </div>
 
             <div>
               <h4 className="font-medium text-gray-900 mb-2">
-                Why is my case taking this long?
+                {t('questions.duration.question')}
               </h4>
               <p className="text-gray-700">
-                Every case is different. Some require more investigation, documentation, or
-                coordination with management. Your steward is working to get the best outcome,
-                not just the fastest one.
+                {t('questions.duration.answer')}
               </p>
             </div>
 
             <div>
               <h4 className="font-medium text-gray-900 mb-2">
-                Can I talk to someone?
+                {t('questions.support.question')}
               </h4>
               <p className="text-gray-700">
-                Absolutely. Your steward is here for you. If you need to talk through what&apos;s
-                happening, reach out directly. Union solidarity means you&apos;re never alone in this.
+                {t('questions.support.answer')}
               </p>
             </div>
           </div>
@@ -235,13 +233,13 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
                 href={`/${params.locale}/dashboard/member/messages`}
                 className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-md font-medium text-center hover:bg-blue-700 transition-colors"
               >
-                Message Your Steward
+                {t('actions.messageSteward')}
               </a>
               <a
                 href={`/${params.locale}/dashboard/member/cases/${params.caseId}`}
                 className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-md font-medium text-center hover:bg-gray-300 transition-colors"
               >
-                View Case Details
+                {t('actions.viewCaseDetails')}
               </a>
             </div>
           </div>
@@ -250,11 +248,11 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         {/* Trust Footer */}
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>
-            Your case data is protected by our{' '}
+            {t('footer.beforeLink')}{' '}
             <Link href="/dashboard/trust" className="text-blue-600 hover:underline">
-              trust infrastructure
+              {t('footer.linkText')}
             </Link>
-            . Only you and your assigned steward can see these details.
+            . {t('footer.afterLink')}
           </p>
         </div>
       </div>
@@ -262,9 +260,11 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
   );
 }
 
-export async function generateMetadata({ params: _params }: TimelinePageProps) {
+export async function generateMetadata({ params }: TimelinePageProps) {
+  const t = await getTranslations({ locale: params.locale, namespace: 'memberTimelinePage.metadata' });
+
   return {
-    title: `Case Timeline | UnionEyes`,
-    description: 'Track the progress of your case with clear, human-centered explanations.',
+    title: t('title'),
+    description: t('description'),
   };
 }

@@ -15,15 +15,25 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from "react";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { UnionStructureDashboard } from "@/components/union-structure/UnionStructureDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const metadata = {
-  title: "Union Structure Management",
-  description: "Manage organizational structure, employers, worksites, bargaining units, and committees",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "structurePage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 async function StructureDashboardContent() {
   const user = await getCurrentUser();

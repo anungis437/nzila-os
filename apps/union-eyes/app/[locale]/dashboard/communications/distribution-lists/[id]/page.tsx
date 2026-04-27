@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -74,6 +74,7 @@ interface Subscriber {
 }
 
 export default function DistributionListDetailPage() {
+  const t = useTranslations('distributionListDetailPage');
   const router = useRouter();
   const locale = useLocale();
   const { id } = useParams<{ id: string }>();
@@ -103,15 +104,15 @@ export default function DistributionListDetailPage() {
       setError(null);
       const response = await fetch(`/api/communications/distribution-lists/${id}`);
       if (!response.ok) {
-        if (response.status === 404) throw new Error('Distribution list not found');
-        throw new Error('Failed to fetch distribution list');
+        if (response.status === 404) throw new Error(t('notFound'));
+        throw new Error(t('failedToFetch'));
       }
       const json = await response.json();
       const data = json.data ?? json;
       setList(data);
       setFormData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch distribution list');
+      setError(err instanceof Error ? err.message : t('failedToFetch'));
     } finally {
       setLoading(false);
     }
@@ -148,17 +149,17 @@ export default function DistributionListDetailPage() {
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error || 'Failed to save');
+        throw new Error(err.error || t('failedToSave'));
       }
 
       const json = await response.json();
       const updated = json.data ?? json;
       setList(updated);
       setFormData(updated);
-      setSuccessMessage('List saved successfully');
+      setSuccessMessage(t('successMessage'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save');
+      setError(err instanceof Error ? err.message : t('failedToSave'));
     } finally {
       setSaving(false);
     }
@@ -173,11 +174,11 @@ export default function DistributionListDetailPage() {
       });
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error || 'Failed to delete');
+        throw new Error(err.error || t('failedToDelete'));
       }
       router.push(`/${locale}/dashboard/communications/distribution-lists`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
+      setError(err instanceof Error ? err.message : t('failedToDelete'));
       setShowDeleteDialog(false);
     } finally {
       setDeleting(false);
@@ -204,7 +205,7 @@ export default function DistributionListDetailPage() {
     return (
       <div className="container mx-auto py-6 space-y-4">
         <Button variant="ghost" onClick={() => router.push(`/${locale}/dashboard/communications/distribution-lists`)}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lists
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('backButton')}
         </Button>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -225,17 +226,17 @@ export default function DistributionListDetailPage() {
           <div>
             <h1 className="text-2xl font-bold">{list?.name}</h1>
             <p className="text-muted-foreground">
-              {list?.subscriberCount ?? 0} subscribers &middot; {list?.listType ?? 'manual'}
+              {t('subscriberCount', { count: list?.subscriberCount ?? 0 })} &middot; {list?.listType ?? 'manual'}
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> {t('deleteButton')}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save Changes
+            {t('saveButton')}
           </Button>
         </div>
       </div>
@@ -256,12 +257,12 @@ export default function DistributionListDetailPage() {
       {/* Details Card */}
       <Card>
         <CardHeader>
-          <CardTitle>List Details</CardTitle>
-          <CardDescription>Update distribution list information</CardDescription>
+          <CardTitle>{t('listDetailsTitle')}</CardTitle>
+          <CardDescription>{t('listDetailsDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('nameLabel')}</Label>
             <Input
               id="name"
               value={formData.name || ''}
@@ -269,7 +270,7 @@ export default function DistributionListDetailPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <Textarea
               id="description"
               value={formData.description || ''}
@@ -282,7 +283,7 @@ export default function DistributionListDetailPage() {
               checked={formData.isActive ?? true}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
             />
-            <Label>Active</Label>
+            <Label>{t('activeLabel')}</Label>
           </div>
         </CardContent>
       </Card>
@@ -294,10 +295,10 @@ export default function DistributionListDetailPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Subscribers
+                {t('subscribersTitle')}
               </CardTitle>
               <CardDescription>
-                {subscribers.length} subscriber(s) in this list
+                {t('subscribersDescription', { count: subscribers.length })}
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={fetchSubscribers}>
@@ -308,15 +309,15 @@ export default function DistributionListDetailPage() {
         <CardContent>
           {subscribers.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              No subscribers yet
+              {t('noSubscribers')}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Subscribed</TableHead>
+                  <TableHead>{t('emailHeader')}</TableHead>
+                  <TableHead>{t('statusHeader')}</TableHead>
+                  <TableHead>{t('subscribedHeader')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -341,16 +342,16 @@ export default function DistributionListDetailPage() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Distribution List</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{list?.name}&quot;? This will remove all subscriber associations. This action cannot be undone.
+              {t('deleteDescription', { name: list?.name ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t('cancelButton')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground">
               {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Delete
+              {t('deleteButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

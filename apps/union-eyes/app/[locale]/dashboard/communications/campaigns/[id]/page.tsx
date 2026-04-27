@@ -13,6 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -88,6 +89,8 @@ interface Campaign {
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('communicationsCampaignDetailPage');
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,15 +114,15 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Campaign not found');
+          throw new Error(t('errors.notFound'));
         }
-        throw new Error('Failed to fetch campaign');
+        throw new Error(t('errors.fetchFailed'));
       }
 
       const data = await response.json();
       setCampaign(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch campaign');
+      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +141,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to send campaign');
+        throw new Error(error.error || t('errors.sendFailed'));
       }
 
       const result = await response.json();
@@ -150,7 +153,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         await fetchCampaign(); // Refresh campaign data
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send campaign');
+      setError(err instanceof Error ? err.message : t('errors.sendFailed'));
     } finally {
       setActionLoading(false);
     }
@@ -167,12 +170,12 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete campaign');
+        throw new Error(error.error || t('errors.deleteFailed'));
       }
 
-      router.push('/dashboard/communications/campaigns');
+      router.push(`/${locale}/dashboard/communications/campaigns`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete campaign');
+      setError(err instanceof Error ? err.message : t('errors.deleteFailed'));
       setShowDeleteDialog(false);
     } finally {
       setActionLoading(false);
@@ -205,9 +208,37 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
 
     return (
       <Badge variant={variants[status] || 'default'} className="text-sm">
-        {status.toUpperCase()}
+        {t(`statuses.${status}`)}
       </Badge>
     );
+  };
+
+  const getChannelLabel = (channel: string) => {
+    switch (channel) {
+      case 'email':
+        return t('channels.email');
+      case 'sms':
+        return t('channels.sms');
+      case 'push':
+        return t('channels.push');
+      default:
+        return channel;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'broadcast':
+        return t('types.broadcast');
+      case 'campaign':
+        return t('types.campaign');
+      case 'newsletter':
+        return t('types.newsletter');
+      case 'alert':
+        return t('types.alert');
+      default:
+        return type;
+    }
   };
 
   const calculateRates = () => {
@@ -246,15 +277,15 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       <div className="container mx-auto py-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error || 'Campaign not found'}</AlertDescription>
+            <AlertDescription>{error || t('errors.notFound')}</AlertDescription>
         </Alert>
         <Button
           variant="outline"
-          onClick={() => router.push('/dashboard/communications/campaigns')}
+          onClick={() => router.push(`/${locale}/dashboard/communications/campaigns`)}
           className="mt-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Campaigns
+          {t('backButton')}
         </Button>
       </div>
     );
@@ -268,11 +299,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       <div>
         <Button
           variant="ghost"
-          onClick={() => router.push('/dashboard/communications/campaigns')}
+          onClick={() => router.push(`/${locale}/dashboard/communications/campaigns`)}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Campaigns
+          {t('backButton')}
         </Button>
 
         <div className="flex items-start justify-between">
@@ -290,7 +321,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               )}
               {campaign.testMode && (
                 <Badge variant="outline" className="mt-2">
-                  Test Mode
+                  {t('testMode')}
                 </Badge>
               )}
             </div>
@@ -300,19 +331,19 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             {canSend && (
               <Button onClick={() => setShowSendDialog(true)} disabled={actionLoading}>
                 <Send className="mr-2 h-4 w-4" />
-                Send Campaign
+                {t('actions.sendCampaign')}
               </Button>
             )}
             {canEdit && (
-              <Button variant="outline" onClick={() => router.push(`/dashboard/communications/campaigns/${campaign.id}/edit`)}>
+              <Button variant="outline" onClick={() => router.push(`/${locale}/dashboard/communications/campaigns/${campaign.id}/edit`)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t('actions.edit')}
               </Button>
             )}
             {canDelete && (
               <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} disabled={actionLoading}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t('actions.delete')}
               </Button>
             )}
             <Button variant="outline" onClick={fetchCampaign} disabled={actionLoading}>
@@ -336,12 +367,12 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              Audience
+              {t('stats.audience.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaign.audienceCount?.toLocaleString() || 0}</div>
-            <p className="text-xs text-muted-foreground">Total recipients</p>
+            <div className="text-2xl font-bold">{campaign.audienceCount?.toLocaleString(locale) || 0}</div>
+            <p className="text-xs text-muted-foreground">{t('stats.audience.description')}</p>
           </CardContent>
         </Card>
 
@@ -349,13 +380,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Send className="h-4 w-4 text-muted-foreground" />
-              Sent
+              {t('stats.sent.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaign.stats.sent?.toLocaleString() || 0}</div>
+            <div className="text-2xl font-bold">{campaign.stats.sent?.toLocaleString(locale) || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {rates.deliveryRate}% delivery rate
+              {t('stats.sent.description', { rate: rates.deliveryRate })}
             </p>
           </CardContent>
         </Card>
@@ -364,13 +395,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Eye className="h-4 w-4 text-muted-foreground" />
-              Opened
+              {t('stats.opened.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaign.stats.opened?.toLocaleString() || 0}</div>
+            <div className="text-2xl font-bold">{campaign.stats.opened?.toLocaleString(locale) || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {rates.openRate}% open rate
+              {t('stats.opened.description', { rate: rates.openRate })}
             </p>
           </CardContent>
         </Card>
@@ -379,13 +410,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-              Clicked
+              {t('stats.clicked.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaign.stats.clicked?.toLocaleString() || 0}</div>
+            <div className="text-2xl font-bold">{campaign.stats.clicked?.toLocaleString(locale) || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {rates.clickRate}% click rate
+              {t('stats.clicked.description', { rate: rates.clickRate })}
             </p>
           </CardContent>
         </Card>
@@ -395,19 +426,19 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         {/* Campaign Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Campaign Details</CardTitle>
+            <CardTitle>{t('details.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <div className="text-sm text-muted-foreground">Type</div>
-              <div className="font-medium capitalize">{campaign.type}</div>
+              <div className="text-sm text-muted-foreground">{t('details.type')}</div>
+              <div className="font-medium capitalize">{getTypeLabel(campaign.type)}</div>
             </div>
 
             <div>
-              <div className="text-sm text-muted-foreground">Channel</div>
+              <div className="text-sm text-muted-foreground">{t('details.channel')}</div>
               <div className="font-medium capitalize flex items-center gap-2">
                 {getChannelIcon(campaign.channel)}
-                {campaign.channel}
+                {getChannelLabel(campaign.channel)}
               </div>
             </div>
 
@@ -415,10 +446,10 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               <div>
                 <div className="text-sm text-muted-foreground flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  Scheduled For
+                  {t('details.scheduledFor')}
                 </div>
                 <div className="font-medium">
-                  {new Date(campaign.scheduledAt).toLocaleString()}
+                  {new Date(campaign.scheduledAt).toLocaleString(locale)}
                 </div>
               </div>
             )}
@@ -427,10 +458,10 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               <div>
                 <div className="text-sm text-muted-foreground flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  Sent At
+                  {t('details.sentAt')}
                 </div>
                 <div className="font-medium">
-                  {new Date(campaign.sentAt).toLocaleString()}
+                  {new Date(campaign.sentAt).toLocaleString(locale)}
                 </div>
               </div>
             )}
@@ -439,18 +470,18 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               <div>
                 <div className="text-sm text-muted-foreground flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
-                  Completed At
+                  {t('details.completedAt')}
                 </div>
                 <div className="font-medium">
-                  {new Date(campaign.completedAt).toLocaleString()}
+                  {new Date(campaign.completedAt).toLocaleString(locale)}
                 </div>
               </div>
             )}
 
             <div>
-              <div className="text-sm text-muted-foreground">Created</div>
+              <div className="text-sm text-muted-foreground">{t('details.created')}</div>
               <div className="font-medium">
-                {new Date(campaign.createdAt).toLocaleString()}
+                {new Date(campaign.createdAt).toLocaleString(locale)}
               </div>
             </div>
           </CardContent>
@@ -459,31 +490,31 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         {/* Delivery Stats */}
         <Card>
           <CardHeader>
-            <CardTitle>Delivery Statistics</CardTitle>
+            <CardTitle>{t('delivery.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Queued</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.queued')}</span>
               <span className="font-medium">{campaign.stats.queued || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Sent</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.sent')}</span>
               <span className="font-medium">{campaign.stats.sent || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Delivered</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.delivered')}</span>
               <span className="font-medium">{campaign.stats.delivered || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Failed</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.failed')}</span>
               <span className="font-medium text-destructive">{campaign.stats.failed || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Bounced</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.bounced')}</span>
               <span className="font-medium text-destructive">{campaign.stats.bounced || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Unsubscribed</span>
+              <span className="text-sm text-muted-foreground">{t('delivery.unsubscribed')}</span>
               <span className="font-medium">{campaign.stats.unsubscribed || 0}</span>
             </div>
           </CardContent>
@@ -493,18 +524,18 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       {/* Content Preview */}
       <Card>
         <CardHeader>
-          <CardTitle>Content</CardTitle>
+          <CardTitle>{t('content.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {campaign.subject && (
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Subject</div>
+              <div className="text-sm text-muted-foreground mb-1">{t('content.subject')}</div>
               <div className="font-medium">{campaign.subject}</div>
             </div>
           )}
 
           <div>
-            <div className="text-sm text-muted-foreground mb-1">Message</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('content.message')}</div>
             <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap">
               {campaign.body}
             </div>
@@ -515,13 +546,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               {campaign.settings.trackOpens && (
                 <div className="flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
-                  Tracking opens
+                  {t('content.trackingOpens')}
                 </div>
               )}
               {campaign.settings.trackClicks && (
                 <div className="flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
-                  Tracking clicks
+                  {t('content.trackingClicks')}
                 </div>
               )}
             </div>
@@ -533,14 +564,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {/* eslint-disable-next-line react/no-unescaped-entities */}
-              This will permanently delete "{campaign.name}". This action cannot be undone.
+              {t('deleteDialog.description', { name: campaign.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={actionLoading}>{t('dialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteCampaign}
               disabled={actionLoading}
@@ -549,10 +579,10 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               {actionLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('deleteDialog.deleting')}
                 </>
               ) : (
-                'Delete Campaign'
+                t('deleteDialog.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -563,11 +593,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       <AlertDialog open={showSendDialog} onOpenChange={setShowSendDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Send Campaign?</AlertDialogTitle>
+            <AlertDialogTitle>{t('sendDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {/* eslint-disable-next-line react/no-unescaped-entities */}
-              This will send "{campaign.name}" to {campaign.audienceCount} recipient(s).
-              {campaign.testMode && ' (Test Mode - will only send to admins)'}
+              {t('sendDialog.description', {
+                name: campaign.name,
+                count: campaign.audienceCount,
+              })}
+              {campaign.testMode ? ` ${t('sendDialog.testModeNote')}` : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -576,9 +608,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>
                 <div className="space-y-1">
-                  <div>Ready to send to {dryRunResult.totalAudience} recipients</div>
+                  <div>{t('sendDialog.readyToSend', { count: dryRunResult.totalAudience })}</div>
                   <div className="text-sm text-muted-foreground">
-                    Estimated completion: {dryRunResult.estimatedCompletionMinutes} minutes
+                    {t('sendDialog.estimatedCompletion', {
+                      minutes: dryRunResult.estimatedCompletionMinutes,
+                    })}
                   </div>
                 </div>
               </AlertDescription>
@@ -586,16 +620,16 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           )}
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={actionLoading}>{t('dialog.cancel')}</AlertDialogCancel>
             {!dryRunResult ? (
               <Button onClick={() => handleSendCampaign(true)} disabled={actionLoading}>
                 {actionLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Checking...
+                    {t('sendDialog.checking')}
                   </>
                 ) : (
-                  'Preview First'
+                  t('sendDialog.previewFirst')
                 )}
               </Button>
             ) : (
@@ -606,10 +640,10 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
                 {actionLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {t('sendDialog.sending')}
                   </>
                 ) : (
-                  'Send Now'
+                  t('sendDialog.sendNow')
                 )}
               </AlertDialogAction>
             )}

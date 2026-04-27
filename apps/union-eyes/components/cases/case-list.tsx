@@ -14,6 +14,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { 
   detectSignals, 
   getHighestSeverityPerCase,
@@ -42,6 +43,7 @@ type FilterSeverity = SignalSeverity | 'all';
  * Case list component with integrated signal detection
  */
 export function CaseList({ cases, showFilters = true, currentUserId }: CaseListProps) {
+  const t = useTranslations('caseList');
   // Feature flags
   const flags = useFeatureFlags([
     LRO_FEATURES.SIGNALS_UI,
@@ -144,7 +146,7 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
           <div>
             <input
               type="text"
-              placeholder="Search cases by title, member name, or ID..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -158,7 +160,7 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
               onClick={() => setSeverityFilter('all')}
               count={severityCounts.all}
             >
-              All Cases
+              {t('filters.all')}
             </FilterButton>
             <FilterButton
               active={severityFilter === 'critical'}
@@ -166,7 +168,7 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
               count={severityCounts.critical}
               variant="critical"
             >
-              Critical
+              {t('filters.critical')}
             </FilterButton>
             <FilterButton
               active={severityFilter === 'urgent'}
@@ -174,7 +176,7 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
               count={severityCounts.urgent}
               variant="urgent"
             >
-              Urgent
+              {t('filters.urgent')}
             </FilterButton>
             <FilterButton
               active={severityFilter === 'warning'}
@@ -182,7 +184,7 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
               count={severityCounts.warning}
               variant="warning"
             >
-              Warning
+              {t('filters.warning')}
             </FilterButton>
           </div>
 
@@ -193,12 +195,12 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
               onChange={(e) => setStateFilter(e.target.value)}
               className="px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All States</option>
-              <option value="submitted">Submitted</option>
-              <option value="acknowledged">Acknowledged</option>
-              <option value="investigating">Investigating</option>
-              <option value="pending_response">Pending Response</option>
-              <option value="negotiating">Negotiating</option>
+              <option value="all">{t('states.all')}</option>
+              <option value="submitted">{t('states.submitted')}</option>
+              <option value="acknowledged">{t('states.acknowledged')}</option>
+              <option value="investigating">{t('states.investigating')}</option>
+              <option value="pending_response">{t('states.pending_response')}</option>
+              <option value="negotiating">{t('states.negotiating')}</option>
             </select>
           </div>
         </div>
@@ -206,14 +208,14 @@ export function CaseList({ cases, showFilters = true, currentUserId }: CaseListP
 
       {/* Case count */}
       <div className="text-sm text-gray-600">
-        Showing {sortedCases.length} of {cases.length} cases
+        {t('showing', { shown: sortedCases.length, total: cases.length })}
       </div>
 
       {/* Case list */}
       <div className="space-y-3">
         {sortedCases.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No cases match your filters
+            {t('empty')}
           </div>
         ) : (
           sortedCases.map((caseData) => (
@@ -276,6 +278,7 @@ interface CaseListItemProps {
 }
 
 function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
+  const t = useTranslations('caseList');
   const [showDetails, setShowDetails] = useState(false);
 
   const isAssignedToMe = currentUserId && caseData.assignedOfficerId === currentUserId;
@@ -297,7 +300,7 @@ function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
                 {/* Assigned indicator */}
                 {isAssignedToMe && (
                   <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                    Assigned to you
+                    {t('assignedToYou')}
                   </span>
                 )}
               </div>
@@ -315,14 +318,14 @@ function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
                   {caseData.currentState.replace('_', ' ')}
                 </span>
                 <span>•</span>
-                <span className="capitalize">{caseData.priority} Priority</span>
+                <span className="capitalize">{t('priorityLabel', { priority: caseData.priority })}</span>
               </div>
             </div>
 
             {/* Right side: Actions */}
             <div className="flex flex-col items-end gap-2">
               <div className="text-sm text-gray-500">
-                Updated {formatRelativeTime(caseData.lastUpdated)}
+                {t('updated', { time: formatRelativeTime(caseData.lastUpdated, t) })}
               </div>
               
               {signal && signal.actionable && (
@@ -333,7 +336,7 @@ function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
                   }}
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  {showDetails ? 'Hide Details' : 'Show Details'} →
+                  {showDetails ? t('hideDetails') : t('showDetails')} →
                 </button>
               )}
             </div>
@@ -354,17 +357,17 @@ function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
 /**
  * Format relative time (e.g., "2 days ago")
  */
-function formatRelativeTime(date: Date): string {
+function formatRelativeTime(date: Date, t: (key: string, vars?: Record<string, string | number | Date>) => string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffMins < 1) return t('time.justNow');
+  if (diffMins < 60) return t('time.minAgo', { count: diffMins });
+  if (diffHours < 24) return t(diffHours === 1 ? 'time.hourAgo' : 'time.hoursAgo', { count: diffHours });
+  if (diffDays < 7) return t(diffDays === 1 ? 'time.dayAgo' : 'time.daysAgo', { count: diffDays });
   
   return date.toLocaleDateString();
 }

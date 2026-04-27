@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,6 +38,7 @@ interface DuesPaymentPortalProps {
 }
 
 export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
+  const t = useTranslations('dashboard.dues');
   const [balance, setBalance] = useState<DuesBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDeductionId, setSelectedDeductionId] = useState<string | undefined>();
@@ -74,11 +76,11 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
   }, [loadDuesBalance]);
 
   if (loading) {
-    return <div className="flex items-center justify-center p-12">Loading...</div>;
+    return <div className="flex items-center justify-center p-12">{t('loading')}</div>;
   }
 
   if (!balance) {
-    return <div className="text-center p-12">No dues information available</div>;
+    return <div className="text-center p-12">{t('noInfo')}</div>;
   }
 
   return (
@@ -87,7 +89,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Balance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('currentBalance')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -97,7 +99,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
             {balance.isInArrears && (
               <p className="text-xs text-destructive flex items-center gap-1 mt-2">
                 <AlertTriangle className="h-3 w-3" />
-                {formatCurrency(balance.arrearsAmount)} overdue
+                {t('overdueShort', { amount: formatCurrency(balance.arrearsAmount) })}
               </p>
             )}
           </CardContent>
@@ -105,7 +107,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Deduction Expected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('nextDeductionExpected')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -113,14 +115,14 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
               {formatCurrency(balance.nextDueAmount)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Expected {new Date(balance.nextDueDate).toLocaleDateString()}
+              {t('expected', { date: new Date(balance.nextDueDate).toLocaleDateString() })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Membership Status</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('membershipStatus')}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -128,12 +130,12 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
               variant={balance.membershipStatus === 'good_standing' ? 'default' : 'destructive'}
               className="text-sm"
             >
-              {balance.membershipStatus === 'good_standing' ? 'Good Standing' : 'Arrears'}
+              {balance.membershipStatus === 'good_standing' ? t('goodStanding') : t('arrears')}
             </Badge>
             {balance.autoPayEnabled && (
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
                 <Clock className="h-3 w-3" />
-                AutoPay enabled (****{balance.paymentMethodLast4})
+                {t('autopayEnabled', { last4: balance.paymentMethodLast4 ?? '' })}
               </p>
             )}
           </CardContent>
@@ -146,11 +148,10 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Overdue Balance
+              {t('overdueBalance')}
             </CardTitle>
             <CardDescription>
-              You have {formatCurrency(balance.overdueAmount)} in overdue dues.
-              If your employer has not deducted dues recently, please report an issue below.
+              {t('overdueBalanceDescription', { amount: formatCurrency(balance.overdueAmount) })}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -159,10 +160,10 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
       {/* Main Tabs — Deduction visibility is primary */}
       <Tabs defaultValue="deductions" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="deductions">Deduction History</TabsTrigger>
-          <TabsTrigger value="report-issue">Report Issue</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-          <TabsTrigger value="manual-payment">Manual Payment</TabsTrigger>
+          <TabsTrigger value="deductions">{t('tabs.deductions')}</TabsTrigger>
+          <TabsTrigger value="report-issue">{t('tabs.reportIssue')}</TabsTrigger>
+          <TabsTrigger value="history">{t('tabs.history')}</TabsTrigger>
+          <TabsTrigger value="manual-payment">{t('tabs.manualPayment')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deductions" className="space-y-4">
@@ -189,9 +190,8 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
           <Card className="mb-4">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
-                <strong>Note:</strong> Most members have dues automatically deducted from payroll.
-                Manual payment is only needed for edge cases such as catch-up payments, arrears
-                settlement, special levies, or non-payroll members.
+                <strong>{t('manualPaymentNote')}</strong>{' '}
+                {t('manualPaymentNoteBody')}
               </p>
             </CardContent>
           </Card>

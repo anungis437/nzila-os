@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ function PaymentForm({
 }: DuesPaymentFormProps & { clientSecret: string }) {
   const stripe = useStripe();
   const elements = useElements();
+  const t = useTranslations('dashboard.dues.form');
   const [paymentType, setPaymentType] = useState<'current' | 'overdue' | 'custom'>('current');
   const [customAmount, setCustomAmount] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -59,7 +61,7 @@ function PaymentForm({
 
     const amount = getPaymentAmount();
     if (amount <= 0) {
-      setError('Please enter a valid payment amount');
+      setError(t('invalidAmount'));
       return;
     }
 
@@ -70,7 +72,7 @@ function PaymentForm({
       // Confirm payment with Stripe
       const { error: submitError } = await elements.submit();
       if (submitError) {
-        setError(submitError.message || 'Failed to submit payment');
+        setError(submitError.message || t('submitFailed'));
         setProcessing(false);
         return;
       }
@@ -84,26 +86,26 @@ function PaymentForm({
       });
 
       if (confirmError) {
-        setError(confirmError.message || 'Payment failed');
+        setError(confirmError.message || t('paymentFailedTitle'));
         toast({
-          title: 'Payment Failed',
+          title: t('paymentFailedTitle'),
           description: confirmError.message,
           variant: 'destructive',
         });
       } else {
         // Payment succeeded
         toast({
-          title: 'Payment Successful',
-          description: `${formatCurrency(amount)} has been paid`,
+          title: t('paymentSuccessTitle'),
+          description: t('paymentSuccessDescription', { amount: formatCurrency(amount) }),
         });
         onPaymentComplete();
       }
 
     } catch (_error) {
-setError('An unexpected error occurred');
+setError(t('unexpectedError'));
       toast({
-        title: 'Payment Failed',
-        description: 'There was an error processing your payment',
+        title: t('paymentFailedTitle'),
+        description: t('paymentFailedGeneric'),
         variant: 'destructive',
       });
     } finally {
@@ -114,20 +116,18 @@ setError('An unexpected error occurred');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Make a Payment</CardTitle>
-        <CardDescription>
-          Pay your union dues securely using credit card or ACH
-        </CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <Label>Payment Amount</Label>
+            <Label>{t('amountLabel')}</Label>
             <RadioGroup value={paymentType} onValueChange={(val) => setPaymentType(val as typeof paymentType)}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="current" id="current" />
                 <Label htmlFor="current" className="font-normal">
-                  Current Balance ({formatCurrency(currentBalance)})
+                  {t('currentBalanceOption', { amount: formatCurrency(currentBalance) })}
                 </Label>
               </div>
               
@@ -135,7 +135,7 @@ setError('An unexpected error occurred');
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="overdue" id="overdue" />
                   <Label htmlFor="overdue" className="font-normal">
-                    Overdue Amount ({formatCurrency(overdueAmount)})
+                    {t('overdueOption', { amount: formatCurrency(overdueAmount) })}
                   </Label>
                 </div>
               )}
@@ -143,20 +143,20 @@ setError('An unexpected error occurred');
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="custom" id="custom" />
                 <Label htmlFor="custom" className="font-normal">
-                  Custom Amount
+                  {t('customOption')}
                 </Label>
               </div>
             </RadioGroup>
 
             {paymentType === 'custom' && (
               <div className="ml-6">
-                <Label htmlFor="customAmount">Enter Amount</Label>
+                <Label htmlFor="customAmount">{t('enterAmount')}</Label>
                 <Input
                   id="customAmount"
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="0.00"
+                  placeholder={t('amountPlaceholder')}
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
                   className="mt-1"
@@ -173,7 +173,7 @@ setError('An unexpected error occurred');
           )}
 
           <div className="space-y-4">
-            <Label>Payment Method</Label>
+            <Label>{t('paymentMethodLabel')}</Label>
             <div className="border rounded-lg p-4">
               <PaymentElement options={{
                 layout: 'tabs',
@@ -184,17 +184,17 @@ setError('An unexpected error occurred');
 
           <div className="flex items-center justify-between pt-4 border-t">
             <div>
-              <p className="text-sm text-muted-foreground">Amount to pay</p>
+              <p className="text-sm text-muted-foreground">{t('amountToPay')}</p>
               <p className="text-2xl font-bold">{formatCurrency(getPaymentAmount())}</p>
             </div>
             <Button type="submit" size="lg" disabled={processing || getPaymentAmount() <= 0}>
               {processing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  {t('processing')}
                 </>
               ) : (
-                `Pay ${formatCurrency(getPaymentAmount())}`
+                t('pay', { amount: formatCurrency(getPaymentAmount()) })
               )}
             </Button>
           </div>
@@ -205,6 +205,7 @@ setError('An unexpected error occurred');
 }
 
 export default function DuesPaymentForm(props: DuesPaymentFormProps) {
+  const t = useTranslations('dashboard.dues.form');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [initError, setInitError] = useState(false);
@@ -246,8 +247,8 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
         if ((error as Error).name === 'AbortError') return;
         setInitError(true);
         toast({
-          title: 'Error',
-          description: 'Failed to initialize payment form',
+          title: t('paymentFailedTitle'),
+          description: t('initFailed'),
           variant: 'destructive',
         });
       } finally {
@@ -267,10 +268,8 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Make a Payment</CardTitle>
-          <CardDescription>
-            Pay your union dues securely using credit card or ACH
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
@@ -286,17 +285,13 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Make a Payment</CardTitle>
-          <CardDescription>
-            Pay your union dues securely using credit card or ACH
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              You have no outstanding balance. No payment is required at this time.
-            </AlertDescription>
+            <AlertDescription>{t('noBalance')}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -307,17 +302,13 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Make a Payment</CardTitle>
-          <CardDescription>
-            Pay your union dues securely using credit card or ACH
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Online payments are not yet configured for this environment. Please contact your union administrator.
-            </AlertDescription>
+            <AlertDescription>{t('notConfigured')}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -328,17 +319,13 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Make a Payment</CardTitle>
-          <CardDescription>
-            Pay your union dues securely using credit card or ACH
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Unable to load payment form. Please try again later.
-            </AlertDescription>
+            <AlertDescription>{t('loadFailed')}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>

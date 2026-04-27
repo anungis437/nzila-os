@@ -9,6 +9,7 @@ import React from 'react';
  */
 
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 import useSWR from "swr";
 import {
   Building2,
@@ -96,6 +97,7 @@ interface HierarchyNode {
 export default function OrganizationDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('adminOrganizationsDetailPage');
   const organizationId = params.id as string;
 
   // Fetch organization details
@@ -188,7 +190,7 @@ export default function OrganizationDetailPage() {
   }, [descendantsData?.data, organization, pathData?.data]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to archive this organization? This action can be reversed later.")) return;
+    if (!confirm(t('deleteConfirmMessage'))) return;
     
     try {
       const response = await fetch(`/api/organizations/${organizationId}`, {
@@ -218,13 +220,13 @@ alert("Failed to archive organization");
       <div className="container mx-auto p-6">
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <AlertCircle className="w-12 h-12 mb-4" />
-          <p>Organization not found</p>
+          <p>{t('organizationNotFound')}</p>
           <Button 
             variant="outline" 
             className="mt-4"
             onClick={() => router.push("/dashboard/admin/organizations")}
           >
-            Back to Organizations
+            {t('backToOrganizations')}
           </Button>
         </div>
       </div>
@@ -276,14 +278,14 @@ alert("Failed to archive organization");
               onClick={() => router.push(`/dashboard/admin/organizations/${organizationId}/edit`)}
             >
               <Edit className="w-4 h-4 mr-2" />
-              Edit
+              {t('editButton')}
             </Button>
             <Button
               variant="outline"
               onClick={() => router.push(`/dashboard/admin/organizations/new?parent=${organizationId}`)}
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Child
+              {t('addChildButton')}
             </Button>
           </div>
         </div>
@@ -295,7 +297,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-sm text-muted-foreground">{t('totalMembersLabel')}</p>
                 <p className="text-2xl font-bold">{organization.memberCount || 0}</p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
@@ -307,7 +309,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Claims</p>
+                <p className="text-sm text-muted-foreground">{t('activeClaimsLabel')}</p>
                 <p className="text-2xl font-bold text-orange-600">{organization.activeClaims || 0}</p>
               </div>
               <FileText className="w-8 h-8 text-orange-600" />
@@ -319,7 +321,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Sub-organizations</p>
+                <p className="text-sm text-muted-foreground">{t('subOrganizationsLabel')}</p>
                 <p className="text-2xl font-bold text-green-600">{organization.childCount || 0}</p>
               </div>
               <Network className="w-8 h-8 text-green-600" />
@@ -331,7 +333,7 @@ alert("Failed to archive organization");
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Claims</p>
+                <p className="text-sm text-muted-foreground">{t('totalClaimsLabel')}</p>
                 <p className="text-2xl font-bold">{organization.totalClaims || 0}</p>
               </div>
               <TrendingUp className="w-8 h-8 text-purple-600" />
@@ -343,49 +345,49 @@ alert("Failed to archive organization");
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="members">Members ({members.length})</TabsTrigger>
-          <TabsTrigger value="hierarchy">Hierarchy ({children.length})</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="overview">{t('overviewTab')}</TabsTrigger>
+          <TabsTrigger value="analytics">{t('analyticsTab')}</TabsTrigger>
+          <TabsTrigger value="members">{t('membersTab')} ({members.length})</TabsTrigger>
+          <TabsTrigger value="hierarchy">{t('hierarchyTab')} ({children.length})</TabsTrigger>
+          <TabsTrigger value="settings">{t('settingsTab')}</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Organization Information</CardTitle>
+              <CardTitle>{t('organizationInformationTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {organization.description && (
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('descriptionLabel')}</h3>
                   <p className="text-sm text-muted-foreground">{organization.description}</p>
                 </div>
               )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Organization ID</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('organizationIdLabel')}</h3>
                   <p className="text-sm font-mono">{organization.id}</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Slug</h3>
-                  <p className="text-sm">{organization.slug || "â€”"}</p>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('slugLabel')}</h3>
+                  <p className="text-sm">{organization.slug || "—"}</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Created</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('createdLabel')}</h3>
                   <p className="text-sm">
                     {organization.created_at 
                       ? new Date(organization.created_at).toLocaleDateString()
-                      : "â€”"}
+                      : "—"}
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Updated</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('lastUpdatedLabel')}</h3>
                   <p className="text-sm">
                     {organization.updated_at 
                       ? new Date(organization.updated_at).toLocaleDateString()
@@ -399,72 +401,72 @@ alert("Failed to archive organization");
                   <Separator />
                   <div className="grid grid-cols-2 gap-4">
                     {organization.settings.headquarters && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Headquarters</h3>
-                        <p className="text-sm">{organization.settings.headquarters}</p>
-                      </div>
-                    )}
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('headquartersLabel')}</h3>
+                          <p className="text-sm">{organization.settings.headquarters}</p>
+                        </div>
+                      )}
 
-                    {organization.settings.industry && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Industry</h3>
-                        <p className="text-sm">{organization.settings.industry}</p>
-                      </div>
-                    )}
+                      {organization.settings.industry && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('industryLabel')}</h3>
+                          <p className="text-sm">{organization.settings.industry}</p>
+                        </div>
+                      )}
 
-                    {typeof organization.settings.founded === "number" && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Founded</h3>
-                        <p className="text-sm">{organization.settings.founded}</p>
-                      </div>
-                    )}
+                      {typeof organization.settings.founded === "number" && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('foundedLabel')}</h3>
+                          <p className="text-sm">{organization.settings.founded}</p>
+                        </div>
+                      )}
 
-                    {typeof organization.settings.locals_count === "number" && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Locals Count</h3>
-                        <p className="text-sm">{organization.settings.locals_count}</p>
-                      </div>
-                    )}
+                      {typeof organization.settings.locals_count === "number" && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('localsCountLabel')}</h3>
+                          <p className="text-sm">{organization.settings.locals_count}</p>
+                        </div>
+                      )}
 
-                    {organization.settings.primary_language && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Primary Language</h3>
-                        <p className="text-sm">{organization.settings.primary_language.toUpperCase()}</p>
-                      </div>
-                    )}
+                      {organization.settings.primary_language && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('primaryLanguageLabel')}</h3>
+                          <p className="text-sm">{organization.settings.primary_language.toUpperCase()}</p>
+                        </div>
+                      )}
 
-                    {organization.settings.secondary_language && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Secondary Language</h3>
-                        <p className="text-sm">{organization.settings.secondary_language.toUpperCase()}</p>
-                      </div>
-                    )}
+                      {organization.settings.secondary_language && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('secondaryLanguageLabel')}</h3>
+                          <p className="text-sm">{organization.settings.secondary_language.toUpperCase()}</p>
+                        </div>
+                      )}
 
-                    {typeof organization.settings.bilingual === "boolean" && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Bilingual</h3>
-                        <p className="text-sm">{organization.settings.bilingual ? "Yes" : "No"}</p>
-                      </div>
-                    )}
+                      {typeof organization.settings.bilingual === "boolean" && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('bilingualLabel')}</h3>
+                          <p className="text-sm">{organization.settings.bilingual ? t('yesLabel') : t('noLabel')}</p>
+                        </div>
+                      )}
 
-                    {organization.settings.international_affiliate && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">International Affiliate</h3>
-                        <p className="text-sm">{organization.settings.international_affiliate}</p>
-                      </div>
-                    )}
+                      {organization.settings.international_affiliate && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('internationalAffiliateLabel')}</h3>
+                          <p className="text-sm">{organization.settings.international_affiliate}</p>
+                        </div>
+                      )}
 
-                    {Array.isArray(organization.settings.major_employers) && organization.settings.major_employers.length > 0 && (
-                      <div className="col-span-2">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Major Employers</h3>
-                        <p className="text-sm">{organization.settings.major_employers.join(", ")}</p>
-                      </div>
-                    )}
+                      {Array.isArray(organization.settings.major_employers) && organization.settings.major_employers.length > 0 && (
+                        <div className="col-span-2">
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('majorEmployersLabel')}</h3>
+                          <p className="text-sm">{organization.settings.major_employers.join(", ")}</p>
+                        </div>
+                      )}
 
-                    {Array.isArray(organization.settings.formed_by_merger) && organization.settings.formed_by_merger.length > 0 && (
-                      <div className="col-span-2">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Formed By Merger</h3>
-                        <p className="text-sm">{organization.settings.formed_by_merger.join(", ")}</p>
+                      {Array.isArray(organization.settings.formed_by_merger) && organization.settings.formed_by_merger.length > 0 && (
+                        <div className="col-span-2">
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('formedByMergerLabel')}</h3>
+                          <p className="text-sm">{organization.settings.formed_by_merger.join(", ")}</p>
                       </div>
                     )}
                   </div>
@@ -477,22 +479,22 @@ alert("Failed to archive organization");
                   <Separator />
                   <div className="grid grid-cols-2 gap-4">
                     {organization.jurisdiction && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Jurisdiction</h3>
-                        <p className="text-sm">{organization.jurisdiction}</p>
-                      </div>
-                    )}
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('jurisdictionLabel')}</h3>
+                          <p className="text-sm">{organization.jurisdiction}</p>
+                        </div>
+                      )}
                     
-                    {organization.charter_number && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Charter Number</h3>
-                        <p className="text-sm">{organization.charter_number}</p>
-                      </div>
-                    )}
+                      {organization.charter_number && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('charterNumberLabel')}</h3>
+                          <p className="text-sm">{organization.charter_number}</p>
+                        </div>
+                      )}
                     
-                    {organization.affiliation_date && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Affiliation Date</h3>
+                      {organization.affiliation_date && (
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('affiliationDateLabel')}</h3>
                         <p className="text-sm">
                           {new Date(organization.affiliation_date).toLocaleDateString()}
                         </p>
@@ -508,8 +510,8 @@ alert("Failed to archive organization");
           {ancestors.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Hierarchy Path</CardTitle>
-                <CardDescription>Position in the organizational structure</CardDescription>
+                <CardTitle>{t('hierarchyPathTitle')}</CardTitle>
+                <CardDescription>{t('hierarchyPathDescription')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -560,9 +562,9 @@ alert("Failed to archive organization");
 
           <Card>
             <CardHeader>
-              <CardTitle>CLC / CUPE Hierarchy View</CardTitle>
+              <CardTitle>{t('clcCupeHierarchyTitle')}</CardTitle>
               <CardDescription>
-                Full reporting chain for this organization, including ancestors and descendants.
+                {t('clcCupeHierarchyDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -573,11 +575,11 @@ alert("Failed to archive organization");
               ) : hierarchyNodes.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Network className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No hierarchy data available for this organization yet.</p>
+                  <p>{t('noHierarchyDataMessage')}</p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  This view makes the CLC to CUPE lineage explicit so parent and child relationships are visible in one place.
+                  {t('clcCupeLineageNote')}
                 </div>
               )}
             </CardContent>
@@ -585,8 +587,8 @@ alert("Failed to archive organization");
 
           <Card>
             <CardHeader>
-              <CardTitle>Child Organizations</CardTitle>
-              <CardDescription>Organizations that report directly to this one</CardDescription>
+              <CardTitle>{t('childOrganizationsTitle')}</CardTitle>
+              <CardDescription>{t('childOrganizationsDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               {childrenLoading ? (
@@ -596,13 +598,13 @@ alert("Failed to archive organization");
               ) : children.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Network className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No child organizations</p>
+                  <p>{t('noChildOrganizationsMessage')}</p>
                   <Button 
                     variant="outline" 
                     className="mt-4"
                     onClick={() => router.push(`/dashboard/admin/organizations/new?parent=${organizationId}`)}
                   >
-                    Add Child Organization
+                    {t('addChildOrganizationButton')}
                   </Button>
                 </div>
               ) : (
@@ -629,7 +631,7 @@ alert("Failed to archive organization");
                           <div className="flex items-center gap-4">
                             <div className="text-right text-sm">
                               <div className="font-medium">{child.memberCount || 0}</div>
-                              <div className="text-muted-foreground">members</div>
+                              <div className="text-muted-foreground">{t('membersLabel')}</div>
                             </div>
                             <Badge variant="outline" className={childStatusInfo.color}>
                               <span className={`w-2 h-2 rounded-full mr-1.5 ${childStatusInfo.dotColor}`} />
@@ -650,12 +652,12 @@ alert("Failed to archive organization");
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Organization Settings</CardTitle>
-              <CardDescription>Configuration and preferences</CardDescription>
+              <CardTitle>{t('organizationSettingsTitle')}</CardTitle>
+              <CardDescription>{t('organizationSettingsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium mb-2">Current Status</h3>
+                <h3 className="text-sm font-medium mb-2">{t('currentStatusLabel')}</h3>
                 <Badge variant="outline" className={statusInfo.color}>
                   <span className={`w-2 h-2 rounded-full mr-1.5 ${statusInfo.dotColor}`} />
                   {statusInfo.label}
@@ -665,16 +667,16 @@ alert("Failed to archive organization");
               <Separator />
 
               <div className="space-y-2">
-                <h3 className="text-sm font-medium">Danger Zone</h3>
+                <h3 className="text-sm font-medium">{t('dangerZoneTitle')}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Irreversible and destructive actions
+                  {t('dangerZoneDescription')}
                 </p>
                 <Button 
                   variant="destructive"
                   onClick={handleDelete}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Archive Organization
+                  {t('archiveOrganizationButton')}
                 </Button>
               </div>
             </CardContent>

@@ -7,6 +7,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +30,7 @@ interface ProposalComparisonToolProps {
 }
 
 export function ProposalComparisonTool({ proposals }: ProposalComparisonToolProps) {
+  const t = useTranslations("proposalComparison");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Group proposals by category
@@ -51,19 +53,19 @@ export function ProposalComparisonTool({ proposals }: ProposalComparisonToolProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Proposal Comparison</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Compare union demands with management offers
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {/* Category Filters */}
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-4">
           <TabsList>
-            <TabsTrigger value="all">All Categories</TabsTrigger>
+            <TabsTrigger value="all">{t("allCategories")}</TabsTrigger>
             {categories.map(cat => (
               <TabsTrigger key={cat} value={cat || "uncategorized"}>
-                {cat || "Uncategorized"}
+                {cat || t("uncategorized")}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -75,10 +77,10 @@ export function ProposalComparisonTool({ proposals }: ProposalComparisonToolProp
           <div className="space-y-3">
             <h3 className="font-semibold text-blue-600 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Union Demands ({filteredUnion.length})
+              {t("unionDemands", { count: filteredUnion.length })}
             </h3>
             {filteredUnion.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No union demands</p>
+              <p className="text-sm text-muted-foreground">{t("noUnionDemands")}</p>
             ) : (
               filteredUnion.map(proposal => (
                 <Card key={proposal.id} className="border-l-4 border-l-blue-500">
@@ -116,10 +118,10 @@ export function ProposalComparisonTool({ proposals }: ProposalComparisonToolProp
           <div className="space-y-3">
             <h3 className="font-semibold text-orange-600 flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Management Offers ({filteredManagement.length})
+              {t("managementOffers", { count: filteredManagement.length })}
             </h3>
             {filteredManagement.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No management offers</p>
+              <p className="text-sm text-muted-foreground">{t("noManagementOffers")}</p>
             ) : (
               filteredManagement.map(proposal => (
                 <Card key={proposal.id} className="border-l-4 border-l-orange-500">
@@ -151,24 +153,24 @@ export function ProposalComparisonTool({ proposals }: ProposalComparisonToolProp
 
         {/* Summary Statistics */}
         <div className="mt-6 p-4 bg-muted rounded-lg">
-          <h4 className="font-semibold mb-2">Comparison Summary</h4>
+          <h4 className="font-semibold mb-2">{t("summary")}</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground">Total Union Demands</p>
+              <p className="text-muted-foreground">{t("totalUnionDemands")}</p>
               <p className="text-2xl font-bold text-blue-600">{unionProposals.length}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Total Management Offers</p>
+              <p className="text-muted-foreground">{t("totalManagementOffers")}</p>
               <p className="text-2xl font-bold text-orange-600">{managementProposals.length}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Accepted Proposals</p>
+              <p className="text-muted-foreground">{t("acceptedProposals")}</p>
               <p className="text-2xl font-bold text-green-600">
                 {proposals.filter(p => p.status === "accepted").length}
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground">Under Review</p>
+              <p className="text-muted-foreground">{t("underReview")}</p>
               <p className="text-2xl font-bold text-yellow-600">
                 {proposals.filter(p => p.status === "under_review").length}
               </p>

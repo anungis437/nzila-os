@@ -13,9 +13,11 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -72,6 +74,8 @@ interface CommunicationPreferences {
 }
 
 export default function CommunicationPreferencesPage() {
+  const t = useTranslations('settingsCommunicationsPage');
+  const locale = useLocale();
   const [preferences, setPreferences] = useState<CommunicationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,13 +94,13 @@ export default function CommunicationPreferencesPage() {
       const response = await fetch('/api/messaging/preferences');
       
       if (!response.ok) {
-        throw new Error('Failed to fetch preferences');
+        throw new Error(t('errors.fetchFailed'));
       }
 
       const data = await response.json();
       setPreferences(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch preferences');
+      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -118,17 +122,17 @@ export default function CommunicationPreferencesPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to save preferences');
+        throw new Error(error.error || t('errors.saveFailed'));
       }
 
       const updated = await response.json();
       setPreferences(updated);
-      setSuccessMessage('Preferences saved successfully');
+      setSuccessMessage(t('success.saved'));
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save preferences');
+      setError(err instanceof Error ? err.message : t('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -179,7 +183,7 @@ export default function CommunicationPreferencesPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         <Button onClick={fetchPreferences} className="mt-4">
-          Try Again
+          {t('retryButton')}
         </Button>
       </div>
     );
@@ -193,9 +197,9 @@ export default function CommunicationPreferencesPage() {
     <div className="container mx-auto py-6 max-w-4xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Communication Preferences</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">
-          Manage how and when you receive notifications from your union
+          {t('subtitle')}
         </p>
       </div>
 
@@ -219,17 +223,16 @@ export default function CommunicationPreferencesPage() {
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription>
-          <strong>Your Privacy:</strong> We respect your communication preferences and comply with CASL and GDPR regulations. 
-          Your consent is tracked securely, and you can update your preferences at any time.
+          <strong>{t('privacyNotice.title')}</strong> {t('privacyNotice.body')}
         </AlertDescription>
       </Alert>
 
       {/* Channel Preferences */}
       <Card>
         <CardHeader>
-          <CardTitle>Communication Channels</CardTitle>
+          <CardTitle>{t('channels.title')}</CardTitle>
           <CardDescription>
-            Choose which channels you want to receive communications through
+            {t('channels.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -239,10 +242,10 @@ export default function CommunicationPreferencesPage() {
               <Mail className="h-5 w-5 text-muted-foreground mt-1" />
               <div>
                 <Label htmlFor="email-enabled" className="text-base font-medium">
-                  Email Notifications
+                  {t('channels.email.title')}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Receive updates, newsletters, and important announcements via email
+                  {t('channels.email.description')}
                 </p>
               </div>
             </div>
@@ -261,13 +264,13 @@ export default function CommunicationPreferencesPage() {
               <MessageSquare className="h-5 w-5 text-muted-foreground mt-1" />
               <div>
                 <Label htmlFor="sms-enabled" className="text-base font-medium">
-                  SMS Notifications
+                  {t('channels.sms.title')}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Receive urgent alerts and time-sensitive updates via text message
+                  {t('channels.sms.description')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  ⚠️ Standard messaging rates may apply
+                  {t('channels.sms.warning')}
                 </p>
               </div>
             </div>
@@ -286,10 +289,10 @@ export default function CommunicationPreferencesPage() {
               <Bell className="h-5 w-5 text-muted-foreground mt-1" />
               <div>
                 <Label htmlFor="push-enabled" className="text-base font-medium">
-                  Push Notifications
+                  {t('channels.push.title')}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Receive instant notifications on your device
+                  {t('channels.push.description')}
                 </p>
               </div>
             </div>
@@ -305,19 +308,19 @@ export default function CommunicationPreferencesPage() {
       {/* Content Categories */}
       <Card>
         <CardHeader>
-          <CardTitle>Content Preferences</CardTitle>
+          <CardTitle>{t('content.title')}</CardTitle>
           <CardDescription>
-            Select the types of content you want to receive
+            {t('content.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="category-campaign" className="font-medium">
-                Campaigns & Petitions
+                {t('content.campaign.title')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Union campaigns, petitions, and organizing activities
+                {t('content.campaign.description')}
               </p>
             </div>
             <Switch
@@ -332,13 +335,13 @@ export default function CommunicationPreferencesPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="category-transactional" className="font-medium">
-                Transactional Messages
+                {t('content.transactional.title')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Account updates, receipts, and confirmations
+                {t('content.transactional.description')}
               </p>
               <p className="text-xs text-amber-600 mt-1">
-                ⚠️ Cannot be disabled - required for account functionality
+                {t('content.transactional.warning')}
               </p>
             </div>
             <Switch
@@ -353,10 +356,10 @@ export default function CommunicationPreferencesPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="category-alerts" className="font-medium">
-                Urgent Alerts
+                {t('content.alerts.title')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Time-sensitive alerts and emergency notifications
+                {t('content.alerts.description')}
               </p>
             </div>
             <Switch
@@ -371,10 +374,10 @@ export default function CommunicationPreferencesPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="category-newsletters" className="font-medium">
-                Newsletters
+                {t('content.newsletters.title')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Regular union newsletters and member updates
+                {t('content.newsletters.description')}
               </p>
             </div>
             <Switch
@@ -389,10 +392,10 @@ export default function CommunicationPreferencesPage() {
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="category-social" className="font-medium">
-                Social & Events
+                {t('content.social.title')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Event invitations, social activities, and community updates
+                {t('content.social.description')}
               </p>
             </div>
             <Switch
@@ -407,14 +410,14 @@ export default function CommunicationPreferencesPage() {
       {/* Delivery Frequency */}
       <Card>
         <CardHeader>
-          <CardTitle>Delivery Frequency</CardTitle>
+          <CardTitle>{t('frequency.title')}</CardTitle>
           <CardDescription>
-            Control how often you receive non-urgent communications
+            {t('frequency.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="frequency">Frequency</Label>
+            <Label htmlFor="frequency">{t('frequency.label')}</Label>
             <Select
               value={preferences.frequency}
               onValueChange={(value) => updatePreferences({ frequency: value as CommunicationPreferences['frequency'] })}
@@ -425,32 +428,32 @@ export default function CommunicationPreferencesPage() {
               <SelectContent>
                 <SelectItem value="real_time">
                   <div className="flex flex-col">
-                    <span>Real-time</span>
+                    <span>{t('frequency.options.realTime.title')}</span>
                     <span className="text-xs text-muted-foreground">
-                      Receive messages as they are sent
+                      {t('frequency.options.realTime.description')}
                     </span>
                   </div>
                 </SelectItem>
                 <SelectItem value="daily_digest">
                   <div className="flex flex-col">
-                    <span>Daily Digest</span>
+                    <span>{t('frequency.options.dailyDigest.title')}</span>
                     <span className="text-xs text-muted-foreground">
-                      One email per day with all updates
+                      {t('frequency.options.dailyDigest.description')}
                     </span>
                   </div>
                 </SelectItem>
                 <SelectItem value="weekly_digest">
                   <div className="flex flex-col">
-                    <span>Weekly Digest</span>
+                    <span>{t('frequency.options.weeklyDigest.title')}</span>
                     <span className="text-xs text-muted-foreground">
-                      One email per week with all updates
+                      {t('frequency.options.weeklyDigest.description')}
                     </span>
                   </div>
                 </SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Note: Urgent alerts and transactional messages are always sent immediately
+              {t('frequency.note')}
             </p>
           </div>
         </CardContent>
@@ -461,16 +464,16 @@ export default function CommunicationPreferencesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Quiet Hours
+            {t('quietHours.title')}
           </CardTitle>
           <CardDescription>
-            Set times when you don&apos;t want to receive non-urgent notifications
+            {t('quietHours.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="quiet-hours-enabled" className="font-medium">
-              Enable Quiet Hours
+              {t('quietHours.enableLabel')}
             </Label>
             <Switch
               id="quiet-hours-enabled"
@@ -485,7 +488,7 @@ export default function CommunicationPreferencesPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="quiet-start">Start Time</Label>
+                  <Label htmlFor="quiet-start">{t('quietHours.startTimeLabel')}</Label>
                   <Input
                     id="quiet-start"
                     type="time"
@@ -495,7 +498,7 @@ export default function CommunicationPreferencesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="quiet-end">End Time</Label>
+                  <Label htmlFor="quiet-end">{t('quietHours.endTimeLabel')}</Label>
                   <Input
                     id="quiet-end"
                     type="time"
@@ -506,7 +509,7 @@ export default function CommunicationPreferencesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
+                <Label htmlFor="timezone">{t('quietHours.timezoneLabel')}</Label>
                 <Select
                   value={preferences.quietHours.timezone}
                   onValueChange={(value) => updateQuietHours({ timezone: value })}
@@ -515,12 +518,12 @@ export default function CommunicationPreferencesPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="America/Toronto">Eastern Time (Toronto)</SelectItem>
-                    <SelectItem value="America/Vancouver">Pacific Time (Vancouver)</SelectItem>
-                    <SelectItem value="America/Chicago">Central Time (Chicago)</SelectItem>
-                    <SelectItem value="America/Denver">Mountain Time (Denver)</SelectItem>
-                    <SelectItem value="America/Halifax">Atlantic Time (Halifax)</SelectItem>
-                    <SelectItem value="America/St_Johns">Newfoundland Time</SelectItem>
+                    <SelectItem value="America/Toronto">{t('quietHours.timezones.toronto')}</SelectItem>
+                    <SelectItem value="America/Vancouver">{t('quietHours.timezones.vancouver')}</SelectItem>
+                    <SelectItem value="America/Chicago">{t('quietHours.timezones.chicago')}</SelectItem>
+                    <SelectItem value="America/Denver">{t('quietHours.timezones.denver')}</SelectItem>
+                    <SelectItem value="America/Halifax">{t('quietHours.timezones.halifax')}</SelectItem>
+                    <SelectItem value="America/St_Johns">{t('quietHours.timezones.stJohns')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -528,8 +531,7 @@ export default function CommunicationPreferencesPage() {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  During quiet hours, you won&apos;t receive non-urgent notifications. 
-                  Urgent alerts will still be delivered immediately.
+                  {t('quietHours.alert')}
                 </AlertDescription>
               </Alert>
             </>
@@ -542,8 +544,9 @@ export default function CommunicationPreferencesPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            You unsubscribed from all communications on {new Date(preferences.unsubscribedAt).toLocaleDateString()}.
-            Enable at least one channel above to resubscribe.
+            {t('unsubscribedNotice', {
+              date: new Date(preferences.unsubscribedAt).toLocaleDateString(locale),
+            })}
           </AlertDescription>
         </Alert>
       )}
@@ -552,18 +555,20 @@ export default function CommunicationPreferencesPage() {
       <Card>
         <CardFooter className="flex justify-between pt-6">
           <p className="text-sm text-muted-foreground">
-            Last updated: {new Date(preferences.updatedAt).toLocaleString()}
+            {t('lastUpdated', {
+              value: new Date(preferences.updatedAt).toLocaleString(locale),
+            })}
           </p>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t('saveButton.saving')}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Save Preferences
+                {t('saveButton.idle')}
               </>
             )}
           </Button>
@@ -575,32 +580,24 @@ export default function CommunicationPreferencesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Privacy & Compliance
+            {t('compliance.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            <strong>Your Rights:</strong> You have the right to control your communication preferences 
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            at any time. We comply with Canada's Anti-Spam Legislation (CASL) and GDPR requirements.
+            <strong>{t('compliance.rightsTitle')}</strong> {t('compliance.rightsBody')}
           </p>
           <p>
-            <strong>Consent Tracking:</strong> All changes to your communication preferences are logged 
-            for compliance purposes, including IP address and timestamp.
+            <strong>{t('compliance.consentTrackingTitle')}</strong> {t('compliance.consentTrackingBody')}
           </p>
           <p>
-            <strong>Transactional Messages:</strong> Even if you unsubscribe from marketing communications, 
-            you will still receive essential account-related messages required for service functionality.
+            <strong>{t('compliance.transactionalTitle')}</strong> {t('compliance.transactionalBody')}
           </p>
           <p>
-            <strong>Data Protection:</strong> Your contact information is stored securely and never 
-            shared with third parties without your explicit consent.
+            <strong>{t('compliance.dataProtectionTitle')}</strong> {t('compliance.dataProtectionBody')}
           </p>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-// Missing Input import - add to component
-import { Input } from '@/components/ui/input';

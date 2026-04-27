@@ -1,25 +1,37 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
+import { Metadata } from 'next';
 import { requireUser } from '@/lib/api-auth-guard';
 import DuesPaymentPortal from '@/components/dues/dues-payment-portal';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export const metadata = {
-  title: 'My Dues | UnionEyes',
-  description: 'View and pay your union dues',
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
 
-export default async function DuesPortalPage() {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'duesPortalPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
+}
+
+export default async function DuesPortalPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'duesPortalPage' });
   const user = await requireUser();
   const userId = user.userId;
 
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">My Dues</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground mt-2">
-          View your dues balance, payment history, and make payments
+          {t('subtitle')}
         </p>
       </div>
 

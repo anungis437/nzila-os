@@ -11,6 +11,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -99,6 +100,8 @@ interface Evidence {
 export default function CaseDetailPage() {
   const _router = useRouter();
   const params = useParams();
+  const locale = useLocale();
+  const t = useTranslations('caseDetailPage');
   const caseId = params.id as string;
   const canManageClaims = useHasPermission(Permission.EDIT_ALL_CLAIMS);
   const [caseDetail, setCaseDetail] = useState<CaseDetail | null>(null);
@@ -247,14 +250,28 @@ export default function CaseDetailPage() {
     }
   };
 
+  const formatDate = (value: string) => new Date(value).toLocaleDateString(locale);
+  const formatDateTime = (value: string) => new Date(value).toLocaleString(locale);
+  const formatCurrency = (value: string | null) => {
+    if (!value) return null;
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'CAD',
+      maximumFractionDigits: 0,
+    }).format(Number(value));
+  };
+  const formatCaseType = (value: string) => value.replace('_', ' ');
+  const formatStatus = (value: string) => t(`statuses.${value}`);
+  const formatPriority = (value: string) => t(`priorities.${value}`);
+
   if (error) {
     return (
       <div className="container mx-auto py-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error loading case</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('error.title')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <Button variant="outline" onClick={() => { setError(null); setLoading(true); fetchCaseDetail(); }}>
-            Retry
+            {t('error.retry')}
           </Button>
         </div>
       </div>
@@ -262,7 +279,7 @@ export default function CaseDetailPage() {
   }
 
   if (loading || !caseDetail) {
-    return <div className="container mx-auto py-6">Loading...</div>;
+    return <div className="container mx-auto py-6">{t('loading')}</div>;
   }
 
   const isOverdue = caseDetail.deadline && new Date(caseDetail.deadline) < new Date();
@@ -272,7 +289,7 @@ export default function CaseDetailPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <span>Cases</span>
+          <span>{t('breadcrumbs.cases')}</span>
           <span>/</span>
           <span>{caseDetail.caseNumber}</span>
         </div>
@@ -280,25 +297,25 @@ export default function CaseDetailPage() {
           <div>
             <h1 className="text-3xl font-bold">{caseDetail.caseNumber}</h1>
             <p className="text-muted-foreground mt-1">
-              {caseDetail.type.replace('_', ' ')} • Opened {new Date(caseDetail.createdAt).toLocaleDateString()}
+              {t('openedLine', { type: formatCaseType(caseDetail.type), date: formatDate(caseDetail.createdAt) })}
             </p>
           </div>
           <div className="flex gap-2">
             {canManageClaims && !editing && (
               <Button variant="outline" size="sm" onClick={startEditing}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                {t('actions.edit')}
               </Button>
             )}
             {editing && (
               <>
-                <Button size="sm" onClick={saveEdits}>Save</Button>
-                <Button variant="outline" size="sm" onClick={cancelEditing}>Cancel</Button>
+                <Button size="sm" onClick={saveEdits}>{t('actions.save')}</Button>
+                <Button variant="outline" size="sm" onClick={cancelEditing}>{t('actions.cancel')}</Button>
               </>
             )}
             <Button variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
-              Export
+              {t('actions.export')}
             </Button>
           </div>
         </div>
@@ -309,7 +326,7 @@ export default function CaseDetailPage() {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Member</span>
+            <span className="text-sm text-muted-foreground">{t('cards.member')}</span>
           </div>
           <p className="font-medium">{caseDetail.memberName}</p>
         </Card>
@@ -317,7 +334,7 @@ export default function CaseDetailPage() {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Status</span>
+            <span className="text-sm text-muted-foreground">{t('cards.status')}</span>
           </div>
           {editing ? (
             <select
@@ -326,12 +343,12 @@ export default function CaseDetailPage() {
               className="w-full border rounded px-2 py-1 text-sm"
             >
               {['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'resolved', 'rejected', 'closed'].map((s) => (
-                <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                <option key={s} value={s}>{formatStatus(s)}</option>
               ))}
             </select>
           ) : (
             <Badge className={getStatusColor(caseDetail.status)}>
-              {caseDetail.status}
+              {formatStatus(caseDetail.status)}
             </Badge>
           )}
         </Card>
@@ -339,7 +356,7 @@ export default function CaseDetailPage() {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Priority</span>
+            <span className="text-sm text-muted-foreground">{t('cards.priority')}</span>
           </div>
           {editing ? (
             <select
@@ -348,12 +365,12 @@ export default function CaseDetailPage() {
               className="w-full border rounded px-2 py-1 text-sm"
             >
               {['low', 'medium', 'high', 'critical'].map((p) => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p} value={p}>{formatPriority(p)}</option>
               ))}
             </select>
           ) : (
             <Badge className={getPriorityColor(caseDetail.priority)}>
-              {caseDetail.priority}
+              {formatPriority(caseDetail.priority)}
             </Badge>
           )}
         </Card>
@@ -361,11 +378,11 @@ export default function CaseDetailPage() {
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Deadline</span>
+            <span className="text-sm text-muted-foreground">{t('cards.deadline')}</span>
           </div>
           <p className={`font-medium ${isOverdue ? 'text-red-600' : ''}`}>
-            {caseDetail.deadline ? new Date(caseDetail.deadline).toLocaleDateString() : 'None'}
-            {isOverdue && ' (Overdue)'}
+            {caseDetail.deadline ? formatDate(caseDetail.deadline) : t('cards.none')}
+            {isOverdue ? ` ${t('cards.overdue')}` : ''}
           </p>
         </Card>
       </div>
@@ -374,7 +391,7 @@ export default function CaseDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <Card className="p-6">
-            <h3 className="font-semibold mb-2">Description</h3>
+            <h3 className="font-semibold mb-2">{t('description.title')}</h3>
             {editing ? (
               <Textarea
                 value={editFields.description}
@@ -388,14 +405,14 @@ export default function CaseDetailPage() {
 
           <Tabs defaultValue="timeline" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="evidence">Evidence</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
+              <TabsTrigger value="evidence">{t('tabs.evidence')}</TabsTrigger>
+              <TabsTrigger value="notes">{t('tabs.notes')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="timeline">
               <Card className="p-6">
-                <h3 className="font-semibold mb-4">Case Timeline</h3>
+                <h3 className="font-semibold mb-4">{t('timeline.title')}</h3>
                 <div className="space-y-4">
                   {timeline.map((event) => (
                     <div key={event.id} className="flex gap-4 relative">
@@ -409,10 +426,10 @@ export default function CaseDetailPage() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium">{event.description}</span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(event.timestamp).toLocaleString()}
+                            {formatDateTime(event.timestamp)}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">by {event.actor}</p>
+                        <p className="text-sm text-muted-foreground">{t('timeline.byActor', { actor: event.actor })}</p>
                       </div>
                     </div>
                   ))}
@@ -424,21 +441,21 @@ export default function CaseDetailPage() {
               <Card>
                 <div className="p-6 border-b">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold">Evidence Locker</h3>
+                    <h3 className="font-semibold">{t('evidence.title')}</h3>
                     <Button size="sm">
                       <Upload className="mr-2 h-4 w-4" />
-                      Upload
+                      {t('evidence.upload')}
                     </Button>
                   </div>
                 </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>File Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Size</TableHead>
-                      <TableHead>Uploaded</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>{t('evidence.table.fileName')}</TableHead>
+                      <TableHead>{t('evidence.table.type')}</TableHead>
+                      <TableHead>{t('evidence.table.size')}</TableHead>
+                      <TableHead>{t('evidence.table.uploaded')}</TableHead>
+                      <TableHead>{t('evidence.table.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -448,7 +465,7 @@ export default function CaseDetailPage() {
                         <TableCell>{doc.fileType.split('/')[1].toUpperCase()}</TableCell>
                         <TableCell>{(doc.size / 1024).toFixed(0)} KB</TableCell>
                         <TableCell>
-                          {new Date(doc.uploadedAt).toLocaleDateString()}
+                          {formatDate(doc.uploadedAt)}
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -464,22 +481,22 @@ export default function CaseDetailPage() {
 
             <TabsContent value="notes">
               <Card className="p-6">
-                <h3 className="font-semibold mb-4">Case Notes</h3>
+                <h3 className="font-semibold mb-4">{t('notes.title')}</h3>
                 <div className="space-y-4">
                   <div>
                     <Textarea
-                      placeholder="Add a note to this case..."
+                      placeholder={t('notes.placeholder')}
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                       rows={4}
                     />
                     <Button className="mt-2" onClick={addNote}>
                       <MessageSquare className="mr-2 h-4 w-4" />
-                      Add Note
+                      {t('notes.addNote')}
                     </Button>
                   </div>
                   <div className="text-muted-foreground text-center py-8">
-                    No notes yet
+                    {t('notes.empty')}
                   </div>
                 </div>
               </Card>
@@ -490,19 +507,19 @@ export default function CaseDetailPage() {
         {/* Sidebar */}
         <div className="space-y-4">
           <Card className="p-4">
-            <h3 className="font-semibold mb-3">Assigned To</h3>
+            <h3 className="font-semibold mb-3">{t('assignedTo.title')}</h3>
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">{caseDetail.assignedTo}</p>
-                <p className="text-sm text-muted-foreground">Case Manager</p>
+                <p className="text-sm text-muted-foreground">{t('assignedTo.caseManager')}</p>
               </div>
             </div>
             {canManageClaims && caseDetail.assignedAt && (
               <p className="text-xs text-muted-foreground mt-2">
-                Since {new Date(caseDetail.assignedAt).toLocaleDateString()}
+                {t('assignedTo.since', { date: formatDate(caseDetail.assignedAt) })}
               </p>
             )}
           </Card>
@@ -513,30 +530,30 @@ export default function CaseDetailPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <User size={18} className="text-blue-600" />
-                  Member Contact
+                  {t('memberContact.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {caseDetail.memberName && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Name</p>
+                    <p className="text-sm font-medium text-gray-500">{t('memberContact.name')}</p>
                     <p className="text-gray-900">{caseDetail.memberName}</p>
                   </div>
                 )}
                 {caseDetail.memberEmail && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-gray-500">{t('memberContact.email')}</p>
                     <a href={`mailto:${caseDetail.memberEmail}`} className="text-blue-600 hover:underline text-sm">{caseDetail.memberEmail}</a>
                   </div>
                 )}
                 {caseDetail.memberPhone && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
+                    <p className="text-sm font-medium text-gray-500">{t('memberContact.phone')}</p>
                     <a href={`tel:${caseDetail.memberPhone}`} className="text-blue-600 hover:underline text-sm">{caseDetail.memberPhone}</a>
                   </div>
                 )}
                 {!caseDetail.memberName && !caseDetail.memberEmail && (
-                  <p className="text-sm text-gray-500">Member details not available</p>
+                  <p className="text-sm text-gray-500">{t('memberContact.empty')}</p>
                 )}
               </CardContent>
             </Card>
@@ -548,32 +565,32 @@ export default function CaseDetailPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Brain size={18} className="text-purple-600" />
-                  AI Assessment
+                  {t('aiAssessment.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {caseDetail.aiScore != null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">AI Score</span>
-                    <span className="font-semibold text-gray-900">{caseDetail.aiScore}/100</span>
+                    <span className="text-sm text-gray-500">{t('aiAssessment.aiScore')}</span>
+                    <span className="font-semibold text-gray-900">{t('aiAssessment.outOf100', { value: caseDetail.aiScore })}</span>
                   </div>
                 )}
                 {caseDetail.meritConfidence != null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Merit Confidence</span>
-                    <span className="font-semibold text-gray-900">{caseDetail.meritConfidence}%</span>
+                    <span className="text-sm text-gray-500">{t('aiAssessment.meritConfidence')}</span>
+                    <span className="font-semibold text-gray-900">{t('aiAssessment.percent', { value: caseDetail.meritConfidence })}</span>
                   </div>
                 )}
                 {caseDetail.precedentMatch != null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Precedent Match</span>
-                    <span className="font-semibold text-gray-900">{caseDetail.precedentMatch}%</span>
+                    <span className="text-sm text-gray-500">{t('aiAssessment.precedentMatch')}</span>
+                    <span className="font-semibold text-gray-900">{t('aiAssessment.percent', { value: caseDetail.precedentMatch })}</span>
                   </div>
                 )}
                 {caseDetail.complexityScore != null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Complexity</span>
-                    <span className="font-semibold text-gray-900">{caseDetail.complexityScore}/100</span>
+                    <span className="text-sm text-gray-500">{t('aiAssessment.complexity')}</span>
+                    <span className="font-semibold text-gray-900">{t('aiAssessment.outOf100', { value: caseDetail.complexityScore })}</span>
                   </div>
                 )}
               </CardContent>
@@ -586,32 +603,32 @@ export default function CaseDetailPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <DollarSign size={18} className="text-green-600" />
-                  Financial Summary
+                  {t('financialSummary.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {caseDetail.claimAmount && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Claim Amount</span>
-                    <span className="font-semibold text-gray-900">${caseDetail.claimAmount}</span>
+                    <span className="text-sm text-gray-500">{t('financialSummary.claimAmount')}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(caseDetail.claimAmount)}</span>
                   </div>
                 )}
                 {caseDetail.settlementAmount && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Settlement Amount</span>
-                    <span className="font-semibold text-gray-900">${caseDetail.settlementAmount}</span>
+                    <span className="text-sm text-gray-500">{t('financialSummary.settlementAmount')}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(caseDetail.settlementAmount)}</span>
                   </div>
                 )}
                 {caseDetail.legalCosts && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Legal Costs</span>
-                    <span className="font-semibold text-gray-900">${caseDetail.legalCosts}</span>
+                    <span className="text-sm text-gray-500">{t('financialSummary.legalCosts')}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(caseDetail.legalCosts)}</span>
                   </div>
                 )}
                 {caseDetail.courtCosts && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Court Costs</span>
-                    <span className="font-semibold text-gray-900">${caseDetail.courtCosts}</span>
+                    <span className="text-sm text-gray-500">{t('financialSummary.courtCosts')}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(caseDetail.courtCosts)}</span>
                   </div>
                 )}
               </CardContent>
@@ -619,38 +636,38 @@ export default function CaseDetailPage() {
           )}
 
           <Card className="p-4">
-            <h3 className="font-semibold mb-3">Quick Actions</h3>
+            <h3 className="font-semibold mb-3">{t('quickActions.title')}</h3>
             <div className="space-y-2">
               <Button variant="outline" className="w-full justify-start">
                 <Calendar className="mr-2 h-4 w-4" />
-                Schedule Meeting
+                {t('quickActions.scheduleMeeting')}
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <FileText className="mr-2 h-4 w-4" />
-                Generate Report
+                {t('quickActions.generateReport')}
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <CheckCircle className="mr-2 h-4 w-4" />
-                Update Status
+                {t('quickActions.updateStatus')}
               </Button>
             </div>
           </Card>
 
           <Card className="p-4">
-            <h3 className="font-semibold mb-3">Case Statistics</h3>
+            <h3 className="font-semibold mb-3">{t('statistics.title')}</h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Days Open:</dt>
+                <dt className="text-muted-foreground">{t('statistics.daysOpen')}</dt>
                 <dd className="font-medium">
                   {Math.floor((Date.now() - new Date(caseDetail.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Evidence Items:</dt>
+                <dt className="text-muted-foreground">{t('statistics.evidenceItems')}</dt>
                 <dd className="font-medium">{evidence.length}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Timeline Events:</dt>
+                <dt className="text-muted-foreground">{t('statistics.timelineEvents')}</dt>
                 <dd className="font-medium">{timeline.length}</dd>
               </div>
             </dl>

@@ -128,6 +128,8 @@ export function GrievancesConsole() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
+  const t = useTranslations();
+
   const fetchGrievances = useCallback(async () => {
       try {
         setLoading(true);
@@ -145,18 +147,16 @@ export function GrievancesConsole() {
           setFetchError(body?.error || `Failed to load grievances (${res.status})`);
         }
       } catch {
-        setFetchError('Unable to load grievances. Please try again later.');
+        setFetchError(t('grievances.errors.fileGrievance'));
       } finally {
         setLoading(false);
       }
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   useEffect(() => {
     fetchGrievances();
   }, [fetchGrievances]);
 
-  const t = useTranslations();
-  
   const statusConfig: Record<GrievanceStatus, { label: string; color: string; icon: React.ReactElement }> = {
     "filed": { label: t('grievances.statusFiled'), color: "text-blue-700 bg-blue-100 border-blue-200", icon: <FileText className="w-3 h-3" /> },
     "step-1": { label: t('grievances.statusStep1'), color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Flag className="w-3 h-3" /> },
@@ -223,7 +223,7 @@ export function GrievancesConsole() {
       }
       await fetchGrievances();
     } catch {
-      alert("Network error updating status");
+      alert(t('grievances.errors.updateStatus'));
     } finally {
       setActionLoading(null);
     }
@@ -244,14 +244,14 @@ export function GrievancesConsole() {
       }
       await fetchGrievances();
     } catch {
-      alert("Network error assigning steward");
+      alert(t('grievances.errors.assignSteward'));
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleAddDocument = async (grievance: Grievance) => {
-    const description = prompt("Document description:");
+    const description = prompt(t('grievances.documentDescriptionPrompt'));
     if (!description) return;
     setActionLoading(`doc-${grievance.id}`);
     try {
@@ -267,7 +267,7 @@ export function GrievancesConsole() {
       }
       await fetchGrievances();
     } catch {
-      alert("Network error adding document");
+      alert(t('grievances.errors.addDocument'));
     } finally {
       setActionLoading(null);
     }
@@ -313,13 +313,13 @@ export function GrievancesConsole() {
       <div className="p-6 md:p-10 max-w-7xl mx-auto">
         {loading && (
           <div className="flex items-center justify-center min-h-64">
-            <div className="text-center text-muted-foreground">Loading grievances…</div>
+            <div className="text-center text-muted-foreground">{t('grievances.loadingGrievances')}</div>
           </div>
         )}
         {fetchError && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 mb-6 text-center">
             <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-red-900 mb-1">Error Loading Grievances</h3>
+            <h3 className="text-lg font-semibold text-red-900 mb-1">{t('grievances.errorLoadingGrievances')}</h3>
             <p className="text-red-800 text-sm">{fetchError}</p>
           </div>
         )}
@@ -351,7 +351,7 @@ export function GrievancesConsole() {
             >
               <Card className="bg-white border-red-200 shadow-lg">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">File New Grievance</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('grievances.fileNewGrievance')}</h3>
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -380,7 +380,7 @@ export function GrievancesConsole() {
                         form.reset();
                         await fetchGrievances();
                       } catch {
-                        alert("Network error filing grievance");
+                        alert(t('grievances.errors.fileGrievance'));
                       } finally {
                         setActionLoading(null);
                       }
@@ -389,40 +389,40 @@ export function GrievancesConsole() {
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.title')}</label>
                         <input name="title" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.type')}</label>
                         <select name="type" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-                          <option value="contract_violation">Contract Violation</option>
-                          <option value="discipline">Discipline</option>
-                          <option value="discrimination">Discrimination</option>
-                          <option value="safety">Safety</option>
-                          <option value="wages">Wages</option>
-                          <option value="benefits">Benefits</option>
-                          <option value="working_conditions">Working Conditions</option>
-                          <option value="other">Other</option>
+                          <option value="contract_violation">{t('grievances.form.types.contract_violation')}</option>
+                          <option value="discipline">{t('grievances.form.types.discipline')}</option>
+                          <option value="discrimination">{t('grievances.form.types.discrimination')}</option>
+                          <option value="safety">{t('grievances.form.types.safety')}</option>
+                          <option value="wages">{t('grievances.form.types.wages')}</option>
+                          <option value="benefits">{t('grievances.form.types.benefits')}</option>
+                          <option value="working_conditions">{t('grievances.form.types.working_conditions')}</option>
+                          <option value="other">{t('grievances.form.types.other')}</option>
                         </select>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.description')}</label>
                       <textarea name="description" required rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.priority')}</label>
                         <select name="priority" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-                          <option value="medium">Medium</option>
-                          <option value="low">Low</option>
-                          <option value="high">High</option>
-                          <option value="urgent">Urgent</option>
+                          <option value="medium">{t('grievances.priorityMedium')}</option>
+                          <option value="low">{t('grievances.priorityLow')}</option>
+                          <option value="high">{t('grievances.priorityHigh')}</option>
+                          <option value="urgent">{t('grievances.priorityUrgent')}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">CBA Article (optional)</label>
-                        <input name="cbaArticle" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" placeholder="e.g. Article 7.3" />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grievances.form.cbaArticleOptional')}</label>
+                        <input name="cbaArticle" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" placeholder={t('grievances.form.cbaArticlePlaceholder')} />
                       </div>
                     </div>
                     <div className="flex gap-3 pt-2">
@@ -432,14 +432,14 @@ export function GrievancesConsole() {
                         className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                       >
                         {actionLoading === "new-grievance" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                        File Grievance
+                        {t('grievances.form.submit')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowNewForm(false)}
                         className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                       >
-                        Cancel
+                        {t('grievances.form.cancel')}
                       </button>
                     </div>
                   </form>
@@ -616,8 +616,8 @@ export function GrievancesConsole() {
             {t('grievances.showingResults', { filtered: filteredGrievances.length, total: totalGrievances })}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">Sort:</span>
-            {(["filedDate", "priority", "status", "title"] as SortField[]).map((field) => (
+            <span className="text-xs text-gray-500">{t('grievances.sortLabel')}</span>
+            {((["filedDate", "priority", "status", "title"] as const)).map((field) => (
               <button
                 key={field}
                 onClick={() => toggleSort(field)}
@@ -627,7 +627,7 @@ export function GrievancesConsole() {
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {field === "filedDate" ? "Date" : field.charAt(0).toUpperCase() + field.slice(1)}
+                {t(`grievances.sortFields.${field}`)}
                 {sortField === field && (
                   <ArrowUpDown className="w-3 h-3" />
                 )}
@@ -692,13 +692,13 @@ export function GrievancesConsole() {
                             </span>
                             {grievance.daysUntilDeadline <= 7 && grievance.daysUntilDeadline > 0 && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full border border-yellow-200">
-                                {grievance.daysUntilDeadline} days until deadline
+                                {t('grievances.deadlineCountdown', { days: grievance.daysUntilDeadline })}
                               </span>
                             )}
                             {grievance.daysUntilDeadline < 0 && (
                               <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full border border-red-200 flex items-center gap-1">
                                 <AlertTriangle className="w-3 h-3" />
-                                Overdue
+                                {t('grievances.overdue')}
                               </span>
                             )}
                           </div>
@@ -720,19 +720,19 @@ export function GrievancesConsole() {
                       {/* Summary Info */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-xs text-gray-600 mb-1">Category</p>
+                          <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.category')}</p>
                           <p className="text-sm font-medium text-gray-900">{grievance.category}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 mb-1">Current Step</p>
+                          <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.currentStep')}</p>
                           <p className="text-sm font-medium text-gray-900">{grievance.currentStep}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 mb-1">Filed Date</p>
+                          <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.filedDate')}</p>
                           <p className="text-sm font-medium text-gray-900">{new Date(grievance.filedDate).toLocaleDateString()}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 mb-1">Deadline</p>
+                          <p className="text-xs text-gray-600 mb-1">{t('grievances.labels.deadline')}</p>
                           <p className="text-sm font-medium text-gray-900">{new Date(grievance.deadline).toLocaleDateString()}</p>
                         </div>
                       </div>
@@ -750,19 +750,19 @@ export function GrievancesConsole() {
                             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                               <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                 <User className="w-4 h-4 text-blue-600" />
-                                Parties Involved
+                                {t('grievances.partiesInvolved')}
                               </h4>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                  <p className="text-xs text-gray-600 mb-1">Grievant</p>
+                                  <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.grievant')}</p>
                                   <p className="text-sm font-medium text-gray-900">{grievance.grievant}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-gray-600 mb-1">Union Steward</p>
+                                  <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.steward')}</p>
                                   <p className="text-sm font-medium text-gray-900">{grievance.steward}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-gray-600 mb-1">Management</p>
+                                  <p className="text-xs text-gray-600 mb-1">{t('grievances.partyLabels.management')}</p>
                                   <p className="text-sm font-medium text-gray-900">{grievance.management}</p>
                                 </div>
                               </div>
@@ -772,7 +772,7 @@ export function GrievancesConsole() {
                             <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
                               <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-purple-600" />
-                                Contract Violation
+                                {t('grievances.contractViolation')}
                               </h4>
                               <p className="text-sm text-gray-900 font-medium">{grievance.violatedArticle}</p>
                             </div>
@@ -781,7 +781,7 @@ export function GrievancesConsole() {
                             <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
                               <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
-                                Remedy Sought
+                                {t('grievances.remedySought')}
                               </h4>
                               <p className="text-sm text-gray-700">{grievance.remedy}</p>
                             </div>
@@ -790,7 +790,7 @@ export function GrievancesConsole() {
                             <div className="mb-6">
                               <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-gray-600" />
-                                Timeline
+                                {t('grievances.timelineTitle')}
                               </h4>
                               <div className="space-y-4">
                                 {grievance.timeline.map((event, idx) => (
@@ -828,18 +828,18 @@ export function GrievancesConsole() {
                                   }}
                                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 bg-white disabled:opacity-50"
                                 >
-                                  <option value="" disabled>Advance Status…</option>
-                                  <option value="filed">Filed</option>
-                                  <option value="acknowledged">Acknowledged</option>
-                                  <option value="investigating">Investigating</option>
-                                  <option value="response_due">Response Due</option>
-                                  <option value="response_received">Response Received</option>
-                                  <option value="escalated">Escalated</option>
-                                  <option value="mediation">Mediation</option>
-                                  <option value="arbitration">Arbitration</option>
-                                  <option value="settled">Settled</option>
-                                  <option value="withdrawn">Withdrawn</option>
-                                  <option value="closed">Closed</option>
+                                  <option value="" disabled>{t('grievances.advanceStatus')}</option>
+                                  <option value="filed">{t('grievances.advanceOptions.filed')}</option>
+                                  <option value="acknowledged">{t('grievances.advanceOptions.acknowledged')}</option>
+                                  <option value="investigating">{t('grievances.advanceOptions.investigating')}</option>
+                                  <option value="response_due">{t('grievances.advanceOptions.response_due')}</option>
+                                  <option value="response_received">{t('grievances.advanceOptions.response_received')}</option>
+                                  <option value="escalated">{t('grievances.advanceOptions.escalated')}</option>
+                                  <option value="mediation">{t('grievances.advanceOptions.mediation')}</option>
+                                  <option value="arbitration">{t('grievances.advanceOptions.arbitration')}</option>
+                                  <option value="settled">{t('grievances.advanceOptions.settled')}</option>
+                                  <option value="withdrawn">{t('grievances.advanceOptions.withdrawn')}</option>
+                                  <option value="closed">{t('grievances.advanceOptions.closed')}</option>
                                 </select>
                                 {actionLoading === `status-${grievance.id}` && (
                                   <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
@@ -855,7 +855,7 @@ export function GrievancesConsole() {
                                 ) : (
                                   <User className="w-4 h-4" />
                                 )}
-                                <span className="text-sm font-medium">Assign Steward</span>
+                                <span className="text-sm font-medium">{t('grievances.assignSteward')}</span>
                               </button>
                               <button
                                 onClick={() => handleAddDocument(grievance)}
@@ -867,7 +867,7 @@ export function GrievancesConsole() {
                                 ) : (
                                   <FileText className="w-4 h-4" />
                                 )}
-                                <span className="text-sm font-medium">Add Documentation</span>
+                                <span className="text-sm font-medium">{t('grievances.addDocumentation')}</span>
                               </button>
                             </div>
                           </motion.div>
@@ -895,13 +895,13 @@ export function GrievancesConsole() {
                   <Scale className="w-6 h-6 text-red-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Grievance Process Guidelines</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('grievances.guidelines.title')}</h3>
                   <ul className="text-sm text-gray-700 space-y-1 mb-4">
-                    <li>• Step 1: Must be filed within 10 days of incident</li>
-                    <li>• Step 2: Advanced within 14 days if Step 1 denied</li>
-                    <li>• Step 3: Final internal review before arbitration</li>
-                    <li>• Arbitration: Binding decision by neutral arbitrator</li>
-                    <li>• All deadlines are contractual and must be strictly observed</li>
+                    <li>• {t('grievances.guidelines.step1')}</li>
+                    <li>• {t('grievances.guidelines.step2')}</li>
+                    <li>• {t('grievances.guidelines.step3')}</li>
+                    <li>• {t('grievances.guidelines.arbitration')}</li>
+                    <li>• {t('grievances.guidelines.deadlines')}</li>
                   </ul>
                   <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
                     View Full Grievance Procedure

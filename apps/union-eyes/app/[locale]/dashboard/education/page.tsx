@@ -5,18 +5,32 @@
 
 export const dynamic = 'force-dynamic';
 
+import { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, BookOpen, Award, Calendar } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/api-auth-guard";
+import { getTranslations } from "next-intl/server";
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "educationDashboardPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function EducationDashboard({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+}: PageProps) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "educationDashboardPage" });
   await requireUser();
 
   return (
@@ -25,10 +39,10 @@ export default async function EducationDashboard({
       <div className="space-y-2">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <GraduationCap className="h-8 w-8 text-primary" />
-          Education & Training
+          {t("title")}
         </h1>
         <p className="text-muted-foreground">
-          Access courses, track your learning progress, and earn certifications
+          {t("subtitle")}
         </p>
       </div>
 
@@ -42,9 +56,9 @@ export default async function EducationDashboard({
               </div>
             </CardHeader>
             <CardContent>
-              <CardTitle className="text-lg">Course Catalog</CardTitle>
+              <CardTitle className="text-lg">{t("cards.catalog.title")}</CardTitle>
               <CardDescription className="mt-2">
-                Browse and enroll in available training courses
+                {t("cards.catalog.description")}
               </CardDescription>
             </CardContent>
           </Link>
@@ -58,9 +72,9 @@ export default async function EducationDashboard({
               </div>
             </CardHeader>
             <CardContent>
-              <CardTitle className="text-lg">My Courses</CardTitle>
+              <CardTitle className="text-lg">{t("cards.myCourses.title")}</CardTitle>
               <CardDescription className="mt-2">
-                View your enrolled courses and learning progress
+                {t("cards.myCourses.description")}
               </CardDescription>
             </CardContent>
           </Link>
@@ -74,9 +88,9 @@ export default async function EducationDashboard({
               </div>
             </CardHeader>
             <CardContent>
-              <CardTitle className="text-lg">My Certificates</CardTitle>
+              <CardTitle className="text-lg">{t("cards.certificates.title")}</CardTitle>
               <CardDescription className="mt-2">
-                View and download your earned certifications
+                {t("cards.certificates.description")}
               </CardDescription>
             </CardContent>
           </Link>
@@ -90,9 +104,9 @@ export default async function EducationDashboard({
               </div>
             </CardHeader>
             <CardContent>
-              <CardTitle className="text-lg">Upcoming Sessions</CardTitle>
+              <CardTitle className="text-lg">{t("cards.sessions.title")}</CardTitle>
               <CardDescription className="mt-2">
-                View scheduled course sessions and events
+                {t("cards.sessions.description")}
               </CardDescription>
             </CardContent>
           </Link>
@@ -103,27 +117,25 @@ export default async function EducationDashboard({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to Education & Training</CardTitle>
+            <CardTitle>{t("welcome.title")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Our education program offers comprehensive training for union members, stewards, and officers. 
-              From foundational steward training to advanced leadership development, we provide the skills 
-              you need to be an effective union representative.
+              {t("welcome.description")}
             </p>
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm">Key Features:</h4>
+              <h4 className="font-semibold text-sm">{t("welcome.featuresTitle")}</h4>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>CLC-approved certification courses</li>
-                <li>In-person and online training options</li>
-                <li>Track your progress and certifications</li>
-                <li>Earn continuing education credits</li>
-                <li>Access to archived course materials</li>
+                <li>{t("welcome.features.clc")}</li>
+                <li>{t("welcome.features.delivery")}</li>
+                <li>{t("welcome.features.progress")}</li>
+                <li>{t("welcome.features.credits")}</li>
+                <li>{t("welcome.features.archives")}</li>
               </ul>
             </div>
             <Button asChild className="w-full">
               <Link href="/dashboard/education/courses">
-                Browse Course Catalog
+                {t("welcome.button")}
               </Link>
             </Button>
           </CardContent>
@@ -131,30 +143,29 @@ export default async function EducationDashboard({
 
         <Card>
           <CardHeader>
-            <CardTitle>Your Learning Path</CardTitle>
+            <CardTitle>{t("path.title")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Not sure where to start? We&apos;ve organized our courses into clear learning paths 
-              based on your role and experience level.
+              {t("path.description")}
             </p>
             <div className="space-y-3">
               <div className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                <h4 className="font-semibold text-sm mb-1">New Steward Training</h4>
+                <h4 className="font-semibold text-sm mb-1">{t("path.newSteward.title")}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Essential courses for newly elected stewards covering union basics, grievance handling, and member support.
+                  {t("path.newSteward.description")}
                 </p>
               </div>
               <div className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                <h4 className="font-semibold text-sm mb-1">Advanced Leadership</h4>
+                <h4 className="font-semibold text-sm mb-1">{t("path.advanced.title")}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Strategic planning, contract negotiation, and mobilization for experienced union leaders.
+                  {t("path.advanced.description")}
                 </p>
               </div>
               <div className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                <h4 className="font-semibold text-sm mb-1">Specialized Training</h4>
+                <h4 className="font-semibold text-sm mb-1">{t("path.specialized.title")}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Health & safety, equity & diversity, communications, and other specialized topics.
+                  {t("path.specialized.description")}
                 </p>
               </div>
             </div>

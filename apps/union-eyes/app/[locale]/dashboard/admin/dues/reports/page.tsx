@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +72,7 @@ function formatDate(date: Date): string {
 // =============================================================================
 
 export default function ReportsAnalyticsPage() {
+  const t = useTranslations('adminDuesReportsPage');
   const [reportType, setReportType] = useState<ReportType>('collection');
   const [dateRange, setDateRange] = useState<DateRange>('this-month');
   const [generating, setGenerating] = useState(false);
@@ -84,7 +86,7 @@ export default function ReportsAnalyticsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reportType, dateRange }),
       });
-      if (!res.ok) throw new Error('Report generation failed');
+      if (!res.ok) throw new Error(t('reportGenerationFailed'));
       // Report generated — could download or show inline
     } catch {
       // API not available yet — silently handle
@@ -119,10 +121,10 @@ export default function ReportsAnalyticsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Financial Reports & Analytics
+            {t('title')}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Generate comprehensive financial reports and analytics
+            {t('subtitle')}
           </p>
         </div>
       </div>
@@ -130,43 +132,43 @@ export default function ReportsAnalyticsPage() {
       {/* Report Configuration */}
       <Card>
         <CardHeader>
-          <CardTitle>Report Configuration</CardTitle>
-          <CardDescription>Select report type and date range</CardDescription>
+          <CardTitle>{t('reportConfigurationTitle')}</CardTitle>
+          <CardDescription>{t('reportConfigurationDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             {/* Report Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Report Type</label>
+              <label className="text-sm font-medium">{t('reportTypeLabel')}</label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={reportType} onValueChange={(value: any) => setReportType(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select report type" />
+                  <SelectValue placeholder={t('selectReportTypePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="collection">Collection Summary</SelectItem>
-                  <SelectItem value="outstanding">Outstanding Dues</SelectItem>
-                  <SelectItem value="member-history">Member Payment History</SelectItem>
-                  <SelectItem value="breakdown">Payment Breakdown</SelectItem>
-                  <SelectItem value="trends">Collection Trends</SelectItem>
+                  <SelectItem value="collection">{t('reportTypeCollection')}</SelectItem>
+                  <SelectItem value="outstanding">{t('reportTypeOutstanding')}</SelectItem>
+                  <SelectItem value="member-history">{t('reportTypeMemberHistory')}</SelectItem>
+                  <SelectItem value="breakdown">{t('reportTypeBreakdown')}</SelectItem>
+                  <SelectItem value="trends">{t('reportTypeTrends')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date Range */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Date Range</label>
+              <label className="text-sm font-medium">{t('dateRangeLabel')}</label>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={dateRange} onValueChange={(value: any) => setDateRange(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select date range" />
+                  <SelectValue placeholder={t('selectDateRangePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="this-month">This Month</SelectItem>
-                  <SelectItem value="last-month">Last Month</SelectItem>
-                  <SelectItem value="quarter">This Quarter</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
+                  <SelectItem value="this-month">{t('dateRangeThisMonth')}</SelectItem>
+                  <SelectItem value="last-month">{t('dateRangeLastMonth')}</SelectItem>
+                  <SelectItem value="quarter">{t('dateRangeQuarter')}</SelectItem>
+                  <SelectItem value="year">{t('dateRangeYear')}</SelectItem>
+                  <SelectItem value="custom">{t('dateRangeCustom')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -175,7 +177,7 @@ export default function ReportsAnalyticsPage() {
           <div className="flex flex-wrap gap-2">
             <Button onClick={handleGenerateReport} disabled={generating}>
               <BarChart3 className="mr-2 h-4 w-4" />
-              {generating ? 'Generating...' : 'Generate Report'}
+              {generating ? t('generatingButton') : t('generateReportButton')}
             </Button>
             <Button
               variant="outline"
@@ -183,7 +185,7 @@ export default function ReportsAnalyticsPage() {
               disabled={exporting}
             >
               <Download className="mr-2 h-4 w-4" />
-              Export CSV
+              {t('exportCsvButton')}
             </Button>
             <Button
               variant="outline"
@@ -191,7 +193,7 @@ export default function ReportsAnalyticsPage() {
               disabled={exporting}
             >
               <FileText className="mr-2 h-4 w-4" />
-              Export PDF
+              {t('exportPdfButton')}
             </Button>
             <Button
               variant="outline"
@@ -199,7 +201,7 @@ export default function ReportsAnalyticsPage() {
               disabled={exporting}
             >
               <Download className="mr-2 h-4 w-4" />
-              Export Excel
+              {t('exportExcelButton')}
             </Button>
           </div>
         </CardContent>
@@ -209,55 +211,55 @@ export default function ReportsAnalyticsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalCollectedTitle')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(1456789)}</div>
             <div className="flex items-center space-x-1 text-xs text-green-600 mt-1">
               <TrendingUp className="h-3 w-3" />
-              <span>+12.5% from last period</span>
+              <span>{t('totalCollectedTrend')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('collectionRateTitle')}</CardTitle>
             <PieChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">94.2%</div>
             <div className="flex items-center space-x-1 text-xs text-green-600 mt-1">
               <TrendingUp className="h-3 w-3" />
-              <span>+2.1% from last period</span>
+              <span>{t('collectionRateTrend')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Members</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeMembersTitle')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,247</div>
             <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
-              <span>8 new this month</span>
+              <span>{t('activeMembersTrend')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Payment Time</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('avgPaymentTimeTitle')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3.2 days</div>
+            <div className="text-2xl font-bold">{t('avgPaymentTimeValue')}</div>
             <div className="flex items-center space-x-1 text-xs text-green-600 mt-1">
               <TrendingDown className="h-3 w-3" />
-              <span>-0.5 days improvement</span>
+              <span>{t('avgPaymentTimeTrend')}</span>
             </div>
           </CardContent>
         </Card>
@@ -266,16 +268,16 @@ export default function ReportsAnalyticsPage() {
       {/* Collection Trends */}
       <Card>
         <CardHeader>
-          <CardTitle>Collection Trends</CardTitle>
-          <CardDescription>Monthly dues collection over time</CardDescription>
+          <CardTitle>{t('collectionTrendsTitle')}</CardTitle>
+          <CardDescription>{t('collectionTrendsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80 flex items-center justify-center border rounded-lg bg-muted/20">
             <div className="text-center">
               <LineChart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Collection trend data will appear once dues are processed</p>
+              <p className="text-muted-foreground">{t('collectionTrendsPlaceholder')}</p>
               <p className="text-xs text-muted-foreground mt-2">
-                Monthly collection totals are charted automatically
+                {t('collectionTrendsFootnote')}
               </p>
             </div>
           </div>
@@ -285,15 +287,15 @@ export default function ReportsAnalyticsPage() {
       {/* Payment Breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment Breakdown by Category</CardTitle>
-          <CardDescription>Distribution of dues, COPE, PAC, and strike fund contributions</CardDescription>
+          <CardTitle>{t('paymentBreakdownTitle')}</CardTitle>
+          <CardDescription>{t('paymentBreakdownDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 rounded-full bg-blue-500" />
-                <span className="text-sm font-medium">Union Dues</span>
+                <span className="text-sm font-medium">{t('categoryUnionDues')}</span>
               </div>
               <div className="text-right">
                 <div className="font-bold">{formatCurrency(986543)}</div>
@@ -304,7 +306,7 @@ export default function ReportsAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 rounded-full bg-green-500" />
-                <span className="text-sm font-medium">COPE Contributions</span>
+                <span className="text-sm font-medium">{t('categoryCopeContributions')}</span>
               </div>
               <div className="text-right">
                 <div className="font-bold">{formatCurrency(245678)}</div>
@@ -315,7 +317,7 @@ export default function ReportsAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 rounded-full bg-purple-500" />
-                <span className="text-sm font-medium">PAC Contributions</span>
+                <span className="text-sm font-medium">{t('categoryPacContributions')}</span>
               </div>
               <div className="text-right">
                 <div className="font-bold">{formatCurrency(156789)}</div>
@@ -326,7 +328,7 @@ export default function ReportsAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 rounded-full bg-orange-500" />
-                <span className="text-sm font-medium">Strike Fund</span>
+                <span className="text-sm font-medium">{t('categoryStrikeFund')}</span>
               </div>
               <div className="text-right">
                 <div className="font-bold">{formatCurrency(67779)}</div>
@@ -338,7 +340,7 @@ export default function ReportsAnalyticsPage() {
           <div className="h-48 flex items-center justify-center border rounded-lg bg-muted/20 mt-6">
             <div className="text-center">
               <PieChart className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Pie chart visualization</p>
+              <p className="text-sm text-muted-foreground">{t('pieChartVisualization')}</p>
             </div>
           </div>
         </CardContent>
@@ -347,27 +349,27 @@ export default function ReportsAnalyticsPage() {
       {/* Recent Reports */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Reports</CardTitle>
-          <CardDescription>Previously generated reports</CardDescription>
+          <CardTitle>{t('recentReportsTitle')}</CardTitle>
+          <CardDescription>{t('recentReportsDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[
               {
-                name: 'February 2026 Collection Summary',
-                type: 'Collection',
+                name: t('recentReport1Name'),
+                type: t('recentReportTypeCollection'),
                 date: new Date(2026, 1, 10),
                 status: 'completed',
               },
               {
-                name: 'Q1 2026 Outstanding Dues Report',
-                type: 'Outstanding',
+                name: t('recentReport2Name'),
+                type: t('recentReportTypeOutstanding'),
                 date: new Date(2026, 1, 5),
                 status: 'completed',
               },
               {
-                name: 'January 2026 Payment Breakdown',
-                type: 'Breakdown',
+                name: t('recentReport3Name'),
+                type: t('recentReportTypeBreakdown'),
                 date: new Date(2026, 0, 28),
                 status: 'completed',
               },
@@ -385,7 +387,7 @@ export default function ReportsAnalyticsPage() {
                         {report.type}
                       </Badge>
                       <span>•</span>
-                      <span>Generated {formatDate(report.date)}</span>
+                      <span>{t('generatedOn', { date: formatDate(report.date) })}</span>
                     </div>
                   </div>
                 </div>

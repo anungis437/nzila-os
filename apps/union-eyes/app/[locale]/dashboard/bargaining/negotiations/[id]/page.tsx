@@ -12,6 +12,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
@@ -58,6 +59,7 @@ async function fetchNegotiationData(id: string) {
 }
 
 async function NegotiationDetailContent({ params }: PageProps) {
+  const t = await getTranslations('bargainingNegotiationsDetailPage');
   const _user = await requireUser();
   const hasAccess = await hasMinRole("bargaining_committee");
   
@@ -108,7 +110,7 @@ async function NegotiationDetailContent({ params }: PageProps) {
             <Button variant="ghost" size="sm" asChild>
               <Link href="/dashboard/bargaining">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+                {t('backToDashboard')}
               </Link>
             </Button>
           </div>
@@ -124,7 +126,7 @@ async function NegotiationDetailContent({ params }: PageProps) {
         </div>
         <Button variant="outline">
           <Settings className="mr-2 h-4 w-4" />
-          Edit Negotiation
+          {t('editNegotiation')}
         </Button>
       </div>
 
@@ -134,14 +136,14 @@ async function NegotiationDetailContent({ params }: PageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              First Session
+              {t('firstSessionLabel')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-semibold">
               {negotiation.firstSessionDate
                 ? format(new Date(negotiation.firstSessionDate), "MMM d, yyyy")
-                : "Not scheduled"}
+                : t('notScheduled')}
             </p>
           </CardContent>
         </Card>
@@ -150,13 +152,13 @@ async function NegotiationDetailContent({ params }: PageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Proposals
+              {t('proposalsLabel')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{statistics.totalProposals}</p>
             <p className="text-sm text-muted-foreground">
-              {statistics.acceptedProposals} accepted
+              {t('acceptedProposalsPrefix')} {statistics.acceptedProposals}
             </p>
           </CardContent>
         </Card>
@@ -165,13 +167,13 @@ async function NegotiationDetailContent({ params }: PageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              Agreements
+              {t('agreementsLabel')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{statistics.tentativeAgreements}</p>
             <p className="text-sm text-muted-foreground">
-              {statistics.ratifiedAgreements} ratified
+              {t('ratifiedAgreementsPrefix')} {statistics.ratifiedAgreements}
             </p>
           </CardContent>
         </Card>
@@ -180,13 +182,13 @@ async function NegotiationDetailContent({ params }: PageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Team Size
+              {t('teamSizeLabel')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{statistics.teamSize}</p>
             <p className="text-sm text-muted-foreground">
-              {statistics.totalSessions} sessions
+              {statistics.totalSessions} {t('sessionsLabel')}
             </p>
           </CardContent>
         </Card>
@@ -195,48 +197,48 @@ async function NegotiationDetailContent({ params }: PageProps) {
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="proposals">Proposals</TabsTrigger>
-          <TabsTrigger value="agreements">Tentative Agreements</TabsTrigger>
-          <TabsTrigger value="team">Bargaining Team</TabsTrigger>
-          <TabsTrigger value="notes">Session Notes</TabsTrigger>
+          <TabsTrigger value="overview">{t('tabOverview')}</TabsTrigger>
+          <TabsTrigger value="proposals">{t('tabProposals')}</TabsTrigger>
+          <TabsTrigger value="agreements">{t('tabTentativeAgreements')}</TabsTrigger>
+          <TabsTrigger value="team">{t('tabBargainingTeam')}</TabsTrigger>
+          <TabsTrigger value="notes">{t('tabSessionNotes')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Negotiation Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Negotiation Details</CardTitle>
+              <CardTitle>{t('negotiationDetailsTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {negotiation.description && (
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Description</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('descriptionLabel')}</h4>
                   <p className="text-sm text-muted-foreground">{negotiation.description}</p>
                 </div>
               )}
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Union</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('unionLabel')}</h4>
                   <p className="text-sm">
                     {negotiation.unionName}
-                    {negotiation.unionLocal && <span className="text-muted-foreground"> • Local {negotiation.unionLocal}</span>}
+                    {negotiation.unionLocal && <span className="text-muted-foreground"> • {t('localPrefix')} {negotiation.unionLocal}</span>}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-1">Employer</h4>
+                  <h4 className="text-sm font-medium mb-1">{t('employerLabel')}</h4>
                   <p className="text-sm">{negotiation.employerName}</p>
                 </div>
                 {negotiation.bargainingUnitSize && (
                   <div>
-                    <h4 className="text-sm font-medium mb-1">Bargaining Unit Size</h4>
-                    <p className="text-sm">{negotiation.bargainingUnitSize} members</p>
+                    <h4 className="text-sm font-medium mb-1">{t('bargainingUnitSizeLabel')}</h4>
+                    <p className="text-sm">{negotiation.bargainingUnitSize} {t('membersLabel')}</p>
                   </div>
                 )}
                 {negotiation.targetCompletionDate && (
                   <div>
-                    <h4 className="text-sm font-medium mb-1">Target Completion</h4>
+                    <h4 className="text-sm font-medium mb-1">{t('targetCompletionLabel')}</h4>
                     <p className="text-sm">
                       {format(new Date(negotiation.targetCompletionDate), "MMMM d, yyyy")}
                     </p>
@@ -246,7 +248,7 @@ async function NegotiationDetailContent({ params }: PageProps) {
 
               {negotiation.keyIssues && negotiation.keyIssues.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Key Issues</h4>
+                  <h4 className="text-sm font-medium mb-2">{t('keyIssuesLabel')}</h4>
                   <div className="space-y-2">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {negotiation.keyIssues.map((issue: any, idx: number) => (

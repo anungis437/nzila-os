@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Truck,
@@ -44,6 +45,7 @@ const STATUS_COLORS: Record<string, string> = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function DispatchPage() {
+  const t = useTranslations('dispatchPage');
   const [requests, setRequests] = useState<DispatchRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
@@ -127,10 +129,10 @@ export default function DispatchPage() {
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Truck className="h-8 w-8" />
-            Dispatch Hall
+            {t('pageTitle')}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Manage dispatch requests and worker assignments
+            {t('pageSubtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -138,13 +140,13 @@ export default function DispatchPage() {
             onClick={fetchQueue}
             className="flex items-center gap-1 rounded border px-3 py-2 text-sm hover:bg-gray-50"
           >
-            <RefreshCw className="h-4 w-4" /> Refresh
+            <RefreshCw className="h-4 w-4" /> {t('refreshButton')}
           </button>
           <button
             onClick={() => setShowCreate(!showCreate)}
             className="flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
           >
-            <Plus className="h-4 w-4" /> New Request
+            <Plus className="h-4 w-4" /> {t('newRequestButton')}
           </button>
         </div>
       </div>
@@ -154,7 +156,7 @@ export default function DispatchPage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Open Requests</p>
+              <p className="text-sm text-muted-foreground">{t('openRequestsLabel')}</p>
               <p className="text-2xl font-bold">{openCount}</p>
             </div>
             <Clock className="h-8 w-8 text-green-600" />
@@ -163,7 +165,7 @@ export default function DispatchPage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Partially Filled</p>
+              <p className="text-sm text-muted-foreground">{t('partiallyFilledLabel')}</p>
               <p className="text-2xl font-bold text-yellow-600">{partialCount}</p>
             </div>
             <AlertTriangle className="h-8 w-8 text-yellow-600" />
@@ -172,7 +174,7 @@ export default function DispatchPage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Filled</p>
+              <p className="text-sm text-muted-foreground">{t('filledLabel')}</p>
               <p className="text-2xl font-bold text-blue-600">{filledCount}</p>
             </div>
             <CheckCircle className="h-8 w-8 text-blue-600" />
@@ -181,7 +183,7 @@ export default function DispatchPage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Total Queue</p>
+              <p className="text-sm text-muted-foreground">{t('totalQueueLabel')}</p>
               <p className="text-2xl font-bold">{requests.length}</p>
             </div>
             <Users className="h-8 w-8 text-muted-foreground" />
@@ -193,12 +195,12 @@ export default function DispatchPage() {
       {showCreate && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">New Dispatch Request</CardTitle>
+            <CardTitle className="text-sm">{t('newRequestFormTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium">Employer ID</label>
+                <label className="mb-1 block text-sm font-medium">{t('employerIdLabel')}</label>
                 <input
                   type="text"
                   value={form.employerId}
@@ -208,7 +210,7 @@ export default function DispatchPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Job Title</label>
+                <label className="mb-1 block text-sm font-medium">{t('jobTitleLabel')}</label>
                 <input
                   type="text"
                   value={form.jobTitle}
@@ -219,7 +221,7 @@ export default function DispatchPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">
-                  Required Skills (comma-separated)
+                  {t('requiredSkillsLabel')}
                 </label>
                 <input
                   type="text"
@@ -229,7 +231,7 @@ export default function DispatchPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Workers Needed</label>
+                <label className="mb-1 block text-sm font-medium">{t('workersNeededLabel')}</label>
                 <input
                   type="number"
                   min={1}
@@ -245,14 +247,14 @@ export default function DispatchPage() {
                   type="submit"
                   className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                 >
-                  Create Request
+                  {t('createButton')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCreate(false)}
                   className="rounded border px-4 py-2 text-sm hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('cancelButton')}
                 </button>
               </div>
             </form>
@@ -263,7 +265,7 @@ export default function DispatchPage() {
       {/* Queue */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Dispatch Queue</CardTitle>
+          <CardTitle className="text-sm">{t('queueTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -271,7 +273,7 @@ export default function DispatchPage() {
               <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-600" />
             </div>
           ) : requests.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">No dispatch requests</p>
+            <p className="py-8 text-center text-sm text-gray-400">{t('noRequests')}</p>
           ) : (
             <div className="space-y-3">
               {requests.map((req) => (
@@ -291,8 +293,8 @@ export default function DispatchPage() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">
-                      Workers: {req.requestedWorkers} · Skills:{" "}
-                      {req.requiredSkills?.join(", ") || "N/A"} · Date:{" "}
+                      {t('workersPrefix')}: {req.requestedWorkers} · {t('skillsPrefix')}:{" "}
+                      {req.requiredSkills?.join(", ") || t('notApplicable')} · {t('datePrefix')}:{" "}
                       {new Date(req.requestedDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -306,7 +308,7 @@ export default function DispatchPage() {
                         }
                         className="rounded bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700"
                       >
-                        {selectedRequest === req.id ? "Deselect" : "Assign Workers"}
+                        {selectedRequest === req.id ? t('deselectButton') : t('assignWorkersButton')}
                       </button>
                     )}
                   </div>
@@ -322,14 +324,13 @@ export default function DispatchPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4" /> Ranked Candidates
+              <Users className="h-4 w-4" /> {t('rankedCandidatesTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {candidates.length === 0 ? (
               <p className="text-sm text-gray-400">
-                Candidate ranking will appear here once the dispatch engine scores workers.
-                Click &quot;Auto-Assign&quot; to run the ranking algorithm.
+                {t('candidateRankingMessage')}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -341,7 +342,7 @@ export default function DispatchPage() {
                     <div>
                       <p className="font-medium">{c.name}</p>
                       <p className="text-xs text-gray-500">
-                        Score: {c.score} · Seniority: {c.seniority}yr · Skills:{" "}
+                        {t('scorePrefix')}: {c.score} · {t('seniorityPrefix')}: {c.seniority}yr · {t('skillsPrefix')}:{" "}
                         {c.skills.join(", ")}
                       </p>
                     </div>
@@ -349,7 +350,7 @@ export default function DispatchPage() {
                       onClick={() => handleAssign(selectedRequest, [c.memberId])}
                       className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700"
                     >
-                      Assign
+                      {t('assignButton')}
                     </button>
                   </li>
                 ))}

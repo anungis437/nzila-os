@@ -3,12 +3,21 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { CommitteesPage } from "./committees-page";
 
-export const metadata: Metadata = {
-  title: "Committees | UnionEyes",
-  description: "Manage union committees and their memberships",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "committeesPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function Page() {
   let user;

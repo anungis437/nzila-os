@@ -25,7 +25,7 @@ export interface ConsentRequest {
   consentGiven: boolean;
   consentMethod: string;
   consentText: string;
-  consentLanguage: "en" | "fr";
+  consentLanguage: "en" | "fr" | "it" | "pt";
   ipAddress?: string;
   userAgent?: string;
 }
@@ -169,6 +169,22 @@ export class ProvincialPrivacyService {
       throw new Error("Quebec Law 25 requires explicit consent, not implied consent");
     }
 
+    // Quebec Bill 96 / Law 25: French is the default language for consent.
+    // If a QC user submits without explicitly choosing a language, force "fr".
+    let consentLanguage = request.consentLanguage;
+    const customRules = (config.customRules ?? {}) as { frenchLanguageRequired?: boolean };
+    if (
+      request.province === "QC" &&
+      customRules.frenchLanguageRequired &&
+      consentLanguage !== "fr"
+    ) {
+      logger.info("Defaulting consent language to fr for QC user (Law 25 / Bill 96)", {
+        userId: request.userId,
+        requested: request.consentLanguage,
+      });
+      consentLanguage = "fr";
+    }
+
     // Calculate expiry for Quebec (1 year for marketing consent)
     let expiresAt: Date | null = null;
     if (request.province === "QC" && request.consentType === "marketing") {
@@ -185,7 +201,7 @@ export class ProvincialPrivacyService {
         consentGiven: request.consentGiven,
         consentMethod: request.consentMethod,
         consentText: request.consentText,
-        consentLanguage: request.consentLanguage,
+        consentLanguage,
         ipAddress: request.ipAddress,
         userAgent: request.userAgent,
         expiresAt,

@@ -1,12 +1,29 @@
 import { requireUser } from "@/lib/api-auth-guard";
+import { Metadata } from "next";
 import { db } from "@/db";
 import { employerTimesheetBatches, employerTimesheetEntries } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 import { TimesheetBatchUploader, TimesheetValidationTable } from "@/components/employer-execution";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmployerExecutionTimesheetsPage() {
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "employerTimesheetsPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
+
+export default async function EmployerExecutionTimesheetsPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "employerTimesheetsPage" });
   const context = await requireUser();
   const organizationId = context.organizationId;
 
@@ -34,8 +51,8 @@ export default async function EmployerExecutionTimesheetsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Timesheet Ingestion</h1>
-        <p className="text-sm text-muted-foreground">Upload CSV, normalize, and review validation outcomes.</p>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
       <TimesheetBatchUploader />
       <TimesheetValidationTable

@@ -6,6 +6,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
@@ -52,6 +53,7 @@ interface Candidate {
 
 export default function ElectionDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const t = useTranslations('electionsDetailPage');
   const [election, setElection] = useState<ElectionDetail | null>(null);
   const [selectedVotes, setSelectedVotes] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
@@ -100,16 +102,16 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
   const submitBallot = async () => {
     try {
       await api.elections.vote(params.id, selectedVotes);
-      alert('Your vote has been submitted successfully!');
+      alert(t('voteSubmittedSuccessfully'));
       router.push('/elections');
     } catch (error) {
       logger.error('Error submitting ballot', error);
-      alert('Failed to submit vote. Please try again.');
+      alert(t('failedToSubmitVote'));
     }
   };
 
   if (loading || !election) {
-    return <div className="container mx-auto py-6">Loading...</div>;
+    return <div className="container mx-auto py-6">{t('loading')}</div>;
   }
 
   const turnoutPercentage = (election.votesCast / election.eligibleVoters) * 100;
@@ -127,7 +129,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
           </div>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
-            Export Results
+            {t('exportResults')}
           </Button>
         </div>
       </div>
@@ -137,7 +139,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            You have already cast your ballot in this election. Thank you for participating!
+            {t('alreadyVoted')}
           </AlertDescription>
         </Alert>
       )}
@@ -146,7 +148,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            This election ends in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Make sure to cast your vote!
+            {t('electionEndingSoon', { days: daysRemaining })}
           </AlertDescription>
         </Alert>
       )}
@@ -156,7 +158,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Election Period</span>
+            <span className="text-sm text-muted-foreground">{t('electionPeriod')}</span>
           </div>
           <p className="font-medium text-sm">
             {new Date(election.startDate).toLocaleDateString()} - {' '}
@@ -167,7 +169,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Eligible Voters</span>
+            <span className="text-sm text-muted-foreground">{t('eligibleVoters')}</span>
           </div>
           <p className="text-2xl font-bold">{election.eligibleVoters}</p>
         </Card>
@@ -175,7 +177,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <Vote className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Votes Cast</span>
+            <span className="text-sm text-muted-foreground">{t('votesCast')}</span>
           </div>
           <p className="text-2xl font-bold text-green-600">{election.votesCast}</p>
         </Card>
@@ -183,7 +185,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Turnout</span>
+            <span className="text-sm text-muted-foreground">{t('turnout')}</span>
           </div>
           <p className="text-2xl font-bold">{turnoutPercentage.toFixed(1)}%</p>
         </Card>
@@ -192,9 +194,9 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
       {/* Turnout Progress */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-medium">Voter Turnout</span>
+          <span className="font-medium">{t('voterTurnout')}</span>
           <span className="text-sm text-muted-foreground">
-            {election.votesCast} of {election.eligibleVoters} votes
+            {election.votesCast} {t('ofVotes')} {election.eligibleVoters} {t('votes')}
           </span>
         </div>
         <Progress value={turnoutPercentage} className="h-2" />
@@ -203,10 +205,10 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
       {/* Main Content */}
       <Tabs defaultValue="ballot" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="ballot">Ballot</TabsTrigger>
-          <TabsTrigger value="candidates">Candidates</TabsTrigger>
+          <TabsTrigger value="ballot">{t('tabBallot')}</TabsTrigger>
+          <TabsTrigger value="candidates">{t('tabCandidates')}</TabsTrigger>
           <TabsTrigger value="results" disabled={election.status !== 'completed'}>
-            Results
+            {t('tabResults')}
           </TabsTrigger>
         </TabsList>
 
@@ -217,7 +219,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
                 <div className="mb-4">
                   <h3 className="text-xl font-semibold">{position.title}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {position.description} • Vote for up to {position.seats}
+                    {position.description} • {t('voteForUpTo', { seats: position.seats })}
                   </p>
                 </div>
 
@@ -260,7 +262,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
               <div className="flex justify-end">
                 <Button onClick={submitBallot} size="lg">
                   <Vote className="mr-2 h-4 w-4" />
-                  Submit Ballot
+                  {t('submitBallot')}
                 </Button>
               </div>
             )}
@@ -290,7 +292,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
         <TabsContent value="results">
           <Card className="p-6">
             <p className="text-center text-muted-foreground">
-              Results will be available after the election closes
+              {t('resultsAvailableAfterClose')}
             </p>
           </Card>
         </TabsContent>

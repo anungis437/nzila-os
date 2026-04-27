@@ -9,6 +9,7 @@
 'use client'
 
 import { useAuth } from '@nzila/platform-auth/entra/client'
+import { useTranslations } from 'next-intl'
 import { useCasePrioritySignal, useCaseSlaRiskSignal } from '@/lib/useUEMlSignals'
 import { PriorityBadge } from './PriorityBadge'
 import { SlaRiskBadge } from './SlaRiskBadge'
@@ -36,6 +37,7 @@ function ModelMeta({
   inferenceRunId: string | null
   occurredAt: string
 }) {
+  const t = useTranslations('caseSignals')
   const ts = new Date(occurredAt)
   const formatted = ts.toLocaleString(undefined, {
     dateStyle: 'medium',
@@ -48,18 +50,19 @@ function ModelMeta({
       </div>
       {inferenceRunId && (
         <div>
-          Run:{' '}
+          {t('runLabel')}{' '}
           <span className="font-mono text-gray-500">
             {inferenceRunId.slice(0, 8)}…
           </span>
         </div>
       )}
-      <div>Last updated: {formatted}</div>
+      <div>{t('lastUpdated', { date: formatted })}</div>
     </div>
   )
 }
 
 export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
+  const t = useTranslations('caseSignals')
   const { getToken } = useAuth()
 
   const {
@@ -80,7 +83,7 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
   return (
     <section
       className="rounded-lg border border-gray-200 bg-white shadow-sm"
-      aria-label="ML Signals"
+      aria-label={t('ariaLabel')}
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200">
@@ -99,7 +102,7 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
-          <h3 className="text-sm font-semibold text-gray-900">ML Signals</h3>
+          <h3 className="text-sm font-semibold text-gray-900">{t('title')}</h3>
         </div>
       </div>
 
@@ -107,12 +110,12 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
       <div className="px-4 py-3 space-y-1">
         {anyError && (
           <div className="rounded-md bg-yellow-50 border border-yellow-200 px-3 py-2 text-xs text-yellow-800">
-            ML signals temporarily unavailable.
+            {t('unavailable')}
           </div>
         )}
 
         {/* Priority signal */}
-        <SignalRow label="Predicted priority">
+        <SignalRow label={t('predictedPriority')}>
           <div className="space-y-1">
             <PriorityBadge score={priorityScore} isLoading={priorityLoading} showConfidence />
             {priorityScore && (
@@ -123,13 +126,13 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
               />
             )}
             {!priorityScore && !priorityLoading && !priorityError && (
-              <p className="text-xs text-gray-400">No inference run yet.</p>
+              <p className="text-xs text-gray-400">{t('noInferenceYet')}</p>
             )}
           </div>
         </SignalRow>
 
         {/* SLA risk signal */}
-        <SignalRow label="SLA breach risk">
+        <SignalRow label={t('slaRisk')}>
           <div className="space-y-1">
             <SlaRiskBadge score={slaScore} isLoading={slaLoading} showProbability />
             {slaScore && (
@@ -140,7 +143,7 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
               />
             )}
             {!slaScore && !slaLoading && !slaError && (
-              <p className="text-xs text-gray-400">No inference run yet.</p>
+              <p className="text-xs text-gray-400">{t('noInferenceYet')}</p>
             )}
           </div>
         </SignalRow>
@@ -150,7 +153,7 @@ export function CaseSignalsPanel({ orgId, caseId }: CaseSignalsPanelProps) {
       {!anyLoading && (priorityScore ?? slaScore) && (
         <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 rounded-b-lg">
           <p className="text-xs text-gray-400">
-            Signals are ML predictions and do not replace staff judgment.
+            {t('footerNote')}
           </p>
         </div>
       )}

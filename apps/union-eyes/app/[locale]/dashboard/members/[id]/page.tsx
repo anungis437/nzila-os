@@ -7,7 +7,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useParams, useRouter } from "next/navigation";
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
@@ -57,37 +57,38 @@ interface Claim {
   updatedAt: string;
 }
 
-const roleConfig: Record<MemberRole, { label: string; color: string }> = {
-  member: { label: "Member", color: "text-blue-700 bg-blue-100 border-blue-200" },
-  steward: { label: "Steward", color: "text-purple-700 bg-purple-100 border-purple-200" },
-  officer: { label: "Officer", color: "text-orange-700 bg-orange-100 border-orange-200" },
-  admin: { label: "Admin", color: "text-red-700 bg-red-100 border-red-200" },
-  super_admin: { label: "Super Admin", color: "text-red-900 bg-red-200 border-red-300" }
-};
-
-const statusConfig: Record<MemberStatus, { label: string; color: string }> = {
-  active: { label: "Active", color: "text-green-700 bg-green-100 border-green-200" },
-  inactive: { label: "Inactive", color: "text-gray-700 bg-gray-100 border-gray-200" },
-  "on-leave": { label: "On Leave", color: "text-yellow-700 bg-yellow-100 border-yellow-200" }
-};
-
-const defaultBadge = { label: "Unknown", color: "text-gray-700 bg-gray-100 border-gray-200" };
-
-function getRoleConfig(role: string | null | undefined) {
-  if (!role) return defaultBadge;
-  return roleConfig[role as MemberRole] ?? { ...defaultBadge, label: role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-}
-
-function getStatusConfig(status: string | null | undefined) {
-  if (!status) return defaultBadge;
-  return statusConfig[status as MemberStatus] ?? { ...defaultBadge, label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-}
-
 export default function MemberDetailPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('memberDetailPage');
   const memberId = params.id as string;
+
+  const roleConfig: Record<MemberRole, { label: string; color: string }> = {
+    member: { label: t('role.member'), color: "text-blue-700 bg-blue-100 border-blue-200" },
+    steward: { label: t('role.steward'), color: "text-purple-700 bg-purple-100 border-purple-200" },
+    officer: { label: t('role.officer'), color: "text-orange-700 bg-orange-100 border-orange-200" },
+    admin: { label: t('role.admin'), color: "text-red-700 bg-red-100 border-red-200" },
+    super_admin: { label: t('role.superAdmin'), color: "text-red-900 bg-red-200 border-red-300" }
+  };
+
+  const statusConfig: Record<MemberStatus, { label: string; color: string }> = {
+    active: { label: t('status.active'), color: "text-green-700 bg-green-100 border-green-200" },
+    inactive: { label: t('status.inactive'), color: "text-gray-700 bg-gray-100 border-gray-200" },
+    "on-leave": { label: t('status.onLeave'), color: "text-yellow-700 bg-yellow-100 border-yellow-200" }
+  };
+
+  const defaultBadge = { label: t('unknownBadge'), color: "text-gray-700 bg-gray-100 border-gray-200" };
+
+  const getRoleConfig = (role: string | null | undefined) => {
+    if (!role) return defaultBadge;
+    return roleConfig[role as MemberRole] ?? { ...defaultBadge, label: role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+  };
+
+  const getStatusConfig = (status: string | null | undefined) => {
+    if (!status) return defaultBadge;
+    return statusConfig[status as MemberStatus] ?? { ...defaultBadge, label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+  };
 
   // Fetch member data
   const { data: memberData, error: memberError, isLoading: memberLoading } = useSWR(
@@ -112,7 +113,7 @@ export default function MemberDetailPage() {
       <div className="flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading member details...</p>
+          <p className="text-lg text-gray-600">{t('loadingMessage')}</p>
         </div>
       </div>
     );
@@ -123,13 +124,13 @@ export default function MemberDetailPage() {
       <div className="flex items-center justify-center">
         <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Member Not Found</h2>
-          <p className="text-gray-600 mb-4">Unable to load member details</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFoundTitle')}</h2>
+          <p className="text-gray-600 mb-4">{t('notFoundDescription')}</p>
           <button
             onClick={() => router.push(`/${locale}/dashboard/members`)}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Back to Members
+            {t('backToMembers')}
           </button>
         </div>
       </div>
@@ -150,7 +151,7 @@ export default function MemberDetailPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to Members
+            {t('backToMembers')}
           </button>
 
           <div className="flex items-start justify-between">
@@ -167,7 +168,7 @@ export default function MemberDetailPage() {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Edit className="w-4 h-4" />
-              Edit Profile
+              {t('editProfileButton')}
             </button>
           </div>
         </div>
@@ -178,7 +179,7 @@ export default function MemberDetailPage() {
             {/* Status Card */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('statusTitle')}</h3>
                 <div className="space-y-3">
                   <div>
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleConfig(member.role).color}`}>
@@ -198,12 +199,12 @@ export default function MemberDetailPage() {
             {/* Contact Info */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('contactInformationTitle')}</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Email</p>
+                      <p className="text-sm text-gray-600">{t('emailLabel')}</p>
                       <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
                         {member.email}
                       </a>
@@ -213,7 +214,7 @@ export default function MemberDetailPage() {
                     <div className="flex items-start gap-3">
                       <Phone className="w-5 h-5 text-gray-400 mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-600">Phone</p>
+                        <p className="text-sm text-gray-600">{t('phoneLabel')}</p>
                         <a href={`tel:${member.phone}`} className="text-blue-600 hover:underline">
                           {member.phone}
                         </a>
@@ -227,19 +228,19 @@ export default function MemberDetailPage() {
             {/* Work Info */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Work Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('workInformationTitle')}</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <Briefcase className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Department</p>
+                      <p className="text-sm text-gray-600">{t('departmentLabel')}</p>
                       <p className="text-gray-900">{member.department}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Hire Date</p>
+                      <p className="text-sm text-gray-600">{t('hireDateLabel')}</p>
                       <p className="text-gray-900">
                         {new Date(member.hireDate).toLocaleDateString()}
                       </p>
@@ -248,8 +249,8 @@ export default function MemberDetailPage() {
                   <div className="flex items-start gap-3">
                     <TrendingUp className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Seniority</p>
-                      <p className="text-gray-900">{member.seniority} years</p>
+                      <p className="text-sm text-gray-600">{t('seniorityLabel')}</p>
+                      <p className="text-gray-900">{t('seniorityYears', { years: member.seniority })}</p>
                     </div>
                   </div>
                 </div>
@@ -259,14 +260,14 @@ export default function MemberDetailPage() {
             {/* Union Info */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Union Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('unionInformationTitle')}</h3>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-600">Membership Number</p>
+                    <p className="text-sm text-gray-600">{t('membershipNumberLabel')}</p>
                     <p className="text-gray-900 font-mono">{member.membershipNumber}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Union Join Date</p>
+                    <p className="text-sm text-gray-600">{t('unionJoinDateLabel')}</p>
                     <p className="text-gray-900">
                       {new Date(member.unionJoinDate).toLocaleDateString()}
                     </p>
@@ -281,21 +282,21 @@ export default function MemberDetailPage() {
             <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Claims History</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{t('claimsHistoryTitle')}</h3>
                   <span className="text-sm text-gray-600">
-                    {claims.length} {claims.length === 1 ? 'claim' : 'claims'}
+                    {claims.length === 1 ? t('claimCountOne', { count: claims.length }) : t('claimCountOther', { count: claims.length })}
                   </span>
                 </div>
 
                 {claimsLoading ? (
                   <div className="text-center py-12">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
-                    <p className="text-gray-600">Loading claims...</p>
+                    <p className="text-gray-600">{t('loadingClaims')}</p>
                   </div>
                 ) : claims.length === 0 ? (
                   <div className="text-center py-12">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600">No claims found for this member</p>
+                    <p className="text-gray-600">{t('noClaimsFound')}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -325,7 +326,7 @@ export default function MemberDetailPage() {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            Created {new Date(claim.createdAt).toLocaleDateString()}
+                            {t('createdDateLabel', { date: new Date(claim.createdAt).toLocaleDateString() })}
                           </div>
                           <div className="flex items-center gap-1">
                             <span className={`w-2 h-2 rounded-full ${
@@ -335,7 +336,7 @@ export default function MemberDetailPage() {
                                 ? 'bg-yellow-500'
                                 : 'bg-green-500'
                             }`} />
-                            {claim.priority} priority
+                            {t('priorityLabel', { priority: claim.priority })}
                           </div>
                         </div>
                       </motion.div>

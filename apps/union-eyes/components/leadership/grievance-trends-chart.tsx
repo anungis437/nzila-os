@@ -11,6 +11,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { BarChart3, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +68,7 @@ export function GrievanceTrendsChart({
   onTimeframeChange,
   className,
 }: GrievanceTrendsChartProps) {
+  const t = useTranslations("grievanceTrends");
   const maxVal = getMaxValue(data);
 
   return (
@@ -75,19 +77,19 @@ export function GrievanceTrendsChart({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">Grievance Trends</h3>
+          <h3 className="text-sm font-semibold">{t("title")}</h3>
         </div>
         <div className="flex items-center gap-3">
           {/* Legend */}
           <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-blue-500" /> Filed
+              <span className="h-2 w-2 rounded-full bg-blue-500" /> {t("legend.filed")}
             </span>
             <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-green-500" /> Resolved
+              <span className="h-2 w-2 rounded-full bg-green-500" /> {t("legend.resolved")}
             </span>
             <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-red-500" /> Escalated
+              <span className="h-2 w-2 rounded-full bg-red-500" /> {t("legend.escalated")}
             </span>
           </div>
           {onTimeframeChange && (
@@ -97,9 +99,9 @@ export function GrievanceTrendsChart({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="weekly">{t("timeframe.weekly")}</SelectItem>
+                <SelectItem value="monthly">{t("timeframe.monthly")}</SelectItem>
+                <SelectItem value="quarterly">{t("timeframe.quarterly")}</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -109,7 +111,7 @@ export function GrievanceTrendsChart({
       {/* Chart — accessible CSS bar chart */}
       {data.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">
-          No grievance trend data for the selected period.
+          {t("noData")}
         </p>
       ) : (
         <div className="space-y-4">
@@ -151,11 +153,11 @@ export function GrievanceTrendsChart({
           {/* Category breakdown */}
           {categories.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground">Top Categories</h4>
+              <h4 className="text-xs font-medium text-muted-foreground">{t("topCategories")}</h4>
               <div className="flex flex-wrap gap-2">
                 {categories.slice(0, 6).map((cat) => (
                   <Badge key={cat.category} variant="secondary" className="text-[10px]">
-                    {cat.category}: {cat.count} ({cat.percentage}%)
+                    {t("categoryItem", { category: cat.category, count: cat.count, percentage: cat.percentage })}
                   </Badge>
                 ))}
               </div>

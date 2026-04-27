@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, Mail, Phone, Briefcase, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TeamMember {
   id: string;
@@ -28,16 +29,16 @@ interface BargainingTeamListProps {
   teamMembers: TeamMember[];
 }
 
-const roleLabels: Record<string, string> = {
-  chief_negotiator: "Chief Negotiator",
-  committee_member: "Committee Member",
-  researcher: "Researcher",
-  note_taker: "Note Taker",
-  subject_expert: "Subject Expert",
-  observer: "Observer",
-  legal_counsel: "Legal Counsel",
-  financial_advisor: "Financial Advisor",
-};
+const roleLabelKeys = [
+  "chief_negotiator",
+  "committee_member",
+  "researcher",
+  "note_taker",
+  "subject_expert",
+  "observer",
+  "legal_counsel",
+  "financial_advisor",
+] as const;
 
 const roleColors: Record<string, string> = {
   chief_negotiator: "bg-purple-500",
@@ -51,9 +52,15 @@ const roleColors: Record<string, string> = {
 };
 
 export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
+  const t = useTranslations("bargainingTeam");
   const activeMembers = teamMembers.filter(m => m.isActive);
   const _inactiveMembers = teamMembers.filter(m => !m.isActive);
   const chiefNegotiator = activeMembers.find(m => m.isChief);
+
+  const roleLabel = (role: string) =>
+    roleLabelKeys.includes(role as typeof roleLabelKeys[number])
+      ? t(`roles.${role}` as 'roles.chief_negotiator')
+      : role;
 
   // Get initials for avatar
   const getInitials = (name: string) => {
@@ -70,9 +77,9 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Bargaining Team</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Committee members participating in negotiations
+              {t("description")}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -88,7 +95,7 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                 <Star className="h-4 w-4 text-yellow-500" />
-                Chief Negotiator
+                {t("chiefNegotiator")}
               </h3>
               <div className="border-l-4 border-l-purple-500 p-4 border rounded-lg bg-purple-50/30">
                 <div className="flex items-start gap-3">
@@ -101,7 +108,7 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold">{chiefNegotiator.name}</h4>
                       <Badge className={roleColors[chiefNegotiator.role]}>
-                        {roleLabels[chiefNegotiator.role]}
+                        {roleLabel(chiefNegotiator.role)}
                       </Badge>
                     </div>
                     {chiefNegotiator.title && (
@@ -151,7 +158,7 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
           {activeMembers.filter(m => !m.isChief).length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                Committee Members ({activeMembers.filter(m => !m.isChief).length})
+                {t("committeeMembers", { count: activeMembers.filter(m => !m.isChief).length })}
               </h3>
               <div className="space-y-3">
                 {activeMembers
@@ -168,7 +175,7 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-medium">{member.name}</h4>
                             <Badge variant="outline" className="text-xs">
-                              {roleLabels[member.role]}
+                              {roleLabel(member.role)}
                             </Badge>
                           </div>
                           {member.title && (
@@ -213,8 +220,8 @@ export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
           {activeMembers.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="mx-auto h-12 w-12 mb-4" />
-              <p>No team members assigned</p>
-              <p className="text-sm">Add members to your bargaining committee</p>
+              <p>{t("noMembers")}</p>
+              <p className="text-sm">{t("addMembersHint")}</p>
             </div>
           )}
         </div>

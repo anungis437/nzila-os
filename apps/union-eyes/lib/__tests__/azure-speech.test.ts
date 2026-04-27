@@ -87,11 +87,22 @@ describe('azure-speech', () => {
   });
 
   // ── SUPPORTED_LANGUAGES ────────────────────────────────────────────
-  it('SUPPORTED_LANGUAGES has en-CA, fr-CA, en-US', async () => {
+  it('SUPPORTED_LANGUAGES has the four UE languages plus en-US', async () => {
     const { SUPPORTED_LANGUAGES } = await import('../azure-speech');
     expect(SUPPORTED_LANGUAGES['en-CA']).toBe('English (Canada)');
     expect(SUPPORTED_LANGUAGES['fr-CA']).toBe('French (Canada)');
+    expect(SUPPORTED_LANGUAGES['it-IT']).toBe('Italiano');
+    expect(SUPPORTED_LANGUAGES['pt-PT']).toBe('Portugues');
     expect(SUPPORTED_LANGUAGES['en-US']).toBe('English (United States)');
+  });
+
+  it('maps UE locales to supported speech languages', async () => {
+    const { speechLanguageForLocale } = await import('../azure-speech');
+    expect(speechLanguageForLocale('en-CA')).toBe('en-CA');
+    expect(speechLanguageForLocale('fr-CA')).toBe('fr-CA');
+    expect(speechLanguageForLocale('it')).toBe('it-IT');
+    expect(speechLanguageForLocale('pt')).toBe('pt-PT');
+    expect(speechLanguageForLocale('unknown')).toBe('en-CA');
   });
 
   // ── transcribeAudio ─────────────────────────────────────────────────

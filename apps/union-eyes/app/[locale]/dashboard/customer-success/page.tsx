@@ -28,6 +28,7 @@ import {
   BarChart3,
   Clipboard,
 } from 'lucide-react';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ── Types ── */
 interface OverviewStats {
@@ -306,22 +307,27 @@ function healthColor(score: number) {
 }
 
 function npsLabel(score: number) {
-  if (score >= 9) return { label: 'Promoter', color: 'text-green-600' };
-  if (score >= 7) return { label: 'Passive', color: 'text-yellow-600' };
-  return { label: 'Detractor', color: 'text-red-600' };
+  if (score >= 9) return { labelKey: 'npsPromoter', color: 'text-green-600' } as const;
+  if (score >= 7) return { labelKey: 'npsPassive', color: 'text-yellow-600' } as const;
+  return { labelKey: 'npsDetractor', color: 'text-red-600' } as const;
 }
 
 /* ── Page ── */
 export default async function CustomerSuccessDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const { locale: routeLocale } = await paramsPromise;
+  const locale = await getLocale();
+  const t = await getTranslations('customerSuccessPage');
   await requireUser();
 
   const hasAccess = await hasMinRole('customer_success_director');
   if (!hasAccess) {
-    redirect('/dashboard');
+    redirect(`/${routeLocale}/dashboard`);
   }
 
   const params = await searchParams;
@@ -346,20 +352,18 @@ export default async function CustomerSuccessDashboard({
   }
 
   const tabs = [
-    { key: 'overview', label: 'Overview', icon: BarChart3 },
-    { key: 'health', label: 'Customer Health', icon: Heart },
-    { key: 'onboarding', label: 'Onboarding', icon: Clipboard },
-    { key: 'adoption', label: 'Adoption', icon: Zap },
-    { key: 'feedback', label: 'Feedback & NPS', icon: ThumbsUp },
+    { key: 'overview', label: t('tabOverview'), icon: BarChart3 },
+    { key: 'health', label: t('tabHealth'), icon: Heart },
+    { key: 'onboarding', label: t('tabOnboarding'), icon: Clipboard },
+    { key: 'adoption', label: t('tabAdoption'), icon: Zap },
+    { key: 'feedback', label: t('tabFeedback'), icon: ThumbsUp },
   ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Customer Success</h1>
-        <p className="text-muted-foreground mt-1">
-          Customer health, onboarding, retention, and satisfaction metrics
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
       </div>
 
       {/* ── Tabs ── */}
@@ -389,13 +393,13 @@ export default async function CustomerSuccessDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Organizations
+                    {t('organizationsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{overview.totalOrgs}</div>
                   <p className="text-xs text-muted-foreground">
-                    {overview.activeOrgs} active · {overview.totalMembers} members
+                    {t('activeMembersLabel', { active: overview.activeOrgs, members: overview.totalMembers })}
                   </p>
                 </CardContent>
               </Card>
@@ -406,7 +410,7 @@ export default async function CustomerSuccessDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <ThumbsUp className="h-4 w-4" />
-                    NPS Score
+                    {t('npsScoreTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -414,7 +418,7 @@ export default async function CustomerSuccessDashboard({
                     {overview.npsScore}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    from {overview.totalNpsSurveys} surveys
+                    {t('fromSurveysLabel', { count: overview.totalNpsSurveys })}
                   </p>
                 </CardContent>
               </Card>
@@ -424,13 +428,13 @@ export default async function CustomerSuccessDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
-                  Support Satisfaction
+                  {t('supportSatisfactionTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{overview.avgSatisfaction}/5</div>
                 <p className="text-xs text-muted-foreground">
-                  {overview.openTickets} open tickets
+                  {t('openTicketsLabel', { count: overview.openTickets })}
                 </p>
               </CardContent>
             </Card>
@@ -439,7 +443,7 @@ export default async function CustomerSuccessDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
-                  At-Risk Orgs
+                  {t('atRiskOrgsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -447,7 +451,7 @@ export default async function CustomerSuccessDashboard({
                   {atRiskOrgs.length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  health score &lt; 60
+                  {t('healthScoreThreshold')}
                 </p>
               </CardContent>
             </Card>
@@ -459,9 +463,9 @@ export default async function CustomerSuccessDashboard({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5" />
-                  Customer Health
+                  {t('customerHealthTitle')}
                 </CardTitle>
-                <CardDescription>Health scores by organization</CardDescription>
+                <CardDescription>{t('healthScoresByOrg')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -471,7 +475,7 @@ export default async function CustomerSuccessDashboard({
                         <div>
                           <p className="text-sm font-medium">{org.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {org.memberCount} members · {org.logins30d} logins (30d)
+                            {t('orgMembersLoginsLabel', { members: org.memberCount, logins: org.logins30d })}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -497,48 +501,49 @@ export default async function CustomerSuccessDashboard({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5" />
-                  Platform Adoption
+                  {t('platformAdoptionTitle')}
                 </CardTitle>
-                <CardDescription>Module usage across the platform</CardDescription>
+                <CardDescription>{t('moduleUsageDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">CBAs</p>
+                    <p className="text-sm text-muted-foreground">{t('cbasTitle')}</p>
                     <p className="text-lg font-bold">{overview.totalCBAs}</p>
                     <p className="text-xs text-muted-foreground">
-                      {overview.activeCBAs} active · {overview.negotiatingCBAs} negotiating
+                      {t('activeNegotiatingLabel', { active: overview.activeCBAs, negotiating: overview.negotiatingCBAs })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Grievances</p>
+                    <p className="text-sm text-muted-foreground">{t('grievancesTitle')}</p>
                     <p className="text-lg font-bold">{overview.totalGrievances}</p>
                     <p className="text-xs text-muted-foreground">
-                      {overview.openGrievances} open · {overview.resolvedGrievances} resolved
+                      {t('openResolvedLabel', { open: overview.openGrievances, resolved: overview.resolvedGrievances })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Settlements</p>
+                    <p className="text-sm text-muted-foreground">{t('settlementsTitle')}</p>
                     <p className="text-lg font-bold">{overview.totalSettlements}</p>
                     <p className="text-xs text-muted-foreground">
-                      ${overview.totalSettlementValue.toLocaleString()} total
+                      {t('settlementTotalLabel', { amount: new Intl.NumberFormat(locale).format(overview.totalSettlementValue) })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Features Used</p>
+                    <p className="text-sm text-muted-foreground">{t('featuresUsedTitle')}</p>
                     <p className="text-lg font-bold">{featureAdoption.length}</p>
                     <p className="text-xs text-muted-foreground">
-                      across {new Set(featureAdoption.map((f) => f.module)).size} modules
+                      {t('acrossModulesLabel', { count: new Set(featureAdoption.map((f) => f.module)).size })}
                     </p>
                   </div>
                 </div>
                 <div className="border-t pt-4">
-                  <p className="text-sm font-medium mb-2">CBA Health</p>
+                  <p className="text-sm font-medium mb-2">{t('cbaHealthTitle')}</p>
                   <div className="space-y-1">
                     {[
                       { label: 'Active', count: overview.activeCBAs, color: 'bg-green-500' },
-                      { label: 'Negotiating', count: overview.negotiatingCBAs, color: 'bg-blue-500' },
-                      { label: 'Expired', count: overview.expiredCBAs, color: 'bg-red-500' },
+                      { label: t('statusActive'), count: overview.activeCBAs, color: 'bg-green-500' },
+                      { label: t('statusNegotiating'), count: overview.negotiatingCBAs, color: 'bg-blue-500' },
+                      { label: t('statusExpired'), count: overview.expiredCBAs, color: 'bg-red-500' },
                     ].map((item) => (
                       <div key={item.label} className="flex items-center gap-2">
                         <div className={`h-2 w-2 rounded-full ${item.color}`} />
@@ -558,9 +563,9 @@ export default async function CustomerSuccessDashboard({
       {tab === 'health' && (
         <Card>
           <CardHeader>
-            <CardTitle>Customer Health Scores</CardTitle>
+            <CardTitle>{t('customerHealthScoresTitle')}</CardTitle>
             <CardDescription>
-              Composite score based on activity, satisfaction, engagement, and status
+              {t('customerHealthScoresDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -568,17 +573,17 @@ export default async function CustomerSuccessDashboard({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-2 font-medium">Organization</th>
-                    <th className="pb-2 font-medium">Type</th>
-                    <th className="pb-2 font-medium text-right">Health</th>
-                    <th className="pb-2 font-medium text-right">Members</th>
-                    <th className="pb-2 font-medium text-right">Logins (30d)</th>
-                    <th className="pb-2 font-medium text-right">Page Views (30d)</th>
-                    <th className="pb-2 font-medium text-right">Open Tickets</th>
-                    <th className="pb-2 font-medium text-right">Satisfaction</th>
-                    <th className="pb-2 font-medium text-right">NPS</th>
-                    <th className="pb-2 font-medium text-right">Grievances</th>
-                    <th className="pb-2 font-medium text-right">CBAs</th>
+                    <th className="pb-2 font-medium">{t('tableOrganization')}</th>
+                    <th className="pb-2 font-medium">{t('tableType')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableHealth')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableMembers')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableLogins30d')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tablePageViews30d')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableOpenTickets')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableSatisfaction')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableNps')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableGrievances')}</th>
+                    <th className="pb-2 font-medium text-right">{t('tableCbas')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -601,20 +606,20 @@ export default async function CustomerSuccessDashboard({
                       <td className="py-3 text-right">{org.pageViews30d}</td>
                       <td className="py-3 text-right">{org.openTickets}</td>
                       <td className="py-3 text-right">
-                        {org.avgTicketSatisfaction ? `${org.avgTicketSatisfaction}/5` : '—'}
+                        {org.avgTicketSatisfaction ? `${org.avgTicketSatisfaction}/5` : t('emptyDash')}
                       </td>
                       <td className="py-3 text-right">
-                        {org.npsAvg ? org.npsAvg.toFixed(1) : '—'}
+                        {org.npsAvg ? org.npsAvg.toFixed(1) : t('emptyDash')}
                       </td>
                       <td className="py-3 text-right">
                         {org.openGrievances > 0 && (
-                          <span className="text-yellow-600">{org.openGrievances} open</span>
+                          <span className="text-yellow-600">{t('openCount', { count: org.openGrievances })}</span>
                         )}
                         {org.openGrievances > 0 && org.resolvedGrievances > 0 && ' / '}
                         {org.resolvedGrievances > 0 && (
-                          <span className="text-green-600">{org.resolvedGrievances} resolved</span>
+                          <span className="text-green-600">{t('resolvedCount', { count: org.resolvedGrievances })}</span>
                         )}
-                        {org.openGrievances === 0 && org.resolvedGrievances === 0 && '—'}
+                        {org.openGrievances === 0 && org.resolvedGrievances === 0 && t('emptyDash')}
                       </td>
                       <td className="py-3 text-right">{org.totalCBAs}</td>
                     </tr>
@@ -641,7 +646,7 @@ export default async function CustomerSuccessDashboard({
                     <div>
                       <CardTitle>{orgName}</CardTitle>
                       <CardDescription>
-                        {completed}/{total} milestones completed
+                        {t('milestonesCompletedLabel', { completed, total })}
                       </CardDescription>
                     </div>
                     <span className={`text-lg font-bold ${pct === 100 ? 'text-green-600' : 'text-blue-600'}`}>
@@ -691,7 +696,7 @@ export default async function CustomerSuccessDashboard({
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Features</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('totalFeaturesTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{featureAdoption.length}</div>
@@ -699,7 +704,7 @@ export default async function CustomerSuccessDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Modules Active</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('modulesActiveTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -709,7 +714,7 @@ export default async function CustomerSuccessDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Usage Events</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('totalUsageEventsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -719,14 +724,14 @@ export default async function CustomerSuccessDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg Org Coverage</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('avgOrgCoverageTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {featureAdoption.length > 0
                     ? (featureAdoption.reduce((sum, f) => sum + f.orgCoverage, 0) / featureAdoption.length).toFixed(1)
                     : 0}{' '}
-                  orgs
+                  {t('orgsSuffix')}
                 </div>
               </CardContent>
             </Card>
@@ -734,19 +739,19 @@ export default async function CustomerSuccessDashboard({
 
           <Card>
             <CardHeader>
-              <CardTitle>Feature Adoption</CardTitle>
-              <CardDescription>Usage across the platform by feature</CardDescription>
+              <CardTitle>{t('featureAdoptionTitle')}</CardTitle>
+              <CardDescription>{t('featureAdoptionDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">Feature</th>
-                      <th className="pb-2 font-medium">Module</th>
-                      <th className="pb-2 font-medium text-right">Usage Count</th>
-                      <th className="pb-2 font-medium text-right">Active Users</th>
-                      <th className="pb-2 font-medium text-right">Org Coverage</th>
+                      <th className="pb-2 font-medium">{t('tableFeature')}</th>
+                      <th className="pb-2 font-medium">{t('tableModule')}</th>
+                      <th className="pb-2 font-medium text-right">{t('tableUsageCount')}</th>
+                      <th className="pb-2 font-medium text-right">{t('tableActiveUsers')}</th>
+                      <th className="pb-2 font-medium text-right">{t('tableOrgCoverage')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -758,7 +763,7 @@ export default async function CustomerSuccessDashboard({
                         </td>
                         <td className="py-2 text-right">{f.usageCount.toLocaleString()}</td>
                         <td className="py-2 text-right">{f.activeUsers}</td>
-                        <td className="py-2 text-right">{f.orgCoverage} org{f.orgCoverage !== 1 ? 's' : ''}</td>
+                        <td className="py-2 text-right">{t('orgCoverageCount', { count: f.orgCoverage })}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -776,33 +781,33 @@ export default async function CustomerSuccessDashboard({
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">NPS Score</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('npsScoreTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className={`text-4xl font-bold ${overview.npsScore >= 50 ? 'text-green-600' : overview.npsScore >= 0 ? 'text-yellow-600' : 'text-red-600'}`}>
                   {overview.npsScore}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {overview.npsScore >= 50 ? 'Excellent' : overview.npsScore >= 30 ? 'Good' : overview.npsScore >= 0 ? 'Fair' : 'Needs improvement'}
+                  {overview.npsScore >= 50 ? t('npsExcellent') : overview.npsScore >= 30 ? t('npsGood') : overview.npsScore >= 0 ? t('npsFair') : t('npsNeedsImprovement')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Survey Responses</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('surveyResponsesTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{npsSurveys.length}</div>
                 <div className="flex gap-2 mt-1">
                   <span className="text-xs text-green-600">
-                    {npsSurveys.filter((s) => s.score >= 9).length} promoters
+                    {t('promotersCount', { count: npsSurveys.filter((s) => s.score >= 9).length })}
                   </span>
                   <span className="text-xs text-yellow-600">
-                    {npsSurveys.filter((s) => s.score >= 7 && s.score <= 8).length} passive
+                    {t('passiveCount', { count: npsSurveys.filter((s) => s.score >= 7 && s.score <= 8).length })}
                   </span>
                   <span className="text-xs text-red-600">
-                    {npsSurveys.filter((s) => s.score <= 6).length} detractors
+                    {t('detractorsCount', { count: npsSurveys.filter((s) => s.score <= 6).length })}
                   </span>
                 </div>
               </CardContent>
@@ -810,14 +815,14 @@ export default async function CustomerSuccessDashboard({
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg NPS by Org</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('avgNpsByOrgTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
                   {orgHealth.map((org) => (
                     <div key={org.id} className="flex items-center justify-between text-sm">
                       <span>{org.name}</span>
-                      <span className="font-bold">{org.npsAvg ?? '—'}</span>
+                      <span className="font-bold">{org.npsAvg ?? t('emptyDash')}</span>
                     </div>
                   ))}
                 </div>
@@ -828,13 +833,13 @@ export default async function CustomerSuccessDashboard({
           {/* Survey detail */}
           <Card>
             <CardHeader>
-              <CardTitle>NPS Survey Responses</CardTitle>
-              <CardDescription>Individual feedback from organization members</CardDescription>
+              <CardTitle>{t('npsSurveyResponsesTitle')}</CardTitle>
+              <CardDescription>{t('npsSurveyResponsesDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {npsSurveys.map((s, i) => {
-                  const { label, color } = npsLabel(s.score);
+                  const { labelKey, color } = npsLabel(s.score);
                   return (
                     <div key={i} className="border-b pb-3 last:border-0">
                       <div className="flex items-center justify-between mb-1">
@@ -845,7 +850,7 @@ export default async function CustomerSuccessDashboard({
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-bold ${color}`}>{s.score}/10</span>
                           <Badge variant={s.score >= 9 ? 'default' : s.score >= 7 ? 'secondary' : 'destructive'}>
-                            {label}
+                            {t(labelKey)}
                           </Badge>
                         </div>
                       </div>

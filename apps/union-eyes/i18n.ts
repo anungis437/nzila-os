@@ -9,6 +9,8 @@ export { locales, defaultLocale, type Locale } from './lib/locales';
 const baseLangMap: Record<string, string> = {
   'en-CA': 'en',
   'fr-CA': 'fr',
+  it: 'en-CA',
+  pt: 'en-CA',
 };
 
 // Merge base language messages with locale-specific overrides.

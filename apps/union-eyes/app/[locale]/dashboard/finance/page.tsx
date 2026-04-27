@@ -7,6 +7,8 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -73,6 +75,7 @@ interface DashboardData {
 }
 
 export default function FinanceDashboardPage() {
+  const t = useTranslations('financeDashboardPage');
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,7 +103,7 @@ export default function FinanceDashboardPage() {
   if (loading) {
     return (
       <div className="space-y-6 p-6">
-        <h1 className="text-2xl font-bold">Finance Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="p-4">
@@ -118,9 +121,9 @@ export default function FinanceDashboardPage() {
       <div className="p-6">
         <Card className="p-6 text-center">
           <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-          <p className="text-destructive">{error ?? 'No data available'}</p>
+          <p className="text-destructive">{error ?? t('noDataAvailable')}</p>
           <Button variant="outline" className="mt-4" onClick={fetchDashboard}>
-            Retry
+            {t('retry')}
           </Button>
         </Card>
       </div>
@@ -147,13 +150,13 @@ export default function FinanceDashboardPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Finance Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => router.push('/finance/exports')}>
-            <Download className="h-4 w-4 mr-1" /> Exports
+            <Download className="h-4 w-4 mr-1" /> {t('exports')}
           </Button>
           <Button variant="outline" size="sm" onClick={fetchDashboard}>
-            Refresh
+            {t('refresh')}
           </Button>
         </div>
       </div>
@@ -163,52 +166,52 @@ export default function FinanceDashboardPage() {
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <DollarSign className="h-4 w-4" />
-            Billing Status
+            {t('billingStatusLabel')}
           </div>
           <div className="text-xl font-semibold">
-            {data.billingAccount?.status ?? 'Not configured'}
+            {data.billingAccount?.status ?? t('notConfigured')}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {data.billingAccount?.displayName ?? 'Set up billing to get started'}
+            {data.billingAccount?.displayName ?? t('setupBillingToStart')}
           </p>
         </Card>
 
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <TrendingUp className="h-4 w-4" />
-            Ledger Entries
+            {t('ledgerEntriesLabel')}
           </div>
           <div className="text-xl font-semibold">
             {data.ledgerSummary?.entryCount ?? 0}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Total: {formatCurrency(Number(data.ledgerSummary?.totalAmountCad ?? 0))}
+            {t('totalPrefix')} {formatCurrency(Number(data.ledgerSummary?.totalAmountCad ?? 0))}
           </p>
         </Card>
 
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <BarChart3 className="h-4 w-4" />
-            Members
+            {t('membersLabel')}
           </div>
           <div className="text-xl font-semibold">
             {data.duesAlignment.memberCount}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {data.duesAlignment.arrearsCount} in arrears
+            {t('inArrearsPrefix')} {data.duesAlignment.arrearsCount}
           </p>
         </Card>
 
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <AlertCircle className="h-4 w-4" />
-            Anomalies
+            {t('anomaliesLabel')}
           </div>
           <div className="text-xl font-semibold">
             {data.duesAlignment.anomalyCount}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Dues alignment issues
+            {t('duesAlignmentIssues')}
           </p>
         </Card>
       </div>
@@ -217,27 +220,27 @@ export default function FinanceDashboardPage() {
       <Card className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <FileText className="h-5 w-5" /> Recent Invoices
+            <FileText className="h-5 w-5" /> {t('recentInvoicesTitle')}
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push('/finance/invoices')}
           >
-            View all <ArrowRight className="h-4 w-4 ml-1" />
+            {t('viewAll')} <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
         {data.recentInvoices.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No invoices yet</p>
+          <p className="text-muted-foreground text-sm">{t('noInvoicesYet')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Amount (CAD)</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Issue Date</TableHead>
-                <TableHead>Due Date</TableHead>
+                <TableHead>{t('invoiceNumberHeader')}</TableHead>
+                <TableHead>{t('amountHeader')}</TableHead>
+                <TableHead>{t('statusHeader')}</TableHead>
+                <TableHead>{t('issueDateHeader')}</TableHead>
+                <TableHead>{t('dueDateHeader')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -266,7 +269,7 @@ export default function FinanceDashboardPage() {
         <Card className="p-4 border-yellow-500/30">
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-yellow-500" />
-            Dues Alignment Anomalies
+            {t('duesAlignmentAnomaliesTitle')}
           </h2>
           <div className="space-y-2">
             {data.duesAlignment.anomalies.map((a, i) => (
@@ -284,13 +287,13 @@ export default function FinanceDashboardPage() {
       {/* Chargebacks */}
       {data.recentChargebacks.length > 0 && (
         <Card className="p-4">
-          <h2 className="text-lg font-semibold mb-3">Recent Chargebacks</h2>
+          <h2 className="text-lg font-semibold mb-3">{t('recentChargebacksTitle')}</h2>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Local</TableHead>
-                <TableHead>Net Amount (CAD)</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t('localHeader')}</TableHead>
+                <TableHead>{t('netAmountHeader')}</TableHead>
+                <TableHead>{t('statusHeader')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -311,7 +314,7 @@ export default function FinanceDashboardPage() {
       {/* Cost Type Breakdown */}
       {data.ledgerSummary && Object.keys(data.ledgerSummary.byCostType).length > 0 && (
         <Card className="p-4">
-          <h2 className="text-lg font-semibold mb-3">Cost Type Breakdown</h2>
+          <h2 className="text-lg font-semibold mb-3">{t('costTypeBreakdownTitle')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(data.ledgerSummary.byCostType).map(([type, amount]) => (
               <div key={type} className="border rounded-md p-3">

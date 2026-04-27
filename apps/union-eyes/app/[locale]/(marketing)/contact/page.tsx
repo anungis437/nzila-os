@@ -9,6 +9,58 @@ import { getTranslations } from 'next-intl/server';
 import { Mail, MapPin, Clock } from 'lucide-react';
 import { ContactForm } from '@/app/(marketing)/contact/contact-form';
 
+const CONTACT_COPY: Record<string, {
+  sendMessage: string;
+  otherWays: string;
+  email: string;
+  address: string;
+  officeHours: string;
+  officeHoursValue: string;
+  salesHeading: string;
+  salesBody: string;
+}> = {
+  'en-CA': {
+    sendMessage: 'Send us a message',
+    otherWays: 'Other ways to reach us',
+    email: 'Email',
+    address: 'Address',
+    officeHours: 'Office hours',
+    officeHoursValue: 'Mon-Fri, 9am-5pm ET',
+    salesHeading: 'No pressure sales',
+    salesBody: "We don't respond to inquiries on a sales cadence. If we're not the right tool for you, we'll tell you honestly.",
+  },
+  'fr-CA': {
+    sendMessage: 'Envoyez-nous un message',
+    otherWays: 'Autres facons de nous joindre',
+    email: 'Courriel',
+    address: 'Adresse',
+    officeHours: 'Heures de bureau',
+    officeHoursValue: 'Lun-Ven, 9h-17h HE',
+    salesHeading: 'Pas de vente sous pression',
+    salesBody: 'Nous ne repondons pas aux demandes sur un rythme commercial. Si nous ne sommes pas le bon outil pour vous, nous vous le dirons honnetement.',
+  },
+  it: {
+    sendMessage: 'Inviaci un messaggio',
+    otherWays: 'Altri modi per contattarci',
+    email: 'Email',
+    address: 'Indirizzo',
+    officeHours: 'Orari di ufficio',
+    officeHoursValue: 'Lun-Ven, 9:00-17:00 ET',
+    salesHeading: 'Nessuna vendita aggressiva',
+    salesBody: 'Non rispondiamo alle richieste con pressione commerciale. Se non siamo lo strumento giusto per te, te lo diremo con onesta.',
+  },
+  pt: {
+    sendMessage: 'Envie-nos uma mensagem',
+    otherWays: 'Outras formas de falar conosco',
+    email: 'Email',
+    address: 'Endereco',
+    officeHours: 'Horario comercial',
+    officeHoursValue: 'Seg-Sex, 9h-17h ET',
+    salesHeading: 'Sem pressao comercial',
+    salesBody: 'Nao respondemos com pressao de vendas. Se nao formos a ferramenta certa para voce, diremos isso com honestidade.',
+  },
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -29,7 +81,7 @@ export default async function LocaleContactPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.contact' });
-  const isFr = locale === 'fr-CA';
+  const copy = CONTACT_COPY[locale] ?? CONTACT_COPY['en-CA'];
 
   return (
     <div className="min-h-screen bg-white">
@@ -46,7 +98,7 @@ export default async function LocaleContactPage({
           {/* Contact Form */}
           <div>
             <h2 className="text-2xl font-semibold text-slate-900 mb-6">
-              {isFr ? 'Envoyez-nous un message' : 'Send us a message'}
+              {copy.sendMessage}
             </h2>
             <ContactForm />
           </div>
@@ -54,35 +106,33 @@ export default async function LocaleContactPage({
           {/* Contact Info */}
           <div>
             <h2 className="text-2xl font-semibold text-slate-900 mb-6">
-              {isFr ? 'Autres façons de nous joindre' : 'Other ways to reach us'}
+              {copy.otherWays}
             </h2>
             <div className="space-y-6">
               <ContactInfoItem
                 icon={<Mail className="h-5 w-5" />}
-                label={isFr ? 'Courriel' : 'Email'}
+                label={copy.email}
                 value="hello@union-eyes.ca"
                 href="mailto:hello@union-eyes.ca"
               />
               <ContactInfoItem
                 icon={<MapPin className="h-5 w-5" />}
-                label={isFr ? 'Adresse' : 'Address'}
-                value={isFr ? 'Toronto, Ontario, Canada' : 'Toronto, Ontario, Canada'}
+                label={copy.address}
+                value="Toronto, Ontario, Canada"
               />
               <ContactInfoItem
                 icon={<Clock className="h-5 w-5" />}
-                label={isFr ? 'Heures de bureau' : 'Office hours'}
-                value={isFr ? 'Lun–Ven, 9h–17h HE' : 'Mon–Fri, 9am–5pm ET'}
+                label={copy.officeHours}
+                value={copy.officeHoursValue}
               />
             </div>
 
             <div className="mt-10 p-6 bg-blue-50 border border-blue-200 rounded-lg">
               <h3 className="font-semibold text-blue-900 mb-2">
-                {isFr ? 'Pas de vente sous pression' : 'No pressure sales'}
+                {copy.salesHeading}
               </h3>
               <p className="text-blue-800 text-sm leading-relaxed">
-                {isFr
-                  ? "Nous ne répondons pas aux demandes sur les délais de vente. Si nous ne sommes pas le bon outil pour vous, nous vous le dirons honnêtement."
-                  : "We don't respond to inquiries on a sales cadence. If we're not the right tool for you, we'll tell you honestly."}
+                {copy.salesBody}
               </p>
             </div>
           </div>

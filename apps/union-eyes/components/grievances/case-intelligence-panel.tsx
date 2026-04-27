@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { CaseGraphSummary } from '@/components/grievances/case-graph-summary';
 import { PrecedentDocumentsPanel } from '@/components/grievances/precedent-documents-panel';
 import { RelatedDocumentsPanel } from '@/components/grievances/related-documents-panel';
@@ -15,6 +16,7 @@ const emptyState: IntelligenceResponse = {
 };
 
 export function CaseIntelligencePanel(props: { caseId: string }) {
+  const t = useTranslations("caseIntelligence");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<IntelligenceResponse>(emptyState);
   const [reasonFilter, setReasonFilter] = useState('');
@@ -62,14 +64,14 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
     <div className="space-y-4">
       <div className="rounded-lg border bg-white p-4">
         <div className="mb-3">
-          <h2 className="text-base font-semibold">Case Intelligence</h2>
-          <p className="text-xs text-gray-500">Governed relevance, similar cases, precedents, and graph context</p>
+          <h2 className="text-base font-semibold">{t("title")}</h2>
+          <p className="text-xs text-gray-500">{t("description")}</p>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           <input
             value={reasonFilter}
             onChange={(event) => setReasonFilter(event.target.value)}
-            placeholder="Filter by reason"
+            placeholder={t("filterByReason")}
             className="rounded border px-3 py-2 text-xs"
           />
           <select
@@ -77,7 +79,7 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
             onChange={(event) => setLabelFilter(event.target.value)}
             className="rounded border px-3 py-2 text-xs"
           >
-            <option value="">All privacy labels</option>
+            <option value="">{t("allPrivacyLabels")}</option>
             {labels.map((label) => (
               <option key={label} value={label}>{label}</option>
             ))}

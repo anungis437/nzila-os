@@ -3,6 +3,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { validateRedirectUrl } from "@/lib/utils/sanitize";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import { Label } from "@/components/ui/label";
  * After payment, they can create an account later and their payment will be linked.
  */
 export default function PayPage() {
+  const t = useTranslations("payPage");
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +60,7 @@ export default function PayPage() {
   const handleCheckout = async () => {
     try {
       if (!isValidEmail) {
-        setError("Please enter a valid email address");
+        setError(t("errors.invalidEmail"));
         return;
       }
 
@@ -85,24 +87,24 @@ export default function PayPage() {
       
       if (!response.ok) {
         const _errorData = await response.json();
-setError('Failed to create checkout. Please try again.');
+        setError(t("errors.checkoutFailed"));
         return;
       }
       
       const data = await response.json();
       
       if (!data.checkoutUrl) {
-setError('Failed to create checkout. Please try again.');
+        setError(t("errors.checkoutFailed"));
         return;
       }
       
       // Log the checkout URL for debugging
 // Redirect to the checkout URL
       const safeUrl = validateRedirectUrl(data.checkoutUrl);
-      if (!safeUrl) { setError('Untrusted checkout URL'); return; }
+      if (!safeUrl) { setError(t("errors.untrustedCheckoutUrl")); return; }
       window.location.href = safeUrl;
     } catch (_err) {
-setError('An unexpected error occurred. Please try again.');
+      setError(t("errors.unexpected"));
     } finally {
       setIsLoading(false);
     }
@@ -110,12 +112,12 @@ setError('An unexpected error occurred. Please try again.');
 
   // Benefits list
   const benefits = [
-    "1,000 AI credits per billing cycle",
-    "AI-powered case triage & drafting",
-    "Precedent research & CBA extraction",
-    "Full claims & arbitration toolkit",
-    "Multi-role team collaboration",
-    "Priority support from labour specialists"
+    t("benefits.aiCredits"),
+    t("benefits.aiTriage"),
+    t("benefits.precedentResearch"),
+    t("benefits.claimsToolkit"),
+    t("benefits.teamCollaboration"),
+    t("benefits.prioritySupport")
   ];
 
   // Current pricing data based on selected billing cycle
@@ -126,10 +128,10 @@ setError('An unexpected error occurred. Please try again.');
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900">
-            Get Started with Pro
+            {t("header.title")}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Purchase now and create your account later
+            {t("header.subtitle")}
           </p>
         </div>
 
@@ -143,7 +145,7 @@ setError('An unexpected error occurred. Please try again.');
               }`}
               onClick={() => setBillingCycle("monthly")}
             >
-              Monthly
+              {t("billing.monthly")}
             </button>
             <button
               className={`px-4 py-2 text-sm font-medium rounded-md ${
@@ -153,7 +155,7 @@ setError('An unexpected error occurred. Please try again.');
               }`}
               onClick={() => setBillingCycle("yearly")}
             >
-              Yearly
+              {t("billing.yearly")}
             </button>
           </div>
         </div>
@@ -168,15 +170,18 @@ setError('An unexpected error occurred. Please try again.');
               className="absolute -top-0.5 right-6"
             >
               <div className="bg-linear-to-r from-purple-500 to-purple-700 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-sm">
-                Save {currentPlan.savingsPercentage}% ({currentPlan.savingsAmount})
+                {t("pricing.save", {
+                  percentage: currentPlan.savingsPercentage,
+                  amount: currentPlan.savingsAmount,
+                })}
               </div>
             </motion.div>
           )}
           
           <CardHeader className="px-6 py-6">
-            <CardTitle className="text-2xl font-bold">Pro Plan</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t("pricing.planTitle")}</CardTitle>
             <CardDescription className="text-base text-gray-500 mt-1">
-              Everything your union needs to manage grievances, members &amp; advocacy.
+              {t("pricing.planDescription")}
             </CardDescription>
           </CardHeader>
           
@@ -193,7 +198,7 @@ setError('An unexpected error occurred. Please try again.');
                 >
                   <span className="text-5xl font-bold">{currentPlan.price}</span>
                   <span className="text-gray-500 ml-2 text-base">
-                    /{billingCycle === "monthly" ? "month" : "year"}
+                    /{billingCycle === "monthly" ? t("pricing.month") : t("pricing.year")}
                   </span>
                 </motion.div>
               </AnimatePresence>
@@ -216,7 +221,7 @@ setError('An unexpected error occurred. Please try again.');
                         clipRule="evenodd" 
                       />
                     </svg>
-                    Billed annually
+                    {t("pricing.billedAnnually")}
                   </span>
                 </motion.div>
               )}
@@ -225,18 +230,18 @@ setError('An unexpected error occurred. Please try again.');
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email address
+                  {t("form.emailLabel")}
                 </Label>
                 <Input 
                   id="email"
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder={t("form.emailPlaceholder")}
                   value={email}
                   onChange={handleEmailChange}
                   className="w-full"
                 />
                 {email && !isValidEmail && (
-                  <p className="text-xs text-red-500">Please enter a valid email address</p>
+                  <p className="text-xs text-red-500">{t("errors.invalidEmail")}</p>
                 )}
               </div>
             </div>
@@ -247,7 +252,7 @@ setError('An unexpected error occurred. Please try again.');
               disabled={isLoading || !isValidEmail || !email}
               variant="default"
             >
-              {isLoading ? "Processing..." : "Upgrade to Pro"}
+              {isLoading ? t("actions.processing") : t("actions.upgrade")}
             </Button>
             
             {error && (
@@ -257,7 +262,7 @@ setError('An unexpected error occurred. Please try again.');
             )}
 
             <div className="pt-4">
-              <h3 className="font-semibold mb-4">Benefits</h3>
+              <h3 className="font-semibold mb-4">{t("benefits.title")}</h3>
               <ul className="space-y-3">
                 {benefits.map((benefit, index) => (
                   <li key={index} className="flex items-center gap-2.5">
@@ -273,8 +278,7 @@ setError('An unexpected error occurred. Please try again.');
         </Card>
 
         <p className="mt-4 text-center text-xs text-gray-500">
-          By proceeding, you&apos;ll be able to create your account after checkout.
-          Your purchase will be linked to your email address.
+          {t("footer.disclaimer")}
         </p>
       </div>
     </div>

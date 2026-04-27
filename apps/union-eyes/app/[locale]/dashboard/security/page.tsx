@@ -19,6 +19,7 @@ import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -172,14 +173,16 @@ function formatEventType(type: string) {
   return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+function makeTimeAgo(t: (k: string, v?: Record<string, string | number | Date>) => string) {
+  return function timeAgo(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return t('timeAgoMins', { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('timeAgoHours', { count: hours });
+    const days = Math.floor(hours / 24);
+    return t('timeAgoDays', { count: days });
+  };
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────
@@ -192,6 +195,7 @@ export default async function SecurityDashboard({
   searchParams: Promise<{ tab?: string; severity?: string; status?: string }>;
 }) {
   const { locale } = await paramsPromise;
+  const t = await getTranslations('securityPage');
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterSeverity = params.severity ?? null;
@@ -223,6 +227,7 @@ export default async function SecurityDashboard({
   }
 
   const stats = computeStats(events, posture);
+  const timeAgo = makeTimeAgo(t);
 
   // Filtered views for tabs
   const alertEvents = filterSeverity
@@ -238,32 +243,30 @@ export default async function SecurityDashboard({
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Security Operations</h1>
-        <p className="text-muted-foreground mt-1">
-          Monitor security events, threats, and access patterns
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href={`/${locale}/dashboard/security`} className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/security`} className="no-underline">{t('tabOverview')}</Link>
           </TabsTrigger>
           <TabsTrigger value="alerts">
             <Link href={`/${locale}/dashboard/security?tab=alerts`} className="no-underline">
-              Alerts {stats.criticalAlerts + stats.highAlerts > 0 && (
+              {t('tabAlerts')} {stats.criticalAlerts + stats.highAlerts > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{stats.criticalAlerts + stats.highAlerts}</Badge>
               )}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="threats">
-            <Link href={`/${locale}/dashboard/security?tab=threats`} className="no-underline">Threats ({stats.blockedThreats})</Link>
+            <Link href={`/${locale}/dashboard/security?tab=threats`} className="no-underline">{t('tabThreats', { count: stats.blockedThreats })}</Link>
           </TabsTrigger>
           <TabsTrigger value="access">
-            <Link href={`/${locale}/dashboard/security?tab=access`} className="no-underline">Access Logs</Link>
+            <Link href={`/${locale}/dashboard/security?tab=access`} className="no-underline">{t('tabAccess')}</Link>
           </TabsTrigger>
           <TabsTrigger value="posture">
-            <Link href={`/${locale}/dashboard/security?tab=posture`} className="no-underline">Posture</Link>
+            <Link href={`/${locale}/dashboard/security?tab=posture`} className="no-underline">{t('tabPosture')}</Link>
           </TabsTrigger>
         </TabsList>
 
@@ -275,16 +278,14 @@ export default async function SecurityDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Shield className="h-4 w-4" />
-                    Security Score
+                    {t('securityScoreTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className={`text-2xl font-bold ${stats.securityScore >= 90 ? 'text-green-600' : stats.securityScore >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
                     {stats.securityScore}%
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.posturePass}/{posture.length} checks passing
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('checksPassingLabel', { pass: stats.posturePass, total: posture.length })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -294,16 +295,14 @@ export default async function SecurityDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Critical Alerts
+                    {t('criticalAlertsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className={`text-2xl font-bold ${stats.criticalAlerts > 0 ? 'text-red-600' : ''}`}>
                     {stats.criticalAlerts}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.highAlerts} high severity
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t('highSeverityLabel', { count: stats.highAlerts })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -313,12 +312,12 @@ export default async function SecurityDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <XCircle className="h-4 w-4" />
-                    Blocked Threats
+                    {t('blockedThreatsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.blockedThreats}</div>
-                  <p className="text-xs text-muted-foreground">Automatically mitigated</p>
+                  <p className="text-xs text-muted-foreground">{t('autoMitigatedLabel')}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -328,12 +327,12 @@ export default async function SecurityDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Activity className="h-4 w-4" />
-                    Security Events
+                    {t('securityEventsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalEvents}</div>
-                  <p className="text-xs text-muted-foreground">Total monitored</p>
+                  <p className="text-xs text-muted-foreground">{t('totalMonitoredLabel')}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -342,7 +341,7 @@ export default async function SecurityDashboard({
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Threat Detection</CardTitle>
+                <CardTitle>{t('threatDetectionTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -356,7 +355,7 @@ export default async function SecurityDashboard({
                       </div>
                     ))}
                   {Object.keys(stats.eventsByType).length === 0 && (
-                    <p className="text-sm text-muted-foreground">No events recorded</p>
+                    <p className="text-sm text-muted-foreground">{t('noEventsRecorded')}</p>
                   )}
                 </div>
               </CardContent>
@@ -364,24 +363,24 @@ export default async function SecurityDashboard({
 
             <Card>
               <CardHeader>
-                <CardTitle>Incident Status</CardTitle>
+                <CardTitle>{t('incidentStatusTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <Link href={`/${locale}/dashboard/security?tab=access&status=open`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Open</span>
+                    <span className="text-sm">{t('statusOpen')}</span>
                     <Badge variant="destructive">{stats.openIncidents}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/security?tab=access&status=investigating`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Investigating</span>
+                    <span className="text-sm">{t('statusInvestigating')}</span>
                     <Badge variant="secondary">{stats.investigatingCount}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/security?tab=access&status=blocked`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Blocked</span>
+                    <span className="text-sm">{t('statusBlocked')}</span>
                     <Badge variant="default">{stats.blockedThreats}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/security?tab=access&status=resolved`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Resolved</span>
+                    <span className="text-sm">{t('statusResolved')}</span>
                     <Badge variant="outline">{stats.resolvedCount}</Badge>
                   </Link>
                 </div>
@@ -394,7 +393,7 @@ export default async function SecurityDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="h-5 w-5" />
-                Security Posture
+                {t('postureTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -407,7 +406,7 @@ export default async function SecurityDashboard({
                         variant={check.status === 'pass' ? 'default' : check.status === 'warn' ? 'secondary' : 'destructive'}
                         className={check.status === 'pass' ? 'bg-green-600' : ''}
                       >
-                        {check.status === 'pass' ? 'Active' : check.status === 'warn' ? 'Warning' : 'Failed'}
+                        {check.status === 'pass' ? t('postureActive') : check.status === 'warn' ? t('postureWarning') : t('postureFailed')}
                       </Badge>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -423,7 +422,7 @@ export default async function SecurityDashboard({
                   </div>
                 ))}
                 {posture.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No posture checks configured</p>
+                  <p className="text-sm text-muted-foreground">{t('noPostureConfigured')}</p>
                 )}
               </div>
             </CardContent>
@@ -435,12 +434,12 @@ export default async function SecurityDashboard({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Security Alerts</CardTitle>
+                <CardTitle>{t('alertsTitle')}</CardTitle>
                 {filterSeverity ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Filtered: {filterSeverity}</Badge>
+                    <Badge variant="secondary">{t('filteredLabel', { value: filterSeverity })}</Badge>
                     <Link href={`/${locale}/dashboard/security?tab=alerts`} className="text-xs text-muted-foreground hover:text-foreground">
-                      Clear filter
+                      {t('clearFilter')}
                     </Link>
                   </div>
                 ) : (
@@ -459,7 +458,7 @@ export default async function SecurityDashboard({
               {alertEvents.length === 0 ? (
                 <div className="py-8 text-center">
                   <CheckCircle className="h-10 w-10 mx-auto text-green-600 mb-2" />
-                  <p className="text-sm text-muted-foreground">No alerts matching filter</p>
+                  <p className="text-sm text-muted-foreground">{t('noAlertsFilter')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -483,7 +482,7 @@ export default async function SecurityDashboard({
                           </span>
                         </div>
                         {event.actionTaken && (
-                          <p className="text-xs text-muted-foreground italic">Action: {event.actionTaken}</p>
+                          <p className="text-xs text-muted-foreground italic">{t('actionLabel', { value: event.actionTaken })}</p>
                         )}
                       </div>
                       <Badge variant={statusVariant(event.status)} className="shrink-0">
@@ -501,13 +500,13 @@ export default async function SecurityDashboard({
         <TabsContent value="threats" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Blocked Threats</CardTitle>
+                <CardTitle>{t('threatsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {threatEvents.length === 0 ? (
                 <div className="py-8 text-center">
                   <Shield className="h-10 w-10 mx-auto text-green-600 mb-2" />
-                  <p className="text-sm text-muted-foreground">No threats detected</p>
+                  <p className="text-sm text-muted-foreground">{t('noThreatsDetected')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -522,16 +521,16 @@ export default async function SecurityDashboard({
                         </div>
                         <p className="text-sm text-muted-foreground">{event.description}</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          {event.sourceIp && <span>Source: {event.sourceIp}</span>}
-                          {event.resource && <><span>&bull;</span><span>Target: {event.resource}</span></>}
+                          {event.sourceIp && <span>{t('sourceLabel', { value: event.sourceIp })}</span>}
+                          {event.resource && <><span>&bull;</span><span>{t('targetLabel', { value: event.resource })}</span></>}
                           <span>&bull;</span>
                           <span>{timeAgo(event.createdAt)}</span>
                         </div>
                         {event.actionTaken && (
-                          <p className="text-xs text-muted-foreground italic">Mitigation: {event.actionTaken}</p>
+                          <p className="text-xs text-muted-foreground italic">{t('mitigationLabel', { value: event.actionTaken })}</p>
                         )}
                       </div>
-                      <Badge variant="default" className="bg-red-600 shrink-0">Blocked</Badge>
+                      <Badge variant="default" className="bg-red-600 shrink-0">{t('statusBlocked')}</Badge>
                     </div>
                   ))}
                 </div>
@@ -545,12 +544,12 @@ export default async function SecurityDashboard({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Access Audit Trail</CardTitle>
+                <CardTitle>{t('accessTitle')}</CardTitle>
                 {filterStatus && (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Filtered: {filterStatus}</Badge>
+                    <Badge variant="secondary">{t('filteredLabel', { value: filterStatus })}</Badge>
                     <Link href={`/${locale}/dashboard/security?tab=access`} className="text-xs text-muted-foreground hover:text-foreground">
-                      Clear filter
+                      {t('clearFilter')}
                     </Link>
                   </div>
                 )}
@@ -558,14 +557,14 @@ export default async function SecurityDashboard({
             </CardHeader>
             <CardContent>
               {accessEvents.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No access logs found</p>
+                <p className="text-sm text-muted-foreground">{t('noAccessLogs')}</p>
               ) : (
                 <div className="space-y-3">
                   {accessEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between border-b pb-3 last:border-0 gap-4">
                       <div className="space-y-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-medium">{event.userEmail ?? 'Unknown'}</span>
+                          <span className="text-sm font-medium">{event.userEmail ?? t('unknownUser')}</span>
                           <Badge variant="outline" className="text-xs">{formatEventType(event.eventType)}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{event.description}</p>
@@ -595,7 +594,7 @@ export default async function SecurityDashboard({
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Passing</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('posturePassTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{stats.posturePass}</div>
@@ -603,7 +602,7 @@ export default async function SecurityDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Warnings</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('postureWarnTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">{stats.postureWarn}</div>
@@ -611,7 +610,7 @@ export default async function SecurityDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Failing</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('postureFailTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{stats.postureFail}</div>
@@ -621,11 +620,11 @@ export default async function SecurityDashboard({
 
           <Card>
             <CardHeader>
-              <CardTitle>Security Posture Checks</CardTitle>
+              <CardTitle>{t('postureChecksTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {posture.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No posture checks configured</p>
+                <p className="text-sm text-muted-foreground">{t('noPostureConfigured')}</p>
               ) : (
                 <div className="space-y-4">
                   {posture.map((check) => (
@@ -643,7 +642,7 @@ export default async function SecurityDashboard({
                             variant={check.status === 'pass' ? 'default' : check.status === 'warn' ? 'secondary' : 'destructive'}
                             className={check.status === 'pass' ? 'bg-green-600' : ''}
                           >
-                            {check.status === 'pass' ? 'Pass' : check.status === 'warn' ? 'Warning' : 'Fail'}
+                            {check.status === 'pass' ? t('postureStatusPass') : check.status === 'warn' ? t('postureStatusWarn') : t('postureStatusFail')}
                           </Badge>
                         </div>
                       </div>
@@ -662,7 +661,7 @@ export default async function SecurityDashboard({
                       )}
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Eye className="h-3 w-3" />
-                        Last checked {timeAgo(check.lastCheckedAt)}
+                        {t('lastCheckedLabel', { time: timeAgo(check.lastCheckedAt) })}
                       </p>
                     </div>
                   ))}

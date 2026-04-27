@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { getTranslations } from 'next-intl/server';
 import { Key, Webhook, Activity, CheckCircle2, XCircle, Clock, Plug, AlertTriangle } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
@@ -290,6 +291,7 @@ export default async function IntegrationsDashboard({
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
+  const t = await getTranslations({ locale, namespace: 'integrationsDashboardPage' });
 
   const user = await requireUser();
 
@@ -320,16 +322,61 @@ export default async function IntegrationsDashboard({
 
   const stats = computeStats(apiKeys, webhooks, partners);
 
+  const relativeTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return t('minutesAgo', { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('hoursAgo', { count: hours });
+    const days = Math.floor(hours / 24);
+    return t('daysAgo', { count: days });
+  };
+
+  const keyStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return t('status.active');
+      case 'expired': return t('status.expired');
+      case 'revoked': return t('status.revoked');
+      case 'inactive': return t('status.inactive');
+      default: return status;
+    }
+  };
+
+  const webhookStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return t('status.active');
+      case 'paused': return t('status.paused');
+      case 'error': return t('status.error');
+      default: return status;
+    }
+  };
+
+  const partnerStatusLabel = (status: string) => {
+    switch (status) {
+      case 'connected': return t('status.connected');
+      case 'pending': return t('status.pending');
+      case 'error': return t('status.error');
+      case 'disconnected': return t('status.disconnected');
+      default: return status;
+    }
+  };
+
   // Integration health
   const healthStatus = stats.errorWebhooks > 0 || stats.errorPartners > 0
-    ? 'Issues'
+    ? 'issues'
     : stats.pausedWebhooks > 0 || stats.pendingPartners > 0
-    ? 'Warning'
-    : 'Healthy';
+    ? 'warning'
+    : 'healthy';
 
-  const healthColor = healthStatus === 'Healthy'
+  const healthLabel = healthStatus === 'healthy'
+    ? t('health.healthy')
+    : healthStatus === 'warning'
+    ? t('health.warning')
+    : t('health.issues');
+
+  const healthColor = healthStatus === 'healthy'
     ? 'text-green-600'
-    : healthStatus === 'Warning'
+    : healthStatus === 'warning'
     ? 'text-yellow-600'
     : 'text-red-600';
 
@@ -344,32 +391,32 @@ export default async function IntegrationsDashboard({
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Integrations Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Manage API keys, webhooks, and partner integrations
+          {t('subtitle')}
         </p>
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href={`/${locale}/dashboard/integrations`} className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/integrations`} className="no-underline">{t('overviewTab')}</Link>
           </TabsTrigger>
           <TabsTrigger value="api-keys">
             <Link href={`/${locale}/dashboard/integrations?tab=api-keys`} className="no-underline">
-              API Keys ({stats.activeApiKeys})
+              {t('apiKeysTab', { count: stats.activeApiKeys })}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="webhooks">
             <Link href={`/${locale}/dashboard/integrations?tab=webhooks`} className="no-underline">
-              Webhooks {stats.errorWebhooks > 0 && (
+              {t('webhooksTab')} {stats.errorWebhooks > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{stats.errorWebhooks}</Badge>
               )}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="partners">
             <Link href={`/${locale}/dashboard/integrations?tab=partners`} className="no-underline">
-              Partners ({stats.connectedPartners})
+              {t('partnersTab', { count: stats.connectedPartners })}
             </Link>
           </TabsTrigger>
         </TabsList>
@@ -382,12 +429,12 @@ export default async function IntegrationsDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Key className="h-4 w-4" />
-                    Active API Keys
+                    {t('cards.activeApiKeysTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activeApiKeys}</div>
-                  <p className="text-xs text-muted-foreground">Out of {stats.totalApiKeys} total</p>
+                  <p className="text-xs text-muted-foreground">{t('cards.outOfTotal', { count: stats.totalApiKeys })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -397,12 +444,12 @@ export default async function IntegrationsDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Webhook className="h-4 w-4" />
-                    Active Webhooks
+                    {t('cards.activeWebhooksTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activeWebhooks}</div>
-                  <p className="text-xs text-muted-foreground">Out of {stats.totalWebhooks} total</p>
+                  <p className="text-xs text-muted-foreground">{t('cards.outOfTotal', { count: stats.totalWebhooks })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -411,14 +458,14 @@ export default async function IntegrationsDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Activity className="h-4 w-4" />
-                  Webhook Success Rate
+                  {t('cards.webhookSuccessRateTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${stats.webhookSuccessRate >= 99 ? 'text-green-600' : stats.webhookSuccessRate >= 95 ? 'text-yellow-600' : 'text-red-600'}`}>
                   {stats.webhookSuccessRate}%
                 </div>
-                <p className="text-xs text-muted-foreground">Across all deliveries</p>
+                <p className="text-xs text-muted-foreground">{t('cards.acrossAllDeliveries')}</p>
               </CardContent>
             </Card>
 
@@ -427,13 +474,13 @@ export default async function IntegrationsDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Plug className="h-4 w-4" />
-                    Integration Health
+                    {t('cards.integrationHealthTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold ${healthColor}`}>{healthStatus}</div>
+                  <div className={`text-2xl font-bold ${healthColor}`}>{healthLabel}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats.connectedPartners}/{stats.totalPartners} connected
+                    {t('cards.connectedPartnersSummary', { connected: stats.connectedPartners, total: stats.totalPartners })}
                   </p>
                 </CardContent>
               </Card>
@@ -443,24 +490,24 @@ export default async function IntegrationsDashboard({
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>API Activity</CardTitle>
+                <CardTitle>{t('apiActivityTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Total Requests</span>
+                    <span className="text-sm">{t('totalRequestsLabel')}</span>
                     <span className="text-sm font-bold">{formatNumber(stats.totalRequests)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Active Keys</span>
+                    <span className="text-sm">{t('activeKeysLabel')}</span>
                     <span className="text-sm font-bold">{stats.activeApiKeys}</span>
                   </div>
                   <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=revoked`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Revoked Keys</span>
+                    <span className="text-sm">{t('revokedKeysLabel')}</span>
                     <Badge variant={stats.revokedApiKeys > 0 ? 'destructive' : 'outline'}>{stats.revokedApiKeys}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=expired`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Expired Keys</span>
+                    <span className="text-sm">{t('expiredKeysLabel')}</span>
                     <Badge variant={stats.expiredApiKeys > 0 ? 'secondary' : 'outline'}>{stats.expiredApiKeys}</Badge>
                   </Link>
                 </div>
@@ -469,7 +516,7 @@ export default async function IntegrationsDashboard({
 
             <Card>
               <CardHeader>
-                <CardTitle>Partner Status</CardTitle>
+                <CardTitle>{t('partnerStatusTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -478,15 +525,12 @@ export default async function IntegrationsDashboard({
                       <span className="text-sm">{partner.name}</span>
                       <Badge variant={partnerStatusVariant(partner.status)} className="flex items-center gap-1">
                         {partnerStatusIcon(partner.status)}
-                        {partner.status === 'connected' ? 'Connected' :
-                         partner.status === 'pending' ? 'Pending' :
-                         partner.status === 'error' ? 'Error' :
-                         partner.status === 'disconnected' ? 'Disconnected' : partner.status}
+                        {partnerStatusLabel(partner.status)}
                       </Badge>
                     </div>
                   ))}
                   {partners.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No integrations configured</p>
+                    <p className="text-sm text-muted-foreground">{t('noIntegrationsConfigured')}</p>
                   )}
                 </div>
               </CardContent>
@@ -499,27 +543,27 @@ export default async function IntegrationsDashboard({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>API Keys</CardTitle>
+                <CardTitle>{t('apiKeysTitle')}</CardTitle>
                 {filterStatus ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Filtered: {filterStatus}</Badge>
+                    <Badge variant="secondary">{t('filteredBadge', { status: filterStatus })}</Badge>
                     <Link href={`/${locale}/dashboard/integrations?tab=api-keys`} className="text-xs text-muted-foreground hover:text-foreground">
-                      Clear filter
+                      {t('clearFilter')}
                     </Link>
                   </div>
                 ) : (
                   <div className="flex gap-1">
                     <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=active`}>
-                      <Badge variant="default" className="cursor-pointer hover:opacity-80">Active ({stats.activeApiKeys})</Badge>
+                      <Badge variant="default" className="cursor-pointer hover:opacity-80">{t('activeBadge', { count: stats.activeApiKeys })}</Badge>
                     </Link>
                     {stats.revokedApiKeys > 0 && (
                       <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=revoked`}>
-                        <Badge variant="destructive" className="cursor-pointer hover:opacity-80">Revoked ({stats.revokedApiKeys})</Badge>
+                        <Badge variant="destructive" className="cursor-pointer hover:opacity-80">{t('revokedBadge', { count: stats.revokedApiKeys })}</Badge>
                       </Link>
                     )}
                     {stats.expiredApiKeys > 0 && (
                       <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=expired`}>
-                        <Badge variant="secondary" className="cursor-pointer hover:opacity-80">Expired ({stats.expiredApiKeys})</Badge>
+                        <Badge variant="secondary" className="cursor-pointer hover:opacity-80">{t('expiredBadge', { count: stats.expiredApiKeys })}</Badge>
                       </Link>
                     )}
                   </div>
@@ -528,7 +572,7 @@ export default async function IntegrationsDashboard({
             </CardHeader>
             <CardContent>
               {filteredApiKeys.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No API keys found</p>
+                <p className="text-sm text-muted-foreground">{t('noApiKeysFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {filteredApiKeys.map((key) => (
@@ -539,27 +583,29 @@ export default async function IntegrationsDashboard({
                         </div>
                         <p className="text-xs text-muted-foreground font-mono">{key.keyPrefix}••••••••</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                          <span>{formatNumber(key.requestCount)} requests</span>
+                          <span>{t('requestCount', { count: key.requestCount })}</span>
                           <span>&bull;</span>
-                          <span>Scopes: {key.scopes.join(', ')}</span>
+                          <span>{t('scopesLabel', { scopes: key.scopes.join(', ') })}</span>
                           {key.lastUsedAt && (
                             <>
                               <span>&bull;</span>
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                Used {timeAgo(key.lastUsedAt)}
+                                {t('usedRelativeTime', { time: relativeTime(key.lastUsedAt) })}
                               </span>
                             </>
                           )}
                         </div>
                         {key.expiresAt && (
                           <p className={`text-xs ${new Date(key.expiresAt) < new Date() ? 'text-red-600' : 'text-muted-foreground'}`}>
-                            {new Date(key.expiresAt) < new Date() ? 'Expired' : 'Expires'}: {new Date(key.expiresAt).toLocaleDateString()}
+                            {new Date(key.expiresAt) < new Date()
+                              ? t('expiredOnDate', { date: new Date(key.expiresAt).toLocaleDateString() })
+                              : t('expiresOnDate', { date: new Date(key.expiresAt).toLocaleDateString() })}
                           </p>
                         )}
                       </div>
                       <Badge variant={keyStatusVariant(key.status)} className="shrink-0">
-                        {key.status}
+                        {keyStatusLabel(key.status)}
                       </Badge>
                     </div>
                   ))}
@@ -574,27 +620,27 @@ export default async function IntegrationsDashboard({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Webhooks</CardTitle>
+                <CardTitle>{t('webhooksTitle')}</CardTitle>
                 {filterStatus ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Filtered: {filterStatus}</Badge>
+                    <Badge variant="secondary">{t('filteredBadge', { status: filterStatus })}</Badge>
                     <Link href={`/${locale}/dashboard/integrations?tab=webhooks`} className="text-xs text-muted-foreground hover:text-foreground">
-                      Clear filter
+                      {t('clearFilter')}
                     </Link>
                   </div>
                 ) : (
                   <div className="flex gap-1">
                     <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=active`}>
-                      <Badge variant="default" className="cursor-pointer hover:opacity-80">Active ({stats.activeWebhooks})</Badge>
+                      <Badge variant="default" className="cursor-pointer hover:opacity-80">{t('activeBadge', { count: stats.activeWebhooks })}</Badge>
                     </Link>
                     {stats.errorWebhooks > 0 && (
                       <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=error`}>
-                        <Badge variant="destructive" className="cursor-pointer hover:opacity-80">Error ({stats.errorWebhooks})</Badge>
+                        <Badge variant="destructive" className="cursor-pointer hover:opacity-80">{t('errorBadge', { count: stats.errorWebhooks })}</Badge>
                       </Link>
                     )}
                     {stats.pausedWebhooks > 0 && (
                       <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=paused`}>
-                        <Badge variant="secondary" className="cursor-pointer hover:opacity-80">Paused ({stats.pausedWebhooks})</Badge>
+                        <Badge variant="secondary" className="cursor-pointer hover:opacity-80">{t('pausedBadge', { count: stats.pausedWebhooks })}</Badge>
                       </Link>
                     )}
                   </div>
@@ -603,7 +649,7 @@ export default async function IntegrationsDashboard({
             </CardHeader>
             <CardContent>
               {filteredWebhooks.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No webhooks found</p>
+                <p className="text-sm text-muted-foreground">{t('noWebhooksFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {filteredWebhooks.map((hook) => {
@@ -626,31 +672,31 @@ export default async function IntegrationsDashboard({
                           </div>
                           <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                             <span className={deliveryRate >= 99 ? 'text-green-600' : deliveryRate >= 95 ? 'text-yellow-600' : 'text-red-600'}>
-                              {deliveryRate}% delivery rate
+                              {t('deliveryRate', { rate: deliveryRate })}
                             </span>
                             <span>&bull;</span>
-                            <span>{formatNumber(hook.successCount)} delivered</span>
+                            <span>{t('deliveredCount', { count: hook.successCount })}</span>
                             {hook.failureCount > 0 && (
                               <>
                                 <span>&bull;</span>
-                                <span className="text-red-600">{hook.failureCount} failed</span>
+                                <span className="text-red-600">{t('failedCount', { count: hook.failureCount })}</span>
                               </>
                             )}
                             {hook.lastTriggeredAt && (
                               <>
                                 <span>&bull;</span>
-                                <span>Last: {timeAgo(hook.lastTriggeredAt)}</span>
+                                <span>{t('lastTriggered', { time: relativeTime(hook.lastTriggeredAt) })}</span>
                               </>
                             )}
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           <Badge variant={webhookStatusVariant(hook.status)}>
-                            {hook.status}
+                            {webhookStatusLabel(hook.status)}
                           </Badge>
                           {hook.lastResponseCode && (
                             <span className={`text-xs font-mono ${hook.lastResponseCode < 300 ? 'text-green-600' : 'text-red-600'}`}>
-                              HTTP {hook.lastResponseCode}
+                              {t('httpStatus', { code: hook.lastResponseCode })}
                             </span>
                           )}
                         </div>
@@ -668,7 +714,7 @@ export default async function IntegrationsDashboard({
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Connected</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('status.connected')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{stats.connectedPartners}</div>
@@ -676,7 +722,7 @@ export default async function IntegrationsDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('status.pending')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">{stats.pendingPartners}</div>
@@ -684,7 +730,7 @@ export default async function IntegrationsDashboard({
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Issues</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('health.issues')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{stats.errorPartners}</div>
@@ -694,11 +740,11 @@ export default async function IntegrationsDashboard({
 
           <Card>
             <CardHeader>
-              <CardTitle>Partner Integrations</CardTitle>
+              <CardTitle>{t('partnerIntegrationsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {partners.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No integrations configured</p>
+                <p className="text-sm text-muted-foreground">{t('noIntegrationsConfigured')}</p>
               ) : (
                 <div className="space-y-4">
                   {partners.map((partner) => (
@@ -712,21 +758,18 @@ export default async function IntegrationsDashboard({
                           <p className="text-sm text-muted-foreground">{partner.description}</p>
                         )}
                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>Provider: {partner.provider}</span>
+                          <span>{t('providerLabel', { provider: partner.provider })}</span>
                           {partner.lastSyncAt && (
                             <>
                               <span>&bull;</span>
-                              <span>Last sync {timeAgo(partner.lastSyncAt)}</span>
+                              <span>{t('lastSync', { time: relativeTime(partner.lastSyncAt) })}</span>
                             </>
                           )}
                         </div>
                       </div>
                       <Badge variant={partnerStatusVariant(partner.status)} className="flex items-center gap-1 shrink-0">
                         {partnerStatusIcon(partner.status)}
-                        {partner.status === 'connected' ? 'Connected' :
-                         partner.status === 'pending' ? 'Pending' :
-                         partner.status === 'error' ? 'Error' :
-                         partner.status === 'disconnected' ? 'Disconnected' : partner.status}
+                        {partnerStatusLabel(partner.status)}
                       </Badge>
                     </div>
                   ))}

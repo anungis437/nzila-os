@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ interface Campaign {
 }
 
 export default function CampaignDashboard() {
+  const t = useTranslations("campaignDashboard");
   const [campaigns, _setCampaigns] = useState<Campaign[]>([
     {
       id: "1",
@@ -117,23 +119,24 @@ export default function CampaignDashboard() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      planning: { label: "Planning", variant: "secondary" as const, icon: Clock, className: "" },
-      active: { label: "Active", variant: "default" as const, icon: TrendingUp, className: "" },
-      card_signing: { label: "Card Signing", variant: "default" as const, icon: FileSignature, className: "" },
-      filing_pending: { label: "Filing Pending", variant: "outline" as const, icon: AlertTriangle, className: "bg-yellow-100 text-yellow-800 border-yellow-300" },
-      election_scheduled: { label: "Election Scheduled", variant: "default" as const, icon: Calendar, className: "" },
-      won: { label: "Won", variant: "outline" as const, icon: CheckCircle2, className: "bg-green-100 text-green-800 border-green-300" },
-      lost: { label: "Lost", variant: "destructive" as const, icon: XCircle, className: "" },
-      withdrawn: { label: "Withdrawn", variant: "secondary" as const, icon: XCircle, className: "" },
+      planning: { variant: "secondary" as const, icon: Clock, className: "" },
+      active: { variant: "default" as const, icon: TrendingUp, className: "" },
+      card_signing: { variant: "default" as const, icon: FileSignature, className: "" },
+      filing_pending: { variant: "outline" as const, icon: AlertTriangle, className: "bg-yellow-100 text-yellow-800 border-yellow-300" },
+      election_scheduled: { variant: "default" as const, icon: Calendar, className: "" },
+      won: { variant: "outline" as const, icon: CheckCircle2, className: "bg-green-100 text-green-800 border-green-300" },
+      lost: { variant: "destructive" as const, icon: XCircle, className: "" },
+      withdrawn: { variant: "secondary" as const, icon: XCircle, className: "" },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.planning;
     const Icon = config.icon;
+    const isKnown = status in statusConfig;
 
     return (
       <Badge variant={config.variant} className={`flex items-center gap-1 ${config.className}`}>
         <Icon className="w-3 h-3" />
-        {config.label}
+        {isKnown ? t(`statuses.${status}` as 'statuses.planning') : status}
       </Badge>
     );
   };
@@ -147,10 +150,11 @@ export default function CampaignDashboard() {
     };
 
     const config = priorityConfig[priority as keyof typeof priorityConfig] || priorityConfig.medium;
+    const isKnown = priority in priorityConfig;
 
     return (
       <Badge variant={config.variant} className={config.className}>
-        {priority.toUpperCase()}
+        {isKnown ? t(`priorities.${priority}` as 'priorities.medium').toUpperCase() : priority.toUpperCase()}
       </Badge>
     );
   };
@@ -183,12 +187,12 @@ export default function CampaignDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Organizing Campaigns</h1>
-          <p className="text-muted-foreground">Manage union organizing drives and certification campaigns</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
         </div>
         <Button className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          New Campaign
+          {t("newCampaign")}
         </Button>
       </div>
 
@@ -196,7 +200,7 @@ export default function CampaignDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Campaigns</CardDescription>
+            <CardDescription>{t("stats.totalCampaigns")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -208,7 +212,7 @@ export default function CampaignDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Active Campaigns</CardDescription>
+            <CardDescription>{t("stats.activeCampaigns")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -220,7 +224,7 @@ export default function CampaignDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Contacts</CardDescription>
+            <CardDescription>{t("stats.totalContacts")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -232,7 +236,7 @@ export default function CampaignDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cards Signed</CardDescription>
+            <CardDescription>{t("stats.cardsSigned")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -244,7 +248,7 @@ export default function CampaignDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Avg Progress</CardDescription>
+            <CardDescription>{t("stats.avgProgress")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -256,7 +260,7 @@ export default function CampaignDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Upcoming Elections</CardDescription>
+            <CardDescription>{t("stats.upcomingElections")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -274,7 +278,7 @@ export default function CampaignDashboard() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search campaigns, employers, codes..."
+                placeholder={t("filters.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -283,35 +287,35 @@ export default function CampaignDashboard() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full md:w-[200px]">
                 <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("filters.statusPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="planning">Planning</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="card_signing">Card Signing</SelectItem>
-                <SelectItem value="filing_pending">Filing Pending</SelectItem>
-                <SelectItem value="election_scheduled">Election Scheduled</SelectItem>
-                <SelectItem value="won">Won</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
+                <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+                <SelectItem value="planning">{t("statuses.planning")}</SelectItem>
+                <SelectItem value="active">{t("statuses.active")}</SelectItem>
+                <SelectItem value="card_signing">{t("statuses.card_signing")}</SelectItem>
+                <SelectItem value="filing_pending">{t("statuses.filing_pending")}</SelectItem>
+                <SelectItem value="election_scheduled">{t("statuses.election_scheduled")}</SelectItem>
+                <SelectItem value="won">{t("statuses.won")}</SelectItem>
+                <SelectItem value="lost">{t("statuses.lost")}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-full md:w-[200px]">
                 <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Priority" />
+                <SelectValue placeholder={t("filters.priorityPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
+                <SelectItem value="all">{t("filters.allPriorities")}</SelectItem>
+                <SelectItem value="low">{t("priorities.low")}</SelectItem>
+                <SelectItem value="medium">{t("priorities.medium")}</SelectItem>
+                <SelectItem value="high">{t("priorities.high")}</SelectItem>
+                <SelectItem value="critical">{t("priorities.critical")}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" className="flex items-center gap-2">
               <Download className="w-4 h-4" />
-              Export
+              {t("filters.export")}
             </Button>
           </div>
         </CardContent>
@@ -341,7 +345,7 @@ export default function CampaignDashboard() {
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
-                  View Details
+                  {t("viewDetails")}
                 </Button>
               </div>
             </CardHeader>
@@ -349,9 +353,9 @@ export default function CampaignDashboard() {
               {/* Card Signing Progress */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">Card Signing Progress</span>
+                  <span className="font-medium">{t("card.cardSigningProgress")}</span>
                   <span className="text-muted-foreground">
-                    {campaign.cardsSigned} / {campaign.targetCardCount} ({campaign.cardSigningProgress.toFixed(1)}%)
+                    {t("card.progressOf", { signed: campaign.cardsSigned, target: campaign.targetCardCount, percent: campaign.cardSigningProgress.toFixed(1) })}
                   </span>
                 </div>
                 <Progress value={campaign.cardSigningProgress} className="h-2" />
@@ -360,23 +364,23 @@ export default function CampaignDashboard() {
               {/* Key Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2">
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Unit Size</div>
+                  <div className="text-xs text-muted-foreground">{t("card.unitSize")}</div>
                   <div className="text-lg font-semibold">{campaign.estimatedUnitSize}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Contacts</div>
+                  <div className="text-xs text-muted-foreground">{t("card.contacts")}</div>
                   <div className="text-lg font-semibold">{campaign.contactsIdentified}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Committed</div>
+                  <div className="text-xs text-muted-foreground">{t("card.committed")}</div>
                   <div className="text-lg font-semibold text-green-600">{campaign.contactsCommitted}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Lead Organizer</div>
+                  <div className="text-xs text-muted-foreground">{t("card.leadOrganizer")}</div>
                   <div className="text-sm font-medium">{campaign.leadOrganizerName}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Card Deadline</div>
+                  <div className="text-xs text-muted-foreground">{t("card.cardDeadline")}</div>
                   <div className="text-sm font-medium">
                     {new Date(campaign.targetCardDeadline).toLocaleDateString()}
                   </div>
@@ -388,7 +392,7 @@ export default function CampaignDashboard() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-blue-600" />
                   <div>
-                    <div className="text-sm font-medium text-blue-900">Election Scheduled</div>
+                    <div className="text-sm font-medium text-blue-900">{t("card.electionScheduled")}</div>
                     <div className="text-sm text-blue-700">
                       {new Date(campaign.electionDate).toLocaleDateString("en-US", {
                         weekday: "long",
@@ -410,11 +414,11 @@ export default function CampaignDashboard() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Target className="w-16 h-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No campaigns found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your filters or create a new campaign</p>
+            <h3 className="text-lg font-semibold mb-2">{t("empty.title")}</h3>
+            <p className="text-muted-foreground mb-4">{t("empty.description")}</p>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Create Campaign
+              {t("empty.createCampaign")}
             </Button>
           </CardContent>
         </Card>

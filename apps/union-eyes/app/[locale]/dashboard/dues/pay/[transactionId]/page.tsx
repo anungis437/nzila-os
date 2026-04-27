@@ -11,7 +11,7 @@
 export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { validateRedirectUrl } from '@/lib/utils/sanitize';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,6 @@ import {
   DollarSign,
   FileText,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { formatCurrency } from '@/lib/utils';
 
@@ -68,12 +67,16 @@ interface CheckoutSession {
 // UTILITIES
 // =============================================================================
 
-function formatDate(date: string | null): string {
-  if (!date) return 'N/A';
+function formatDate(date: string | null, locale: string, t: (key: string) => string): string {
+  if (!date) return t('naLabel');
   try {
-    return format(new Date(date), 'MMMM dd, yyyy');
+    return new Intl.DateTimeFormat(locale, {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    }).format(new Date(date));
   } catch {
-    return 'Invalid date';
+    return t('invalidDate');
   }
 }
 
@@ -82,21 +85,23 @@ function formatDate(date: string | null): string {
 // =============================================================================
 
 function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
+  const t = useTranslations('duesPayPage');
+  const locale = useLocale();
   const isDue = new Date(transaction.dueDate) < new Date();
   
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Payment Summary</CardTitle>
+          <CardTitle>{t('paymentSummaryTitle')}</CardTitle>
           {isDue && (
             <Badge variant="destructive" className="ml-2">
-              Overdue
+              {t('statusOverdue')}
             </Badge>
           )}
         </div>
         <CardDescription>
-          Dues period: {formatDate(transaction.periodStart)} - {formatDate(transaction.periodEnd)}
+          {t('duesPeriodLabel')}: {formatDate(transaction.periodStart, locale, t)} - {formatDate(transaction.periodEnd, locale, t)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -104,10 +109,10 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
         <div className="flex items-center justify-between pb-2">
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Due Date</span>
+            <span className="text-sm font-medium">{t('dueDateLabel')}</span>
           </div>
           <span className={`text-sm font-medium ${isDue ? 'text-destructive' : ''}`}>
-            {formatDate(transaction.dueDate)}
+            {formatDate(transaction.dueDate, locale, t)}
           </span>
         </div>
 
@@ -116,41 +121,41 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
         {/* Amount Breakdown */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Dues</span>
+            <span>{t('duesLabel')}</span>
             <span className="font-medium">{formatCurrency(Number(transaction.duesAmount))}</span>
           </div>
 
           {parseFloat(transaction.copeAmount) > 0 && (
             <div className="flex justify-between text-sm">
-              <span>COPE Contribution</span>
+              <span>{t('copeContributionLabel')}</span>
               <span className="font-medium">{formatCurrency(Number(transaction.copeAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.pacAmount) > 0 && (
             <div className="flex justify-between text-sm">
-              <span>PAC Contribution</span>
+              <span>{t('pacContributionLabel')}</span>
               <span className="font-medium">{formatCurrency(Number(transaction.pacAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.strikeFundAmount) > 0 && (
             <div className="flex justify-between text-sm">
-              <span>Strike Fund</span>
+              <span>{t('strikeFundLabel')}</span>
               <span className="font-medium">{formatCurrency(Number(transaction.strikeFundAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.lateFeeAmount) > 0 && (
             <div className="flex justify-between text-sm text-destructive">
-              <span>Late Fee</span>
+              <span>{t('lateFeeLabel')}</span>
               <span className="font-medium">{formatCurrency(Number(transaction.lateFeeAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.adjustmentAmount) !== 0 && (
             <div className="flex justify-between text-sm">
-              <span>Adjustment</span>
+              <span>{t('adjustmentLabel')}</span>
               <span className="font-medium">{formatCurrency(Number(transaction.adjustmentAmount))}</span>
             </div>
           )}
@@ -160,7 +165,7 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
 
         {/* Total */}
         <div className="flex justify-between items-center pt-2">
-          <span className="text-lg font-semibold">Total Amount</span>
+          <span className="text-lg font-semibold">{t('totalAmountLabel')}</span>
           <span className="text-2xl font-bold">{formatCurrency(Number(transaction.totalAmount))}</span>
         </div>
 
@@ -168,7 +173,7 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
         <div className="pt-4 space-y-2 text-xs text-muted-foreground">
           <div className="flex items-center space-x-2">
             <FileText className="h-3 w-3" />
-            <span>Transaction ID: {transaction.id.slice(0, 8)}...</span>
+            <span>{t('transactionIdLabel')}: {transaction.id.slice(0, 8)}...</span>
           </div>
         </div>
       </CardContent>
@@ -187,11 +192,13 @@ function PaymentMethodSelector({
   onPaymentMethodSelected: (method: string) => void;
   loading: boolean;
 }) {
+  const t = useTranslations('duesPayPage');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment Method</CardTitle>
-        <CardDescription>Select how you&apos;d like to pay</CardDescription>
+        <CardTitle>{t('paymentMethodTitle')}</CardTitle>
+        <CardDescription>{t('paymentMethodDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Credit/Debit Card */}
@@ -206,9 +213,9 @@ function PaymentMethodSelector({
               <CreditCard className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1 text-left">
-              <div className="font-semibold">Credit or Debit Card</div>
+              <div className="font-semibold">{t('cardOptionTitle')}</div>
               <div className="text-sm text-muted-foreground">
-                Pay securely with Visa, Mastercard, or American Express
+                {t('cardOptionDescription')}
               </div>
             </div>
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -226,8 +233,8 @@ function PaymentMethodSelector({
               <DollarSign className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="flex-1 text-left">
-              <div className="font-semibold">Bank Transfer (ACH)</div>
-              <div className="text-sm text-muted-foreground">Contact your local for details</div>
+              <div className="font-semibold">{t('bankTransferOptionTitle')}</div>
+              <div className="text-sm text-muted-foreground">{t('bankTransferOptionDescription')}</div>
             </div>
           </div>
         </Button>
@@ -244,6 +251,7 @@ export default function PaymentCheckoutPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('duesPayPage');
   const transactionId = params.transactionId as string;
 
   const [transaction, setTransaction] = useState<DuesTransaction | null>(null);
@@ -260,14 +268,14 @@ export default function PaymentCheckoutPage() {
         const response = await fetch('/api/members/dues');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch transaction');
+          throw new Error(t('failedToFetchTransaction'));
         }
 
         const data = await response.json();
         const txn = data.transactions.find((t: DuesTransaction) => t.id === transactionId);
         
         if (!txn) {
-          throw new Error('Transaction not found');
+          throw new Error(t('transactionNotFound'));
         }
 
         // Check if already paid
@@ -277,8 +285,8 @@ export default function PaymentCheckoutPage() {
 
         setTransaction(txn);
       } catch (err) {
-        logger.error('Error fetching transaction', { error: err, transactionId });
-        setError(err instanceof Error ? err.message : 'Failed to load transaction');
+        logger.error(t('errorFetchingTransactionLog'), { error: err, transactionId });
+        setError(err instanceof Error ? err.message : t('failedToLoadTransaction'));
       } finally {
         setLoading(false);
       }
@@ -287,7 +295,7 @@ export default function PaymentCheckoutPage() {
     if (transactionId) {
       fetchTransaction();
     }
-  }, [transactionId]);
+  }, [transactionId, t]);
 
   // Handle payment initiation
   const handlePaymentMethodSelected = async (method: string) => {
@@ -297,7 +305,7 @@ export default function PaymentCheckoutPage() {
       setProcessing(true);
       setError(null);
 
-      logger.info('Initiating payment', { transactionId, method });
+      logger.info(t('initiatingPaymentLog'), { transactionId, method });
 
       // Create checkout session
       const response = await fetch('/api/payments/checkout/create', {
@@ -315,7 +323,7 @@ export default function PaymentCheckoutPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
+        throw new Error(errorData.error || t('failedToCreateCheckoutSession'));
       }
 
       const data: CheckoutSession = await response.json();
@@ -323,14 +331,14 @@ export default function PaymentCheckoutPage() {
       // Redirect to checkout
       if (data.url) {
         const safeUrl = validateRedirectUrl(data.url);
-        if (!safeUrl) throw new Error('Untrusted checkout URL');
+        if (!safeUrl) throw new Error(t('untrustedCheckoutUrl'));
         window.location.href = safeUrl;
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error(t('noCheckoutUrlReceived'));
       }
     } catch (err) {
-      logger.error('Error creating checkout session', { error: err, transactionId });
-      setError(err instanceof Error ? err.message : 'Failed to start payment process');
+      logger.error(t('errorCreatingCheckoutSessionLog'), { error: err, transactionId });
+      setError(err instanceof Error ? err.message : t('failedToStartPaymentProcess'));
       setProcessing(false);
     }
   };
@@ -342,7 +350,7 @@ export default function PaymentCheckoutPage() {
         <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-base md:text-lg font-medium">Loading payment details...</p>
+            <p className="text-base md:text-lg font-medium">{t('loadingPaymentDetails')}</p>
           </div>
         </div>
       </div>
@@ -359,20 +367,20 @@ export default function PaymentCheckoutPage() {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dues
+          {t('backToDuesButton')}
         </Button>
 
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t('errorTitle')}</AlertTitle>
           <AlertDescription>
-            {error || 'Failed to load transaction details'}
+            {error || t('failedToLoadTransactionDetails')}
           </AlertDescription>
         </Alert>
 
         <div className="mt-6">
           <Button onClick={() => router.push(`/${locale}/dashboard/dues`)}>
-            Return to Dues Dashboard
+            {t('returnToDuesDashboardButton')}
           </Button>
         </div>
       </div>
@@ -389,20 +397,20 @@ export default function PaymentCheckoutPage() {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dues
+          {t('backToDuesButton')}
         </Button>
 
         <Alert>
           <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertTitle>Payment Complete</AlertTitle>
+          <AlertTitle>{t('paymentCompleteTitle')}</AlertTitle>
           <AlertDescription>
-            This transaction has already been paid.
+            {t('alreadyPaidDescription')}
           </AlertDescription>
         </Alert>
 
         <div className="mt-6">
           <Button onClick={() => router.push(`/${locale}/dashboard/dues`)}>
-            Return to Dues Dashboard
+            {t('returnToDuesDashboardButton')}
           </Button>
         </div>
       </div>
@@ -420,11 +428,11 @@ export default function PaymentCheckoutPage() {
           disabled={processing}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          {t('backButton')}
         </Button>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Complete Payment</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Review and pay your union dues</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('completePaymentTitle')}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t('completePaymentSubtitle')}</p>
         </div>
       </div>
 
@@ -432,7 +440,7 @@ export default function PaymentCheckoutPage() {
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Payment Error</AlertTitle>
+          <AlertTitle>{t('paymentErrorTitle')}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -459,9 +467,9 @@ export default function PaymentCheckoutPage() {
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="flex-1 text-sm">
-                  <div className="font-medium mb-1">Secure Payment</div>
+                  <div className="font-medium mb-1">{t('securePaymentTitle')}</div>
                   <p className="text-muted-foreground">
-                    Your payment information is encrypted and secure. We never store your card details.
+                    {t('securePaymentDescription')}
                   </p>
                 </div>
               </div>
@@ -478,9 +486,9 @@ export default function PaymentCheckoutPage() {
               <div className="flex flex-col items-center text-center space-y-4">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Processing Payment</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('processingPaymentTitle')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Please wait while we set up your secure payment...
+                    {t('processingPaymentDescription')}
                   </p>
                 </div>
               </div>

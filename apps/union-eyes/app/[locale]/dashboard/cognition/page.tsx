@@ -15,6 +15,7 @@ import {
   listEngagementSnapshots,
   type RiskTier,
 } from '@nzila/ue-cognition';
+import { getTranslations } from 'next-intl/server';
 import {
   scoreOrgRecentCases,
   scoreStewardWorkloads,
@@ -23,6 +24,10 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
 const TIER_COLOR: Record<RiskTier, string> = {
   low: 'bg-emerald-100 text-emerald-800',
   medium: 'bg-amber-100 text-amber-800',
@@ -30,14 +35,68 @@ const TIER_COLOR: Record<RiskTier, string> = {
   critical: 'bg-red-100 text-red-800',
 };
 
-export default async function CognitionPage() {
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'cognitionPage.metadata' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
+
+export default async function CognitionPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'cognitionPage' });
+  const getRiskTierLabel = (tier: RiskTier) => {
+    switch (tier) {
+      case 'low':
+        return t('riskTier.low');
+      case 'medium':
+        return t('riskTier.medium');
+      case 'high':
+        return t('riskTier.high');
+      case 'critical':
+        return t('riskTier.critical');
+      default:
+        return tier;
+    }
+  };
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'overloaded':
+        return t('status.overloaded');
+      case 'busy':
+        return t('status.busy');
+      case 'balanced':
+        return t('status.balanced');
+      case 'idle':
+        return t('status.idle');
+      default:
+        return t('status.unknown');
+    }
+  };
+  const getEngagementTierLabel = (tier: string) => {
+    switch (tier) {
+      case 'engaged':
+        return t('engagementTier.engaged');
+      case 'at_risk':
+        return t('engagementTier.atRisk');
+      case 'disengaged':
+        return t('engagementTier.disengaged');
+      case 'lost':
+        return t('engagementTier.lost');
+      default:
+        return tier;
+    }
+  };
   const session = await auth();
   if (!session?.userId) {
-    return <div className="p-8 text-sm">Sign-in required.</div>;
+    return <div className="p-8 text-sm">{t('states.signInRequired')}</div>;
   }
   const orgId = await getOrganizationIdForUser(session.userId);
   if (!orgId) {
-    return <div className="p-8 text-sm">No organization context.</div>;
+    return <div className="p-8 text-sm">{t('states.noOrganizationContext')}</div>;
   }
   const subject = { tenantId: 'union-eyes', orgId };
 
@@ -69,26 +128,25 @@ export default async function CognitionPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">Cognition Operations</h1>
+        <h1 className="text-2xl font-semibold">{t('header.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Predictive operational intelligence across grievances, stewards, and members.
-          All recommendations are advisory — human override is required for every action.
+          {t('header.description')}
         </p>
       </header>
 
       {/* KPI Tiles */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Operational KPIs (last 30 days)</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t('kpis.title')}</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <KpiTile label="Backlog risk score (now)" value={kpis.backlogRiskCurrent} format="prob" />
-          <KpiTile label="Steward fairness" value={kpis.utilizationFairnessCurrent} format="prob" />
-          <KpiTile label="Disengaged member count" value={kpis.disengagedMembersEnd} format="int" />
-          <KpiTile label="Avg cycle time (days)" value={kpis.avgCycleTimeDays} format="num" />
-          <KpiTile label="Admin hours saved" value={kpis.estimatedAdminHoursSaved} format="num" />
-          <KpiTile label="Estimated ROI (CAD)" value={kpis.estimatedRoiCad} format="cad" />
+          <KpiTile label={t('kpis.tiles.backlogRiskCurrent')} value={kpis.backlogRiskCurrent} format="prob" noSourceDataText={t('kpis.noSourceData')} />
+          <KpiTile label={t('kpis.tiles.stewardFairness')} value={kpis.utilizationFairnessCurrent} format="prob" noSourceDataText={t('kpis.noSourceData')} />
+          <KpiTile label={t('kpis.tiles.disengagedMembers')} value={kpis.disengagedMembersEnd} format="int" noSourceDataText={t('kpis.noSourceData')} />
+          <KpiTile label={t('kpis.tiles.avgCycleTimeDays')} value={kpis.avgCycleTimeDays} format="num" noSourceDataText={t('kpis.noSourceData')} />
+          <KpiTile label={t('kpis.tiles.adminHoursSaved')} value={kpis.estimatedAdminHoursSaved} format="num" noSourceDataText={t('kpis.noSourceData')} />
+          <KpiTile label={t('kpis.tiles.estimatedRoiCad')} value={kpis.estimatedRoiCad} format="cad" noSourceDataText={t('kpis.noSourceData')} />
         </div>
         <details className="mt-4 text-xs text-muted-foreground">
-          <summary className="cursor-pointer">Assumptions &amp; model versions</summary>
+          <summary className="cursor-pointer">{t('kpis.assumptionsSummary')}</summary>
           <ul className="mt-2 list-disc pl-5">
             {kpis.assumptions.map((a) => (
               <li key={a.key}>
@@ -102,12 +160,12 @@ export default async function CognitionPage() {
       {/* Risk funnel */}
       {recentCases.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Grievance Risk Funnel</h2>
+          <h2 className="mb-3 text-lg font-semibold">{t('riskFunnel.title')}</h2>
           <div className="grid grid-cols-4 gap-3">
-            {(Object.keys(tierCounts) as RiskTier[]).map((t) => (
-              <div key={t} className={`rounded-md p-4 ${TIER_COLOR[t]}`}>
-                <div className="text-xs uppercase">{t}</div>
-                <div className="text-2xl font-bold">{tierCounts[t]}</div>
+            {(Object.keys(tierCounts) as RiskTier[]).map((tier) => (
+              <div key={tier} className={`rounded-md p-4 ${TIER_COLOR[tier]}`}>
+                <div className="text-xs uppercase">{getRiskTierLabel(tier)}</div>
+                <div className="text-2xl font-bold">{tierCounts[tier]}</div>
               </div>
             ))}
           </div>
@@ -117,22 +175,35 @@ export default async function CognitionPage() {
       {/* Steward heat-map */}
       {stewards.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Steward Workload</h2>
+          <h2 className="mb-3 text-lg font-semibold">{t('stewardWorkload.title')}</h2>
           {fairness && (
             <p className="mb-2 text-sm text-muted-foreground">
-              Team fairness score: <strong>{fairness.fairnessScore.toFixed(2)}</strong>
-              &nbsp;(mean utilisation {(fairness.meanUtilization * 100).toFixed(0)}%)
+              {t('stewardWorkload.teamFairness', {
+                score: fairness.fairnessScore.toFixed(2),
+                utilization: (fairness.meanUtilization * 100).toFixed(0),
+              })}
             </p>
           )}
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr><th>Steward</th><th>Status</th><th>Utilisation</th><th>At-risk cases</th><th>SLA risk</th></tr>
+              <tr>
+                <th>{t('stewardWorkload.columns.steward')}</th>
+                <th>{t('stewardWorkload.columns.status')}</th>
+                <th>{t('stewardWorkload.columns.utilization')}</th>
+                <th>{t('stewardWorkload.columns.atRiskCases')}</th>
+                <th>{t('stewardWorkload.columns.slaRisk')}</th>
+              </tr>
             </thead>
             <tbody>
               {stewards.map((s) => (
                 <tr key={s.id} className="border-t">
                   <td className="py-2">{s.stewardId.slice(0, 8)}</td>
-                  <td><StatusPill status={s.status} /></td>
+                  <td>
+                    <StatusPill
+                      status={s.status}
+                      label={getStatusLabel(s.status)}
+                    />
+                  </td>
                   <td>{(s.utilizationRatio * 100).toFixed(0)}%</td>
                   <td>{s.atRiskCaseCount}</td>
                   <td>{(s.slaRiskScore * 100).toFixed(0)}%</td>
@@ -146,16 +217,22 @@ export default async function CognitionPage() {
       {/* Disengaged members queue */}
       {engagement.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Member Engagement Queue</h2>
+          <h2 className="mb-3 text-lg font-semibold">{t('memberEngagement.title')}</h2>
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr><th>Member</th><th>Tier</th><th>Disengagement risk</th><th>Recommended channel</th><th>Within (h)</th></tr>
+              <tr>
+                <th>{t('memberEngagement.columns.member')}</th>
+                <th>{t('memberEngagement.columns.tier')}</th>
+                <th>{t('memberEngagement.columns.disengagementRisk')}</th>
+                <th>{t('memberEngagement.columns.recommendedChannel')}</th>
+                <th>{t('memberEngagement.columns.withinHours')}</th>
+              </tr>
             </thead>
             <tbody>
               {engagement.map((m) => (
                 <tr key={m.id} className="border-t">
                   <td className="py-2">{m.memberId.slice(0, 8)}</td>
-                  <td>{m.tier}</td>
+                  <td>{getEngagementTierLabel(m.tier)}</td>
                   <td>{(m.disengagementProbability * 100).toFixed(0)}%</td>
                   <td>{m.recommendedChannel}</td>
                   <td>{m.recommendedTimingHours}</td>
@@ -169,11 +246,13 @@ export default async function CognitionPage() {
       {/* Executive interventions */}
       {summary.recommendedInterventions.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Executive Interventions</h2>
+          <h2 className="mb-3 text-lg font-semibold">{t('executiveInterventions.title')}</h2>
           <ul className="space-y-2">
             {summary.recommendedInterventions.map((i, idx) => (
               <li key={idx} className="rounded border p-3 text-sm">
-                <span className="mr-2 rounded bg-slate-100 px-2 py-0.5 text-xs uppercase">{i.priority}</span>
+                <span className="mr-2 rounded bg-slate-100 px-2 py-0.5 text-xs uppercase">
+                  {getRiskTierLabel(i.priority)}
+                </span>
                 {i.summary}
               </li>
             ))}
@@ -182,13 +261,17 @@ export default async function CognitionPage() {
       )}
 
       <footer className="border-t pt-4 text-xs text-muted-foreground">
-        Models: case-risk {kpis.modelVersion} · org {orgId.slice(0, 8)} · generated {new Date().toISOString()}
+        {t('footer.models', {
+          modelVersion: kpis.modelVersion,
+          org: orgId.slice(0, 8),
+          generatedAt: new Date().toISOString(),
+        })}
       </footer>
     </div>
   );
 }
 
-function KpiTile({ label, value, format }: { label: string; value: number | null; format: 'prob' | 'int' | 'num' | 'cad' }) {
+function KpiTile({ label, value, format, noSourceDataText }: { label: string; value: number | null; format: 'prob' | 'int' | 'num' | 'cad'; noSourceDataText: string }) {
   const isNull = value === null || Number.isNaN(value);
   let text = '—';
   if (!isNull) {
@@ -201,17 +284,17 @@ function KpiTile({ label, value, format }: { label: string; value: number | null
     <div className="rounded-lg border p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-2xl font-bold">{text}</div>
-      {isNull && <div className="mt-1 text-xs text-muted-foreground">No source data yet</div>}
+      {isNull && <div className="mt-1 text-xs text-muted-foreground">{noSourceDataText}</div>}
     </div>
   );
 }
 
-function StatusPill({ status }: { status: string }) {
+function StatusPill({ status, label }: { status: string; label: string }) {
   const colour =
     status === 'overloaded' ? 'bg-red-100 text-red-800' :
     status === 'busy' ? 'bg-amber-100 text-amber-800' :
     status === 'balanced' ? 'bg-emerald-100 text-emerald-800' :
     status === 'idle' ? 'bg-slate-100 text-slate-700' :
     'bg-slate-50 text-slate-500';
-  return <span className={`rounded px-2 py-0.5 text-xs ${colour}`}>{status}</span>;
+  return <span className={`rounded px-2 py-0.5 text-xs ${colour}`}>{label}</span>;
 }

@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Shield, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSkeletonComposer } from '@/components/ui/loading-skeleton-composer';
@@ -63,6 +64,8 @@ interface DashboardData {
 
 export default function LeadershipPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('leadershipPage');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'quarterly'>('monthly');
@@ -93,32 +96,32 @@ export default function LeadershipPage() {
   const buildExportMetrics = (): ExportableMetrics | null => {
     if (!data) return null;
     return {
-      title: 'Union Leadership Report',
-      generatedAt: new Date().toLocaleDateString(),
+      title: t('export.title'),
+      generatedAt: new Date().toLocaleDateString(locale),
       kpi: {
-        'Active Grievances': data.kpi.activeGrievances,
-        'Resolved This Month': data.kpi.resolvedThisMonth,
-        'Avg. Triage (days)': data.kpi.avgTriageDays,
-        'Avg. Resolution (days)': data.kpi.avgResolutionDays,
-        'Arbitrations': data.kpi.arbitrationCount,
-        'Overdue Cases': data.kpi.overdueCases,
+        [t('export.kpi.activeGrievances')]: data.kpi.activeGrievances,
+        [t('export.kpi.resolvedThisMonth')]: data.kpi.resolvedThisMonth,
+        [t('export.kpi.avgTriageDays')]: data.kpi.avgTriageDays,
+        [t('export.kpi.avgResolutionDays')]: data.kpi.avgResolutionDays,
+        [t('export.kpi.arbitrations')]: data.kpi.arbitrationCount,
+        [t('export.kpi.overdueCases')]: data.kpi.overdueCases,
       },
       employerRows: data.employers.map((e) => ({
-        Employer: e.employerName,
-        Active: e.activeGrievances,
-        Overdue: e.overdueCases,
-        'Resolved (Qtr)': e.resolvedThisQuarter,
-        'Top Category': e.topCategory,
-        'Avg Days': e.avgResolutionDays,
-        Trend: e.trend,
+        [t('export.employerRows.employer')]: e.employerName,
+        [t('export.employerRows.active')]: e.activeGrievances,
+        [t('export.employerRows.overdue')]: e.overdueCases,
+        [t('export.employerRows.resolvedQuarter')]: e.resolvedThisQuarter,
+        [t('export.employerRows.topCategory')]: e.topCategory,
+        [t('export.employerRows.avgDays')]: e.avgResolutionDays,
+        [t('export.employerRows.trend')]: e.trend,
       })),
       stewardRows: data.stewards.map((s) => ({
-        Steward: s.stewardName,
-        Active: s.activeCases,
-        Overdue: s.overdueCases,
-        'Capacity Limit': s.capacityLimit,
-        'Avg Days/Case': s.avgDaysPerCase,
-        'Resolved (Month)': s.resolvedThisMonth,
+        [t('export.stewardRows.steward')]: s.stewardName,
+        [t('export.stewardRows.active')]: s.activeCases,
+        [t('export.stewardRows.overdue')]: s.overdueCases,
+        [t('export.stewardRows.capacityLimit')]: s.capacityLimit,
+        [t('export.stewardRows.avgDaysPerCase')]: s.avgDaysPerCase,
+        [t('export.stewardRows.resolvedMonth')]: s.resolvedThisMonth,
       })),
     };
   };
@@ -129,8 +132,8 @@ export default function LeadershipPage() {
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Leadership Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Loading executive overview…</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('loading')}</p>
         </div>
         <LoadingSkeletonComposer variant="card" rows={3} />
       </div>
@@ -142,8 +145,8 @@ export default function LeadershipPage() {
       <div className="container mx-auto py-6">
         <EmptyState
           icon={Shield}
-          title="No dashboard data"
-          description="Leadership metrics will appear once grievance data is available."
+          title={t('empty.title')}
+          description={t('empty.description')}
         />
       </div>
     );
@@ -156,16 +159,16 @@ export default function LeadershipPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Leadership Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Executive overview of grievance operations and compliance
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {exportMetrics && <LeadershipExport metrics={exportMetrics} />}
           <Button variant="outline" size="sm" onClick={fetchDashboard}>
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            Refresh
+            {t('refresh')}
           </Button>
         </div>
       </div>
