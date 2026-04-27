@@ -1,0 +1,8 @@
+{
+  "extends": "@nzila/config/tsconfig/base",
+  "compilerOptions": {
+    "noImplicitAny": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}

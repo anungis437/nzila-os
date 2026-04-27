@@ -1,0 +1,10 @@
+{
+  "owner": "health-platform",
+  "category": "HEALTH_CORE",
+  "stability": "EVOLVING",
+  "allowed_dependents": ["apps/*", "packages/health-*", "packages/veridian-*"],
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
+}
