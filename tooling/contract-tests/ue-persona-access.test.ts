@@ -165,6 +165,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Admin pages (layout gates admin role, level 95) ────────────────────
   { path: 'admin/page.tsx',                              minRole: 'admin',                description: 'Admin dashboard overview' },
+  { path: 'admin/onboarding/page.tsx',                   minRole: 'admin',                description: 'Admin first-run onboarding wizard' },
   { path: 'admin/governance/page.tsx',                   minRole: 'admin',                description: 'Governance console (golden share, reserved matters)' },
   { path: 'admin/members/page.tsx',                      minRole: 'support_manager',      description: 'Platform member management (hasMinRole support_manager)' },
   { path: 'admin/organizations/page.tsx',                minRole: 'admin',                description: 'Organization hierarchy list' },

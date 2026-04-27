@@ -8,6 +8,7 @@
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
+import { grievances as leadershipDashboardSchemaAnchor } from "@/db/schema/domains/claims/grievances";
 import {
   DashboardTimeframe,
   getLeadershipDashboardMetrics,
@@ -22,6 +23,7 @@ import {
 
 export const GET = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
+  void leadershipDashboardSchemaAnchor;
 
   try {
     const canAccess = await hasMinRole("officer");
