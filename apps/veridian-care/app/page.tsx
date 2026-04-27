@@ -4,7 +4,7 @@ import { SYNTHETIC_PATIENTS } from '@/lib/synthetic-patients'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
-const overduReferrals = SYNTHETIC_PATIENTS.flatMap((p) =>
+const overdueReferrals = SYNTHETIC_PATIENTS.flatMap((p) =>
   p.referrals.filter((r) => r.status === 'overdue'),
 ).length
 
@@ -16,7 +16,7 @@ const kpiCards = [
   { label: 'Synthetic patients', value: SYNTHETIC_PATIENTS.length.toString(), color: 'bg-teal-50 border-teal-200 text-teal-700' },
   { label: 'Active alerts', value: '1', color: 'bg-amber-50 border-amber-200 text-amber-700' },
   { label: 'Pending referrals', value: pendingReferrals.toString(), color: 'bg-blue-50 border-blue-200 text-blue-700' },
-  { label: 'Overdue referrals', value: overduReferrals.toString(), color: 'bg-rose-50 border-rose-200 text-rose-700' },
+  { label: 'Overdue referrals', value: overdueReferrals.toString(), color: 'bg-rose-50 border-rose-200 text-rose-700' },
 ]
 
 export default function DashboardPage() {
