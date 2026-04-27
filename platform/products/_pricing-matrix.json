@@ -4,8 +4,7 @@
     "enterprise": [
       "abr",
       "mobility",
-      "union-eyes",
-      "veridian-care"
+      "union-eyes"
     ],
     "growth": [
       "agrimo",
@@ -24,6 +23,7 @@
       "platform-admin",
       "test-scaffold-gp",
       "veridian-admin",
+      "veridian-care",
       "veridian-site",
       "web",
       "weekone"

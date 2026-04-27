@@ -171,10 +171,10 @@
       "publicVisible": false
     },
     "veridian-care": {
-      "pricingTier": "enterprise",
-      "telemetryRequired": true,
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
       "finopsEnabled": false,
-      "trustProfile": "tier-2-public",
+      "trustProfile": "tier-3-internal",
       "launchStage": "incubating",
       "publicVisible": false
     },

@@ -10,7 +10,6 @@
     "orchestrator-api",
     "trade",
     "union-eyes",
-    "veridian-care",
     "web",
     "zonga"
   ],
@@ -23,6 +22,7 @@
     "platform-admin",
     "test-scaffold-gp",
     "veridian-admin",
+    "veridian-care",
     "veridian-site",
     "weekone"
   ]
