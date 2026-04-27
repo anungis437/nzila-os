@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-26",
+  "generated_at": "2026-04-27",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 19,
+    "total_products": 22,
     "sell_now_count": 3,
     "internal_only_count": 3,
     "frozen_count": 3
@@ -23,7 +23,7 @@
       },
       {
         "tier": 4,
-        "count": 7
+        "count": 10
       },
       {
         "tier": 5,
@@ -41,7 +41,7 @@
       },
       {
         "status": "incubating",
-        "count": 7
+        "count": 10
       },
       {
         "status": "internal",
@@ -235,6 +235,42 @@
       "readiness_tier": "internal-only",
       "registry_tier": "INCUBATING",
       "dev_port": 3008
+    },
+    {
+      "id": "veridian-admin",
+      "name": "Veridian Admin",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 5.2,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3012
+    },
+    {
+      "id": "veridian-care",
+      "name": "Veridian Care",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 5.2,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3011
+    },
+    {
+      "id": "veridian-site",
+      "name": "Veridian Site",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 4.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3010
     },
     {
       "id": "weekone",

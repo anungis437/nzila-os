@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-26
+> Generated: 2026-04-27
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -20,6 +20,9 @@
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
+| Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
+| Veridian Care | 4 | incubating | hold | pre-revenue | internal-proof | high |
+| Veridian Site | 4 | incubating | hold | pre-revenue | internal-proof | medium |
 | WeekOne | 4 | incubating | hold | pre-revenue | internal-proof | medium |
 | Zonga | 4 | incubating | hold | pre-revenue | internal-proof | low |
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
@@ -44,6 +47,9 @@
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |
+| Veridian Admin | INCUBATING | internal-only | internal | HOLD |
+| Veridian Care | INCUBATING | internal-only | internal | HOLD |
+| Veridian Site | INCUBATING | internal-only | internal | HOLD |
 | WeekOne | INCUBATING | internal-only | internal | HOLD |
 | Zonga | INCUBATING | internal-only | internal | HOLD |
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
