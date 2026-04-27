@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "appCount": 19,
-  "packageCount": 173,
-  "workspacePackageCount": 196,
-  "workflowCount": 45,
-  "contractTestCount": 220,
-  "tsTestFileCount": 1232,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "appCount": 22,
+  "packageCount": 180,
+  "workspacePackageCount": 206,
+  "workflowCount": 46,
+  "contractTestCount": 226,
+  "tsTestFileCount": 1246,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -528,7 +528,61 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3180
+      "codeFileCount": 3187
+    },
+    {
+      "name": "veridian-admin",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3012,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "health-ui",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 17
+    },
+    {
+      "name": "veridian-care",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3011,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "health-ui",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 20
+    },
+    {
+      "name": "veridian-site",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3010,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "health-ui",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 20
     },
     {
       "name": "web",
@@ -645,6 +699,7 @@
     "doc-hygiene.yml",
     "dr-drill-reminder.yml",
     "e2e.yml",
+    "flow-shopmoica-cutover-gate.yml",
     "game-day.yml",
     "gitops-deploy.yml",
     "lighthouse.yml",

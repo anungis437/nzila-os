@@ -1,6 +1,6 @@
 {
-  "slug": "weekone",
-  "name": "WeekOne",
+  "slug": "veridian-admin",
+  "name": "Veridian Admin",
   "tier": 4,
   "tierLabel": "lab",
   "status": "incubating",
@@ -13,7 +13,7 @@
   "publicVisible": false,
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
-  "strategicRole": "Onboarding and first-week activation surface for new tenants across the portfolio.",
+  "strategicRole": "Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots.",
   "generatedAt": "2026-04-27T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
