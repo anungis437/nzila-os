@@ -15,16 +15,15 @@
     "@heroicons/react": "^2.2.0",
     "@nzila/os-core": "workspace:*",
     "@nzila/health-ui": "workspace:*",
-    "next": "workspace:*",
+    "next": "16.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
-    "typescript": "workspace:*",
-    "eslint": "workspace:*",
-    "eslint-config-next": "workspace:*",
-    "vitest": "workspace:*",
-    "@vitejs/plugin-react": "workspace:*"
+    "typescript": "^6",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.2",
+    "vitest": "^4.1.2"
   }
 }
