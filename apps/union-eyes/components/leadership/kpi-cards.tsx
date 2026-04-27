@@ -11,6 +11,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Briefcase,
   CheckCircle2,
@@ -87,6 +88,7 @@ export function KpiCards({
   previousPeriod,
   className,
 }: KpiCardsProps) {
+  const t = useTranslations("leadershipDashboard.kpi");
   const cards: Array<{
     icon: React.ElementType;
     label: string;
@@ -98,7 +100,7 @@ export function KpiCards({
   }> = [
     {
       icon: Briefcase,
-      label: "Active Grievances",
+      label: t("activeGrievances"),
       value: String(activeGrievances),
       delta: formatDelta(activeGrievances, previousPeriod?.activeGrievances),
       trend: computeTrend(activeGrievances, previousPeriod?.activeGrievances),
@@ -107,7 +109,7 @@ export function KpiCards({
     },
     {
       icon: CheckCircle2,
-      label: "Resolved This Month",
+      label: t("resolvedThisMonth"),
       value: String(resolvedThisMonth),
       delta: formatDelta(resolvedThisMonth, previousPeriod?.resolvedThisMonth),
       trend: computeTrend(resolvedThisMonth, previousPeriod?.resolvedThisMonth),
@@ -116,7 +118,7 @@ export function KpiCards({
     },
     {
       icon: Clock,
-      label: "Avg. Time to Triage",
+      label: t("avgTimeToTriage"),
       value: `${avgTriageDays}d`,
       delta: formatDelta(avgTriageDays, previousPeriod?.avgTriageDays),
       trend: computeTrend(avgTriageDays, previousPeriod?.avgTriageDays),
@@ -125,7 +127,7 @@ export function KpiCards({
     },
     {
       icon: Clock,
-      label: "Avg. Time to Resolution",
+      label: t("avgTimeToResolution"),
       value: `${avgResolutionDays}d`,
       delta: formatDelta(avgResolutionDays, previousPeriod?.avgResolutionDays),
       trend: computeTrend(avgResolutionDays, previousPeriod?.avgResolutionDays),
@@ -134,7 +136,7 @@ export function KpiCards({
     },
     {
       icon: Gavel,
-      label: "Arbitrations",
+      label: t("arbitrations"),
       value: String(arbitrationCount),
       delta: formatDelta(arbitrationCount, previousPeriod?.arbitrationCount),
       trend: computeTrend(arbitrationCount, previousPeriod?.arbitrationCount),
@@ -143,7 +145,7 @@ export function KpiCards({
     },
     {
       icon: AlertTriangle,
-      label: "Overdue Cases",
+      label: t("overdueCases"),
       value: String(overdueCases),
       delta: formatDelta(overdueCases, previousPeriod?.overdueCases),
       trend: computeTrend(overdueCases, previousPeriod?.overdueCases),

@@ -5,6 +5,7 @@
  */
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { UserButton, useAuth } from '@nzila/platform-auth/entra/client';
 import { Home, LayoutDashboard, Menu, X } from "lucide-react";
@@ -15,6 +16,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import LanguageSwitcher from "./language-switcher";
 
 export default function Header() {
+  const t = useTranslations("headerNav");
+  const locale = useLocale();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -144,16 +147,16 @@ export default function Header() {
               <NavButton 
                 href="/" 
                 icon={<Home size={18} />} 
-                label="Home"
+                label={t("home")}
                 isActive={isActive("/")}
               />
 
               {isSignedIn && (
                 <NavButton 
-                  href="/en-CA/dashboard" 
+                  href={`/${locale}/dashboard`} 
                   icon={<LayoutDashboard size={18} />} 
-                  label="Dashboard"
-                  isActive={isActive("/en-CA/dashboard") || isActive("/fr-CA/dashboard")}
+                  label={t("dashboard")}
+                  isActive={pathname.startsWith(`/${locale}/dashboard`) || pathname.startsWith("/en-CA/dashboard") || pathname.startsWith("/fr-CA/dashboard")}
                 />
               )}
             </nav>
@@ -183,7 +186,7 @@ export default function Header() {
                           repeatDelay: 1
                         }}
                       />
-                      <span className="relative z-10">Sign In</span>
+                      <span className="relative z-10">{t("signIn")}</span>
                     </Button>
                   </motion.div>
                 </Link>
@@ -226,7 +229,7 @@ export default function Header() {
                     variant="ghost"
                     size="icon"
                     onClick={toggleMenu}
-                    aria-label="Toggle menu"
+                    aria-label={t("toggleMenu")}
                     className="text-gray-800 bg-white/70 rounded-xl shadow-sm border border-white/60 hover:bg-white/90 relative overflow-hidden w-9.5 h-9.5 p-0"
                   >
                     {/* Enhanced button glow effect */}
@@ -267,17 +270,17 @@ export default function Header() {
                 <MobileNavLink 
                   href="/" 
                   icon={<Home size={18} />} 
-                  label="Home" 
+                  label={t("home")} 
                   isActive={isActive("/")}
                   onClick={toggleMenu}
                 />
 
                 {isSignedIn && (
                   <MobileNavLink 
-                    href="/en-CA/dashboard" 
+                    href={`/${locale}/dashboard`} 
                     icon={<LayoutDashboard size={18} />} 
-                    label="Dashboard" 
-                    isActive={isActive("/en-CA/dashboard") || isActive("/fr-CA/dashboard")}
+                    label={t("dashboard")} 
+                    isActive={pathname.startsWith(`/${locale}/dashboard`) || pathname.startsWith("/en-CA/dashboard") || pathname.startsWith("/fr-CA/dashboard")}
                     onClick={toggleMenu}
                   />
                 )}

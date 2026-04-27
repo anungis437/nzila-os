@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,6 +34,7 @@ interface Invoice {
 }
 
 export default function InvoicesPage() {
+  const t = useTranslations('financeInvoicesPage');
   const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,15 +44,15 @@ export default function InvoicesPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/finance/invoices?limit=50');
-      if (!res.ok) throw new Error('Failed to load invoices');
+      if (!res.ok) throw new Error(t('errors.failedLoad'));
       const json = await res.json();
       setInvoices(json.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : t('errors.generic'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchInvoices();
@@ -68,7 +70,7 @@ export default function InvoicesPage() {
   if (loading) {
     return (
       <div className="space-y-6 p-6">
-        <h1 className="text-2xl font-bold">Invoices</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Card className="p-6">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-10 w-full mb-2" />
@@ -93,26 +95,26 @@ export default function InvoicesPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <FileText className="h-6 w-6" /> Invoices
+          <FileText className="h-6 w-6" /> {t('title')}
         </h1>
       </div>
 
       {invoices.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No invoices generated yet</p>
+          <p className="text-muted-foreground">{t('empty')}</p>
         </Card>
       ) : (
         <Card className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Total (CAD)</TableHead>
-                <TableHead>Paid (CAD)</TableHead>
-                <TableHead>Balance Due</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Issue Date</TableHead>
-                <TableHead>Due Date</TableHead>
+                <TableHead>{t('table.invoiceNumber')}</TableHead>
+                <TableHead>{t('table.totalCad')}</TableHead>
+                <TableHead>{t('table.paidCad')}</TableHead>
+                <TableHead>{t('table.balanceDue')}</TableHead>
+                <TableHead>{t('table.status')}</TableHead>
+                <TableHead>{t('table.issueDate')}</TableHead>
+                <TableHead>{t('table.dueDate')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

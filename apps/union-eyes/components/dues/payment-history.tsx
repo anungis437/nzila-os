@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ interface PaymentHistoryProps {
 }
 
 export default function PaymentHistory({ userId }: PaymentHistoryProps) {
+  const t = useTranslations('dashboard.dues.history');
   const [payments, setPayments] = useState<PaymentHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -72,13 +74,13 @@ export default function PaymentHistory({ userId }: PaymentHistoryProps) {
       document.body.removeChild(a);
       
       toast({
-        title: 'Success',
-        description: 'Receipt downloaded',
+        title: t('successTitle'),
+        description: t('downloadSuccess'),
       });
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to download receipt',
+        title: t('errorTitle'),
+        description: t('downloadFailed'),
         variant: 'destructive',
       });
     }
@@ -92,43 +94,42 @@ toast({
       refunded: 'outline',
     };
 
+    const labelKey = (['completed', 'pending', 'failed', 'refunded'].includes(status) ? status : 'pending') as 'completed' | 'pending' | 'failed' | 'refunded';
     return (
       <Badge variant={variants[status] || 'secondary'}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {t(`status.${labelKey}`)}
       </Badge>
     );
   };
 
   if (loading) {
-    return <div className="text-center p-12">Loading payment history...</div>;
+    return <div className="text-center p-12">{t('loading')}</div>;
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment History</CardTitle>
-        <CardDescription>
-          View your past dues payments and download receipts
-        </CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {payments.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No payment history available</p>
+            <p className="text-muted-foreground">{t('empty')}</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Late Fee</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Receipt</TableHead>
+                <TableHead>{t('columns.date')}</TableHead>
+                <TableHead>{t('columns.period')}</TableHead>
+                <TableHead>{t('columns.amount')}</TableHead>
+                <TableHead>{t('columns.lateFee')}</TableHead>
+                <TableHead>{t('columns.total')}</TableHead>
+                <TableHead>{t('columns.method')}</TableHead>
+                <TableHead>{t('columns.status')}</TableHead>
+                <TableHead>{t('columns.receipt')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

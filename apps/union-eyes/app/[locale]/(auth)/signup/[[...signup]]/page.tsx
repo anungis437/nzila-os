@@ -1,18 +1,35 @@
+import { Metadata } from 'next'
 import AuthPageLayout from '@/components/auth/auth-page-layout'
+import { getTranslations } from 'next-intl/server'
 import { SignupForm } from '@/components/auth/signup-form'
 
-const stats = [
-  { value: '200+', label: 'Locals' },
-  { value: '50K+', label: 'Members' },
-  { value: '99.9%', label: 'Uptime' },
-]
+type PageProps = {
+  params: Promise<{ locale: string }>
+}
 
-export default function SignUpPage() {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'signUpPage' })
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  }
+}
+
+export default async function SignUpPage({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'signUpPage' })
+  const stats = [
+    { value: t('stats.localsValue'), label: t('stats.localsLabel') },
+    { value: t('stats.membersValue'), label: t('stats.membersLabel') },
+    { value: t('stats.uptimeValue'), label: t('stats.uptimeLabel') },
+  ]
+
   return (
     <AuthPageLayout
-      appName="UnionEyes"
-      tagline="A Decision System for Labour Leadership"
-      subtitle="From intake to outcome — casework, intelligence, and member services in one system."
+      appName={t('appName')}
+      tagline={t('tagline')}
+      subtitle={t('subtitle')}
       stats={stats}
       isSignUp
     >

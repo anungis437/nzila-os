@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Users, Search, Calendar, Mail, Badge as BadgeIcon } from "lucide-react";
 import {
   Card,
@@ -34,21 +35,6 @@ interface Committee {
   contactEmail: string | null;
 }
 
-const typeLabels: Record<string, string> = {
-  bargaining: "Bargaining",
-  grievance: "Grievance",
-  health_safety: "Health & Safety",
-  education: "Education",
-  political_action: "Political Action",
-  social: "Social & Recreation",
-  communications: "Communications",
-  finance: "Finance",
-  bylaws: "Bylaws",
-  membership: "Membership",
-  pension_benefits: "Pension & Benefits",
-  other: "Other",
-};
-
 const statusColors: Record<string, string> = {
   active: "bg-green-500",
   inactive: "bg-gray-400",
@@ -56,7 +42,14 @@ const statusColors: Record<string, string> = {
   dissolved: "bg-red-500",
 };
 
+const KNOWN_TYPES = new Set([
+  "bargaining", "grievance", "health_safety", "education",
+  "political_action", "social", "communications", "finance",
+  "bylaws", "membership", "pension_benefits", "other",
+]);
+
 export function MyCommittees({ organizationId }: { organizationId: string }) {
+  const t = useTranslations("committeesPanel");
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,11 +67,11 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
       const items = json?.data?.data ?? json?.data ?? json ?? [];
       setCommittees(Array.isArray(items) ? items : []);
     } catch {
-      setError("Unable to load committees.");
+      setError(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   useEffect(() => {
     fetchCommittees();
@@ -97,10 +90,10 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Your Committees
+          {t("title")}
         </CardTitle>
         <CardDescription>
-          Committees you belong to and their current status
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -108,7 +101,7 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search committees..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
@@ -118,7 +111,7 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-8">
@@ -128,32 +121,30 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
           <div className="flex flex-col items-center justify-center py-8">
             <Users className="mb-2 h-8 w-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              {searchQuery
-                ? "No committees match your search"
-                : "No committees found"}
+              {searchQuery ? t("noMatches") : t("empty")}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Committee</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Scope</TableHead>
-                <TableHead>Members</TableHead>
+                <TableHead>{t("columns.committee")}</TableHead>
+                <TableHead>{t("columns.type")}</TableHead>
+                <TableHead>{t("columns.scope")}</TableHead>
+                <TableHead>{t("columns.members")}</TableHead>
                 <TableHead>
                   <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> Meetings
+                    <Calendar className="h-3 w-3" /> {t("columns.meetings")}
                   </span>
                 </TableHead>
                 <TableHead>
                   <span className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" /> Contact
+                    <Mail className="h-3 w-3" /> {t("columns.contact")}
                   </span>
                 </TableHead>
                 <TableHead>
                   <span className="flex items-center gap-1">
-                    <BadgeIcon className="h-3 w-3" /> Status
+                    <BadgeIcon className="h-3 w-3" /> {t("columns.status")}
                   </span>
                 </TableHead>
               </TableRow>
@@ -165,12 +156,13 @@ export function MyCommittees({ organizationId }: { organizationId: string }) {
                     {committee.name}
                   </TableCell>
                   <TableCell>
-                    {typeLabels[committee.committeeType] ??
-                      committee.committeeType}
+                    {KNOWN_TYPES.has(committee.committeeType)
+                      ? t(`types.${committee.committeeType}`)
+                      : committee.committeeType}
                   </TableCell>
                   <TableCell>
                     {committee.isOrganizationWide
-                      ? "Organization-wide"
+                      ? t("scope.organizationWide")
                       : committee.unitName ||
                         committee.worksiteName ||
                         "—"}

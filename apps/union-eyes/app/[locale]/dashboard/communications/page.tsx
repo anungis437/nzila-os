@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Users, FileText, Mail, BarChart3, Send } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import CampaignsPage from "./campaigns/page";
 import DistributionListsPage from "./distribution-lists/page";
@@ -100,16 +101,16 @@ async function getHubMetrics(orgId: string) {
   }
 }
 
-function formatTimeAgo(date: Date | null): string {
-  if (!date) return '';
+function formatTimeAgo(date: Date | null, t: Awaited<ReturnType<typeof getTranslations>>): string {
+  if (!date) return t('time.justNow');
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return t('time.minutesAgo', { count: diffMin });
   const diffHrs = Math.floor(diffMin / 60);
-  if (diffHrs < 24) return `${diffHrs}h ago`;
+  if (diffHrs < 24) return t('time.hoursAgo', { count: diffHrs });
   const diffDays = Math.floor(diffHrs / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
+  if (diffDays < 30) return t('time.daysAgo', { count: diffDays });
   return date.toLocaleDateString();
 }
 
@@ -126,6 +127,7 @@ export default async function CommunicationsDashboard({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'communicationsHubPage' });
   let user;
   try {
     user = await requireUser();
@@ -145,10 +147,10 @@ export default async function CommunicationsDashboard({
       <div className="space-y-2">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <MessageSquare className="h-8 w-8 text-primary" />
-          Communications Hub
+          {t('header.title')}
         </h1>
         <p className="text-muted-foreground">
-          Manage campaigns, distribution lists, templates, and member communications
+          {t('header.description')}
         </p>
       </div>
 
@@ -156,41 +158,41 @@ export default async function CommunicationsDashboard({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Campaigns</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.activeCampaigns')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.activeCampaignCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{metrics?.scheduledCount ?? 0} scheduled</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('stats.scheduled', { count: metrics?.scheduledCount ?? 0 })}</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Distribution Lists</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.distributionLists')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.listCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{(metrics?.totalSubscribers ?? 0).toLocaleString()} total subscribers</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('stats.totalSubscribers', { count: (metrics?.totalSubscribers ?? 0).toLocaleString() })}</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Templates</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.templates')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.templateCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Across all channels</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('stats.acrossChannels')}</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Campaigns Sent</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.campaignsSent')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.sentCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{metrics?.smsCampaignCount ?? 0} SMS campaigns</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('stats.smsCampaigns', { count: metrics?.smsCampaignCount ?? 0 })}</p>
           </CardContent>
         </Card>
       </div>
@@ -198,11 +200,11 @@ export default async function CommunicationsDashboard({
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="lists">Distribution Lists</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="sms">SMS</TabsTrigger>
+          <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="campaigns">{t('tabs.campaigns')}</TabsTrigger>
+          <TabsTrigger value="lists">{t('tabs.distributionLists')}</TabsTrigger>
+          <TabsTrigger value="templates">{t('tabs.templates')}</TabsTrigger>
+          <TabsTrigger value="sms">{t('tabs.sms')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -210,13 +212,13 @@ export default async function CommunicationsDashboard({
             {/* Recent Activity */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest campaigns</CardDescription>
+                <CardTitle>{t('overview.recentActivity.title')}</CardTitle>
+                <CardDescription>{t('overview.recentActivity.description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {(metrics?.recentCampaigns ?? []).length === 0 && (
-                    <p className="text-sm text-muted-foreground">No campaigns yet</p>
+                    <p className="text-sm text-muted-foreground">{t('overview.recentActivity.empty')}</p>
                   )}
                   {(metrics?.recentCampaigns ?? []).map((c) => {
                     const Icon = channelIcons[c.channel] ?? Mail;
@@ -226,7 +228,7 @@ export default async function CommunicationsDashboard({
                         <div className="flex-1">
                           <p className="font-medium text-sm">{c.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {c.status} &middot; {c.channel} &middot; {formatTimeAgo(c.createdAt)}
+                            {c.status} &middot; {c.channel} &middot; {formatTimeAgo(c.createdAt, t)}
                           </p>
                         </div>
                       </div>
@@ -239,38 +241,38 @@ export default async function CommunicationsDashboard({
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common communication tasks</CardDescription>
+                <CardTitle>{t('overview.quickActions.title')}</CardTitle>
+                <CardDescription>{t('overview.quickActions.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/campaigns/new`}>
                     <Send className="mr-2 h-4 w-4" />
-                    Create New Campaign
+                    {t('overview.quickActions.createCampaign')}
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/sms`}>
                     <MessageSquare className="mr-2 h-4 w-4" />
-                    Send SMS Message
+                    {t('overview.quickActions.sendSms')}
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/distribution-lists`}>
                     <Users className="mr-2 h-4 w-4" />
-                    Manage Distribution Lists
+                    {t('overview.quickActions.manageLists')}
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/templates`}>
                     <FileText className="mr-2 h-4 w-4" />
-                    Browse Templates
+                    {t('overview.quickActions.browseTemplates')}
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/campaigns`}>
                     <BarChart3 className="mr-2 h-4 w-4" />
-                    View Analytics
+                    {t('overview.quickActions.viewAnalytics')}
                   </Link>
                 </Button>
               </CardContent>

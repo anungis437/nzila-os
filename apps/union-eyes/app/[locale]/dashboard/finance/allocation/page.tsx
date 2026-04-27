@@ -7,6 +7,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ interface SimulationResult {
 }
 
 export default function AllocationPage() {
+  const t = useTranslations('financeAllocationPage');
   const [rules, setRules] = useState<AllocationRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,15 +57,15 @@ export default function AllocationPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/finance/allocation');
-      if (!res.ok) throw new Error('Failed to load allocation rules');
+      if (!res.ok) throw new Error(t('errors.failedToLoadRules'));
       const json = await res.json();
       setRules(json.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : t('errors.generic'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchRules();
@@ -82,11 +84,11 @@ export default function AllocationPage() {
           localBasisData: [],
         }),
       });
-      if (!res.ok) throw new Error('Simulation failed');
+      if (!res.ok) throw new Error(t('errors.simulationFailed'));
       const json = await res.json();
       setSimResult(json.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Simulation error');
+      setError(err instanceof Error ? err.message : t('errors.simulationError'));
     } finally {
       setSimRunning(false);
     }
@@ -95,7 +97,7 @@ export default function AllocationPage() {
   if (loading) {
     return (
       <div className="space-y-6 p-6">
-        <h1 className="text-2xl font-bold">Cost Allocation</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Card className="p-6">
           {[1, 2].map((i) => (
             <Skeleton key={i} className="h-10 w-full mb-2" />
@@ -109,7 +111,7 @@ export default function AllocationPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <BarChart3 className="h-6 w-6" /> Cost Allocation
+          <BarChart3 className="h-6 w-6" /> {t('title')}
         </h1>
       </div>
 
@@ -124,32 +126,32 @@ export default function AllocationPage() {
 
       {/* Rules */}
       <Card className="p-4">
-        <h2 className="text-lg font-semibold mb-3">Allocation Rules</h2>
+        <h2 className="text-lg font-semibold mb-3">{t('rules.title')}</h2>
         <div className="mb-4 max-w-sm">
           <Label htmlFor="sim-period" className="text-sm font-medium mb-1 block">
-            Billing Period ID
+            {t('rules.billingPeriodId')}
           </Label>
           <Input
             id="sim-period"
-            placeholder="Enter billing period UUID to simulate"
+            placeholder={t('rules.billingPeriodPlaceholder')}
             value={simPeriodId}
             onChange={(e) => setSimPeriodId(e.target.value.trim())}
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Required to run a simulation — no records will be written.
+            {t('rules.simulationNotice')}
           </p>
         </div>
         {rules.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No allocation rules configured</p>
+          <p className="text-muted-foreground text-sm">{t('rules.empty')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Cost Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('rules.columns.name')}</TableHead>
+                <TableHead>{t('rules.columns.costType')}</TableHead>
+                <TableHead>{t('rules.columns.status')}</TableHead>
+                <TableHead>{t('rules.columns.created')}</TableHead>
+                <TableHead>{t('rules.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -159,7 +161,7 @@ export default function AllocationPage() {
                   <TableCell className="capitalize">{rule.costType.replace(/_/g, ' ')}</TableCell>
                   <TableCell>
                     <Badge variant={rule.isActive ? 'default' : 'secondary'}>
-                      {rule.isActive ? 'Active' : 'Inactive'}
+                      {rule.isActive ? t('rules.status.active') : t('rules.status.inactive')}
                     </Badge>
                   </TableCell>
                   <TableCell>{new Date(rule.createdAt).toLocaleDateString()}</TableCell>
@@ -171,7 +173,7 @@ export default function AllocationPage() {
                       onClick={() => runSimulation(rule.id)}
                     >
                       <Play className="h-3 w-3 mr-1" />
-                      Simulate
+                      {t('rules.simulate')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -185,19 +187,21 @@ export default function AllocationPage() {
       {simResult && (
         <Card className="p-4 border-blue-500/30">
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <Badge variant="outline">Simulation</Badge>
-            Allocation Preview
+            <Badge variant="outline">{t('results.simulationBadge')}</Badge>
+            {t('results.title')}
           </h2>
           <p className="text-sm text-muted-foreground mb-3">
-            Total cost pool: {formatCurrency(Number(simResult.totalCostPoolCad))} — No records written
+            {t('results.totalCostPool', {
+              amount: formatCurrency(Number(simResult.totalCostPoolCad)),
+            })}
           </p>
           {simResult.lines.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Local</TableHead>
-                  <TableHead>Share %</TableHead>
-                  <TableHead>Allocated (CAD)</TableHead>
+                  <TableHead>{t('results.columns.local')}</TableHead>
+                  <TableHead>{t('results.columns.sharePercent')}</TableHead>
+                  <TableHead>{t('results.columns.allocatedCad')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -211,7 +215,7 @@ export default function AllocationPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground">No allocation lines in simulation</p>
+            <p className="text-sm text-muted-foreground">{t('results.empty')}</p>
           )}
         </Card>
       )}

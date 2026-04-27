@@ -10,6 +10,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Users, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,7 @@ export function StewardCapacityChart({
   stewards,
   className,
 }: StewardCapacityChartProps) {
+  const t = useTranslations("leadershipDashboard.stewardCapacity");
   const sorted = [...stewards].sort((a, b) => {
     const ua = utilization(a.activeCases, a.capacityLimit);
     const ub = utilization(b.activeCases, b.capacityLimit);
@@ -75,17 +77,17 @@ export function StewardCapacityChart({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">Steward Capacity</h3>
+          <h3 className="text-sm font-semibold">{t("title")}</h3>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span>{stewards.length} stewards</span>
+          <span>{t("stewardsCount", { count: stewards.length })}</span>
           <span>·</span>
-          <span>{totalActive} active cases</span>
+          <span>{t("activeCasesCount", { count: totalActive })}</span>
           {totalOverdue > 0 && (
             <>
               <span>·</span>
               <span className="text-red-600 font-medium">
-                {totalOverdue} overdue
+                {t("overdueCount", { count: totalOverdue })}
               </span>
             </>
           )}
@@ -94,7 +96,7 @@ export function StewardCapacityChart({
 
       {/* Avg utilization */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">Avg. Utilization:</span>
+        <span className="text-xs text-muted-foreground">{t("avgUtilization")}</span>
         <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
           <div
             className={cn("h-full rounded-full transition-all", utilizationColor(avgUtil))}
@@ -107,7 +109,7 @@ export function StewardCapacityChart({
       {/* Steward bars */}
       {sorted.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">
-          No steward capacity data available.
+          {t("noData")}
         </p>
       ) : (
         <div className="space-y-3" role="list" aria-label="Steward workload">
@@ -144,8 +146,8 @@ export function StewardCapacityChart({
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>Avg. {steward.avgDaysPerCase}d per case</span>
-                  <span>{steward.resolvedThisMonth} resolved this month</span>
+                  <span>{t("perCase", { days: steward.avgDaysPerCase })}</span>
+                  <span>{t("resolvedMonth", { count: steward.resolvedThisMonth })}</span>
                 </div>
               </div>
             );

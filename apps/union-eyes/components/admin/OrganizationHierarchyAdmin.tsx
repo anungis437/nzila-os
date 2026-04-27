@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +57,7 @@ export function OrganizationHierarchyAdmin({
   organizationId, 
   userRole 
 }: OrganizationHierarchyAdminProps) {
+  const t = useTranslations('organizationHierarchyAdmin');
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [hierarchyTree, setHierarchyTree] = useState<any[]>([]);
@@ -195,10 +197,12 @@ export function OrganizationHierarchyAdmin({
               <h4 className="font-semibold">{node.name}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={getOrgTypeColor(node.organization_type)}>
-                  {node.organization_type.replace('_', ' ')}
+                  {(['international','national','regional','local_union','chapter'] as const).includes(node.organization_type as 'international') 
+                    ? t(node.organization_type as 'international')
+                    : node.organization_type.replace('_', ' ')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  Level {node.level}
+                  {t('levels.level')} {node.level}
                 </span>
               </div>
             </div>
@@ -207,17 +211,17 @@ export function OrganizationHierarchyAdmin({
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              <span>{node.member_count || 0} members</span>
+              <span>{node.member_count || 0} {t('stats.members')}</span>
             </div>
             {node.rls_enabled && (
               <div className="flex items-center gap-2 text-green-600">
                 <Shield className="h-4 w-4" />
-                <span>RLS Enabled</span>
+                <span>{t('stats.rlsEnabled')}</span>
               </div>
             )}
             {node.children && node.children.length > 0 && (
               <Badge variant="outline">
-                {node.children.length} sub-org{node.children.length !== 1 ? 's' : ''}
+                {node.children.length} {node.children.length === 1 ? t('stats.subOrganizations') : t('stats.subOrganizations') + 's'}
               </Badge>
             )}
             {userRole === 'admin' && (
@@ -252,45 +256,45 @@ export function OrganizationHierarchyAdmin({
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading organization hierarchy...</div>;
+    return <div className="flex items-center justify-center p-8">{t('loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Organization Hierarchy</h2>
-          <p className="text-muted-foreground">Manage organization structure and isolation</p>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         {userRole === 'admin' && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Organization
+                {t('addOrganization')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New Organization</DialogTitle>
+                <DialogTitle>{t('createOrganization')}</DialogTitle>
                 <DialogDescription>
-                  Add a new organization to the hierarchy with proper organization isolation.
+                  {t('createDescription')}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Organization Name</Label>
+                  <Label htmlFor="name">{t('organizationName')}</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Local 123"
+                    placeholder={t('organizationNamePlaceholder')}
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="type">Organization Type</Label>
+                  <Label htmlFor="type">{t('organizationType')}</Label>
                   <Select
                     value={formData.organizationType}
                     onValueChange={(value) => setFormData({ ...formData, organizationType: value })}
@@ -299,23 +303,23 @@ export function OrganizationHierarchyAdmin({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="international">International</SelectItem>
-                      <SelectItem value="national">National</SelectItem>
-                      <SelectItem value="regional">Regional</SelectItem>
-                      <SelectItem value="local_union">Local Union</SelectItem>
-                      <SelectItem value="chapter">Chapter</SelectItem>
+                      <SelectItem value="international">{t('international')}</SelectItem>
+                      <SelectItem value="national">{t('national')}</SelectItem>
+                      <SelectItem value="regional">{t('regional')}</SelectItem>
+                      <SelectItem value="local_union">{t('localUnion')}</SelectItem>
+                      <SelectItem value="chapter">{t('chapter')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label htmlFor="parent">Parent Organization (Optional)</Label>
+                  <Label htmlFor="parent">{t('parentOrganization')}</Label>
                   <Select
                     value={formData.parentOrganizationId}
                     onValueChange={(value) => setFormData({ ...formData, parentOrganizationId: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select parent organization" />
+                      <SelectValue placeholder={t('selectParent')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">None (Top Level)</SelectItem>
@@ -331,10 +335,10 @@ export function OrganizationHierarchyAdmin({
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button onClick={handleCreateOrganization}>
-                  Create Organization
+                  {t('createOrganization')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -385,7 +389,7 @@ export function OrganizationHierarchyAdmin({
         </CardHeader>
         <CardContent>
           {hierarchyTree.length === 0 ? (
-            <p className="text-muted-foreground">No organizations in hierarchy.</p>
+            <p className="text-muted-foreground">{t('noResults')}</p>
           ) : (
             <div className="space-y-2">
               {hierarchyTree.map(node => renderOrganizationNode(node))}

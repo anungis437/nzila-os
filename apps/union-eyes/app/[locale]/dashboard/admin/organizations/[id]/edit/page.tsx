@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   Save,
@@ -36,65 +37,66 @@ import type { OrganizationType, LabourSector, CAJurisdiction, OrganizationStatus
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 // Canadian sectors
-const sectors: { value: LabourSector; label: string }[] = [
-  { value: "healthcare", label: "Healthcare" },
-  { value: "education", label: "Education" },
-  { value: "public_service", label: "Public Service" },
-  { value: "trades", label: "Trades" },
-  { value: "manufacturing", label: "Manufacturing" },
-  { value: "transportation", label: "Transportation" },
-  { value: "retail", label: "Retail" },
-  { value: "hospitality", label: "Hospitality" },
-  { value: "technology", label: "Technology" },
-  { value: "construction", label: "Construction" },
-  { value: "utilities", label: "Utilities" },
-  { value: "telecommunications", label: "Telecommunications" },
-  { value: "financial_services", label: "Financial Services" },
-  { value: "agriculture", label: "Agriculture" },
-  { value: "arts_culture", label: "Arts & Culture" },
-  { value: "other", label: "Other" }
+const sectors: { value: LabourSector }[] = [
+  { value: "healthcare" },
+  { value: "education" },
+  { value: "public_service" },
+  { value: "trades" },
+  { value: "manufacturing" },
+  { value: "transportation" },
+  { value: "retail" },
+  { value: "hospitality" },
+  { value: "technology" },
+  { value: "construction" },
+  { value: "utilities" },
+  { value: "telecommunications" },
+  { value: "financial_services" },
+  { value: "agriculture" },
+  { value: "arts_culture" },
+  { value: "other" }
 ];
 
 // Canadian jurisdictions
-const jurisdictions: { value: CAJurisdiction; label: string }[] = [
-  { value: "CA-FED", label: "Federal" },
-  { value: "CA-AB", label: "Alberta" },
-  { value: "CA-BC", label: "British Columbia" },
-  { value: "CA-MB", label: "Manitoba" },
-  { value: "CA-NB", label: "New Brunswick" },
-  { value: "CA-NL", label: "Newfoundland and Labrador" },
-  { value: "CA-NS", label: "Nova Scotia" },
-  { value: "CA-NT", label: "Northwest Territories" },
-  { value: "CA-NU", label: "Nunavut" },
-  { value: "CA-ON", label: "Ontario" },
-  { value: "CA-PE", label: "Prince Edward Island" },
-  { value: "CA-QC", label: "Quebec" },
-  { value: "CA-SK", label: "Saskatchewan" },
-  { value: "CA-YT", label: "Yukon" }
+const jurisdictions: { value: CAJurisdiction }[] = [
+  { value: "CA-FED" },
+  { value: "CA-AB" },
+  { value: "CA-BC" },
+  { value: "CA-MB" },
+  { value: "CA-NB" },
+  { value: "CA-NL" },
+  { value: "CA-NS" },
+  { value: "CA-NT" },
+  { value: "CA-NU" },
+  { value: "CA-ON" },
+  { value: "CA-PE" },
+  { value: "CA-QC" },
+  { value: "CA-SK" },
+  { value: "CA-YT" }
 ];
 
 // Organization types
-const orgTypes: { value: OrganizationType; label: string; description: string }[] = [
-  { value: "platform", label: "Platform", description: "SaaS platform provider (Nzila Ventures)" },
-  { value: "congress", label: "Congress", description: "National labour congress (e.g., CLC)" },
-  { value: "federation", label: "Federation", description: "Provincial/territorial federation (e.g., OFL, BCFED)" },
-  { value: "union", label: "Union", description: "National/international union (e.g., CUPE, Unifor)" },
-  { value: "local", label: "Local", description: "Local union or chapter" },
-  { value: "region", label: "Region", description: "Regional council" },
-  { value: "district", label: "District", description: "District labour council" }
+const orgTypes: { value: OrganizationType }[] = [
+  { value: "platform" },
+  { value: "congress" },
+  { value: "federation" },
+  { value: "union" },
+  { value: "local" },
+  { value: "region" },
+  { value: "district" }
 ];
 
 // Organization statuses
-const statuses: { value: OrganizationStatus; label: string }[] = [
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-  { value: "suspended", label: "Suspended" },
-  { value: "archived", label: "Archived" }
+const statuses: { value: OrganizationStatus }[] = [
+  { value: "active" },
+  { value: "inactive" },
+  { value: "suspended" },
+  { value: "archived" }
 ];
 
 export default function EditOrganizationPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('adminOrganizationEditPage');
   const organizationId = params.id as string;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -183,29 +185,29 @@ export default function EditOrganizationPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update organization");
+          throw new Error(errorData.error || t('failedToUpdateOrganization'));
       }
 
       router.push(`/dashboard/admin/organizations/${organizationId}`);
     } catch (error) {
-      setError(error.message);
+      setError(error instanceof Error ? error.message : t('failedToUpdateOrganization'));
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to archive this organization? This action can be reversed later.")) return;
+    if (!confirm(t('confirmArchiveOrganization'))) return;
     
     try {
       const response = await fetch(`/api/organizations/${organizationId}`, {
         method: "DELETE",
       });
       
-      if (!response.ok) throw new Error("Failed to archive organization");
+      if (!response.ok) throw new Error(t('failedToArchiveOrganization'));
       
       router.push("/dashboard/admin/organizations");
     } catch (_error) {
-alert("Failed to archive organization");
+      alert(t('failedToArchiveOrganization'));
     }
   };
 
@@ -224,13 +226,13 @@ alert("Failed to archive organization");
       <div className="container mx-auto p-6">
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <AlertCircle className="w-12 h-12 mb-4" />
-          <p>Organization not found</p>
+          <p>{t('organizationNotFound')}</p>
           <Button 
             variant="outline" 
             className="mt-4"
             onClick={() => router.push("/dashboard/admin/organizations")}
           >
-            Back to Organizations
+            {t('backToOrganizationsButton')}
           </Button>
         </div>
       </div>
@@ -251,9 +253,9 @@ alert("Failed to archive organization");
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Edit Organization</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground mt-1">
-              Update organization details and settings
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -270,39 +272,39 @@ alert("Failed to archive organization");
         {/* Basic Information */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t('basicInformationTitle')}</CardTitle>
             <CardDescription>
-              Update the basic details for the organization
+              {t('basicInformationDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Organization Name *</Label>
+              <Label htmlFor="name">{t('organizationNameLabel')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., CUPE Local 1000"
+                placeholder={t('organizationNamePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
+              <Label htmlFor="slug">{t('slugLabel')}</Label>
               <Input
                 id="slug"
                 value={formData.slug}
                 onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="cupe-local-1000"
+                placeholder={t('slugPlaceholder')}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                URL-friendly identifier
+                {t('slugHelp')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="type">Organization Type *</Label>
+              <Label htmlFor="type">{t('organizationTypeLabel')}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as OrganizationType }))}
@@ -314,8 +316,8 @@ alert("Failed to archive organization");
                   {orgTypes.map(type => (
                     <SelectItem key={type.value} value={type.value}>
                       <div>
-                        <div>{type.label}</div>
-                        <div className="text-xs text-muted-foreground">{type.description}</div>
+                        <div>{t(`orgType.${type.value}`)}</div>
+                        <div className="text-xs text-muted-foreground">{t(`orgTypeDescription.${type.value}`)}</div>
                       </div>
                     </SelectItem>
                   ))}
@@ -324,7 +326,7 @@ alert("Failed to archive organization");
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status *</Label>
+              <Label htmlFor="status">{t('statusLabel')}</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as OrganizationStatus }))}
@@ -335,7 +337,7 @@ alert("Failed to archive organization");
                 <SelectContent>
                   {statuses.map(status => (
                     <SelectItem key={status.value} value={status.value}>
-                      {status.label}
+                      {t(`status.${status.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -343,12 +345,12 @@ alert("Failed to archive organization");
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('descriptionLabel')}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Brief description of the organization..."
+                placeholder={t('descriptionPlaceholder')}
                 rows={3}
               />
             </div>
@@ -358,26 +360,26 @@ alert("Failed to archive organization");
         {/* Hierarchy */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Hierarchy</CardTitle>
+            <CardTitle>{t('hierarchyTitle')}</CardTitle>
             <CardDescription>
-              Update position within the organizational hierarchy
+              {t('hierarchyDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="parent">Parent Organization</Label>
+              <Label htmlFor="parent">{t('parentOrganizationLabel')}</Label>
               <Select
                 value={formData.parentId}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value }))}
               >
                 <SelectTrigger id="parent">
-                  <SelectValue placeholder="No parent (root organization)" />
+                  <SelectValue placeholder={t('noParentOption')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No parent (root organization)</SelectItem>
+                  <SelectItem value="">{t('noParentOption')}</SelectItem>
                   {availableOrganizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name} ({org.type})
+                      {org.name} ({t(`orgType.${org.type}`)})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -385,7 +387,7 @@ alert("Failed to archive organization");
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  Changing the parent may affect access permissions for members
+                  {t('parentChangeWarning')}
                 </AlertDescription>
               </Alert>
             </div>
@@ -395,14 +397,14 @@ alert("Failed to archive organization");
         {/* Classification */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Classification</CardTitle>
+            <CardTitle>{t('classificationTitle')}</CardTitle>
             <CardDescription>
-              Sector and jurisdiction information
+              {t('classificationDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="sector">Primary Sector</Label>
+              <Label htmlFor="sector">{t('primarySectorLabel')}</Label>
               <Select
                 value={formData.sector}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, sector: value as LabourSector }))}
@@ -413,7 +415,7 @@ alert("Failed to archive organization");
                 <SelectContent>
                   {sectors.map(sector => (
                     <SelectItem key={sector.value} value={sector.value}>
-                      {sector.label}
+                      {t(`sector.${sector.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -421,7 +423,7 @@ alert("Failed to archive organization");
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="jurisdiction">Jurisdiction</Label>
+              <Label htmlFor="jurisdiction">{t('jurisdictionLabel')}</Label>
               <Select
                 value={formData.jurisdiction}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, jurisdiction: value as CAJurisdiction }))}
@@ -432,7 +434,7 @@ alert("Failed to archive organization");
                 <SelectContent>
                   {jurisdictions.map(jurisdiction => (
                     <SelectItem key={jurisdiction.value} value={jurisdiction.value}>
-                      {jurisdiction.label}
+                      {t(`jurisdiction.${jurisdiction.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -444,24 +446,24 @@ alert("Failed to archive organization");
         {/* Additional Details */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Additional Details</CardTitle>
+            <CardTitle>{t('additionalDetailsTitle')}</CardTitle>
             <CardDescription>
-              Optional information about the organization
+              {t('additionalDetailsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="charter">Charter Number</Label>
+              <Label htmlFor="charter">{t('charterNumberLabel')}</Label>
               <Input
                 id="charter"
                 value={formData.charterNumber}
                 onChange={(e) => setFormData(prev => ({ ...prev, charterNumber: e.target.value }))}
-                placeholder="e.g., 1000"
+                placeholder={t('charterNumberPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="affiliation">Affiliation Date</Label>
+              <Label htmlFor="affiliation">{t('affiliationDateLabel')}</Label>
               <Input
                 id="affiliation"
                 type="date"
@@ -475,17 +477,17 @@ alert("Failed to archive organization");
         {/* Danger Zone */}
         <Card className="mb-6 border-red-200">
           <CardHeader>
-            <CardTitle className="text-red-600">Danger Zone</CardTitle>
+            <CardTitle className="text-red-600">{t('dangerZoneTitle')}</CardTitle>
             <CardDescription>
-              Irreversible and destructive actions
+              {t('dangerZoneDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <h3 className="font-medium">Archive this organization</h3>
+                <h3 className="font-medium">{t('archiveOrganizationTitle')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Once archived, this organization will be hidden from active lists
+                  {t('archiveOrganizationDescription')}
                 </p>
               </div>
               <Button 
@@ -494,7 +496,7 @@ alert("Failed to archive organization");
                 onClick={handleDelete}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Archive
+                {t('archiveButton')}
               </Button>
             </div>
           </CardContent>
@@ -508,7 +510,7 @@ alert("Failed to archive organization");
             onClick={() => router.push(`/dashboard/admin/organizations/${organizationId}`)}
             disabled={isSubmitting}
           >
-            Cancel
+            {t('cancelButton')}
           </Button>
           <Button
             type="submit"
@@ -518,12 +520,12 @@ alert("Failed to archive organization");
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Saving...
+                {t('savingButton')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                Save Changes
+                {t('saveChangesButton')}
               </>
             )}
           </Button>

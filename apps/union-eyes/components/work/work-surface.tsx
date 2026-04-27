@@ -19,6 +19,7 @@ import Link from "next/link";
 
 export function WorkSurface() {
   const t = useTranslations();
+  const tWork = useTranslations("workSurface");
   const locale = useLocale();
   const { organizationId } = useOrganization();
 
@@ -27,23 +28,23 @@ export function WorkSurface() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.work")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Active casework and operations — manage cases, grievances, bargaining, arbitration, and committees.
+          {tWork("subtitle")}
         </p>
         <Link
           href={`/${locale}/dashboard/knowledge`}
           className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1"
         >
-          <BookOpen size={12} /> Reference clauses &amp; precedents in Knowledge
+          <BookOpen size={12} /> {tWork("knowledgeLink")}
         </Link>
       </div>
 
       <Tabs defaultValue="cases" className="w-full">
         <TabsList>
-          <TabsTrigger value="cases">{t("claims.caseQueue")}</TabsTrigger>
-          <TabsTrigger value="grievances">{t("grievance.title")}</TabsTrigger>
-          <TabsTrigger value="bargaining">{t("sidebar.bargainingNegotiations")}</TabsTrigger>
-          <TabsTrigger value="arbitration">Arbitration</TabsTrigger>
-          <TabsTrigger value="committees">Committees</TabsTrigger>
+          <TabsTrigger value="cases">{tWork("tabs.cases")}</TabsTrigger>
+          <TabsTrigger value="grievances">{tWork("tabs.grievances")}</TabsTrigger>
+          <TabsTrigger value="bargaining">{tWork("tabs.bargaining")}</TabsTrigger>
+          <TabsTrigger value="arbitration">{tWork("tabs.arbitration")}</TabsTrigger>
+          <TabsTrigger value="committees">{tWork("tabs.committees")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cases" className="mt-4">
@@ -59,7 +60,7 @@ export function WorkSurface() {
             <NegotiationDashboard organizationId={organizationId} />
           ) : (
             <p className="text-sm text-gray-400 py-8 text-center">
-              Select an organization to view bargaining.
+              {tWork("selectOrgBargaining")}
             </p>
           )}
         </TabsContent>
@@ -69,7 +70,7 @@ export function WorkSurface() {
             <ArbitrationConsole />
           ) : (
             <p className="text-sm text-gray-400 py-8 text-center">
-              Select an organization to view arbitrations.
+              {tWork("selectOrgArbitration")}
             </p>
           )}
         </TabsContent>
@@ -79,7 +80,7 @@ export function WorkSurface() {
             <MyCommittees organizationId={organizationId} />
           ) : (
             <p className="text-sm text-gray-400 py-8 text-center">
-              Select an organization to view your committees.
+              {tWork("selectOrgCommittees")}
             </p>
           )}
         </TabsContent>

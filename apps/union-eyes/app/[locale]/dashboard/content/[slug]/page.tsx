@@ -8,6 +8,7 @@
 export const dynamic = 'force-dynamic';
 
 import { redirect, notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +84,15 @@ async function loadTemplate(orgId: string, slug: string): Promise<TemplateData |
   };
 }
 
-function FieldRenderer({ field }: { field: TemplateField }) {
+function FieldRenderer({
+  field,
+  selectPlaceholder,
+  signatureFieldLabel,
+}: {
+  field: TemplateField;
+  selectPlaceholder: string;
+  signatureFieldLabel: string;
+}) {
   const labelClass = 'block text-sm font-medium text-foreground mb-1';
   const inputClass =
     'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground placeholder:text-muted-foreground/50';
@@ -103,7 +112,7 @@ function FieldRenderer({ field }: { field: TemplateField }) {
         />
       ) : field.type === 'select' ? (
         <select className={inputClass} disabled>
-          <option value="">Select…</option>
+          <option value="">{selectPlaceholder}</option>
           {field.options?.map((opt) => (
             <option key={opt} value={opt}>
               {opt}
@@ -112,7 +121,7 @@ function FieldRenderer({ field }: { field: TemplateField }) {
         </select>
       ) : field.type === 'signature' ? (
         <div className="h-16 rounded-md border border-dashed border-input bg-muted/30 flex items-center justify-center text-xs text-muted-foreground">
-          Signature field
+          {signatureFieldLabel}
         </div>
       ) : (
         <input
@@ -126,7 +135,15 @@ function FieldRenderer({ field }: { field: TemplateField }) {
   );
 }
 
-function ContentBlockRenderer({ block }: { block: ContentBlock }) {
+function ContentBlockRenderer({
+  block,
+  selectPlaceholder,
+  signatureFieldLabel,
+}: {
+  block: ContentBlock;
+  selectPlaceholder: string;
+  signatureFieldLabel: string;
+}) {
   switch (block.type) {
     case 'heading':
       return (
@@ -148,7 +165,11 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
                 const isWide = field.type === 'textarea' || field.type === 'signature';
                 return (
                   <div key={i} className={isWide ? 'sm:col-span-2' : ''}>
-                    <FieldRenderer field={field} />
+                    <FieldRenderer
+                      field={field}
+                      selectPlaceholder={selectPlaceholder}
+                      signatureFieldLabel={signatureFieldLabel}
+                    />
                   </div>
                 );
               })}
@@ -173,6 +194,7 @@ export default async function TemplateDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { slug, locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'contentTemplateDetailPage' });
 
   const user = await requireUser();
 
@@ -203,7 +225,7 @@ export default async function TemplateDetailPage({
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Content
+        {t('backToContent')}
       </Link>
 
       {/* Header */}
@@ -238,19 +260,21 @@ export default async function TemplateDetailPage({
       <div className="flex items-center gap-6 text-sm text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Eye className="h-4 w-4" />
-          {template.views.toLocaleString()} views
+          {t('stats.views', { count: template.views.toLocaleString() })}
         </span>
         <span className="flex items-center gap-1.5">
           <Download className="h-4 w-4" />
-          {template.downloads.toLocaleString()} downloads
+          {t('stats.downloads', { count: template.downloads.toLocaleString() })}
         </span>
         {template.updatedAt && (
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            Updated {new Date(template.updatedAt).toLocaleDateString('en-CA', {
+            {t('stats.updated', {
+              date: new Date(template.updatedAt).toLocaleDateString('en-CA', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
+              }),
             })}
           </span>
         )}
@@ -262,11 +286,16 @@ export default async function TemplateDetailPage({
       {template.content.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Template Preview</CardTitle>
+            <CardTitle>{t('templatePreviewTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {template.content.map((block, index) => (
-              <ContentBlockRenderer key={index} block={block} />
+              <ContentBlockRenderer
+                key={index}
+                block={block}
+                selectPlaceholder={t('field.selectPlaceholder')}
+                signatureFieldLabel={t('field.signatureField')}
+              />
             ))}
           </CardContent>
         </Card>
@@ -274,7 +303,7 @@ export default async function TemplateDetailPage({
         <Card>
           <CardContent className="py-12 text-center">
             <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-            <p className="text-muted-foreground">No template content available yet.</p>
+            <p className="text-muted-foreground">{t('empty')}</p>
           </CardContent>
         </Card>
       )}

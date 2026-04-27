@@ -11,6 +11,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { AlertTriangle, XCircle, FileText, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,21 +39,12 @@ export interface IntakeReviewPanelProps {
   onRequestInfo?: (intakeId: string, notes: string) => Promise<void>;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  individual: "Individual",
-  group: "Group",
-  policy: "Policy",
-  contract: "Contract",
-  harassment: "Harassment",
-  discrimination: "Discrimination",
-  safety: "Safety",
-  seniority: "Seniority",
-  discipline: "Discipline",
-  termination: "Termination",
-  other: "Other",
-};
+const TYPE_KEYS = [
+  "individual", "group", "policy", "contract", "harassment", "discrimination", "safety", "seniority", "discipline", "termination", "other",
+] as const;
 
 export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }: IntakeReviewPanelProps) {
+  const t = useTranslations("intakeReview");
   const { toast } = useToast();
   const [action, setAction] = React.useState<"convert" | "close" | "request_info" | null>(null);
   const [notes, setNotes] = React.useState("");
@@ -67,21 +59,21 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
       switch (action) {
         case "convert":
           await onConvert?.(intake.id, priority, notes);
-          toast({ title: "Intake converted to official case" });
+          toast({ title: t("toast.converted") });
           break;
         case "close":
           await onClose?.(intake.id, notes);
-          toast({ title: "Intake closed without case" });
+          toast({ title: t("toast.closed") });
           break;
         case "request_info":
           await onRequestInfo?.(intake.id, notes);
-          toast({ title: "Information requested from member" });
+          toast({ title: t("toast.requested") });
           break;
       }
       setAction(null);
       setNotes("");
     } catch {
-      toast({ title: "Action failed", variant: "destructive" });
+      toast({ title: t("toast.failed"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -95,7 +87,7 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
             <FileText className="mr-2 inline-block h-4 w-4" />
             {intake.grievanceNumber}
           </CardTitle>
-          <Badge variant="outline">{TYPE_LABELS[intake.type] ?? intake.type}</Badge>
+          <Badge variant="outline">{(TYPE_KEYS as readonly string[]).includes(intake.type) ? t(`types.${intake.type}` as 'types.other') : intake.type}</Badge>
         </div>
         <p className="text-sm text-muted-foreground mt-1">{intake.title}</p>
       </CardHeader>
@@ -104,8 +96,8 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
         <p className="text-sm">{intake.description}</p>
 
         <div className="flex gap-4 text-xs text-muted-foreground">
-          <span>Submitted: {format(new Date(intake.createdAt), "MMM d, yyyy")}</span>
-          <span>Status: {intake.status}</span>
+          <span>{t("submittedLabel", { date: format(new Date(intake.createdAt), "MMM d, yyyy") })}</span>
+          <span>{t("statusLabel", { status: intake.status })}</span>
         </div>
 
         {/* Action selection */}
@@ -113,15 +105,15 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
           <div className="flex gap-2 pt-2">
             <Button size="sm" onClick={() => setAction("convert")}>
               <ArrowRight className="mr-1 h-3 w-3" />
-              Convert to Case
+              {t("actions.convert")}
             </Button>
             <Button size="sm" variant="outline" onClick={() => setAction("request_info")}>
               <AlertTriangle className="mr-1 h-3 w-3" />
-              Request Info
+              {t("actions.requestInfo")}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => setAction("close")}>
               <XCircle className="mr-1 h-3 w-3" />
-              Close Without Case
+              {t("actions.close")}
             </Button>
           </div>
         )}
@@ -130,30 +122,30 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
         {action && (
           <div className="space-y-3 pt-2 border-t">
             <p className="text-sm font-medium">
-              {action === "convert" && "Convert Intake to Official Case"}
-              {action === "close" && "Close Intake Without Case"}
-              {action === "request_info" && "Request Additional Information"}
+              {action === "convert" && t("headings.convert")}
+              {action === "close" && t("headings.close")}
+              {action === "request_info" && t("headings.request_info")}
             </p>
 
             {action === "convert" && (
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Priority" />
+                  <SelectValue placeholder={t("priorityPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t("priorities.low")}</SelectItem>
+                  <SelectItem value="medium">{t("priorities.medium")}</SelectItem>
+                  <SelectItem value="high">{t("priorities.high")}</SelectItem>
+                  <SelectItem value="urgent">{t("priorities.urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             )}
 
             <Textarea
               placeholder={
-                action === "convert" ? "Notes for the official case..." :
-                action === "close" ? "Reason for closing without case..." :
-                "What information is needed from the member..."
+                action === "convert" ? t("notesPlaceholder.convert") :
+                action === "close" ? t("notesPlaceholder.close") :
+                t("notesPlaceholder.request_info")
               }
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -171,17 +163,17 @@ export function IntakeReviewPanel({ intake, onConvert, onClose, onRequestInfo }:
             onClick={() => { setAction(null); setNotes(""); }}
             disabled={submitting}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             size="sm"
             onClick={handleSubmit}
             disabled={submitting}
           >
-            {submitting ? "Processing..." : (
-              action === "convert" ? "Confirm Conversion" :
-              action === "close" ? "Confirm Close" :
-              "Send Request"
+            {submitting ? t("processing") : (
+              action === "convert" ? t("confirm.convert") :
+              action === "close" ? t("confirm.close") :
+              t("confirm.request_info")
             )}
           </Button>
         </CardFooter>

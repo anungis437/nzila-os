@@ -11,14 +11,24 @@
  */
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { PrioritiesConsole } from "@/components/priorities/priorities-console";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Priorities | UnionEyes",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "prioritiesPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function PrioritiesPage() {
   const user = await requireUser();

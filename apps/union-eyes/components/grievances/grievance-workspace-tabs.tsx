@@ -10,6 +10,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Clock,
@@ -42,6 +43,16 @@ export interface GrievanceWorkspaceTabsProps {
 
 // ─── Default Tab Config ───────────────────────────────────────
 
+export const DEFAULT_WORKSPACE_TAB_IDS = [
+  "overview",
+  "timeline",
+  "documents",
+  "clauses",
+  "employer",
+  "ai",
+  "audit",
+] as const;
+
 export const DEFAULT_WORKSPACE_TABS: Omit<WorkspaceTab, "content">[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "timeline", label: "Timeline", icon: Clock },
@@ -59,18 +70,24 @@ export function GrievanceWorkspaceTabs({
   defaultTab,
   className,
 }: GrievanceWorkspaceTabsProps) {
+  const t = useTranslations("grievanceWorkspaceTabs");
   const [activeTab, setActiveTab] = React.useState(
     defaultTab ?? tabs[0]?.id ?? ""
   );
 
   const currentTab = tabs.find((t) => t.id === activeTab) ?? tabs[0];
 
+  const labelFor = (tab: WorkspaceTab) =>
+    (DEFAULT_WORKSPACE_TAB_IDS as readonly string[]).includes(tab.id)
+      ? t(`tabs.${tab.id}` as 'tabs.overview')
+      : tab.label;
+
   return (
     <div className={cn("space-y-4", className)}>
       {/* Tab Bar */}
       <div
         role="tablist"
-        aria-label="Grievance workspace"
+        aria-label={t("ariaLabel")}
         className="flex items-center gap-1 border-b overflow-x-auto pb-px"
       >
         {tabs.map((tab) => {
@@ -94,7 +111,7 @@ export function GrievanceWorkspaceTabs({
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="hidden sm:inline">{labelFor(tab)}</span>
               {tab.badge != null && (
                 <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">
                   {tab.badge}

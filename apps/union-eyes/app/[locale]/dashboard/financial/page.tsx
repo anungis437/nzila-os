@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { getTranslations } from 'next-intl/server';
 import FinancialOverview from '@/components/financial/FinancialOverview';
 
 /**
@@ -17,4 +19,17 @@ export default async function FinancialIndexPage({
     redirect('/login');
   }
   return <FinancialOverview />;
+}
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'financialOverviewPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
 }

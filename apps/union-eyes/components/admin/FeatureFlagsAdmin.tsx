@@ -5,9 +5,10 @@
  * Access at: /admin/feature-flags
  */
 
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -18,6 +19,7 @@ import { RefreshCw, Search } from 'lucide-react';
 import type { FeatureFlag } from '@/lib/feature-flags';
 
 export function FeatureFlagsAdmin() {
+  const t = useTranslations('featureFlagsAdmin');
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,14 +79,14 @@ export function FeatureFlagsAdmin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Feature Flags</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Manage feature toggles and rollouts
+            {t('subtitle')}
           </p>
         </div>
         <Button onClick={fetchFlags} variant="outline" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {t('refresh')}
         </Button>
       </div>
 
@@ -92,7 +94,7 @@ export function FeatureFlagsAdmin() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Flags</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.totalFlags')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{flags.length}</div>
@@ -100,7 +102,7 @@ export function FeatureFlagsAdmin() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Enabled</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.enabled')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -110,7 +112,7 @@ export function FeatureFlagsAdmin() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Disabled</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.disabled')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">
@@ -120,7 +122,7 @@ export function FeatureFlagsAdmin() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Rollouts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.rollouts')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
@@ -137,7 +139,7 @@ export function FeatureFlagsAdmin() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search flags..."
+                placeholder={t('search.placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -151,16 +153,16 @@ export function FeatureFlagsAdmin() {
       <Tabs defaultValue="all" onValueChange={setFilterType}>
         <TabsList>
           <TabsTrigger value="all">
-            All ({groupedFlags.all.length})
+            {t('tabs.all')} ({groupedFlags.all.length})
           </TabsTrigger>
           <TabsTrigger value="boolean">
-            Boolean ({groupedFlags.boolean.length})
+            {t('tabs.boolean')} ({groupedFlags.boolean.length})
           </TabsTrigger>
           <TabsTrigger value="percentage">
-            Percentage ({groupedFlags.percentage.length})
+            {t('tabs.percentage')} ({groupedFlags.percentage.length})
           </TabsTrigger>
           <TabsTrigger value="org">
-            Organization ({groupedFlags.org.length})
+            {t('tabs.organization')} ({groupedFlags.org.length})
           </TabsTrigger>
         </TabsList>
 
@@ -169,14 +171,14 @@ export function FeatureFlagsAdmin() {
             {loading ? (
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-center text-muted-foreground">Loading...</p>
+                  <p className="text-center text-muted-foreground">{t('loading')}</p>
                 </CardContent>
               </Card>
             ) : typeFlags.length === 0 ? (
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-center text-muted-foreground">
-                    No flags found
+                    {t('noFlags')}
                   </p>
                 </CardContent>
               </Card>
@@ -203,6 +205,8 @@ function FlagCard({
   flag: FeatureFlag;
   onToggle: (name: string, enabled: boolean) => void;
 }) {
+  const t = useTranslations('featureFlagsAdmin');
+
   return (
     <Card>
       <CardHeader>
@@ -213,7 +217,7 @@ function FlagCard({
               <Badge variant="outline">{flag.type}</Badge>
               {flag.enabled && (
                 <Badge variant="default" className="bg-green-500">
-                  Enabled
+                  {t('flagCard.enabled')}
                 </Badge>
               )}
             </div>
@@ -234,7 +238,7 @@ function FlagCard({
           <dl className="grid grid-cols-2 gap-4 text-sm">
             {flag.percentage !== null && flag.percentage !== undefined && (
               <div>
-                <dt className="font-medium text-muted-foreground">Rollout Percentage</dt>
+                <dt className="font-medium text-muted-foreground">{t('flagCard.rolloutPercentage')}</dt>
                 <dd className="mt-1">
                   <Badge variant="secondary">{flag.percentage}%</Badge>
                 </dd>
@@ -243,14 +247,14 @@ function FlagCard({
             
             {flag.allowedOrgs && flag.allowedOrgs.length > 0 && (
               <div>
-                <dt className="font-medium text-muted-foreground">Allowed Organizations</dt>
-                <dd className="mt-1">{flag.allowedOrgs.length} organizations</dd>
+                <dt className="font-medium text-muted-foreground">{t('flagCard.allowedOrganizations')}</dt>
+                <dd className="mt-1">{flag.allowedOrgs.length} {t('flagCard.organizations')}</dd>
               </div>
             )}
             
             {flag.tags && flag.tags.length > 0 && (
               <div className="col-span-2">
-                <dt className="font-medium text-muted-foreground">Tags</dt>
+                <dt className="font-medium text-muted-foreground">{t('flagCard.tags')}</dt>
                 <dd className="mt-1 flex flex-wrap gap-1">
                   {flag.tags.map((tag) => (
                     <Badge key={tag} variant="outline" className="text-xs">

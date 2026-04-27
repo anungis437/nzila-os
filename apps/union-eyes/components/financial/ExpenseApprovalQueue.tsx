@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,7 @@ interface ExpenseApprovalQueueProps {
 }
 
 export default function ExpenseApprovalQueue({ organizationId: _organizationId }: ExpenseApprovalQueueProps) {
+  const t = useTranslations('expenseApproval');
   const [expenses, setExpenses] = useState<ExpenseRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedExpense, setSelectedExpense] = useState<ExpenseRequest | null>(null);
@@ -52,8 +54,8 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
       setExpenses(data.data.expenses || []);
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to load pending expenses',
+        title: t('errorTitle'),
+        description: t('loadError'),
         variant: 'destructive',
       });
     } finally {
@@ -75,8 +77,8 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
       if (!response.ok) throw new Error(`Failed to ${action} expense`);
 
       toast({
-        title: 'Success',
-        description: `Expense ${action === 'approve' ? 'approved' : 'rejected'} successfully`,
+        title: t('successTitle'),
+        description: action === 'approve' ? t('approvedSuccess') : t('rejectedSuccess'),
       });
 
       setSelectedExpense(null);
@@ -84,8 +86,8 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
       fetchPendingExpenses();
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: `Failed to ${action} expense`,
+        title: t('errorTitle'),
+        description: t('actionFailed', { action: action === 'approve' ? t('actions.approve') : t('actions.reject') }),
         variant: 'destructive',
       });
     }
@@ -111,38 +113,38 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Expense Approval Queue</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Review and approve pending expense requests
+          {t('description')}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Pending Approvals</CardTitle>
+          <CardTitle>{t('pendingTitle')}</CardTitle>
           <CardDescription>
-            {expenses.length} expense{expenses.length !== 1 ? 's' : ''} awaiting your approval
+            {t(expenses.length === 1 ? 'pending' : 'pendingPlural', { count: expenses.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('loading')}</div>
           ) : expenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No pending approvals
+              {t('empty')}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Request #</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Vendor</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('table.requestNumber')}</TableHead>
+                  <TableHead>{t('table.date')}</TableHead>
+                  <TableHead>{t('table.vendor')}</TableHead>
+                  <TableHead>{t('table.description')}</TableHead>
+                  <TableHead>{t('table.category')}</TableHead>
+                  <TableHead>{t('table.amount')}</TableHead>
+                  <TableHead>{t('table.status')}</TableHead>
+                  <TableHead>{t('table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -163,7 +165,7 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
                           onClick={() => setSelectedExpense(expense)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          Review
+                          {t('actions.review')}
                         </Button>
                         <Button
                           size="sm"
@@ -174,7 +176,7 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
                           }}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
+                          {t('actions.approve')}
                         </Button>
                         <Button
                           size="sm"
@@ -185,7 +187,7 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
                           }}
                         >
                           <XCircle className="h-4 w-4 mr-1" />
-                          Reject
+                          {t('actions.reject')}
                         </Button>
                       </div>
                     </TableCell>
@@ -202,47 +204,47 @@ export default function ExpenseApprovalQueue({ organizationId: _organizationId }
         <Dialog open={!!selectedExpense} onOpenChange={() => setSelectedExpense(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{actionType === 'approve' ? 'Approve' : 'Reject'} Expense Request</DialogTitle>
+              <DialogTitle>{actionType === 'approve' ? t('dialog.approveTitle') : t('dialog.rejectTitle')}</DialogTitle>
               <DialogDescription>
-                Request #{selectedExpense.requestNumber}
+                {t('dialog.requestPrefix', { number: selectedExpense.requestNumber })}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-muted-foreground">Amount</div>
+                  <div className="text-muted-foreground">{t('dialog.amount')}</div>
                   <div className="font-semibold text-lg">${parseFloat(selectedExpense.totalAmount).toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Date</div>
+                  <div className="text-muted-foreground">{t('dialog.date')}</div>
                   <div className="font-medium">{new Date(selectedExpense.expenseDate).toLocaleDateString()}</div>
                 </div>
                 <div className="col-span-2">
-                  <div className="text-muted-foreground">Description</div>
+                  <div className="text-muted-foreground">{t('dialog.description')}</div>
                   <div className="font-medium">{selectedExpense.description}</div>
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="comments">Comments {actionType === 'reject' && '*'}</Label>
+                <Label htmlFor="comments">{actionType === 'reject' ? t('dialog.commentsRequired') : t('dialog.comments')}</Label>
                 <Textarea
                   id="comments"
                   value={approvalComments}
                   onChange={(e) => setApprovalComments(e.target.value)}
-                  placeholder={actionType === 'reject' ? 'Please explain why this is being rejected...' : 'Optional approval comments...'}
+                  placeholder={actionType === 'reject' ? t('dialog.rejectPlaceholder') : t('dialog.approvePlaceholder')}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setSelectedExpense(null)}>
-                Cancel
+                {t('dialog.cancel')}
               </Button>
               <Button
                 variant={actionType === 'approve' ? 'default' : 'destructive'}
                 onClick={() => handleApproval(selectedExpense.id, actionType)}
                 disabled={actionType === 'reject' && !approvalComments}
               >
-                {actionType === 'approve' ? 'Approve' : 'Reject'} Expense
+                {actionType === 'approve' ? t('dialog.confirmApprove') : t('dialog.confirmReject')}
               </Button>
             </DialogFooter>
           </DialogContent>

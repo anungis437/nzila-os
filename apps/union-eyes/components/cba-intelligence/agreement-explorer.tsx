@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -152,6 +153,7 @@ function AgreementDetailPanel({
   agreementId: string;
   onClose: () => void;
 }) {
+  const t = useTranslations("agreementExplorer");
   const { data, isLoading } = useQuery<AgreementDetailResponse>({
     queryKey: ["cba-intel-agreement", agreementId],
     queryFn: () =>
@@ -162,7 +164,7 @@ function AgreementDetailPanel({
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          Loading agreement details...
+          {t("detail.loading")}
         </CardContent>
       </Card>
     );
@@ -181,12 +183,12 @@ function AgreementDetailPanel({
           <div>
             <CardTitle className="text-lg">{agreement.title}</CardTitle>
             <CardDescription>
-              {agreement.cbaNumber && `CBA #${agreement.cbaNumber} · `}
+              {agreement.cbaNumber && `${t("detail.cbaPrefix", { number: agreement.cbaNumber })} · `}
               {agreement.jurisdiction} · {agreement.sector}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Back to list
+            {t("detail.back")}
           </Button>
         </div>
       </CardHeader>
@@ -194,27 +196,27 @@ function AgreementDetailPanel({
         {/* Metadata */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <div className="text-sm text-muted-foreground">Employer</div>
+            <div className="text-sm text-muted-foreground">{t("detail.employer")}</div>
             <div className="flex items-center gap-1 font-medium">
               <Building2 className="h-3.5 w-3.5" />
               {agreement.employer ?? "—"}
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">Union</div>
+            <div className="text-sm text-muted-foreground">{t("detail.union")}</div>
             <div className="flex items-center gap-1 font-medium">
               <Users className="h-3.5 w-3.5" />
               {agreement.unionName ?? "—"}
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">Coverage</div>
+            <div className="text-sm text-muted-foreground">{t("detail.coverage")}</div>
             <div className="font-medium">
-              {agreement.employeeCoverage?.toLocaleString() ?? "—"} employees
+              {agreement.employeeCoverage != null ? t("detail.employees", { count: agreement.employeeCoverage }) : "—"}
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">Term</div>
+            <div className="text-sm text-muted-foreground">{t("detail.term")}</div>
             <div className="font-medium">
               {formatDate(agreement.effectiveDate)} — {formatDate(agreement.expiryDate)}
             </div>
@@ -224,16 +226,16 @@ function AgreementDetailPanel({
         {/* Wage Adjustments */}
         {wages.length > 0 && (
           <div>
-            <h4 className="font-semibold mb-2">Wage Adjustments ({wages.length})</h4>
+            <h4 className="font-semibold mb-2">{t("detail.wageAdjustments", { count: wages.length })}</h4>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Adjustment</TableHead>
-                    <TableHead>Classification</TableHead>
-                    <TableHead>Confidence</TableHead>
+                    <TableHead>{t("detail.wageTable.year")}</TableHead>
+                    <TableHead>{t("detail.wageTable.type")}</TableHead>
+                    <TableHead>{t("detail.wageTable.adjustment")}</TableHead>
+                    <TableHead>{t("detail.wageTable.classification")}</TableHead>
+                    <TableHead>{t("detail.wageTable.confidence")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -250,7 +252,7 @@ function AgreementDetailPanel({
                             ? `$${w.adjustmentFlat}`
                             : "—"}
                       </TableCell>
-                      <TableCell>{w.classification ?? "General"}</TableCell>
+                      <TableCell>{w.classification ?? t("detail.wageTable.general")}</TableCell>
                       <TableCell>{confidenceBadge(w.confidence)}</TableCell>
                     </TableRow>
                   ))}
@@ -263,16 +265,16 @@ function AgreementDetailPanel({
         {/* Clauses */}
         {clauses.length > 0 && (
           <div>
-            <h4 className="font-semibold mb-2">Clauses ({clauses.length})</h4>
+            <h4 className="font-semibold mb-2">{t("detail.clauses", { count: clauses.length })}</h4>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Family</TableHead>
-                    <TableHead>Clause</TableHead>
-                    <TableHead>Summary</TableHead>
-                    <TableHead>Confidence</TableHead>
-                    <TableHead>Review</TableHead>
+                    <TableHead>{t("detail.clauseTable.family")}</TableHead>
+                    <TableHead>{t("detail.clauseTable.clause")}</TableHead>
+                    <TableHead>{t("detail.clauseTable.summary")}</TableHead>
+                    <TableHead>{t("detail.clauseTable.confidence")}</TableHead>
+                    <TableHead>{t("detail.clauseTable.review")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -294,7 +296,7 @@ function AgreementDetailPanel({
                       <TableCell>{confidenceBadge(c.confidence)}</TableCell>
                       <TableCell>
                         <Badge variant={REVIEW_BADGE[c.reviewStatus] ?? "outline"}>
-                          {c.reviewStatus.replace(/_/g, " ")}
+                          {(['pending','approved','rejected','needs_revision','auto_approved'] as const).includes(c.reviewStatus as 'pending') ? t(`reviewStatuses.${c.reviewStatus}` as 'reviewStatuses.pending') : c.reviewStatus.replace(/_/g, ' ')}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -314,6 +316,7 @@ function AgreementDetailPanel({
 // ---------------------------------------------------------------------------
 
 export function AgreementExplorer() {
+  const t = useTranslations("agreementExplorer");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
@@ -344,10 +347,10 @@ export function AgreementExplorer() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Agreement Explorer
+          {t("title")}
         </CardTitle>
         <CardDescription>
-          Browse and search extracted collective bargaining agreements
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -356,7 +359,7 @@ export function AgreementExplorer() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search agreements..."
+              placeholder={t("searchPlaceholder")}
               className="pl-8"
               value={search}
               onChange={(e) => {
@@ -367,10 +370,10 @@ export function AgreementExplorer() {
           </div>
           <Select value={jurisdiction} onValueChange={(v) => { setJurisdiction(v); setPage(1); }}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Jurisdiction" />
+              <SelectValue placeholder={t("filters.jurisdictionPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All jurisdictions</SelectItem>
+              <SelectItem value="all">{t("filters.allJurisdictions")}</SelectItem>
               {JURISDICTIONS.map((j) => (
                 <SelectItem key={j} value={j}>{j}</SelectItem>
               ))}
@@ -378,14 +381,14 @@ export function AgreementExplorer() {
           </Select>
           <Select value={reviewStatus} onValueChange={(v) => { setReviewStatus(v); setPage(1); }}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Review" />
+              <SelectValue placeholder={t("filters.reviewPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All reviews</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="needs_revision">Needs revision</SelectItem>
+              <SelectItem value="all">{t("filters.allReviews")}</SelectItem>
+              <SelectItem value="pending">{t("reviewStatuses.pending")}</SelectItem>
+              <SelectItem value="approved">{t("reviewStatuses.approved")}</SelectItem>
+              <SelectItem value="rejected">{t("reviewStatuses.rejected")}</SelectItem>
+              <SelectItem value="needs_revision">{t("reviewStatuses.needs_revision")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -395,12 +398,12 @@ export function AgreementExplorer() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Agreement</TableHead>
-                <TableHead>Employer / Union</TableHead>
-                <TableHead>Jurisdiction</TableHead>
-                <TableHead>Term</TableHead>
-                <TableHead>Confidence</TableHead>
-                <TableHead>Review</TableHead>
+                <TableHead>{t("table.agreement")}</TableHead>
+                <TableHead>{t("table.employerUnion")}</TableHead>
+                <TableHead>{t("table.jurisdiction")}</TableHead>
+                <TableHead>{t("table.term")}</TableHead>
+                <TableHead>{t("table.confidence")}</TableHead>
+                <TableHead>{t("table.review")}</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -408,19 +411,19 @@ export function AgreementExplorer() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Loading agreements...
+                    {t("loading")}
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-red-500">
-                    Failed to load agreements
+                    {t("errorLoad")}
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No agreements found
+                    {t("empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -466,7 +469,7 @@ export function AgreementExplorer() {
                     <TableCell>{confidenceBadge(a.overallConfidence)}</TableCell>
                     <TableCell>
                       <Badge variant={REVIEW_BADGE[a.reviewStatus] ?? "outline"}>
-                        {a.reviewStatus.replace(/_/g, " ")}
+                        {(['pending','approved','rejected','needs_revision','auto_approved'] as const).includes(a.reviewStatus as 'pending') ? t(`reviewStatuses.${a.reviewStatus}` as 'reviewStatuses.pending') : a.reviewStatus.replace(/_/g, ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -483,15 +486,15 @@ export function AgreementExplorer() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <span className="text-sm text-muted-foreground">
-              {total} agreement{total !== 1 ? "s" : ""}
+              {t(total === 1 ? "pagination.count" : "pagination.countPlural", { count: total })}
             </span>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                Previous
+                {t("pagination.previous")}
               </Button>
-              <span className="text-sm py-1.5">Page {page} of {totalPages}</span>
+              <span className="text-sm py-1.5">{t("pagination.pageOf", { page, total: totalPages })}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                Next
+                {t("pagination.next")}
               </Button>
             </div>
           </div>

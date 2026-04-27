@@ -10,12 +10,15 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { OrganizerImpact } from '@/types/marketing';
 import { getImpactSummary, compareImpactPeriods } from '@/lib/marketing/organizer-impact';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
 
 export default function OrganizerImpactPage() {
+  const t = useTranslations('organizerImpactPage');
+  const locale = useLocale();
   const [currentImpact, setCurrentImpact] = useState<OrganizerImpact | null>(null);
   const [previousImpact, setPreviousImpact] = useState<OrganizerImpact | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,7 @@ export default function OrganizerImpactPage() {
     return (
       <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-600">Loading your impact...</p>
+          <p className="text-gray-600">{t('loadingMessage')}</p>
         </div>
       </div>
     );
@@ -55,11 +58,10 @@ export default function OrganizerImpactPage() {
       <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Your Impact Dashboard
+            {t('emptyStateTitle')}
           </h1>
           <p className="text-gray-600 mb-6">
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            Start handling cases to see your impact on members' lives.
+            {t('emptyStateDescription')}
           </p>
         </div>
       </div>
@@ -77,17 +79,16 @@ export default function OrganizerImpactPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Your Impact
+            {t('title')}
           </h1>
           <p className="text-lg text-gray-600">
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            See the difference you&apos;re making in members' lives
+            {t('subtitle')}
           </p>
         </div>
 
         <HumanCenteredCallout
           variant="solidarity"
-          message="These metrics celebrate your impact, not measure your productivity. Every member you help matters, regardless of numbers."
+          message={t('calloutMessage')}
           className="mb-8"
         />
 
@@ -102,7 +103,7 @@ export default function OrganizerImpactPage() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              This Month
+              {t('period.month')}
             </button>
             <button
               onClick={() => setPeriod('quarter')}
@@ -112,7 +113,7 @@ export default function OrganizerImpactPage() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              This Quarter
+              {t('period.quarter')}
             </button>
             <button
               onClick={() => setPeriod('year')}
@@ -122,7 +123,7 @@ export default function OrganizerImpactPage() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              This Year
+              {t('period.year')}
             </button>
           </div>
         </div>
@@ -131,8 +132,12 @@ export default function OrganizerImpactPage() {
         <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 mb-8">
           <h2 className="text-3xl font-bold mb-2">{summary.headline}</h2>
           <p className="text-xl text-blue-100">
-            {currentImpact.casesHandled} member{currentImpact.casesHandled !== 1 ? 's' : ''} supported this{' '}
-            {period === 'month' ? 'month' : period === 'quarter' ? 'quarter' : 'year'}
+            {currentImpact.casesHandled === 1
+              ? t('oneMemberSupportedThisPeriod', { period: t(`periodValue.${period}`) })
+              : t('membersSupportedThisPeriod', {
+                  count: currentImpact.casesHandled,
+                  period: t(`periodValue.${period}`),
+                })}
           </p>
         </div>
 
@@ -151,7 +156,7 @@ export default function OrganizerImpactPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-900">{currentImpact.casesWon}</p>
-                <p className="text-sm text-gray-600">Positive Outcomes</p>
+                <p className="text-sm text-gray-600">{t('metrics.positiveOutcomes')}</p>
               </div>
             </div>
           </div>
@@ -167,7 +172,7 @@ export default function OrganizerImpactPage() {
                 <p className="text-3xl font-bold text-gray-900">
                   {currentImpact.memberSatisfactionAvg.toFixed(1)}
                 </p>
-                <p className="text-sm text-gray-600">Avg Satisfaction</p>
+                <p className="text-sm text-gray-600">{t('metrics.avgSatisfaction')}</p>
               </div>
             </div>
           </div>
@@ -187,7 +192,7 @@ export default function OrganizerImpactPage() {
                 <p className="text-3xl font-bold text-gray-900">
                   {Math.round(currentImpact.avgResolutionTime)}
                 </p>
-                <p className="text-sm text-gray-600">Avg Days to Resolve</p>
+                <p className="text-sm text-gray-600">{t('metrics.avgDaysToResolve')}</p>
               </div>
             </div>
           </div>
@@ -203,7 +208,7 @@ export default function OrganizerImpactPage() {
                 <p className="text-3xl font-bold text-gray-900">
                   {currentImpact.democraticParticipationRate}%
                 </p>
-                <p className="text-sm text-gray-600">Member Participation</p>
+                <p className="text-sm text-gray-600">{t('metrics.memberParticipation')}</p>
               </div>
             </div>
           </div>
@@ -213,7 +218,7 @@ export default function OrganizerImpactPage() {
         {summary.highlights.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              ✨ Highlights
+              {t('highlightsTitle')}
             </h2>
             <ul className="space-y-2">
               {summary.highlights.map((highlight, idx) => (
@@ -230,10 +235,10 @@ export default function OrganizerImpactPage() {
         {comparisons.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Your Growth
+              {t('growthTitle')}
             </h2>
             <p className="text-gray-600 mb-6">
-              Comparing this {period} to last {period}
+              {t('growthComparisonDescription', { period: t(`periodValue.${period}`) })}
             </p>
             <div className="space-y-4">
               {comparisons.map((comp, idx) => (
@@ -255,10 +260,10 @@ export default function OrganizerImpactPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>Previous: {comp.previousValue}</span>
+                    <span>{t('previousValueLabel', { value: comp.previousValue })}</span>
                     <span>→</span>
                     <span className="font-medium text-gray-900">
-                      Current: {comp.currentValue}
+                      {t('currentValueLabel', { value: comp.currentValue })}
                     </span>
                   </div>
                 </div>
@@ -271,10 +276,10 @@ export default function OrganizerImpactPage() {
         {summary.areasForGrowth.length > 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-3">
-              💡 Opportunities
+              {t('opportunitiesTitle')}
             </h2>
             <p className="text-sm text-gray-600 mb-4">
-              These are suggestions, not requirements. Focus on what matters most to your members.
+              {t('opportunitiesDescription')}
             </p>
             <ul className="space-y-2">
               {summary.areasForGrowth.map((area, idx) => (
@@ -291,7 +296,7 @@ export default function OrganizerImpactPage() {
         {currentImpact.recognitionEvents.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              🏆 Recognition
+              {t('recognitionTitle')}
             </h2>
             <div className="space-y-3">
               {currentImpact.recognitionEvents.map((event, idx) => (
@@ -305,7 +310,7 @@ export default function OrganizerImpactPage() {
                   <div>
                     <p className="font-medium text-gray-900">{event.description}</p>
                     <p className="text-sm text-gray-600">
-                      {new Date(event.date).toLocaleDateString('en-US', {
+                      {new Date(event.date).toLocaleDateString(locale, {
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric',
@@ -321,13 +326,12 @@ export default function OrganizerImpactPage() {
         {/* Philosophy Note */}
         <div className="bg-gray-100 rounded-lg p-6">
           <h3 className="font-semibold text-gray-900 mb-2">
-            About These Metrics
+            {t('aboutMetricsTitle')}
           </h3>
           <p className="text-sm text-gray-700">
-            These numbers reflect your <strong>impact on members&apos; lives</strong>, not your individual
-            performance. There are no quotas, no rankings, and no comparisons to other stewards.
-            Every case you handle matters, regardless of these numbers. Use this dashboard to
-            celebrate your wins and identify areas where you want to grow—on your own terms.
+            {t.rich('aboutMetricsDescription', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('@/i18n', () => ({
-  locales: ['en-CA', 'fr-CA'] as const,
+  locales: ['en-CA', 'fr-CA', 'it', 'pt'] as const,
 }));
 
 import {
@@ -17,6 +17,8 @@ describe('i18n-utils', () => {
     it('returns true for supported locales', () => {
       expect(isValidLocale('en-CA')).toBe(true);
       expect(isValidLocale('fr-CA')).toBe(true);
+      expect(isValidLocale('it')).toBe(true);
+      expect(isValidLocale('pt')).toBe(true);
     });
 
     it('returns false for unsupported locale', () => {
@@ -27,6 +29,8 @@ describe('i18n-utils', () => {
   describe('getLocaleFromParams', () => {
     it('returns locale when valid', () => {
       expect(getLocaleFromParams({ locale: 'fr-CA' })).toBe('fr-CA');
+      expect(getLocaleFromParams({ locale: 'it' })).toBe('it');
+      expect(getLocaleFromParams({ locale: 'pt' })).toBe('pt');
     });
 
     it('defaults to en-CA for missing/invalid locale', () => {

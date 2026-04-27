@@ -8,6 +8,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ const typeColors = {
 };
 
 export function ProposalManager({ negotiationId }: ProposalManagerProps) {
+  const t = useTranslations("proposalManager");
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -172,42 +174,42 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-2xl font-bold">Proposals</h3>
+          <h3 className="text-2xl font-bold">{t("title")}</h3>
           <p className="text-muted-foreground">
-            Union demands and management offers
+            {t("subtitle")}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Proposal
+              {t("newProposal")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>Create New Proposal</DialogTitle>
+                <DialogTitle>{t("createTitle")}</DialogTitle>
                 <DialogDescription>
-                  Add a new bargaining proposal or demand
+                  {t("createDescription")}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="proposalNumber">Proposal Number *</Label>
+                    <Label htmlFor="proposalNumber">{t("form.proposalNumber")}</Label>
                     <Input
                       id="proposalNumber"
                       value={formData.proposalNumber}
                       onChange={(e) => setFormData({ ...formData, proposalNumber: e.target.value })}
-                      placeholder="e.g., UP-001"
+                      placeholder={t("form.proposalNumberPlaceholder")}
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="proposalType">Type *</Label>
+                    <Label htmlFor="proposalType">{t("form.type")}</Label>
                     <Select
                       value={formData.proposalType}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -217,74 +219,74 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="union_demand">Union Demand</SelectItem>
-                        <SelectItem value="management_offer">Management Offer</SelectItem>
-                        <SelectItem value="joint_proposal">Joint Proposal</SelectItem>
-                        <SelectItem value="mediator_proposal">Mediator Proposal</SelectItem>
+                        <SelectItem value="union_demand">{t("types.union_demand")}</SelectItem>
+                        <SelectItem value="management_offer">{t("types.management_offer")}</SelectItem>
+                        <SelectItem value="joint_proposal">{t("types.joint_proposal")}</SelectItem>
+                        <SelectItem value="mediator_proposal">{t("types.mediator_proposal")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title">{t("form.title")}</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Brief title of the proposal"
+                    placeholder={t("form.titlePlaceholder")}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="clauseCategory">Clause Category</Label>
+                  <Label htmlFor="clauseCategory">{t("form.clauseCategory")}</Label>
                   <Input
                     id="clauseCategory"
                     value={formData.clauseCategory}
                     onChange={(e) => setFormData({ ...formData, clauseCategory: e.target.value })}
-                    placeholder="e.g., Wages, Benefits, Hours"
+                    placeholder={t("form.clauseCategoryPlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description">{t("form.description")}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Detailed description of the proposal"
+                    placeholder={t("form.descriptionPlaceholder")}
                     rows={3}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="proposedLanguage">Proposed Language *</Label>
+                  <Label htmlFor="proposedLanguage">{t("form.proposedLanguage")}</Label>
                   <Textarea
                     id="proposedLanguage"
                     value={formData.proposedLanguage}
                     onChange={(e) => setFormData({ ...formData, proposedLanguage: e.target.value })}
-                    placeholder="The exact proposed contract language"
+                    placeholder={t("form.proposedLanguagePlaceholder")}
                     rows={4}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rationale">Rationale</Label>
+                  <Label htmlFor="rationale">{t("form.rationale")}</Label>
                   <Textarea
                     id="rationale"
                     value={formData.rationale}
                     onChange={(e) => setFormData({ ...formData, rationale: e.target.value })}
-                    placeholder="Why this proposal is important"
+                    placeholder={t("form.rationalePlaceholder")}
                     rows={2}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="estimatedCost">Estimated Cost</Label>
+                    <Label htmlFor="estimatedCost">{t("form.estimatedCost")}</Label>
                     <Input
                       id="estimatedCost"
                       type="number"
@@ -296,7 +298,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="unionPosition">Union Position</Label>
+                    <Label htmlFor="unionPosition">{t("form.unionPosition")}</Label>
                     <Select
                       value={formData.unionPosition}
                       onValueChange={(value) => setFormData({ ...formData, unionPosition: value })}
@@ -305,10 +307,10 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="must_have">Must Have</SelectItem>
-                        <SelectItem value="important">Important</SelectItem>
-                        <SelectItem value="tradeable">Tradeable</SelectItem>
-                        <SelectItem value="dropped">Dropped</SelectItem>
+                        <SelectItem value="must_have">{t("positions.must_have")}</SelectItem>
+                        <SelectItem value="important">{t("positions.important")}</SelectItem>
+                        <SelectItem value="tradeable">{t("positions.tradeable")}</SelectItem>
+                        <SelectItem value="dropped">{t("positions.dropped")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -317,9 +319,9 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
+                  {t("form.cancel")}
                 </Button>
-                <Button type="submit">Create Proposal</Button>
+                <Button type="submit">{t("form.create")}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -330,7 +332,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.total")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -338,7 +340,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Union Demands</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.unionDemands")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.union}</div>
@@ -346,7 +348,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Management Offers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.managementOffers")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.management}</div>
@@ -354,7 +356,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.accepted")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
@@ -362,7 +364,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.pending")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
@@ -373,25 +375,25 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
       {/* Proposals List with Tabs */}
       <Card>
         <CardHeader>
-          <CardTitle>Proposals</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="union">Union Demands</TabsTrigger>
-              <TabsTrigger value="management">Management Offers</TabsTrigger>
-              <TabsTrigger value="accepted">Accepted</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="all">{t("tabs.all")}</TabsTrigger>
+              <TabsTrigger value="union">{t("tabs.union")}</TabsTrigger>
+              <TabsTrigger value="management">{t("tabs.management")}</TabsTrigger>
+              <TabsTrigger value="accepted">{t("tabs.accepted")}</TabsTrigger>
+              <TabsTrigger value="pending">{t("tabs.pending")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value={selectedTab} className="mt-4">
               {loading ? (
-                <p className="text-center py-8 text-muted-foreground">Loading proposals...</p>
+                <p className="text-center py-8 text-muted-foreground">{t("loading")}</p>
               ) : filteredProposals.length === 0 ? (
                 <Alert>
                   <AlertDescription>
-                    No proposals found. Create your first proposal to get started.
+                    {t("empty")}
                   </AlertDescription>
                 </Alert>
               ) : (
@@ -409,11 +411,11 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                             </span>
                             <h4 className="font-semibold">{proposal.title}</h4>
                             <Badge className={typeColors[proposal.proposalType]}>
-                              {proposal.proposalType.replace("_", " ")}
+                              {t(`types.${proposal.proposalType}` as 'types.union_demand')}
                             </Badge>
                             <Badge className={statusColors[proposal.status]}>
                               {statusIcons[proposal.status]}
-                              <span className="ml-1">{proposal.status.replace("_", " ")}</span>
+                              <span className="ml-1">{t(`statuses.${proposal.status}` as 'statuses.draft')}</span>
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -421,18 +423,18 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                           </p>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             {proposal.clauseCategory && (
-                              <span>Category: {proposal.clauseCategory}</span>
+                              <span>{t("categoryLabel", { value: proposal.clauseCategory })}</span>
                             )}
                             {proposal.unionPosition && (
-                              <span>Position: {proposal.unionPosition}</span>
+                              <span>{t("positionLabel", { value: proposal.unionPosition })}</span>
                             )}
                             {proposal.submittedDate && (
-                              <span>Submitted: {format(new Date(proposal.submittedDate), "MMM d, yyyy")}</span>
+                              <span>{t("submittedLabel", { date: format(new Date(proposal.submittedDate), "MMM d, yyyy") })}</span>
                             )}
                           </div>
                         </div>
                         <Button variant="outline" size="sm">
-                          View Details
+                          {t("viewDetails")}
                         </Button>
                       </div>
                     </div>

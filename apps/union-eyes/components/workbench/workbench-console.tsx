@@ -168,33 +168,28 @@ const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: 
   claimType: claim.claimType || '',
 });
 
-const statusConfig: Record<CaseStatus, { label: string; icon: React.ReactElement; color: string; dotColor: string }> = {
+const statusConfig: Record<CaseStatus, { icon: React.ReactElement; color: string; dotColor: string }> = {
   pending: { 
-    label: "Pending Assignment", 
     icon: <Clock className="w-4 h-4" />, 
     color: "text-yellow-700 bg-yellow-100 border-yellow-200",
     dotColor: "bg-yellow-500"
   },
   "in-review": { 
-    label: "Under Review", 
     icon: <AlertCircle className="w-4 h-4" />, 
     color: "text-blue-700 bg-blue-100 border-blue-200",
     dotColor: "bg-blue-500"
   },
   approved: { 
-    label: "Approved", 
     icon: <CheckCircle className="w-4 h-4" />, 
     color: "text-green-700 bg-green-100 border-green-200",
     dotColor: "bg-green-500"
   },
   rejected: { 
-    label: "Rejected", 
     icon: <XCircle className="w-4 h-4" />, 
     color: "text-red-700 bg-red-100 border-red-200",
     dotColor: "bg-red-500"
   },
   resolved: { 
-    label: "Resolved", 
     icon: <CheckCircle className="w-4 h-4" />, 
     color: "text-gray-700 bg-gray-100 border-gray-200",
     dotColor: "bg-gray-500"
@@ -422,7 +417,7 @@ export default function WorkbenchConsole() {
           >
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading assigned cases...</p>
+              <p className="text-gray-600">{t('workbench.loadingCases')}</p>
             </div>
           </motion.div>
         )}
@@ -437,7 +432,7 @@ export default function WorkbenchConsole() {
             <div className="flex items-center gap-3">
               <XCircle className="text-red-600" size={24} />
               <div>
-                <h3 className="font-semibold text-red-900">Error Loading Cases</h3>
+                <h3 className="font-semibold text-red-900">{t('workbench.errorLoadingCases')}</h3>
                 <p className="text-red-700">{error}</p>
               </div>
             </div>
@@ -452,9 +447,9 @@ export default function WorkbenchConsole() {
             className="text-center py-20"
           >
             <Clipboard size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">{isPlatformOrg ? 'No Cases Filed' : 'No Cases Assigned'}</h3>
-            <p className="text-gray-600 mb-6">{isPlatformOrg ? 'No cases have been filed across the platform yet.' : "You don't have any cases assigned to you yet."}</p>
-            <p className="text-sm text-gray-500">{isPlatformOrg ? 'Cases from all organizations will appear here once members submit them.' : 'Cases will appear here when they are assigned to you by administrators or when you take ownership of pending cases.'}</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{isPlatformOrg ? t('workbench.empty.noCasesFiledTitle') : t('workbench.empty.noCasesAssignedTitle')}</h3>
+            <p className="text-gray-600 mb-6">{isPlatformOrg ? t('workbench.empty.noCasesFiledBody') : t('workbench.empty.noCasesAssignedBody')}</p>
+            <p className="text-sm text-gray-500">{isPlatformOrg ? t('workbench.empty.platformHint') : t('workbench.empty.assignedHint')}</p>
           </motion.div>
         )}
 
@@ -472,7 +467,7 @@ export default function WorkbenchConsole() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Pending Assignment</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('workbench.pendingAssignment')}</p>
                     <p className="text-3xl font-bold text-yellow-600">{pendingCount}</p>
                   </div>
                   <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -557,7 +552,7 @@ export default function WorkbenchConsole() {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by case ID, member name, title, or category..."
+                  placeholder={t('workbench.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -570,7 +565,7 @@ export default function WorkbenchConsole() {
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
                     <Filter className="w-4 h-4 mr-2" />
-                    Status
+                    {t('workbench.status')}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -647,15 +642,15 @@ export default function WorkbenchConsole() {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Sort By
+                  {t('workbench.sortBy')}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { field: "submittedDate" as SortField, label: "Date Submitted" },
-                    { field: "priority" as SortField, label: "Priority" },
-                    { field: "status" as SortField, label: "Status" },
-                    { field: "title" as SortField, label: "Title" }
-                  ].map(({ field, label }) => (
+                    { field: "submittedDate" as SortField, key: "submittedDate" },
+                    { field: "priority" as SortField, key: "priority" },
+                    { field: "status" as SortField, key: "status" },
+                    { field: "title" as SortField, key: "title" }
+                  ].map(({ field, key }) => (
                     <button
                       key={field}
                       onClick={() => handleSort(field)}
@@ -665,7 +660,7 @@ export default function WorkbenchConsole() {
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {label}
+                      {t(`workbench.sortFields.${key}`)}
                       {sortField === field && (
                         <span className="text-xs">
                           {sortOrder === "asc" ? "\u2191" : "\u2193"}
@@ -708,7 +703,7 @@ export default function WorkbenchConsole() {
                         }}
                         className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                       >
-                        Clear All Filters
+                        {t('workbench.clearFilters')}
                       </button>
                     )}
                   </CardContent>
@@ -743,7 +738,7 @@ export default function WorkbenchConsole() {
                                 </span>
                                 <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusInfo.color}`}>
                                   <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor} ${caseItem.status === "pending" ? "animate-pulse" : ""}`}></span>
-                                  {statusInfo.label}
+                                  {t(`workbench.statuses.${caseItem.status}`)}
                                 </span>
                                 <span className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${priorityInfo.color}`}>
                                   {priorityInfo.icon}
@@ -755,7 +750,7 @@ export default function WorkbenchConsole() {
                                 {caseItem.daysOpen > 5 && (
                                   <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
-                                    {caseItem.daysOpen} days open
+                                    {t('workbench.daysOpen', { days: caseItem.daysOpen })}
                                   </span>
                                 )}
                               </div>
@@ -772,19 +767,19 @@ export default function WorkbenchConsole() {
                                 </div>
                                 <div className="flex items-center gap-1 text-gray-500">
                                   <Calendar className="w-4 h-4" />
-                                  Submitted: {new Date(caseItem.submittedDate).toLocaleDateString()}
+                                  {t('workbench.submittedOn', { date: new Date(caseItem.submittedDate).toLocaleDateString() })}
                                 </div>
                                 {caseItem.assignedTo && (
                                   <div className="flex items-center gap-1 text-blue-600">
                                     <UserCheck className="w-4 h-4" />
-                                    Assigned to: {caseItem.assignedTo}
+                                    {t('workbench.assignedTo', { name: caseItem.assignedTo })}
                                   </div>
                                 )}
                               </div>
                             </div>
                             <button
                               className="ml-4 text-orange-600 hover:text-orange-700"
-                              aria-label={isExpanded ? "Collapse" : "Expand"}
+                              aria-label={isExpanded ? t('workbench.collapse') : t('workbench.expand')}
                             >
                               <motion.div
                                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -810,7 +805,7 @@ export default function WorkbenchConsole() {
                               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                   <User className="w-4 h-4" />
-                                  Member Contact Information
+                                  {t('workbench.memberContact')}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                                   <div className="flex items-center gap-2 text-gray-700">
@@ -837,7 +832,7 @@ export default function WorkbenchConsole() {
                                 <div className="mb-6">
                                   <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                     <MessageSquare className="w-4 h-4" />
-                                    Case Notes ({caseItem.notes.length})
+                                    {t('workbench.caseNotes', { count: caseItem.notes.length })}
                                   </h4>
                                   <div className="space-y-2">
                                     {caseItem.notes.map((note, idx) => (
@@ -856,12 +851,12 @@ export default function WorkbenchConsole() {
                               <div className="mb-6">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                   <MessageSquare className="w-4 h-4" />
-                                  Add Case Note
+                                  {t('workbench.addCaseNote')}
                                 </h4>
                                 <div className="flex gap-2">
                                   <input
                                     type="text"
-                                    placeholder="Enter your note or update..."
+                                    placeholder={t('workbench.addNotePlaceholder')}
                                     value={newNote[caseItem.id] || ""}
                                     onChange={(e) => setNewNote({ ...newNote, [caseItem.id]: e.target.value })}
                                     onKeyDown={(e) => {
@@ -877,7 +872,7 @@ export default function WorkbenchConsole() {
                                     className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                   >
                                     {actionLoading === caseItem.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                    Add Note
+                                    {t('workbench.addNote')}
                                   </button>
                                 </div>
                               </div>
@@ -891,12 +886,12 @@ export default function WorkbenchConsole() {
                                     className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
                                   >
                                     {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
-                                    Assign to Me
+                                    {t('workbench.assignToMe')}
                                   </button>
                                 )}
                                 <Link href={`/dashboard/cases/${caseItem.claimId}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                   <Eye className="w-5 h-5" />
-                                  View Full Details
+                                  {t('workbench.viewFullDetails')}
                                 </Link>
                                 {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
                                   <select
@@ -907,14 +902,14 @@ export default function WorkbenchConsole() {
                                     value=""
                                     className="flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200 cursor-pointer"
                                   >
-                                    <option value="">Update Status…</option>
-                                    <option value="under_review">Under Review</option>
-                                    <option value="assigned">Assigned</option>
-                                    <option value="investigation">Investigation</option>
-                                    <option value="pending_documentation">Pending Documentation</option>
-                                    <option value="resolved">Resolved</option>
-                                    <option value="rejected">Rejected</option>
-                                    <option value="closed">Closed</option>
+                                    <option value="">{t('workbench.updateStatusLabel')}</option>
+                                    <option value="under_review">{t('workbench.statusOptions.under_review')}</option>
+                                    <option value="assigned">{t('workbench.statusOptions.assigned')}</option>
+                                    <option value="investigation">{t('workbench.statusOptions.investigation')}</option>
+                                    <option value="pending_documentation">{t('workbench.statusOptions.pending_documentation')}</option>
+                                    <option value="resolved">{t('workbench.statusOptions.resolved')}</option>
+                                    <option value="rejected">{t('workbench.statusOptions.rejected')}</option>
+                                    <option value="closed">{t('workbench.statusOptions.closed')}</option>
                                   </select>
                                 )}
                                 {/* Escalate to formal grievance — only for active grievance-type claims */}
@@ -925,7 +920,7 @@ export default function WorkbenchConsole() {
                                     className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                                   >
                                     {escalatingId === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Gavel className="w-5 h-5" />}
-                                    Escalate to Grievance
+                                    {t('workbench.escalateToGrievance')}
                                   </button>
                                 )}
                               </div>
@@ -956,17 +951,17 @@ export default function WorkbenchConsole() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    LRO Best Practices
+                    {t('workbench.lroBestPractices')}
                   </h3>
                   <ul className="text-gray-600 space-y-1 text-sm mb-4">
-                    <li>&bull; Review and assign pending cases within 24 hours</li>
-                    <li>&bull; Update case notes regularly to track progress</li>
-                    <li>&bull; Prioritize urgent and high-priority cases first</li>
-                    <li>&bull; Contact members promptly to gather additional information</li>
-                    <li>&bull; Coordinate with HR and management as needed</li>
+                    <li>&bull; {t('workbench.lroTips.review')}</li>
+                    <li>&bull; {t('workbench.lroTips.notes')}</li>
+                    <li>&bull; {t('workbench.lroTips.prioritize')}</li>
+                    <li>&bull; {t('workbench.lroTips.contact')}</li>
+                    <li>&bull; {t('workbench.lroTips.coordinate')}</li>
                   </ul>
                   <button className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                    View LRO Guidelines
+                    {t('workbench.viewLroGuidelines')}
                   </button>
                 </div>
               </div>

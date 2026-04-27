@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Building2,
   Users,
@@ -50,6 +50,7 @@ interface FederationDashboardProps {
 }
 
 export default function FederationDashboard({ isPlatformViewer = false }: FederationDashboardProps) {
+  const t = useTranslations("federationDashboard");
   const { user } = useUser();
   const { organization, organizationId } = useOrganization();
   const locale = useLocale();
@@ -93,31 +94,31 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return t("greetings.morning");
+    if (hour < 18) return t("greetings.afternoon");
+    return t("greetings.evening");
   };
 
-  const provinceName = organization?.jurisdiction || "Provincial Federation";
+  const provinceName = organization?.jurisdiction || t("defaultProvince");
 
   const kpis = [
-    { title: "Affiliated Locals", value: stats.totalLocals, icon: <Building2 size={20} />, color: "text-blue-600 bg-blue-100", change: "in province" },
-    { title: "Total Members", value: stats.totalMembers.toLocaleString(), icon: <Users size={20} />, color: "text-green-600 bg-green-100", change: "provincial members" },
-    { title: "Remittances Collected", value: `$${stats.remittancesCollected.toLocaleString()}`, icon: <DollarSign size={20} />, color: "text-emerald-600 bg-emerald-100", change: "current period" },
-    { title: "Outstanding", value: `$${stats.remittancesOutstanding.toLocaleString()}`, icon: <DollarSign size={20} />, color: "text-amber-600 bg-amber-100", change: "pending" },
-    { title: "Active CBAs", value: stats.activeCBAs, icon: <Handshake size={20} />, color: "text-purple-600 bg-purple-100", change: "active agreements" },
-    { title: "Compliance Rate", value: `${stats.complianceRate}%`, icon: <ClipboardCheck size={20} />, color: "text-indigo-600 bg-indigo-100", change: "locals reporting" },
+    { title: t("kpis.locals.title"), value: stats.totalLocals, icon: <Building2 size={20} />, color: "text-blue-600 bg-blue-100", change: t("kpis.locals.change") },
+    { title: t("kpis.members.title"), value: stats.totalMembers.toLocaleString(), icon: <Users size={20} />, color: "text-green-600 bg-green-100", change: t("kpis.members.change") },
+    { title: t("kpis.collected.title"), value: `$${stats.remittancesCollected.toLocaleString()}`, icon: <DollarSign size={20} />, color: "text-emerald-600 bg-emerald-100", change: t("kpis.collected.change") },
+    { title: t("kpis.outstanding.title"), value: `$${stats.remittancesOutstanding.toLocaleString()}`, icon: <DollarSign size={20} />, color: "text-amber-600 bg-amber-100", change: t("kpis.outstanding.change") },
+    { title: t("kpis.cbas.title"), value: stats.activeCBAs, icon: <Handshake size={20} />, color: "text-purple-600 bg-purple-100", change: t("kpis.cbas.change") },
+    { title: t("kpis.compliance.title"), value: `${stats.complianceRate}%`, icon: <ClipboardCheck size={20} />, color: "text-indigo-600 bg-indigo-100", change: t("kpis.compliance.change") },
   ];
 
   const quickActions = [
-    { title: "Federation Dashboard", description: "Regional overview", href: `/${locale}/dashboard/federation`, icon: <Landmark size={24} />, color: "from-blue-500 to-blue-600" },
-    { title: "Affiliated Unions", description: "Manage local affiliates", href: `/${locale}/dashboard/federation/affiliates`, icon: <Building2 size={24} />, color: "from-cyan-500 to-cyan-600" },
-    { title: "Remittance Tracking", description: "Per-capita & dues tracking", href: `/${locale}/dashboard/remittances`, icon: <DollarSign size={24} />, color: "from-emerald-500 to-emerald-600" },
-    { title: "Provincial Analytics", description: "Regional trends & metrics", href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
-    { title: "Precedent Database", description: "Provincial precedents", href: `/${locale}/dashboard/precedents`, icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
-    { title: "Shared Clause Library", description: "Model contract language", href: `/${locale}/dashboard/clause-library`, icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
-    { title: "CBA Calendar", description: "Renewal & expiry dates", href: `/${locale}/dashboard/calendar`, icon: <Calendar size={24} />, color: "from-violet-500 to-violet-600" },
-    { title: "Provincial Reports", description: "Compliance & filing reports", href: `/${locale}/dashboard/reports`, icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
+    { title: t("actions.dashboard.title"), description: t("actions.dashboard.description"), href: `/${locale}/dashboard/federation`, icon: <Landmark size={24} />, color: "from-blue-500 to-blue-600" },
+    { title: t("actions.unions.title"), description: t("actions.unions.description"), href: `/${locale}/dashboard/federation/affiliates`, icon: <Building2 size={24} />, color: "from-cyan-500 to-cyan-600" },
+    { title: t("actions.remittances.title"), description: t("actions.remittances.description"), href: `/${locale}/dashboard/remittances`, icon: <DollarSign size={24} />, color: "from-emerald-500 to-emerald-600" },
+    { title: t("actions.analytics.title"), description: t("actions.analytics.description"), href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
+    { title: t("actions.precedents.title"), description: t("actions.precedents.description"), href: `/${locale}/dashboard/precedents`, icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
+    { title: t("actions.clauses.title"), description: t("actions.clauses.description"), href: `/${locale}/dashboard/clause-library`, icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
+    { title: t("actions.calendar.title"), description: t("actions.calendar.description"), href: `/${locale}/dashboard/calendar`, icon: <Calendar size={24} />, color: "from-violet-500 to-violet-600" },
+    { title: t("actions.reports.title"), description: t("actions.reports.description"), href: `/${locale}/dashboard/reports`, icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
   ];
 
   if (!mounted || !user) {
@@ -138,11 +139,11 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
       {/* Welcome */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          {getGreeting()}, {user?.firstName || "Staff"}
+          {getGreeting()}, {user?.firstName || t("fallbackName")}
         </h1>
         <p className="text-gray-600 text-lg">
           <MapPin size={16} className="inline mr-1" />
-          {provinceName} &mdash; Federation Operations
+          {provinceName} &mdash; {t("subtitle")}
         </p>
       </motion.div>
 
@@ -172,7 +173,7 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
       {/* Quick Actions — hidden for platform admins */}
       {!isPlatformViewer && (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Federation Operations</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("sectionTitle")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, i) => (
             <motion.div key={action.href} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.04 }}>
@@ -185,7 +186,7 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
                     <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">{action.title}</h3>
                     <p className="text-sm text-gray-600 mb-3">{action.description}</p>
                     <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                      Open <ArrowRight size={16} className="ml-1" />
+                      {t("open")} <ArrowRight size={16} className="ml-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -204,17 +205,17 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp size={20} className="text-green-600" />
-                Regional Overview
+                {t("overview.title")}
               </CardTitle>
-              <CardDescription>Provincial aggregate trends</CardDescription>
+              <CardDescription>{t("overview.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { label: "Membership Growth", value: "—", trend: "neutral" },
-                  { label: "Avg. Grievance Resolution", value: "—", trend: "neutral" },
-                  { label: "Upcoming CBA Renewals", value: "—", trend: "neutral" },
-                  { label: "Provincial Compliance", value: "—", trend: "neutral" },
+                  { label: t("overview.rows.membershipGrowth"), value: "—", trend: "neutral" },
+                  { label: t("overview.rows.avgResolution"), value: "—", trend: "neutral" },
+                  { label: t("overview.rows.cbaRenewals"), value: "—", trend: "neutral" },
+                  { label: t("overview.rows.compliance"), value: "—", trend: "neutral" },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
                     <span className="text-sm font-medium text-gray-900">{item.label}</span>
@@ -232,17 +233,17 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle size={20} className="text-orange-600" />
-                Provincial Alerts
+                {t("alerts.title")}
               </CardTitle>
-              <CardDescription>Items requiring attention</CardDescription>
+              <CardDescription>{t("alerts.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
                 <div className="inline-flex p-3 rounded-full bg-green-100 mb-3">
                   <MapPin size={24} className="text-green-600" />
                 </div>
-                <p className="text-gray-600">No urgent items</p>
-                <p className="text-sm text-gray-500 mt-1">Provincial alerts will appear here</p>
+                <p className="text-gray-600">{t("alerts.noUrgent")}</p>
+                <p className="text-sm text-gray-500 mt-1">{t("alerts.willAppear")}</p>
               </div>
             </CardContent>
           </Card>

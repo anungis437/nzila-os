@@ -11,7 +11,7 @@
 export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -27,7 +27,6 @@ import {
   User,
   Loader2,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -72,9 +71,13 @@ interface ReceiptData {
 // UTILITIES
 // =============================================================================
 
-function formatDate(date: string): string {
+function formatDate(date: string, locale: string): string {
   try {
-    return format(new Date(date), 'MMMM dd, yyyy');
+    return new Intl.DateTimeFormat(locale, {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    }).format(new Date(date));
   } catch {
     return date;
   }
@@ -85,6 +88,9 @@ function formatDate(date: string): string {
 // =============================================================================
 
 function ReceiptHeader({ receipt }: { receipt: ReceiptData }) {
+  const t = useTranslations('duesReceiptPage');
+  const locale = useLocale();
+
   return (
     <div className="space-y-4 pb-6">
       {/* Union/Organization Info */}
@@ -106,13 +112,13 @@ function ReceiptHeader({ receipt }: { receipt: ReceiptData }) {
       <div className="text-center py-4">
         <div className="flex items-center justify-center mb-2">
           <CheckCircle2 className="h-6 w-6 text-green-600 mr-2" />
-          <h2 className="text-xl font-semibold">Payment Receipt</h2>
+          <h2 className="text-xl font-semibold">{t('paymentReceiptTitle')}</h2>
         </div>
         <Badge variant="outline" className="text-base px-4 py-1">
           {receipt.receiptNumber}
         </Badge>
         <p className="text-sm text-muted-foreground mt-2">
-          Issued: {formatDate(receipt.paymentDate)}
+          {t('issuedPrefix')}: {formatDate(receipt.paymentDate, locale)}
         </p>
       </div>
     </div>
@@ -124,26 +130,34 @@ function ReceiptHeader({ receipt }: { receipt: ReceiptData }) {
 // =============================================================================
 
 function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
+  const t = useTranslations('duesReceiptPage');
+  const locale = useLocale();
+  const paymentMethod = receipt.paymentMethod
+    ? (t.has(`paymentMethod.${receipt.paymentMethod}`)
+        ? t(`paymentMethod.${receipt.paymentMethod}`)
+        : receipt.paymentMethod)
+    : t('naLabel');
+
   return (
     <div className="space-y-6">
       {/* Member Information */}
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
           <User className="h-4 w-4 mr-2" />
-          Member Information
+          {t('memberInformationTitle')}
         </h3>
         <div className="space-y-2 pl-6">
           <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">Name</span>
+            <span className="text-sm text-muted-foreground">{t('nameLabel')}</span>
             <span className="text-sm font-medium">{receipt.memberName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">Member ID</span>
+            <span className="text-sm text-muted-foreground">{t('memberIdLabel')}</span>
             <span className="text-sm font-medium">{receipt.memberNumber}</span>
           </div>
           {receipt.memberEmail && (
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm text-muted-foreground">{t('emailLabel')}</span>
               <span className="text-sm font-medium">{receipt.memberEmail}</span>
             </div>
           )}
@@ -156,26 +170,26 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
           <CreditCard className="h-4 w-4 mr-2" />
-          Payment Information
+          {t('paymentInformationTitle')}
         </h3>
         <div className="space-y-2 pl-6">
           {receipt.billingPeriod && (
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Billing Period</span>
+              <span className="text-sm text-muted-foreground">{t('billingPeriodLabel')}</span>
               <span className="text-sm font-medium">{receipt.billingPeriod}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">Payment Date</span>
-            <span className="text-sm font-medium">{formatDate(receipt.paymentDate)}</span>
+            <span className="text-sm text-muted-foreground">{t('paymentDateLabel')}</span>
+            <span className="text-sm font-medium">{formatDate(receipt.paymentDate, locale)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-muted-foreground">Payment Method</span>
-            <span className="text-sm font-medium capitalize">{receipt.paymentMethod}</span>
+            <span className="text-sm text-muted-foreground">{t('paymentMethodLabel')}</span>
+            <span className="text-sm font-medium capitalize">{paymentMethod}</span>
           </div>
           {receipt.paymentReference && (
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Reference</span>
+              <span className="text-sm text-muted-foreground">{t('referenceLabel')}</span>
               <span className="text-xs font-medium font-mono">
                 {receipt.paymentReference}
               </span>
@@ -190,31 +204,31 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center">
           <FileText className="h-4 w-4 mr-2" />
-          Amount Breakdown
+          {t('amountBreakdownTitle')}
         </h3>
         <div className="space-y-2 pl-6">
           <div className="flex justify-between">
-            <span className="text-sm">Dues Amount</span>
+            <span className="text-sm">{t('duesAmountLabel')}</span>
             <span className="text-sm font-medium">{formatCurrency(Number(receipt.duesAmount))}</span>
           </div>
 
           {receipt.copeAmount && parseFloat(receipt.copeAmount) > 0 && (
             <div className="flex justify-between">
-              <span className="text-sm">COPE Contribution</span>
+              <span className="text-sm">{t('copeContributionLabel')}</span>
               <span className="text-sm font-medium">{formatCurrency(Number(receipt.copeAmount))}</span>
             </div>
           )}
 
           {receipt.pacAmount && parseFloat(receipt.pacAmount) > 0 && (
             <div className="flex justify-between">
-              <span className="text-sm">PAC Contribution</span>
+              <span className="text-sm">{t('pacContributionLabel')}</span>
               <span className="text-sm font-medium">{formatCurrency(Number(receipt.pacAmount))}</span>
             </div>
           )}
 
           {receipt.strikeFundAmount && parseFloat(receipt.strikeFundAmount) > 0 && (
             <div className="flex justify-between">
-              <span className="text-sm">Strike Fund</span>
+              <span className="text-sm">{t('strikeFundLabel')}</span>
               <span className="text-sm font-medium">
                 {formatCurrency(Number(receipt.strikeFundAmount))}
               </span>
@@ -223,14 +237,14 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
 
           {receipt.lateFee && parseFloat(receipt.lateFee) > 0 && (
             <div className="flex justify-between text-orange-600">
-              <span className="text-sm">Late Fee</span>
+              <span className="text-sm">{t('lateFeeLabel')}</span>
               <span className="text-sm font-medium">{formatCurrency(Number(receipt.lateFee))}</span>
             </div>
           )}
 
           {receipt.adjustmentAmount && parseFloat(receipt.adjustmentAmount) !== 0 && (
             <div className="flex justify-between">
-              <span className="text-sm">Adjustment</span>
+              <span className="text-sm">{t('adjustmentLabel')}</span>
               <span className="text-sm font-medium">
                 {formatCurrency(Number(receipt.adjustmentAmount))}
               </span>
@@ -240,7 +254,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
           <Separator className="my-3" />
 
           <div className="flex justify-between items-center pt-2">
-            <span className="text-base font-semibold">Total Amount</span>
+            <span className="text-base font-semibold">{t('totalAmountLabel')}</span>
             <span className="text-2xl font-bold text-green-600">
               {formatCurrency(Number(receipt.totalAmount))}
             </span>
@@ -259,6 +273,7 @@ export default function ReceiptViewerPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('duesReceiptPage');
   const transactionId = params.transactionId as string;
 
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
@@ -274,14 +289,14 @@ export default function ReceiptViewerPage() {
         const response = await fetch(`/api/dues/receipt/${transactionId}?format=json`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch receipt');
+          throw new Error(t('failedToFetchReceipt'));
         }
 
         const data = await response.json();
         setReceipt(data);
       } catch (err) {
-        logger.error('Error fetching receipt', { error: err, transactionId });
-        setError(err instanceof Error ? err.message : 'Failed to load receipt');
+        logger.error(t('errorFetchingReceiptLog'), { error: err, transactionId });
+        setError(err instanceof Error ? err.message : t('failedToLoadReceipt'));
       } finally {
         setLoading(false);
       }
@@ -290,7 +305,7 @@ export default function ReceiptViewerPage() {
     if (transactionId) {
       fetchReceipt();
     }
-  }, [transactionId]);
+  }, [transactionId, t]);
 
   // Handle PDF download
   const handleDownload = async () => {
@@ -299,7 +314,7 @@ export default function ReceiptViewerPage() {
       const response = await fetch(`/api/dues/receipt/${transactionId}?format=pdf`);
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        throw new Error(t('failedToGeneratePdf'));
       }
 
       const blob = await response.blob();
@@ -312,8 +327,8 @@ export default function ReceiptViewerPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      logger.error('Error downloading receipt', { error: err, transactionId });
-      alert('Failed to download receipt. Please try again.');
+      logger.error(t('errorDownloadingReceiptLog'), { error: err, transactionId });
+      alert(t('failedToDownloadReceiptAlert'));
     } finally {
       setDownloading(false);
     }
@@ -331,7 +346,7 @@ export default function ReceiptViewerPage() {
         <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-lg font-medium">Loading receipt...</p>
+            <p className="text-lg font-medium">{t('loadingReceipt')}</p>
           </div>
         </div>
       </div>
@@ -348,20 +363,20 @@ export default function ReceiptViewerPage() {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dues
+          {t('backToDuesButton')}
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-destructive">Receipt Not Found</CardTitle>
-            <CardDescription>{error || 'Failed to load receipt'}</CardDescription>
+            <CardTitle className="text-destructive">{t('receiptNotFoundTitle')}</CardTitle>
+            <CardDescription>{error || t('failedToLoadReceipt')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              The receipt you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
+              {t('receiptNotFoundDescription')}
             </p>
             <Button onClick={() => router.push(`/${locale}/dashboard/dues`)}>
-              Return to Dues Dashboard
+              {t('returnToDuesDashboardButton')}
             </Button>
           </CardContent>
         </Card>
@@ -377,13 +392,13 @@ export default function ReceiptViewerPage() {
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => router.push(`/${locale}/dashboard/dues`)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dues
+            {t('backToDuesButton')}
           </Button>
 
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
-              Print
+              {t('printButton')}
             </Button>
             <Button size="sm" onClick={handleDownload} disabled={downloading}>
               {downloading ? (
@@ -391,7 +406,7 @@ export default function ReceiptViewerPage() {
               ) : (
                 <Download className="mr-2 h-4 w-4" />
               )}
-              Download PDF
+              {t('downloadPdfButton')}
             </Button>
           </div>
         </div>
@@ -406,14 +421,14 @@ export default function ReceiptViewerPage() {
           {/* Footer */}
           <div className="mt-8 pt-6 border-t text-center">
             <p className="text-xs text-muted-foreground">
-              This is an official receipt for your records. Please keep it for tax purposes.
+              {t('officialReceiptNote')}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              Thank you for your payment!
+              {t('thankYouMessage')}
             </p>
             {receipt.generatedAt && (
               <p className="text-xs text-muted-foreground mt-4">
-                Generated: {receipt.generatedAt}
+                {t('generatedPrefix')}: {receipt.generatedAt}
               </p>
             )}
           </div>

@@ -12,6 +12,7 @@
 
 import * as React from "react";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export interface IntakeStep {
@@ -36,9 +37,10 @@ export function GrievanceIntakeStepper({
   onStepClick,
   className,
 }: GrievanceIntakeStepperProps) {
+  const t = useTranslations("grievanceIntakeStepper");
   return (
     <nav
-      aria-label="Grievance intake progress"
+      aria-label={t("ariaLabel")}
       className={cn("w-full", className)}
     >
       {/* Desktop horizontal stepper */}
@@ -56,7 +58,7 @@ export function GrievanceIntakeStepper({
                   onClick={() => isClickable && onStepClick?.(index)}
                   disabled={!isClickable}
                   aria-current={isActive ? "step" : undefined}
-                  aria-label={`Step ${index + 1}: ${step.title}${isCompleted ? " (completed)" : ""}`}
+                  aria-label={t("stepLabel", { n: index + 1, title: step.title }) + (isCompleted ? t("completedSuffix") : "")}
                   className={cn(
                     "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
                     isCompleted && "bg-green-600 border-green-600 text-white",
@@ -91,7 +93,7 @@ export function GrievanceIntakeStepper({
                 </span>
                 {step.optional && (
                   <span className="text-[10px] text-gray-400 mt-0.5">
-                    Optional
+                    {t("optional")}
                   </span>
                 )}
               </li>
@@ -112,7 +114,7 @@ export function GrievanceIntakeStepper({
       {/* Mobile compact stepper */}
       <div className="md:hidden flex items-center justify-between bg-muted/50 rounded-lg px-4 py-3">
         <span className="text-sm font-medium text-foreground">
-          Step {currentStep + 1} of {steps.length}
+          {t("stepOf", { current: currentStep + 1, total: steps.length })}
         </span>
         <span className="text-sm text-muted-foreground">
           {steps[currentStep]?.title}

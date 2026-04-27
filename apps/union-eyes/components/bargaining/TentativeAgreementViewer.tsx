@@ -6,6 +6,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ interface TentativeAgreementViewerProps {
 }
 
 export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewerProps) {
+  const t = useTranslations("tentativeAgreements");
   const ratifiedAgreements = agreements.filter(a => a.ratified);
   const pendingAgreements = agreements.filter(a => !a.ratified);
 
@@ -45,13 +47,13 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Tentative Agreements</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Agreed language awaiting membership ratification
+              {t("description")}
             </CardDescription>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total Agreements</p>
+            <p className="text-sm text-muted-foreground">{t("totalAgreements")}</p>
             <p className="text-3xl font-bold">{agreements.length}</p>
           </div>
         </div>
@@ -62,7 +64,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
           <div className="p-4 border rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="text-sm font-medium">Ratified</span>
+              <span className="text-sm font-medium">{t("ratified")}</span>
             </div>
             <p className="text-2xl font-bold text-green-600">{ratifiedAgreements.length}</p>
           </div>
@@ -70,7 +72,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
           <div className="p-4 border rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">Pending Vote</span>
+              <span className="text-sm font-medium">{t("pendingVote")}</span>
             </div>
             <p className="text-2xl font-bold text-yellow-600">{pendingAgreements.length}</p>
           </div>
@@ -78,7 +80,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
           <div className="p-4 border rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium">Annual Cost</span>
+              <span className="text-sm font-medium">{t("annualCost")}</span>
             </div>
             <p className="text-2xl font-bold text-blue-600">
               ${totalCost.toLocaleString()}
@@ -91,7 +93,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <Clock className="h-5 w-5 text-yellow-500" />
-              Pending Ratification ({pendingAgreements.length})
+              {t("pendingRatification", { count: pendingAgreements.length })}
             </h3>
             <div className="space-y-3">
               {pendingAgreements.map((agreement) => (
@@ -105,7 +107,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                         <Badge>{agreement.clauseCategory}</Badge>
                         <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
                           <Clock className="h-3 w-3 mr-1" />
-                          Pending Vote
+                          {t("pendingVote")}
                         </Badge>
                       </div>
                       <h4 className="font-semibold">{agreement.title}</h4>
@@ -114,7 +116,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                   
                   <div className="space-y-2">
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Agreed Language:</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t("agreedLanguage")}</p>
                       <p className="text-sm bg-muted p-2 rounded">
                         {agreement.agreedLanguage}
                       </p>
@@ -122,7 +124,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                     
                     {agreement.previousLanguage && (
                       <div>
-                        <p className="text-xs text-muted-foreground mb-1">Previous Language:</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t("previousLanguage")}</p>
                         <p className="text-sm bg-muted/50 p-2 rounded text-muted-foreground">
                           {agreement.previousLanguage}
                         </p>
@@ -132,12 +134,12 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        Agreed: {format(new Date(agreement.agreedDate), "MMM d, yyyy")}
+                        {t("agreedDate", { date: format(new Date(agreement.agreedDate), "MMM d, yyyy") })}
                       </span>
                       {agreement.annualCost && (
                         <span className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
-                          ${parseFloat(agreement.annualCost).toLocaleString()}/year
+                          {t("costPerYear", { cost: parseFloat(agreement.annualCost).toLocaleString() })}
                         </span>
                       )}
                     </div>
@@ -145,10 +147,10 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                   
                   <div className="mt-3 flex gap-2">
                     <Button size="sm" variant="outline">
-                      View Full Details
+                      {t("viewFullDetails")}
                     </Button>
                     <Button size="sm">
-                      Schedule Ratification Vote
+                      {t("scheduleVote")}
                     </Button>
                   </div>
                 </div>
@@ -162,7 +164,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              Ratified ({ratifiedAgreements.length})
+              {t("ratifiedHeader", { count: ratifiedAgreements.length })}
             </h3>
             <div className="space-y-3">
               {ratifiedAgreements.map((agreement) => (
@@ -176,7 +178,7 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                         <Badge>{agreement.clauseCategory}</Badge>
                         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Ratified
+                          {t("ratified")}
                         </Badge>
                       </div>
                       <h4 className="font-semibold">{agreement.title}</h4>
@@ -185,16 +187,18 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                       {agreement.ratificationVoteYes !== undefined && agreement.ratificationVoteNo !== undefined && (
                         <div className="mt-2 flex items-center gap-4 text-sm">
                           <span className="text-green-600 font-medium">
-                            Yes: {agreement.ratificationVoteYes}
+                            {t("voteYes", { count: agreement.ratificationVoteYes })}
                           </span>
                           <span className="text-red-600 font-medium">
-                            No: {agreement.ratificationVoteNo}
+                            {t("voteNo", { count: agreement.ratificationVoteNo })}
                           </span>
                           <span className="text-muted-foreground">
-                            ({(
-                              (agreement.ratificationVoteYes / 
-                                (agreement.ratificationVoteYes + agreement.ratificationVoteNo)) * 100
-                            ).toFixed(1)}% approval)
+                            {t("approval", {
+                              pct: (
+                                (agreement.ratificationVoteYes /
+                                  (agreement.ratificationVoteYes + agreement.ratificationVoteNo)) * 100
+                              ).toFixed(1)
+                            })}
                           </span>
                         </div>
                       )}
@@ -203,13 +207,13 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
                         {agreement.ratificationDate && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Ratified: {format(new Date(agreement.ratificationDate), "MMM d, yyyy")}
+                            {t("ratifiedDate", { date: format(new Date(agreement.ratificationDate), "MMM d, yyyy") })}
                           </span>
                         )}
                         {agreement.annualCost && (
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-3 w-3" />
-                            ${parseFloat(agreement.annualCost).toLocaleString()}/year
+                            {t("costPerYear", { cost: parseFloat(agreement.annualCost).toLocaleString() })}
                           </span>
                         )}
                       </div>
@@ -227,8 +231,8 @@ export function TentativeAgreementViewer({ agreements }: TentativeAgreementViewe
         {agreements.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <FileCheck className="mx-auto h-12 w-12 mb-4" />
-            <p>No tentative agreements yet</p>
-            <p className="text-sm">Agreements will appear here as proposals are accepted</p>
+            <p>{t("emptyTitle")}</p>
+            <p className="text-sm">{t("emptyBody")}</p>
           </div>
         )}
       </CardContent>

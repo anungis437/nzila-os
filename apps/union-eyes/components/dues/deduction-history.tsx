@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ interface DeductionHistoryProps {
 }
 
 export default function DeductionHistory({ userId, onReportIssue }: DeductionHistoryProps) {
+  const t = useTranslations('dashboard.dues.deductions');
   const [deductions, setDeductions] = useState<DeductionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,49 +58,47 @@ export default function DeductionHistory({ userId, onReportIssue }: DeductionHis
   const getSourceLabel = (source: string) => {
     switch (source) {
       case 'remittance':
-        return 'Employer Remittance';
+        return t('sources.remittance');
       case 'payroll_api':
-        return 'Payroll System';
+        return t('sources.payrollApi');
       case 'pay_stub_upload':
-        return 'Pay Stub';
+        return t('sources.payStubUpload');
       case 'manual_entry':
-        return 'Manual Entry';
+        return t('sources.manualEntry');
       default:
         return source;
     }
   };
 
   if (loading) {
-    return <div className="text-center p-12">Loading deduction history...</div>;
+    return <div className="text-center p-12">{t('loading')}</div>;
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Deduction History</CardTitle>
-        <CardDescription>
-          Union dues deducted from your payroll by your employer
-        </CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {deductions.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No deduction records available yet</p>
+            <p className="text-muted-foreground">{t('empty')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Deductions will appear here once your employer submits remittance data.
+              {t('emptyHint')}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Pay Period</TableHead>
-                <TableHead>Dues Deducted</TableHead>
-                <TableHead>Gross Pay</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Status</TableHead>
-                {onReportIssue && <TableHead>Actions</TableHead>}
+                <TableHead>{t('columns.payPeriod')}</TableHead>
+                <TableHead>{t('columns.duesDeducted')}</TableHead>
+                <TableHead>{t('columns.grossPay')}</TableHead>
+                <TableHead>{t('columns.source')}</TableHead>
+                <TableHead>{t('columns.status')}</TableHead>
+                {onReportIssue && <TableHead>{t('columns.actions')}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,7 +119,7 @@ export default function DeductionHistory({ userId, onReportIssue }: DeductionHis
                   </TableCell>
                   <TableCell>
                     <Badge variant={deduction.verified ? 'default' : 'secondary'}>
-                      {deduction.verified ? 'Verified' : 'Pending'}
+                      {deduction.verified ? t('verified') : t('pending')}
                     </Badge>
                   </TableCell>
                   {onReportIssue && (
@@ -130,7 +130,7 @@ export default function DeductionHistory({ userId, onReportIssue }: DeductionHis
                         onClick={() => onReportIssue(deduction.id)}
                       >
                         <AlertTriangle className="h-4 w-4 mr-1" />
-                        Report Issue
+                        {t('reportIssue')}
                       </Button>
                     </TableCell>
                   )}

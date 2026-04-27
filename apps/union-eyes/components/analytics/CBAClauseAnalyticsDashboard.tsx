@@ -8,6 +8,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Card,
   CardContent,
@@ -56,6 +57,7 @@ interface PrecedentMatchStats {
 }
 
 export function CBAClauseAnalyticsDashboard() {
+  const t = useTranslations('cbaClauseAnalytics');
   const [loading, setLoading] = useState(true);
   const [clauseDistribution, setClauseDistribution] = useState<ClauseTypeDistribution[]>([]);
   const [aiPerformance, setAiPerformance] = useState<AIPerformanceMetrics[]>([]);
@@ -106,19 +108,19 @@ export function CBAClauseAnalyticsDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">CBA Intelligence Analytics</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            AI-assisted clause extraction and precedent matching — all outputs are advisory and subject to review
+            {t('description')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchAnalytics}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {t('refresh')}
           </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t('export')}
           </Button>
         </div>
       </div>
@@ -127,21 +129,21 @@ export function CBAClauseAnalyticsDashboard() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clauses Extracted</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalClausesExtracted')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {clauseDistribution.reduce((sum, item) => sum + item.count, 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              Across {clauseDistribution.length} clause types
+              {t('acrossTypes', { count: clauseDistribution.length })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AI Extraction Accuracy</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('aiAccuracy')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -150,21 +152,21 @@ export function CBAClauseAnalyticsDashboard() {
                 : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              Last 30 days average
+              {t('last30Days')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Precedent Matches</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('precedentMatches')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {precedentStats?.totalMatches.toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Avg confidence: {((precedentStats?.avgConfidence || 0) * 100).toFixed(1)}%
+              {t('avgConfidence', { percent: ((precedentStats?.avgConfidence || 0) * 100).toFixed(1) })}
             </p>
           </CardContent>
         </Card>
@@ -173,9 +175,9 @@ export function CBAClauseAnalyticsDashboard() {
       {/* Clause Type Distribution */}
       <Card>
         <CardHeader>
-          <CardTitle>Clause Type Distribution</CardTitle>
+          <CardTitle>{t('clauseDistribution.title')}</CardTitle>
           <CardDescription>
-            Breakdown of extracted clauses by category
+            {t('clauseDistribution.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -217,9 +219,9 @@ export function CBAClauseAnalyticsDashboard() {
       {/* AI Performance Over Time */}
       <Card>
         <CardHeader>
-          <CardTitle>AI Performance Metrics</CardTitle>
+          <CardTitle>{t('aiPerformance.title')}</CardTitle>
           <CardDescription>
-            Extraction and classification accuracy trends
+            {t('aiPerformance.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -255,9 +257,9 @@ export function CBAClauseAnalyticsDashboard() {
       {precedentStats && (
         <Card>
           <CardHeader>
-            <CardTitle>Precedent Matches by Jurisdiction</CardTitle>
+            <CardTitle>{t('precedentJurisdiction.title')}</CardTitle>
             <CardDescription>
-              Distribution of precedent matches across labor jurisdictions
+              {t('precedentJurisdiction.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>

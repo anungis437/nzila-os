@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,6 +35,7 @@ export function CBAExpiryTracker({
   organizationId,
   timeframe = '180d',
 }: ExpiryTrackerProps) {
+  const t = useTranslations('cbaExpiryTracker');
   const [expiringCBAs, setExpiringCBAs] = useState<ExpiringCBA[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,8 +110,8 @@ export function CBAExpiryTracker({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>CBA Expiry Tracker</CardTitle>
-          <CardDescription>Loading expiry data...</CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('loadingDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -126,10 +128,10 @@ export function CBAExpiryTracker({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>CBA Expiry Tracker</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-600">Error: {error}</p>
+          <p className="text-red-600">{t('error', { error })}</p>
         </CardContent>
       </Card>
     );
@@ -138,9 +140,9 @@ export function CBAExpiryTracker({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CBA Expiry Tracker</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          Monitor upcoming agreement expirations and plan for bargaining
+          {t('description')}
         </CardDescription>
 
         {/* Timeframe Selector */}
@@ -153,7 +155,7 @@ export function CBAExpiryTracker({
                 selectedTimeframe === tf ? 'bg-primary text-primary-foreground' : 'bg-muted'
               }`}
             >
-              {tf === '30d' ? '30 Days' : tf === '60d' ? '60 Days' : tf === '90d' ? '90 Days' : tf === '180d' ? '6 Months' : '1 Year'}
+              {t(`timeframes.${tf}` as 'timeframes.30d')}
             </button>
           ))}
         </div>
@@ -164,10 +166,9 @@ export function CBAExpiryTracker({
         {criticalCount > 0 && (
           <Alert className="mb-4 border-red-500 bg-red-50 dark:bg-red-950">
             <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertTitle>Action Required</AlertTitle>
+            <AlertTitle>{t('alertTitle')}</AlertTitle>
             <AlertDescription>
-              {criticalCount} agreement{criticalCount > 1 ? 's' : ''} expiring within 30 days affecting{' '}
-              {totalMembersAffected.toLocaleString()} members
+              {t('alertMessage', { count: criticalCount, plural: criticalCount > 1 ? 's' : '', members: totalMembersAffected.toLocaleString() })}
             </AlertDescription>
           </Alert>
         )}
@@ -177,28 +178,28 @@ export function CBAExpiryTracker({
           <div className="border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Expiring</span>
+              <span className="text-sm text-muted-foreground">{t('summary.expiring')}</span>
             </div>
             <p className="text-2xl font-bold">{expiringCBAs.length}</p>
             <p className="text-xs text-muted-foreground">
-              in next {selectedTimeframe === '30d' ? '30 days' : selectedTimeframe === '180d' ? '6 months' : '1 year'}
+              {t('summary.expiringIn', { timeframe: selectedTimeframe === '30d' ? '30 days' : selectedTimeframe === '180d' ? '6 months' : '1 year' })}
             </p>
           </div>
           <div className="border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Members</span>
+              <span className="text-sm text-muted-foreground">{t('summary.members')}</span>
             </div>
             <p className="text-2xl font-bold">{totalMembersAffected.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">total affected</p>
+            <p className="text-xs text-muted-foreground">{t('summary.totalAffected')}</p>
           </div>
           <div className="border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="h-4 w-4 text-red-600" />
-              <span className="text-sm text-muted-foreground">Critical</span>
+              <span className="text-sm text-muted-foreground">{t('summary.critical')}</span>
             </div>
             <p className="text-2xl font-bold text-red-600">{criticalCount}</p>
-            <p className="text-xs text-muted-foreground">urgent actions</p>
+            <p className="text-xs text-muted-foreground">{t('summary.urgentActions')}</p>
           </div>
         </div>
 
@@ -223,23 +224,23 @@ export function CBAExpiryTracker({
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">Expiry Date</p>
+                    <p className="text-xs text-muted-foreground">{t('cbaCard.expiryDate')}</p>
                     <p className="text-sm font-medium">{formatDate(cba.expiryDate)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Days Until Expiry</p>
+                    <p className="text-xs text-muted-foreground">{t('cbaCard.daysUntilExpiry')}</p>
                     <p className={`text-sm font-medium ${urgency === 'critical' ? 'text-red-600' : ''}`}>
                       {cba.daysUntilExpiry} days
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Members</p>
+                    <p className="text-xs text-muted-foreground">{t('cbaCard.members')}</p>
                     <p className="text-sm font-medium">{cba.totalMembers?.toLocaleString() || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Status</p>
+                    <p className="text-xs text-muted-foreground">{t('cbaCard.status')}</p>
                     <Badge variant={cba.status === 'negotiating' ? 'default' : 'secondary'}>
-                      {cba.status}
+                      {(['negotiating'] as readonly string[]).includes(cba.status) ? t(`badges.negotiating` as 'badges.negotiating') : cba.status}
                     </Badge>
                   </div>
                 </div>
@@ -247,7 +248,7 @@ export function CBAExpiryTracker({
                 {cba.bargainingStart && (
                   <div className="mt-3 pt-3 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Bargaining started: {formatDate(cba.bargainingStart)}
+                      {t('cbaCard.bargainingStarted', { date: formatDate(cba.bargainingStart) })}
                     </p>
                   </div>
                 )}
@@ -259,7 +260,7 @@ export function CBAExpiryTracker({
             <div className="text-center py-8">
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
               <p className="text-muted-foreground">
-                No CBAs expiring in the selected timeframe
+                {t('empty')}
               </p>
             </div>
           )}

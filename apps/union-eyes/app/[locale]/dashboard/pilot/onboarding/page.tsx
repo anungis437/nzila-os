@@ -9,12 +9,21 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import OnboardingConsole from './onboarding-console';
 
-export const metadata: Metadata = {
-  title: 'Pilot Onboarding | UnionEyes',
-  description: 'Readiness checklist, demo data controls, training resources',
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'pilotOnboardingPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
+}
 
 export default async function PilotOnboardingPage() {
   await requireUser();

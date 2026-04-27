@@ -14,6 +14,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { db } from '@/db';
 import { dataAggregationConsent } from '@/db/schema/domains/marketing';
 import { organizations } from '@/db/schema';
@@ -35,6 +36,7 @@ interface DataSharingPageProps {
 }
 
 export default async function DataSharingPage({ params }: DataSharingPageProps) {
+  const t = await getTranslations('dataSharingPage');
   const { locale: _locale } = params;
 
   // Get user's organization
@@ -77,9 +79,9 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
     <div className="container mx-auto py-8 max-w-4xl space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold">Data Sharing Settings</h1>
+        <h1 className="text-4xl font-bold">{t('pageTitle')}</h1>
         <p className="text-muted-foreground mt-2">
-          Control how your organization participates in movement-wide insights
+          {t('pageSubtitle')}
         </p>
       </div>
 
@@ -90,19 +92,19 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
             {hasActiveConsent ? (
               <>
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-                Data Sharing Enabled
+                {t('sharingEnabledTitle')}
               </>
             ) : (
               <>
                 <XCircle className="h-5 w-5 text-gray-400" />
-                Data Sharing Disabled
+                {t('sharingDisabledTitle')}
               </>
             )}
           </CardTitle>
           <CardDescription>
             {hasActiveConsent
-              ? 'Your organization is contributing to movement insights'
-              : 'Your organization is not currently participating'}
+              ? t('sharingEnabledDescription')
+              : t('sharingDisabledDescription')}
           </CardDescription>
         </CardHeader>
         {consent && (
@@ -110,31 +112,31 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
             <div className="space-y-4">
               {/* Current Preferences */}
               <div>
-                <h3 className="font-semibold mb-3">Sharing Preferences</h3>
+                <h3 className="font-semibold mb-3">{t('sharingPreferencesTitle')}</h3>
                 <div className="grid gap-2">
                   <PreferenceItem
-                    label="Impact Metrics"
-                    description="Win rates, resolution outcomes"
+                    label={t('impactMetricsLabel')}
+                    description={t('impactMetricsDescription')}
                     enabled={consent.preferences.shareImpactMetrics}
                   />
                   <PreferenceItem
-                    label="Case Resolution Times"
-                    description="How long cases take to resolve"
+                    label={t('caseResolutionLabel')}
+                    description={t('caseResolutionDescription')}
                     enabled={consent.preferences.shareCaseResolutionTimes}
                   />
                   <PreferenceItem
-                    label="Demographic Data"
-                    description="Age ranges, employment sectors (anonymized)"
+                    label={t('demographicDataLabel')}
+                    description={t('demographicDataDescription')}
                     enabled={consent.preferences.shareDemographicData}
                   />
                   <PreferenceItem
-                    label="Industry Insights"
-                    description="Industry-specific patterns"
+                    label={t('industryInsightsLabel')}
+                    description={t('industryInsightsDescription')}
                     enabled={consent.preferences.shareIndustryInsights}
                   />
                   <PreferenceItem
-                    label="Legislative Data"
-                    description="Collective agreement patterns"
+                    label={t('legislativeDataLabel')}
+                    description={t('legislativeDataDescription')}
                     enabled={consent.preferences.shareLegislativeData}
                   />
                 </div>
@@ -143,15 +145,15 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
               {/* Consent Details */}
               <div className="text-sm text-muted-foreground space-y-1 pt-4 border-t">
                 <div>
-                  <strong>Granted by:</strong> {consent.consentGivenBy}
+                  <strong>{t('grantedByLabel')}:</strong> {consent.consentGivenBy}
                 </div>
                 <div>
-                  <strong>Date:</strong>{' '}
+                  <strong>{t('dateLabel')}:</strong>{' '}
                   {new Date(consent.grantedAt).toLocaleDateString()}
                 </div>
                 {consent.expiresAt && (
                   <div>
-                    <strong>Expires:</strong>{' '}
+                    <strong>{t('expiresLabel')}:</strong>{' '}
                     {new Date(consent.expiresAt).toLocaleDateString()}
                   </div>
                 )}
@@ -171,67 +173,60 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5" />
-            How Movement Insights Works
+            {t('howItWorksTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="font-semibold mb-2">Privacy Guarantees</h3>
+            <h3 className="font-semibold mb-2">{t('privacyGuaranteesTitle')}</h3>
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2">
                 <Shield className="h-4 w-4 mt-0.5 text-green-600" />
                 <span>
-                  <strong>Minimum 5 unions:</strong> Data only aggregated when at least 5
-                  organizations participate
+                  <strong>{t('minimum5UnionsLabel')}:</strong> {t('minimum5UnionsDescription')}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Shield className="h-4 w-4 mt-0.5 text-green-600" />
                 <span>
-                  <strong>Minimum 10-25 cases:</strong> Higher thresholds for sensitive data like
-                  demographics
+                  <strong>{t('minimum10CasesLabel')}:</strong> {t('minimum10CasesDescription')}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Shield className="h-4 w-4 mt-0.5 text-green-600" />
                 <span>
-                  <strong>Statistical noise:</strong> Random variation added to prevent reverse
-                  engineering
+                  <strong>{t('statisticalNoiseLabel')}:</strong> {t('statisticalNoiseDescription')}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Shield className="h-4 w-4 mt-0.5 text-green-600" />
                 <span>
-                  <strong>No organization names:</strong> Your union is never identified in
-                  aggregated data
+                  <strong>{t('noOrgNamesLabel')}:</strong> {t('noOrgNamesDescription')}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Shield className="h-4 w-4 mt-0.5 text-green-600" />
                 <span>
-                  <strong>Revocable anytime:</strong> Opt out instantly with no questions asked
+                  <strong>{t('revocableAnyTimeLabel')}:</strong> {t('revocableAnyTimeDescription')}
                 </span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-2">Why Participate?</h3>
+            <h3 className="font-semibold mb-2">{t('whyParticipateTitle')}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                • <strong>Learn from the movement:</strong> See how unions across Canada are
-                resolving cases
+                • <strong>{t('learnFromMovementLabel')}:</strong> {t('learnFromMovementDescription')}
               </li>
               <li>
-                • <strong>Support CLC advocacy:</strong> Provide data for legislative briefs and
-                policy work
+                • <strong>{t('supportAdvocacyLabel')}:</strong> {t('supportAdvocacyDescription')}
               </li>
               <li>
-                • <strong>Benchmark anonymously:</strong> Compare your outcomes to movement-wide
-                trends
+                • <strong>{t('benchmarkAnonymouslyLabel')}:</strong> {t('benchmarkAnonymouslyDescription')}
               </li>
               <li>
-                • <strong>Strengthen solidarity:</strong> Help other unions improve their processes
+                • <strong>{t('strengthenSolidarityLabel')}:</strong> {t('strengthenSolidarityDescription')}
               </li>
             </ul>
           </div>
@@ -242,9 +237,9 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
       {!hasActiveConsent && (
         <Card>
           <CardHeader>
-            <CardTitle>Enable Data Sharing</CardTitle>
+            <CardTitle>{t('enableDataSharingTitle')}</CardTitle>
             <CardDescription>
-              Choose what data to contribute to movement insights
+              {t('enableDataSharingDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -259,10 +254,10 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
-              Consent History
+              {t('consentHistoryTitle')}
             </CardTitle>
             <CardDescription>
-              Your organization&apos;s data sharing activity (last 10 records)
+              {t('consentHistoryDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -287,24 +282,23 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
                       </Badge>
                       <span className="text-sm font-medium">
                         {record.status === 'revoked'
-                          ? 'Consent Revoked'
+                          ? t('consentRevokedStatus')
                           : record.status === 'expired'
-                          ? 'Consent Expired'
-                          : 'Consent Granted'}
+                          ? t('consentExpiredStatus')
+                          : t('consentGrantedStatus')}
                       </span>
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {new Date(record.createdAt).toLocaleString()}
                       {record.revokedAt && (
                         <span>
-                          {' '}
-                          → Revoked {new Date(record.revokedAt).toLocaleString()}
+                          {' '} {t('revokedAtPrefix')} {new Date(record.revokedAt).toLocaleString()}
                         </span>
                       )}
                     </div>
                     {record.revocationReason && (
                       <div className="text-sm text-muted-foreground">
-                        Reason: {record.revocationReason}
+                        {t('revocationReasonLabel')}: {record.revocationReason}
                       </div>
                     )}
                   </div>
@@ -318,19 +312,17 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
       {/* Legal Notice */}
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>Legal Notice</AlertTitle>
+        <AlertTitle>{t('legalNoticeTitle')}</AlertTitle>
         <AlertDescription className="text-xs">
-          By enabling data sharing, you authorize UnionEyes to aggregate anonymized data from your
-          organization with data from other consenting unions. You can revoke consent at any time.
-          All aggregation occurs in Canada. Data is never sold or shared with employers. See our{' '}
+          {t('legalNoticeText')}{' '}
           <Link href="/privacy" className="underline">
-            Privacy Policy
+            {t('privacyPolicyLink')}
           </Link>{' '}
-          and{' '}
+          {t('and')} {' '}
           <Link href="/terms" className="underline">
-            Terms of Service
+            {t('termsLink')}
           </Link>{' '}
-          for details.
+          {t('forDetails')}.
         </AlertDescription>
       </Alert>
     </div>

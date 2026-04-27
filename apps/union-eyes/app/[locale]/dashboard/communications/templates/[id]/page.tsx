@@ -13,7 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,6 +91,7 @@ interface Template {
 export default function TemplateDetailPage() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('communicationsTemplatesDetailPage');
   const { id: paramId } = useParams<{ id: string }>();
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
@@ -271,7 +272,7 @@ export default function TemplateDetailPage() {
           className="mt-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Templates
+          {t('backToTemplates')}
         </Button>
       </div>
     );
@@ -291,7 +292,7 @@ export default function TemplateDetailPage() {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Templates
+          {t('backToTemplates')}
         </Button>
 
         <div className="flex items-start justify-between">
@@ -308,7 +309,7 @@ export default function TemplateDetailPage() {
                 <Badge variant="outline" className="capitalize">{template.type}</Badge>
                 <Badge variant="outline" className="capitalize">{template.category}</Badge>
                 <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                  {template.isActive ? 'Active' : 'Inactive'}
+                  {template.isActive ? t('activeStatus') : t('inactiveStatus')}
                 </Badge>
               </div>
             </div>
@@ -317,18 +318,18 @@ export default function TemplateDetailPage() {
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowPreview(true)}>
               <Eye className="mr-2 h-4 w-4" />
-              Preview
+              {t('previewButton')}
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t('savingStatus')}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+                  {t('saveChangesButton')}
                 </>
               )}
             </Button>
@@ -343,7 +344,7 @@ export default function TemplateDetailPage() {
       {successMessage && (
         <Alert>
           <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>{successMessage}</AlertDescription>
+          <AlertDescription>{t('templateSavedMessage')}</AlertDescription>
         </Alert>
       )}
 
@@ -358,23 +359,23 @@ export default function TemplateDetailPage() {
       {/* Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Template name, description, and settings</CardDescription>
+          <CardTitle>{t('basicInformationTitle')}</CardTitle>
+          <CardDescription>{t('basicInformationDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Template Name *</Label>
+              <Label htmlFor="name">{t('templateNameLabel')} *</Label>
               <Input
                 id="name"
                 value={formData.name || ''}
                 onChange={(e) => updateFormData({ name: e.target.value })}
-                placeholder="e.g., Welcome Email"
+                placeholder={t('templateNamePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t('categoryLabel')}</Label>
               <Select
                 value={formData.category || ''}
                 onValueChange={(value) => updateFormData({ category: value })}
@@ -383,23 +384,23 @@ export default function TemplateDetailPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="campaign">Campaign</SelectItem>
-                  <SelectItem value="transactional">Transactional</SelectItem>
-                  <SelectItem value="alert">Alert</SelectItem>
-                  <SelectItem value="newsletter">Newsletter</SelectItem>
-                  <SelectItem value="announcement">Announcement</SelectItem>
+                  <SelectItem value="campaign">{t('categoryOptionCampaign')}</SelectItem>
+                  <SelectItem value="transactional">{t('categoryOptionTransactional')}</SelectItem>
+                  <SelectItem value="alert">{t('categoryOptionAlert')}</SelectItem>
+                  <SelectItem value="newsletter">{t('categoryOptionNewsletter')}</SelectItem>
+                  <SelectItem value="announcement">{t('categoryOptionAnnouncement')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <Textarea
               id="description"
               value={formData.description || ''}
               onChange={(e) => updateFormData({ description: e.target.value })}
-              placeholder="Brief description of this template"
+              placeholder={t('descriptionPlaceholder')}
               rows={2}
             />
           </div>
@@ -411,7 +412,7 @@ export default function TemplateDetailPage() {
               onCheckedChange={(checked) => updateFormData({ isActive: checked })}
             />
             <Label htmlFor="isActive" className="font-normal">
-              Active (available for use in campaigns)
+              {t('activeTemplateLabel')}
             </Label>
           </div>
         </CardContent>
@@ -420,33 +421,33 @@ export default function TemplateDetailPage() {
       {/* Content */}
       <Card>
         <CardHeader>
-          <CardTitle>Template Content</CardTitle>
+          <CardTitle>{t('templateContentTitle')}</CardTitle>
           <CardDescription>
-            {template.type === 'email' && 'Email subject, body, and optional HTML content'}
-            {template.type === 'sms' && 'SMS message body (max 160 characters)'}
-            {template.type === 'push' && 'Push notification title and body'}
+            {template.type === 'email' && t('contentDescriptionEmail')}
+            {template.type === 'sms' && t('contentDescriptionSms')}
+            {template.type === 'push' && t('contentDescriptionPush')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {template.type === 'email' && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="subject">Subject Line *</Label>
+                <Label htmlFor="subject">{t('subjectLineLabel')} *</Label>
                 <Input
                   id="subject"
                   value={formData.subject || ''}
                   onChange={(e) => updateFormData({ subject: e.target.value })}
-                  placeholder="Enter email subject"
+                  placeholder={t('subjectLinePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="preheader">Preheader Text</Label>
+                <Label htmlFor="preheader">{t('preheaderTextLabel')}</Label>
                 <Input
                   id="preheader"
                   value={formData.preheader || ''}
                   onChange={(e) => updateFormData({ preheader: e.target.value })}
-                  placeholder="Preview text that appears after the subject line"
+                  placeholder={t('preheaderPlaceholder')}
                 />
               </div>
             </>
@@ -454,7 +455,7 @@ export default function TemplateDetailPage() {
 
           <div className="space-y-2">
             <Label htmlFor="body">
-              {template.type === 'email' ? 'Plain Text Body' : 'Message Body'} *
+              {template.type === 'email' ? t('plainTextBodyLabel') : t('messageBodyLabel')} *
             </Label>
             <Textarea
               id="body"
@@ -462,15 +463,15 @@ export default function TemplateDetailPage() {
               onChange={(e) => updateFormData({ body: e.target.value })}
               placeholder={
                 template.type === 'sms'
-                  ? 'Enter SMS message (max 160 characters)'
-                  : 'Enter message content'
+                  ? t('smsBodyPlaceholder')
+                  : t('messageBodyPlaceholder')
               }
               rows={10}
               maxLength={template.type === 'sms' ? 160 : undefined}
             />
             {template.type === 'sms' && (
               <p className="text-sm text-muted-foreground">
-                {formData.body?.length || 0} / 160 characters
+                {formData.body?.length || 0} / 160 {t('charactersLabel')}
               </p>
             )}
           </div>
@@ -478,27 +479,27 @@ export default function TemplateDetailPage() {
           {template.type === 'email' && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="htmlContent">HTML Content (Optional)</Label>
+                <Label htmlFor="htmlContent">{t('htmlContentLabel')}</Label>
                 <Textarea
                   id="htmlContent"
                   value={formData.htmlContent || ''}
                   onChange={(e) => updateFormData({ htmlContent: e.target.value })}
-                  placeholder="Enter HTML email content"
+                  placeholder={t('htmlContentPlaceholder')}
                   rows={8}
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  If provided, this HTML content will be used instead of plain text for HTML-capable email clients
+                  {t('htmlContentNote')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="plainTextContent">Plain Text Fallback (Optional)</Label>
+                <Label htmlFor="plainTextContent">{t('plainTextFallbackLabel')}</Label>
                 <Textarea
                   id="plainTextContent"
                   value={formData.plainTextContent || ''}
                   onChange={(e) => updateFormData({ plainTextContent: e.target.value })}
-                  placeholder="Plain text version for email clients that don&apos;t support HTML"
+                  placeholder={t('plainTextFallbackPlaceholder')}
                   rows={6}
                 />
               </div>
@@ -510,9 +511,9 @@ export default function TemplateDetailPage() {
       {/* Variables */}
       <Card>
         <CardHeader>
-          <CardTitle>Template Variables</CardTitle>
+          <CardTitle>{t('templateVariablesTitle')}</CardTitle>
           <CardDescription>
-            Define placeholder variables that can be replaced with actual data when sending
+            {t('templateVariablesDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -525,7 +526,7 @@ export default function TemplateDetailPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="secondary">{'{{'}{variable.name}{'}}'}</Badge>
                         {variable.required && (
-                          <Badge variant="destructive" className="text-xs">Required</Badge>
+                          <Badge variant="destructive" className="text-xs">{t('requiredBadge')}</Badge>
                         )}
                       </div>
                       {variable.description && (
@@ -534,8 +535,8 @@ export default function TemplateDetailPage() {
                         </p>
                       )}
                       <div className="flex gap-4 text-xs text-muted-foreground">
-                        {variable.default && <span>Default: {variable.default}</span>}
-                        {variable.example && <span>Example: {variable.example}</span>}
+                        {variable.default && <span>{t('defaultPrefix')} {variable.default}</span>}
+                        {variable.example && <span>{t('examplePrefix')} {variable.example}</span>}
                       </div>
                     </div>
                     <Button
@@ -554,48 +555,48 @@ export default function TemplateDetailPage() {
           <Separator />
 
           <div className="space-y-3">
-            <h4 className="text-sm font-medium">Add Variable</h4>
+            <h4 className="text-sm font-medium">{t('addVariableTitle')}</h4>
             
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="var-name" className="text-sm">Variable Name *</Label>
+                <Label htmlFor="var-name" className="text-sm">{t('variableNameLabel')} *</Label>
                 <Input
                   id="var-name"
                   value={newVariable.name}
                   onChange={(e) => setNewVariable({ ...newVariable, name: e.target.value })}
-                  placeholder="e.g., firstName"
+                  placeholder={t('variableNamePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="var-description" className="text-sm">Description</Label>
+                <Label htmlFor="var-description" className="text-sm">{t('descriptionLabel')}</Label>
                 <Input
                   id="var-description"
                   value={newVariable.description}
                   onChange={(e) => setNewVariable({ ...newVariable, description: e.target.value })}
-                  placeholder="e.g., Member's first name"
+                  placeholder={t('variableDescriptionPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="var-default" className="text-sm">Default Value</Label>
+                <Label htmlFor="var-default" className="text-sm">{t('defaultValueLabel')}</Label>
                 <Input
                   id="var-default"
                   value={newVariable.default || ''}
                   onChange={(e) => setNewVariable({ ...newVariable, default: e.target.value || null })}
-                  placeholder="Optional default"
+                  placeholder={t('defaultValuePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="var-example" className="text-sm">Example</Label>
+                <Label htmlFor="var-example" className="text-sm">{t('exampleLabel')}</Label>
                 <Input
                   id="var-example"
                   value={newVariable.example || ''}
                   onChange={(e) => setNewVariable({ ...newVariable, example: e.target.value || null })}
-                  placeholder="e.g., John"
+                  placeholder={t('examplePlaceholder')}
                 />
               </div>
             </div>
@@ -607,13 +608,13 @@ export default function TemplateDetailPage() {
                 onCheckedChange={(checked) => setNewVariable({ ...newVariable, required: checked })}
               />
               <Label htmlFor="var-required" className="text-sm font-normal">
-                Required variable
+                {t('requiredVariableLabel')}
               </Label>
             </div>
 
             <Button onClick={addVariable} disabled={!newVariable.name.trim()}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Variable
+              {t('addVariableButton')}
             </Button>
           </div>
         </CardContent>
@@ -622,9 +623,9 @@ export default function TemplateDetailPage() {
       {/* Tags */}
       <Card>
         <CardHeader>
-          <CardTitle>Tags</CardTitle>
+          <CardTitle>{t('tagsTitle')}</CardTitle>
           <CardDescription>
-            Add tags to organize and categorize templates
+            {t('tagsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -646,11 +647,11 @@ export default function TemplateDetailPage() {
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addTag()}
-              placeholder="Enter tag name"
+              placeholder={t('tagInputPlaceholder')}
             />
             <Button onClick={addTag} disabled={!newTag.trim()}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Tag
+              {t('addTagButton')}
             </Button>
           </div>
         </CardContent>
@@ -659,15 +660,15 @@ export default function TemplateDetailPage() {
       {/* Metadata */}
       <Card>
         <CardHeader>
-          <CardTitle>Template Info</CardTitle>
+          <CardTitle>{t('templateInfoTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Created:</span>
+            <span className="text-muted-foreground">{t('createdLabel')}:</span>
             <span>{new Date(template.createdAt).toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Last Updated:</span>
+            <span className="text-muted-foreground">{t('lastUpdatedLabel')}:</span>
             <span>{new Date(template.updatedAt).toLocaleString()}</span>
           </div>
         </CardContent>
@@ -677,19 +678,19 @@ export default function TemplateDetailPage() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Template?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {/* eslint-disable-next-line react/no-unescaped-entities */}
-              This will permanently delete "{template.name}". This action cannot be undone.
+              {t('deleteDialogDescription', { name: template.name })}
               {template.isActive && (
                 <div className="mt-2 text-amber-600">
-                  ⚠️ This template is currently active and may be used by campaigns.
+                  ⚠️ {t('deleteActiveTemplateWarning')}
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t('cancelButton')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
@@ -698,10 +699,10 @@ export default function TemplateDetailPage() {
               {deleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('deletingStatus')}
                 </>
               ) : (
-                'Delete Template'
+                t('deleteTemplateButton')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -713,13 +714,13 @@ export default function TemplateDetailPage() {
         <AlertDialog open={showPreview} onOpenChange={setShowPreview}>
           <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <AlertDialogHeader>
-              <AlertDialogTitle>Template Preview</AlertDialogTitle>
+              <AlertDialogTitle>{t('previewModalTitle')}</AlertDialogTitle>
               <AlertDialogDescription>{formData.description}</AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-4">
               {formData.subject && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Subject</div>
+                  <div className="text-sm font-medium mb-1">{t('subjectLabel')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {formData.subject}
                   </div>
@@ -728,7 +729,7 @@ export default function TemplateDetailPage() {
 
               {formData.preheader && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Preheader</div>
+                  <div className="text-sm font-medium mb-1">{t('preheaderLabel')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {formData.preheader}
                   </div>
@@ -736,7 +737,7 @@ export default function TemplateDetailPage() {
               )}
 
               <div>
-                <div className="text-sm font-medium mb-1">Body</div>
+                <div className="text-sm font-medium mb-1">{t('bodyLabel')}</div>
                 <div className="p-3 bg-muted rounded-lg text-sm whitespace-pre-wrap">
                   {formData.body}
                 </div>
@@ -744,7 +745,7 @@ export default function TemplateDetailPage() {
 
               {formData.variables && formData.variables.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Variables</div>
+                  <div className="text-sm font-medium mb-2">{t('variablesLabel')}</div>
                   <div className="space-y-2">
                     {formData.variables.map((variable, index) => (
                       <div key={index} className="p-2 bg-muted rounded text-sm">
@@ -761,7 +762,7 @@ export default function TemplateDetailPage() {
               )}
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Close</AlertDialogCancel>
+              <AlertDialogCancel>{t('closeButton')}</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

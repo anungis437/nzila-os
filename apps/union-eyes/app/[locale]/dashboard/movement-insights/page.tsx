@@ -15,6 +15,7 @@
 export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { db } from '@/db';
 import { dataAggregationConsent, movementTrends } from '@/db/schema/domains/marketing';
 import { eq, and, desc, gte } from 'drizzle-orm';
@@ -52,6 +53,7 @@ export default async function MovementInsightsPage({
   searchParams,
 }: MovementInsightsPageProps) {
   const { locale } = await params;
+  const t = await getTranslations('movementInsightsPage');
   const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = await searchParams;
 
   // Require officer-level role to view cross-union analytics.
@@ -103,16 +105,16 @@ export default async function MovementInsightsPage({
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-bold">Movement Insights</h1>
+            <h1 className="text-4xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground mt-2">
-              Privacy-preserving cross-union trends for advocacy and learning
+              {t('subtitle')}
             </p>
           </div>
 
           {!consent && (
             <Button asChild>
               <Link href={`/${locale}/dashboard/settings/data-sharing`}>
-                Enable Data Sharing
+                {t('enableDataSharingButton')}
               </Link>
             </Button>
           )}
@@ -121,14 +123,13 @@ export default async function MovementInsightsPage({
         {/* Privacy Disclaimer */}
         <Alert>
           <Shield className="h-4 w-4" />
-          <AlertTitle>Privacy-First Design</AlertTitle>
+          <AlertTitle>{t('privacyFirstTitle')}</AlertTitle>
           <AlertDescription>
-            All insights are anonymized and aggregated from organizations that have explicitly
-            opted in. <strong>Minimum 5 unions and 10 cases required for any trend.</strong>{' '}
-            No individual organization can be identified. Statistical noise added to prevent
-            reverse engineering.{' '}
+            {t('privacyDescriptionPrefix')}{' '}
+            <strong>{t('privacyDescriptionStrong')}</strong>{' '}
+            {t('privacyDescriptionSuffix')}{' '}
             <Link href={`/${locale}/legal/privacy`} className="underline">
-              Learn more about our privacy guarantees
+              {t('privacyLearnMoreLink')}
             </Link>
           </AlertDescription>
         </Alert>
@@ -137,30 +138,28 @@ export default async function MovementInsightsPage({
         {consent ? (
           <Alert className="border-green-200 bg-green-50">
             <Users className="h-4 w-4 text-green-600" />
-            <AlertTitle>Your Organization is Participating</AlertTitle>
+            <AlertTitle>{t('consentParticipatingTitle')}</AlertTitle>
             <AlertDescription>
-              Thank you for contributing to movement-wide insights. Your data is helping unions
-              across the country learn from each other.{' '}
+              {t('consentParticipatingDescription')}{' '}
               <Link
                 href={`/${locale}/dashboard/settings/data-sharing`}
                 className="underline"
               >
-                Manage your consent preferences
+                {t('manageConsentPreferencesLink')}
               </Link>
             </AlertDescription>
           </Alert>
         ) : (
           <Alert className="border-yellow-200 bg-yellow-50">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertTitle>Your Organization is Not Participating</AlertTitle>
+            <AlertTitle>{t('consentNotParticipatingTitle')}</AlertTitle>
             <AlertDescription>
-              You&apos;re viewing insights from other unions but not contributing. Consider opting in
-              to help the movement learn and grow together.{' '}
+              {t('consentNotParticipatingDescription')}{' '}
               <Link
                 href={`/${locale}/dashboard/settings/data-sharing`}
                 className="underline"
               >
-                Enable data sharing
+                {t('enableDataSharingLink')}
               </Link>
             </AlertDescription>
           </Alert>
@@ -170,35 +169,35 @@ export default async function MovementInsightsPage({
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filter Insights</CardTitle>
+          <CardTitle>{t('filterInsightsTitle')}</CardTitle>
           <CardDescription>
-            Explore trends by timeframe, sector, or jurisdiction
+            {t('filterInsightsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Timeframe</label>
+              <label className="text-sm font-medium">{t('timeframeLabel')}</label>
               <div className="flex gap-2">
                 <Link
                   href={`/${locale}/dashboard/movement-insights?timeframe=month`}
                 >
                   <Badge variant={timeframe === 'month' ? 'default' : 'outline'}>
-                    Last Month
+                    {t('timeframeMonth')}
                   </Badge>
                 </Link>
                 <Link
                   href={`/${locale}/dashboard/movement-insights?timeframe=quarter`}
                 >
                   <Badge variant={timeframe === 'quarter' ? 'default' : 'outline'}>
-                    Last Quarter
+                    {t('timeframeQuarter')}
                   </Badge>
                 </Link>
                 <Link
                   href={`/${locale}/dashboard/movement-insights?timeframe=year`}
                 >
                   <Badge variant={timeframe === 'year' ? 'default' : 'outline'}>
-                    Last Year
+                    {t('timeframeYear')}
                   </Badge>
                 </Link>
               </div>
@@ -206,7 +205,7 @@ export default async function MovementInsightsPage({
 
             {/* Sector filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Sector</label>
+              <label className="text-sm font-medium">{t('sectorLabel')}</label>
               <div className="flex gap-2">
                 {['all', 'public', 'private', 'non-profit'].map((s) => (
                   <Link
@@ -214,7 +213,13 @@ export default async function MovementInsightsPage({
                     href={`/${locale}/dashboard/movement-insights?timeframe=${timeframe}&sector=${s === 'all' ? '' : s}`}
                   >
                     <Badge variant={(_sector ?? '') === (s === 'all' ? '' : s) ? 'default' : 'outline'}>
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                      {s === 'all'
+                        ? t('sectorAll')
+                        : s === 'public'
+                          ? t('sectorPublic')
+                          : s === 'private'
+                            ? t('sectorPrivate')
+                            : t('sectorNonProfit')}
                     </Badge>
                   </Link>
                 ))}
@@ -228,9 +233,9 @@ export default async function MovementInsightsPage({
       {Object.keys(trendsByType).length === 0 && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>No Insights Available Yet</AlertTitle>
+          <AlertTitle>{t('noInsightsTitle')}</AlertTitle>
           <AlertDescription>
-            Trends will appear once enough organizations opt in to data sharing. Come back soon!
+            {t('noInsightsDescription')}
           </AlertDescription>
         </Alert>
       )}
@@ -238,36 +243,39 @@ export default async function MovementInsightsPage({
       {/* Resolution Time Trend */}
       {trendsByType['avg-resolution-time'] && (
         <TrendCard
-          title="Average Resolution Time"
-          description="How long grievances take to resolve across participating unions"
+          title={t('avgResolutionTimeTitle')}
+          description={t('avgResolutionTimeDescription')}
           trends={trendsByType['avg-resolution-time']}
-          unit="days"
+          unit={t('unitDays')}
           lowerIsBetter={true}
           icon={<TrendingDown className="h-4 w-4" />}
+          t={t}
         />
       )}
 
       {/* Win Rate Trend */}
       {trendsByType['win-rate'] && (
         <TrendCard
-          title="Member Win Rate"
-          description="Percentage of cases resolved favorably for members"
+          title={t('memberWinRateTitle')}
+          description={t('memberWinRateDescription')}
           trends={trendsByType['win-rate']}
-          unit="%"
+          unit={t('unitPercent')}
           lowerIsBetter={false}
           icon={<TrendingUp className="h-4 w-4" />}
+          t={t}
         />
       )}
 
       {/* Member Satisfaction */}
       {trendsByType['member-satisfaction'] && (
         <TrendCard
-          title="Member Satisfaction"
-          description="How satisfied members are with the grievance process"
+          title={t('memberSatisfactionTitle')}
+          description={t('memberSatisfactionDescription')}
           trends={trendsByType['member-satisfaction']}
-          unit="/5"
+          unit={t('unitOutOfFive')}
           lowerIsBetter={false}
           icon={<TrendingUp className="h-4 w-4" />}
+          t={t}
         />
       )}
 
@@ -275,16 +283,16 @@ export default async function MovementInsightsPage({
       {trends.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Export for Advocacy</CardTitle>
+            <CardTitle>{t('exportForAdvocacyTitle')}</CardTitle>
             <CardDescription>
-              Generate legislative briefs for union leadership and public advocacy
+              {t('exportForAdvocacyDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
               <Link href={`/${locale}/dashboard/movement-insights/export`}>
                 <FileText className="mr-2 h-4 w-4" />
-                Generate Legislative Brief
+                {t('generateLegislativeBriefButton')}
               </Link>
             </Button>
           </CardContent>
@@ -304,6 +312,7 @@ function TrendCard({
   unit,
   lowerIsBetter,
   icon,
+  t,
 }: {
   title: string;
   description: string;
@@ -312,6 +321,7 @@ function TrendCard({
   unit: string;
   lowerIsBetter: boolean;
   icon: React.ReactNode;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
 }) {
   const latestTrend = trends[0];
   const previousTrend = trends[1];
@@ -346,7 +356,7 @@ function TrendCard({
             <CardDescription>{description}</CardDescription>
           </div>
           <Badge variant={improving ? 'default' : 'secondary'}>
-            {improving ? 'Improving' : 'Declining'}
+            {improving ? t('improvingBadge') : t('decliningBadge')}
           </Badge>
         </div>
       </CardHeader>
@@ -362,7 +372,7 @@ function TrendCard({
               <div className="text-sm text-muted-foreground mt-1">
                 {change > 0 ? '+' : ''}
                 {change.toFixed(1)}
-                {unit} ({changePercent.toFixed(1)}%) vs previous period
+                {unit} ({changePercent.toFixed(1)}%) {t('vsPreviousPeriod')}
               </div>
             )}
           </div>
@@ -371,11 +381,11 @@ function TrendCard({
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              {latestTrend.participatingOrgs} unions
+              {t('unionCount', { count: latestTrend.participatingOrgs })}
             </div>
             <div className="flex items-center gap-1">
               <FileText className="h-4 w-4" />
-              {latestTrend.totalCases.toLocaleString()} cases
+              {t('caseCount', { count: latestTrend.totalCases.toLocaleString() })}
             </div>
           </div>
 

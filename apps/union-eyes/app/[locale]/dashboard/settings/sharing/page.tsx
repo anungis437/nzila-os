@@ -4,12 +4,14 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, FileText, Eye } from "lucide-react";
 import SharingSettingsForm from "@/components/sharing/SharingSettingsForm";
 import AccessLogViewer from "@/components/sharing/AccessLogViewer";
 
 export default function SharingSettingsPage() {
+  const t = useTranslations("sharingSettingsPage");
   const params = useParams();
   const organizationId = params?.id as string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +46,7 @@ export default function SharingSettingsPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <div className="text-center">Loading settings...</div>
+        <div className="text-center">{t("loading")}</div>
       </div>
     );
   }
@@ -56,9 +58,9 @@ export default function SharingSettingsPage() {
           <Shield className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Sharing & Privacy Settings</h1>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Control what data is shared with other unions and track access to your resources
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -67,11 +69,11 @@ export default function SharingSettingsPage() {
         <TabsList>
           <TabsTrigger value="settings" className="gap-2">
             <FileText className="h-4 w-4" />
-            Sharing Settings
+            {t("tabs.settings")}
           </TabsTrigger>
           <TabsTrigger value="audit" className="gap-2">
             <Eye className="h-4 w-4" />
-            Access Logs
+            {t("tabs.audit")}
           </TabsTrigger>
         </TabsList>
 

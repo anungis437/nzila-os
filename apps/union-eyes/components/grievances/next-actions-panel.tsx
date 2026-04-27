@@ -10,6 +10,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   UserPlus,
   FileText,
@@ -162,6 +163,8 @@ export function NextActionsPanel({
   protocol,
   className,
 }: NextActionsPanelProps) {
+  const t = useTranslations("nextActions");
+  const KNOWN_ACTION_IDS = ['assign_steward','contact_employer','request_docs','follow_up','escalate','arbitration','add_note','resolve'] as const;
   const actions = deriveActions({
     grievanceStatus,
     hasSteward,
@@ -175,7 +178,7 @@ export function NextActionsPanel({
   return (
     <Card className={cn("p-4 space-y-3", className)}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Recommended Next Actions</h3>
+        <h3 className="text-sm font-semibold">{t("title")}</h3>
         <Badge variant="outline" className="text-xs">
           {actions.length}
         </Badge>
@@ -204,8 +207,8 @@ export function NextActionsPanel({
                 <Icon className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{action.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+                <p className="text-sm font-medium">{(KNOWN_ACTION_IDS as readonly string[]).includes(action.id) ? t(`actions.${action.id}.label` as 'actions.assign_steward.label') : action.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{(KNOWN_ACTION_IDS as readonly string[]).includes(action.id) ? t(`actions.${action.id}.description` as 'actions.assign_steward.description') : action.description}</p>
               </div>
             </button>
           );

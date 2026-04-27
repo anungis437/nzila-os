@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
+import { isSupportedLanguage, transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
@@ -15,7 +15,11 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
       // Parse form data
       const formData = await request.formData();
       const audioFile = formData.get("audio") as File;
-      const language = (formData.get("language") as SupportedLanguage) || "en-CA";
+      const requestedLanguage = formData.get("language");
+      const language: SupportedLanguage =
+        typeof requestedLanguage === "string" && isSupportedLanguage(requestedLanguage)
+          ? requestedLanguage
+          : "en-CA";
 
       if (!audioFile) {
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Audio file is required');

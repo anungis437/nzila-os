@@ -33,14 +33,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
  
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
-const appealSchema = z.object({
-  reason: z.string().min(1, "Please select a reason for appeal"),
-  justification: z.string().min(50, "Please provide a detailed justification (minimum 50 characters)"),
-  additionalEvidence: z.array(z.string()).optional(),
-});
-
-type AppealFormData = z.infer<typeof appealSchema>;
+type AppealFormData = {
+  reason: string;
+  justification: string;
+  additionalEvidence?: string[];
+};
 
 export interface ClaimAppealFormProps {
   claimId: string;
@@ -53,14 +52,14 @@ export interface ClaimAppealFormProps {
 }
 
 const appealReasons = [
-  { value: "procedural-error", label: "Procedural Error" },
-  { value: "new-evidence", label: "New Evidence Available" },
-  { value: "incorrect-interpretation", label: "Incorrect Interpretation of Rules" },
-  { value: "inadequate-investigation", label: "Inadequate Investigation" },
-  { value: "bias-concern", label: "Concern About Bias" },
-  { value: "excessive-penalty", label: "Excessive Penalty" },
-  { value: "mitigating-circumstances", label: "Mitigating Circumstances Not Considered" },
-  { value: "other", label: "Other" },
+  "procedural-error",
+  "new-evidence",
+  "incorrect-interpretation",
+  "inadequate-investigation",
+  "bias-concern",
+  "excessive-penalty",
+  "mitigating-circumstances",
+  "other",
 ];
 
 export function ClaimAppealForm({
@@ -74,6 +73,16 @@ export function ClaimAppealForm({
 }: ClaimAppealFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const t = useTranslations("claimAppealForm");
+  const appealSchema = React.useMemo(
+    () =>
+      z.object({
+        reason: z.string().min(1, t("validation.reasonRequired")),
+        justification: z.string().min(50, t("validation.justificationMin")),
+        additionalEvidence: z.array(z.string()).optional(),
+      }),
+    [t]
+  );
 
   const form = useForm<AppealFormData>({
     resolver: zodResolver(appealSchema),
@@ -89,13 +98,13 @@ export function ClaimAppealForm({
     try {
       await onSubmit(data);
       toast({
-        title: "Appeal submitted successfully",
-        description: "Your appeal has been submitted and will be reviewed.",
+        title: t("successTitle"),
+        description: t("successMessage"),
       });
     } catch (error) {
       toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: t("errorTitle"),
+        description: error instanceof Error ? error.message : t("genericError"),
         variant: "destructive",
       });
     } finally {
@@ -110,25 +119,25 @@ export function ClaimAppealForm({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Original Decision - Claim #{claimNumber}
+            {t("originalDecisionTitle", { claimNumber })}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-500 mb-1">Decision</div>
+              <div className="text-sm text-gray-500 mb-1">{t("decision")}</div>
               <Badge variant="destructive" className="text-sm">
                 {currentDecision}
               </Badge>
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Decision Date</div>
+              <div className="text-sm text-gray-500 mb-1">{t("decisionDate")}</div>
               <div className="font-medium">
                 {format(decisionDate, "PPP")}
               </div>
             </div>
             <div className="col-span-2">
-              <div className="text-sm text-gray-500 mb-1">Decision Maker</div>
+              <div className="text-sm text-gray-500 mb-1">{t("decisionMaker")}</div>
               <div className="font-medium">{decisionMaker}</div>
             </div>
           </div>
@@ -136,11 +145,8 @@ export function ClaimAppealForm({
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
             <div className="text-sm text-yellow-900">
-              <p className="font-medium mb-1">Important Notice</p>
-              <p>
-                Appeals must be filed within 30 days of the decision date. Ensure 
-                you provide detailed justification and any supporting evidence.
-              </p>
+              <p className="font-medium mb-1">{t("importantNoticeTitle")}</p>
+              <p>{t("importantNoticeBody")}</p>
             </div>
           </div>
         </CardContent>
@@ -149,26 +155,26 @@ export function ClaimAppealForm({
       {/* Appeal Form */}
       <Card>
         <CardHeader>
-          <CardTitle>File an Appeal</CardTitle>
+          <CardTitle>{t("fileAppealTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* Reason */}
             <div className="space-y-2">
               <Label htmlFor="reason">
-                Reason for Appeal <span className="text-red-500">*</span>
+                {t("reasonForAppeal")} <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={form.watch("reason")}
                 onValueChange={(value) => form.setValue("reason", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a reason" />
+                  <SelectValue placeholder={t("selectReason")} />
                 </SelectTrigger>
                 <SelectContent>
                   {appealReasons.map((reason) => (
-                    <SelectItem key={reason.value} value={reason.value}>
-                      {reason.label}
+                    <SelectItem key={reason} value={reason}>
+                      {t(`reasons.${reason}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -183,11 +189,11 @@ export function ClaimAppealForm({
             {/* Justification */}
             <div className="space-y-2">
               <Label htmlFor="justification">
-                Detailed Justification <span className="text-red-500">*</span>
+                {t("detailedJustification")} <span className="text-red-500">*</span>
               </Label>
               <Textarea
                 id="justification"
-                placeholder="Provide a detailed explanation of why you are appealing this decision. Include specific facts, dates, and circumstances..."
+                placeholder={t("justificationPlaceholder")}
                 rows={8}
                 {...form.register("justification")}
               />
@@ -198,21 +204,21 @@ export function ClaimAppealForm({
                   </p>
                 )}
                 <p className="text-gray-500 ml-auto">
-                  {form.watch("justification").length} characters (minimum 50)
+                  {t("characterCount", { count: form.watch("justification").length })}
                 </p>
               </div>
             </div>
 
             {/* Additional Evidence */}
             <div className="space-y-2">
-              <Label>Additional Evidence (Optional)</Label>
+              <Label>{t("additionalEvidence")}</Label>
               <div className="border-2 border-dashed rounded-lg p-6 text-center">
                 <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-600 mb-2">
-                  Upload any new evidence to support your appeal
+                  {t("uploadEvidencePrompt")}
                 </p>
                 <Button type="button" variant="outline" size="sm">
-                  Browse Files
+                  {t("browseFiles")}
                 </Button>
               </div>
             </div>
@@ -221,12 +227,12 @@ export function ClaimAppealForm({
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
               <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
               <div className="text-sm text-blue-900">
-                <p className="font-medium mb-1">What happens next?</p>
+                <p className="font-medium mb-1">{t("whatHappensNext")}</p>
                 <ul className="list-disc list-inside space-y-1 text-blue-800">
-                  <li>Your appeal will be reviewed by a senior steward</li>
-                  <li>You will be notified of the review schedule within 5 business days</li>
-                  <li>You may be asked to provide additional information</li>
-                  <li>A final decision will be made within 30 days</li>
+                  <li>{t("nextSteps.reviewed")}</li>
+                  <li>{t("nextSteps.notified")}</li>
+                  <li>{t("nextSteps.additionalInfo")}</li>
+                  <li>{t("nextSteps.finalDecision")}</li>
                 </ul>
               </div>
             </div>
@@ -235,11 +241,11 @@ export function ClaimAppealForm({
             <div className="flex items-center justify-end gap-3 pt-4 border-t">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel}>
-                  Cancel
+                  {t("cancel")}
                 </Button>
               )}
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Appeal"}
+                {isSubmitting ? t("submitting") : t("submitAppeal")}
               </Button>
             </div>
           </form>
@@ -249,16 +255,16 @@ export function ClaimAppealForm({
       {/* Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle>Appeal Process Timeline</CardTitle>
+          <CardTitle>{t("timeline.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
-              { step: 1, title: "Appeal Filed", duration: "Today" },
-              { step: 2, title: "Review Assignment", duration: "1-5 business days" },
-              { step: 3, title: "Evidence Review", duration: "5-14 business days" },
-              { step: 4, title: "Hearing (if required)", duration: "15-20 business days" },
-              { step: 5, title: "Final Decision", duration: "20-30 business days" },
+              { step: 1, title: t("timeline.steps.filed.title"), duration: t("timeline.steps.filed.duration") },
+              { step: 2, title: t("timeline.steps.assignment.title"), duration: t("timeline.steps.assignment.duration") },
+              { step: 3, title: t("timeline.steps.evidence.title"), duration: t("timeline.steps.evidence.duration") },
+              { step: 4, title: t("timeline.steps.hearing.title"), duration: t("timeline.steps.hearing.duration") },
+              { step: 5, title: t("timeline.steps.decision.title"), duration: t("timeline.steps.decision.duration") },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-4">
                 <div className="shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-700">

@@ -7,17 +7,18 @@ import { Card } from "@/components/ui/card";
 import { Mic, Square, Play, Pause, Trash2, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { speechLanguageForLocale, type SupportedLanguage } from "@/lib/azure-speech";
 
 interface VoiceRecorderProps {
   onTranscriptionComplete?: (text: string, audioBlob: Blob) => void;
-  language?: "en-CA" | "fr-CA" | "en-US";
+  language?: SupportedLanguage;
   maxDuration?: number; // in seconds
   className?: string;
 }
 
 export function VoiceRecorder({
   onTranscriptionComplete,
-  language = "en-CA",
+  language,
   maxDuration = 300, // 5 minutes default
   className,
 }: VoiceRecorderProps) {
@@ -25,8 +26,7 @@ export function VoiceRecorder({
   const locale = useLocale();
   const { toast } = useToast();
   
-  // Auto-detect language from locale if not provided
-  const detectedLanguage = language || (locale === 'fr' ? 'fr-CA' : 'en-CA');
+  const detectedLanguage = language ?? speechLanguageForLocale(locale);
   
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -89,14 +89,14 @@ export function VoiceRecorder({
       }, 1000);
 
       toast({
-        title: "Recording started",
-        description: "Speak clearly into your microphone",
+        title: t("toast.recordingStarted"),
+        description: t("toast.speakClearly"),
       });
 
     } catch (_error) {
 toast({
-        title: "Recording failed",
-        description: "Could not access microphone. Please check permissions.",
+        title: t("toast.permissionDenied"),
+        description: t("toast.permissionRequired"),
         variant: "destructive",
       });
     }
@@ -115,8 +115,8 @@ toast({
       }
 
       toast({
-        title: "Recording stopped",
-        description: `Duration: ${formatTime(recordingTime)}`,
+        title: t("toast.recordingStopped"),
+        description: `${t("toast.duration")}: ${formatTime(recordingTime)}`,
       });
     }
   }, [isRecording, recordingTime, toast]);

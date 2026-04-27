@@ -22,7 +22,7 @@ export function createSpeechConfig() {
     process.env.AZURE_SPEECH_REGION
   );
 
-  // Set recognition language (supports bilingual: English and French)
+  // Set a safe default recognition language for general audio flows.
   speechConfig.speechRecognitionLanguage = "en-CA";
 
   return speechConfig;
@@ -105,10 +105,27 @@ export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
 export const SUPPORTED_LANGUAGES = {
   "en-CA": "English (Canada)",
   "fr-CA": "French (Canada)",
+  "it-IT": "Italiano",
+  "pt-PT": "Portugues",
   "en-US": "English (United States)",
 } as const;
 
 export type SupportedLanguage = keyof typeof SUPPORTED_LANGUAGES;
+
+const LOCALE_TO_SPEECH_LANGUAGE: Record<string, SupportedLanguage> = {
+  "en-CA": "en-CA",
+  "fr-CA": "fr-CA",
+  it: "it-IT",
+  pt: "pt-PT",
+};
+
+export function isSupportedLanguage(value: string): value is SupportedLanguage {
+  return Object.prototype.hasOwnProperty.call(SUPPORTED_LANGUAGES, value);
+}
+
+export function speechLanguageForLocale(locale: string): SupportedLanguage {
+  return LOCALE_TO_SPEECH_LANGUAGE[locale] ?? "en-CA";
+}
 
 /**
  * Transcribes audio with specific language

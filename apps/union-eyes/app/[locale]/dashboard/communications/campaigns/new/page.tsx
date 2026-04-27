@@ -13,6 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,17 +92,17 @@ interface CampaignForm {
   trackClicks: boolean;
 }
 
-const STEPS = [
-  { id: 1, name: 'Basic Info', icon: Mail },
-  { id: 2, name: 'Audience', icon: Users },
-  { id: 3, name: 'Content', icon: MessageSquare },
-  { id: 4, name: 'Schedule', icon: Calendar },
-  { id: 5, name: 'Review', icon: Check },
-];
-
 export default function NewCampaignPage() {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
+  const t = useTranslations('communicationsCampaignsNewPage');
+  const steps = [
+    { id: 1, name: t('stepBasicInfo'), icon: Mail },
+    { id: 2, name: t('stepAudience'), icon: Users },
+    { id: 3, name: t('stepContent'), icon: MessageSquare },
+    { id: 4, name: t('stepSchedule'), icon: Calendar },
+    { id: 5, name: t('stepReview'), icon: Check },
+  ];
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +143,7 @@ export default function NewCampaignPage() {
       });
 
       const response = await fetch(`/api/communications/templates?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch templates');
+      if (!response.ok) throw new Error(t('fetchTemplatesError'));
 
       const data = await response.json();
       setTemplates(data.data ?? []);
@@ -196,7 +197,7 @@ export default function NewCampaignPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to create campaign');
+        throw new Error(error.message || t('createCampaignError'));
       }
 
       await response.json();
@@ -204,7 +205,7 @@ export default function NewCampaignPage() {
       // Redirect to campaigns list (detail page not yet built)
       router.push(`/${locale}/dashboard/communications/campaigns`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create campaign');
+      setError(err instanceof Error ? err.message : t('createCampaignError'));
     } finally {
       setLoading(false);
     }
@@ -233,35 +234,35 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Campaign Basics</CardTitle>
+              <CardTitle>{t('campaignBasicsTitle')}</CardTitle>
               <CardDescription>
-                Set up the basic information for your campaign
+                {t('campaignBasicsDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Campaign Name *</Label>
+                <Label htmlFor="name">{t('campaignNameLabel')} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => updateFormData({ name: e.target.value })}
-                  placeholder="e.g., March Member Newsletter"
+                  placeholder={t('campaignNamePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('descriptionLabel')}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => updateFormData({ description: e.target.value })}
-                  placeholder="Brief description of this campaign"
+                  placeholder={t('campaignDescriptionPlaceholder')}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Campaign Type *</Label>
+                <Label>{t('campaignTypeLabel')} *</Label>
                 <RadioGroup
                   value={formData.type}
                   onValueChange={(value) => updateFormData({ type: value as CampaignForm['type'] })}
@@ -269,32 +270,32 @@ export default function NewCampaignPage() {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="campaign" id="type-campaign" />
                     <Label htmlFor="type-campaign" className="font-normal">
-                      Campaign - Regular marketing or organizing campaign
+                      {t('typeOptionCampaign')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="announcement" id="type-announcement" />
                     <Label htmlFor="type-announcement" className="font-normal">
-                      Announcement - Important news or updates
+                      {t('typeOptionAnnouncement')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="alert" id="type-alert" />
                     <Label htmlFor="type-alert" className="font-normal">
-                      Alert - Urgent or time-sensitive information
+                      {t('typeOptionAlert')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="transactional" id="type-transactional" />
                     <Label htmlFor="type-transactional" className="font-normal">
-                      Transactional - Response to user action
+                      {t('typeOptionTransactional')}
                     </Label>
                   </div>
                 </RadioGroup>
               </div>
 
               <div className="space-y-2">
-                <Label>Channel *</Label>
+                <Label>{t('channelLabel')} *</Label>
                 <RadioGroup
                   value={formData.channel}
                   onValueChange={(value) => updateFormData({ channel: value as CampaignForm['channel'] })}
@@ -303,27 +304,27 @@ export default function NewCampaignPage() {
                     <RadioGroupItem value="email" id="channel-email" />
                     <Label htmlFor="channel-email" className="font-normal flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      Email
+                      {t('channelOptionEmail')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="sms" id="channel-sms" />
                     <Label htmlFor="channel-sms" className="font-normal flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
-                      SMS
+                      {t('channelOptionSms')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="push" id="channel-push" />
                     <Label htmlFor="channel-push" className="font-normal flex items-center gap-2">
                       <Bell className="h-4 w-4" />
-                      Push Notification
+                      {t('channelOptionPush')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="multi_channel" id="channel-multi" />
                     <Label htmlFor="channel-multi" className="font-normal">
-                      Multi-Channel (Email + SMS + Push)
+                      {t('channelOptionMulti')}
                     </Label>
                   </div>
                 </RadioGroup>
@@ -336,34 +337,33 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Select Audience</CardTitle>
+              <CardTitle>{t('selectAudienceTitle')}</CardTitle>
               <CardDescription>
-                Choose who will receive this campaign
+                {t('selectAudienceDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <Users className="h-4 w-4" />
                 <AlertDescription>
-                  Segment selection will be integrated with the member database.
-                  For now, the campaign will target all eligible members.
+                  {t('segmentIntegrationNote')}
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
-                <Label htmlFor="segment">Segment (Optional)</Label>
+                <Label htmlFor="segment">{t('segmentLabel')}</Label>
                 <Select
                   value={formData.segmentId || 'all'}
                   onValueChange={(value) => updateFormData({ segmentId: value === 'all' ? null : value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a segment" />
+                    <SelectValue placeholder={t('selectSegmentPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Members</SelectItem>
-                    <SelectItem value="active">Active Members</SelectItem>
-                    <SelectItem value="inactive">Inactive Members</SelectItem>
-                    <SelectItem value="new">New Members (Last 30 Days)</SelectItem>
+                    <SelectItem value="all">{t('segmentOptionAll')}</SelectItem>
+                    <SelectItem value="active">{t('segmentOptionActive')}</SelectItem>
+                    <SelectItem value="inactive">{t('segmentOptionInactive')}</SelectItem>
+                    <SelectItem value="new">{t('segmentOptionNew')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -371,7 +371,7 @@ export default function NewCampaignPage() {
               {audiencePreview !== null && (
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Estimated Audience</span>
+                    <span className="text-sm text-muted-foreground">{t('estimatedAudienceLabel')}</span>
                     <span className="text-2xl font-bold">{audiencePreview.toLocaleString()}</span>
                   </div>
                 </div>
@@ -386,7 +386,7 @@ export default function NewCampaignPage() {
                   className="rounded"
                 />
                 <Label htmlFor="testMode" className="font-normal">
-                  Test mode (send to admins only)
+                  {t('testModeLabel')}
                 </Label>
               </div>
             </CardContent>
@@ -397,14 +397,14 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Campaign Content</CardTitle>
+              <CardTitle>{t('campaignContentTitle')}</CardTitle>
               <CardDescription>
-                Choose a template or write custom content
+                {t('campaignContentDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="template">Template (Optional)</Label>
+                <Label htmlFor="template">{t('templateLabel')}</Label>
                 <Select
                   value={formData.templateId || 'custom'}
                   onValueChange={(value) => {
@@ -423,10 +423,10 @@ export default function NewCampaignPage() {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a template" />
+                    <SelectValue placeholder={t('selectTemplatePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="custom">Custom Content</SelectItem>
+                    <SelectItem value="custom">{t('customContentOption')}</SelectItem>
                     {templates.map(template => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name}
@@ -438,33 +438,33 @@ export default function NewCampaignPage() {
 
               {formData.channel === 'email' && (
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Subject Line *</Label>
+                  <Label htmlFor="subject">{t('subjectLineLabel')} *</Label>
                   <Input
                     id="subject"
                     value={formData.subject}
                     onChange={(e) => updateFormData({ subject: e.target.value })}
-                    placeholder="Enter email subject"
+                    placeholder={t('subjectLinePlaceholder')}
                   />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="body">Message *</Label>
+                <Label htmlFor="body">{t('messageLabel')} *</Label>
                 <Textarea
                   id="body"
                   value={formData.body}
                   onChange={(e) => updateFormData({ body: e.target.value })}
                   placeholder={
                     formData.channel === 'sms' 
-                      ? 'Enter SMS message (max 160 characters)'
-                      : 'Enter your message content'
+                      ? t('smsMessagePlaceholder')
+                      : t('messageBodyPlaceholder')
                   }
                   rows={10}
                   maxLength={formData.channel === 'sms' ? 160 : undefined}
                 />
                 {formData.channel === 'sms' && (
                   <p className="text-sm text-muted-foreground">
-                    {formData.body.length} / 160 characters
+                    {formData.body.length} / 160 {t('charactersLabel')}
                   </p>
                 )}
               </div>
@@ -478,7 +478,7 @@ export default function NewCampaignPage() {
                       onChange={(e) => updateFormData({ trackOpens: e.target.checked })}
                       className="rounded"
                     />
-                    Track email opens
+                    {t('trackOpensLabel')}
                   </Label>
                   <Label className="flex items-center gap-2">
                     <input
@@ -487,7 +487,7 @@ export default function NewCampaignPage() {
                       onChange={(e) => updateFormData({ trackClicks: e.target.checked })}
                       className="rounded"
                     />
-                    Track link clicks
+                    {t('trackClicksLabel')}
                   </Label>
                 </div>
               )}
@@ -499,9 +499,9 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Schedule Campaign</CardTitle>
+              <CardTitle>{t('scheduleCampaignTitle')}</CardTitle>
               <CardDescription>
-                Choose when to send your campaign
+                {t('scheduleCampaignDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -517,20 +517,20 @@ export default function NewCampaignPage() {
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="now" id="send-now" />
                   <Label htmlFor="send-now" className="font-normal">
-                    Send immediately after creation
+                    {t('sendNowOption')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="scheduled" id="send-scheduled" />
                   <Label htmlFor="send-scheduled" className="font-normal">
-                    Schedule for later
+                    {t('scheduleForLaterOption')}
                   </Label>
                 </div>
               </RadioGroup>
 
               {!formData.sendNow && (
                 <div className="space-y-2">
-                  <Label htmlFor="scheduledAt">Schedule Date & Time *</Label>
+                  <Label htmlFor="scheduledAt">{t('scheduleDateTimeLabel')} *</Label>
                   <Input
                     id="scheduledAt"
                     type="datetime-local"
@@ -548,35 +548,51 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Review Campaign</CardTitle>
+              <CardTitle>{t('reviewCampaignTitle')}</CardTitle>
               <CardDescription>
-                Review your campaign details before sending
+                {t('reviewCampaignDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="font-semibold mb-2">Campaign Information</h3>
+                <h3 className="font-semibold mb-2">{t('campaignInformationLabel')}</h3>
                 <dl className="space-y-2">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Name:</dt>
+                    <dt className="text-muted-foreground">{t('nameLabel')}:</dt>
                     <dd className="font-medium">{formData.name}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Type:</dt>
-                    <dd className="font-medium capitalize">{formData.type}</dd>
+                    <dt className="text-muted-foreground">{t('typeLabel')}:</dt>
+                    <dd className="font-medium">
+                      {formData.type === 'campaign'
+                        ? t('typeOptionCampaign')
+                        : formData.type === 'announcement'
+                          ? t('typeOptionAnnouncement')
+                          : formData.type === 'alert'
+                            ? t('typeOptionAlert')
+                            : t('typeOptionTransactional')}
+                    </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Channel:</dt>
-                    <dd className="font-medium capitalize">{formData.channel}</dd>
+                    <dt className="text-muted-foreground">{t('channelLabel')}:</dt>
+                    <dd className="font-medium">
+                      {formData.channel === 'email'
+                        ? t('channelOptionEmail')
+                        : formData.channel === 'sms'
+                          ? t('channelOptionSms')
+                          : formData.channel === 'push'
+                            ? t('channelOptionPush')
+                            : t('channelOptionMulti')}
+                    </dd>
                   </div>
                 </dl>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Content</h3>
+                <h3 className="font-semibold mb-2">{t('contentLabel')}</h3>
                 {formData.channel === 'email' && (
                   <div className="mb-2">
-                    <span className="text-sm text-muted-foreground">Subject: </span>
+                    <span className="text-sm text-muted-foreground">{t('subjectLabel')}: </span>
                     <span className="font-medium">{formData.subject}</span>
                   </div>
                 )}
@@ -586,12 +602,12 @@ export default function NewCampaignPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Schedule</h3>
+                <h3 className="font-semibold mb-2">{t('scheduleLabel')}</h3>
                 <p className="text-muted-foreground">
                   {formData.sendNow ? (
-                    'Send immediately'
+                    t('sendImmediatelyLabel')
                   ) : (
-                    `Scheduled for ${new Date(formData.scheduledAt!).toLocaleString()}`
+                    `${t('scheduledForLabel')} ${new Date(formData.scheduledAt!).toLocaleString()}`
                   )}
                 </p>
               </div>
@@ -599,7 +615,7 @@ export default function NewCampaignPage() {
               {formData.testMode && (
                 <Alert>
                   <AlertDescription>
-                    <strong>Test Mode:</strong> This campaign will only be sent to administrators.
+                    <strong>{t('testModeLabel')}:</strong> {t('testModeDescription')}
                   </AlertDescription>
                 </Alert>
               )}
@@ -628,18 +644,18 @@ export default function NewCampaignPage() {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Campaigns
+          {t('backToCampaignsButton')}
         </Button>
-        <h1 className="text-3xl font-bold">Create New Campaign</h1>
+        <h1 className="text-3xl font-bold">{t('createCampaignTitle')}</h1>
         <p className="text-muted-foreground">
-          Follow the steps to create and launch your campaign
+          {t('createCampaignDescription')}
         </p>
       </div>
 
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {STEPS.map((step, index) => {
+          {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
@@ -659,7 +675,7 @@ export default function NewCampaignPage() {
                   </div>
                   <span className="text-xs mt-1 text-center">{step.name}</span>
                 </div>
-                {index < STEPS.length - 1 && (
+                {index < steps.length - 1 && (
                   <div
                     className={`
                       h-0.5 flex-1 mx-2
@@ -687,7 +703,7 @@ export default function NewCampaignPage() {
             disabled={currentStep === 1 || loading}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Previous
+            {t('previousButton')}
           </Button>
 
           {currentStep < 5 ? (
@@ -695,7 +711,7 @@ export default function NewCampaignPage() {
               onClick={() => setCurrentStep(s => s + 1)}
               disabled={!canProceed() || loading}
             >
-              Next
+              {t('nextButton')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
@@ -706,12 +722,12 @@ export default function NewCampaignPage() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t('creatingStatus')}
                 </>
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                  Create Campaign
+                  {t('createCampaignButton')}
                 </>
               )}
             </Button>

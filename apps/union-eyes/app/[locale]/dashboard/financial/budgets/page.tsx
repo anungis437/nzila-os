@@ -1,16 +1,28 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import BudgetManager from '@/components/financial/BudgetManager';
 import { requireUser, hasMinRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 
-export const metadata = {
-  title: 'Budget Management | UnionEyes',
-  description: 'Manage organizational budgets and financial planning',
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
 
-export default async function BudgetsPage() {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'financialBudgetsPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
+}
+
+export default async function BudgetsPage({ params }: PageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'financialBudgetsPage' });
   const user = await requireUser();
   const authorized = await hasMinRole('member');
   if (!authorized) {
@@ -23,9 +35,9 @@ export default async function BudgetsPage() {
     return (
       <div className="container mx-auto py-10">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <h1 className="text-2xl font-bold mb-4">{t('accessDeniedTitle')}</h1>
           <p className="text-muted-foreground">
-            You need Financial Officer permissions (level 85+) to access budget management.
+            {t('accessDeniedBody')}
           </p>
         </div>
       </div>
@@ -36,7 +48,7 @@ export default async function BudgetsPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+      <Suspense fallback={<div className="text-center py-10">{t('loading')}</div>}>
         <BudgetManager organizationId={organizationId} />
       </Suspense>
     </div>

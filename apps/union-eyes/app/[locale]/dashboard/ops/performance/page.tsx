@@ -24,6 +24,7 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
@@ -67,6 +68,11 @@ interface WatchlistItem {
   reason: string;
   severity: 'high' | 'medium' | 'low';
 }
+
+type TranslateFn = (
+  key: string,
+  values?: Record<string, string | number | Date>
+) => string;
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
@@ -169,22 +175,22 @@ async function loadRouteMetrics(): Promise<RouteMetric[]> {
   );
 }
 
-function buildWatchlist(metrics: RouteMetric[]): WatchlistItem[] {
+function buildWatchlist(metrics: RouteMetric[], t: TranslateFn): WatchlistItem[] {
   const items: WatchlistItem[] = [];
 
   for (const m of metrics) {
     if (m.p95Ms !== null && m.p95Ms > P95_YELLOW) {
-      items.push({ route: m.route, reason: `p95 ${fmt(m.p95Ms)} exceeds 2s threshold`, severity: 'high' });
+      items.push({ route: m.route, reason: t('watchP95Exceeds', { value: fmt(m.p95Ms) }), severity: 'high' });
     } else if (m.p95Ms !== null && m.p95Ms > P95_GREEN) {
-      items.push({ route: m.route, reason: `p95 ${fmt(m.p95Ms)} in yellow zone (500ms–2s)`, severity: 'medium' });
+      items.push({ route: m.route, reason: t('watchP95Yellow', { value: fmt(m.p95Ms) }), severity: 'medium' });
     }
     if (m.errorRatePct !== null && m.errorRatePct >= ERR_YELLOW) {
-      items.push({ route: m.route, reason: `Error rate ${fmtPct(m.errorRatePct)} ≥ 5%`, severity: 'high' });
+      items.push({ route: m.route, reason: t('watchErrorRed', { value: fmtPct(m.errorRatePct) }), severity: 'high' });
     } else if (m.errorRatePct !== null && m.errorRatePct >= ERR_GREEN) {
-      items.push({ route: m.route, reason: `Error rate ${fmtPct(m.errorRatePct)} in yellow zone`, severity: 'medium' });
+      items.push({ route: m.route, reason: t('watchErrorYellow', { value: fmtPct(m.errorRatePct) }), severity: 'medium' });
     }
     if (m.trend === 'up' && m.p95Ms !== null && m.p95Ms > P95_GREEN) {
-      items.push({ route: m.route, reason: 'Latency trending worse vs. yesterday', severity: 'low' });
+      items.push({ route: m.route, reason: t('watchTrendWorse'), severity: 'low' });
     }
   }
 
@@ -206,12 +212,13 @@ function watchlistBadgeVariant(severity: 'high' | 'medium' | 'low'): BadgeVarian
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default async function OpsPerformancePage() {
+  const t = await getTranslations('opsPerformancePage');
   await requireUser();
   const hasAccess = await hasMinRole('platform_lead');
   if (!hasAccess) redirect('/dashboard');
 
   const metrics = await loadRouteMetrics();
-  const watchlist = buildWatchlist(metrics);
+  const watchlist = buildWatchlist(metrics, t);
   const noData = pendingCount(metrics) === metrics.length;
   const greenCount  = metrics.filter((m) => m.status === 'green').length;
   const yellowCount = metrics.filter((m) => m.status === 'yellow').length;
@@ -224,10 +231,10 @@ export default async function OpsPerformancePage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Route Performance</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('pageTitle')}</h1>
           <p className="text-muted-foreground mt-1">
-            p50 / p95 latency, error rate and volume for the six priority routes.
-            Data from Redis analytics store wired via{' '}
+            {t('pageDescriptionPrefix')}{' '}
+            {t('pageDescriptionRedis')}{' '}
             <code className="text-xs bg-muted px-1 rounded">lib/analytics-performance.ts</code>.
           </p>
         </div>
@@ -235,7 +242,7 @@ export default async function OpsPerformancePage() {
           href="/dashboard/operations?tab=sla"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          Platform SLAs
+          {t('platformSlasLink')}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -245,22 +252,22 @@ export default async function OpsPerformancePage() {
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-medium text-amber-900">Live telemetry not yet available</p>
+            <p className="text-sm font-medium text-amber-900">{t('liveTelemetryUnavailableTitle')}</p>
             <p className="text-sm text-amber-700 mt-0.5">
-              The Redis analytics store requires{' '}
+              {t('liveTelemetryUnavailableDescPrefix')}{' '}
               <code className="text-xs bg-amber-100 px-1 rounded">UPSTASH_REDIS_REST_URL</code> and{' '}
               <code className="text-xs bg-amber-100 px-1 rounded">UPSTASH_REDIS_REST_TOKEN</code>{' '}
-              to be set. Once instrumentation is active, this page populates automatically.
-              The{' '}
+              {t('liveTelemetryUnavailableDescMiddle')}{' '}
+              {t('liveTelemetryUnavailableDescNext')}{' '}
               <a
                 href="https://github.com/anungis437/nzila-os/blob/main/docs/ops/azure-monitor/union-eyes-route-performance.workbook.json"
                 className="underline"
                 target="_blank"
                 rel="noreferrer"
               >
-                Azure Monitor workbook
+                {t('azureWorkbookLink')}
               </a>{' '}
-              provides equivalent visibility from Application Insights.
+              {t('azureWorkbookSuffix')}
             </p>
           </div>
         </div>
@@ -272,12 +279,12 @@ export default async function OpsPerformancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              Green Routes
+              {t('greenRoutesTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700">{greenCount}</div>
-            <p className="text-xs text-muted-foreground">p95 ≤ 500ms · error &lt; 1%</p>
+            <p className="text-xs text-muted-foreground">{t('greenRoutesRule')}</p>
           </CardContent>
         </Card>
 
@@ -285,12 +292,12 @@ export default async function OpsPerformancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
-              Yellow Routes
+              {t('yellowRoutesTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-700">{yellowCount}</div>
-            <p className="text-xs text-muted-foreground">p95 500ms–2s · error 1%–5%</p>
+            <p className="text-xs text-muted-foreground">{t('yellowRoutesRule')}</p>
           </CardContent>
         </Card>
 
@@ -298,14 +305,14 @@ export default async function OpsPerformancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-600" />
-              Red Routes
+              {t('redRoutesTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${redCount > 0 ? 'text-red-700' : 'text-slate-600'}`}>
               {redCount}
             </div>
-            <p className="text-xs text-muted-foreground">p95 &gt; 2s · error ≥ 5%</p>
+            <p className="text-xs text-muted-foreground">{t('redRoutesRule')}</p>
           </CardContent>
         </Card>
 
@@ -313,12 +320,12 @@ export default async function OpsPerformancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-slate-500" />
-              Pending Data
+              {t('pendingDataTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-500">{pendingC}</div>
-            <p className="text-xs text-muted-foreground">awaiting live instrumentation</p>
+            <p className="text-xs text-muted-foreground">{t('pendingDataRule')}</p>
           </CardContent>
         </Card>
       </div>
@@ -328,7 +335,7 @@ export default async function OpsPerformancePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Priority Route Metrics — Today
+            {t('priorityRouteMetricsTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -336,13 +343,13 @@ export default async function OpsPerformancePage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-muted-foreground text-xs uppercase tracking-wide">
-                  <th className="text-left py-2 pr-4">Route</th>
-                  <th className="text-right py-2 pr-4">P50</th>
-                  <th className="text-right py-2 pr-4">P95</th>
-                  <th className="text-right py-2 pr-4">Error Rate</th>
-                  <th className="text-right py-2 pr-4">Volume</th>
-                  <th className="text-right py-2 pr-4">24h Trend</th>
-                  <th className="text-center py-2">Status</th>
+                  <th className="text-left py-2 pr-4">{t('routeColumn')}</th>
+                  <th className="text-right py-2 pr-4">{t('p50Column')}</th>
+                  <th className="text-right py-2 pr-4">{t('p95Column')}</th>
+                  <th className="text-right py-2 pr-4">{t('errorRateColumn')}</th>
+                  <th className="text-right py-2 pr-4">{t('volumeColumn')}</th>
+                  <th className="text-right py-2 pr-4">{t('trend24hColumn')}</th>
+                  <th className="text-center py-2">{t('statusColumn')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -357,14 +364,14 @@ export default async function OpsPerformancePage() {
                       {m.trend === 'up'      && <TrendingUp   className="inline h-4 w-4 text-red-500 ml-auto" />}
                       {m.trend === 'down'    && <TrendingDown  className="inline h-4 w-4 text-green-500 ml-auto" />}
                       {m.trend === 'flat'    && <Minus         className="inline h-4 w-4 text-slate-400 ml-auto" />}
-                      {m.trend === 'pending' && <span className="text-slate-400 text-xs">—</span>}
+                      {m.trend === 'pending' && <span className="text-slate-400 text-xs">{t('noDataSymbol')}</span>}
                     </td>
                     <td className="py-3 text-center">
                       <span title={m.status}>{statusDot(m.status)}</span>
                       <span
                         className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badgeFor(m.status)}`}
                       >
-                        {m.status}
+                        {t(`status.${m.status}`)}
                       </span>
                     </td>
                   </tr>
@@ -380,7 +387,7 @@ export default async function OpsPerformancePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Route Risk Watchlist
+            {t('routeRiskWatchlistTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -388,8 +395,8 @@ export default async function OpsPerformancePage() {
             <div className="flex items-center gap-2 text-sm text-green-700">
               <CheckCircle2 className="h-4 w-4" />
               {noData
-                ? 'No data yet — watchlist will populate once instrumentation is active.'
-                : 'No routes in risk zone — all priority routes within thresholds.'}
+                ? t('watchlistNoData')
+                : t('watchlistNoRisk')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -397,7 +404,7 @@ export default async function OpsPerformancePage() {
                 <div key={i} className="flex items-center justify-between border rounded-md px-3 py-2">
                   <div className="flex items-center gap-3">
                     <Badge variant={watchlistBadgeVariant(w.severity)}>
-                      {w.severity}
+                      {t(`severity.${w.severity}`)}
                     </Badge>
                     <span className="font-mono text-xs font-medium">{w.route}</span>
                   </div>
@@ -412,45 +419,42 @@ export default async function OpsPerformancePage() {
       {/* ── Availability notes ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Availability Notes</CardTitle>
+          <CardTitle className="text-base">{t('availabilityNotesTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-start gap-3 border-b pb-3">
             <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium">Uptime target: 99.9%</p>
+              <p className="font-medium">{t('uptimeTargetTitle')}</p>
               <p className="text-muted-foreground text-xs mt-0.5">
-                No contractual SLA yet. Uptime monitored via Azure Application Insights.
+                {t('uptimeTargetDescription')}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3 border-b pb-3">
             <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium">OTEL + Sentry instrumentation active</p>
+              <p className="font-medium">{t('otelSentryTitle')}</p>
               <p className="text-muted-foreground text-xs mt-0.5">
-                OpenTelemetry traces and Sentry error tracking are wired.
-                Per-route p95 numeric data populates once the Redis analytics store is connected.
+                {t('otelSentryDescription')}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3 border-b pb-3">
             <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium">Error rate tracking: pending OTEL enrichment</p>
+              <p className="font-medium">{t('errorRateTrackingTitle')}</p>
               <p className="text-muted-foreground text-xs mt-0.5">
-                The current Redis analytics-performance store tracks duration only.
-                Error rate classification requires an OTEL span attribute enrichment
-                (target: 2026-Q2).
+                {t('errorRateTrackingDescription')}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <CheckCircle2 className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium">Azure Monitor workbook available</p>
+              <p className="font-medium">{t('azureWorkbookAvailableTitle')}</p>
               <p className="text-muted-foreground text-xs mt-0.5">
-                Full p50/p95/error rate/volume workbook with 24h and 7d trend queries:
+                {t('azureWorkbookAvailableDescription')}
                 <code className="ml-1 text-xs bg-muted px-1 rounded">
                   docs/ops/azure-monitor/union-eyes-route-performance.workbook.json
                 </code>
@@ -462,13 +466,13 @@ export default async function OpsPerformancePage() {
 
       {/* ── Thresholds legend ── */}
       <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-4 border-t pt-4">
-        <span className="font-medium">Thresholds:</span>
-        <span>🟢 p95 ≤ 500ms · error &lt; 1%</span>
-        <span>🟡 p95 500ms–2s · error 1%–5%</span>
-        <span>🔴 p95 &gt; 2s · error ≥ 5%</span>
-        <span>⚪ No data yet</span>
+        <span className="font-medium">{t('thresholdsLabel')}</span>
+        <span>{t('thresholdGreen')}</span>
+        <span>{t('thresholdYellow')}</span>
+        <span>{t('thresholdRed')}</span>
+        <span>{t('thresholdNoData')}</span>
         <span className="ml-auto">
-          Monthly export:{' '}
+          {t('monthlyExportLabel')}{' '}
           <code className="bg-muted px-1 rounded">reports/ops/performance-summary.md</code>
         </span>
       </div>

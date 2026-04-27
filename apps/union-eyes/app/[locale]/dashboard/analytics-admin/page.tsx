@@ -17,6 +17,7 @@ import { BarChart3, Users, FileText, TrendingUp, Activity, Eye, LogIn, Layers, B
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ─── types ─── */
 interface ModuleUsage {
@@ -205,16 +206,29 @@ function pctChange(current: number, previous: number): string {
   return (pct >= 0 ? '+' : '') + pct.toFixed(1);
 }
 
+function formatCount(value: number, locale: string) {
+  return new Intl.NumberFormat(locale).format(value);
+}
+
+function formatDuration(seconds: number, t: Awaited<ReturnType<typeof getTranslations>>) {
+  return t('common.durationMinutesSeconds', {
+    minutes: Math.floor(seconds / 60),
+    seconds: seconds % 60,
+  });
+}
+
 /* ─── page ─── */
 export default async function AnalyticsAdminDashboard({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string; module?: string }>;
 }) {
+  const locale = await getLocale();
+  const t = await getTranslations('analyticsAdminPage');
   await requireUser();
 
   const hasAccess = await hasMinRole('data_analyst');
-  if (!hasAccess) redirect('/dashboard');
+  if (!hasAccess) redirect(`/${locale}/dashboard`);
 
   const params = await searchParams;
   const activeTab = params.tab || 'overview';
@@ -237,25 +251,25 @@ export default async function AnalyticsAdminDashboard({
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Platform Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Cross-organization analytics, usage patterns, and feature adoption
+          {t('subtitle')}
         </p>
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview" asChild>
-            <Link href="?tab=overview">Overview</Link>
+            <Link href="?tab=overview">{t('tabs.overview')}</Link>
           </TabsTrigger>
           <TabsTrigger value="organizations" asChild>
-            <Link href="?tab=organizations">Organizations</Link>
+            <Link href="?tab=organizations">{t('tabs.organizations')}</Link>
           </TabsTrigger>
           <TabsTrigger value="usage" asChild>
-            <Link href="?tab=usage">Usage</Link>
+            <Link href="?tab=usage">{t('tabs.usage')}</Link>
           </TabsTrigger>
           <TabsTrigger value="features" asChild>
-            <Link href="?tab=features">Features</Link>
+            <Link href="?tab=features">{t('tabs.features')}</Link>
           </TabsTrigger>
         </TabsList>
 
@@ -267,12 +281,12 @@ export default async function AnalyticsAdminDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    Organizations
+                    {t('overview.organizationsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_organizations}</div>
-                  <p className="text-xs text-muted-foreground">{stats.total_members} total members</p>
+                  <div className="text-2xl font-bold">{formatCount(stats.total_organizations, locale)}</div>
+                  <p className="text-xs text-muted-foreground">{t('overview.totalMembers', { count: formatCount(stats.total_members, locale) })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -282,13 +296,13 @@ export default async function AnalyticsAdminDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Active Users (30d)
+                    {t('overview.activeUsers30dTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.active_users_30d}</div>
+                  <div className="text-2xl font-bold">{formatCount(stats.active_users_30d, locale)}</div>
                   <p className={`text-xs ${Number(pctChange(stats.active_users_30d, stats.active_users_prev_30d).replace('+', '')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {pctChange(stats.active_users_30d, stats.active_users_prev_30d)}% from prev 30d
+                    {t('overview.fromPrevious30d', { value: pctChange(stats.active_users_30d, stats.active_users_prev_30d) })}
                   </p>
                 </CardContent>
               </Card>
@@ -299,13 +313,13 @@ export default async function AnalyticsAdminDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Eye className="h-4 w-4" />
-                    Page Views (30d)
+                    {t('overview.pageViews30dTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.page_views_30d}</div>
+                  <div className="text-2xl font-bold">{formatCount(stats.page_views_30d, locale)}</div>
                   <p className={`text-xs ${Number(pctChange(stats.page_views_30d, stats.page_views_prev_30d).replace('+', '')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {pctChange(stats.page_views_30d, stats.page_views_prev_30d)}% from prev 30d
+                    {t('overview.fromPrevious30d', { value: pctChange(stats.page_views_30d, stats.page_views_prev_30d) })}
                   </p>
                 </CardContent>
               </Card>
@@ -316,12 +330,12 @@ export default async function AnalyticsAdminDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Layers className="h-4 w-4" />
-                    Features Tracked
+                    {t('overview.featuresTrackedTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_features}</div>
-                  <p className="text-xs text-muted-foreground">Across all modules</p>
+                  <div className="text-2xl font-bold">{formatCount(stats.total_features, locale)}</div>
+                  <p className="text-xs text-muted-foreground">{t('common.acrossAllModules')}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -332,7 +346,7 @@ export default async function AnalyticsAdminDashboard({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Usage by Module (30d)
+                  {t('overview.usageByModuleTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -341,7 +355,7 @@ export default async function AnalyticsAdminDashboard({
                     <div key={m.module} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="capitalize">{m.module}</span>
-                        <span className="text-muted-foreground">{m.views} views · {m.avg_duration_sec}s avg</span>
+                        <span className="text-muted-foreground">{t('overview.viewsWithAvg', { views: formatCount(m.views, locale), seconds: m.avg_duration_sec })}</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
@@ -359,32 +373,32 @@ export default async function AnalyticsAdminDashboard({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Key Metrics
+                  {t('overview.keyMetricsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Logins (30d)</span>
-                    <span className="text-lg font-bold">{stats.logins_30d}</span>
+                    <span className="text-sm">{t('metrics.logins30d')}</span>
+                    <span className="text-lg font-bold">{formatCount(stats.logins_30d, locale)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Login Growth</span>
+                    <span className="text-sm">{t('metrics.loginGrowth')}</span>
                     <span className={`text-lg font-bold ${Number(pctChange(stats.logins_30d, stats.logins_prev_30d).replace('+', '')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {pctChange(stats.logins_30d, stats.logins_prev_30d)}%
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Avg Session Duration</span>
-                    <span className="text-lg font-bold">{Math.floor(stats.avg_session_sec / 60)}m {stats.avg_session_sec % 60}s</span>
+                    <span className="text-sm">{t('metrics.avgSessionDuration')}</span>
+                    <span className="text-lg font-bold">{formatDuration(stats.avg_session_sec, t)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Cases Filed</span>
-                    <span className="text-lg font-bold">{stats.total_grievances}</span>
+                    <span className="text-sm">{t('metrics.casesFiled')}</span>
+                    <span className="text-lg font-bold">{formatCount(stats.total_grievances, locale)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Active Agreements</span>
-                    <span className="text-lg font-bold">{stats.total_agreements}</span>
+                    <span className="text-sm">{t('metrics.activeAgreements')}</span>
+                    <span className="text-lg font-bold">{formatCount(stats.total_agreements, locale)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -398,7 +412,7 @@ export default async function AnalyticsAdminDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Organization Insights
+                  {t('organizations.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -406,14 +420,14 @@ export default async function AnalyticsAdminDashboard({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">Organization</th>
-                      <th className="pb-2 font-medium">Type</th>
-                      <th className="pb-2 font-medium text-right">Members</th>
-                      <th className="pb-2 font-medium text-right">Active Users</th>
-                      <th className="pb-2 font-medium text-right">Page Views</th>
-                      <th className="pb-2 font-medium text-right">Logins</th>
-                      <th className="pb-2 font-medium text-right">Features</th>
-                      <th className="pb-2 font-medium text-right">Avg Session</th>
+                      <th className="pb-2 font-medium">{t('organizations.table.organization')}</th>
+                      <th className="pb-2 font-medium">{t('organizations.table.type')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.members')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.activeUsers')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.pageViews')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.logins')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.features')}</th>
+                      <th className="pb-2 font-medium text-right">{t('organizations.table.avgSession')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -428,12 +442,12 @@ export default async function AnalyticsAdminDashboard({
                             {org.organization_type}
                           </span>
                         </td>
-                        <td className="py-3 text-right">{org.member_count}</td>
-                        <td className="py-3 text-right">{org.active_users_30d}</td>
-                        <td className="py-3 text-right">{org.page_views_30d}</td>
-                        <td className="py-3 text-right">{org.logins_30d}</td>
-                        <td className="py-3 text-right">{org.features_adopted}</td>
-                        <td className="py-3 text-right">{Math.floor(org.avg_session_sec / 60)}m {org.avg_session_sec % 60}s</td>
+                        <td className="py-3 text-right">{formatCount(org.member_count, locale)}</td>
+                        <td className="py-3 text-right">{formatCount(org.active_users_30d, locale)}</td>
+                        <td className="py-3 text-right">{formatCount(org.page_views_30d, locale)}</td>
+                        <td className="py-3 text-right">{formatCount(org.logins_30d, locale)}</td>
+                        <td className="py-3 text-right">{formatCount(org.features_adopted, locale)}</td>
+                        <td className="py-3 text-right">{formatDuration(org.avg_session_sec, t)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -450,13 +464,13 @@ export default async function AnalyticsAdminDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
-                  Total Logins (30d)
+                  {t('usage.totalLogins30dTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.logins_30d}</div>
+                <div className="text-2xl font-bold">{formatCount(stats.logins_30d, locale)}</div>
                 <p className={`text-xs ${Number(pctChange(stats.logins_30d, stats.logins_prev_30d).replace('+', '')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {pctChange(stats.logins_30d, stats.logins_prev_30d)}% vs prev period
+                  {t('usage.vsPreviousPeriod', { value: pctChange(stats.logins_30d, stats.logins_prev_30d) })}
                 </p>
               </CardContent>
             </Card>
@@ -465,13 +479,13 @@ export default async function AnalyticsAdminDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  Page Views (30d)
+                  {t('overview.pageViews30dTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.page_views_30d}</div>
+                <div className="text-2xl font-bold">{formatCount(stats.page_views_30d, locale)}</div>
                 <p className={`text-xs ${Number(pctChange(stats.page_views_30d, stats.page_views_prev_30d).replace('+', '')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {pctChange(stats.page_views_30d, stats.page_views_prev_30d)}% vs prev period
+                  {t('usage.vsPreviousPeriod', { value: pctChange(stats.page_views_30d, stats.page_views_prev_30d) })}
                 </p>
               </CardContent>
             </Card>
@@ -480,12 +494,12 @@ export default async function AnalyticsAdminDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Avg Session Duration
+                  {t('metrics.avgSessionDuration')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{Math.floor(stats.avg_session_sec / 60)}m {stats.avg_session_sec % 60}s</div>
-                <p className="text-xs text-muted-foreground">Across all modules</p>
+                <div className="text-2xl font-bold">{formatDuration(stats.avg_session_sec, t)}</div>
+                <p className="text-xs text-muted-foreground">{t('common.acrossAllModules')}</p>
               </CardContent>
             </Card>
           </div>
@@ -493,7 +507,7 @@ export default async function AnalyticsAdminDashboard({
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Login Methods</CardTitle>
+                <CardTitle>{t('usage.loginMethodsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -501,7 +515,7 @@ export default async function AnalyticsAdminDashboard({
                     <div key={lb.login_method} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="uppercase font-medium">{lb.login_method}</span>
-                        <span className="text-muted-foreground">{lb.count} ({totalLogins30d > 0 ? Math.round((lb.count / totalLogins30d) * 100) : 0}%)</span>
+                        <span className="text-muted-foreground">{t('usage.loginMethodCount', { count: formatCount(lb.count, locale), percent: totalLogins30d > 0 ? Math.round((lb.count / totalLogins30d) * 100) : 0 })}</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
@@ -517,7 +531,7 @@ export default async function AnalyticsAdminDashboard({
 
             <Card>
               <CardHeader>
-                <CardTitle>Module Page Views (30d)</CardTitle>
+                <CardTitle>{t('usage.modulePageViewsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -525,8 +539,8 @@ export default async function AnalyticsAdminDashboard({
                     <div key={m.module} className="flex items-center justify-between text-sm border-b last:border-0 pb-2 last:pb-0">
                       <span className="capitalize font-medium">{m.module}</span>
                       <div className="text-right">
-                        <span className="font-bold">{m.views}</span>
-                        <span className="text-muted-foreground ml-2">({m.avg_duration_sec}s avg)</span>
+                        <span className="font-bold">{formatCount(m.views, locale)}</span>
+                        <span className="text-muted-foreground ml-2">{t('usage.avgSeconds', { seconds: m.avg_duration_sec })}</span>
                       </div>
                     </div>
                   ))}
@@ -540,7 +554,7 @@ export default async function AnalyticsAdminDashboard({
         <TabsContent value="features" className="space-y-4">
           {moduleFilter && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Filtered by module:</span>
+              <span className="text-sm text-muted-foreground">{t('features.filteredByModule')}</span>
               <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary text-primary-foreground capitalize">
                 {moduleFilter}
                 <Link href="?tab=features" className="ml-1 hover:text-primary-foreground/80">
@@ -554,7 +568,7 @@ export default async function AnalyticsAdminDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
-                Feature Adoption
+                  {t('features.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -562,14 +576,14 @@ export default async function AnalyticsAdminDashboard({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">Feature</th>
-                      <th className="pb-2 font-medium">Module</th>
-                      <th className="pb-2 font-medium text-right">Total Usage</th>
-                      <th className="pb-2 font-medium text-right">Active Users</th>
-                      <th className="pb-2 font-medium text-right">Orgs</th>
-                      <th className="pb-2 font-medium text-right">First Used</th>
-                      <th className="pb-2 font-medium text-right">Last Used</th>
-                      <th className="pb-2 font-medium w-32">Adoption</th>
+                      <th className="pb-2 font-medium">{t('features.table.feature')}</th>
+                      <th className="pb-2 font-medium">{t('features.table.module')}</th>
+                      <th className="pb-2 font-medium text-right">{t('features.table.totalUsage')}</th>
+                      <th className="pb-2 font-medium text-right">{t('features.table.activeUsers')}</th>
+                      <th className="pb-2 font-medium text-right">{t('features.table.orgs')}</th>
+                      <th className="pb-2 font-medium text-right">{t('features.table.firstUsed')}</th>
+                      <th className="pb-2 font-medium text-right">{t('features.table.lastUsed')}</th>
+                      <th className="pb-2 font-medium w-32">{t('features.table.adoption')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -584,9 +598,9 @@ export default async function AnalyticsAdminDashboard({
                             {f.module}
                           </Link>
                         </td>
-                        <td className="py-3 text-right font-bold">{f.total_usage.toLocaleString()}</td>
-                        <td className="py-3 text-right">{f.total_active_users}</td>
-                        <td className="py-3 text-right">{f.org_count}/{stats.total_organizations}</td>
+                        <td className="py-3 text-right font-bold">{formatCount(f.total_usage, locale)}</td>
+                        <td className="py-3 text-right">{formatCount(f.total_active_users, locale)}</td>
+                        <td className="py-3 text-right">{t('features.orgCountOfTotal', { count: f.org_count, total: stats.total_organizations })}</td>
                         <td className="py-3 text-right text-muted-foreground">{f.first_used}</td>
                         <td className="py-3 text-right text-muted-foreground">{f.last_used}</td>
                         <td className="py-3">
@@ -607,7 +621,7 @@ export default async function AnalyticsAdminDashboard({
 
           <Card>
             <CardHeader>
-              <CardTitle>Module Summary</CardTitle>
+              <CardTitle>{t('features.moduleSummaryTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -620,8 +634,8 @@ export default async function AnalyticsAdminDashboard({
                       <Card className="hover:border-primary/40 transition-colors cursor-pointer">
                         <CardContent className="pt-4">
                           <div className="text-sm font-medium capitalize">{mod}</div>
-                          <div className="text-2xl font-bold mt-1">{totalUsage.toLocaleString()}</div>
-                          <p className="text-xs text-muted-foreground">{modFeatures.length} features · {totalUsers} users</p>
+                          <div className="text-2xl font-bold mt-1">{formatCount(totalUsage, locale)}</div>
+                          <p className="text-xs text-muted-foreground">{t('features.moduleSummaryDetail', { features: modFeatures.length, users: formatCount(totalUsers, locale) })}</p>
                         </CardContent>
                       </Card>
                     </Link>
@@ -637,26 +651,26 @@ export default async function AnalyticsAdminDashboard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Platform Summary
+            {t('platformSummary.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4 text-center">
             <div>
-              <div className="text-2xl font-bold">{stats.total_organizations}</div>
-              <div className="text-xs text-muted-foreground">Organizations</div>
+              <div className="text-2xl font-bold">{formatCount(stats.total_organizations, locale)}</div>
+              <div className="text-xs text-muted-foreground">{t('platformSummary.organizations')}</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{stats.total_members}</div>
-              <div className="text-xs text-muted-foreground">Members</div>
+              <div className="text-2xl font-bold">{formatCount(stats.total_members, locale)}</div>
+              <div className="text-xs text-muted-foreground">{t('platformSummary.members')}</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{stats.total_grievances}</div>
-              <div className="text-xs text-muted-foreground">Grievances</div>
+              <div className="text-2xl font-bold">{formatCount(stats.total_grievances, locale)}</div>
+              <div className="text-xs text-muted-foreground">{t('platformSummary.grievances')}</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{stats.total_agreements}</div>
-              <div className="text-xs text-muted-foreground">Agreements</div>
+              <div className="text-2xl font-bold">{formatCount(stats.total_agreements, locale)}</div>
+              <div className="text-xs text-muted-foreground">{t('platformSummary.agreements')}</div>
             </div>
           </div>
         </CardContent>

@@ -20,12 +20,45 @@ const socials = [
   { name: 'Email',       href: 'mailto:hello@unioneyes.com',               icon: Mail     },
 ];
 
+const FOOTER_COPY: Record<string, {
+  ctaHeading: string;
+  ctaBody: string;
+  pilotBadge: string;
+  canadaBadge: string;
+}> = {
+  'en-CA': {
+    ctaHeading: 'Ready to lead with clarity?',
+    ctaBody: 'See how UnionEyes turns casework into confident, data-backed decisions. Request a demo - no commitment.',
+    pilotBadge: 'Pilot Active',
+    canadaBadge: 'Canadian Made',
+  },
+  'fr-CA': {
+    ctaHeading: 'Pret a diriger avec clarte?',
+    ctaBody: 'Decouvrez comment UnionEyes transforme le travail syndical en decisions eclairees.',
+    pilotBadge: 'Pilote actif',
+    canadaBadge: 'Fait au Canada',
+  },
+  it: {
+    ctaHeading: 'Pronto a guidare con chiarezza?',
+    ctaBody: 'Scopri come UnionEyes trasforma il lavoro sindacale in decisioni sicure e supportate dai dati. Richiedi una demo senza impegno.',
+    pilotBadge: 'Pilota attivo',
+    canadaBadge: 'Creato in Canada',
+  },
+  pt: {
+    ctaHeading: 'Pronto para liderar com clareza?',
+    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical em decisoes confiantes e orientadas por dados. Solicite uma demonstracao sem compromisso.',
+    pilotBadge: 'Piloto ativo',
+    canadaBadge: 'Feito no Canada',
+  },
+};
+
 
 
 export default function LocaleSiteFooter() {
   const t  = useTranslations('marketing.footer');
   const params = useParams();
   const locale = (params?.locale as string) || 'en-CA';
+  const copy = FOOTER_COPY[locale] ?? FOOTER_COPY['en-CA'];
 
   const footerLinks = {
     System: [
@@ -65,12 +98,10 @@ export default function LocaleSiteFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="text-center lg:text-left max-w-xl">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              {locale === 'fr-CA' ? 'Prêt à diriger avec clarté?' : 'Ready to lead with clarity?'}
+              {copy.ctaHeading}
             </h3>
             <p className="text-gray-200 text-lg">
-              {locale === 'fr-CA'
-                ? 'Découvrez comment UnionEyes transforme le travail syndical en décisions éclairées.'
-                : 'See how UnionEyes turns casework into confident, data-backed decisions. Request a demo — no commitment.'}
+              {copy.ctaBody}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -111,10 +142,10 @@ export default function LocaleSiteFooter() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1.5 animate-pulse" />
-                {locale === 'fr-CA' ? 'Pilote actif' : 'Pilot Active'}
+                {copy.pilotBadge}
               </span>
               <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-gold/20 text-gold">
-                {locale === 'fr-CA' ? 'Fait au Canada' : 'Canadian Made'}
+                {copy.canadaBadge}
               </span>
               <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-electric/20 text-electric-light">
                 PIPEDA

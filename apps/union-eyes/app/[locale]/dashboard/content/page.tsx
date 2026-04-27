@@ -9,6 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -149,6 +150,7 @@ export default async function ContentDashboard({
   searchParams: Promise<{ tab?: string; status?: string; type?: string }>;
 }) {
   const { locale } = await paramsPromise;
+  const t = await getTranslations('contentPage');
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
@@ -197,25 +199,25 @@ export default async function ContentDashboard({
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Content Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Manage templates, resources, and training materials
+          {t('subtitle')}
         </p>
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href={`/${locale}/dashboard/content`} className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/content`} className="no-underline">{t('tabOverview')}</Link>
           </TabsTrigger>
           <TabsTrigger value="templates">
-            <Link href={`/${locale}/dashboard/content?tab=templates`} className="no-underline">Templates ({stats.templates.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=templates`} className="no-underline">{t('tabTemplates', { count: stats.templates.total })}</Link>
           </TabsTrigger>
           <TabsTrigger value="resources">
-            <Link href={`/${locale}/dashboard/content?tab=resources`} className="no-underline">Resources ({stats.resources.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=resources`} className="no-underline">{t('tabResources', { count: stats.resources.total })}</Link>
           </TabsTrigger>
           <TabsTrigger value="training">
-            <Link href={`/${locale}/dashboard/content?tab=training`} className="no-underline">Training ({stats.training.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=training`} className="no-underline">{t('tabTraining', { count: stats.training.total })}</Link>
           </TabsTrigger>
         </TabsList>
 
@@ -227,12 +229,12 @@ export default async function ContentDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    Templates
+                    {t('templatesTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.templates.total}</div>
-                  <p className="text-xs text-muted-foreground">{stats.templates.published} published</p>
+                  <p className="text-xs text-muted-foreground">{t('publishedCount', { count: stats.templates.published })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -242,12 +244,12 @@ export default async function ContentDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <FolderOpen className="h-4 w-4" />
-                    Resources
+                    {t('resourcesTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.resources.total}</div>
-                  <p className="text-xs text-muted-foreground">{stats.resources.published} published</p>
+                  <p className="text-xs text-muted-foreground">{t('publishedCount', { count: stats.resources.published })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -257,12 +259,12 @@ export default async function ContentDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
-                    Training Courses
+                    {t('trainingCoursesTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.training.total}</div>
-                  <p className="text-xs text-muted-foreground">{stats.training.totalCompletions.toLocaleString()} completions</p>
+                  <p className="text-xs text-muted-foreground">{t('completionsCount', { count: stats.training.totalCompletions.toLocaleString(locale) })}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -271,12 +273,12 @@ export default async function ContentDashboard({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  Total Views
+                  {t('totalViewsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.views.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">{stats.downloads.toLocaleString()} downloads</p>
+                <div className="text-2xl font-bold">{stats.views.toLocaleString(locale)}</div>
+                <p className="text-xs text-muted-foreground">{t('downloadsCount', { count: stats.downloads.toLocaleString(locale) })}</p>
               </CardContent>
             </Card>
           </div>
@@ -284,26 +286,26 @@ export default async function ContentDashboard({
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Content Performance</CardTitle>
+                <CardTitle>{t('contentPerformanceTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Most Viewed</span>
-                    <span className="text-sm font-bold">{stats.mostViewed?.title ?? '—'}</span>
+                    <span className="text-sm">{t('mostViewedLabel')}</span>
+                    <span className="text-sm font-bold">{stats.mostViewed?.title ?? t('emptyDash')}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Top Views</span>
-                    <span className="text-sm font-bold">{stats.mostViewed?.views.toLocaleString() ?? '0'}</span>
+                    <span className="text-sm">{t('topViewsLabel')}</span>
+                    <span className="text-sm font-bold">{stats.mostViewed?.views.toLocaleString(locale) ?? '0'}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Total Downloads</span>
-                    <span className="text-sm font-bold">{stats.downloads.toLocaleString()}</span>
+                    <span className="text-sm">{t('totalDownloadsLabel')}</span>
+                    <span className="text-sm font-bold">{stats.downloads.toLocaleString(locale)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Avg. Views per Item</span>
+                    <span className="text-sm">{t('avgViewsPerItemLabel')}</span>
                     <span className="text-sm font-bold">
-                      {items.length > 0 ? Math.round(stats.views / items.length).toLocaleString() : '0'}
+                      {items.length > 0 ? Math.round(stats.views / items.length).toLocaleString(locale) : '0'}
                     </span>
                   </div>
                 </div>
@@ -312,24 +314,24 @@ export default async function ContentDashboard({
 
             <Card>
               <CardHeader>
-                <CardTitle>Content Status</CardTitle>
+                <CardTitle>{t('contentStatusTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <Link href={`/${locale}/dashboard/content?tab=templates&status=published`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Published</span>
+                    <span className="text-sm">{t('status.published')}</span>
                     <Badge variant="default">{stats.templates.published + stats.resources.published}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/content?tab=templates&status=draft`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">In Draft</span>
+                    <span className="text-sm">{t('status.inDraft')}</span>
                     <Badge variant="secondary">{stats.templates.draft}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/content?tab=templates&status=review`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Needs Review</span>
+                    <span className="text-sm">{t('status.needsReview')}</span>
                     <Badge variant="outline">{stats.templates.review}</Badge>
                   </Link>
                   <Link href={`/${locale}/dashboard/content?tab=templates&status=archived`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
-                    <span className="text-sm">Archived</span>
+                    <span className="text-sm">{t('status.archived')}</span>
                     <Badge variant="outline">{stats.templates.archived}</Badge>
                   </Link>
                 </div>
@@ -341,7 +343,7 @@ export default async function ContentDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Popular Content
+                {t('popularContentTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -354,18 +356,18 @@ export default async function ContentDashboard({
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{item.title}</p>
-                          <Badge variant="outline" className="text-xs">{item.type}</Badge>
+                          <Badge variant="outline" className="text-xs">{t(`itemType.${item.type}`)}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">{item.category ?? 'Uncategorized'}</p>
+                        <p className="text-xs text-muted-foreground">{item.category ?? t('uncategorizedLabel')}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold">{item.views.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">views</p>
+                        <p className="text-sm font-bold">{item.views.toLocaleString(locale)}</p>
+                        <p className="text-xs text-muted-foreground">{t('viewsLabel')}</p>
                       </div>
                     </Link>
                   ))}
                 {items.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No content found</p>
+                  <p className="text-sm text-muted-foreground">{t('noContentFound')}</p>
                 )}
               </div>
             </CardContent>
@@ -377,12 +379,12 @@ export default async function ContentDashboard({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Content Templates</CardTitle>
+                <CardTitle>{t('contentTemplatesTitle')}</CardTitle>
                 {filterStatus && (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Filtered: {filterStatus}</Badge>
+                    <Badge variant="secondary">{t('filteredBadge', { status: filterStatus })}</Badge>
                     <Link href={`/${locale}/dashboard/content?tab=templates`} className="text-xs text-muted-foreground hover:text-foreground">
-                      Clear filter
+                      {t('clearFilter')}
                     </Link>
                   </div>
                 )}
@@ -390,7 +392,7 @@ export default async function ContentDashboard({
             </CardHeader>
             <CardContent>
               {templates.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No templates found</p>
+                <p className="text-sm text-muted-foreground">{t('noTemplatesFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {templates.map((template) => (
@@ -403,7 +405,7 @@ export default async function ContentDashboard({
                               template.status === 'draft' ? 'secondary' :
                               'outline'
                             } className="cursor-pointer hover:opacity-80">
-                              {template.status}
+                              {t(`statusValue.${template.status}`)}
                             </Badge>
                           </Link>
                           <Link href={`/${locale}/dashboard/content/${template.slug}`} className="text-sm font-semibold hover:underline">{template.title}</Link>
@@ -412,18 +414,18 @@ export default async function ContentDashboard({
                           <p className="text-xs text-muted-foreground line-clamp-2">{template.description}</p>
                         )}
                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{template.category}</span>
+                          <span>{template.category ?? t('uncategorizedLabel')}</span>
                           <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{template.views.toLocaleString()}</span>
+                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{template.views.toLocaleString(locale)}</span>
                           <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{template.downloads.toLocaleString()}</span>
+                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{template.downloads.toLocaleString(locale)}</span>
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
-                        <Link href={`/${locale}/dashboard/content/${template.slug}`} className="p-2 hover:bg-muted rounded-md" title="View">
+                        <Link href={`/${locale}/dashboard/content/${template.slug}`} className="p-2 hover:bg-muted rounded-md" title={t('viewTitle')}>
                           <Eye className="h-4 w-4" />
                         </Link>
-                        <button className="p-2 hover:bg-muted rounded-md" title="Download">
+                        <button className="p-2 hover:bg-muted rounded-md" title={t('downloadTitle')}>
                           <Download className="h-4 w-4" />
                         </button>
                       </div>
@@ -439,11 +441,11 @@ export default async function ContentDashboard({
         <TabsContent value="resources" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Resource Library</CardTitle>
+              <CardTitle>{t('resourceLibraryTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {resources.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No resources found</p>
+                <p className="text-sm text-muted-foreground">{t('noResourcesFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {resources.map((resource) => (
@@ -459,18 +461,18 @@ export default async function ContentDashboard({
                           <p className="text-xs text-muted-foreground line-clamp-2">{resource.description}</p>
                         )}
                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{resource.category}</span>
+                          <span>{resource.category ?? t('uncategorizedLabel')}</span>
                           <span>&bull;</span>
-                          <span>PDF</span>
+                          <span>{t('pdfLabel')}</span>
                           {resource.fileSizeMb && (
-                            <><span>&bull;</span><span>{resource.fileSizeMb} MB</span></>
+                            <><span>&bull;</span><span>{t('fileSizeMb', { size: resource.fileSizeMb })}</span></>
                           )}
                           <span>&bull;</span>
-                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{resource.downloads.toLocaleString()}</span>
+                          <span className="flex items-center gap-1"><Download className="h-3 w-3" />{resource.downloads.toLocaleString(locale)}</span>
                         </div>
                       </div>
                       <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 shrink-0">
-                        Download
+                        {t('downloadButton')}
                       </button>
                     </div>
                   ))}
@@ -484,11 +486,11 @@ export default async function ContentDashboard({
         <TabsContent value="training" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Training Materials</CardTitle>
+              <CardTitle>{t('trainingMaterialsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {filteredCourses.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No training courses found</p>
+                <p className="text-sm text-muted-foreground">{t('noTrainingCoursesFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {filteredCourses.map((course) => (
@@ -505,26 +507,26 @@ export default async function ContentDashboard({
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-semibold">{course.name}</p>
                             {course.isMandatory && (
-                              <Badge variant="destructive" className="text-xs">Required</Badge>
+                              <Badge variant="destructive" className="text-xs">{t('requiredBadge')}</Badge>
                             )}
                           </div>
                           {course.description && (
                             <p className="text-xs text-muted-foreground line-clamp-2">{course.description}</p>
                           )}
                           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{course.deliveryMethod === 'video' ? 'Video' :
-                             course.deliveryMethod === 'workshop' ? 'Workshop' : 'Document'}</span>
+                            <span>{course.deliveryMethod === 'video' ? t('deliveryMethod.video') :
+                             course.deliveryMethod === 'workshop' ? t('deliveryMethod.workshop') : t('deliveryMethod.document')}</span>
                             {course.durationLabel && (
                               <><span>&bull;</span><span>{course.durationLabel}</span></>
                             )}
                             <span>&bull;</span>
-                            <span>{course.completions} completions</span>
+                            <span>{t('completionsCount', { count: course.completions })}</span>
                           </div>
                         </div>
                       </div>
                       <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 shrink-0">
-                        {course.deliveryMethod === 'video' ? 'Watch' :
-                         course.deliveryMethod === 'workshop' ? 'Enroll' : 'Read'}
+                        {course.deliveryMethod === 'video' ? t('action.watch') :
+                         course.deliveryMethod === 'workshop' ? t('action.enroll') : t('action.read')}
                       </button>
                     </div>
                   ))}

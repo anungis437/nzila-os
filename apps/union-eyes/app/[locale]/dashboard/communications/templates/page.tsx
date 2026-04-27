@@ -13,6 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -73,6 +74,8 @@ interface Template {
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const t = useTranslations('communicationsTemplatesPage');
+  const locale = useLocale();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +118,7 @@ export default function TemplatesPage() {
       const response = await fetch(`/api/communications/templates?${params}`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch templates');
+        throw new Error(t('failedToFetchTemplates'));
       }
 
       const json = await response.json();
@@ -124,7 +127,7 @@ export default function TemplatesPage() {
       setTemplates(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
       setTotalPages(payload.pagination?.totalPages ?? 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch templates');
+      setError(err instanceof Error ? err.message : t('failedToFetchTemplates'));
     } finally {
       setLoading(false);
     }
@@ -149,7 +152,7 @@ export default function TemplatesPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -169,14 +172,14 @@ export default function TemplatesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Message Templates</h1>
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground">
-              Create and manage reusable templates for your campaigns
+              {t('subtitle')}
             </p>
           </div>
           <Button onClick={() => router.push('/dashboard/communications/templates/new')}>
             <Plus className="mr-2 h-4 w-4" />
-            Create Template
+            {t('createTemplateButton')}
           </Button>
         </div>
 
@@ -184,7 +187,7 @@ export default function TemplatesPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Templates</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('totalTemplatesTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{templates.length}</div>
@@ -193,7 +196,7 @@ export default function TemplatesPage() {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Email</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('type.email')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -204,7 +207,7 @@ export default function TemplatesPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">SMS</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('type.sms')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -215,7 +218,7 @@ export default function TemplatesPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Active</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('status.active')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -228,7 +231,7 @@ export default function TemplatesPage() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Filters</CardTitle>
+            <CardTitle>{t('filtersTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
@@ -236,7 +239,7 @@ export default function TemplatesPage() {
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search templates..."
+                    placeholder={t('searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-8"
@@ -246,38 +249,38 @@ export default function TemplatesPage() {
 
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-full md:w-45">
-                  <SelectValue placeholder="Type" />
+                  <SelectValue placeholder={t('typePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="sms">SMS</SelectItem>
-                  <SelectItem value="push">Push</SelectItem>
+                  <SelectItem value="all">{t('allTypes')}</SelectItem>
+                  <SelectItem value="email">{t('type.email')}</SelectItem>
+                  <SelectItem value="sms">{t('type.sms')}</SelectItem>
+                  <SelectItem value="push">{t('type.push')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-full md:w-45">
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder={t('categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="campaign">Campaign</SelectItem>
-                  <SelectItem value="transactional">Transactional</SelectItem>
-                  <SelectItem value="alert">Alert</SelectItem>
-                  <SelectItem value="newsletter">Newsletter</SelectItem>
-                  <SelectItem value="announcement">Announcement</SelectItem>
+                  <SelectItem value="all">{t('allCategories')}</SelectItem>
+                  <SelectItem value="campaign">{t('category.campaign')}</SelectItem>
+                  <SelectItem value="transactional">{t('category.transactional')}</SelectItem>
+                  <SelectItem value="alert">{t('category.alert')}</SelectItem>
+                  <SelectItem value="newsletter">{t('category.newsletter')}</SelectItem>
+                  <SelectItem value="announcement">{t('category.announcement')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-45">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t('statusPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="all">{t('allStatus')}</SelectItem>
+                  <SelectItem value="active">{t('status.active')}</SelectItem>
+                  <SelectItem value="inactive">{t('status.inactive')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -291,29 +294,29 @@ export default function TemplatesPage() {
         {/* Templates Table */}
         <Card>
           <CardHeader>
-            <CardTitle>All Templates</CardTitle>
+            <CardTitle>{t('allTemplatesTitle')}</CardTitle>
             <CardDescription>
-              {filteredTemplates.length} template(s) found
+              {t('templatesFound', { count: filteredTemplates.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">Loading templates...</p>
+                <p className="mt-2 text-muted-foreground">{t('loadingTemplates')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-8 text-destructive">
                 <p>{error}</p>
                 <Button variant="outline" onClick={fetchTemplates} className="mt-4">
-                  Try Again
+                  {t('tryAgainButton')}
                 </Button>
               </div>
             ) : filteredTemplates.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">No templates found</p>
+                <p className="text-muted-foreground">{t('noTemplatesFound')}</p>
                 <Button onClick={() => router.push('/dashboard/communications/templates/new')} className="mt-4">
-                  Create Your First Template
+                  {t('createFirstTemplateButton')}
                 </Button>
               </div>
             ) : (
@@ -321,13 +324,13 @@ export default function TemplatesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Template</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Variables</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>{t('columnTemplate')}</TableHead>
+                      <TableHead>{t('columnType')}</TableHead>
+                      <TableHead>{t('columnCategory')}</TableHead>
+                      <TableHead>{t('columnVariables')}</TableHead>
+                      <TableHead>{t('columnStatus')}</TableHead>
+                      <TableHead>{t('columnLastUpdated')}</TableHead>
+                      <TableHead>{t('columnActions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -350,11 +353,11 @@ export default function TemplatesPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getChannelIcon(template.type)}
-                            <span className="capitalize">{template.type}</span>
+                            <span>{t(`type.${template.type}`)}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="capitalize">
-                          <Badge variant="outline">{template.category}</Badge>
+                        <TableCell>
+                          <Badge variant="outline">{t(`category.${template.category}`)}</Badge>
                         </TableCell>
                         <TableCell>
                           {template.variables.length > 0 ? (
@@ -366,17 +369,17 @@ export default function TemplatesPage() {
                               ))}
                               {template.variables.length > 3 && (
                                 <Badge variant="secondary" className="text-xs">
-                                  +{template.variables.length - 3}
+                                  {t('moreVariables', { count: template.variables.length - 3 })}
                                 </Badge>
                               )}
                             </div>
                           ) : (
-                            <span className="text-sm text-muted-foreground">None</span>
+                            <span className="text-sm text-muted-foreground">{t('noneLabel')}</span>
                           )}
                         </TableCell>
                         <TableCell>
                           <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                            {template.isActive ? 'Active' : 'Inactive'}
+                            {template.isActive ? t('status.active') : t('status.inactive')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">
@@ -402,7 +405,7 @@ export default function TemplatesPage() {
                                 router.push(`/dashboard/communications/templates/${template.id}`);
                               }}
                             >
-                              Edit
+                              {t('editButton')}
                             </Button>
                           </div>
                         </TableCell>
@@ -415,7 +418,7 @@ export default function TemplatesPage() {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                      Page {page} of {totalPages}
+                      {t('pageInfo', { page, totalPages })}
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -424,7 +427,7 @@ export default function TemplatesPage() {
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
                       >
-                        Previous
+                        {t('previousButton')}
                       </Button>
                       <Button
                         variant="outline"
@@ -432,7 +435,7 @@ export default function TemplatesPage() {
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
                       >
-                        Next
+                        {t('nextButton')}
                       </Button>
                     </div>
                   </div>
@@ -454,7 +457,7 @@ export default function TemplatesPage() {
             <div className="space-y-4">
               {previewTemplate.subject && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Subject</div>
+                  <div className="text-sm font-medium mb-1">{t('subjectLabel')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {previewTemplate.subject}
                   </div>
@@ -463,7 +466,7 @@ export default function TemplatesPage() {
 
               {previewTemplate.preheader && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Preheader</div>
+                  <div className="text-sm font-medium mb-1">{t('preheaderLabel')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {previewTemplate.preheader}
                   </div>
@@ -471,7 +474,7 @@ export default function TemplatesPage() {
               )}
 
               <div>
-                <div className="text-sm font-medium mb-1">Body</div>
+                <div className="text-sm font-medium mb-1">{t('bodyLabel')}</div>
                 <div className="p-3 bg-muted rounded-lg text-sm whitespace-pre-wrap">
                   {previewTemplate.body}
                 </div>
@@ -479,14 +482,14 @@ export default function TemplatesPage() {
 
               {previewTemplate.variables.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Variables</div>
+                  <div className="text-sm font-medium mb-2">{t('variablesLabel')}</div>
                   <div className="space-y-2">
                     {previewTemplate.variables.map((variable, index) => (
                       <div key={index} className="p-2 bg-muted rounded text-sm">
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{variable.name}</Badge>
                           {variable.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                            <Badge variant="destructive" className="text-xs">{t('requiredLabel')}</Badge>
                           )}
                         </div>
                         {variable.description && (
@@ -496,7 +499,7 @@ export default function TemplatesPage() {
                         )}
                         {variable.example && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Example: {variable.example}
+                            {t('examplePrefix')}: {variable.example}
                           </p>
                         )}
                       </div>
@@ -507,7 +510,7 @@ export default function TemplatesPage() {
 
               {previewTemplate.tags.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Tags</div>
+                  <div className="text-sm font-medium mb-2">{t('tagsLabel')}</div>
                   <div className="flex gap-2 flex-wrap">
                     {previewTemplate.tags.map((tag, index) => (
                       <Badge key={index} variant="outline">{tag}</Badge>

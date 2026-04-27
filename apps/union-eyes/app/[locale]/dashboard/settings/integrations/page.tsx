@@ -33,6 +33,7 @@ import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -161,14 +162,38 @@ function statusIcon(status: string) {
   }
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, t: Awaited<ReturnType<typeof getTranslations>>) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return t('timeAgo.minutes', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('timeAgo.hours', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t('timeAgo.days', { count: days });
+}
+
+function integrationStatusLabel(
+  status: ProviderInfo['status'] | IntegrationConfig['status'],
+  t: Awaited<ReturnType<typeof getTranslations>>,
+) {
+  switch (status) {
+    case 'connected':
+      return t('statuses.connected');
+    case 'available':
+      return t('statuses.available');
+    case 'coming_soon':
+      return t('statuses.comingSoon');
+    case 'active':
+      return t('statuses.active');
+    case 'inactive':
+      return t('statuses.inactive');
+    case 'suspended':
+      return t('statuses.suspended');
+    case 'error':
+      return t('statuses.error');
+    default:
+      return status;
+  }
 }
 
 // ── Domain catalogue ───────────────────────────────────────────────────────
@@ -176,6 +201,7 @@ function timeAgo(dateStr: string) {
 function buildDomainCatalogue(
   configs: IntegrationConfig[],
   domainStats: DomainStats[],
+  t: Awaited<ReturnType<typeof getTranslations>>,
 ): DataDomain[] {
   const configsByDomain = new Map<string, IntegrationConfig[]>();
   for (const cfg of configs) {
@@ -201,86 +227,86 @@ function buildDomainCatalogue(
   return [
     {
       key: 'pension',
-      label: 'Pension & Retirement',
-      description: 'Connect pension providers to sync member plans, contributions, and benefit estimates.',
+      label: t('domains.pension.label'),
+      description: t('domains.pension.description'),
       icon: <Wallet className="h-5 w-5" />,
       tableCount: statsMap.get('pension')?.tableCount ?? 0,
       providers: [
-        { key: 'otpp', label: 'OTPP', status: providerStatus('pension', 'otpp'), configId: providerConfigId('pension', 'otpp') },
-        { key: 'cpp', label: 'CPP/QPP', status: providerStatus('pension', 'cpp'), configId: providerConfigId('pension', 'cpp') },
-        { key: 'hoopp', label: 'HOOPP', status: providerStatus('pension', 'hoopp'), configId: providerConfigId('pension', 'hoopp') },
-        { key: 'omers', label: 'OMERS', status: providerStatus('pension', 'omers'), configId: providerConfigId('pension', 'omers') },
+        { key: 'otpp', label: t('providers.otpp'), status: providerStatus('pension', 'otpp'), configId: providerConfigId('pension', 'otpp') },
+        { key: 'cpp', label: t('providers.cpp'), status: providerStatus('pension', 'cpp'), configId: providerConfigId('pension', 'cpp') },
+        { key: 'hoopp', label: t('providers.hoopp'), status: providerStatus('pension', 'hoopp'), configId: providerConfigId('pension', 'hoopp') },
+        { key: 'omers', label: t('providers.omers'), status: providerStatus('pension', 'omers'), configId: providerConfigId('pension', 'omers') },
       ],
     },
     {
       key: 'calendar',
-      label: 'Calendar & Scheduling',
-      description: 'Sync union calendars, meetings, and event attendance from external providers.',
+      label: t('domains.calendar.label'),
+      description: t('domains.calendar.description'),
       icon: <Calendar className="h-5 w-5" />,
       tableCount: statsMap.get('calendar')?.tableCount ?? 0,
       providers: [
-        { key: 'outlook', label: 'Outlook / Microsoft 365', status: providerStatus('calendar', 'outlook'), configId: providerConfigId('calendar', 'outlook') },
-        { key: 'google', label: 'Google Calendar', status: providerStatus('calendar', 'google'), configId: providerConfigId('calendar', 'google') },
-        { key: 'apple', label: 'Apple Calendar', status: 'coming_soon' as const },
+        { key: 'outlook', label: t('providers.outlook'), status: providerStatus('calendar', 'outlook'), configId: providerConfigId('calendar', 'outlook') },
+        { key: 'google', label: t('providers.google'), status: providerStatus('calendar', 'google'), configId: providerConfigId('calendar', 'google') },
+        { key: 'apple', label: t('providers.apple'), status: 'coming_soon' as const },
       ],
     },
     {
       key: 'hris',
-      label: 'HRIS & Membership',
-      description: 'Human resources information systems for member records, employment, and demographics.',
+      label: t('domains.hris.label'),
+      description: t('domains.hris.description'),
       icon: <Users className="h-5 w-5" />,
       tableCount: statsMap.get('hris')?.tableCount ?? 0,
       providers: [
-        { key: 'workday', label: 'Workday', status: providerStatus('hris', 'workday'), configId: providerConfigId('hris', 'workday') },
-        { key: 'bamboohr', label: 'BambooHR', status: providerStatus('hris', 'bamboohr'), configId: providerConfigId('hris', 'bamboohr') },
-        { key: 'adp', label: 'ADP', status: providerStatus('hris', 'adp'), configId: providerConfigId('hris', 'adp') },
+        { key: 'workday', label: t('providers.workday'), status: providerStatus('hris', 'workday'), configId: providerConfigId('hris', 'workday') },
+        { key: 'bamboohr', label: t('providers.bamboohr'), status: providerStatus('hris', 'bamboohr'), configId: providerConfigId('hris', 'bamboohr') },
+        { key: 'adp', label: t('providers.adp'), status: providerStatus('hris', 'adp'), configId: providerConfigId('hris', 'adp') },
       ],
     },
     {
       key: 'insurance',
-      label: 'Insurance & Benefits',
-      description: 'Sync insurance plans, claims, coverage details, and provider networks.',
+      label: t('domains.insurance.label'),
+      description: t('domains.insurance.description'),
       icon: <Shield className="h-5 w-5" />,
       tableCount: statsMap.get('insurance')?.tableCount ?? 0,
       providers: [
-        { key: 'sunlife', label: 'Sun Life', status: providerStatus('insurance', 'sunlife'), configId: providerConfigId('insurance', 'sunlife') },
-        { key: 'manulife', label: 'Manulife', status: providerStatus('insurance', 'manulife'), configId: providerConfigId('insurance', 'manulife') },
-        { key: 'greatwest', label: 'Canada Life', status: providerStatus('insurance', 'greatwest'), configId: providerConfigId('insurance', 'greatwest') },
+        { key: 'sunlife', label: t('providers.sunlife'), status: providerStatus('insurance', 'sunlife'), configId: providerConfigId('insurance', 'sunlife') },
+        { key: 'manulife', label: t('providers.manulife'), status: providerStatus('insurance', 'manulife'), configId: providerConfigId('insurance', 'manulife') },
+        { key: 'greatwest', label: t('providers.greatwest'), status: providerStatus('insurance', 'greatwest'), configId: providerConfigId('insurance', 'greatwest') },
       ],
     },
     {
       key: 'accounting',
-      label: 'Accounting & Finance',
-      description: 'Financial integrations for ledger, invoices, payments, and expense management.',
+      label: t('domains.accounting.label'),
+      description: t('domains.accounting.description'),
       icon: <Calculator className="h-5 w-5" />,
       tableCount: statsMap.get('accounting')?.tableCount ?? 0,
       providers: [
-        { key: 'quickbooks', label: 'QuickBooks', status: providerStatus('accounting', 'quickbooks'), configId: providerConfigId('accounting', 'quickbooks') },
-        { key: 'sage', label: 'Sage', status: providerStatus('accounting', 'sage'), configId: providerConfigId('accounting', 'sage') },
-        { key: 'xero', label: 'Xero', status: providerStatus('accounting', 'xero'), configId: providerConfigId('accounting', 'xero') },
+        { key: 'quickbooks', label: t('providers.quickbooks'), status: providerStatus('accounting', 'quickbooks'), configId: providerConfigId('accounting', 'quickbooks') },
+        { key: 'sage', label: t('providers.sage'), status: providerStatus('accounting', 'sage'), configId: providerConfigId('accounting', 'sage') },
+        { key: 'xero', label: t('providers.xero'), status: providerStatus('accounting', 'xero'), configId: providerConfigId('accounting', 'xero') },
       ],
     },
     {
       key: 'communication',
-      label: 'Communication',
-      description: 'Email, SMS, and push notification providers for member engagement.',
+      label: t('domains.communication.label'),
+      description: t('domains.communication.description'),
       icon: <MessageSquare className="h-5 w-5" />,
       tableCount: statsMap.get('communication')?.tableCount ?? 0,
       providers: [
-        { key: 'resend', label: 'Resend', status: providerStatus('communication', 'resend'), configId: providerConfigId('communication', 'resend') },
-        { key: 'twilio', label: 'Twilio', status: providerStatus('communication', 'twilio'), configId: providerConfigId('communication', 'twilio') },
-        { key: 'sendgrid', label: 'SendGrid', status: providerStatus('communication', 'sendgrid'), configId: providerConfigId('communication', 'sendgrid') },
+        { key: 'resend', label: t('providers.resend'), status: providerStatus('communication', 'resend'), configId: providerConfigId('communication', 'resend') },
+        { key: 'twilio', label: t('providers.twilio'), status: providerStatus('communication', 'twilio'), configId: providerConfigId('communication', 'twilio') },
+        { key: 'sendgrid', label: t('providers.sendgrid'), status: providerStatus('communication', 'sendgrid'), configId: providerConfigId('communication', 'sendgrid') },
       ],
     },
     {
       key: 'crm',
-      label: 'CRM & Outreach',
-      description: 'Member relationship management and organizing platform integrations.',
+      label: t('domains.crm.label'),
+      description: t('domains.crm.description'),
       icon: <BarChart3 className="h-5 w-5" />,
       tableCount: statsMap.get('crm')?.tableCount ?? 0,
       providers: [
-        { key: 'hubspot', label: 'HubSpot', status: providerStatus('crm', 'hubspot'), configId: providerConfigId('crm', 'hubspot') },
-        { key: 'salesforce', label: 'Salesforce', status: 'coming_soon' as const },
+        { key: 'hubspot', label: t('providers.hubspot'), status: providerStatus('crm', 'hubspot'), configId: providerConfigId('crm', 'hubspot') },
+        { key: 'salesforce', label: t('providers.salesforce'), status: 'coming_soon' as const },
       ],
     },
   ];
@@ -297,6 +323,7 @@ export default async function IntegrationSettingsPage({
 }) {
   const { locale } = await paramsPromise;
   const params = await searchParams;
+  const t = await getTranslations('settingsIntegrationsPage');
   const activeTab = params.tab ?? 'overview';
   const filterDomain = params.domain ?? null;
 
@@ -324,7 +351,7 @@ export default async function IntegrationSettingsPage({
     }
   }
 
-  const domains = buildDomainCatalogue(configs, domainStats);
+  const domains = buildDomainCatalogue(configs, domainStats, t);
   const filteredDomains = filterDomain
     ? domains.filter((d) => d.key === filterDomain)
     : domains;
@@ -343,9 +370,9 @@ export default async function IntegrationSettingsPage({
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Enterprise Integration Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Configure data-source integrations across pension, calendar, HRIS, insurance, and more
+          {t('subtitle')}
         </p>
       </div>
 
@@ -353,17 +380,17 @@ export default async function IntegrationSettingsPage({
         <TabsList>
           <TabsTrigger value="overview">
             <Link href={`/${locale}/dashboard/settings/integrations`} className="no-underline">
-              Overview
+              {t('tabs.overview')}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="domains">
             <Link href={`/${locale}/dashboard/settings/integrations?tab=domains`} className="no-underline">
-              Data Domains ({domains.length})
+              {t('tabs.domains', { count: domains.length })}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="configs">
             <Link href={`/${locale}/dashboard/settings/integrations?tab=configs`} className="no-underline">
-              Active Configs ({configs.length})
+              {t('tabs.configs', { count: configs.length })}
             </Link>
           </TabsTrigger>
         </TabsList>
@@ -375,12 +402,12 @@ export default async function IntegrationSettingsPage({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  Connected
+                  {t('overview.connectedTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalConnected}</div>
-                <p className="text-xs text-muted-foreground">Active provider connections</p>
+                <p className="text-xs text-muted-foreground">{t('overview.connectedDescription')}</p>
               </CardContent>
             </Card>
 
@@ -388,12 +415,12 @@ export default async function IntegrationSettingsPage({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Plug className="h-4 w-4 text-blue-600" />
-                  Available
+                  {t('overview.availableTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalAvailable}</div>
-                <p className="text-xs text-muted-foreground">Ready to connect</p>
+                <p className="text-xs text-muted-foreground">{t('overview.availableDescription')}</p>
               </CardContent>
             </Card>
 
@@ -401,12 +428,12 @@ export default async function IntegrationSettingsPage({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Database className="h-4 w-4 text-purple-600" />
-                  Data Tables
+                  {t('overview.dataTablesTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalTables}</div>
-                <p className="text-xs text-muted-foreground">External domain tables</p>
+                <p className="text-xs text-muted-foreground">{t('overview.dataTablesDescription')}</p>
               </CardContent>
             </Card>
 
@@ -414,12 +441,12 @@ export default async function IntegrationSettingsPage({
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-500" />
-                  Coming Soon
+                  {t('overview.comingSoonTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalComingSoon}</div>
-                <p className="text-xs text-muted-foreground">Providers in development</p>
+                <p className="text-xs text-muted-foreground">{t('overview.comingSoonDescription')}</p>
               </CardContent>
             </Card>
           </div>
@@ -447,12 +474,12 @@ export default async function IntegrationSettingsPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant={connected > 0 ? 'default' : 'secondary'}>
-                            {connected}/{total} connected
+                            {t('overview.domainConnectedBadge', { connected, total })}
                           </Badge>
                         </div>
                         {domain.tableCount > 0 && (
                           <span className="text-xs text-muted-foreground">
-                            {domain.tableCount} tables
+                            {t('overview.domainTables', { count: domain.tableCount })}
                           </span>
                         )}
                       </div>
@@ -469,13 +496,15 @@ export default async function IntegrationSettingsPage({
           {filterDomain && (
             <div className="flex items-center gap-2">
               <Badge variant="secondary">
-                Filtered: {domains.find((d) => d.key === filterDomain)?.label ?? filterDomain}
+                {t('domainsTab.filtered', {
+                  domain: domains.find((d) => d.key === filterDomain)?.label ?? filterDomain,
+                })}
               </Badge>
               <Link
                 href={`/${locale}/dashboard/settings/integrations?tab=domains`}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                Show all
+                {t('domainsTab.showAll')}
               </Link>
             </div>
           )}
@@ -492,7 +521,7 @@ export default async function IntegrationSettingsPage({
                     </div>
                   </div>
                   {domain.tableCount > 0 && (
-                    <Badge variant="outline">{domain.tableCount} tables</Badge>
+                    <Badge variant="outline">{t('overview.domainTables', { count: domain.tableCount })}</Badge>
                   )}
                 </div>
               </CardHeader>
@@ -529,10 +558,10 @@ export default async function IntegrationSettingsPage({
                           <Plug className="h-3 w-3" />
                         )}
                         {provider.status === 'connected'
-                          ? 'Connected'
+                          ? t('statuses.connected')
                           : provider.status === 'coming_soon'
-                            ? 'Coming Soon'
-                            : 'Available'}
+                            ? t('statuses.comingSoon')
+                            : t('statuses.available')}
                       </Badge>
                     </div>
                   ))}
@@ -546,25 +575,25 @@ export default async function IntegrationSettingsPage({
         <TabsContent value="configs" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active Integration Configurations</CardTitle>
+              <CardTitle>{t('configs.title')}</CardTitle>
               <CardDescription>
-                All provider connections configured for this organization
+                {t('configs.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {configs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Plug className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>No integration configurations yet.</p>
+                  <p>{t('configs.emptyTitle')}</p>
                   <p className="text-sm mt-1">
-                    Connect a provider from the{' '}
+                    {t('configs.emptyDescriptionPrefix')}{' '}
                     <Link
-                      href="/dashboard/settings/integrations?tab=domains"
+                      href={`/${locale}/dashboard/settings/integrations?tab=domains`}
                       className="text-primary underline"
                     >
-                      Data Domains
+                      {t('tabs.domainsLink')}
                     </Link>{' '}
-                    tab.
+                    {t('configs.emptyDescriptionSuffix')}
                   </p>
                 </div>
               ) : (
@@ -579,14 +608,17 @@ export default async function IntegrationSettingsPage({
                         <div>
                           <p className="text-sm font-medium">{cfg.provider}</p>
                           <p className="text-xs text-muted-foreground">
-                            {cfg.type} &middot; Updated {timeAgo(cfg.updatedAt)}
+                            {t('configs.updatedLabel', {
+                              type: cfg.type,
+                              value: timeAgo(cfg.updatedAt, t),
+                            })}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={statusVariant(cfg.status)} className="flex items-center gap-1">
                           {statusIcon(cfg.status)}
-                          {cfg.status}
+                          {integrationStatusLabel(cfg.status, t)}
                         </Badge>
                       </div>
                     </div>

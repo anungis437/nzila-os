@@ -43,19 +43,19 @@ const URGENCY_COLORS: Record<SignalUrgency, string> = {
   low: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
-const TYPE_LABELS: Record<SignalType, string> = {
-  intake: "Intake",
-  message: "Message",
-  alert: "Alert",
-  system: "System",
+const TYPE_LABEL_KEYS: Record<SignalType, string> = {
+  intake: "intake",
+  message: "message",
+  alert: "alert",
+  system: "system",
 };
 
 // ── Transform API data into Signal format ────────────────────────────────────
-function claimToSignal(c: Record<string, unknown>): Signal {
+function claimToSignal(c: Record<string, unknown>, defaults: { newSubmission: string; defaultType: string }): Signal {
   return {
     id: `intake-${c.claimId || c.id}`,
     type: "intake",
-    title: `${c.claimType || "Case"}: ${(c.description as string)?.slice(0, 60) || "New submission"}`,
+    title: `${c.claimType || defaults.defaultType}: ${(c.description as string)?.slice(0, 60) || defaults.newSubmission}`,
     preview: (c.description as string)?.slice(0, 120) || "",
     status: "unread",
     urgency: c.priority === "urgent" ? "high" : c.priority === "critical" ? "critical" : "normal",
@@ -65,11 +65,11 @@ function claimToSignal(c: Record<string, unknown>): Signal {
   };
 }
 
-function notificationToSignal(n: Record<string, unknown>): Signal {
+function notificationToSignal(n: Record<string, unknown>, defaults: { defaultNotification: string }): Signal {
   return {
     id: `alert-${n.id}`,
     type: n.type === "message" ? "message" : "alert",
-    title: (n.title as string) || "Notification",
+    title: (n.title as string) || defaults.defaultNotification,
     preview: (n.message as string)?.slice(0, 120) || "",
     status: n.read ? "read" : "unread",
     urgency: n.priority === "high" ? "high" : "normal",
@@ -81,6 +81,7 @@ function notificationToSignal(n: Record<string, unknown>): Signal {
 // ── Component ────────────────────────────────────────────────────────────────
 export function InboxConsole() {
   const t = useTranslations();
+  const tInbox = useTranslations("inboxConsole");
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,13 +112,18 @@ export function InboxConsole() {
       if (claimsRes.status === "fulfilled" && claimsRes.value.ok) {
         const claimsData = await claimsRes.value.json();
         const claimsList = Array.isArray(claimsData) ? claimsData : claimsData.claims || [];
-        items.push(...claimsList.map(claimToSignal));
+        const defaults = {
+          newSubmission: tInbox("signalTitleNew"),
+          defaultType: tInbox("signalDefaultType"),
+        };
+        items.push(...claimsList.map((c: Record<string, unknown>) => claimToSignal(c, defaults)));
       }
 
       if (notifRes.status === "fulfilled" && notifRes.value.ok) {
         const notifData = await notifRes.value.json();
         const notifList = Array.isArray(notifData) ? notifData : notifData.notifications || [];
-        items.push(...notifList.map(notificationToSignal));
+        const defaults = { defaultNotification: tInbox("signalNotificationDefault") };
+        items.push(...notifList.map((n: Record<string, unknown>) => notificationToSignal(n, defaults)));
       }
 
       // Sort by createdAt desc
@@ -128,7 +134,7 @@ export function InboxConsole() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tInbox]);
 
   useEffect(() => { fetchSignals(); }, [fetchSignals]);
 
@@ -156,17 +162,17 @@ export function InboxConsole() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.inbox")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Everything that needs your attention — intake, messages, alerts, and system signals in one place.
+          {tInbox("subtitle")}
         </p>
-        <ActionHint hintKey="inbox-first" text="Start here — review or action the first item below" />
+        <ActionHint hintKey="inbox-first" text={tInbox("actionHint")} />
       </div>
 
       {/* Filter chips */}
       <div className="flex flex-wrap gap-2">
         <span className="flex items-center gap-1 text-xs text-gray-500 mr-1">
-          <Filter size={12} /> Filter:
+          <Filter size={12} /> {tInbox("filterLabel")}
         </span>
-        {(["all", "intake", "message", "alert", "system"] as const).map(type => (
+        {((["all", "intake", "message", "alert", "system"]) as const).map(type => (
           <button
             key={type}
             onClick={() => setTypeFilter(type)}
@@ -176,11 +182,11 @@ export function InboxConsole() {
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
             }`}
           >
-            {type === "all" ? "All" : TYPE_LABELS[type]}
+            {type === "all" ? tInbox("all") : tInbox(`types.${TYPE_LABEL_KEYS[type]}`)}
           </button>
         ))}
         <div className="w-px h-6 bg-gray-200 mx-1" />
-        {(["all", "critical", "high", "normal", "low"] as const).map(urg => (
+        {((["all", "critical", "high", "normal", "low"]) as const).map(urg => (
           <button
             key={urg}
             onClick={() => setUrgencyFilter(urg)}
@@ -190,7 +196,7 @@ export function InboxConsole() {
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
             }`}
           >
-            {urg === "all" ? "Any urgency" : urg.charAt(0).toUpperCase() + urg.slice(1)}
+            {urg === "all" ? tInbox("anyUrgency") : tInbox(`urgency.${urg}`)}
           </button>
         ))}
       </div>
@@ -206,16 +212,16 @@ export function InboxConsole() {
             <MessageSquare size={40} className="mx-auto text-gray-300 mb-3" />
             {signals.length === 0 ? (
               <>
-                <p className="text-gray-500 font-medium">No signals yet</p>
+                <p className="text-gray-500 font-medium">{tInbox("empty.noSignalsTitle")}</p>
                 <p className="text-gray-400 text-sm mt-1">
-                  New intake submissions, messages, and alerts will appear here automatically.
+                  {tInbox("empty.noSignalsBody")}
                 </p>
               </>
             ) : (
               <>
-                <p className="text-gray-500 font-medium">No items match your filters</p>
+                <p className="text-gray-500 font-medium">{tInbox("empty.noMatchesTitle")}</p>
                 <p className="text-gray-400 text-sm mt-1">
-                  Try adjusting your type or urgency filter to see more items.
+                  {tInbox("empty.noMatchesBody")}
                 </p>
               </>
             )}
@@ -236,10 +242,10 @@ export function InboxConsole() {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-medium text-sm text-gray-900 truncate">{signal.title}</span>
                     <Badge variant="outline" className="text-[10px] shrink-0 text-gray-500 border-gray-200">
-                      {TYPE_LABELS[signal.type]}
+                      {tInbox(`types.${TYPE_LABEL_KEYS[signal.type]}`)}
                     </Badge>
                     <Badge variant="outline" className={`text-[10px] shrink-0 ${URGENCY_COLORS[signal.urgency]}`}>
-                      {signal.urgency}
+                      {tInbox(`urgency.${signal.urgency}`)}
                     </Badge>
                   </div>
                   <p className="text-xs text-gray-500 truncate">{signal.preview}</p>
@@ -248,7 +254,7 @@ export function InboxConsole() {
                       <Clock size={10} />
                       {new Date(signal.createdAt).toLocaleDateString()}
                     </span>
-                    {signal.actor && <span>from {signal.actor}</span>}
+                    {signal.actor && <span>{tInbox("from", { actor: signal.actor })}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -259,7 +265,7 @@ export function InboxConsole() {
                       className="text-xs h-7"
                       onClick={() => handleAction(signal, "review")}
                     >
-                      {signal.type === "intake" ? "Review case" : "Open"} <ArrowRight size={12} className="ml-1" />
+                      {signal.type === "intake" ? tInbox("actions.reviewCase") : tInbox("actions.open")} <ArrowRight size={12} className="ml-1" />
                     </Button>
                   )}
                   {signal.type === "intake" && (
@@ -269,7 +275,7 @@ export function InboxConsole() {
                       className="text-xs h-7 text-blue-600"
                       onClick={() => handleAction(signal, "convert_to_case")}
                     >
-                      Convert
+                      {tInbox("actions.convert")}
                     </Button>
                   )}
                 </div>

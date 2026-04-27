@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 interface RemittanceData {
   affiliateId: string;
@@ -23,6 +24,7 @@ interface CLCRemittanceDashboardProps {
 }
 
 export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboardProps) {
+  const t = useTranslations("clcRemittance");
   const [remittances, setRemittances] = useState<RemittanceData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -93,53 +95,53 @@ export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboar
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Due</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalDue")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalDue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              {remittances.length} affiliates
+              {t("affiliates", { count: remittances.length })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalCollected")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalPaid.toLocaleString()}</div>
             <p className="text-xs text-green-500 flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
-              {collectionRate.toFixed(1)}% collection rate
+              {t("collectionRate", { rate: collectionRate.toFixed(1) })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("outstanding")}</CardTitle>
             <AlertCircle className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${(totalDue - totalPaid).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              {statusCounts.partial || 0} partial, {statusCounts.overdue || 0} overdue
+              {t("outstandingDetail", { partial: statusCounts.partial || 0, overdue: statusCounts.overdue || 0 })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("complianceRate")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{statusCounts.paid || 0}/{remittances.length}</div>
             <p className="text-xs text-muted-foreground">
-              {((statusCounts.paid || 0) / remittances.length * 100).toFixed(0)}% fully paid
+              {t("fullyPaid", { percent: ((statusCounts.paid || 0) / remittances.length * 100).toFixed(0) })}
             </p>
           </CardContent>
         </Card>
@@ -148,22 +150,22 @@ export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboar
       {/* Remittances Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Affiliate Remittances - {period}</CardTitle>
-          <CardDescription>Per-capita remittance tracking for all affiliates</CardDescription>
+          <CardTitle>{t("tableTitle", { period })}</CardTitle>
+          <CardDescription>{t("tableDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-2 font-medium">Affiliate</th>
-                  <th className="text-left p-2 font-medium">Province</th>
-                  <th className="text-right p-2 font-medium">Members</th>
-                  <th className="text-right p-2 font-medium">Rate</th>
-                  <th className="text-right p-2 font-medium">Due</th>
-                  <th className="text-right p-2 font-medium">Paid</th>
-                  <th className="text-center p-2 font-medium">Status</th>
-                  <th className="text-left p-2 font-medium">Due Date</th>
+                  <th className="text-left p-2 font-medium">{t("columns.affiliate")}</th>
+                  <th className="text-left p-2 font-medium">{t("columns.province")}</th>
+                  <th className="text-right p-2 font-medium">{t("columns.members")}</th>
+                  <th className="text-right p-2 font-medium">{t("columns.rate")}</th>
+                  <th className="text-right p-2 font-medium">{t("columns.due")}</th>
+                  <th className="text-right p-2 font-medium">{t("columns.paid")}</th>
+                  <th className="text-center p-2 font-medium">{t("columns.status")}</th>
+                  <th className="text-left p-2 font-medium">{t("columns.dueDate")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,7 +182,7 @@ export default function CLCRemittanceDashboard({ period }: CLCRemittanceDashboar
                     <td className="text-center p-2">
                       <Badge variant="outline" className={`${getStatusColor(remittance.status)} flex items-center gap-1 justify-center`}>
                         {getStatusIcon(remittance.status)}
-                        {remittance.status}
+                        {(['paid','partial','overdue','pending'] as const).includes(remittance.status as 'paid') ? t(`status.${remittance.status}` as 'status.paid') : remittance.status}
                       </Badge>
                     </td>
                     <td className="p-2 text-sm text-muted-foreground">

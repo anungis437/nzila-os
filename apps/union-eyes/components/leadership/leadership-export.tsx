@@ -11,6 +11,7 @@
 
 import * as React from "react";
 import { Download, FileText, Table2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -107,6 +108,7 @@ ${metrics.stewardRows.map(r => `<tr>${Object.values(r).map(v => `<td>${v}</td>`)
 // ─── Component ────────────────────────────────────────────────
 
 export function LeadershipExport({ metrics, onExportStarted }: LeadershipExportProps) {
+  const t = useTranslations("leadershipExport");
   const handleCSV = () => {
     onExportStarted?.("csv");
 
@@ -159,17 +161,17 @@ export function LeadershipExport({ metrics, onExportStarted }: LeadershipExportP
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
           <Download className="h-3.5 w-3.5 mr-1.5" />
-          Export
+          {t("export")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handlePDF}>
           <FileText className="h-3.5 w-3.5 mr-2" />
-          PDF Board Summary
+          {t("pdfSummary")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCSV}>
           <Table2 className="h-3.5 w-3.5 mr-2" />
-          CSV Detail Export
+          {t("csvDetail")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

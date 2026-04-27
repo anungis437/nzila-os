@@ -5,11 +5,22 @@
 export const dynamic = 'force-dynamic';
 
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import MigrationDetailConsole from '@/components/admin/migration-detail-console';
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'adminMigrationDetailPage' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
 }
 
 export default async function AdminMigrationDetailPage({ params }: Props) {

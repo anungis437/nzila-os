@@ -19,6 +19,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,6 +79,7 @@ interface Answer {
 export default function SurveyResponsePage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('surveyPage');
   const { toast } = useToast();
   const surveyId = params.surveyId as string;
 
@@ -99,7 +101,7 @@ export default function SurveyResponsePage() {
   const loadSurvey = useCallback(async () => {
     try {
       const response = await fetch(`/api/communications/surveys/${surveyId}`);
-      if (!response.ok) throw new Error('Survey not found');
+      if (!response.ok) throw new Error(t('surveyNotFoundTitle'));
 
       const data = await response.json();
       setSurvey(data.survey);
@@ -113,8 +115,8 @@ export default function SurveyResponsePage() {
       setIsLoading(false);
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to load survey',
+        title: t('errorTitle'),
+        description: t('failedToLoadSurvey'),
         variant: 'destructive',
       });
       setIsLoading(false);
@@ -142,19 +144,19 @@ toast({
     const answer = answers.get(question.id);
 
     if (question.required) {
-      if (!answer) return 'This question is required';
+      if (!answer) return t('validation.questionRequired');
 
       if (question.questionType === 'text' || question.questionType === 'textarea') {
-        if (!answer.answerText?.trim()) return 'This question is required';
+        if (!answer.answerText?.trim()) return t('validation.questionRequired');
       } else if (question.questionType === 'single_choice' || question.questionType === 'yes_no') {
-        if (!answer.answerChoices) return 'Please select an option';
+        if (!answer.answerChoices && !answer.answerText) return t('validation.selectOption');
       } else if (question.questionType === 'multiple_choice') {
         if (!answer.answerChoices || (Array.isArray(answer.answerChoices) && answer.answerChoices.length === 0)) {
-          return 'Please select at least one option';
+          return t('validation.selectAtLeastOne');
         }
       } else if (question.questionType === 'rating') {
         if (answer.answerNumber === undefined || answer.answerNumber === null) {
-          return 'Please select a rating';
+          return t('validation.selectRating');
         }
       }
     }
@@ -162,20 +164,20 @@ toast({
     // Text length validation
     if (answer?.answerText) {
       if (question.minLength && answer.answerText.length < question.minLength) {
-        return `Minimum ${question.minLength} characters required`;
+        return t('validation.minCharacters', { count: question.minLength });
       }
       if (question.maxLength && answer.answerText.length > question.maxLength) {
-        return `Maximum ${question.maxLength} characters allowed`;
+        return t('validation.maxCharacters', { count: question.maxLength });
       }
     }
 
     // Multiple choice min/max
     if (question.questionType === 'multiple_choice' && answer?.answerChoices && Array.isArray(answer.answerChoices)) {
       if (question.minChoices && answer.answerChoices.length < question.minChoices) {
-        return `Select at least ${question.minChoices} options`;
+        return t('validation.minChoices', { count: question.minChoices });
       }
       if (question.maxChoices && answer.answerChoices.length > question.maxChoices) {
-        return `Select at most ${question.maxChoices} options`;
+        return t('validation.maxChoices', { count: question.maxChoices });
       }
     }
 
@@ -201,8 +203,8 @@ toast({
   const handleSubmit = async () => {
     if (!validateAllQuestions()) {
       toast({
-        title: 'Validation Error',
-        description: 'Please complete all required fields',
+        title: t('validationErrorTitle'),
+        description: t('validationErrorDescription'),
         variant: 'destructive',
       });
       return;
@@ -225,12 +227,13 @@ toast({
       });
 
       if (!response.ok) throw new Error('Failed to submit response');
+      if (!response.ok) throw new Error(t('failedToSubmitResponse'));
 
       setIsComplete(true);
     } catch (_error) {
 toast({
-        title: 'Error',
-        description: 'Failed to submit response',
+        title: t('errorTitle'),
+        description: t('failedToSubmitResponse'),
         variant: 'destructive',
       });
     } finally {
@@ -262,7 +265,7 @@ toast({
             <Input
               value={answer?.answerText || ''}
               onChange={(e) => updateAnswer(question.id, { answerText: e.target.value })}
-              placeholder={question.placeholder || 'Your answer...'}
+              placeholder={question.placeholder || t('yourAnswerPlaceholder')}
               maxLength={question.maxLength}
             />
             {question.maxLength && (
@@ -279,7 +282,7 @@ toast({
             <Textarea
               value={answer?.answerText || ''}
               onChange={(e) => updateAnswer(question.id, { answerText: e.target.value })}
-              placeholder={question.placeholder || 'Your answer...'}
+              placeholder={question.placeholder || t('yourAnswerPlaceholder')}
               rows={5}
               maxLength={question.maxLength}
             />
@@ -310,14 +313,14 @@ toast({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="other" id={`${question.id}-other`} />
                   <Label htmlFor={`${question.id}-other`} className="font-normal cursor-pointer">
-                    Other
+                    {t('otherOption')}
                   </Label>
                 </div>
                 {answer?.answerChoices === 'other' && (
                   <Input
                     value={answer?.answerOther || ''}
                     onChange={(e) => updateAnswer(question.id, { answerOther: e.target.value })}
-                    placeholder="Please specify..."
+                    placeholder={t('pleaseSpecifyPlaceholder')}
                     className="ml-6"
                   />
                 )}
@@ -366,14 +369,14 @@ toast({
                     }}
                   />
                   <Label htmlFor={`${question.id}-other`} className="font-normal cursor-pointer">
-                    Other
+                    {t('otherOption')}
                   </Label>
                 </div>
                 {((answer?.answerChoices as string[]) || []).includes('other') && (
                   <Input
                     value={answer?.answerOther || ''}
                     onChange={(e) => updateAnswer(question.id, { answerOther: e.target.value })}
-                    placeholder="Please specify..."
+                    placeholder={t('pleaseSpecifyPlaceholder')}
                     className="ml-6"
                   />
                 )}
@@ -382,10 +385,10 @@ toast({
             {(question.minChoices || question.maxChoices) && (
               <p className="text-xs text-muted-foreground">
                 {question.minChoices && question.maxChoices
-                  ? `Select ${question.minChoices}-${question.maxChoices} options`
+                  ? t('selectRangeOptions', { min: question.minChoices, max: question.maxChoices })
                   : question.minChoices
-                  ? `Select at least ${question.minChoices} options`
-                  : `Select at most ${question.maxChoices} options`}
+                  ? t('validation.minChoices', { count: question.minChoices })
+                  : t('validation.maxChoices', { count: question.maxChoices! })}
               </p>
             )}
           </div>
@@ -430,13 +433,13 @@ toast({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="yes" id={`${question.id}-yes`} />
               <Label htmlFor={`${question.id}-yes`} className="font-normal cursor-pointer">
-                Yes
+                {t('yesLabel')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="no" id={`${question.id}-no`} />
               <Label htmlFor={`${question.id}-no`} className="font-normal cursor-pointer">
-                No
+                {t('noLabel')}
               </Label>
             </div>
           </RadioGroup>
@@ -460,8 +463,8 @@ toast({
   if (!survey) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h2 className="text-2xl font-bold mb-2">Survey Not Found</h2>
-        <p className="text-muted-foreground">This survey may have been deleted or is no longer available.</p>
+        <h2 className="text-2xl font-bold mb-2">{t('surveyNotFoundTitle')}</h2>
+        <p className="text-muted-foreground">{t('surveyNotFoundDescription')}</p>
       </div>
     );
   }
@@ -469,8 +472,8 @@ toast({
   if (survey.status !== 'published') {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h2 className="text-2xl font-bold mb-2">Survey Not Available</h2>
-        <p className="text-muted-foreground">This survey is not currently accepting responses.</p>
+        <h2 className="text-2xl font-bold mb-2">{t('surveyNotAvailableTitle')}</h2>
+        <p className="text-muted-foreground">{t('surveyNotAvailableDescription')}</p>
       </div>
     );
   }
@@ -481,13 +484,13 @@ toast({
         <Card className="max-w-2xl w-full">
           <CardContent className="pt-12 pb-12 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('thankYouTitle')}</h2>
             <p className="text-muted-foreground mb-6">
-              {survey.thankYouMessage || 'Your response has been submitted successfully.'}
+              {survey.thankYouMessage || t('responseSubmittedSuccessfully')}
             </p>
             {survey.showResults && (
               <Button onClick={() => router.push(`/surveys/${surveyId}/results`)}>
-                View Results
+                {t('viewResultsButton')}
               </Button>
             )}
           </CardContent>
@@ -515,7 +518,7 @@ toast({
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">
-                  Progress: {answers.size} of {questions.length} questions answered
+                  {t('progressLabel', { answered: answers.size, total: questions.length })}
                 </span>
                 <span className="text-sm font-medium">{Math.round(progress)}%</span>
               </div>
@@ -525,23 +528,23 @@ toast({
             {/* Anonymous respondent info */}
             {survey.allowAnonymous && !survey.requireAuthentication && (
               <div className="mb-8 p-4 border rounded-lg space-y-4">
-                <h3 className="font-semibold">Contact Information (Optional)</h3>
+                <h3 className="font-semibold">{t('contactInformationOptional')}</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label>Name</Label>
+                    <Label>{t('nameLabel')}</Label>
                     <Input
                       value={respondentName}
                       onChange={(e) => setRespondentName(e.target.value)}
-                      placeholder="Your name..."
+                      placeholder={t('yourNamePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>Email</Label>
+                    <Label>{t('emailLabel')}</Label>
                     <Input
                       type="email"
                       value={respondentEmail}
                       onChange={(e) => setRespondentEmail(e.target.value)}
-                      placeholder="your.email@example.com"
+                      placeholder={t('emailPlaceholder')}
                     />
                   </div>
                 </div>
@@ -554,7 +557,7 @@ toast({
                   <Card key={question.id}>
                     <CardHeader>
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary">Question {index + 1}</Badge>
+                        <Badge variant="secondary">{t('questionBadge', { number: index + 1 })}</Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -570,12 +573,12 @@ toast({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    {t('submittingButton')}
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Submit Response
+                    {t('submitResponseButton')}
                   </>
                 )}
               </Button>

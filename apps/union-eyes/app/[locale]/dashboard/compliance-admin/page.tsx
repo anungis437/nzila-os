@@ -9,6 +9,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -41,6 +42,7 @@ async function getAuditLogs() {
 }
 
 export default async function ComplianceDashboard() {
+  const t = await getTranslations('complianceAdminPage');
   await requireUser();
   
   // Require compliance manager role
@@ -63,18 +65,18 @@ export default async function ComplianceDashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Compliance & Audit</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Monitor compliance status, audit logs, and regulatory requirements
+          {t('subtitle')}
         </p>
       </div>
       
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="audit-logs">Audit Logs</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
+          <TabsTrigger value="overview">{t('tabOverview')}</TabsTrigger>
+          <TabsTrigger value="audit-logs">{t('tabAuditLogs')}</TabsTrigger>
+          <TabsTrigger value="reports">{t('tabReports')}</TabsTrigger>
+          <TabsTrigger value="risk">{t('tabRiskAssessment')}</TabsTrigger>
         </TabsList>
         
         {/* Overview Tab */}
@@ -84,12 +86,12 @@ export default async function ComplianceDashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Shield className="h-4 w-4" />
-                  Compliance Score
+                  {t('complianceScoreTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{complianceScore}%</div>
-                <p className="text-xs text-muted-foreground">Above target</p>
+                <p className="text-xs text-muted-foreground">{t('aboveTarget')}</p>
               </CardContent>
             </Card>
             
@@ -97,12 +99,12 @@ export default async function ComplianceDashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  Audit Events (24h)
+                  {t('auditEventsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalEvents}</div>
-                <p className="text-xs text-muted-foreground">Total logged</p>
+                <p className="text-xs text-muted-foreground">{t('totalLogged')}</p>
               </CardContent>
             </Card>
             
@@ -110,12 +112,12 @@ export default async function ComplianceDashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
-                  High Risk Events
+                  {t('highRiskEventsTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">{highRiskEvents}</div>
-                <p className="text-xs text-muted-foreground">Require review</p>
+                <p className="text-xs text-muted-foreground">{t('requireReview')}</p>
               </CardContent>
             </Card>
             
@@ -123,12 +125,12 @@ export default async function ComplianceDashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  GDPR Status
+                  {t('gdprStatusTitle')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">Compliant</div>
-                <p className="text-xs text-muted-foreground">All checks passed</p>
+                <div className="text-2xl font-bold text-green-600">{t('compliant')}</div>
+                <p className="text-xs text-muted-foreground">{t('allChecksPassed')}</p>
               </CardContent>
             </Card>
           </div>
@@ -136,36 +138,36 @@ export default async function ComplianceDashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Compliance Metrics</CardTitle>
+                <CardTitle>{t('complianceMetricsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Data Protection (GDPR)</span>
+                    <span className="text-sm">{t('dataProtectionGdpr')}</span>
                     <Badge variant="default" className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Compliant
+                      {t('compliant')}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Access Controls</span>
+                    <span className="text-sm">{t('accessControls')}</span>
                     <Badge variant="default" className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Compliant
+                      {t('compliant')}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Audit Logging</span>
+                    <span className="text-sm">{t('auditLogging')}</span>
                     <Badge variant="default" className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Compliant
+                      {t('compliant')}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Data Retention</span>
+                    <span className="text-sm">{t('dataRetention')}</span>
                     <Badge variant="secondary" className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      Review Needed
+                      {t('reviewNeeded')}
                     </Badge>
                   </div>
                 </div>
@@ -174,30 +176,30 @@ export default async function ComplianceDashboard() {
             
             <Card>
               <CardHeader>
-                <CardTitle>Recent Compliance Checks</CardTitle>
+                <CardTitle>{t('recentComplianceChecksTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Data Encryption Audit</p>
-                      <p className="text-xs text-muted-foreground">2 hours ago</p>
+                      <p className="text-sm font-medium">{t('dataEncryptionAudit')}</p>
+                      <p className="text-xs text-muted-foreground">{t('twoHoursAgo')}</p>
                     </div>
-                    <Badge variant="default">Passed</Badge>
+                    <Badge variant="default">{t('passed')}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Access Review</p>
-                      <p className="text-xs text-muted-foreground">5 hours ago</p>
+                      <p className="text-sm font-medium">{t('accessReview')}</p>
+                      <p className="text-xs text-muted-foreground">{t('fiveHoursAgo')}</p>
                     </div>
-                    <Badge variant="default">Passed</Badge>
+                    <Badge variant="default">{t('passed')}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Privacy Policy Update</p>
-                      <p className="text-xs text-muted-foreground">1 day ago</p>
+                      <p className="text-sm font-medium">{t('privacyPolicyUpdate')}</p>
+                      <p className="text-xs text-muted-foreground">{t('oneDayAgo')}</p>
                     </div>
-                    <Badge variant="secondary">Pending</Badge>
+                    <Badge variant="secondary">{t('pending')}</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -209,11 +211,11 @@ export default async function ComplianceDashboard() {
         <TabsContent value="audit-logs" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Audit Trail</CardTitle>
+              <CardTitle>{t('auditTrailTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               {auditLogs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No audit logs found</p>
+                <p className="text-sm text-muted-foreground">{t('noAuditLogsFound')}</p>
               ) : (
                 <div className="space-y-3">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -247,35 +249,35 @@ export default async function ComplianceDashboard() {
         <TabsContent value="reports" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Compliance Reports</CardTitle>
+              <CardTitle>{t('complianceReportsTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Monthly Compliance Report</p>
-                    <p className="text-xs text-muted-foreground">January 2026</p>
+                    <p className="text-sm font-medium">{t('monthlyComplianceReport')}</p>
+                    <p className="text-xs text-muted-foreground">{t('january2026')}</p>
                   </div>
                   <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                    Download
+                    {t('download')}
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">GDPR Compliance Audit</p>
-                    <p className="text-xs text-muted-foreground">Q4 2025</p>
+                    <p className="text-sm font-medium">{t('gdprComplianceAudit')}</p>
+                    <p className="text-xs text-muted-foreground">{t('q42025')}</p>
                   </div>
                   <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                    Download
+                    {t('download')}
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Access Control Review</p>
-                    <p className="text-xs text-muted-foreground">December 2025</p>
+                    <p className="text-sm font-medium">{t('accessControlReview')}</p>
+                    <p className="text-xs text-muted-foreground">{t('december2025')}</p>
                   </div>
                   <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                    Download
+                    {t('download')}
                   </button>
                 </div>
               </div>
@@ -287,14 +289,14 @@ export default async function ComplianceDashboard() {
         <TabsContent value="risk" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Risk Assessment</CardTitle>
+              <CardTitle>{t('riskAssessmentTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Data Security Risk</span>
-                    <span className="text-sm text-green-600">Low</span>
+                    <span className="text-sm font-medium">{t('dataSecurityRisk')}</span>
+                    <span className="text-sm text-green-600">{t('low')}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-green-600 rounded-full" style={{ width: '15%' }} />
@@ -302,8 +304,8 @@ export default async function ComplianceDashboard() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Access Control Risk</span>
-                    <span className="text-sm text-green-600">Low</span>
+                    <span className="text-sm font-medium">{t('accessControlRisk')}</span>
+                    <span className="text-sm text-green-600">{t('low')}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-green-600 rounded-full" style={{ width: '10%' }} />
@@ -311,8 +313,8 @@ export default async function ComplianceDashboard() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Compliance Risk</span>
-                    <span className="text-sm text-yellow-600">Medium</span>
+                    <span className="text-sm font-medium">{t('complianceRisk')}</span>
+                    <span className="text-sm text-yellow-600">{t('medium')}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-yellow-600 rounded-full" style={{ width: '35%' }} />

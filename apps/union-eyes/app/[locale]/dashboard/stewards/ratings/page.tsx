@@ -5,12 +5,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { RepRatingsDashboard, type LroPerformanceData } from "@/components/satisfaction/rep-ratings-dashboard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function LroRatingsPage() {
+  const t = useTranslations("stewardRatingsPage");
   const [rankings, setRankings] = useState<LroPerformanceData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,13 +42,13 @@ export default function LroRatingsPage() {
         <Link href="/dashboard/stewards">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("back")}
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">LRO Satisfaction Ratings</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Member feedback on representative performance
+            {t("subtitle")}
           </p>
         </div>
       </div>

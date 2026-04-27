@@ -13,6 +13,7 @@
 export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -75,6 +76,8 @@ interface TemplateForm {
 
 export default function NewTemplatePage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('communicationsTemplateNewPage');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -145,15 +148,15 @@ export default function NewTemplatePage() {
 
       // Validation
       if (!formData.name.trim()) {
-        throw new Error('Template name is required');
+        throw new Error(t('errors.nameRequired'));
       }
 
       if (!formData.body.trim()) {
-        throw new Error('Template body is required');
+        throw new Error(t('errors.bodyRequired'));
       }
 
       if (formData.type === 'email' && !formData.subject.trim()) {
-        throw new Error('Email subject is required');
+        throw new Error(t('errors.subjectRequired'));
       }
 
       const response = await fetch('/api/communications/templates', {
@@ -164,14 +167,14 @@ export default function NewTemplatePage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create template');
+        throw new Error(error.error || t('errors.createFailed'));
       }
 
       const json = await response.json();
       const template = json.data ?? json;
-      router.push(`/dashboard/communications/templates/${template.id}`);
+      router.push(`/${locale}/dashboard/communications/templates/${template.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create template');
+      setError(err instanceof Error ? err.message : t('errors.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -196,35 +199,35 @@ export default function NewTemplatePage() {
       <div>
         <Button
           variant="ghost"
-          onClick={() => router.push('/dashboard/communications/templates')}
+          onClick={() => router.push(`/${locale}/dashboard/communications/templates`)}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Templates
+          {t('backButton')}
         </Button>
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Create New Template</h1>
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground">
-              Build a reusable message template for your campaigns
+              {t('subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowPreview(true)}>
               <Eye className="mr-2 h-4 w-4" />
-              Preview
+              {t('actions.preview')}
             </Button>
             <Button onClick={handleSubmit} disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t('actions.creating')}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Create Template
+                  {t('actions.createTemplate')}
                 </>
               )}
             </Button>
@@ -243,33 +246,33 @@ export default function NewTemplatePage() {
       {/* Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Template name, type, and settings</CardDescription>
+          <CardTitle>{t('basic.title')}</CardTitle>
+          <CardDescription>{t('basic.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Template Name *</Label>
+            <Label htmlFor="name">{t('basic.nameLabel')}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => updateFormData({ name: e.target.value })}
-              placeholder="e.g., Welcome Email"
+              placeholder={t('basic.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('basic.descriptionLabel')}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => updateFormData({ description: e.target.value })}
-              placeholder="Brief description of this template"
+              placeholder={t('basic.descriptionPlaceholder')}
               rows={2}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Channel Type *</Label>
+            <Label>{t('basic.channelTypeLabel')}</Label>
             <RadioGroup
               value={formData.type}
               onValueChange={(value) => updateFormData({ type: value as TemplateForm['type'] })}
@@ -278,28 +281,28 @@ export default function NewTemplatePage() {
                 <RadioGroupItem value="email" id="type-email" />
                 <Label htmlFor="type-email" className="font-normal flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Email
+                  {t('channels.email')}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="sms" id="type-sms" />
                 <Label htmlFor="type-sms" className="font-normal flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
-                  SMS
+                  {t('channels.sms')}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="push" id="type-push" />
                 <Label htmlFor="type-push" className="font-normal flex items-center gap-2">
                   <Bell className="h-4 w-4" />
-                  Push Notification
+                  {t('channels.push')}
                 </Label>
               </div>
             </RadioGroup>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{t('basic.categoryLabel')}</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => updateFormData({ category: value })}
@@ -308,11 +311,11 @@ export default function NewTemplatePage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="campaign">Campaign</SelectItem>
-                <SelectItem value="transactional">Transactional</SelectItem>
-                <SelectItem value="alert">Alert</SelectItem>
-                <SelectItem value="newsletter">Newsletter</SelectItem>
-                <SelectItem value="announcement">Announcement</SelectItem>
+                <SelectItem value="campaign">{t('categories.campaign')}</SelectItem>
+                <SelectItem value="transactional">{t('categories.transactional')}</SelectItem>
+                <SelectItem value="alert">{t('categories.alert')}</SelectItem>
+                <SelectItem value="newsletter">{t('categories.newsletter')}</SelectItem>
+                <SelectItem value="announcement">{t('categories.announcement')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -324,7 +327,7 @@ export default function NewTemplatePage() {
               onCheckedChange={(checked) => updateFormData({ isActive: checked })}
             />
             <Label htmlFor="isActive" className="font-normal">
-              Make this template active immediately
+              {t('basic.activeImmediately')}
             </Label>
           </div>
         </CardContent>
@@ -333,33 +336,33 @@ export default function NewTemplatePage() {
       {/* Content */}
       <Card>
         <CardHeader>
-          <CardTitle>Template Content</CardTitle>
+          <CardTitle>{t('content.title')}</CardTitle>
           <CardDescription>
-            {formData.type === 'email' && 'Email subject, body, and optional HTML content'}
-            {formData.type === 'sms' && 'SMS message body (max 160 characters)'}
-            {formData.type === 'push' && 'Push notification title and body'}
+            {formData.type === 'email' && t('content.descriptions.email')}
+            {formData.type === 'sms' && t('content.descriptions.sms')}
+            {formData.type === 'push' && t('content.descriptions.push')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {formData.type === 'email' && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="subject">Subject Line *</Label>
+                <Label htmlFor="subject">{t('content.subjectLineLabel')}</Label>
                 <Input
                   id="subject"
                   value={formData.subject}
                   onChange={(e) => updateFormData({ subject: e.target.value })}
-                  placeholder="Enter email subject"
+                  placeholder={t('content.subjectLinePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="preheader">Preheader Text</Label>
+                <Label htmlFor="preheader">{t('content.preheaderLabel')}</Label>
                 <Input
                   id="preheader"
                   value={formData.preheader}
                   onChange={(e) => updateFormData({ preheader: e.target.value })}
-                  placeholder="Preview text that appears after the subject line"
+                  placeholder={t('content.preheaderPlaceholder')}
                 />
               </div>
             </>
@@ -367,7 +370,7 @@ export default function NewTemplatePage() {
 
           <div className="space-y-2">
             <Label htmlFor="body">
-              {formData.type === 'email' ? 'Plain Text Body' : 'Message Body'} *
+              {formData.type === 'email' ? t('content.plainTextBodyLabel') : t('content.messageBodyLabel')}
             </Label>
             <Textarea
               id="body"
@@ -375,15 +378,15 @@ export default function NewTemplatePage() {
               onChange={(e) => updateFormData({ body: e.target.value })}
               placeholder={
                 formData.type === 'sms'
-                  ? 'Enter SMS message (max 160 characters)'
-                  : 'Enter message content. Use {{variableName}} for placeholders.'
+                  ? t('content.smsBodyPlaceholder')
+                  : t('content.messageBodyPlaceholder')
               }
               rows={10}
               maxLength={formData.type === 'sms' ? 160 : undefined}
             />
             {formData.type === 'sms' && (
               <p className="text-sm text-muted-foreground">
-                {formData.body.length} / 160 characters
+                {t('content.charactersCount', { count: formData.body.length })}
               </p>
             )}
           </div>
@@ -393,27 +396,27 @@ export default function NewTemplatePage() {
               <Separator />
               
               <div className="space-y-2">
-                <Label htmlFor="htmlContent">HTML Content (Optional)</Label>
+                <Label htmlFor="htmlContent">{t('content.htmlContentLabel')}</Label>
                 <Textarea
                   id="htmlContent"
                   value={formData.htmlContent}
                   onChange={(e) => updateFormData({ htmlContent: e.target.value })}
-                  placeholder="<html><body>Enter HTML email content...</body></html>"
+                  placeholder={t('content.htmlContentPlaceholder')}
                   rows={8}
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  If provided, this HTML content will be used instead of plain text for HTML-capable email clients
+                  {t('content.htmlContentHelp')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="plainTextContent">Plain Text Fallback (Optional)</Label>
+                <Label htmlFor="plainTextContent">{t('content.plainTextFallbackLabel')}</Label>
                 <Textarea
                   id="plainTextContent"
                   value={formData.plainTextContent}
                   onChange={(e) => updateFormData({ plainTextContent: e.target.value })}
-                  placeholder="Plain text version for email clients that don&apos;t support HTML"
+                  placeholder={t('content.plainTextFallbackPlaceholder')}
                   rows={6}
                 />
               </div>
@@ -425,10 +428,9 @@ export default function NewTemplatePage() {
       {/* Variables */}
       <Card>
         <CardHeader>
-          <CardTitle>Template Variables</CardTitle>
+          <CardTitle>{t('variables.title')}</CardTitle>
           <CardDescription>
-            Define placeholder variables that can be replaced with actual data when sending.
-            Use {'{{variableName}}'} in your template body.
+            {t('variables.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -442,7 +444,7 @@ export default function NewTemplatePage() {
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant="secondary">{'{{'}{variable.name}{'}}'}</Badge>
                           {variable.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                            <Badge variant="destructive" className="text-xs">{t('variables.required')}</Badge>
                           )}
                         </div>
                         {variable.description && (
@@ -451,8 +453,8 @@ export default function NewTemplatePage() {
                           </p>
                         )}
                         <div className="flex gap-4 text-xs text-muted-foreground">
-                          {variable.default && <span>Default: {variable.default}</span>}
-                          {variable.example && <span>Example: {variable.example}</span>}
+                          {variable.default && <span>{t('variables.defaultValue', { value: variable.default })}</span>}
+                          {variable.example && <span>{t('variables.exampleValue', { value: variable.example })}</span>}
                         </div>
                       </div>
                       <Button
@@ -471,48 +473,48 @@ export default function NewTemplatePage() {
           )}
 
           <div className="space-y-3">
-            <h4 className="text-sm font-medium">Add Variable</h4>
+            <h4 className="text-sm font-medium">{t('variables.addVariableTitle')}</h4>
             
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="var-name" className="text-sm">Variable Name *</Label>
+                <Label htmlFor="var-name" className="text-sm">{t('variables.variableNameLabel')}</Label>
                 <Input
                   id="var-name"
                   value={newVariable.name}
                   onChange={(e) => setNewVariable({ ...newVariable, name: e.target.value })}
-                  placeholder="e.g., firstName"
+                  placeholder={t('variables.variableNamePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="var-description" className="text-sm">Description</Label>
+                <Label htmlFor="var-description" className="text-sm">{t('basic.descriptionLabel')}</Label>
                 <Input
                   id="var-description"
                   value={newVariable.description}
                   onChange={(e) => setNewVariable({ ...newVariable, description: e.target.value })}
-                  placeholder="e.g., Member's first name"
+                  placeholder={t('variables.variableDescriptionPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="var-default" className="text-sm">Default Value</Label>
+                <Label htmlFor="var-default" className="text-sm">{t('variables.defaultValueLabel')}</Label>
                 <Input
                   id="var-default"
                   value={newVariable.default || ''}
                   onChange={(e) => setNewVariable({ ...newVariable, default: e.target.value || null })}
-                  placeholder="Optional default"
+                  placeholder={t('variables.defaultValuePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="var-example" className="text-sm">Example</Label>
+                <Label htmlFor="var-example" className="text-sm">{t('variables.exampleLabel')}</Label>
                 <Input
                   id="var-example"
                   value={newVariable.example || ''}
                   onChange={(e) => setNewVariable({ ...newVariable, example: e.target.value || null })}
-                  placeholder="e.g., John"
+                  placeholder={t('variables.examplePlaceholder')}
                 />
               </div>
             </div>
@@ -524,13 +526,13 @@ export default function NewTemplatePage() {
                 onCheckedChange={(checked) => setNewVariable({ ...newVariable, required: checked })}
               />
               <Label htmlFor="var-required" className="text-sm font-normal">
-                Required variable
+                {t('variables.requiredVariableLabel')}
               </Label>
             </div>
 
             <Button onClick={addVariable} disabled={!newVariable.name.trim()}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Variable
+              {t('variables.addVariableButton')}
             </Button>
           </div>
         </CardContent>
@@ -539,9 +541,9 @@ export default function NewTemplatePage() {
       {/* Tags */}
       <Card>
         <CardHeader>
-          <CardTitle>Tags</CardTitle>
+          <CardTitle>{t('tags.title')}</CardTitle>
           <CardDescription>
-            Add tags to organize and categorize templates
+            {t('tags.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -563,11 +565,11 @@ export default function NewTemplatePage() {
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addTag()}
-              placeholder="Enter tag name"
+              placeholder={t('tags.placeholder')}
             />
             <Button onClick={addTag} disabled={!newTag.trim()}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Tag
+              {t('tags.addTagButton')}
             </Button>
           </div>
         </CardContent>
@@ -578,13 +580,13 @@ export default function NewTemplatePage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="max-w-2xl max-h-[80vh] overflow-y-auto m-4">
             <CardHeader>
-              <CardTitle>Template Preview</CardTitle>
-              <CardDescription>{formData.description || 'No description'}</CardDescription>
+              <CardTitle>{t('preview.title')}</CardTitle>
+              <CardDescription>{formData.description || t('preview.noDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {formData.subject && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Subject</div>
+                  <div className="text-sm font-medium mb-1">{t('preview.subject')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {formData.subject}
                   </div>
@@ -593,7 +595,7 @@ export default function NewTemplatePage() {
 
               {formData.preheader && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Preheader</div>
+                  <div className="text-sm font-medium mb-1">{t('preview.preheader')}</div>
                   <div className="p-3 bg-muted rounded-lg text-sm">
                     {formData.preheader}
                   </div>
@@ -601,15 +603,15 @@ export default function NewTemplatePage() {
               )}
 
               <div>
-                <div className="text-sm font-medium mb-1">Body</div>
+                <div className="text-sm font-medium mb-1">{t('preview.body')}</div>
                 <div className="p-3 bg-muted rounded-lg text-sm whitespace-pre-wrap">
-                  {formData.body || 'No content yet'}
+                  {formData.body || t('preview.noContentYet')}
                 </div>
               </div>
 
               {formData.variables.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Variables</div>
+                  <div className="text-sm font-medium mb-2">{t('preview.variables')}</div>
                   <div className="space-y-2">
                     {formData.variables.map((variable, index) => (
                       <div key={index} className="p-2 bg-muted rounded text-sm">
@@ -627,7 +629,7 @@ export default function NewTemplatePage() {
             </CardContent>
             <CardFooter>
               <Button variant="outline" onClick={() => setShowPreview(false)}>
-                Close Preview
+                {t('preview.closeButton')}
               </Button>
             </CardFooter>
           </Card>

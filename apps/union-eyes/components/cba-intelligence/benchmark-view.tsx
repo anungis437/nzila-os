@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -103,6 +104,7 @@ function formatPct(v: number | null | string): string {
 // ---------------------------------------------------------------------------
 
 export function BenchmarkView() {
+  const t = useTranslations("benchmarkView");
   const [agreementId, setAgreementId] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
   const [sector, setSector] = useState("");
@@ -154,29 +156,29 @@ export function BenchmarkView() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
-          Benchmark Analysis
+          {t("title")}
         </CardTitle>
         <CardDescription>
-          Compare agreements against comparable CBAs by jurisdiction, sector, and union
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Input controls */}
         <div className="flex gap-3 items-end">
           <div className="flex-1 max-w-md">
-            <label className="text-sm font-medium mb-1 block">Agreement ID</label>
+            <label className="text-sm font-medium mb-1 block">{t("agreementId")}</label>
             <Input
-              placeholder="Paste agreement UUID..."
+              placeholder={t("agreementIdPlaceholder")}
               value={agreementId}
               onChange={(e) => setAgreementId(e.target.value.trim())}
             />
           </div>
           <Select value={jurisdiction} onValueChange={setJurisdiction}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Jurisdiction" />
+              <SelectValue placeholder={t("jurisdictionPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">{t("jurisdictionAll")}</SelectItem>
               {JURISDICTIONS.map((j) => (
                 <SelectItem key={j} value={j}>{j}</SelectItem>
               ))}
@@ -184,25 +186,25 @@ export function BenchmarkView() {
           </Select>
           <div className="w-[180px]">
             <Input
-              placeholder="Sector filter..."
+              placeholder={t("sectorPlaceholder")}
               value={sector}
               onChange={(e) => setSector(e.target.value)}
             />
           </div>
           <Button disabled={!agreementId} onClick={() => refetch()}>
-            Run Benchmark
+            {t("runBenchmark")}
           </Button>
         </div>
 
         {/* Loading / Error */}
         {isLoading && (
           <div className="text-center py-8 text-muted-foreground">
-            Computing benchmark...
+            {t("computing")}
           </div>
         )}
         {error && (
           <div className="text-center py-8 text-red-500">
-            Failed to compute benchmark
+            {t("errorLoad")}
           </div>
         )}
 
@@ -213,33 +215,33 @@ export function BenchmarkView() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Card>
                 <CardContent className="pt-4">
-                  <div className="text-sm text-muted-foreground">Comparables</div>
+                  <div className="text-sm text-muted-foreground">{t("summary.comparables")}</div>
                   <div className="text-2xl font-bold">{result.comparableCount}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4">
-                  <div className="text-sm text-muted-foreground">Wage P25</div>
+                  <div className="text-sm text-muted-foreground">{t("summary.wageP25")}</div>
                   <div className="text-2xl font-bold">{formatPct(result.wageIncreaseP25)}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4">
-                  <div className="text-sm text-muted-foreground">Wage P50 (Median)</div>
+                  <div className="text-sm text-muted-foreground">{t("summary.wageP50")}</div>
                   <div className="text-2xl font-bold">{formatPct(result.wageIncreaseP50)}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4">
-                  <div className="text-sm text-muted-foreground">Wage P75</div>
+                  <div className="text-sm text-muted-foreground">{t("summary.wageP75")}</div>
                   <div className="text-2xl font-bold">{formatPct(result.wageIncreaseP75)}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4">
-                  <div className="text-sm text-muted-foreground">Avg Term</div>
+                  <div className="text-sm text-muted-foreground">{t("summary.avgTerm")}</div>
                   <div className="text-2xl font-bold">
-                    {result.avgTermMonths ? `${Math.round(result.avgTermMonths)}mo` : "—"}
+                    {result.avgTermMonths ? t("summary.monthsShort", { count: Math.round(result.avgTermMonths) }) : "—"}
                   </div>
                 </CardContent>
               </Card>
@@ -248,7 +250,7 @@ export function BenchmarkView() {
             {/* Clause coverage chart */}
             {clauseChartData.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2">Clause Family Coverage</h4>
+                <h4 className="font-semibold mb-2">{t("clauseCoverage")}</h4>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={clauseChartData} layout="vertical" margin={{ left: 120 }}>
@@ -266,16 +268,16 @@ export function BenchmarkView() {
             {/* Comparable agreements */}
             {result.comparables.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2">Comparable Agreements</h4>
+                <h4 className="font-semibold mb-2">{t("comparableAgreements")}</h4>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Agreement</TableHead>
-                        <TableHead>Employer</TableHead>
-                        <TableHead>Union</TableHead>
-                        <TableHead>Jurisdiction</TableHead>
-                        <TableHead>Match</TableHead>
+                        <TableHead>{t("table.agreement")}</TableHead>
+                        <TableHead>{t("table.employer")}</TableHead>
+                        <TableHead>{t("table.union")}</TableHead>
+                        <TableHead>{t("table.jurisdiction")}</TableHead>
+                        <TableHead>{t("table.match")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -309,31 +311,31 @@ export function BenchmarkView() {
                 }
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save Snapshot
+                {t("actions.saveSnapshot")}
               </Button>
               <Button variant="outline" onClick={() => setShowHistory(!showHistory)}>
-                {showHistory ? "Hide History" : "Show History"}
+                {showHistory ? t("actions.hideHistory") : t("actions.showHistory")}
               </Button>
             </div>
 
             {/* History */}
             {showHistory && history.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2">Snapshot History</h4>
+                <h4 className="font-semibold mb-2">{t("history.title")}</h4>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Version</TableHead>
-                        <TableHead>Comparables</TableHead>
-                        <TableHead>Wage P50</TableHead>
-                        <TableHead>Date</TableHead>
+                        <TableHead>{t("history.version")}</TableHead>
+                        <TableHead>{t("history.comparables")}</TableHead>
+                        <TableHead>{t("history.wageP50")}</TableHead>
+                        <TableHead>{t("history.date")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {history.map((h) => (
                         <TableRow key={h.id}>
-                          <TableCell>v{h.snapshotVersion}</TableCell>
+                          <TableCell>{t("history.versionShort", { version: h.snapshotVersion })}</TableCell>
                           <TableCell>{h.comparableCount}</TableCell>
                           <TableCell>{formatPct(h.wageIncreaseP50)}</TableCell>
                           <TableCell>

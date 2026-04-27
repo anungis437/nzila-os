@@ -4,11 +4,26 @@
  * Tabbed interface for Sources, Ingestion, Agreements, Review, Benchmark, Freshness.
  */
 
+import type { Metadata } from "next";
 import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { CbaIntelligenceClient } from "./cba-intelligence-client";
 
 export const dynamic = "force-dynamic";
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "cbaIntelligencePage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function CbaIntelligencePage() {
   const user = await requireUser();

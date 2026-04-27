@@ -8,14 +8,24 @@
  */
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { requireUser, isCongressOrg } from "@/lib/api-auth-guard";
 import { OutcomesConsole } from "@/components/outcomes/outcomes-console";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Outcomes | UnionEyes",
+type PageProps = {
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "outcomesPage" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  };
+}
 
 export default async function OutcomesPage() {
   const user = await requireUser();

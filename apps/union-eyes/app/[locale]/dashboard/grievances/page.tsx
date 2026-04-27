@@ -5,12 +5,14 @@
  * Canonical location: /dashboard/work
  */
 import { LegacyRedirect } from "@/components/legacy-redirect";
+import { useTranslations } from "next-intl";
 
 export default function GrievancesPage() {
+  const t = useTranslations("legacyRoutes");
   return (
     <LegacyRedirect
-      oldName="Grievances"
-      newName="Work"
+      oldName={t("grievances.oldName")}
+      newName={t("grievances.newName")}
       href="/dashboard/work"
     />
   );

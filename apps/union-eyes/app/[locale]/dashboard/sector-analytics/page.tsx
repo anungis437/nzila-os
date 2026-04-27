@@ -16,6 +16,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ── Types ── */
 interface OrgRow {
@@ -220,13 +221,27 @@ function formatSector(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
+function formatNumber(value: number, locale: string) {
+  return new Intl.NumberFormat(locale).format(value);
+}
+
+function formatCurrency(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'CAD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 /* ── Page ── */
 export default async function SectorAnalyticsPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const locale = await getLocale();
+  const t = await getTranslations('sectorAnalyticsPage');
   await requireUser();
   const hasAccess = await hasMinRole('platform_lead');
-  if (!hasAccess) redirect('/dashboard');
+  if (!hasAccess) redirect(`/${locale}/dashboard`);
 
   const searchParams = await props.searchParams;
   const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'overview';
@@ -244,18 +259,18 @@ export default async function SectorAnalyticsPage(props: {
 
   const tabs = ['overview', 'sectors', 'organizations', 'bargaining'] as const;
   const tabLabels: Record<string, string> = {
-    overview: 'Overview',
-    sectors: 'Sector Breakdown',
-    organizations: 'Organizations',
-    bargaining: 'Bargaining & Settlements',
+    overview: t('tabs.overview'),
+    sectors: t('tabs.sectors'),
+    organizations: t('tabs.organizations'),
+    bargaining: t('tabs.bargaining'),
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Sector Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Industry-wide trends, wage data, and strategic intelligence across all sectors
+          {t('subtitle')}
         </p>
       </div>
 
@@ -280,41 +295,41 @@ export default async function SectorAnalyticsPage(props: {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active Sectors</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('overview.activeSectorsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{overview.sectorCount}</div>
-                <p className="text-xs text-muted-foreground">{overview.totalOrgs} organizations total</p>
+                <p className="text-xs text-muted-foreground">{t('overview.organizationsTotal', { count: overview.totalOrgs })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('overview.totalMembersTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{overview.totalMembers.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">{overview.activeMembers} active</p>
+                <div className="text-2xl font-bold">{formatNumber(overview.totalMembers, locale)}</div>
+                <p className="text-xs text-muted-foreground">{t('overview.activeMembersCount', { count: overview.activeMembers })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active CBAs</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('overview.activeCbasTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{cba.active}</div>
-                <p className="text-xs text-muted-foreground">{cba.total} total agreements</p>
+                <p className="text-xs text-muted-foreground">{t('overview.totalAgreements', { count: cba.total })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('overview.activeCasesTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">{grievances.open}</div>
-                <p className="text-xs text-muted-foreground">{grievances.inArbitration} in arbitration</p>
+                <p className="text-xs text-muted-foreground">{t('overview.inArbitration', { count: grievances.inArbitration })}</p>
               </CardContent>
             </Card>
           </div>
@@ -328,22 +343,22 @@ export default async function SectorAnalyticsPage(props: {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Organizations</span>
+                    <span className="text-muted-foreground">{t('labels.organizations')}</span>
                     <span className="font-medium">{s.orgCount}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Total Members</span>
-                    <span className="font-medium">{s.totalMembers.toLocaleString()}</span>
+                    <span className="text-muted-foreground">{t('labels.totalMembers')}</span>
+                    <span className="font-medium">{formatNumber(s.totalMembers, locale)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Active Members</span>
-                    <span className="font-medium">{s.activeMembers.toLocaleString()}</span>
+                    <span className="text-muted-foreground">{t('labels.activeMembers')}</span>
+                    <span className="font-medium">{formatNumber(s.activeMembers, locale)}</span>
                   </div>
                 </CardContent>
               </Card>
             )) : (
               <div className="col-span-3 border rounded-lg p-8 text-center">
-                <p className="text-muted-foreground">No sector data available. Organizations need sectors assigned.</p>
+                <p className="text-muted-foreground">{t('empty.overview')}</p>
               </div>
             )}
           </div>
@@ -352,23 +367,23 @@ export default async function SectorAnalyticsPage(props: {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Collective Agreements</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingSummary.collectiveAgreementsTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Total CBAs</span>
+                  <span>{t('bargainingSummary.totalCbas')}</span>
                   <span className="font-semibold">{cba.total}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Active</span>
+                  <span>{t('statuses.active')}</span>
                   <span className="font-semibold text-green-600">{cba.active}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Under Negotiation</span>
+                  <span>{t('statuses.underNegotiation')}</span>
                   <span className="font-semibold text-blue-600">{cba.negotiating}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Expired</span>
+                  <span>{t('statuses.expired')}</span>
                   <span className="font-semibold text-red-600">{cba.expired}</span>
                 </div>
               </CardContent>
@@ -376,23 +391,23 @@ export default async function SectorAnalyticsPage(props: {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Settlements & Grievances</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingSummary.settlementsAndGrievancesTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Total Settlements</span>
+                  <span>{t('bargainingSummary.totalSettlements')}</span>
                   <span className="font-semibold">{settlements.total}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Settlement Value</span>
-                  <span className="font-semibold text-green-600">${settlements.totalMonetaryValue.toLocaleString()}</span>
+                  <span>{t('bargainingSummary.settlementValue')}</span>
+                  <span className="font-semibold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Grievances Resolved</span>
+                  <span>{t('bargainingSummary.grievancesResolved')}</span>
                   <span className="font-semibold text-green-600">{grievances.resolved}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Active Cases</span>
+                  <span>{t('overview.activeCasesTitle')}</span>
                   <span className="font-semibold text-orange-600">{grievances.open}</span>
                 </div>
               </CardContent>
@@ -415,21 +430,21 @@ export default async function SectorAnalyticsPage(props: {
                   <div className="grid gap-4 md:grid-cols-4 mb-4">
                     <div className="text-center p-3 bg-muted rounded">
                       <p className="text-2xl font-bold">{s.orgCount}</p>
-                      <p className="text-xs text-muted-foreground">Organizations</p>
+                      <p className="text-xs text-muted-foreground">{t('labels.organizations')}</p>
                     </div>
                     <div className="text-center p-3 bg-muted rounded">
-                      <p className="text-2xl font-bold">{s.totalMembers.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Total Members</p>
+                      <p className="text-2xl font-bold">{formatNumber(s.totalMembers, locale)}</p>
+                      <p className="text-xs text-muted-foreground">{t('labels.totalMembers')}</p>
                     </div>
                     <div className="text-center p-3 bg-muted rounded">
-                      <p className="text-2xl font-bold">{s.activeMembers.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">Active Members</p>
+                      <p className="text-2xl font-bold">{formatNumber(s.activeMembers, locale)}</p>
+                      <p className="text-xs text-muted-foreground">{t('labels.activeMembers')}</p>
                     </div>
                     <div className="text-center p-3 bg-muted rounded">
                       <p className="text-2xl font-bold">
                         {s.totalMembers > 0 ? Math.round((s.activeMembers / s.totalMembers) * 100) : 0}%
                       </p>
-                      <p className="text-xs text-muted-foreground">Engagement Rate</p>
+                      <p className="text-xs text-muted-foreground">{t('labels.engagementRate')}</p>
                     </div>
                   </div>
                   {sectorOrgs.length > 0 && (
@@ -437,11 +452,11 @@ export default async function SectorAnalyticsPage(props: {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b text-left">
-                            <th className="pb-2 font-medium">Organization</th>
-                            <th className="pb-2 font-medium">Type</th>
-                            <th className="pb-2 font-medium">Members</th>
+                            <th className="pb-2 font-medium">{t('table.organization')}</th>
+                            <th className="pb-2 font-medium">{t('table.type')}</th>
+                            <th className="pb-2 font-medium">{t('table.members')}</th>
                             <th className="pb-2 font-medium">CLC</th>
-                            <th className="pb-2 font-medium">Tickets</th>
+                            <th className="pb-2 font-medium">{t('table.tickets')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -451,7 +466,7 @@ export default async function SectorAnalyticsPage(props: {
                               <td className="py-2">
                                 <Badge variant="outline">{o.organizationType}</Badge>
                               </td>
-                              <td className="py-2">{o.memberCount}</td>
+                              <td className="py-2">{formatNumber(o.memberCount, locale)}</td>
                               <td className="py-2">{o.clcAffiliated ? '✓' : '—'}</td>
                               <td className="py-2">{o.ticketCount}</td>
                             </tr>
@@ -466,7 +481,7 @@ export default async function SectorAnalyticsPage(props: {
           }) : (
             <Card>
               <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">No sectors found. Assign sectors to organizations to see breakdowns.</p>
+                <p className="text-muted-foreground">{t('empty.sectors')}</p>
               </CardContent>
             </Card>
           )}
@@ -477,22 +492,22 @@ export default async function SectorAnalyticsPage(props: {
       {tab === 'organizations' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">All Organizations</CardTitle>
+            <CardTitle className="text-lg">{t('organizationsTab.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-2 font-medium">Organization</th>
-                    <th className="pb-2 font-medium">Type</th>
-                    <th className="pb-2 font-medium">Sectors</th>
-                    <th className="pb-2 font-medium">Status</th>
-                    <th className="pb-2 font-medium">Members</th>
-                    <th className="pb-2 font-medium">Active</th>
+                    <th className="pb-2 font-medium">{t('table.organization')}</th>
+                    <th className="pb-2 font-medium">{t('table.type')}</th>
+                    <th className="pb-2 font-medium">{t('table.sectors')}</th>
+                    <th className="pb-2 font-medium">{t('table.status')}</th>
+                    <th className="pb-2 font-medium">{t('table.members')}</th>
+                    <th className="pb-2 font-medium">{t('table.active')}</th>
                     <th className="pb-2 font-medium">CLC</th>
-                    <th className="pb-2 font-medium">Logins (30d)</th>
-                    <th className="pb-2 font-medium">Tickets</th>
+                    <th className="pb-2 font-medium">{t('table.logins30d')}</th>
+                    <th className="pb-2 font-medium">{t('table.tickets')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -505,13 +520,13 @@ export default async function SectorAnalyticsPage(props: {
                       <td className="py-2">
                         {o.sectors.length > 0
                           ? o.sectors.map(s => formatSector(s)).join(', ')
-                          : <span className="text-muted-foreground">—</span>}
+                          : <span className="text-muted-foreground">{t('empty.none')}</span>}
                       </td>
                       <td className="py-2">
                         <Badge variant={o.status === 'active' ? 'default' : 'secondary'}>{o.status}</Badge>
                       </td>
-                      <td className="py-2">{o.memberCount}</td>
-                      <td className="py-2">{o.activeMemberCount}</td>
+                      <td className="py-2">{formatNumber(o.memberCount, locale)}</td>
+                      <td className="py-2">{formatNumber(o.activeMemberCount, locale)}</td>
                       <td className="py-2">{o.clcAffiliated ? '✓' : '—'}</td>
                       <td className="py-2">{o.loginCount}</td>
                       <td className="py-2">{o.ticketCount}</td>
@@ -530,7 +545,7 @@ export default async function SectorAnalyticsPage(props: {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total CBAs</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('bargainingTab.totalCbasTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{cba.total}</div>
@@ -538,7 +553,7 @@ export default async function SectorAnalyticsPage(props: {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('statuses.active')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{cba.active}</div>
@@ -546,7 +561,7 @@ export default async function SectorAnalyticsPage(props: {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Under Negotiation</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('statuses.underNegotiation')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">{cba.negotiating}</div>
@@ -554,7 +569,7 @@ export default async function SectorAnalyticsPage(props: {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Expired</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('statuses.expired')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{cba.expired}</div>
@@ -565,23 +580,23 @@ export default async function SectorAnalyticsPage(props: {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Grievance Pipeline</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingTab.grievancePipelineTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Total Grievances</span>
+                  <span>{t('bargainingTab.totalGrievances')}</span>
                   <span className="font-bold">{grievances.total}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Open (Filed / Investigating / Escalated / Mediation)</span>
+                  <span>{t('bargainingTab.openGrievances')}</span>
                   <span className="font-bold text-orange-600">{grievances.open}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>In Arbitration</span>
+                  <span>{t('bargainingTab.inArbitration')}</span>
                   <span className="font-bold text-red-600">{grievances.inArbitration}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Resolved / Settled</span>
+                  <span>{t('bargainingTab.resolvedSettled')}</span>
                   <span className="font-bold text-green-600">{grievances.resolved}</span>
                 </div>
               </CardContent>
@@ -589,21 +604,24 @@ export default async function SectorAnalyticsPage(props: {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Settlement Summary</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingTab.settlementSummaryTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Total Settlements</span>
+                  <span>{t('bargainingSummary.totalSettlements')}</span>
                   <span className="font-bold">{settlements.total}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Total Monetary Value</span>
-                  <span className="font-bold text-green-600">${settlements.totalMonetaryValue.toLocaleString()}</span>
+                  <span>{t('bargainingTab.totalMonetaryValue')}</span>
+                  <span className="font-bold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Avg. Settlement</span>
+                  <span>{t('bargainingTab.averageSettlement')}</span>
                   <span className="font-bold">
-                    ${settlements.total > 0 ? Math.round(settlements.totalMonetaryValue / settlements.total).toLocaleString() : 0}
+                    {formatCurrency(
+                      settlements.total > 0 ? Math.round(settlements.totalMonetaryValue / settlements.total) : 0,
+                      locale,
+                    )}
                   </span>
                 </div>
               </CardContent>

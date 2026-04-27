@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,6 +26,7 @@ interface AnalyticsDashboardProps {
 }
 
 export function AnalyticsDashboard({ organizationId }: AnalyticsDashboardProps) {
+  const t = useTranslations('analyticsDashboard');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [metrics, setMetrics] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,9 +75,9 @@ export function AnalyticsDashboard({ organizationId }: AnalyticsDashboardProps) 
         setTrends(trendsData.trends);
       }
     } catch (_error) {
-toast({
-        title: 'Error',
-        description: 'Failed to load analytics data',
+  toast({
+      title: t('error'),
+      description: t('errorDescription'),
         variant: 'destructive'
       });
     } finally {
@@ -88,8 +90,8 @@ toast({
     await loadDashboardData();
     setIsRefreshing(false);
     toast({
-      title: 'Dashboard Refreshed',
-      description: 'All analytics data has been updated'
+      title: t('dashboardRefreshed'),
+      description: t('dashboardRefreshedDescription')
     });
   }
 
@@ -98,7 +100,7 @@ toast({
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading analytics...</p>
+          <p className="text-muted-foreground">{t('loadingMessage')}</p>
         </div>
       </div>
     );
@@ -109,9 +111,9 @@ toast({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Monitor key metrics and insights for your organization
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -122,7 +124,7 @@ toast({
             disabled={isRefreshing}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('refresh')}
           </Button>
           <KPIBuilderDialog />
         </div>
@@ -131,43 +133,43 @@ toast({
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title="Claims This Month"
+          title={t('quickStats.claimsThisMonth')}
           value={metrics.find(m => m.metricType === 'claims_volume')?.metricValue || '0'}
           trend={metrics.find(m => m.metricType === 'claims_volume')?.trend}
           icon={TrendingUp}
-          description="vs. last month"
+          description={t('comparison')}
         />
         <MetricCard
-          title="Avg Resolution Time"
-          value={`${metrics.find(m => m.metricType === 'resolution_time')?.metricValue || '0'} days`}
+          title={t('quickStats.avgResolutionTime')}
+          value={`${metrics.find(m => m.metricType === 'resolution_time')?.metricValue || '0'} ${t('days')}`}
           trend={metrics.find(m => m.metricType === 'resolution_time')?.trend}
           icon={TrendingDown}
-          description="vs. last month"
+          description={t('comparison')}
         />
         <MetricCard
-          title="New Members"
+          title={t('quickStats.newMembers')}
           value={metrics.find(m => m.metricType === 'member_growth')?.metricValue || '0'}
           trend={metrics.find(m => m.metricType === 'member_growth')?.trend}
           icon={TrendingUp}
-          description="vs. last month"
+          description={t('comparison')}
         />
         <MetricCard
-          title="Active Insights"
+          title={t('quickStats.activeInsights')}
           value={insights.length.toString()}
           trend="stable"
           icon={AlertCircle}
-          description="requiring attention"
+          description={t('requiresAttention')}
         />
       </div>
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="insights">Insights</TabsTrigger>
-          <TabsTrigger value="kpis">Custom KPIs</TabsTrigger>
-          <TabsTrigger value="compare">Compare</TabsTrigger>
+          <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="trends">{t('tabs.trends')}</TabsTrigger>
+          <TabsTrigger value="insights">{t('tabs.insights')}</TabsTrigger>
+          <TabsTrigger value="kpis">{t('tabs.kpis')}</TabsTrigger>
+          <TabsTrigger value="compare">{t('tabs.compare')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -175,9 +177,9 @@ toast({
             {/* Claims Trend Chart */}
             <Card className="col-span-4">
               <CardHeader>
-                <CardTitle>Claims Volume Trend</CardTitle>
+                <CardTitle>{t('claimsVolumeTrend.title')}</CardTitle>
                 <CardDescription>
-                  Daily claims volume over the last 30 days
+                  {t('claimsVolumeTrend.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -196,9 +198,9 @@ toast({
             {/* Recent Insights */}
             <Card className="col-span-3">
               <CardHeader>
-                <CardTitle>Recent Insights</CardTitle>
+                <CardTitle>{t('recentInsights.title')}</CardTitle>
                 <CardDescription>
-                  AI-powered recommendations
+                  {t('recentInsights.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -210,9 +212,9 @@ toast({
           {/* Resolution Time Trend */}
           <Card>
             <CardHeader>
-              <CardTitle>Resolution Time Trend</CardTitle>
+              <CardTitle>{t('resolutionTimeTrend.title')}</CardTitle>
               <CardDescription>
-                Average days to resolve claims
+                {t('resolutionTimeTrend.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -232,9 +234,9 @@ toast({
         <TabsContent value="trends" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Trend Analysis</CardTitle>
+              <CardTitle>{t('trendAnalysis.title')}</CardTitle>
               <CardDescription>
-                Detected trends and patterns in your data
+                {t('trendAnalysis.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -250,7 +252,7 @@ toast({
                           {trend.detectedTrend}
                         </span>
                         <span className="text-sm text-muted-foreground">
-                          ({(Number(trend.trendStrength) * 100).toFixed(1)}% confidence)
+                          ({(Number(trend.trendStrength) * 100).toFixed(1)}% {t('confidence')})
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
@@ -258,12 +260,12 @@ toast({
                       </p>
                       {trend.anomalyCount > 0 && (
                         <p className="text-sm text-orange-600">
-                          {trend.anomalyCount} anomalies detected
+                          {t('anomaliesDetected', { count: trend.anomalyCount })}
                         </p>
                       )}
                     </div>
                     <Button variant="outline" size="sm">
-                      View Details
+                      {t('viewDetails')}
                     </Button>
                   </div>
                 ))}

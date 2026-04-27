@@ -8,9 +8,10 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 export const dynamic = 'force-dynamic';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ interface NoteForm {
 }
 
 export default function NewFieldNotePage() {
+  const t = useTranslations('organizingNotesNewPage');
   const router = useRouter();
   const [formData, setFormData] = useState<NoteForm>({
     memberId: '',
@@ -133,17 +135,17 @@ export default function NewFieldNotePage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">New Field Note</h1>
-            <p className="text-gray-600 mt-1">Record a member interaction</p>
+            <h1 className="text-3xl font-bold">{t('pageTitle')}</h1>
+            <p className="text-gray-600 mt-1">{t('pageDescription')}</p>
           </div>
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={() => router.back()}>
-            Cancel
+            {t('cancelButton')}
           </Button>
           <Button onClick={handleSubmit} disabled={saving}>
             <Save className="mr-2 h-4 w-4" />
-            {saving ? 'Saving...' : 'Save Note'}
+            {saving ? t('savingButton') : t('saveNoteButton')}
           </Button>
         </div>
       </div>
@@ -160,26 +162,26 @@ export default function NewFieldNotePage() {
       {/* Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-          <CardDescription>Who and when</CardDescription>
+          <CardTitle>{t('basicInformationTitle')}</CardTitle>
+          <CardDescription>{t('basicInformationDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="memberId">Member ID *</Label>
+              <Label htmlFor="memberId">{t('memberIdLabel')}</Label>
               <Input
                 id="memberId"
-                placeholder="Enter member user ID"
+                placeholder={t('memberIdPlaceholder')}
                 value={formData.memberId}
                 onChange={(e) => updateFormData({ memberId: e.target.value })}
               />
               <p className="text-sm text-gray-500">
-                The Clerk user ID of the member this note is about
+                {t('memberIdHelper')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="interactionDate">Interaction Date *</Label>
+              <Label htmlFor="interactionDate">{t('interactionDateLabel')}</Label>
               <Input
                 id="interactionDate"
                 type="date"
@@ -191,7 +193,7 @@ export default function NewFieldNotePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="noteType">Note Type *</Label>
+              <Label htmlFor="noteType">{t('noteTypeLabel')}</Label>
               <Select 
                 value={formData.noteType} 
                 onValueChange={(value) => updateFormData({ noteType: value })}
@@ -200,34 +202,34 @@ export default function NewFieldNotePage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="contact">Contact</SelectItem>
-                  <SelectItem value="grievance">Grievance</SelectItem>
-                  <SelectItem value="organizing">Organizing</SelectItem>
-                  <SelectItem value="meeting">Meeting</SelectItem>
-                  <SelectItem value="personal">Personal</SelectItem>
-                  <SelectItem value="workplace">Workplace</SelectItem>
-                  <SelectItem value="follow_up">Follow-up</SelectItem>
+                  <SelectItem value="contact">{t('noteTypeContact')}</SelectItem>
+                  <SelectItem value="grievance">{t('noteTypeGrievance')}</SelectItem>
+                  <SelectItem value="organizing">{t('noteTypeOrganizing')}</SelectItem>
+                  <SelectItem value="meeting">{t('noteTypeMeeting')}</SelectItem>
+                  <SelectItem value="personal">{t('noteTypePersonal')}</SelectItem>
+                  <SelectItem value="workplace">{t('noteTypeWorkplace')}</SelectItem>
+                  <SelectItem value="follow_up">{t('noteTypeFollowUp')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sentiment">Sentiment</Label>
-              <Select 
-                value={formData.sentiment} 
+              <Label htmlFor="sentiment">{t('sentimentLabel')}</Label>
+              <Select
+                value={formData.sentiment}
                 onValueChange={(value) => updateFormData({ sentiment: value })}
               >
                 <SelectTrigger id="sentiment">
-                  <SelectValue placeholder="Select sentiment" />
+                  <SelectValue placeholder={t('sentimentPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  <SelectItem value="positive">Positive</SelectItem>
-                  <SelectItem value="neutral">Neutral</SelectItem>
-                  <SelectItem value="negative">Negative</SelectItem>
-                  <SelectItem value="concerned">Concerned</SelectItem>
-                  <SelectItem value="engaged">Engaged</SelectItem>
-                  <SelectItem value="disengaged">Disengaged</SelectItem>
+                  <SelectItem value="">{t('sentimentNone')}</SelectItem>
+                  <SelectItem value="positive">{t('sentimentPositive')}</SelectItem>
+                  <SelectItem value="neutral">{t('sentimentNeutral')}</SelectItem>
+                  <SelectItem value="negative">{t('sentimentNegative')}</SelectItem>
+                  <SelectItem value="concerned">{t('sentimentConcerned')}</SelectItem>
+                  <SelectItem value="engaged">{t('sentimentEngaged')}</SelectItem>
+                  <SelectItem value="disengaged">{t('sentimentDisengaged')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -238,25 +240,25 @@ export default function NewFieldNotePage() {
       {/* Note Content */}
       <Card>
         <CardHeader>
-          <CardTitle>Note Content</CardTitle>
-          <CardDescription>What happened during this interaction</CardDescription>
+          <CardTitle>{t('noteContentTitle')}</CardTitle>
+          <CardDescription>{t('noteContentDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
+            <Label htmlFor="subject">{t('subjectLabel')}</Label>
             <Input
               id="subject"
-              placeholder="Brief summary (optional)"
+              placeholder={t('subjectPlaceholder')}
               value={formData.subject}
               onChange={(e) => updateFormData({ subject: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Note Content *</Label>
+            <Label htmlFor="content">{t('contentLabel')}</Label>
             <Textarea
               id="content"
-              placeholder="Describe the interaction, key points discussed, member concerns, etc."
+              placeholder={t('contentPlaceholder')}
               rows={8}
               value={formData.content}
               onChange={(e) => updateFormData({ content: e.target.value })}
@@ -264,21 +266,21 @@ export default function NewFieldNotePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="engagementLevel">Engagement Level (1-5)</Label>
+            <Label htmlFor="engagementLevel">{t('engagementLevelLabel')}</Label>
             <Select 
               value={formData.engagementLevel?.toString() || ''} 
               onValueChange={(value) => updateFormData({ engagementLevel: value ? parseInt(value) : null })}
             >
               <SelectTrigger id="engagementLevel">
-                <SelectValue placeholder="Select engagement level" />
+                  <SelectValue placeholder={t('engagementLevelPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Not rated</SelectItem>
-                <SelectItem value="1">1 - Very Low</SelectItem>
-                <SelectItem value="2">2 - Low</SelectItem>
-                <SelectItem value="3">3 - Moderate</SelectItem>
-                <SelectItem value="4">4 - High</SelectItem>
-                <SelectItem value="5">5 - Very High</SelectItem>
+                <SelectItem value="">{t('engagementNotRated')}</SelectItem>
+                <SelectItem value="1">{t('engagementVeryLow')}</SelectItem>
+                <SelectItem value="2">{t('engagementLow')}</SelectItem>
+                <SelectItem value="3">{t('engagementModerate')}</SelectItem>
+                <SelectItem value="4">{t('engagementHigh')}</SelectItem>
+                <SelectItem value="5">{t('engagementVeryHigh')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -288,12 +290,12 @@ export default function NewFieldNotePage() {
       {/* Follow-up */}
       <Card>
         <CardHeader>
-          <CardTitle>Follow-up</CardTitle>
-          <CardDescription>Set a reminder to follow up with this member</CardDescription>
+          <CardTitle>{t('followUpTitle')}</CardTitle>
+          <CardDescription>{t('followUpDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="followUpDate">Follow-up Date</Label>
+            <Label htmlFor="followUpDate">{t('followUpDateLabel')}</Label>
             <Input
               id="followUpDate"
               type="date"
@@ -301,7 +303,7 @@ export default function NewFieldNotePage() {
               onChange={(e) => updateFormData({ followUpDate: e.target.value })}
             />
             <p className="text-sm text-gray-500">
-              When should you check in with this member again?
+              {t('followUpDateHelper')}
             </p>
           </div>
         </CardContent>
@@ -310,8 +312,8 @@ export default function NewFieldNotePage() {
       {/* Tags */}
       <Card>
         <CardHeader>
-          <CardTitle>Tags</CardTitle>
-          <CardDescription>Categorize this note for easier searching</CardDescription>
+          <CardTitle>{t('tagsTitle')}</CardTitle>
+          <CardDescription>{t('tagsDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {formData.tags.length > 0 && (
@@ -332,13 +334,13 @@ export default function NewFieldNotePage() {
 
           <div className="flex space-x-2">
             <Input
-              placeholder="Add tag..."
+              placeholder={t('addTagPlaceholder')}
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addTag()}
             />
             <Button type="button" variant="outline" onClick={addTag}>
-              Add Tag
+              {t('addTagButton')}
             </Button>
           </div>
         </CardContent>
@@ -347,14 +349,14 @@ export default function NewFieldNotePage() {
       {/* Privacy Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Privacy Settings</CardTitle>
-          <CardDescription>Control who can see this note</CardDescription>
+          <CardTitle>{t('privacyTitle')}</CardTitle>
+          <CardDescription>{t('privacyDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="isPrivate">Private Note</Label>
-              <p className="text-sm text-gray-500">Only you can see this note</p>
+              <Label htmlFor="isPrivate">{t('privateNoteLabel')}</Label>
+              <p className="text-sm text-gray-500">{t('privateNoteHelper')}</p>
             </div>
             <Switch
               id="isPrivate"
@@ -365,8 +367,8 @@ export default function NewFieldNotePage() {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="isConfidential">Confidential</Label>
-              <p className="text-sm text-gray-500">Restricted to authorized users only</p>
+              <Label htmlFor="isConfidential">{t('confidentialLabel')}</Label>
+              <p className="text-sm text-gray-500">{t('confidentialHelper')}</p>
             </div>
             <Switch
               id="isConfidential"

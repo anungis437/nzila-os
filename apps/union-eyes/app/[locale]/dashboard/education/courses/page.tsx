@@ -7,11 +7,13 @@
 
 export const dynamic = 'force-dynamic';
 import CourseCatalog from "@/components/education/CourseCatalog";
+import { useTranslations } from "next-intl";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CoursesPage() {
+  const t = useTranslations("educationCoursesPage");
   const { user, isLoaded: userLoaded } = useUser();
   const organizationId = useOrganizationId();
 
@@ -28,7 +30,7 @@ export default function CoursesPage() {
   if (!user) {
     return (
       <div className="p-6">
-        <p>Please sign in to view courses.</p>
+        <p>{t("signInPrompt")}</p>
       </div>
     );
   }
@@ -36,7 +38,7 @@ export default function CoursesPage() {
   if (!organizationId) {
     return (
       <div className="p-6">
-        <p>Please select an organization to view courses.</p>
+        <p>{t("selectOrgPrompt")}</p>
       </div>
     );
   }
@@ -44,9 +46,9 @@ export default function CoursesPage() {
   return (
     <div className="p-6">
       <div className="space-y-2 mb-6">
-        <h1 className="text-3xl font-bold">Course Catalog</h1>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Browse and enroll in available training courses
+          {t("subtitle")}
         </p>
       </div>
       

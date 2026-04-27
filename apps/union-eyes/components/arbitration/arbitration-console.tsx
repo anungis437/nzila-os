@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -61,15 +62,15 @@ interface ArbitrationCase {
   createdAt: string;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactElement }> = {
-  pending: { label: "Pending", color: "text-yellow-700 bg-yellow-100 border-yellow-200", icon: <Clock className="w-3 h-3" /> },
-  scheduled: { label: "Scheduled", color: "text-blue-700 bg-blue-100 border-blue-200", icon: <Calendar className="w-3 h-3" /> },
-  in_progress: { label: "Hearing In Progress", color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Gavel className="w-3 h-3" /> },
-  adjourned: { label: "Adjourned", color: "text-orange-700 bg-orange-100 border-orange-200", icon: <Clock className="w-3 h-3" /> },
-  reserved: { label: "Reserved (Awaiting Award)", color: "text-indigo-700 bg-indigo-100 border-indigo-200", icon: <Scale className="w-3 h-3" /> },
-  award_rendered: { label: "Award Rendered", color: "text-green-700 bg-green-100 border-green-200", icon: <CheckCircle className="w-3 h-3" /> },
-  settled: { label: "Settled", color: "text-teal-700 bg-teal-100 border-teal-200", icon: <CheckCircle className="w-3 h-3" /> },
-  withdrawn: { label: "Withdrawn", color: "text-gray-700 bg-gray-100 border-gray-200", icon: <FileText className="w-3 h-3" /> },
+const statusConfig: Record<string, { color: string; icon: React.ReactElement }> = {
+  pending: { color: "text-yellow-700 bg-yellow-100 border-yellow-200", icon: <Clock className="w-3 h-3" /> },
+  scheduled: { color: "text-blue-700 bg-blue-100 border-blue-200", icon: <Calendar className="w-3 h-3" /> },
+  in_progress: { color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Gavel className="w-3 h-3" /> },
+  adjourned: { color: "text-orange-700 bg-orange-100 border-orange-200", icon: <Clock className="w-3 h-3" /> },
+  reserved: { color: "text-indigo-700 bg-indigo-100 border-indigo-200", icon: <Scale className="w-3 h-3" /> },
+  award_rendered: { color: "text-green-700 bg-green-100 border-green-200", icon: <CheckCircle className="w-3 h-3" /> },
+  settled: { color: "text-teal-700 bg-teal-100 border-teal-200", icon: <CheckCircle className="w-3 h-3" /> },
+  withdrawn: { color: "text-gray-700 bg-gray-100 border-gray-200", icon: <FileText className="w-3 h-3" /> },
 };
 
 const defaultStatus = statusConfig.pending;
@@ -132,6 +133,7 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 export function ArbitrationConsole() {
+  const t = useTranslations("arbitrationConsole");
   const { organizationId } = useOrganization();
   const [cases, setCases] = useState<ArbitrationCase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,16 +158,16 @@ export function ArbitrationConsole() {
           setCases(Array.isArray(items) ? items.map(mapApiToCase) : []);
         } else {
           const body = await res.json().catch(() => ({}));
-          setError(body?.error ?? `Failed to load arbitrations (${res.status})`);
+          setError(body?.error ?? t("errors.loadFailedStatus", { status: res.status }));
         }
       } catch {
-        setError("Unable to load arbitrations. Please try again later.");
+        setError(t("errors.loadFailed"));
       } finally {
         setLoading(false);
       }
     };
     fetchArbitrations();
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   // Filter
   const filteredCases = cases.filter((c) => {
@@ -228,9 +230,9 @@ export function ArbitrationConsole() {
     return (
       <div className="rounded-lg border p-8 text-center">
         <Scale size={32} className="mx-auto text-gray-300 mb-3" />
-        <p className="font-medium text-gray-700 mb-1">No Arbitration Cases</p>
+        <p className="font-medium text-gray-700 mb-1">{t("empty.noCasesTitle")}</p>
         <p className="text-sm text-gray-400">
-          When grievances are escalated to arbitration, hearing schedules and case details will appear here.
+          {t("empty.noCasesBody")}
         </p>
       </div>
     );
@@ -247,7 +249,7 @@ export function ArbitrationConsole() {
             </div>
             <div>
               <p className="text-2xl font-bold">{activeCount}</p>
-              <p className="text-xs text-gray-500">Active Cases</p>
+              <p className="text-xs text-gray-500">{t("stats.activeCases")}</p>
             </div>
           </CardContent>
         </Card>
@@ -258,7 +260,7 @@ export function ArbitrationConsole() {
             </div>
             <div>
               <p className="text-2xl font-bold">{scheduledCount}</p>
-              <p className="text-xs text-gray-500">Scheduled Hearings</p>
+              <p className="text-xs text-gray-500">{t("stats.scheduledHearings")}</p>
             </div>
           </CardContent>
         </Card>
@@ -269,7 +271,7 @@ export function ArbitrationConsole() {
             </div>
             <div>
               <p className="text-2xl font-bold">{completedCount}</p>
-              <p className="text-xs text-gray-500">Completed / Settled</p>
+              <p className="text-xs text-gray-500">{t("stats.completedSettled")}</p>
             </div>
           </CardContent>
         </Card>
@@ -280,16 +282,16 @@ export function ArbitrationConsole() {
         <Card className="border-orange-200 bg-orange-50/50">
           <CardContent className="p-4">
             <h3 className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4" /> Upcoming Deadlines
+              <AlertTriangle className="w-4 h-4" /> {t("upcomingDeadlines")}
             </h3>
             <div className="space-y-1">
               {upcomingDeadlines.slice(0, 5).map((dl, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
                   <span className="text-gray-700">
-                    <span className="font-medium">{dl.caseNum}</span> — {dl.label} deadline
+                    <span className="font-medium">{dl.caseNum}</span> — {t("deadlineSuffix", { label: t(`deadlineLabels.${dl.label}`) })}
                   </span>
                   <span className={`font-medium ${dl.daysLeft <= 3 ? "text-red-600" : dl.daysLeft <= 7 ? "text-orange-600" : "text-gray-600"}`}>
-                    {dl.daysLeft === 0 ? "Today" : `${dl.daysLeft}d`} · {formatDate(dl.date)}
+                    {dl.daysLeft === 0 ? t("today") : t("daysShort", { days: dl.daysLeft })} · {formatDate(dl.date)}
                   </span>
                 </div>
               ))}
@@ -304,7 +306,7 @@ export function ArbitrationConsole() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by case number, board, or arbitrator…"
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -317,15 +319,15 @@ export function ArbitrationConsole() {
             onChange={(e) => setSelectedStatus(e.target.value as ArbitrationStatus | "all")}
             className="pl-10 pr-8 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="in_progress">Hearing In Progress</option>
-            <option value="adjourned">Adjourned</option>
-            <option value="reserved">Awaiting Award</option>
-            <option value="award_rendered">Award Rendered</option>
-            <option value="settled">Settled</option>
-            <option value="withdrawn">Withdrawn</option>
+            <option value="all">{t("statusOptions.all")}</option>
+            <option value="pending">{t("statuses.pending")}</option>
+            <option value="scheduled">{t("statuses.scheduled")}</option>
+            <option value="in_progress">{t("statuses.in_progress")}</option>
+            <option value="adjourned">{t("statuses.adjourned")}</option>
+            <option value="reserved">{t("statusOptions.reserved")}</option>
+            <option value="award_rendered">{t("statuses.award_rendered")}</option>
+            <option value="settled">{t("statuses.settled")}</option>
+            <option value="withdrawn">{t("statuses.withdrawn")}</option>
           </select>
         </div>
       </div>
@@ -339,7 +341,7 @@ export function ArbitrationConsole() {
             animate={{ opacity: 1 }}
             className="text-center py-8 text-sm text-gray-400"
           >
-            No arbitration cases match your filters.
+            {t("empty.noMatches")}
           </motion.div>
         ) : (
           filteredCases.map((arb, index) => {
@@ -368,7 +370,7 @@ export function ArbitrationConsole() {
                               {arb.arbitrationNumber}
                             </h3>
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${si.color}`}>
-                              {si.icon} {si.label}
+                              {si.icon} {t(`statuses.${arb.status}`)}
                             </span>
                             <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
                               {arb.boardType}
@@ -398,7 +400,7 @@ export function ArbitrationConsole() {
                         {arb.chairAppointee && (
                           <span className="flex items-center gap-1">
                             <Gavel className="w-3 h-3" />
-                            Chair: {arb.chairAppointee}
+                            {t("chairPrefix", { name: arb.chairAppointee })}
                           </span>
                         )}
                         {arb.estimatedCost != null && (
@@ -424,25 +426,25 @@ export function ArbitrationConsole() {
                             {/* Panel */}
                             <div>
                               <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                <Users className="w-4 h-4" /> Arbitration Panel
+                                <Users className="w-4 h-4" /> {t("panel.title")}
                               </h4>
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                                 <div>
-                                  <p className="text-gray-400 text-xs">Union Appointee</p>
+                                  <p className="text-gray-400 text-xs">{t("panel.unionAppointee")}</p>
                                   <p className="text-gray-700">{arb.unionAppointee || "—"}</p>
                                 </div>
                                 <div>
-                                  <p className="text-gray-400 text-xs">Employer Appointee</p>
+                                  <p className="text-gray-400 text-xs">{t("panel.employerAppointee")}</p>
                                   <p className="text-gray-700">{arb.employerAppointee || "—"}</p>
                                 </div>
                                 <div>
-                                  <p className="text-gray-400 text-xs">Chair</p>
+                                  <p className="text-gray-400 text-xs">{t("panel.chair")}</p>
                                   <p className="text-gray-700">{arb.chairAppointee || "—"}</p>
                                 </div>
                               </div>
                               {arb.arbitratorNames && arb.arbitratorNames.length > 0 && (
                                 <p className="text-xs text-gray-500 mt-1">
-                                  Panel: {arb.arbitratorNames.join(", ")}
+                                  {t("panel.panelList", { names: arb.arbitratorNames.join(", ") })}
                                 </p>
                               )}
                             </div>
@@ -450,7 +452,7 @@ export function ArbitrationConsole() {
                             {/* Deadlines */}
                             <div>
                               <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                <Clock className="w-4 h-4" /> Deadlines
+                                <Clock className="w-4 h-4" /> {t("deadlines.title")}
                               </h4>
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                                 {(
@@ -464,11 +466,11 @@ export function ArbitrationConsole() {
                                   const days = daysUntil(date);
                                   return (
                                     <div key={label}>
-                                      <p className="text-gray-400 text-xs">{label}</p>
+                                      <p className="text-gray-400 text-xs">{t(`deadlineLabels.${label}`)}</p>
                                       <p className="text-gray-700">{formatDate(date)}</p>
                                       {days != null && days >= 0 && (
                                         <p className={`text-xs ${days <= 3 ? "text-red-600 font-medium" : days <= 7 ? "text-orange-600" : "text-gray-500"}`}>
-                                          {days === 0 ? "Due today" : `${days} days left`}
+                                          {days === 0 ? t("dueToday") : t("daysLeft", { days })}
                                         </p>
                                       )}
                                     </div>
@@ -481,7 +483,7 @@ export function ArbitrationConsole() {
                             {arb.hearingDates && arb.hearingDates.length > 0 && (
                               <div>
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" /> Hearing Dates
+                                  <Calendar className="w-4 h-4" /> {t("hearingDates.title")}
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
                                   {arb.hearingDates.map((d, i) => (
@@ -500,23 +502,23 @@ export function ArbitrationConsole() {
                             {(arb.estimatedCost != null || arb.actualCost != null) && (
                               <div>
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                  <DollarSign className="w-4 h-4" /> Costs
+                                  <DollarSign className="w-4 h-4" /> {t("costs.title")}
                                 </h4>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                                   <div>
-                                    <p className="text-gray-400 text-xs">Estimated</p>
+                                    <p className="text-gray-400 text-xs">{t("costs.estimated")}</p>
                                     <p className="text-gray-700">{formatCurrency(arb.estimatedCost)}</p>
                                   </div>
                                   <div>
-                                    <p className="text-gray-400 text-xs">Actual</p>
+                                    <p className="text-gray-400 text-xs">{t("costs.actual")}</p>
                                     <p className="text-gray-700">{formatCurrency(arb.actualCost)}</p>
                                   </div>
                                   <div>
-                                    <p className="text-gray-400 text-xs">Union Share</p>
+                                    <p className="text-gray-400 text-xs">{t("costs.unionShare")}</p>
                                     <p className="text-gray-700">{arb.unionCostShare != null ? `${arb.unionCostShare}%` : "—"}</p>
                                   </div>
                                   <div>
-                                    <p className="text-gray-400 text-xs">Employer Share</p>
+                                    <p className="text-gray-400 text-xs">{t("costs.employerShare")}</p>
                                     <p className="text-gray-700">{arb.employerCostShare != null ? `${arb.employerCostShare}%` : "—"}</p>
                                   </div>
                                 </div>
@@ -527,14 +529,14 @@ export function ArbitrationConsole() {
                             {arb.awardSummary && (
                               <div>
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                  <Gavel className="w-4 h-4" /> Award
+                                  <Gavel className="w-4 h-4" /> {t("award.title")}
                                 </h4>
                                 <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
                                   {arb.awardSummary}
                                 </p>
                                 {arb.awardDate && (
                                   <p className="text-xs text-gray-400 mt-1">
-                                    Rendered: {formatDate(arb.awardDate)}
+                                    {t("award.rendered", { date: formatDate(arb.awardDate) })}
                                   </p>
                                 )}
                               </div>
@@ -548,7 +550,7 @@ export function ArbitrationConsole() {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
                               >
-                                <ExternalLink className="w-3 h-3" /> Join Virtual Hearing
+                                <ExternalLink className="w-3 h-3" /> {t("joinVirtual")}
                               </a>
                             )}
                           </div>

@@ -22,7 +22,9 @@ import { getUserRole } from "@/lib/auth/rbac-server";
 import { db } from "@/db/db";
 import { profiles } from "@/db/schema";
 import { organizationMembers } from "@/db/schema-organizations";
+import { organizations } from "@/db/schema-organizations";
 import { eq, sql } from "drizzle-orm";
+import { QcBilingualBanner } from "@/components/compliance/qc-bilingual-banner";
 // Credits system disabled — platform does not require credits
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
@@ -173,6 +175,21 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // Get user's organization and role via proper RBAC chain
   const organizationId = await getOrganizationIdForUser(userId);
   const userRole = await getUserRole(userId, organizationId);
+
+  // Fetch organization province for QC bilingual banner (Bill 96 / Law 25)
+  let organizationProvince: string | null = null;
+  if (organizationId) {
+    try {
+      const orgRow = (await db
+        .select({ provinceTerritory: organizations.provinceTerritory })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1))[0];
+      organizationProvince = orgRow?.provinceTerritory ?? null;
+    } catch (err) {
+      logger.warn('Failed to fetch organization province for QC banner', err);
+    }
+  }
   
   logger.debug('User role resolved via RBAC', {
     userId,
@@ -215,6 +232,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         
         {/* Main content area with organization selector */}
         <div className="flex-1 min-w-0 overflow-auto relative bg-linear-to-br from-slate-50 via-white to-blue-50">
+          {/* QC bilingual banner (Bill 96 / Law 25) */}
+          <QcBilingualBanner province={organizationProvince} />
           {/* Organization selector and breadcrumb in header - sticky at top */}
           <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 px-3 md:px-6 py-2.5 md:py-4 flex justify-between items-center gap-2 min-h-12 md:min-h-15">
             <OrganizationBreadcrumb />

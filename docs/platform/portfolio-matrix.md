@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-25
+> Generated: 2026-04-26
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |

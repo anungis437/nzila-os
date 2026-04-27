@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   FileBarChart,
@@ -44,6 +45,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function CompliancePage() {
+  const t = useTranslations("compliancePage");
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
   const [reports, setReports] = useState<ComplianceReport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,17 +88,17 @@ export default function CompliancePage() {
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Shield className="h-8 w-8" />
-            Employer Compliance Dashboard
+            {t("header.title")}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Contract violations, compliance alerts, and employer reporting
+            {t("header.description")}
           </p>
         </div>
         <button
           onClick={fetchData}
           className="flex items-center gap-1 rounded border px-3 py-2 text-sm hover:bg-gray-50"
         >
-          <RefreshCw className="h-4 w-4" /> Refresh
+          <RefreshCw className="h-4 w-4" /> {t("header.refresh")}
         </button>
       </div>
 
@@ -105,7 +107,7 @@ export default function CompliancePage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Active Alerts</p>
+              <p className="text-sm text-muted-foreground">{t("stats.activeAlerts")}</p>
               <p className="text-2xl font-bold">{unresolvedAlerts.length}</p>
             </div>
             <AlertCircle className="h-8 w-8 text-red-600" />
@@ -114,7 +116,7 @@ export default function CompliancePage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Critical</p>
+              <p className="text-sm text-muted-foreground">{t("stats.critical")}</p>
               <p className="text-2xl font-bold text-red-600">{criticalCount}</p>
             </div>
             <AlertCircle className="h-8 w-8 text-red-600" />
@@ -123,7 +125,7 @@ export default function CompliancePage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">High Priority</p>
+              <p className="text-sm text-muted-foreground">{t("stats.highPriority")}</p>
               <p className="text-2xl font-bold text-orange-600">{highCount}</p>
             </div>
             <Clock className="h-8 w-8 text-orange-600" />
@@ -132,7 +134,7 @@ export default function CompliancePage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Resolved</p>
+              <p className="text-sm text-muted-foreground">{t("stats.resolved")}</p>
               <p className="text-2xl font-bold text-green-600">{resolvedCount}</p>
             </div>
             <CheckCircle2 className="h-8 w-8 text-green-600" />
@@ -146,7 +148,7 @@ export default function CompliancePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <AlertCircle className="h-4 w-4" /> Active Compliance Alerts
+              <AlertCircle className="h-4 w-4" /> {t("sections.activeAlerts")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -157,7 +159,7 @@ export default function CompliancePage() {
             ) : unresolvedAlerts.length === 0 ? (
               <div className="py-8 text-center">
                 <CheckCircle2 className="mx-auto mb-2 h-10 w-10 text-green-500" />
-                <p className="text-sm text-gray-500">All clear — no active alerts</p>
+                <p className="text-sm text-gray-500">{t("sections.allClear")}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -194,7 +196,7 @@ export default function CompliancePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <FileBarChart className="h-4 w-4" /> Recent Compliance Reports
+              <FileBarChart className="h-4 w-4" /> {t("sections.recentReports")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -203,7 +205,7 @@ export default function CompliancePage() {
                 <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-600" />
               </div>
             ) : reports.length === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-400">No reports yet</p>
+              <p className="py-8 text-center text-sm text-gray-400">{t("sections.noReports")}</p>
             ) : (
               <div className="space-y-3">
                 {reports.slice(0, 10).map((report) => (
@@ -216,7 +218,7 @@ export default function CompliancePage() {
                         {report.reportType.replace(/_/g, " ")}
                       </p>
                       <p className="text-xs text-gray-500">
-                        Employer: {report.employerName || report.employerId}
+                        {t("sections.employerLabel")}: {report.employerName || report.employerId}
                       </p>
                     </div>
                     <span className="text-xs text-gray-400">
@@ -233,44 +235,44 @@ export default function CompliancePage() {
       {/* Charter Compliance (preserved from original) */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="mb-4 text-xl font-semibold">Charter Compliance</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t("charter.title")}</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded bg-muted p-3">
-              <span>Elections & Democracy</span>
+              <span>{t("charter.items.electionsDemocracy")}</span>
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex items-center justify-between rounded bg-muted p-3">
-              <span>Financial Reporting</span>
+              <span>{t("charter.items.financialReporting")}</span>
               <Clock className="h-5 w-5 text-yellow-600" />
             </div>
             <div className="flex items-center justify-between rounded bg-muted p-3">
-              <span>Member Rights</span>
+              <span>{t("charter.items.memberRights")}</span>
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
           </div>
         </div>
 
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="mb-4 text-xl font-semibold">Reporting Deadlines</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t("deadlines.title")}</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded bg-muted p-3">
               <div>
-                <p className="font-medium">Annual Financial Report</p>
-                <p className="text-sm text-muted-foreground">Due: March 31</p>
+                <p className="font-medium">{t("deadlines.items.annualFinancialReport.name")}</p>
+                <p className="text-sm text-muted-foreground">{t("deadlines.items.annualFinancialReport.due")}</p>
               </div>
               <Clock className="h-5 w-5 text-yellow-600" />
             </div>
             <div className="flex items-center justify-between rounded bg-muted p-3">
               <div>
-                <p className="font-medium">Election Results</p>
-                <p className="text-sm text-muted-foreground">Due: Within 30 days</p>
+                <p className="font-medium">{t("deadlines.items.electionResults.name")}</p>
+                <p className="text-sm text-muted-foreground">{t("deadlines.items.electionResults.due")}</p>
               </div>
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex items-center justify-between rounded bg-muted p-3">
               <div>
-                <p className="font-medium">Constitution Updates</p>
-                <p className="text-sm text-muted-foreground">As needed</p>
+                <p className="font-medium">{t("deadlines.items.constitutionUpdates.name")}</p>
+                <p className="text-sm text-muted-foreground">{t("deadlines.items.constitutionUpdates.due")}</p>
               </div>
               <AlertCircle className="h-5 w-5 text-muted-foreground" />
             </div>

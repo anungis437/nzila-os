@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,7 @@ interface VendorListProps {
 }
 
 export default function VendorList({ organizationId: _organizationId }: VendorListProps) {
+  const t = useTranslations('vendorList');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,8 +56,8 @@ export default function VendorList({ organizationId: _organizationId }: VendorLi
       setVendors(data.data.vendors || []);
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to load vendors',
+        title: t('errorTitle'),
+        description: t('loadError'),
         variant: 'destructive',
       });
     } finally {
@@ -70,79 +72,80 @@ export default function VendorList({ organizationId: _organizationId }: VendorLi
       suspended: 'destructive',
       archived: 'outline',
     };
-    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
+    const isKnown = (['active','inactive','suspended','archived'] as const).includes(status as 'active');
+    return <Badge variant={variants[status] || 'outline'}>{isKnown ? t(`statuses.${status}` as 'statuses.active') : status}</Badge>;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Vendors</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Manage vendor/supplier directory
+            {t('description')}
           </p>
         </div>
         <Button onClick={() => window.location.href = '/dashboard/financial/vendors/new'}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Vendor
+          {t('addVendor')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Search & Filter</CardTitle>
+          <CardTitle>{t('searchFilter')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Input
-              placeholder="Search vendors..."
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t('allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="">{t('allStatuses')}</SelectItem>
+                <SelectItem value="active">{t('statuses.active')}</SelectItem>
+                <SelectItem value="inactive">{t('statuses.inactive')}</SelectItem>
+                <SelectItem value="suspended">{t('statuses.suspended')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={fetchVendors}>Search</Button>
+            <Button onClick={fetchVendors}>{t('search')}</Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Vendor Directory</CardTitle>
+          <CardTitle>{t('directoryTitle')}</CardTitle>
           <CardDescription>
-            {vendors.length} vendor{vendors.length !== 1 ? 's' : ''} found
+            {t(vendors.length === 1 ? 'found' : 'foundPlural', { count: vendors.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading vendors...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('loading')}</div>
           ) : vendors.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No vendors found
+              {t('empty')}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Vendor #</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Payment Terms</TableHead>
-                  <TableHead>YTD Spending</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('table.vendorNumber')}</TableHead>
+                  <TableHead>{t('table.name')}</TableHead>
+                  <TableHead>{t('table.type')}</TableHead>
+                  <TableHead>{t('table.contact')}</TableHead>
+                  <TableHead>{t('table.paymentTerms')}</TableHead>
+                  <TableHead>{t('table.ytdSpending')}</TableHead>
+                  <TableHead>{t('table.balance')}</TableHead>
+                  <TableHead>{t('table.status')}</TableHead>
+                  <TableHead>{t('table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -9,6 +9,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, CheckCircle, FileText, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
  
 import { format } from "date-fns";
 
@@ -38,12 +39,13 @@ export function NegotiationTimeline({
   proposals = [],
   agreements = [],
 }: NegotiationTimelineProps) {
+  const t = useTranslations("negotiationTimeline");
   // Combine all events into timeline
   const timelineEvents: TimelineEvent[] = [
     ...sessions.map(s => ({
       id: s.id,
       type: "session" as const,
-      title: `Session ${s.sessionNumber}: ${s.title}`,
+      title: t("sessionTitle", { number: s.sessionNumber, title: s.title }),
       description: s.summary,
       date: s.scheduledDate || s.actualStartDate,
       status: s.status,
@@ -52,8 +54,8 @@ export function NegotiationTimeline({
     ...proposals.map(p => ({
       id: p.id,
       type: "proposal" as const,
-      title: `Proposal: ${p.title}`,
-      description: `${p.proposalType} - ${p.status}`,
+      title: t("proposalTitle", { title: p.title }),
+      description: t("proposalDescription", { type: p.proposalType, status: p.status }),
       date: p.submittedDate || p.createdAt,
       status: p.status,
       icon: <FileText className="h-4 w-4" />,
@@ -61,8 +63,8 @@ export function NegotiationTimeline({
     ...agreements.map(a => ({
       id: a.id,
       type: "agreement" as const,
-      title: `Tentative Agreement: ${a.title}`,
-      description: `Category: ${a.clauseCategory}`,
+      title: t("agreementTitle", { title: a.title }),
+      description: t("agreementCategory", { category: a.clauseCategory }),
       date: a.agreedDate,
       status: a.ratified ? 'ratified' : 'pending',
       icon: <CheckCircle className="h-4 w-4" />,
@@ -87,17 +89,17 @@ export function NegotiationTimeline({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Negotiation Timeline</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Chronological view of all bargaining activities
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {timelineEvents.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <AlertCircle className="mx-auto h-12 w-12 mb-4" />
-            <p>No timeline events yet</p>
-            <p className="text-sm">Events will appear as sessions and proposals are added</p>
+            <p>{t("empty")}</p>
+            <p className="text-sm">{t("emptyHint")}</p>
           </div>
         ) : (
           <div className="relative space-y-4">
@@ -117,7 +119,7 @@ export function NegotiationTimeline({
                         {event.icon}
                         <h4 className="font-semibold">{event.title}</h4>
                         <Badge variant="outline" className="text-xs">
-                          {event.type}
+                          {t(`types.${event.type}` as 'types.session')}
                         </Badge>
                       </div>
                       {event.description && (

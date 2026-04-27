@@ -12,6 +12,7 @@
 export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { db } from '@/db';
 import { movementTrends } from '@/db/schema/domains/marketing';
 import { gte } from 'drizzle-orm';
@@ -45,11 +46,22 @@ interface ExportPageProps {
   }>;
 }
 
+export async function generateMetadata({ params }: Pick<ExportPageProps, 'params'>) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'movementInsightsExportPage.metadata' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
+
 export default async function LegislativeBriefExportPage({
   params,
   searchParams,
 }: ExportPageProps) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'movementInsightsExportPage' });
   const { focusArea = 'Workplace Dispute Resolution', jurisdiction, timeframe: _timeframe = 'quarter' } = await searchParams;
 
   // Role gate — same requirement as the parent movement-insights page.
@@ -83,15 +95,15 @@ export default async function LegislativeBriefExportPage({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-4xl font-bold">Legislative Brief</h1>
+          <h1 className="text-4xl font-bold">{t('header.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Export anonymized insights for advocacy and policy work
+            {t('header.description')}
           </p>
         </div>
 
         <Button asChild>
           <Link href={`/${locale}/dashboard/movement-insights`}>
-            Back to Insights
+            {t('header.backToInsights')}
           </Link>
         </Button>
       </div>
@@ -108,14 +120,14 @@ export default async function LegislativeBriefExportPage({
             </div>
             <Button>
               <Download className="mr-2 h-4 w-4" />
-              Export PDF
+              {t('preview.exportPdf')}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Key Findings */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Key Findings</h3>
+            <h3 className="text-lg font-semibold mb-3">{t('preview.keyFindings')}</h3>
             <ul className="space-y-2">
               {brief.keyFindings.map((finding, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
@@ -131,7 +143,7 @@ export default async function LegislativeBriefExportPage({
           {/* Recommendations */}
           {brief.recommendations.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
+              <h3 className="text-lg font-semibold mb-3">{t('preview.recommendations')}</h3>
               <ul className="space-y-2">
                 {brief.recommendations.map((rec, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
@@ -150,7 +162,7 @@ export default async function LegislativeBriefExportPage({
             <div className="flex items-start gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 mt-0.5" />
               <div>
-                <strong>Data Source:</strong> {brief.dataSource}
+                <strong>{t('preview.dataSourceLabel')}</strong> {brief.dataSource}
               </div>
             </div>
           </div>
@@ -160,57 +172,57 @@ export default async function LegislativeBriefExportPage({
       {/* Customization Options */}
       <Card>
         <CardHeader>
-          <CardTitle>Customize Brief</CardTitle>
+          <CardTitle>{t('customize.title')}</CardTitle>
           <CardDescription>
-            Filter insights by focus area, jurisdiction, or timeframe
+            {t('customize.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Focus Area</label>
+              <label className="text-sm font-medium">{t('customize.focusAreaLabel')}</label>
               <div className="flex flex-wrap gap-2">
                 <Badge 
                   variant={focusArea === 'Workplace Dispute Resolution' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Workplace Disputes
+                  {t('customize.focusAreaOptions.workplaceDisputes')}
                 </Badge>
                 <Badge 
                   variant={focusArea === 'Healthcare' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Healthcare
+                  {t('customize.focusAreaOptions.healthcare')}
                 </Badge>
                 <Badge 
                   variant={focusArea === 'Education' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Education
+                  {t('customize.focusAreaOptions.education')}
                 </Badge>
                 <Badge 
                   variant={focusArea === 'Public Sector' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Public Sector
+                  {t('customize.focusAreaOptions.publicSector')}
                 </Badge>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Jurisdiction</label>
+              <label className="text-sm font-medium">{t('customize.jurisdictionLabel')}</label>
               <div className="flex flex-wrap gap-2">
                 <Badge 
                   variant={!jurisdiction ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  All Canada
+                  {t('customize.jurisdictionOptions.allCanada')}
                 </Badge>
                 <Badge 
                   variant={jurisdiction === 'ON' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Ontario
+                  {t('customize.jurisdictionOptions.ontario')}
                 </Badge>
                 <Badge 
                   variant={jurisdiction === 'BC' ? 'default' : 'outline'}
@@ -222,7 +234,7 @@ export default async function LegislativeBriefExportPage({
                   variant={jurisdiction === 'QC' ? 'default' : 'outline'}
                   className="cursor-pointer"
                 >
-                  Quebec
+                  {t('customize.jurisdictionOptions.quebec')}
                 </Badge>
               </div>
             </div>
@@ -235,25 +247,21 @@ export default async function LegislativeBriefExportPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            How to Use This Brief
+            {t('usage.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p>
-            <strong>For Union Leadership:</strong> Use these insights in strategic planning,
-            contract negotiations, and member communications.
+            <strong>{t('usage.unionLeadership.label')}</strong> {t('usage.unionLeadership.text')}
           </p>
           <p>
-            <strong>For CLC Advocacy:</strong> Reference anonymized data in legislative
-            submissions, policy papers, and public reports.
+            <strong>{t('usage.clcAdvocacy.label')}</strong> {t('usage.clcAdvocacy.text')}
           </p>
           <p>
-            <strong>For Media Relations:</strong> Cite cross-union trends to demonstrate
-            systemic workplace issues requiring policy solutions.
+            <strong>{t('usage.mediaRelations.label')}</strong> {t('usage.mediaRelations.text')}
           </p>
           <p className="text-muted-foreground">
-            <strong>Note:</strong> All data is anonymized. No individual organization or member can
-            be identified. Minimum 5 unions and 10 cases required for all metrics.
+            <strong>{t('usage.note.label')}</strong> {t('usage.note.text')}
           </p>
         </CardContent>
       </Card>

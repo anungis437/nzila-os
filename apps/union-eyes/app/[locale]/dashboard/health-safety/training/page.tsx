@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ interface TrainingRecord {
 }
 
 export default function TrainingPage() {
+  const t = useTranslations("healthSafetyTrainingPage");
   const organizationId = useOrganizationId();
   const [searchQuery, setSearchQuery] = useState("");
   const [_records, _setRecords] = useState<TrainingRecord[]>([]);
@@ -75,12 +77,12 @@ export default function TrainingPage() {
         });
       }
     } catch (error) {
-      logger.error("Failed to load training data:", error);
-      toast.error("Failed to load training records");
+      logger.error(t("errors.failedToLoadTrainingData"), error);
+      toast.error(t("errors.failedToLoadTrainingRecords"));
     } finally {
       setLoading(false);
     }
-  }, [organizationId]);
+  }, [organizationId, t]);
 
   useEffect(() => {
     loadTrainingData();
@@ -90,9 +92,9 @@ export default function TrainingPage() {
     return (
       <div className="p-8 text-center">
         <GraduationCap className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-2xl font-bold mb-2">No Organization Selected</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("states.noOrganizationSelectedTitle")}</h2>
         <p className="text-muted-foreground">
-          Please select an organization to view training records.
+          {t("states.noOrganizationSelectedDescription")}
         </p>
       </div>
     );
@@ -112,22 +114,22 @@ export default function TrainingPage() {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Health & Safety
+            {t("header.back")}
           </Link>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <GraduationCap className="h-8 w-8 text-purple-600" />
-                Safety Training
+                {t("header.title")}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Track certifications, training records and compliance
+                {t("header.description")}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
-                Export
+                {t("header.export")}
               </Button>
             </div>
           </div>
@@ -142,45 +144,45 @@ export default function TrainingPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Records</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("stats.totalRecords.title")}</CardTitle>
               <BookOpen className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalRecords}</div>
-              <p className="text-xs text-muted-foreground">Training records on file</p>
+              <p className="text-xs text-muted-foreground">{t("stats.totalRecords.description")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Certified Members</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("stats.certifiedMembers.title")}</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{stats.certifiedMembers}</div>
-              <p className="text-xs text-muted-foreground">Up to date certifications</p>
+              <p className="text-xs text-muted-foreground">{t("stats.certifiedMembers.description")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("stats.expiringSoon.title")}</CardTitle>
               <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</div>
-              <p className="text-xs text-muted-foreground">Within 30 days</p>
+              <p className="text-xs text-muted-foreground">{t("stats.expiringSoon.description")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("stats.overdue.title")}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
-              <p className="text-xs text-muted-foreground">Requires immediate action</p>
+              <p className="text-xs text-muted-foreground">{t("stats.overdue.description")}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -195,7 +197,7 @@ export default function TrainingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Training Records
+                {t("records.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -203,7 +205,7 @@ export default function TrainingPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by member name or certification..."
+                    placeholder={t("records.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -211,13 +213,13 @@ export default function TrainingPage() {
                 </div>
                 <Select defaultValue="all">
                   <SelectTrigger className="w-45">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t("records.statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="current">Current</SelectItem>
-                    <SelectItem value="expiring">Expiring Soon</SelectItem>
-                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="all">{t("records.statusOptions.all")}</SelectItem>
+                    <SelectItem value="current">{t("records.statusOptions.current")}</SelectItem>
+                    <SelectItem value="expiring">{t("records.statusOptions.expiringSoon")}</SelectItem>
+                    <SelectItem value="expired">{t("records.statusOptions.expired")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -229,15 +231,15 @@ export default function TrainingPage() {
               ) : stats.totalRecords === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">No Training Records Yet</h3>
+                  <h3 className="text-lg font-medium mb-2">{t("records.empty.title")}</h3>
                   <p className="text-sm">
-                    Training records will appear here once safety training programs are configured.
+                    {t("records.empty.description")}
                   </p>
                 </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
                   <p className="text-sm">
-                    {stats.totalRecords} training records found. Detailed view coming soon.
+                    {t("records.summary", { count: stats.totalRecords })}
                   </p>
                 </div>
               )}

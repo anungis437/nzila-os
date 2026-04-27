@@ -16,6 +16,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ── Types ── */
 interface Service {
@@ -277,21 +278,25 @@ function serviceStatusIcon(status: string) {
   return '🔴';
 }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+function formatDate(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function formatDateTime(d: string) {
-  return new Date(d).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+function formatDateTime(d: string, locale: string) {
+  return new Date(d).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 /* ── Page ── */
 export default async function OperationsDashboard(props: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { locale: routeLocale } = await props.params;
+  const locale = await getLocale();
+  const t = await getTranslations('operationsPage');
   await requireUser();
   const hasAccess = await hasMinRole('platform_lead');
-  if (!hasAccess) redirect('/dashboard');
+  if (!hasAccess) redirect(`/${routeLocale}/dashboard`);
 
   const searchParams = await props.searchParams;
   const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'overview';
@@ -321,11 +326,11 @@ export default async function OperationsDashboard(props: {
 
   const tabs = ['overview', 'incidents', 'sla', 'releases', 'capacity'] as const;
   const tabLabels: Record<string, string> = {
-    overview: 'Overview',
-    incidents: 'Incidents',
-    sla: 'SLA & Performance',
-    releases: 'Releases',
-    capacity: 'Capacity',
+    overview: t('tabOverview'),
+    incidents: t('tabIncidents'),
+    sla: t('tabSla'),
+    releases: t('tabReleases'),
+    capacity: t('tabCapacity'),
   };
 
   const incidentStatuses = ['all', 'investigating', 'monitoring', 'open', 'resolved'];
@@ -333,23 +338,21 @@ export default async function OperationsDashboard(props: {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Platform Operations</h1>
-        <p className="text-muted-foreground mt-1">
-          Real-time platform health, incidents, and operational metrics
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 border-b pb-2">
-        {tabs.map(t => (
+        {tabs.map(tabKey => (
           <Link
-            key={t}
-            href={`?tab=${t}`}
+            key={tabKey}
+            href={`?tab=${tabKey}`}
             className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-              tab === t ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+              tab === tabKey ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
             }`}
           >
-            {tabLabels[t]}
+            {tabLabels[tabKey]}
           </Link>
         ))}
       </div>
@@ -361,7 +364,7 @@ export default async function OperationsDashboard(props: {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">System Health</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('systemHealthTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -369,15 +372,15 @@ export default async function OperationsDashboard(props: {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {overview.degradedServices > 0
-                    ? `${overview.degradedServices} degraded`
-                    : 'All services healthy'}
+                    ? t('degradedServicesLabel', { count: overview.degradedServices })
+                    : t('allServicesHealthy')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('activeIncidentsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${overview.activeIncidents > 0 ? 'text-red-600' : 'text-green-600'}`}>
@@ -385,32 +388,32 @@ export default async function OperationsDashboard(props: {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {overview.highSeverityIncidents > 0
-                    ? `${overview.highSeverityIncidents} high severity`
-                    : 'No high severity'}
+                    ? t('highSeverityLabel', { count: overview.highSeverityIncidents })
+                    : t('noHighSeverity')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Platform Uptime</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('platformUptimeTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{overview.avgUptime}%</div>
                 <p className="text-xs text-muted-foreground">
-                  SLAs: {overview.slasMeeting}/{overview.slasTotal} meeting target
+                  {t('slasMeetingLabel', { meeting: overview.slasMeeting, total: overview.slasTotal })}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Logins (7d)</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('logins7dTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{overview.totalLoginsPast7d}</div>
                 <p className="text-xs text-muted-foreground">
-                  {overview.upcomingReleases} release{overview.upcomingReleases !== 1 ? 's' : ''} scheduled
+                  {t('releasesScheduled', { count: overview.upcomingReleases })}
                 </p>
               </CardContent>
             </Card>
@@ -420,7 +423,7 @@ export default async function OperationsDashboard(props: {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Service Health</CardTitle>
+                <CardTitle className="text-lg">{t('serviceHealthTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {services.map(s => (
@@ -440,11 +443,11 @@ export default async function OperationsDashboard(props: {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Active Incidents</CardTitle>
+                <CardTitle className="text-lg">{t('activeIncidentsTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {incidents.filter(i => i.status !== 'resolved').length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No active incidents</p>
+                  <p className="text-sm text-muted-foreground">{t('noActiveIncidents')}</p>
                 ) : (
                   <div className="space-y-3">
                     {incidents
@@ -460,7 +463,7 @@ export default async function OperationsDashboard(props: {
                             <p className="text-sm text-muted-foreground">{inc.title}</p>
                           </div>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${statusBadge(inc.status)}`}>
-                            {inc.status}
+                            {inc.status === 'investigating' ? t('statusInvestigating') : inc.status === 'monitoring' ? t('statusMonitoring') : inc.status === 'open' ? t('statusOpen') : inc.status === 'resolved' ? t('statusResolved') : inc.status}
                           </span>
                         </div>
                       ))}
@@ -473,7 +476,7 @@ export default async function OperationsDashboard(props: {
           {/* Recent releases */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Recent Releases</CardTitle>
+              <CardTitle className="text-lg">{t('recentReleasesTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -485,12 +488,12 @@ export default async function OperationsDashboard(props: {
                         {rel.title && <span className="text-sm text-muted-foreground">— {rel.title}</span>}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {rel.featureCount} features, {rel.bugfixCount} fixes
+                        {t('releaseCounts', { features: rel.featureCount, fixes: rel.bugfixCount })}
                       </p>
                     </div>
                     <div className="text-right">
                       {rel.releaseDate && (
-                        <p className="text-xs text-muted-foreground">{formatDate(rel.releaseDate)}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(rel.releaseDate, locale)}</p>
                       )}
                       <Badge variant={rel.status === 'deployed' ? 'default' : 'secondary'}>
                         {rel.status}
@@ -517,7 +520,7 @@ export default async function OperationsDashboard(props: {
                   statusFilter === s ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                 }`}
               >
-                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'all' ? t('filterAll') : s === 'investigating' ? t('statusInvestigating') : s === 'monitoring' ? t('statusMonitoring') : s === 'open' ? t('statusOpen') : t('statusResolved')}
               </Link>
             ))}
           </div>
@@ -525,7 +528,7 @@ export default async function OperationsDashboard(props: {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                Incidents {statusFilter !== 'all' && `— ${statusFilter}`}
+                {t('incidentsTitle')} {statusFilter !== 'all' && `— ${statusFilter === 'investigating' ? t('statusInvestigating') : statusFilter === 'monitoring' ? t('statusMonitoring') : statusFilter === 'open' ? t('statusOpen') : t('statusResolved')}`}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -533,13 +536,13 @@ export default async function OperationsDashboard(props: {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="pb-2 font-medium">ID</th>
-                      <th className="pb-2 font-medium">Title</th>
-                      <th className="pb-2 font-medium">Severity</th>
-                      <th className="pb-2 font-medium">Status</th>
-                      <th className="pb-2 font-medium">Service</th>
-                      <th className="pb-2 font-medium">Reported</th>
-                      <th className="pb-2 font-medium">Duration</th>
+                      <th className="pb-2 font-medium">{t('tableId')}</th>
+                      <th className="pb-2 font-medium">{t('tableTitle')}</th>
+                      <th className="pb-2 font-medium">{t('tableSeverity')}</th>
+                      <th className="pb-2 font-medium">{t('tableStatus')}</th>
+                      <th className="pb-2 font-medium">{t('tableService')}</th>
+                      <th className="pb-2 font-medium">{t('tableReported')}</th>
+                      <th className="pb-2 font-medium">{t('tableDuration')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -552,7 +555,7 @@ export default async function OperationsDashboard(props: {
                             <p className="text-xs text-muted-foreground mt-0.5">{inc.description}</p>
                           )}
                           {inc.rootCause && (
-                            <p className="text-xs text-blue-600 mt-0.5">Root cause: {inc.rootCause}</p>
+                            <p className="text-xs text-blue-600 mt-0.5">{t('rootCauseLabel', { value: inc.rootCause })}</p>
                           )}
                         </td>
                         <td className="py-2">
@@ -560,17 +563,17 @@ export default async function OperationsDashboard(props: {
                         </td>
                         <td className="py-2">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${statusBadge(inc.status)}`}>
-                            {inc.status}
+                            {inc.status === 'investigating' ? t('statusInvestigating') : inc.status === 'monitoring' ? t('statusMonitoring') : inc.status === 'open' ? t('statusOpen') : inc.status === 'resolved' ? t('statusResolved') : inc.status}
                           </span>
                         </td>
-                        <td className="py-2 text-muted-foreground">{inc.serviceName ?? '—'}</td>
-                        <td className="py-2 text-xs text-muted-foreground">{formatDateTime(inc.reportedAt)}</td>
+                        <td className="py-2 text-muted-foreground">{inc.serviceName ?? t('emptyDash')}</td>
+                        <td className="py-2 text-xs text-muted-foreground">{formatDateTime(inc.reportedAt, locale)}</td>
                         <td className="py-2 text-xs">
                           {inc.durationMinutes != null
-                            ? `${Math.floor(inc.durationMinutes / 60)}h ${inc.durationMinutes % 60}m`
+                            ? t('durationHoursMins', { hours: Math.floor(inc.durationMinutes / 60), mins: inc.durationMinutes % 60 })
                             : inc.status === 'resolved'
-                              ? '—'
-                              : 'Ongoing'}
+                              ? t('emptyDash')
+                              : t('ongoing')}
                         </td>
                       </tr>
                     ))}
@@ -589,7 +592,7 @@ export default async function OperationsDashboard(props: {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                Current Month — {new Date().toLocaleString('en-CA', { month: 'long', year: 'numeric' })}
+                {t('currentMonthTitle', { month: new Date().toLocaleString(locale, { month: 'long', year: 'numeric' }) })}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -599,7 +602,7 @@ export default async function OperationsDashboard(props: {
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{m.metricName}</p>
                       <p className="text-xs text-muted-foreground">
-                        Target: {m.targetValue}{m.unit === '%' || m.unit === 'ms' || m.unit === 'seconds' ? '' : ' '}{m.unit}
+                        {t('targetLabel', { value: `${m.targetValue}${m.unit === '%' || m.unit === 'ms' || m.unit === 'seconds' ? '' : ' '}${m.unit}` })}
                       </p>
                     </div>
                     <div className="text-right">
@@ -607,7 +610,7 @@ export default async function OperationsDashboard(props: {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         m.status === 'meeting' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {m.status}
+                        {m.status === 'meeting' ? t('statusMeeting') : t('statusMissing')}
                       </span>
                     </div>
                   </div>
@@ -621,11 +624,11 @@ export default async function OperationsDashboard(props: {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  Previous Month — {(() => {
+                  {t('previousMonthTitle', { month: (() => {
                     const d = new Date();
                     d.setMonth(d.getMonth() - 1);
-                    return d.toLocaleString('en-CA', { month: 'long', year: 'numeric' });
-                  })()}
+                    return d.toLocaleString(locale, { month: 'long', year: 'numeric' });
+                  })() })}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -633,10 +636,10 @@ export default async function OperationsDashboard(props: {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-left">
-                        <th className="pb-2 font-medium">Metric</th>
-                        <th className="pb-2 font-medium">Value</th>
-                        <th className="pb-2 font-medium">Target</th>
-                        <th className="pb-2 font-medium">Status</th>
+                        <th className="pb-2 font-medium">{t('tableMetric')}</th>
+                        <th className="pb-2 font-medium">{t('tableValue')}</th>
+                        <th className="pb-2 font-medium">{t('tableTarget')}</th>
+                        <th className="pb-2 font-medium">{t('tableStatus')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -649,7 +652,7 @@ export default async function OperationsDashboard(props: {
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
                               m.status === 'meeting' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                             }`}>
-                              {m.status}
+                              {m.status === 'meeting' ? t('statusMeeting') : t('statusMissing')}
                             </span>
                           </td>
                         </tr>
@@ -668,7 +671,7 @@ export default async function OperationsDashboard(props: {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Release History</CardTitle>
+              <CardTitle className="text-lg">{t('releaseHistoryTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -682,15 +685,15 @@ export default async function OperationsDashboard(props: {
                         </Badge>
                       </div>
                       <div className="text-right text-sm text-muted-foreground">
-                        {rel.releaseDate && formatDate(rel.releaseDate)}
-                        {rel.deployedBy && <span className="ml-2">by {rel.deployedBy}</span>}
+                        {rel.releaseDate && formatDate(rel.releaseDate, locale)}
+                        {rel.deployedBy && <span className="ml-2">{t('deployedByLabel', { value: rel.deployedBy })}</span>}
                       </div>
                     </div>
                     {rel.title && <p className="font-medium">{rel.title}</p>}
                     {rel.notes && <p className="text-sm text-muted-foreground">{rel.notes}</p>}
                     <div className="flex gap-4 text-xs text-muted-foreground">
-                      <span>{rel.featureCount} feature{rel.featureCount !== 1 ? 's' : ''}</span>
-                      <span>{rel.bugfixCount} bugfix{rel.bugfixCount !== 1 ? 'es' : ''}</span>
+                      <span>{t('featuresCount', { count: rel.featureCount })}</span>
+                      <span>{t('bugfixesCount', { count: rel.bugfixCount })}</span>
                     </div>
                   </div>
                 ))}
@@ -705,7 +708,7 @@ export default async function OperationsDashboard(props: {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Resource Utilization</CardTitle>
+              <CardTitle className="text-lg">{t('resourceUtilizationTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {capacity.map(c => {
@@ -726,8 +729,8 @@ export default async function OperationsDashboard(props: {
                       />
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Warning: {c.thresholdWarning}%</span>
-                      <span>Critical: {c.thresholdCritical}%</span>
+                      <span>{t('warningLabel', { value: c.thresholdWarning })}</span>
+                      <span>{t('criticalLabel', { value: c.thresholdCritical })}</span>
                     </div>
                   </div>
                 );
@@ -750,7 +753,7 @@ export default async function OperationsDashboard(props: {
                       {pct.toFixed(1)}%
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {c.currentUsage} {c.unit} of {c.totalCapacity} {c.unit}
+                      {t('capacityUsageLabel', { used: c.currentUsage, unit: c.unit, total: c.totalCapacity })}
                     </p>
                   </CardContent>
                 </Card>

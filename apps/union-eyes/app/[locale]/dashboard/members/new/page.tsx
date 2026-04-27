@@ -4,16 +4,17 @@
  */
 "use client";
 
-
-export const dynamic = 'force-dynamic';
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 import { motion } from "framer-motion";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Briefcase, 
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
   Calendar,
   Save,
   X,
@@ -40,6 +41,7 @@ interface CreateMemberForm {
 }
 
 export default function CreateMemberPage() {
+  const t = useTranslations('membersNewPage');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,13 +104,13 @@ export default function CreateMemberPage() {
             className="mb-4 hover:bg-white/50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Members
+            {t('backToMembers')}
           </Button>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Add New Member
+            {t('pageTitle')}
           </h1>
           <p className="text-gray-600">
-            Fill out the form below to add a new member to your organization
+            {t('pageDescription')}
           </p>
         </motion.div>
 
@@ -133,7 +135,7 @@ export default function CreateMemberPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Member Information
+                {t('memberInformationTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -141,13 +143,13 @@ export default function CreateMemberPage() {
                 {/* Basic Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Basic Information
+                    {t('basicInformationSection')}
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name *
+                        {t('fullNameLabel')}
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -158,14 +160,14 @@ export default function CreateMemberPage() {
                           onChange={handleChange}
                           required
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="John Smith"
+                          placeholder={t('fullNamePlaceholder')}
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address *
+                        {t('emailAddressLabel')}
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -176,14 +178,14 @@ export default function CreateMemberPage() {
                           onChange={handleChange}
                           required
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="john.smith@example.com"
+                          placeholder={t('emailAddressPlaceholder')}
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
+                        {t('phoneNumberLabel')}
                       </label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -193,14 +195,14 @@ export default function CreateMemberPage() {
                           value={formData.phone}
                           onChange={handleChange}
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="(555) 123-4567"
+                          placeholder={t('phoneNumberPlaceholder')}
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Membership Number *
+                        {t('membershipNumberLabel')}
                       </label>
                       <input
                         type="text"
@@ -209,7 +211,7 @@ export default function CreateMemberPage() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="M-12345"
+                        placeholder={t('membershipNumberPlaceholder')}
                       />
                     </div>
                   </div>
@@ -218,13 +220,13 @@ export default function CreateMemberPage() {
                 {/* Work Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Work Information
+                    {t('workInformationSection')}
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Department
+                        {t('departmentLabel')}
                       </label>
                       <div className="relative">
                         <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -234,14 +236,14 @@ export default function CreateMemberPage() {
                           value={formData.department}
                           onChange={handleChange}
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Manufacturing"
+                          placeholder={t('departmentPlaceholder')}
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Position
+                        {t('positionLabel')}
                       </label>
                       <input
                         type="text"
@@ -249,13 +251,13 @@ export default function CreateMemberPage() {
                         value={formData.position}
                         onChange={handleChange}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Machine Operator"
+                        placeholder={t('positionPlaceholder')}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Hire Date
+                        {t('hireDateLabel')}
                       </label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -271,7 +273,7 @@ export default function CreateMemberPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Union Join Date
+                        {t('unionJoinDateLabel')}
                       </label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -290,13 +292,13 @@ export default function CreateMemberPage() {
                 {/* Role and Status */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Role & Status
+                    {t('roleStatusSection')}
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Role *
+                        {t('roleLabel')}
                       </label>
                       <select
                         name="role"
@@ -305,16 +307,16 @@ export default function CreateMemberPage() {
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="member">Member</option>
-                        <option value="steward">Steward</option>
-                        <option value="officer">Officer</option>
-                        <option value="admin">Admin</option>
+                        <option value="member">{t('roleMember')}</option>
+                        <option value="steward">{t('roleSteward')}</option>
+                        <option value="officer">{t('roleOfficer')}</option>
+                        <option value="admin">{t('roleAdmin')}</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status *
+                        {t('statusLabel')}
                       </label>
                       <select
                         name="status"
@@ -323,9 +325,9 @@ export default function CreateMemberPage() {
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="on-leave">On Leave</option>
+                        <option value="active">{t('statusActive')}</option>
+                        <option value="inactive">{t('statusInactive')}</option>
+                        <option value="on-leave">{t('statusOnLeave')}</option>
                       </select>
                     </div>
                   </div>
@@ -341,12 +343,12 @@ export default function CreateMemberPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Creating Member...
+                        {t('creatingMemberButton')}
                       </>
                     ) : (
                       <>
                         <Save className="w-5 h-5 mr-2" />
-                        Create Member
+                        {t('createMemberButton')}
                       </>
                     )}
                   </Button>
@@ -358,7 +360,7 @@ export default function CreateMemberPage() {
                     className="flex-1 border-gray-300 py-3 rounded-lg"
                   >
                     <X className="w-5 h-5 mr-2" />
-                    Cancel
+                    {t('cancelButton')}
                   </Button>
                 </div>
               </form>

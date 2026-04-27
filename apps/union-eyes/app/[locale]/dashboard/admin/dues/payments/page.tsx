@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 
 export const dynamic = 'force-dynamic';
 /**
@@ -87,7 +88,7 @@ function getStatusBadge(status: string) {
     string,
     { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }
   > = {
-    paid: { variant: 'default', label: 'Paid' },
+    paid: { variant: 'default', label: 'Paid' }, // Badge labels use option strings from select above
     pending: { variant: 'secondary', label: 'Pending' },
     overdue: { variant: 'destructive', label: 'Overdue' },
     cancelled: { variant: 'outline', label: 'Cancelled' },
@@ -102,6 +103,7 @@ function getStatusBadge(status: string) {
 // =============================================================================
 
 export default function AdminPaymentsList() {
+  const t = useTranslations('adminPaymentsPage');
   const router = useRouter();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export default function AdminPaymentsList() {
       <div className="container mx-auto p-4 md:p-6 space-y-6">
         <div className="text-center py-12">
           <RefreshCw className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-lg font-medium">Loading payments...</p>
+          <p className="text-lg font-medium">{t('loadingPayments')}</p>
         </div>
       </div>
     );
@@ -177,13 +179,13 @@ export default function AdminPaymentsList() {
       <div className="container mx-auto p-4 md:p-6">
         < Card className="border-destructive">
           <CardHeader>
-            <CardTitle>Error Loading Payments</CardTitle>
+            <CardTitle>{t('errorLoadingPayments')}</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={fetchPayments} variant="outline">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t('tryAgainButton')}
             </Button>
           </CardContent>
         </Card>
@@ -196,19 +198,19 @@ export default function AdminPaymentsList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Payment Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('pageTitle')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            View and manage all member payment transactions
+            {t('pageDescription')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={fetchPayments} disabled={refreshing}>
             <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('refreshButton')}
           </Button>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t('exportButton')}
           </Button>
         </div>
       </div>
@@ -216,7 +218,7 @@ export default function AdminPaymentsList() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
+          <CardTitle className="text-lg">{t('filtersTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
@@ -225,7 +227,7 @@ export default function AdminPaymentsList() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by member name or ID..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -237,14 +239,14 @@ export default function AdminPaymentsList() {
             <div className="w-full md:w-48">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Statuses" />
+                  <SelectValue placeholder={t('allStatusesPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="all">{t('statusAll')}</SelectItem>
+                  <SelectItem value="paid">{t('statusPaid')}</SelectItem>
+                  <SelectItem value="pending">{t('statusPending')}</SelectItem>
+                  <SelectItem value="overdue">{t('statusOverdue')}</SelectItem>
+                  <SelectItem value="cancelled">{t('statusCancelled')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -252,13 +254,13 @@ export default function AdminPaymentsList() {
             {/* Search Button */}
             <Button type="submit" className="w-full md:w-auto">
               <Filter className="mr-2 h-4 w-4" />
-              Apply Filters
+              {t('applyFiltersButton')}
             </Button>
           </form>
 
           {/* Results Summary */}
           <div className="mt-4 text-sm text-muted-foreground">
-            Showing {payments.length} of {totalCount} payments
+            {t('showingResults', { current: payments.length, total: totalCount })}
           </div>
         </CardContent>
       </Card>
@@ -266,18 +268,18 @@ export default function AdminPaymentsList() {
       {/* Payments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Payments</CardTitle>
+          <CardTitle>{t('allPaymentsTitle')}</CardTitle>
           <CardDescription>
-            {totalCount} total payment{totalCount !== 1 ? 's' : ''}
+            {t('totalPaymentsCount', { count: totalCount })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {payments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No payments found</p>
+              <p className="text-lg font-medium">{t('noPaymentsFound')}</p>
               <p className="text-sm text-muted-foreground">
-                Try adjusting your filters or search criteria
+                {t('noPaymentsDescription')}
               </p>
             </div>
           ) : (
@@ -286,13 +288,13 @@ export default function AdminPaymentsList() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Member</TableHead>
-                      <TableHead className="hidden md:table-cell">Due Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead className="hidden lg:table-cell">Status</TableHead>
-                      <TableHead className="hidden xl:table-cell">Payment Method</TableHead>
-                      <TableHead className="hidden xl:table-cell">Paid Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t('memberColumn')}</TableHead>
+                        <TableHead className="hidden md:table-cell">{t('dueDateColumn')}</TableHead>
+                        <TableHead>{t('amountColumn')}</TableHead>
+                        <TableHead className="hidden lg:table-cell">{t('statusColumn')}</TableHead>
+                        <TableHead className="hidden xl:table-cell">{t('paymentMethodColumn')}</TableHead>
+                        <TableHead className="hidden xl:table-cell">{t('paidDateColumn')}</TableHead>
+                        <TableHead className="text-right">{t('actionsColumn')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -313,7 +315,7 @@ export default function AdminPaymentsList() {
                           <div className="flex flex-col">
                             <span className="font-medium">{formatCurrency(payment.amount)}</span>
                             <span className="text-xs text-muted-foreground md:hidden">
-                              Due: {formatDate(payment.dueDate)}
+                              {t('dueLabel')}: {formatDate(payment.dueDate)}
                             </span>
                           </div>
                         </TableCell>
@@ -343,7 +345,7 @@ export default function AdminPaymentsList() {
                             }
                           >
                             <Eye className="h-4 w-4 md:mr-2" />
-                            <span className="hidden md:inline">View</span>
+                            <span className="hidden md:inline">{t('viewButton')}</span>
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -355,7 +357,7 @@ export default function AdminPaymentsList() {
               {/* Pagination */}
               <div className="flex items-center justify-between mt-6 pt-6 border-t">
                 <div className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {t('pageInfo', { current: page, total: totalPages })}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -365,7 +367,7 @@ export default function AdminPaymentsList() {
                     disabled={page === 1 || refreshing}
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
+                    {t('previousButton')}
                   </Button>
                   <Button
                     variant="outline"
@@ -373,7 +375,7 @@ export default function AdminPaymentsList() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages || refreshing}
                   >
-                    Next
+                    {t('nextButton')}
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
