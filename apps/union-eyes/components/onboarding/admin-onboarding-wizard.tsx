@@ -109,11 +109,11 @@ export function AdminOnboardingWizard() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('admin_onboarding_completed', new Date().toISOString());
     }
-    router.push(`/${locale}/admin`);
+    router.push(`/${locale}/dashboard/admin`);
   };
 
   const handleSkip = () => {
-    router.push(`/${locale}/admin`);
+    router.push(`/${locale}/dashboard/admin`);
   };
 
   return (
@@ -284,7 +284,7 @@ function UsersStep() {
           <li>• Follow principle of least privilege</li>
           <li>• Audit user access regularly</li>
           <li>• Remove inactive users promptly</li>
-          <li>• Use role groups for批量 assignment</li>
+          <li>• Use role groups for bulk assignment</li>
         </ul>
       </div>
     </div>

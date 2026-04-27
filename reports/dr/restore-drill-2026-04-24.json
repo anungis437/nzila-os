@@ -3,7 +3,7 @@
   "reportId": "ue-dr-2026-04-24",
   "drillId": "drill-2026-04-4a32d2fc",
   "timestamp": "2026-04-24T12:36:15.176Z",
-  "generatedAt": "2026-04-24T12:45:38.676Z",
+  "generatedAt": "2026-04-27T16:50:31.932Z",
   "app": "union-eyes",
   "mode": "evidence",
   "environment": "local",
@@ -16,8 +16,9 @@
   "failCount": 2,
   "skipCount": 2,
   "migrationCount": 103,
+  "readinessState": "ready-for-live-drill",
   "evidenceArtifacts": [
-    "reports/db/restore-drill-2026-04.json",
+    "reports\\db\\restore-drill-2026-04.json",
     "reports/dr/restore-drill-2026-04-24.md",
     "reports/dr/restore-drill-2026-04-24.json"
   ],

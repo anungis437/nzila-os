@@ -42,7 +42,8 @@ defined in `apps/union-eyes/maturity.json` under `maturity_gaps.backup_restore`.
 ## Pre-Drill Checklist
 
 Before starting any drill, confirm the following. Run `pnpm dr:drill:checklist`
-to generate a printable version.
+to generate a printable version. For live staging drills, run
+`pnpm dr:drill:checklist --live`.
 
 - [ ] Confirmed drill is on staging or isolated environment (NEVER production)
 - [ ] Informed on-call team via ops channel
@@ -52,6 +53,8 @@ to generate a printable version.
 - [ ] GitHub Actions secrets available if running via CI
 - [ ] `pnpm install --frozen-lockfile` run successfully
 - [ ] `scripts/db/restore-drill.ts` accessible
+- [ ] For live execution, `DR_DB_HOST` and `DR_DB_USER` are set
+- [ ] Optional but recommended: `DR_READY_URL` set for app readiness verification
 
 ---
 
@@ -94,6 +97,14 @@ Evidence output: `reports/db/restore-drill-YYYY-MM.json`
 pnpm db:restore-drill:execute
 # or with custom scratch DB:
 npx tsx scripts/db/restore-drill.ts --execute --scratch-db ue_drill_$(date +%Y%m%d)
+# with explicit staging DB/ready endpoint:
+npx tsx scripts/db/restore-drill.ts --execute \
+  --db-host "$DR_DB_HOST" \
+  --db-port "${DR_DB_PORT:-5432}" \
+  --db-user "$DR_DB_USER" \
+  --db-admin-db "${DR_DB_ADMIN_DB:-postgres}" \
+  --scratch-db "ue_drill_$(date +%Y%m%d)" \
+  --ready-url "$DR_READY_URL"
 ```
 
 This additionally:
@@ -103,6 +114,7 @@ This additionally:
 3. Verifies table count post-restore
 4. Records `restoreDurationMs` → reported as RTO
 5. Drops the scratch database on completion
+6. Optionally validates the ready endpoint if `--ready-url` or `DR_READY_URL` is set
 
 ### Step 3 — Generate markdown evidence report
 

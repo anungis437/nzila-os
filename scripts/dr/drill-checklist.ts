@@ -34,6 +34,10 @@ interface CheckResult {
   required: boolean
 }
 
+function hasFlag(name: string): boolean {
+  return process.argv.includes(name)
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const results: CheckResult[] = []
@@ -56,7 +60,8 @@ function fileExists(rel: string): boolean {
 
 function commandAvailable(cmd: string): boolean {
   try {
-    child_process.execSync(`which ${cmd} 2>/dev/null || where ${cmd} 2>nul`, { stdio: 'ignore' })
+    const resolver = process.platform === 'win32' ? 'where' : 'which'
+    child_process.execSync(`${resolver} ${cmd}`, { stdio: 'ignore' })
     return true
   } catch {
     return false
@@ -172,6 +177,30 @@ if (fileExists('docs/public/restore-readiness-summary.md')) {
   warn('public-trust-doc', 'docs/public/restore-readiness-summary.md missing')
 }
 
+const liveMode = hasFlag('--live')
+// 9. Live drill prerequisites
+if (liveMode) {
+  const requiredLiveVars = ['DR_DB_HOST', 'DR_DB_USER']
+  const missingLiveVars = requiredLiveVars.filter((name) => !process.env[name])
+  if (missingLiveVars.length === 0) {
+    pass('live-env', 'Live drill DB environment variables present (DR_DB_HOST, DR_DB_USER)')
+  } else {
+    fail('live-env', `Missing required live drill env vars: ${missingLiveVars.join(', ')}`)
+  }
+
+  if (process.env.DR_READY_URL) {
+    pass('live-ready-url', `DR_READY_URL configured: ${process.env.DR_READY_URL}`)
+  } else {
+    warn('live-ready-url', 'DR_READY_URL not set; app readiness check will be skipped in execute mode')
+  }
+
+  if (commandAvailable('psql')) {
+    pass('live-psql', 'psql available for live restore execution')
+  } else {
+    fail('live-psql', 'psql not found; live restore execution cannot run')
+  }
+}
+
 // ── Print Results ─────────────────────────────────────────────────────────────
 
 const passCount = results.filter((r) => r.status === 'pass').length
@@ -196,5 +225,7 @@ if (failCount > 0) {
   process.stdout.write(`  ✓ Pre-flight PASSED — safe to proceed with the drill.\n`)
   process.stdout.write(`\n  Run the drill:\n`)
   process.stdout.write(`    pnpm db:restore-drill           # dry-run\n`)
-  process.stdout.write(`    pnpm db:restore-drill:execute   # live staging restore\n\n`)
+    process.stdout.write(`    pnpm db:restore-drill:execute   # live staging restore\n`)
+    process.stdout.write(`\n  Live checklist mode:\n`)
+    process.stdout.write(`    pnpm dr:drill:checklist --live\n\n`)
 }

@@ -60,6 +60,10 @@ export interface PilotReadinessData {
   evidenceExport: boolean;
 }
 
+export interface PilotChecklistFlags {
+  [key: string]: boolean;
+}
+
 // ─── Default items ────────────────────────────────────────────
 
 const DEFAULT_CHECKLIST: Omit<ChecklistItem, "completed">[] = [
@@ -120,6 +124,35 @@ const DEFAULT_CHECKLIST: Omit<ChecklistItem, "completed">[] = [
     actionHref: "/grievances",
   },
 ];
+
+const API_ITEM_TO_CHECKLIST_ID: Record<string, string> = {
+  "org-seeded": "org_seeded",
+  "users-invited": "users_invited",
+  "roles-assigned": "roles_assigned",
+  "contracts-uploaded": "contracts_uploaded",
+  "employers-imported": "employers_imported",
+  "integrations-configured": "integrations_configured",
+  "export-verified": "export_verified",
+};
+
+/**
+ * Convert backend onboarding flags to checklist item completion states.
+ * Unknown keys are ignored by design to keep the UI forward compatible.
+ */
+export function buildChecklistFromFlags(flags: PilotChecklistFlags): ChecklistItem[] {
+  const completionById = new Map<string, boolean>();
+
+  for (const [apiItemId, completed] of Object.entries(flags)) {
+    const checklistId = API_ITEM_TO_CHECKLIST_ID[apiItemId];
+    if (!checklistId) continue;
+    completionById.set(checklistId, Boolean(completed));
+  }
+
+  return DEFAULT_CHECKLIST.map((item) => ({
+    ...item,
+    completed: completionById.get(item.id) ?? false,
+  }));
+}
 
 // ─── Dynamic checklist builder ────────────────────────────────
 

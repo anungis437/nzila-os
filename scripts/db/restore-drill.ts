@@ -80,6 +80,14 @@ interface DrillEvidence {
   schemaVersion: 1
 }
 
+interface DbConfig {
+  host: string
+  port: number
+  user: string
+  adminDatabase: string
+  password?: string
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function parseArg(name: string): string | undefined {
@@ -92,10 +100,31 @@ function hasFlag(name: string): boolean {
   return process.argv.includes(name)
 }
 
-function exec(cmd: string, timeout = 30_000): { stdout: string; ok: boolean; durationMs: number } {
+function commandAvailable(cmd: string): boolean {
+  const resolver = process.platform === 'win32' ? 'where' : 'which'
+  try {
+    child_process.execSync(`${resolver} ${cmd}`, { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function quoteIdentifier(value: string): string {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value)) {
+    throw new Error(`Invalid identifier: ${value}`)
+  }
+  return `"${value}"`
+}
+
+function exec(
+  cmd: string,
+  timeout = 30_000,
+  env: NodeJS.ProcessEnv = process.env,
+): { stdout: string; ok: boolean; durationMs: number } {
   const start = Date.now()
   try {
-    const stdout = child_process.execSync(cmd, { encoding: 'utf8', timeout }).trim()
+    const stdout = child_process.execSync(cmd, { encoding: 'utf8', timeout, env }).trim()
     return { stdout, ok: true, durationMs: Date.now() - start }
   } catch {
     return { stdout: '', ok: false, durationMs: Date.now() - start }
@@ -126,6 +155,19 @@ const executeMode = hasFlag('--execute')
 const evidenceOnly = hasFlag('--evidence')
 const mode = executeMode ? 'execute' : evidenceOnly ? 'evidence' : 'dry-run'
 const scratchDb = parseArg('--scratch-db') ?? 'nzila_drill'
+const dbConfig: DbConfig = {
+  host: parseArg('--db-host') ?? process.env.DR_DB_HOST ?? 'localhost',
+  port: Number.parseInt(parseArg('--db-port') ?? process.env.DR_DB_PORT ?? '5433', 10),
+  user: parseArg('--db-user') ?? process.env.DR_DB_USER ?? 'nzila',
+  adminDatabase: parseArg('--db-admin-db') ?? process.env.DR_DB_ADMIN_DB ?? 'postgres',
+  password: parseArg('--db-password') ?? process.env.DR_DB_PASSWORD,
+}
+const readyUrl = parseArg('--ready-url') ?? process.env.DR_READY_URL
+const dbEnv = dbConfig.password ? { ...process.env, PGPASSWORD: dbConfig.password } : process.env
+
+function psql(database: string, command: string): string {
+  return `psql -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.user} -d ${database} ${command}`
+}
 
 // ── Checks ────────────────────────────────────────────────────────────────────
 
@@ -202,11 +244,17 @@ function checkMigrationIntegrity(): void {
 // Check 3: pg_isready / DB connectivity
 function checkDbConnectivity(): void {
   console.log('  Checking database connectivity...')
-  const { ok, durationMs } = exec('pg_isready -h localhost -p 5433 2>&1')
+  const { ok, durationMs } = exec(
+    `pg_isready -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.user} 2>&1`,
+    30_000,
+    dbEnv,
+  )
   checks.push({
     check: 'db-connectivity',
     status: ok ? 'pass' : 'skip',
-    message: ok ? 'PostgreSQL accepting connections' : 'PostgreSQL not available locally — skipping live checks',
+    message: ok
+      ? `PostgreSQL accepting connections (${dbConfig.host}:${dbConfig.port})`
+      : `PostgreSQL not reachable at ${dbConfig.host}:${dbConfig.port} — skipping live checks`,
     durationMs,
   })
 }
@@ -218,22 +266,48 @@ function checkRestore(): void {
     return
   }
 
-  console.log(`  Creating scratch database ${scratchDb}...`)
-  const { ok: createOk } = exec(`psql -h localhost -p 5433 -U nzila -d postgres -c "DROP DATABASE IF EXISTS ${scratchDb}; CREATE DATABASE ${scratchDb};"`)
+  if (!commandAvailable('psql')) {
+    checks.push({
+      check: 'restore-execute',
+      status: 'fail',
+      message: 'psql command not found in PATH; cannot execute live restore drill',
+    })
+    return
+  }
+
+  const safeScratchDb = quoteIdentifier(scratchDb)
+  console.log(`  Creating scratch database ${scratchDb} on ${dbConfig.host}:${dbConfig.port}...`)
+
+  exec(psql(dbConfig.adminDatabase, `-c "DROP DATABASE IF EXISTS ${safeScratchDb};"`), 30_000, dbEnv)
+  const { ok: createOk } = exec(
+    psql(dbConfig.adminDatabase, `-c "CREATE DATABASE ${safeScratchDb};"`),
+    30_000,
+    dbEnv,
+  )
   if (!createOk) {
-    checks.push({ check: 'restore-execute', status: 'fail', message: 'Failed to create scratch database' })
+    checks.push({
+      check: 'restore-execute',
+      status: 'fail',
+      message: `Failed to create scratch database ${scratchDb}`,
+    })
     return
   }
 
   // Run migrations against scratch DB
   console.log(`  Running migrations on scratch DB...`)
   const restoreStart = Date.now()
-  const migDir = path.join(ROOT, 'migrations')
-  if (fs.existsSync(migDir)) {
-    const sqlFiles = fs.readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()
+  const migrationFiles = MIGRATION_DIRS.flatMap((dir) => {
+    const absDir = path.join(ROOT, dir)
+    if (!fs.existsSync(absDir)) return []
+    return fs.readdirSync(absDir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort()
+      .map((f) => path.join(absDir, f))
+  })
+  if (migrationFiles.length > 0) {
     let failedCount = 0
-    for (const sql of sqlFiles) {
-      const { ok } = exec(`psql -h localhost -p 5433 -U nzila -d ${scratchDb} -f "${path.join(migDir, sql)}"`)
+    for (const migrationFile of migrationFiles) {
+      const { ok } = exec(psql(scratchDb, `-f "${migrationFile}"`), 60_000, dbEnv)
       if (!ok) failedCount++
     }
     restoreDurationMs = Date.now() - restoreStart
@@ -241,29 +315,51 @@ function checkRestore(): void {
       check: 'restore-execute',
       status: failedCount === 0 ? 'pass' : 'fail',
       message: failedCount === 0
-        ? `Migrations applied successfully to ${scratchDb} (${sqlFiles.length} files)`
-        : `${failedCount}/${sqlFiles.length} migrations failed`,
+        ? `Migrations applied successfully to ${scratchDb} (${migrationFiles.length} files)`
+        : `${failedCount}/${migrationFiles.length} migrations failed`,
       durationMs: restoreDurationMs,
     })
   } else {
-    checks.push({ check: 'restore-execute', status: 'skip', message: 'No migrations/ directory found' })
+    checks.push({ check: 'restore-execute', status: 'fail', message: 'No migration files found for replay' })
   }
 
   // Post-restore: table count check
   const { stdout: tableCount, ok: tableOk } = exec(
-    `psql -h localhost -p 5433 -U nzila -d ${scratchDb} -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"`,
+    psql(
+      scratchDb,
+      `-t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"`,
+    ),
+    30_000,
+    dbEnv,
   )
   if (tableOk) {
+    const tableCountValue = Number.parseInt(tableCount.trim(), 10)
     checks.push({
       check: 'restore-table-count',
-      status: parseInt(tableCount.trim()) > 0 ? 'pass' : 'fail',
+      status: tableCountValue > 0 ? 'pass' : 'fail',
       message: `${tableCount.trim()} tables in restored database`,
+    })
+  }
+
+  if (readyUrl) {
+    const { ok, durationMs } = exec(`curl -fsS "${readyUrl}"`, 20_000)
+    checks.push({
+      check: 'ready-endpoint',
+      status: ok ? 'pass' : 'fail',
+      message: ok ? `Ready endpoint reachable: ${readyUrl}` : `Ready endpoint check failed: ${readyUrl}`,
+      durationMs,
+    })
+  } else {
+    checks.push({
+      check: 'ready-endpoint',
+      status: 'skip',
+      message: 'Skipped — set DR_READY_URL or pass --ready-url to validate app readiness',
     })
   }
 
   // Cleanup
   console.log(`  Cleaning up scratch database...`)
-  exec(`psql -h localhost -p 5433 -U nzila -d postgres -c "DROP DATABASE IF EXISTS ${scratchDb};"`)
+  exec(psql(dbConfig.adminDatabase, `-c "DROP DATABASE IF EXISTS ${safeScratchDb};"`), 30_000, dbEnv)
 }
 
 // Check 5: DR doc completeness
@@ -290,7 +386,7 @@ function checkDrDocs(): void {
 // Check 6: Doctor and migration safety pass
 function checkDoctorAndSafety(): void {
   console.log('  Running db:doctor...')
-  const { ok: doctorOk, durationMs: doctorMs } = exec('npx tsx scripts/db/doctor.ts', 60_000)
+  const { ok: doctorOk, durationMs: doctorMs } = exec('npx tsx scripts/db/doctor.ts', 60_000, dbEnv)
   checks.push({
     check: 'db-doctor',
     status: doctorOk ? 'pass' : 'fail',
@@ -299,7 +395,7 @@ function checkDoctorAndSafety(): void {
   })
 
   console.log('  Running migration-safety...')
-  const { ok: safetyOk, durationMs: safetyMs } = exec('npx tsx scripts/db/migration-safety.ts', 60_000)
+  const { ok: safetyOk, durationMs: safetyMs } = exec('npx tsx scripts/db/migration-safety.ts', 60_000, dbEnv)
   checks.push({
     check: 'migration-safety',
     status: safetyOk ? 'pass' : 'fail',
@@ -387,7 +483,7 @@ if (mode === 'execute' && failCount === 0 && rtoActual) {
       maturity.maturity_gaps.backup_restore.status = 'closed'
       maturity.maturity_gaps.backup_restore.blocker =
         `Live staging drill completed ${now.toISOString().slice(0, 10)}. ` +
-        `Measured RTO: ${rtoActual}. Evidence: ${reportPath.replace(ROOT + '/', '')}`
+        `Measured RTO: ${rtoActual}. Evidence: ${path.relative(ROOT, reportPath)}`
       maturity.maturity_gaps.backup_restore.severity = 'none'
       maturity.maturity_gaps.backup_restore.rtoActual = rtoActual
       maturity.maturity_gaps.backup_restore.drillDate = now.toISOString().slice(0, 10)

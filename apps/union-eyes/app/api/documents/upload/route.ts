@@ -11,6 +11,7 @@ import { createDocument } from "@/lib/services/document-service";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from "@/lib/rate-limiter";
 import { putBlob } from "@/lib/blob-client";
+import { isMalwareScanError } from "@/lib/security/clamav";
 
 const ALLOWED_MIME_TYPES_LIST = [
   'application/pdf',
@@ -259,6 +260,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
         originalFileName: file.name,
         uploadedAt: new Date().toISOString(),
         blobKey: blob.pathname,
+        malwareScan: blob.malwareScan,
       },
     });
 
@@ -281,6 +283,20 @@ export const POST = withRoleAuth('member', async (request, context) => {
 
     return NextResponse.json(document, { status: 201 });
   } catch (error) {
+    if (isMalwareScanError(error)) {
+      if (error.result.status === 'infected') {
+        return NextResponse.json(
+          { error: 'File blocked by malware scan', scan: error.result },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: 'Malware scanner unavailable; upload blocked by policy', scan: error.result },
+        { status: 503 }
+      );
+    }
+
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
       userId,

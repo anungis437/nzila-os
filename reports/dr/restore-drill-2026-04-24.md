@@ -22,6 +22,7 @@
 | RPO target | 1 hour |
 | Migration files | 103 |
 | Drill duration | 3231ms |
+| Readiness state | Ready for live drill |
 
 ---
 
@@ -65,4 +66,15 @@
 
 ---
 
-_Report generated from: `reports/db/restore-drill-2026-04.json`_
+## 6. Sign-Off
+
+| Role | Name | Date | Status |
+|------|------|------|--------|
+| SRE Operator | — | — | ⬜ Pending |
+| Platform Engineering | — | — | ⬜ Pending |
+| CISO | — | — | ⬜ Pending |
+| CTO | — | — | ⬜ Pending |
+
+---
+
+_Report generated from: `reports\db\restore-drill-2026-04.json`_

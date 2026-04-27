@@ -96,6 +96,7 @@ import {
   getDaysUntilDeadline,
   getClaimWorkflowStatus,
   updateClaimStatus,
+  updateClaimStatusById,
   assignClaim,
   getOverdueClaims,
   getClaimsApproachingDeadline,
@@ -444,6 +445,61 @@ describe('workflow-engine', () => {
       const result = await updateClaimStatus('CLM-001', 'resolved' as any, 'user1', 'done', mockTx as any);
       expect(result.success).toBe(true);
       expect(mocks.mockGenerateDefPack).toHaveBeenCalled();
+    });
+  });
+
+  // ── updateClaimStatusById ───────────────────────────────────────────────
+  describe('updateClaimStatusById', () => {
+    const baseClaim = {
+      claimId: 'uuid-1', claimNumber: 'CLM-001', status: 'submitted',
+      priority: 'medium', description: 'A description longer than twenty chars for checks',
+      createdAt: new Date('2026-03-01'), updatedAt: new Date('2026-03-01'),
+      assignedTo: null, organizationId: 'org1', memberId: 'member1',
+      progress: 10, closedAt: null, claimType: 'grievance', id: 1,
+    };
+
+    it('returns error when claim id is not found', async () => {
+      const mockTx = {
+        select: vi.fn(() => chain([])),
+        update: vi.fn(() => chain(undefined)),
+        insert: vi.fn(() => chain(undefined)),
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await updateClaimStatusById('missing', 'under_review' as any, 'user1', 'note', mockTx as any);
+      expect(result).toEqual({ success: false, error: 'Claim not found' });
+    });
+
+    it('returns error when claimNumber is missing', async () => {
+      const mockTx = {
+        select: vi.fn(() => chain([{ claimNumber: null }])),
+        update: vi.fn(() => chain(undefined)),
+        insert: vi.fn(() => chain(undefined)),
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await updateClaimStatusById('uuid-1', 'under_review' as any, 'user1', 'note', mockTx as any);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('missing claimNumber');
+    });
+
+    it('delegates to FSM-enforced updateClaimStatus when claimNumber exists', async () => {
+      mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
+      mocks.mockDetectSignals.mockResolvedValue([]);
+
+      const updatedClaim = { ...baseClaim, status: 'under_review', progress: 25 };
+      const mockTx = {
+        select: vi.fn()
+          .mockReturnValueOnce(chain([{ claimNumber: 'CLM-001' }]))
+          .mockReturnValueOnce(chain([baseClaim]))
+          .mockReturnValueOnce(chain([{ role: 'steward' }])),
+        update: vi.fn(() => chain([updatedClaim])),
+        insert: vi.fn(() => chain(undefined)),
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await updateClaimStatusById('uuid-1', 'under_review' as any, 'user1', 'reviewing', mockTx as any);
+      expect(result.success).toBe(true);
     });
   });
 });

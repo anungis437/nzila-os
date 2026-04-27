@@ -113,6 +113,7 @@ function main(): void {
 | RPO target | ${raw.rpoTarget} |
 | Migration files | ${raw.migrationCount} |
 | Drill duration | ${raw.timing.totalDurationMs}ms |
+| Readiness state | ${raw.rtoActual ? 'Live RTO measured' : 'Ready for live drill'} |
 
 ---
 
@@ -148,6 +149,17 @@ ${raw.rtoActual == null ? `- **Execute live staging restore** to measure actual 
 
 ---
 
+## 6. Sign-Off
+
+| Role | Name | Date | Status |
+|------|------|------|--------|
+| SRE Operator | — | — | ⬜ Pending |
+| Platform Engineering | — | — | ⬜ Pending |
+| CISO | — | — | ⬜ Pending |
+| CTO | — | — | ⬜ Pending |
+
+---
+
 _Report generated from: \`${path.relative(ROOT, inputPath)}\`_
 `
 
@@ -171,6 +183,7 @@ _Report generated from: \`${path.relative(ROOT, inputPath)}\`_
     failCount,
     skipCount,
     migrationCount: raw.migrationCount,
+    readinessState: raw.rtoActual ? 'live-rto-measured' : 'ready-for-live-drill',
     evidenceArtifacts: [
       path.relative(ROOT, inputPath),
       `reports/dr/restore-drill-${dateStr}.md`,

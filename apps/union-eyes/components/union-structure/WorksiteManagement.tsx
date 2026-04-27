@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { MapPin, Plus, Edit, Trash2, Search, MoreVertical, Building2 } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, Search, MoreVertical, Building2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import{ Input } from "@/components/ui/input";
@@ -176,8 +176,8 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this worksite?")) return;
+  const handleDelete = async (id: string, worksiteName: string) => {
+    if (!confirm(`Archive worksite '${worksiteName}'?`)) return;
 
     try {
       const response = await fetch(`/api/worksites/${id}`, { method: "DELETE" });
@@ -261,10 +261,16 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                 Manage physical work locations
               </CardDescription>
             </div>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Worksite
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={fetchWorksites}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Worksite
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -276,6 +282,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                aria-label="Search worksites"
               />
             </div>
           </div>
@@ -350,7 +357,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleDelete(worksite.id)}
+                              onClick={() => handleDelete(worksite.id, worksite.name)}
                               className="text-red-600"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

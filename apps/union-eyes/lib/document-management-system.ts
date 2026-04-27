@@ -121,6 +121,9 @@ export async function uploadDocument(
         retentionPeriodDays: options.retentionPeriodDays,
         uploadedBy,
         uploadedAt: new Date(),
+        metadata: {
+          malwareScan: blob.malwareScan,
+        },
       })
       .returning();
 
@@ -216,6 +219,10 @@ export async function uploadDocumentVersion(
         retentionPeriodDays: parentDoc.retentionPeriodDays,
         uploadedBy,
         uploadedAt: new Date(),
+        metadata: {
+          ...(parentDoc.metadata ?? {}),
+          malwareScan: blob.malwareScan,
+        },
       })
       .returning();
 

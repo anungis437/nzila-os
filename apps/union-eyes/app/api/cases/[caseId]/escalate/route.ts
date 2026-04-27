@@ -15,6 +15,7 @@ import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle'
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { updateClaimStatusById } from '@/lib/workflow-engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,8 +103,8 @@ export const POST = withApi(
     const orgId = claim.organizationId ?? ctx.organizationId ?? '';
 
     // Create the grievance
-    const grievance = await withRLSContext(async () => {
-      const [g] = await db
+    const escalationResult = await withRLSContext(async (tx) => {
+      const [g] = await tx
         .insert(grievances)
         .values({
           grievanceNumber: `GRV-${Date.now()}`,
@@ -124,21 +125,34 @@ export const POST = withApi(
         .returning();
 
       // Insert lifecycle event
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType: 'created',
         actorUserId: ctx.userId ?? '',
         notes: `Escalated from case ${claim.claimNumber ?? caseId}. ${notes ?? ''}`.trim(),
       });
 
+      const transitionResult = await updateClaimStatusById(
+        caseId,
+        'resolved',
+        ctx.userId ?? 'system',
+        notes ?? 'Escalated to formal grievance',
+        tx,
+      );
+
+      if (!transitionResult.success) {
+        return {
+          success: false as const,
+          error: transitionResult.error ?? 'Escalation requires a valid FSM transition to resolved',
+        };
+      }
+
       // Store the link in the claim's metadata
       const existingMeta = (claim.metadata as Record<string, unknown>) ?? {};
-      await db
+      await tx
         .update(claims)
         .set({
-          status: 'resolved',
           resolutionOutcome: 'escalated_to_grievance',
-          resolvedAt: new Date(),
           updatedAt: new Date(),
           metadata: {
             ...existingMeta,
@@ -148,8 +162,17 @@ export const POST = withApi(
         })
         .where(eq(claims.claimId, caseId));
 
-      return g;
+      return { success: true as const, grievance: g };
     });
+
+    if (!escalationResult.success) {
+      return NextResponse.json(
+        { success: false, error: escalationResult.error },
+        { status: 422 },
+      );
+    }
+
+    const grievance = escalationResult.grievance;
 
     // Audit
     await auditLog({

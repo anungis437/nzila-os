@@ -9,7 +9,17 @@ import { Users, Upload, Download, Plus, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { BulkImportMembers } from "@/components/admin/bulk-import-members";
+import JobClassificationManagement from "@/components/admin/JobClassificationManagement";
 import {
   Select,
   SelectContent,
@@ -26,6 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Organization {
   id: string;
@@ -54,7 +65,12 @@ interface Member {
 }
 
 export default function MembersConsole() {
+  const { toast } = useToast();
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
+  const [inviteSending, setInviteSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -157,6 +173,57 @@ export default function MembersConsole() {
     fetchMembers();
   };
 
+  const currentOrganization = organizations.find((org) => org.id === selectedOrg);
+
+  const handleSendInvite = async () => {
+    const email = inviteEmail.trim();
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Invalid email",
+        description: "Enter a valid email to send an invitation.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setInviteSending(true);
+      const response = await fetch('/api/auth/invite/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          role: inviteRole,
+          organizationName: currentOrganization?.name,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to send invitation');
+      }
+
+      toast({
+        title: "Invitation sent",
+        description: data?.delivery === 'failed'
+          ? "Invite created, but email delivery failed. Ask the user to retry later."
+          : "User invitation created successfully.",
+      });
+
+      setInviteOpen(false);
+      setInviteEmail("");
+      setInviteRole("member");
+    } catch (error) {
+      toast({
+        title: "Invitation failed",
+        description: error instanceof Error ? error.message : 'Unable to send invitation',
+        variant: "destructive",
+      });
+    } finally {
+      setInviteSending(false);
+    }
+  };
+
   // Filter members by search query
   const filteredMembers = members.filter((member) => {
     if (!searchQuery) return true;
@@ -181,6 +248,14 @@ export default function MembersConsole() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setInviteOpen(true)}
+              className="gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Invite User
+            </Button>
             <Button 
               variant="outline"
               onClick={() => setBulkImportOpen(true)}
@@ -414,6 +489,21 @@ export default function MembersConsole() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Vocabulary and Taxonomy</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {selectedOrg === "all" ? (
+            <p className="text-sm text-muted-foreground">
+              Select a specific organization to manage job classifications and employment taxonomy.
+            </p>
+          ) : (
+            <JobClassificationManagement organizationId={selectedOrg} />
+          )}
+        </CardContent>
+      </Card>
+
       {/* Bulk Import Dialog */}
       <BulkImportMembers
         open={bulkImportOpen}
@@ -423,6 +513,53 @@ export default function MembersConsole() {
           refreshMemberList();
         }}
       />
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite user</DialogTitle>
+            <DialogDescription>
+              Send an invitation for the currently active organization context.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="member@local.org"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-role">Role</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger id="invite-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="steward">Steward</SelectItem>
+                  <SelectItem value="officer">Officer</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)} disabled={inviteSending}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendInvite} disabled={inviteSending}>
+              {inviteSending ? 'Sending…' : 'Send Invite'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

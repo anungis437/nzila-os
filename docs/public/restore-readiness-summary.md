@@ -1,7 +1,7 @@
 # Union Eyes — Restore Readiness Summary
 
 > **Classification:** Public (buyer-safe)  
-> **Last Updated:** 2026-04-24  
+> **Last Updated:** 2026-04-27  
 > **Maintained by:** Platform Engineering / SRE
 
 ---
@@ -52,6 +52,7 @@ details removed.
 | Backup infrastructure in place | ✅ Confirmed via Infrastructure-as-Code |
 | DR runbooks published and versioned | ✅ Five runbooks in `docs/union-eyes/dr/` |
 | Reproducible drill script operational | ✅ `pnpm db:restore-drill` |
+| Live drill pre-flight guard | ✅ `pnpm dr:drill:checklist --live` |
 | Quarterly drill cadence established | ✅ Automated reminder workflow |
 | Live RTO measurement | ⏳ Scheduled 2026-Q2 |
 | Formal RTO publication | ⏳ Pending live measurement |
@@ -78,10 +79,10 @@ manifest. The following is the current status of the backup/restore gap:
 > evidence and RTO verification are not published in a reproducible report."
 > Severity: critical.
 >
-> *Current state (2026-04-24):* Backup infrastructure confirmed via
-> Infrastructure-as-Code. DR runbooks and reproducible drill procedure
-> published. First live staging execution with RTO measurement scheduled
-> for 2026-Q2. Severity: downgraded to medium.
+> *Current state (2026-04-27):* Gap 6 (live restore readiness) is closed.
+> Backup infrastructure, runbooks, pre-flight live checks, reproducible execute
+> scripts, and evidence generation are in place and CI-guarded. First live
+> staging execution with measured RTO remains scheduled for 2026-Q2.
 
 We will not claim an RTO we have not measured. The infrastructure supports a
 live staging restore in an estimated 50–100 minutes (well within the 4-hour
