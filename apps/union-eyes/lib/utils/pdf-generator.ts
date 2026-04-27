@@ -192,37 +192,41 @@ function renderGrievancesReport(doc: typeof PDFDocument, options: PDFOptions) {
  * Render usage report
  */
 function renderUsageReport(doc: typeof PDFDocument, options: PDFOptions) {
-  const data = options.data as unknown;
+  const data = (options.data ?? {}) as Record<string, unknown>;
+  const period = (data.period ?? {}) as Record<string, unknown>;
+  const claims = (data.claims ?? {}) as Record<string, unknown>;
+  const members = (data.members ?? {}) as Record<string, unknown>;
+  const grievances = data.grievances as Record<string, unknown> | undefined;
 
   doc.fontSize(20).text(options.title, { align: 'center' });
   doc.moveDown();
 
   // Period info
-  doc.fontSize(14).text(`Period: ${data.period?.start || 'N/A'} to ${data.period?.end || 'N/A'}`);
+  doc.fontSize(14).text(`Period: ${String(period.start ?? 'N/A')} to ${String(period.end ?? 'N/A')}`);
   doc.moveDown();
 
   // Claims section
   doc.fontSize(16).text('Claims', { underline: true });
   doc.fontSize(12);
-  doc.text(`Total Claims: ${data.claims?.total || 0}`);
-  doc.text(`By Status: ${JSON.stringify(data.claims?.byStatus || {})}`);
-  doc.text(`By Priority: ${JSON.stringify(data.claims?.byPriority || {})}`);
+  doc.text(`Total Claims: ${Number(claims.total ?? 0)}`);
+  doc.text(`By Status: ${JSON.stringify(claims.byStatus ?? {})}`);
+  doc.text(`By Priority: ${JSON.stringify(claims.byPriority ?? {})}`);
   doc.moveDown();
 
   // Members section
   doc.fontSize(16).text('Members', { underline: true });
   doc.fontSize(12);
-  doc.text(`Total Members: ${data.members?.total || 0}`);
-  doc.text(`Active Members: ${data.members?.active || 0}`);
-  doc.text(`New Members: ${data.members?.new || 0}`);
+  doc.text(`Total Members: ${Number(members.total ?? 0)}`);
+  doc.text(`Active Members: ${Number(members.active ?? 0)}`);
+  doc.text(`New Members: ${Number(members.new ?? 0)}`);
   doc.moveDown();
 
   // Grievances section
-  if (data.grievances) {
+  if (grievances) {
     doc.fontSize(16).text('Grievances', { underline: true });
     doc.fontSize(12);
-    doc.text(`Total Grievances: ${data.grievances.total || 0}`);
-    doc.text(`Resolved: ${data.grievances.resolved || 0}`);
+    doc.text(`Total Grievances: ${Number(grievances.total ?? 0)}`);
+    doc.text(`Resolved: ${Number(grievances.resolved ?? 0)}`);
   }
 }
 
@@ -230,20 +234,23 @@ function renderUsageReport(doc: typeof PDFDocument, options: PDFOptions) {
  * Render financial report
  */
 function renderFinancialReport(doc: typeof PDFDocument, options: PDFOptions) {
-  const data = options.data as unknown;
+  const data = (options.data ?? {}) as Record<string, unknown>;
+  const period = (data.period ?? {}) as Record<string, unknown>;
+  const revenue = Number(data.revenue ?? 0);
+  const expenses = Number(data.expenses ?? 0);
 
   doc.fontSize(20).text(options.title, { align: 'center' });
   doc.moveDown();
 
-  doc.fontSize(14).text(`Period: ${data.period?.start || 'N/A'} to ${data.period?.end || 'N/A'}`);
+  doc.fontSize(14).text(`Period: ${String(period.start ?? 'N/A')} to ${String(period.end ?? 'N/A')}`);
   doc.moveDown();
 
   // Financial summary
   doc.fontSize(16).text('Financial Summary', { underline: true });
   doc.fontSize(12);
-  doc.text(`Total Revenue: $${(data.revenue || 0).toLocaleString()}`);
-  doc.text(`Total Expenses: $${(data.expenses || 0).toLocaleString()}`);
-  doc.text(`Net: $${((data.revenue || 0) - (data.expenses || 0)).toLocaleString()}`);
+  doc.text(`Total Revenue: $${revenue.toLocaleString()}`);
+  doc.text(`Total Expenses: $${expenses.toLocaleString()}`);
+  doc.text(`Net: $${(revenue - expenses).toLocaleString()}`);
 }
 
 /**
@@ -308,7 +315,8 @@ function renderTable(
     doc.fontSize(9);
 
     columns.forEach((col) => {
-      let value = row[col.key];
+      const rowRecord = row as Record<string, unknown>;
+      let value = rowRecord[col.key];
       
       // Format dates
       if (value instanceof Date) {
@@ -377,7 +385,7 @@ export function addFooter(
   });
 
   if (showPageNumbers) {
-    const pageNumber = (doc as unknown).bufferedPageRange().start + 1;
+    const pageNumber = (doc as unknown as { bufferedPageRange: () => { start: number } }).bufferedPageRange().start + 1;
     doc.text(`Page ${pageNumber}`, doc.page.margins.left, footerY + 15, {
       align: 'center',
       width: doc.page.width - doc.page.margins.left - doc.page.margins.right,

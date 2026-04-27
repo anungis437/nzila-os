@@ -23,6 +23,7 @@ import {
   Search,
   MoreVertical,
   MapPin,
+  RefreshCw,
   Phone as _Phone,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -220,8 +221,8 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this employer? This will soft-delete the record.")) {
+  const handleDelete = async (id: string, employerName: string) => {
+    if (!confirm(`Archive employer '${employerName}'? This will soft-delete the record.`)) {
       return;
     }
 
@@ -323,10 +324,16 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
                 Manage companies that employ union members
               </CardDescription>
             </div>
-            <Button onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Employer
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={fetchEmployers}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Employer
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -339,6 +346,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                aria-label="Search employers"
               />
             </div>
           </div>
@@ -432,7 +440,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleDelete(employer.id)}
+                              onClick={() => handleDelete(employer.id, employer.name)}
                               className="text-red-600"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

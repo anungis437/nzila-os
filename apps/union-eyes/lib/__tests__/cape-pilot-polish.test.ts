@@ -179,6 +179,7 @@ describe("getTemplatesByCategory", () => {
 
 import {
   buildReadinessChecklist,
+  buildChecklistFromFlags,
   type PilotReadinessData,
 } from "@/components/pilot/pilot-readiness-checklist";
 
@@ -253,6 +254,27 @@ describe("buildReadinessChecklist", () => {
       expect(item.actionHref).toBeDefined();
       expect(item.actionHref!.startsWith("/")).toBe(true);
     }
+  });
+
+  it("maps pilot onboarding API flags to checklist completion", () => {
+    const items = buildChecklistFromFlags({
+      'org-seeded': true,
+      'users-invited': true,
+      'roles-assigned': false,
+      'contracts-uploaded': true,
+      'employers-imported': false,
+      'integrations-configured': true,
+      'export-verified': false,
+    });
+
+    const map = Object.fromEntries(items.map((i) => [i.id, i.completed]));
+    expect(map.org_seeded).toBe(true);
+    expect(map.users_invited).toBe(true);
+    expect(map.roles_assigned).toBe(false);
+    expect(map.contracts_uploaded).toBe(true);
+    expect(map.employers_imported).toBe(false);
+    expect(map.integrations_configured).toBe(true);
+    expect(map.export_verified).toBe(false);
   });
 
   it("dynamically reflects counts in descriptions", () => {

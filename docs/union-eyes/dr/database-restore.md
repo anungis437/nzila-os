@@ -49,6 +49,23 @@ database recovery scenarios:
 - Subscription and resource group identifiers
 - Target restore timestamp (must be within 35-day retention window)
 - Staging environment available to validate before production promote
+- For staging drill automation: `DR_DB_HOST`, `DR_DB_USER` (and optional `DR_DB_PASSWORD`, `DR_READY_URL`) set
+
+### Scripted Staging Drill Path (Recommended)
+
+```bash
+# Step 0: Validate readiness
+pnpm dr:drill:checklist --live
+
+# Step 1: Execute live restore drill with measured RTO
+pnpm db:restore-drill:execute -- --db-host "$DR_DB_HOST" --db-user "$DR_DB_USER" --ready-url "$DR_READY_URL"
+
+# Step 2: Generate human-readable and JSON evidence
+pnpm dr:drill:report
+```
+
+This path is preferred for quarterly live drills because it produces consistent,
+auditable artifacts in `reports/db/` and `reports/dr/`.
 
 ### Commands
 

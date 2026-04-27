@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSkeletonComposer } from '@/components/ui/loading-skeleton-composer';
 import {
   PilotReadinessChecklist,
+  buildChecklistFromFlags,
   ChecklistItem,
 } from '@/components/pilot/pilot-readiness-checklist';
 import { DemoDataBadge, DemoDataset } from '@/components/pilot/demo-data-badge';
@@ -49,7 +50,18 @@ export default function OnboardingConsole() {
       const response = await fetch('/api/pilot/onboarding');
       if (response.ok) {
         const result = await response.json();
-        setState(result.data ?? result);
+        const payload = result.data ?? result;
+        const checklist = Array.isArray(payload?.checklist)
+          ? payload.checklist
+          : payload?.items && typeof payload.items === 'object'
+            ? buildChecklistFromFlags(payload.items as Record<string, boolean>)
+            : [];
+
+        setState({
+          checklist,
+          demo: payload?.demo ?? { isActive: false },
+          support: payload?.support,
+        });
       } else {
         // Use defaults if endpoint not yet wired
         setState({

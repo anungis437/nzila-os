@@ -525,6 +525,53 @@ return {
 }
 
 /**
+ * Update claim status by claimId using the same FSM enforcement as updateClaimStatus.
+ *
+ * Use this helper for routes keyed by claimId so status transitions never bypass
+ * workflow validation.
+ */
+export async function updateClaimStatusById(
+  claimId: string,
+  newStatus: ClaimStatus,
+  userId: string,
+  notes?: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tx?: NodePgDatabase<any>
+): Promise<{ success: boolean; error?: string; claim?: unknown }> {
+  if (!tx) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return withRLSContext(async (transaction: NodePgDatabase<any>) => {
+      return updateClaimStatusById(claimId, newStatus, userId, notes, transaction);
+    });
+  }
+
+  try {
+    const [claimRef] = await tx
+      .select({
+        claimNumber: claims.claimNumber,
+      })
+      .from(claims)
+      .where(eq(claims.claimId, claimId))
+      .limit(1);
+
+    if (!claimRef) {
+      return { success: false, error: 'Claim not found' };
+    }
+
+    if (!claimRef.claimNumber) {
+      return { success: false, error: 'Claim is missing claimNumber and cannot be transitioned safely' };
+    }
+
+    return updateClaimStatus(claimRef.claimNumber, newStatus, userId, notes, tx);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update claim status by ID',
+    };
+  }
+}
+
+/**
  * Assign claim to a steward
  */
 export async function assignClaim(

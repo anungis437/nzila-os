@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-04-26",
+  "last_audit": "2026-04-27",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -32,6 +32,9 @@
     "mobility": "incubating",
     "nacp-exams": "incubating",
     "trade": "incubating",
+    "veridian-admin": "incubating",
+    "veridian-care": "incubating",
+    "veridian-site": "incubating",
     "weekone": "incubating",
     "zonga": "incubating",
     "mobility-client-portal": "frozen",
@@ -193,6 +196,39 @@
       "revenue_status": "pre-revenue",
       "priority": "low"
     },
+    "veridian-admin": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "high"
+    },
+    "veridian-care": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "high"
+    },
+    "veridian-site": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
     "weekone": {
       "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
@@ -278,6 +314,9 @@
         "mobility",
         "nacp-exams",
         "trade",
+        "veridian-admin",
+        "veridian-care",
+        "veridian-site",
         "weekone",
         "zonga"
       ],
@@ -312,6 +351,9 @@
         "mobility",
         "nacp-exams",
         "trade",
+        "veridian-admin",
+        "veridian-care",
+        "veridian-site",
         "weekone",
         "zonga"
       ],

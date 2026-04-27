@@ -9,6 +9,7 @@ import { sql } from 'drizzle-orm';
 import { claims } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { updateClaimStatusById, type ClaimStatus } from '@/lib/workflow-engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,9 +91,23 @@ export const GET = withApi(
   },
 );
 
-// Allowed fields for PATCH — steward can update status, priority, description, etc.
+const CLAIM_STATUS_VALUES = [
+  'submitted',
+  'under_review',
+  'assigned',
+  'investigation',
+  'pending_documentation',
+  'resolved',
+  'rejected',
+  'closed',
+] as const;
+
+function isClaimStatus(value: unknown): value is ClaimStatus {
+  return typeof value === 'string' && CLAIM_STATUS_VALUES.includes(value as (typeof CLAIM_STATUS_VALUES)[number]);
+}
+
+// Allowed fields for PATCH — status transitions are enforced separately via FSM.
 const ALLOWED_PATCH_FIELDS: Record<string, keyof typeof claims.$inferInsert> = {
-  status: 'status',
   priority: 'priority',
   description: 'description',
   desiredOutcome: 'desiredOutcome',
@@ -128,13 +143,36 @@ export const PATCH = withApi(
       : sql`AND FALSE`;
 
     const existing = await withRLSContext(async () => db.execute(sql`
-      SELECT claim_id FROM claims
+      SELECT claim_id, claim_number FROM claims
       WHERE (claim_number = ${id} OR claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1
     `));
     if (!existing[0]) throw ApiError.notFound('Case not found');
     const claimId = (existing[0] as { claim_id: string }).claim_id;
+
+    if (body.status !== undefined) {
+      if (!isClaimStatus(body.status)) {
+        throw ApiError.badRequest('Invalid claim status transition target');
+      }
+      if (!userId) {
+        throw ApiError.unauthorized('Authentication required for status transitions');
+      }
+
+      const transitionResult = await withRLSContext(async (tx) =>
+        updateClaimStatusById(
+          claimId,
+          body.status,
+          userId,
+          typeof body.notes === 'string' ? body.notes : undefined,
+          tx,
+        ),
+      );
+
+      if (!transitionResult.success) {
+        throw ApiError.badRequest(transitionResult.error ?? 'Status transition denied by workflow policy');
+      }
+    }
 
     // Build update object from allowed fields only
     const updates: Record<string, unknown> = {};
@@ -144,6 +182,9 @@ export const PATCH = withApi(
       }
     }
     if (Object.keys(updates).length === 0) {
+      if (body.status !== undefined) {
+        return { updated: true, claimId, statusTransitioned: true };
+      }
       throw ApiError.badRequest('No valid fields to update');
     }
     // Always bump updatedAt
@@ -160,6 +201,6 @@ export const PATCH = withApi(
         .where(and(eq(claims.claimId, claimId)))
     );
 
-    return { updated: true, claimId };
+    return { updated: true, claimId, statusTransitioned: body.status !== undefined };
   },
 );

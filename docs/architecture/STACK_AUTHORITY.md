@@ -33,6 +33,9 @@ audit trails, and lets contract tests enforce structural invariants.
 | **trade** | **TS/Drizzle** | `@nzila/trade-db` + `resolveOrgContext` | — | Cross-border trade vertical |
 | **zonga** | **TS/Drizzle** | `@nzila/db` + `resolveOrgContext` | — | ESLint-enforced `createScopedDb` |
 | **flow** | **TS/Drizzle** | `createScopedDb` + `createAuditedScopedDb` + control-layer | — | Full commerce vertical |
+| **veridian-admin** | **TS/Drizzle** | Next.js server actions + scoped shared platform packages | — | Healthcare operations admin surface |
+| **veridian-care** | **TS/Drizzle** | Next.js server actions + scoped shared platform packages | — | Clinical workflow and care coordination surface |
+| **veridian-site** | **TS/Drizzle** | Next.js app router + platform-shared packages | — | Public-facing Veridian marketing and trust surface |
 | **web** | **None** | No DB | — | Static/marketing |
 | **orchestrator-api** | **TS/Drizzle** | Lazy `getDb()` (Fastify) | — | API-key authed, not a business app |
 | **union-eyes** | **Django** | Django ORM (12 apps) | TS/Drizzle (read proxy) | See §2 |

@@ -8,6 +8,7 @@ import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { isMalwareScanError } from '@/lib/security/clamav';
 
 interface AttachmentMetadata {
   url: string;
@@ -17,6 +18,13 @@ interface AttachmentMetadata {
   fileType: string;
   uploadedAt: string;
   uploadedBy: string;
+  malwareScan?: {
+    status: 'clean' | 'infected' | 'unavailable';
+    scannedAt: string;
+    engine: 'clamav';
+    signature?: string;
+    reason?: string;
+  };
 }
 
 interface CaseRecord {
@@ -137,11 +145,26 @@ export const POST = withApi(
     const claim = await resolveCaseRecord(params.caseId, organizationId, userId);
     const attachments = normalizeAttachments(claim.attachments);
 
-    const blob = await putBlob(
-      `cases/${claim.claimId}/${Date.now()}-${sanitizeFilename(file.name)}`,
-      file,
-      { addRandomSuffix: true },
-    );
+    let blob;
+    try {
+      blob = await putBlob(
+        `cases/${claim.claimId}/${Date.now()}-${sanitizeFilename(file.name)}`,
+        file,
+        { addRandomSuffix: true },
+      );
+    } catch (error) {
+      if (isMalwareScanError(error)) {
+        if (error.result.status === 'infected') {
+          throw ApiError.badRequest('File blocked by malware scan', {
+            scanStatus: error.result.status,
+            signature: error.result.signature,
+          });
+        }
+
+        throw ApiError.externalService('ClamAV', 'Scanner unavailable. Upload blocked by policy');
+      }
+      throw error;
+    }
 
     const attachment: AttachmentMetadata = {
       url: blob.url,
@@ -151,6 +174,7 @@ export const POST = withApi(
       fileType: file.type,
       uploadedAt: new Date().toISOString(),
       uploadedBy: userId,
+      malwareScan: blob.malwareScan,
     };
 
     const nextAttachments = [...attachments, attachment];
@@ -168,6 +192,8 @@ export const POST = withApi(
         fileType: attachment.fileType,
         fileSize: attachment.fileSize,
         attachmentUrl: attachment.url,
+        scanStatus: attachment.malwareScan?.status,
+        scanSignature: attachment.malwareScan?.signature,
       },
     });
 

@@ -13,6 +13,7 @@ import {
   container,
 } from '@nzila/blob'
 import crypto from 'node:crypto'
+import { assertBufferSafeForUpload, type MalwareScanResult } from '@/lib/security/clamav'
 
 export { uploadBuffer, downloadBuffer, generateSasUrl, computeSha256, container }
 
@@ -26,6 +27,7 @@ export interface PutBlobResult {
   contentType: string
   sha256: string
   sizeBytes: number
+  malwareScan: MalwareScanResult
 }
 
 /**
@@ -67,6 +69,8 @@ export async function putBlob(
     }
   }
 
+  const malwareScan = await assertBufferSafeForUpload(buffer, path)
+
   const result = await uploadBuffer({
     container: UE_CONTAINER,
     blobPath,
@@ -82,6 +86,7 @@ export async function putBlob(
     contentType,
     sha256: result.sha256,
     sizeBytes: result.sizeBytes,
+    malwareScan,
   }
 }
 

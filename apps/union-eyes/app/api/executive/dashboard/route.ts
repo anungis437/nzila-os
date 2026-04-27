@@ -5,8 +5,9 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { profilesTable, grievances, strategicGoals } from '@/db/schema';
-import { eq, and, desc, count, sql } from 'drizzle-orm';
+import { grievances, strategicGoals } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+import { DashboardTimeframe, getExecutiveMetrics } from '@/lib/services/dashboard-kpi-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,15 +22,10 @@ export const GET = withApi(
   },
   async ({ organizationId }) => {
     const orgId = organizationId!;
+    const timeframe: DashboardTimeframe = 'monthly';
 
-    const [memberResult, activeGrievanceResult, recentGrievances, goals] = await Promise.all([
-      db.select({ total: count() }).from(profilesTable).where(eq(profilesTable.status, 'active')),
-      db.select({ total: count() }).from(grievances).where(
-        and(
-          eq(grievances.organizationId, orgId),
-          sql`${grievances.status} NOT IN ('closed', 'withdrawn', 'dismissed')`,
-        ),
-      ),
+    const [metrics, recentGrievances, goals] = await Promise.all([
+      getExecutiveMetrics({ organizationId: orgId, timeframe }),
       db.select()
         .from(grievances)
         .where(eq(grievances.organizationId, orgId))
@@ -43,12 +39,7 @@ export const GET = withApi(
     ]);
 
     return {
-      metrics: {
-        totalMembers: memberResult[0]?.total ?? 0,
-        activeGrievances: activeGrievanceResult[0]?.total ?? 0,
-        pendingApprovals: 0,
-        upcomingMeetings: 0,
-      },
+      metrics,
       recentGrievances,
       strategicGoals: goals,
     };

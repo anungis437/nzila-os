@@ -434,6 +434,43 @@ toast.error("Failed to optimize database");
               </Card>
             </div>
 
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Admin Setup Hub</h2>
+              <p className="text-sm text-gray-600 mb-5">
+                Complete first-run setup and core administration workflows.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <button
+                  onClick={() => (window.location.href = '/dashboard/admin/onboarding')}
+                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
+                >
+                  <p className="font-semibold text-gray-900">Setup Checklist</p>
+                  <p className="text-xs text-gray-600 mt-1">Run first-run wizard and close readiness checklist tasks.</p>
+                </button>
+                <button
+                  onClick={() => (window.location.href = '/dashboard/admin/members')}
+                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
+                >
+                  <p className="font-semibold text-gray-900">User Invites</p>
+                  <p className="text-xs text-gray-600 mt-1">Invite members, stewards, officers, and admins.</p>
+                </button>
+                <button
+                  onClick={() => (window.location.href = '/dashboard/structure')}
+                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
+                >
+                  <p className="font-semibold text-gray-900">Worksites & Employers</p>
+                  <p className="text-xs text-gray-600 mt-1">Manage organization structure and workplace entities.</p>
+                </button>
+                <button
+                  onClick={() => (window.location.href = '/dashboard/admin/members')}
+                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
+                >
+                  <p className="font-semibold text-gray-900">Taxonomy Management</p>
+                  <p className="text-xs text-gray-600 mt-1">Manage role and employment classification workflows.</p>
+                </button>
+              </div>
+            </Card>
+
             {/* Recent Activity */}
             <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
               <h2 className="text-xl font-bold text-gray-900 mb-4">

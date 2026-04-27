@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-04-26
+Generated: 2026-04-27
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
@@ -22,6 +22,9 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility | incubating | Mobility option retained for future demand rather than current execution focus. | none | HOLD |
 | NACP Exams | incubating | Certification workflow option with limited current commercial proof. | none | HOLD |
 | Trade | incubating | Trade venture option that stays in incubation until evidence improves. | none | HOLD |
+| Veridian Admin | incubating | Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots. | internal-proof | HOLD |
+| Veridian Care | incubating | Clinical workflow operating system for piloting care-team coordination and patient timeline intelligence. | internal-proof | HOLD |
+| Veridian Site | incubating | Healthcare trust and demand-generation surface validating market pull for the Veridian suite. | internal-proof | HOLD |
 | WeekOne | incubating | Onboarding and first-week activation surface for new tenants across the portfolio. | internal-proof | HOLD |
 | Zonga | incubating | Future growth option in the creator economy pending stronger market evidence. | internal-proof | HOLD |
 

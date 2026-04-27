@@ -2,7 +2,14 @@
  * Tests for evidence-export.ts
  */
 import { describe, it, expect } from 'vitest';
-import { buildEvidencePack, computeSeal, verifySeal } from '../evidence-export';
+import {
+  buildEvidencePack,
+  buildEvidencePackage,
+  buildEvidencePdf,
+  buildEvidenceZip,
+  computeSeal,
+  verifySeal,
+} from '../evidence-export';
 
 describe('evidence-export', () => {
   const sampleInput = {
@@ -97,6 +104,58 @@ describe('evidence-export', () => {
       const pack = buildEvidencePack(sampleInput);
       const tampered = { ...pack, seal: 'a'.repeat(64) };
       expect(verifySeal(tampered)).toBe(false);
+    });
+  });
+
+  describe('buildEvidencePackage', () => {
+    it('builds manifest and verification metadata', () => {
+      const pkg = buildEvidencePackage(sampleInput);
+      expect(pkg.pack.caseId).toBe(sampleInput.caseId);
+      expect(pkg.manifest.schemaVersion).toBe('1.0');
+      expect(pkg.manifest.algorithm).toBe('hmac-sha256');
+      expect(pkg.manifest.artifacts.length).toBe(4);
+      expect(pkg.verification.sealValid).toBe(true);
+    });
+
+    it('includes attachment malware scan provenance from case record', () => {
+      const pkg = buildEvidencePackage({
+        ...sampleInput,
+        caseRecord: {
+          ...sampleInput.caseRecord,
+          attachments: [
+            {
+              fileName: 'clean.pdf',
+              malwareScan: { status: 'clean', scannedAt: '2026-04-27T00:00:00.000Z' },
+            },
+            {
+              fileName: 'legacy.docx',
+            },
+          ],
+        },
+      });
+
+      expect(pkg.manifest.attachmentSecurity?.totalAttachments).toBe(2);
+      expect(pkg.manifest.attachmentSecurity?.clean).toBe(1);
+      expect(pkg.manifest.attachmentSecurity?.unscanned).toBe(1);
+      expect(pkg.manifest.attachmentSecurity?.entries[0]?.fileName).toBe('clean.pdf');
+    });
+  });
+
+  describe('buildEvidenceZip', () => {
+    it('returns non-empty zip buffer', async () => {
+      const pkg = buildEvidencePackage(sampleInput);
+      const zip = await buildEvidenceZip(pkg);
+      expect(Buffer.isBuffer(zip)).toBe(true);
+      expect(zip.length).toBeGreaterThan(100);
+    });
+  });
+
+  describe('buildEvidencePdf', () => {
+    it('returns non-empty pdf buffer', async () => {
+      const pkg = buildEvidencePackage(sampleInput);
+      const pdf = await buildEvidencePdf(pkg);
+      expect(Buffer.isBuffer(pdf)).toBe(true);
+      expect(pdf.length).toBeGreaterThan(100);
     });
   });
 });

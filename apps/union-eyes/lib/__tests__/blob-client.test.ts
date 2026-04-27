@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   mockComputeSha256: vi.fn(),
   mockContainer: vi.fn(),
   mockDeleteIfExists: vi.fn(),
+  mockAssertBufferSafeForUpload: vi.fn(),
 }));
 
 vi.mock('@nzila/blob', () => ({
@@ -15,6 +16,10 @@ vi.mock('@nzila/blob', () => ({
   generateSasUrl: mocks.mockGenerateSasUrl,
   computeSha256: mocks.mockComputeSha256,
   container: mocks.mockContainer,
+}));
+
+vi.mock('@/lib/security/clamav', () => ({
+  assertBufferSafeForUpload: mocks.mockAssertBufferSafeForUpload,
 }));
 
 describe('blob-client', () => {
@@ -26,6 +31,11 @@ describe('blob-client', () => {
       blobPath: 'docs/test.pdf',
       sha256: 'abc123',
       sizeBytes: 1024,
+    });
+    mocks.mockAssertBufferSafeForUpload.mockResolvedValue({
+      status: 'clean',
+      scannedAt: '2026-04-27T00:00:00.000Z',
+      engine: 'clamav',
     });
     mocks.mockGenerateSasUrl.mockResolvedValue('https://storage.blob.core.windows.net/test/docs/test.pdf?sig=xxx');
     mocks.mockContainer.mockReturnValue({
@@ -44,7 +54,9 @@ describe('blob-client', () => {
     expect(result.contentType).toBe('application/pdf');
     expect(result.sha256).toBe('abc123');
     expect(result.sizeBytes).toBe(1024);
+    expect(result.malwareScan.status).toBe('clean');
     expect(result.url).toContain('https://');
+    expect(mocks.mockAssertBufferSafeForUpload).toHaveBeenCalled();
   });
 
   it('putBlob adds random suffix when requested', async () => {
@@ -63,6 +75,15 @@ describe('blob-client', () => {
     const result = await putBlob('file.bin', buf);
 
     expect(result.contentType).toBe('application/octet-stream');
+  });
+
+  it('putBlob surfaces malware scan failures', async () => {
+    const { putBlob } = await import('../blob-client');
+    const buf = Buffer.from('danger');
+    mocks.mockAssertBufferSafeForUpload.mockRejectedValue(new Error('blocked'));
+
+    await expect(putBlob('file.bin', buf)).rejects.toThrow('blocked');
+    expect(mocks.mockUploadBuffer).not.toHaveBeenCalled();
   });
 
   it('deleteBlob deletes by plain path', async () => {

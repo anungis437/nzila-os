@@ -82,7 +82,7 @@ export async function auditCaseExport(p: {
   userId: string;
   organizationId: string;
   caseId: string;
-  format: 'json' | 'zip';
+  format: 'json' | 'zip' | 'pdf';
 }): Promise<void> {
   return auditLog({
     eventType: CaseAuditEvent.CASE_EVIDENCE_EXPORTED,
