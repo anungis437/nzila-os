@@ -93,6 +93,18 @@ describe('detectDuplicates', () => {
     expect(groups[0].reviewStatus).toBe('pending')
   })
 
+  it('collapses transitive duplicates into a single group', () => {
+    // A≈B and B≈C should produce one group, not two
+    const a: MatchCandidate = baseCandidate
+    const b: MatchCandidate = { ...baseCandidate, patientId: 'p-002' }
+    const c: MatchCandidate = { ...baseCandidate, patientId: 'p-003' }
+    const groups = detectDuplicates([a, b, c])
+    expect(groups.length).toBe(1)
+    expect(groups[0].primaryPatientId).toBe('p-001')
+    expect(groups[0].duplicatePatientIds).toContain('p-002')
+    expect(groups[0].duplicatePatientIds).toContain('p-003')
+  })
+
   it('returns empty array when no duplicates found', () => {
     const candidates: MatchCandidate[] = [
       baseCandidate,
