@@ -6,7 +6,7 @@
       "path": "apps/orchestrator-api",
       "package": "platform-shell",
       "owner": "platform-team",
-      "justification": "Fastify API server — no browser UI, no need for platform shell components. Uses API key auth instead.",
+      "justification": "Fastify API server \u00e2\u20ac\u201d no browser UI, no need for platform shell components. Uses API key auth instead.",
       "expiresOn": "2027-01-01"
     },
     {
@@ -20,7 +20,7 @@
       "path": "apps/web",
       "package": "platform-shell",
       "owner": "platform-team",
-      "justification": "Public marketing site — uses a custom public layout, not the authenticated platform shell. No org-scoped context.",
+      "justification": "Public marketing site \u00e2\u20ac\u201d uses a custom public layout, not the authenticated platform shell. No org-scoped context.",
       "expiresOn": "2027-01-01"
     },
     {
@@ -36,6 +36,27 @@
       "owner": "platform-team",
       "justification": "Golden-path scaffold harness used for platform validation and contract checks. It intentionally validates auth and enforcement primitives without adopting the full internal shell UI.",
       "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/veridian-admin",
+      "package": "platform-shell",
+      "owner": "health-team",
+      "justification": "INCUBATING healthcare administration portal with a custom clinical shell layout distinct from the internal platform shell. Uses platform-auth for identity. Full platform-shell adoption planned pre-PILOT.",
+      "expiresOn": "2027-04-01"
+    },
+    {
+      "path": "apps/veridian-care",
+      "package": "platform-shell",
+      "owner": "health-team",
+      "justification": "INCUBATING healthcare member care portal with a patient-facing layout distinct from the internal platform shell. Uses platform-auth for identity. Full platform-shell adoption planned pre-PILOT.",
+      "expiresOn": "2027-04-01"
+    },
+    {
+      "path": "apps/veridian-site",
+      "package": "platform-shell",
+      "owner": "health-team",
+      "justification": "INCUBATING public-facing healthcare site with a public marketing layout, no org-scoped context. Uses platform-auth for identity. Full platform-shell adoption planned pre-PILOT.",
+      "expiresOn": "2027-04-01"
     }
   ]
 }
