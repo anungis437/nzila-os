@@ -1,0 +1,9 @@
+{
+  "extends": "@nzila/config/tsconfig/base",
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}
