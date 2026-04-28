@@ -5,6 +5,6 @@ export default defineProject({
     name: 'platform-intelligence-home',
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    passWithNoTests: true,
   },
 })
+

@@ -8,7 +8,6 @@ export default defineProject({
     name: 'veridian-site',
     environment: 'node',
     include: ['lib/**/*.test.ts', 'app/**/*.test.ts'],
-    passWithNoTests: true,
   },
   resolve: {
     alias: {
@@ -17,3 +16,4 @@ export default defineProject({
     },
   },
 })
+

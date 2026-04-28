@@ -5,6 +5,6 @@ export default defineProject({
     name: 'platform-lakehouse',
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    passWithNoTests: true,
   },
 })
+

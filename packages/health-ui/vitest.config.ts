@@ -5,6 +5,6 @@ export default defineProject({
     name: 'health-ui',
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    passWithNoTests: true,
   },
 })
+
