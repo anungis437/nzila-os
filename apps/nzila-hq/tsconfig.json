@@ -1,0 +1,26 @@
+{
+  "extends": "@nzila/config/tsconfig/nextjs",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@nzila/ui": ["../../packages/ui/src"],
+      "@nzila/hq-domain": ["../../packages/hq-domain/src/index.ts"],
+      "@nzila/hq-domain/types": ["../../packages/hq-domain/src/types.ts"],
+      "@nzila/hq-domain/dependency-engine": ["../../packages/hq-domain/src/dependency-engine.ts"],
+      "@nzila/hq-domain/automations": ["../../packages/hq-domain/src/automations.ts"],
+      "@nzila/hq-domain/reports": ["../../packages/hq-domain/src/reports.ts"],
+      "@nzila/platform-auth": ["../../packages/platform-auth/src/index.ts"],
+      "@nzila/platform-auth/entra/server": ["../../packages/platform-auth/src/entra/server.ts"],
+      "@nzila/os-core": ["../../packages/os-core/src/index.ts"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/**/*.ts",
+    "../../packages/ui/src/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
+}

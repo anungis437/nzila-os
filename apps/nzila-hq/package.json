@@ -1,0 +1,46 @@
+{
+  "name": "@nzila/nzila-hq",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3020",
+    "build": "next build",
+    "start": "next start --port 3020",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@nzila/hq-domain": "workspace:*",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/payments-stripe": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/qbo": "workspace:*",
+    "@nzila/ui": "workspace:*",
+    "drizzle-orm": "^0.45.1",
+    "next": "16.2.3",
+    "postgres": "^3.4.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.8",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

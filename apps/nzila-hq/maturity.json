@@ -1,0 +1,14 @@
+{
+  "generated_from": "apps/nzila-hq/control-manifest.json",
+  "generated_at": "2026-04-28",
+  "status": "active",
+  "exposure": "internal",
+  "data_integrity": "seeded",
+  "contracts_complete": false,
+  "observability": "partial",
+  "portfolio_tier": "TIER 1",
+  "gtm_posture": "internal-only",
+  "proof_level": "phase-1",
+  "revenue_status": "internal-tooling",
+  "last_validated": "2026-04-28"
+}
