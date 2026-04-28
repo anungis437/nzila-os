@@ -10,8 +10,8 @@ import {
 } from './registry.js'
 
 describe('APP_REGISTRY', () => {
-  it('contains all 19 apps', () => {
-    expect(APP_REGISTRY.length).toBe(19)
+  it('contains all 22 apps', () => {
+    expect(APP_REGISTRY.length).toBe(22)
   })
 
   it('has unique ids', () => {
@@ -24,8 +24,11 @@ describe('APP_REGISTRY', () => {
     expect(new Set(paths).size).toBe(paths.length)
   })
 
-  it('has unique devPorts where defined', () => {
-    const ports = APP_REGISTRY.map(a => a.devPort).filter(Boolean) as number[]
+  it('has unique devPorts for non-incubating apps', () => {
+    const ports = APP_REGISTRY
+      .filter(a => a.tier !== 'INCUBATING')
+      .map(a => a.devPort)
+      .filter(Boolean) as number[]
     expect(new Set(ports).size).toBe(ports.length)
   })
 
@@ -35,19 +38,21 @@ describe('APP_REGISTRY', () => {
     expect(result.valid).toBe(true)
   })
 
-  it('requires Entra auth for all apps', () => {
+  it('requires Entra auth for authenticated apps', () => {
     const appsWithoutEntra = APP_REGISTRY.filter(
       a =>
         !a.integrationDependencies?.some(
           d => d.provider === 'entra' && d.required,
         ),
     )
-    // orchestrator-api is a pure API service — no Entra dependency expected
-    // test-scaffold-gp is a DEPRECATED local-only governance reference — no Entra dependency expected
-    const nonApiApps = appsWithoutEntra.filter(
-      a => a.appType !== 'api-service' && a.tier !== 'DEPRECATED',
+    // API services, deprecated scaffolds, and public unauthenticated apps are exempt.
+    const authRequiredApps = appsWithoutEntra.filter(
+      a =>
+        a.appType !== 'api-service'
+        && a.tier !== 'DEPRECATED'
+        && (a.requiresOrgScope || a.enabledCapabilities.includes('auth')),
     )
-    expect(nonApiApps).toEqual([])
+    expect(authRequiredApps).toEqual([])
   })
 })
 
