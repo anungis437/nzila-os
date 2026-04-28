@@ -29,7 +29,7 @@ export default async function RootLayout({
 
   return (
     <AuthProvider>
-      <html lang={locale} suppressHydrationWarning>
+      <html lang={locale} suppressHydrationWarning data-product="control-plane">
         <body className={poppins.className} suppressHydrationWarning>
           <NzilaAppShell moduleId="control-plane">
             <ThemeProvider

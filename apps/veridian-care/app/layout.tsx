@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} data-product="veridian">
       <body className="min-h-screen flex">
         <Sidebar />
         <div className="flex-1 flex flex-col">

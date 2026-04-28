@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <AuthProvider>
-      <html lang="en" className={poppins.variable}>
+      <html lang="en" className={poppins.variable} data-product="flow">
         <body className="font-sans antialiased">
           <NzilaAppShell moduleId="flow">{children}</NzilaAppShell>
         </body>

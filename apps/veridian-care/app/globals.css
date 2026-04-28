@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@nzila/ui/globals.css";
 
 :root {
   --background: #f8fafc;

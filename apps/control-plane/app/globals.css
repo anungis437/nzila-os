@@ -104,3 +104,10 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
+
+/* ── @nzila/ui — per-product accent (Phase 1 portfolio adoption) ── */
+[data-product="control-plane"] {
+  --color-accent: #0ea5e9;
+  --color-accent-soft: #e0f2fe;
+  --color-accent-fg: #ffffff;
+}

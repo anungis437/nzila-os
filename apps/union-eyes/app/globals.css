@@ -419,3 +419,9 @@ html {
 .dashboard-content > *:nth-child(4) { animation-delay: 0.15s; }
 .dashboard-content > *:nth-child(5) { animation-delay: 0.2s; }
 .dashboard-content > *:nth-child(n+6) { animation-delay: 0.25s; }
+/* ── @nzila/ui — per-product accent (Phase 1 portfolio adoption) ── */
+[data-product="union-eyes"] {
+  --color-accent: #1e3a8a;
+  --color-accent-soft: #dbeafe;
+  --color-accent-fg: #ffffff;
+}

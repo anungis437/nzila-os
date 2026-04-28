@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@nzila/ui/globals.css";
 
 /* ── Design Tokens ── */
 :root {

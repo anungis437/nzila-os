@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@nzila/ui/globals.css";
+
+html,
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-feature-settings: "ss01", "ss02", "cv11";
+}
+
+body {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
