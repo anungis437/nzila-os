@@ -1,24 +1,24 @@
 {
-   "name": "@nzila/agri-reporting",
-   "version": "0.1.0",
-   "private": true,
-   "type": "module",
-   "main": "./src/index.ts",
-   "types": "./src/index.ts",
-   "exports": {
-      ".": "./src/index.ts",
-      "./engine": "./src/engine.ts",
-      "./formats": "./src/formats.ts",
-      "./canonical": "./src/canonical-reporting-schema.ts",
-      "./validate": "./src/validate-canonical-report.ts",
-      "./coragov": "./src/coragov-ingestion-contract.ts",
-      "./coragov-harness": "./src/coragov-ingestion-harness.ts"
-   },
-   "dependencies": {
-      "@nzila/agri-core": "workspace:*",
-      "zod": "^3.24.0"
-   },
-   "scripts": {
-      "test:coverage": "vitest run --coverage"
-   }
+  "name": "@nzila/agri-reporting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./engine": "./src/engine.ts",
+    "./formats": "./src/formats.ts",
+    "./canonical": "./src/canonical-reporting-schema.ts",
+    "./validate": "./src/validate-canonical-report.ts",
+    "./coragov": "./src/coragov-ingestion-contract.ts",
+    "./coragov-harness": "./src/coragov-ingestion-harness.ts"
+  },
+  "dependencies": {
+    "@nzila/agri-core": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "scripts": {
+    "test:coverage": "vitest run --coverage"
+  }
 }
