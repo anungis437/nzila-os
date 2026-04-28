@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedAt": "2026-04-28T00:00:00.000Z",
   "appCount": 22,
   "packageCount": 180,
   "workspacePackageCount": 206,
   "workflowCount": 46,
   "contractTestCount": 226,
-  "tsTestFileCount": 1246,
+  "tsTestFileCount": 1260,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -541,12 +541,11 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "config",
-        "health-ui",
         "os-core",
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 17
+      "codeFileCount": 18
     },
     {
       "name": "veridian-care",
@@ -559,12 +558,11 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "config",
-        "health-ui",
         "os-core",
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 20
+      "codeFileCount": 21
     },
     {
       "name": "veridian-site",
@@ -577,12 +575,11 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "config",
-        "health-ui",
         "os-core",
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 20
+      "codeFileCount": 21
     },
     {
       "name": "web",
