@@ -8,6 +8,7 @@ export default defineProject({
     name: 'veridian-care',
     environment: 'node',
     include: ['lib/**/*.test.ts', 'app/**/*.test.ts'],
+    passWithNoTests: true,
   },
   resolve: {
     alias: {
