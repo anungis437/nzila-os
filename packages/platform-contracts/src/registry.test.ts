@@ -50,7 +50,7 @@ describe('APP_REGISTRY', () => {
       a =>
         a.appType !== 'api-service'
         && a.tier !== 'DEPRECATED'
-        && (a.requiresOrgScope || a.enabledCapabilities.includes('auth')),
+        && (a.requiresOrgScope || (a.enabledCapabilities ?? []).includes('auth')),
     )
     expect(authRequiredApps).toEqual([])
   })
