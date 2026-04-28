@@ -1,8 +1,22 @@
 import React from 'react'
 
+/**
+ * Card — disciplined container.
+ *
+ * Three elevation roles only (per the design tokens): `default` (low
+ * shadow), `bordered` (no shadow, border-only), `elevated` (mid shadow,
+ * for popovers/sheets). Surfaces and borders use semantic CSS variables
+ * so themes (light/dark/enterprise) flip globally.
+ */
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'bordered' | 'elevated'
 }
+
+const variantClass = {
+  default: 'border border-[var(--color-border)] shadow-[var(--shadow-low)]',
+  bordered: 'border border-[var(--color-border-strong)]',
+  elevated: 'border border-[var(--color-border)] shadow-[var(--shadow-mid)]',
+} as const
 
 export function Card({
   variant = 'default',
@@ -10,14 +24,11 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const base = 'rounded-xl bg-card text-card-foreground overflow-hidden'
-  const variants = {
-    default: 'border border-border',
-    bordered: 'border-2 border-border',
-    elevated: 'shadow-lg',
-  }
   return (
-    <div className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <div
+      className={`rounded-[var(--radius-lg)] bg-[var(--color-surface-1)] text-[var(--color-fg)] overflow-hidden ${variantClass[variant]} ${className}`}
+      {...props}
+    >
       {children}
     </div>
   )
@@ -29,7 +40,10 @@ Card.Header = function CardHeader({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-6 py-4 border-b border-border ${className}`} {...props}>
+    <div
+      className={`px-5 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface-2)]/50 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   )
@@ -41,7 +55,7 @@ Card.Body = function CardBody({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-6 py-4 ${className}`} {...props}>
+    <div className={`px-5 py-4 ${className}`} {...props}>
       {children}
     </div>
   )
@@ -53,7 +67,10 @@ Card.Footer = function CardFooter({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-6 py-4 border-t border-border ${className}`} {...props}>
+    <div
+      className={`px-5 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface-2)]/40 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   )

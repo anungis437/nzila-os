@@ -9,45 +9,59 @@ describe('Badge', () => {
     expect(screen.getByText('New')).toBeInTheDocument()
   })
 
-  it('applies default variant styling', () => {
+  it('default variant maps to neutral status tokens', () => {
     render(<Badge>Default</Badge>)
-    const badge = screen.getByText('Default')
-    expect(badge.className).toContain('bg-gray-100')
+    expect(screen.getByText('Default').className).toContain('var(--color-status-neutral-soft)')
   })
 
-  it('applies success variant', () => {
+  it('canonical "ok" variant uses ok tokens', () => {
+    render(<Badge variant="ok">OK</Badge>)
+    expect(screen.getByText('OK').className).toContain('var(--color-status-ok-soft)')
+  })
+
+  it('legacy alias "success" still maps to ok', () => {
     render(<Badge variant="success">OK</Badge>)
-    const badge = screen.getByText('OK')
-    expect(badge.className).toContain('bg-green-100')
+    expect(screen.getByText('OK').className).toContain('var(--color-status-ok-soft)')
   })
 
-  it('applies warning variant', () => {
-    render(<Badge variant="warning">Warn</Badge>)
-    const badge = screen.getByText('Warn')
-    expect(badge.className).toContain('bg-yellow-100')
+  it('canonical "critical" variant uses critical tokens', () => {
+    render(<Badge variant="critical">Error</Badge>)
+    expect(screen.getByText('Error').className).toContain('var(--color-status-critical-soft)')
   })
 
-  it('applies danger variant', () => {
+  it('legacy alias "danger" still maps to critical', () => {
     render(<Badge variant="danger">Error</Badge>)
-    const badge = screen.getByText('Error')
-    expect(badge.className).toContain('bg-red-100')
+    expect(screen.getByText('Error').className).toContain('var(--color-status-critical-soft)')
   })
 
-  it('applies info variant', () => {
+  it('warning variant uses warning tokens', () => {
+    render(<Badge variant="warning">Warn</Badge>)
+    expect(screen.getByText('Warn').className).toContain('var(--color-status-warning-soft)')
+  })
+
+  it('info variant uses info tokens', () => {
     render(<Badge variant="info">Info</Badge>)
-    const badge = screen.getByText('Info')
-    expect(badge.className).toContain('bg-blue-100')
+    expect(screen.getByText('Info').className).toContain('var(--color-status-info-soft)')
+  })
+
+  it('accent variant tracks the per-product accent', () => {
+    render(<Badge variant="accent">Tag</Badge>)
+    expect(screen.getByText('Tag').className).toContain('var(--color-accent-soft)')
+  })
+
+  it('renders a leading dot when dot=true', () => {
+    const { container } = render(<Badge variant="ok" dot>Live</Badge>)
+    const dot = container.querySelector('span > span[aria-hidden="true"]')
+    expect(dot).not.toBeNull()
   })
 
   it('merges custom className', () => {
     render(<Badge className="extra">Styled</Badge>)
-    const badge = screen.getByText('Styled')
-    expect(badge.className).toContain('extra')
+    expect(screen.getByText('Styled').className).toContain('extra')
   })
 
   it('renders as a span element', () => {
     render(<Badge>Tag</Badge>)
-    const badge = screen.getByText('Tag')
-    expect(badge.tagName).toBe('SPAN')
+    expect(screen.getByText('Tag').tagName).toBe('SPAN')
   })
 })
