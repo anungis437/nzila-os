@@ -1,0 +1,16 @@
+{
+  "owner": "platform",
+  "category": "DOMAIN_SHARED",
+  "stability": "EVOLVING",
+  "description": "ITSM core domain: ticket FSM, SLA computation, automation rules, ticket numbering, asset risk scoring.",
+  "allowed_dependents": [
+    "apps/platform-admin",
+    "apps/console",
+    "apps/control-plane",
+    "packages/platform-*"
+  ],
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
+}

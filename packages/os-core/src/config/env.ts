@@ -170,6 +170,7 @@ type AppName =
   | 'trade'
   | 'platform-admin'
   | 'control-plane'
+  | 'nzila-hq'
   | 'base'
 
 const SCHEMAS: Record<AppName, ZodTypeAny> = {
@@ -191,6 +192,7 @@ const SCHEMAS: Record<AppName, ZodTypeAny> = {
   trade: tradeSchema,
   'platform-admin': platformAdminSchema,
   'control-plane': controlPlaneSchema,
+  'nzila-hq': baseSchema,
 }
 
 export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'

@@ -28,6 +28,7 @@ type AppName =
   | 'trade'
   | 'platform-admin'
   | 'control-plane'
+  | 'nzila-hq'
 
 export interface AppBootOptions {
   /** Skip env validation (e.g. for marketing-only apps) */

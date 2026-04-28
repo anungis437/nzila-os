@@ -3,6 +3,25 @@ import createNextIntlPlugin from 'next-intl/plugin'
 
 const withNextIntl = createNextIntlPlugin('./i18n.ts')
 
+/**
+ * Bundle analyzer is opt-in via `ANALYZE=true` env. When the optional
+ * `@next/bundle-analyzer` package is installed, it wraps the config
+ * and emits HTML reports under `.next/analyze/`. When not installed,
+ * the wrapper is a no-op so ordinary builds never break on missing dep.
+ */
+function maybeBundleAnalyzer<T>(cfg: T): T {
+  if (process.env.ANALYZE !== 'true') return cfg
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const withBundleAnalyzer = require('@next/bundle-analyzer')({ enabled: true })
+    return withBundleAnalyzer(cfg)
+  } catch {
+    // Package not installed — silent no-op. Install with:
+    //   pnpm --filter @nzila/console add -D @next/bundle-analyzer
+    return cfg
+  }
+}
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
@@ -96,4 +115,4 @@ const nextConfig: NextConfig = {
   ],
 }
 
-export default withNextIntl(nextConfig)
+export default maybeBundleAnalyzer(withNextIntl(nextConfig))

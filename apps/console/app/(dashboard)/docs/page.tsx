@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { getAllInternalDocs } from '@/lib/docs'
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
 
-export const dynamic = 'force-dynamic'
+// Internal docs are file-system content (content/internal/*.md). Revalidate
+// every 5 minutes so newly merged docs surface without redeploy.
+export const revalidate = 300
 
 export const metadata = {
   title: 'Internal Docs | Nzila Console',

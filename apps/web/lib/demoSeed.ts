@@ -2,21 +2,9 @@
  * Web — Demo Seed Data
  *
  * Creates demo org, users, workflow examples, and analytics data
- * for pilot demonstrations. Also includes WeekOne demo data.
+ * for pilot demonstrations. WeekOne demo data is seeded independently
+ * via `tsx apps/weekone/lib/demoSeed.ts` (no app-to-app coupling).
  */
-
-// Re-export WeekOne demo types and functions
-export { seedWeekOneDemo } from '../../weekone/lib/demoSeed'
-export type {
-  DemoWeeköneOrg,
-  DemoWeeköneUser,
-  DemoWeeköneSubscription,
-  DemoWeekoneCashSnapshot,
-  DemoWeeköneInvoice,
-  DemoWeeköneDeal,
-  DemoWeeköneWeeklyBrief,
-  DemoWeekonePriority,
-} from '../../weekone/lib/demoSeed'
 
 export interface DemoOrg {
   id: string
@@ -55,7 +43,12 @@ export function createDemoPages(): DemoPage[] {
     { slug: 'about', title: 'About Nzila', status: 'published', author: 'demo-editor' },
     { slug: 'pricing', title: 'Pricing Plans', status: 'published', author: 'demo-editor' },
     { slug: 'enterprise', title: 'Enterprise Solutions', status: 'draft', author: 'demo-admin' },
-    { slug: 'blog-launch', title: 'Platform Launch Announcement', status: 'published', author: 'demo-editor' },
+    {
+      slug: 'blog-launch',
+      title: 'Platform Launch Announcement',
+      status: 'published',
+      author: 'demo-editor',
+    },
   ]
 }
 
@@ -75,21 +68,14 @@ export async function seedDemo() {
   const pages = createDemoPages()
   const analytics = createDemoAnalytics()
 
-  // Import and seed WeekOne demo data
-  const { seedWeekOneDemo } = await import('../../weekone/lib/demoSeed')
-  const weekoneData = await seedWeekOneDemo()
-
-  console.log(`[demo:seed] Web + WeekOne demo data created`)
+  console.log(`[demo:seed] Web demo data created`)
   console.log(`  Web Org: ${org.name}`)
   console.log(`  Web Users: ${users.length}`)
   console.log(`  Web Pages: ${pages.length}`)
   console.log(`  Web Analytics: ready`)
-  console.log(`  WeekOne Org: ${weekoneData.org.name}`)
-  console.log(`  WeekOne User: ${weekoneData.user.name}`)
-  console.log(`  WeekOne Deals: ${weekoneData.deals.length}`)
-  console.log(`  WeekOne Priorities: ${weekoneData.priorities.length}`)
+  console.log(`  (WeekOne demo data: run \`tsx apps/weekone/lib/demoSeed.ts\` separately)`)
 
-  return { web: { org, users, pages, analytics }, weekone: weekoneData }
+  return { web: { org, users, pages, analytics } }
 }
 
 if (process.argv[1]?.includes('demoSeed')) {

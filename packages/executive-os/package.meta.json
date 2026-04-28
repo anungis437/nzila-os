@@ -1,0 +1,17 @@
+{
+  "owner": "platform",
+  "category": "PLATFORM_CORE",
+  "stability": "EXPERIMENTAL",
+  "description": "Nzila ExecutiveOS — governed multi-agent executive stack (Chief of Staff, CFO, RevOps, Platform, Legal, Knowledge).",
+  "allowed_dependents": [
+    "apps/console",
+    "apps/control-plane",
+    "apps/platform-admin",
+    "apps/nzila-hq",
+    "packages/platform-*"
+  ],
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
+}

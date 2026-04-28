@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nzila.local/governance/ai/inventory.schema.json",
+  "title": "Nzila AI Surface Inventory",
+  "type": "object",
+  "required": ["version", "updated", "owner", "architecture", "surfaces"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string" },
+    "updated": { "type": "string", "format": "date" },
+    "owner": { "type": "string" },
+    "architecture": {
+      "type": "object",
+      "required": ["mandatedEntryPoint", "envelopeType", "contractTests"],
+      "additionalProperties": true
+    },
+    "approvedProviders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "models", "contract", "zeroRetention"],
+        "properties": {
+          "name": { "type": "string" },
+          "models": { "type": "array" },
+          "contract": { "type": "string" },
+          "zeroRetention": { "type": "boolean" }
+        }
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "owner", "riskTier", "provider", "highestDataTier", "approval", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "name": { "type": "string" },
+          "app": { "type": "string" },
+          "package": { "type": "string" },
+          "supportingPackages": { "type": "array", "items": { "type": "string" } },
+          "entrypoint": { "type": "string" },
+          "owner": { "type": "string" },
+          "riskTier": { "type": "integer", "enum": [0, 1, 2, 3] },
+          "tierRationale": { "type": "string" },
+          "provider": { "type": "string" },
+          "models": { "type": "array", "items": { "type": "string" } },
+          "region": { "type": "string" },
+          "highestDataTier": {
+            "type": "string",
+            "enum": ["Public", "Internal", "Confidential", "Restricted"]
+          },
+          "pia": { "type": ["string", "null"] },
+          "piaStatus": { "type": "string" },
+          "evalDataset": { "type": ["string", "null"] },
+          "approval": {
+            "type": "object",
+            "required": ["by", "decision"],
+            "properties": {
+              "by": { "type": "string" },
+              "date": { "type": ["string", "null"] },
+              "decision": { "type": "string" }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["DESIGN", "DEV", "PROD", "DEPRECATED", "RETIRED"]
+          }
+        }
+      }
+    }
+  }
+}

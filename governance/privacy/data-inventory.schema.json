@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nzila.local/governance/privacy/data-inventory.schema.json",
+  "title": "Nzila Privacy Data Inventory",
+  "type": "object",
+  "required": ["version", "updated", "owner", "tiers", "dataStores"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string" },
+    "updated": { "type": "string", "format": "date" },
+    "owner": { "type": "string" },
+    "tiers": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["Public", "Internal", "Confidential", "Restricted"] }
+    },
+    "dataStores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "kind", "owner", "environment",
+          "highestDataTier", "personalData", "categories",
+          "retention", "encryption", "lawfulBasis", "crossBorder"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "name": { "type": "string" },
+          "kind": { "type": "string" },
+          "host": { "type": "string" },
+          "owner": { "type": "string" },
+          "environment": { "type": "string", "enum": ["dev", "staging", "production", "shared"] },
+          "highestDataTier": {
+            "type": "string",
+            "enum": ["Public", "Internal", "Confidential", "Restricted"]
+          },
+          "personalData": { "type": "boolean" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "retention": { "type": "string" },
+          "encryption": { "type": "string" },
+          "lawfulBasis": { "type": "array", "items": { "type": "string" } },
+          "crossBorder": { "type": "boolean" },
+          "transferMechanism": { "type": "string" },
+          "subProcessors": { "type": "array", "items": { "type": "string" } },
+          "linkedSurfaces": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

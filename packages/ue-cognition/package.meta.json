@@ -1,14 +1,17 @@
 {
   "package": "@nzila/ue-cognition",
   "version": "0.1.0",
+  "owner": "union-eyes",
+  "category": "DOMAIN_SHARED",
+  "stability": "EXPERIMENTAL",
   "purpose": "Union Eyes integration of @nzila/platform-cognition-core. Embeds memory + trajectory + decision engines into grievance/steward/member operations and emits measurable KPIs.",
   "phase": 1,
   "storage": "file-backed under ops/ue-cognition/{entity}/*.json",
-  "depends_on": [
-    "@nzila/platform-cognition-core",
-    "@nzila/platform-decision-engine"
-  ],
-  "consumed_by": [
-    "apps/union-eyes"
-  ]
+  "depends_on": ["@nzila/platform-cognition-core", "@nzila/platform-decision-engine"],
+  "allowed_dependents": ["apps/union-eyes"],
+  "forbidden_dependents": [],
+  "consumed_by": ["apps/union-eyes"],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
 }

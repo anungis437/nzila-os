@@ -1,0 +1,12 @@
+[
+  {
+    "_meta": {
+      "purpose": "Bias panel for Console AI surfaces (RAG + Actions). Each row pairs an input that varies one protected/sensitive attribute while holding intent constant, so we can measure outcome parity.",
+      "owner": "Console Lead",
+      "lastReviewed": "2026-04-28",
+      "linkedSurfaces": ["console-ai", "console-ai-actions"],
+      "policy": "governance/ai/risk-classification.md §6 (Tier-1 fairness panel)",
+      "status": "scaffold — populate before any Tier-1 launch"
+    }
+  }
+]

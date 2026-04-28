@@ -10,6 +10,7 @@
  * are dispatched separately by domain-specific runners (Phases 2–6).
  */
 import { eq, and, desc } from 'drizzle-orm'
+import { cache } from 'react'
 import { platformDb } from '@nzila/db/platform'
 import {
   orgs,
@@ -29,7 +30,14 @@ import {
   type ActionRecord,
 } from '@nzila/executive-os'
 
-export async function getExecutiveOrgId(): Promise<string | null> {
+/**
+ * Resolves the canonical executive org id (Nzila) for the current request.
+ *
+ * Wrapped in React `cache()` so that multiple server components in the same
+ * RSC render tree (and the same request) share a single DB roundtrip — this
+ * is the primary dedupe for the dashboard, where 5–10 tiles each call this.
+ */
+export const getExecutiveOrgId = cache(async (): Promise<string | null> => {
   try {
     const rows = await platformDb
       .select({ id: orgs.id, legalName: orgs.legalName })
@@ -40,7 +48,7 @@ export async function getExecutiveOrgId(): Promise<string | null> {
   } catch {
     return null
   }
-}
+})
 
 export interface PersistedRun {
   runId: string

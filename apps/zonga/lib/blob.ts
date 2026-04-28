@@ -13,6 +13,7 @@
  */
 
 import { uploadBuffer, generateSasUrl, computeSha256 } from '@nzila/blob'
+import { assertBufferSafeForUpload, type MalwareScanResult } from '@/lib/security/clamav'
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
@@ -56,6 +57,7 @@ export interface UploadAudioResult {
   blobPath: string
   sha256: string
   sizeBytes: number
+  malwareScan: MalwareScanResult
 }
 
 /**
@@ -81,6 +83,8 @@ export async function uploadAudioFile(
 
   const blobPath = `${creatorId}/${assetId}/${fileName}`
 
+  const malwareScan = await assertBufferSafeForUpload(buffer, blobPath)
+
   const result = await uploadBuffer({
     container: AUDIO_CONTAINER,
     blobPath,
@@ -92,6 +96,7 @@ export async function uploadAudioFile(
     blobPath: result.blobPath,
     sha256: result.sha256,
     sizeBytes: result.sizeBytes,
+    malwareScan,
   }
 }
 
@@ -125,6 +130,8 @@ export async function uploadCoverArt(
 
   const blobPath = `${creatorId}/${assetId}/${fileName}`
 
+  const malwareScan = await assertBufferSafeForUpload(buffer, blobPath)
+
   const result = await uploadBuffer({
     container: COVER_CONTAINER,
     blobPath,
@@ -136,6 +143,7 @@ export async function uploadCoverArt(
     blobPath: result.blobPath,
     sha256: result.sha256,
     sizeBytes: result.sizeBytes,
+    malwareScan,
   }
 }
 

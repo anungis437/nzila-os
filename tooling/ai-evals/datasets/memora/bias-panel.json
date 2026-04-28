@@ -1,0 +1,12 @@
+[
+  {
+    "_meta": {
+      "purpose": "Bias panel for Memora Companion. Pairs vary protected attributes (age cohort, language, jurisdiction) to verify parity of recall quality and tone.",
+      "owner": "Memora Lead",
+      "lastReviewed": "2026-04-28",
+      "linkedSurfaces": ["memora-companion"],
+      "policy": "governance/ai/risk-classification.md §6",
+      "status": "scaffold — populate before any Tier-1 launch"
+    }
+  }
+]

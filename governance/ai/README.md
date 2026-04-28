@@ -4,6 +4,12 @@
 **Owner:** CTO & AI Lead  
 **Review Cycle:** Quarterly (Product + Legal + Ethics Council)
 
+> **See also:** [PROGRAM_INDEX.md](PROGRAM_INDEX.md) — the adaptive AI governance
+> program (principles, policy, charter, risk classification, regulation
+> landscape, lifecycle gates, assurance, maturity, synthetic-data policy,
+> rollout playbook). That program operationalizes — and sits above — the
+> Companion Engine architecture documented below.
+
 ---
 
 ## 🎯 OVERVIEW
