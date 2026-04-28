@@ -22,6 +22,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Generate CycloneDX SBOM
         uses: CycloneDX/gh-node-module-generatebom@27e13c2bf0fae78d66387b35ca9749d8cc853060 # v1.0.3
@@ -71,7 +75,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download SBOM
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: sbom-${{ github.run_id }}
           path: .
@@ -96,7 +100,7 @@ jobs:
           cosign-release: 'v2.4.1'
 
       - name: Download SBOM
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: sbom-${{ github.run_id }}
           path: .
