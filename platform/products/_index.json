@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-22T00:00:00.000Z",
-  "count": 19,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 22,
   "products": [
     {
       "slug": "abr",
@@ -96,6 +96,24 @@
       "slug": "union-eyes",
       "tier": 1,
       "tierLabel": "flagship",
+      "publicVisible": true
+    },
+    {
+      "slug": "veridian-admin",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "veridian-care",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "veridian-site",
+      "tier": 4,
+      "tierLabel": "lab",
       "publicVisible": true
     },
     {

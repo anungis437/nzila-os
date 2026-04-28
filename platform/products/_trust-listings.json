@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-22T00:00:00.000Z",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
   "products": [
     {
       "slug": "abr",
@@ -24,6 +24,12 @@
       "name": "Union Eyes",
       "trustProfile": "tier-1-public",
       "launchStage": "pilot-paid"
+    },
+    {
+      "slug": "veridian-site",
+      "name": "Veridian Site",
+      "trustProfile": "tier-2-public",
+      "launchStage": "incubating"
     },
     {
       "slug": "web",

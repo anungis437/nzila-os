@@ -45,3 +45,30 @@ exceptions:
       without adopting the full internal shell UI.
     owner: platform-team
     reviewDate: "2027-01-01"
+
+  - app: veridian-admin
+    missing: platform-shell
+    reason: >-
+      INCUBATING healthcare administration portal with a custom clinical shell
+      layout distinct from the internal platform shell. Uses platform-auth for
+      identity. Full platform-shell adoption planned pre-PILOT.
+    owner: health-team
+    reviewDate: "2027-04-01"
+
+  - app: veridian-care
+    missing: platform-shell
+    reason: >-
+      INCUBATING healthcare member care portal with a patient-facing layout
+      distinct from the internal platform shell. Uses platform-auth for
+      identity. Full platform-shell adoption planned pre-PILOT.
+    owner: health-team
+    reviewDate: "2027-04-01"
+
+  - app: veridian-site
+    missing: platform-shell
+    reason: >-
+      INCUBATING public-facing healthcare site. Public marketing layout —
+      no org-scoped context or authenticated shell required. Uses
+      platform-auth for identity. Full platform-shell adoption planned pre-PILOT.
+    owner: health-team
+    reviewDate: "2027-04-01"

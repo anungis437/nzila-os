@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-22T00:00:00.000Z",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
   "requiredApps": [
     "abr",
     "cfo",
@@ -21,6 +21,9 @@
     "partners",
     "platform-admin",
     "test-scaffold-gp",
+    "veridian-admin",
+    "veridian-care",
+    "veridian-site",
     "weekone"
   ]
 }

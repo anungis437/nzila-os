@@ -161,6 +161,30 @@
       "trustProfile": "sunset",
       "launchStage": "sunset",
       "publicVisible": false
+    },
+    "veridian-admin": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
+    "veridian-care": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
+    "veridian-site": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-2-public",
+      "launchStage": "incubating",
+      "publicVisible": true
     }
   }
 }

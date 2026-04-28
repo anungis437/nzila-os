@@ -157,6 +157,7 @@ secrets/
 # Allow @nzila/secrets package (TypeScript source, NOT actual credentials)
 !packages/secrets/
 !packages/secrets/**
+packages/secrets/coverage/
 packages/secrets/node_modules/
 packages/secrets/.turbo/
 *.pem

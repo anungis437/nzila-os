@@ -1,6 +1,6 @@
 {
   "generated_from": "governance/portfolio/product-catalog.json",
-  "generated_at": "2026-04-27",
+  "generated_at": "2026-04-28",
   "status": "pilot",
   "exposure": "internal",
   "data_integrity": "partial",
@@ -10,7 +10,7 @@
   "gtm_posture": "sell-now",
   "proof_level": "pilot-proof",
   "revenue_status": "pilot-contracting",
-  "last_validated": "2026-04-27",
+  "last_validated": "2026-04-28",
   "runbooks": "complete",
   "backup_restore": "ready-for-live-drill",
   "analytics_readiness": "partial",

@@ -1,0 +1,22 @@
+{
+  "slug": "veridian-admin",
+  "name": "Veridian Admin",
+  "tier": 4,
+  "tierLabel": "lab",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": false,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "hold",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots.",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

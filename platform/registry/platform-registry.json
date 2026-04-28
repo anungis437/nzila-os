@@ -5,7 +5,7 @@
     { "name": "flow", "path": "apps/flow", "tier": "PRODUCTION", "owner": "commerce", "domain": "commerce" },
     { "name": "web", "path": "apps/web", "tier": "PRODUCTION", "owner": "platform", "domain": "platform" },
     { "name": "partners", "path": "apps/partners", "tier": "PILOT", "owner": "commerce", "domain": "commerce" },
-    { "name": "cfo", "path": "apps/cfo", "tier": "PILOT", "owner": "finance", "domain": "finance" },
+    { "name": "cfo", "path": "apps/cfo", "tier": "PRODUCTION", "owner": "finance", "domain": "finance" },
     { "name": "console", "path": "apps/console", "tier": "PILOT", "owner": "platform", "domain": "platform" },
     { "name": "control-plane", "path": "apps/control-plane", "tier": "PILOT", "owner": "platform", "domain": "platform" },
     { "name": "zonga", "path": "apps/zonga", "tier": "INCUBATING", "owner": "media", "domain": "media" },
@@ -15,9 +15,14 @@
     { "name": "agrimo", "path": "apps/agrimo", "tier": "INCUBATING", "owner": "platform", "domain": "analytics" },
     { "name": "platform-admin", "path": "apps/platform-admin", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
     { "name": "orchestrator-api", "path": "apps/orchestrator-api", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
+    { "name": "veridian-admin", "path": "apps/veridian-admin", "tier": "INCUBATING", "owner": "health", "domain": "health" },
+    { "name": "veridian-care", "path": "apps/veridian-care", "tier": "INCUBATING", "owner": "health", "domain": "health" },
+    { "name": "veridian-site", "path": "apps/veridian-site", "tier": "INCUBATING", "owner": "health", "domain": "health" },
     { "name": "nacp-exams", "path": "apps/nacp-exams", "tier": "EXPERIMENTAL", "owner": "education", "domain": "education" },
     { "name": "mobility", "path": "apps/mobility", "tier": "EXPERIMENTAL", "owner": "mobility", "domain": "mobility" },
-    { "name": "mobility-client-portal", "path": "apps/mobility-client-portal", "tier": "EXPERIMENTAL", "owner": "mobility", "domain": "mobility" }
+    { "name": "mobility-client-portal", "path": "apps/mobility-client-portal", "tier": "EXPERIMENTAL", "owner": "mobility", "domain": "mobility" },
+    { "name": "test-scaffold-gp", "path": "apps/test-scaffold-gp", "tier": "EXPERIMENTAL", "owner": "platform", "domain": "testing" },
+    { "name": "weekone", "path": "apps/weekone", "tier": "EXPERIMENTAL", "owner": "platform", "domain": "testing" }
   ],
   "platform_services": [
     {

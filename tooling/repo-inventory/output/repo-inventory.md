@@ -1,24 +1,24 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-25 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-04-28 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Apps | 19 |
-| Packages (packages/*) | 173 |
-| Workspace Packages (apps|packages|services|tooling) | 196 |
-| GitHub Workflows | 45 |
-| Contract Test Files | 220 |
-| TS/JS Test Files | 1232 |
+| Apps | 22 |
+| Packages (packages/*) | 180 |
+| Workspace Packages (apps|packages|services|tooling) | 206 |
+| GitHub Workflows | 46 |
+| Contract Test Files | 226 |
+| TS/JS Test Files | 1260 |
 | Python Test Files | 31 |
 
 ## Apps
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 318 | Internal operations console — platform governance, compliance, analytics, integr |
@@ -33,8 +33,11 @@
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3180 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3187 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 18 |  |
+| veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 21 |  |
+| veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 21 |  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 446 | Africa-first music distribution, streaming, and royalty management platform. |
 
@@ -66,6 +69,7 @@
 - doc-hygiene.yml
 - dr-drill-reminder.yml
 - e2e.yml
+- flow-shopmoica-cutover-gate.yml
 - game-day.yml
 - gitops-deploy.yml
 - lighthouse.yml

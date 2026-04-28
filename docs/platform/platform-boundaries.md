@@ -15,7 +15,7 @@ each and prevents duplication.
 
 | Layer | Prefix | Location | Purpose |
 |-------|--------|----------|---------|
-| **Runtime SDKs** | `@nzila/*` | `packages/{os-core,ai-sdk,ml-sdk,db,blob,…}` | App-facing APIs consumed directly by the 19 apps |
+| **Runtime SDKs** | `@nzila/*` | `packages/{os-core,ai-sdk,ml-sdk,db,blob,…}` | App-facing APIs consumed directly by the 22 apps |
 | **Platform packages** | `@nzila/platform-*` | `packages/platform-*` | Cross-cutting platform infrastructure — ontology, governance, observability, events |
 
 ## Decision Guide

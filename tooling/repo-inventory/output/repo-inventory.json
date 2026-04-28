@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "appCount": 19,
-  "packageCount": 173,
-  "workspacePackageCount": 196,
-  "workflowCount": 45,
-  "contractTestCount": 220,
-  "tsTestFileCount": 1232,
+  "generatedAt": "2026-04-28T00:00:00.000Z",
+  "appCount": 22,
+  "packageCount": 180,
+  "workspacePackageCount": 206,
+  "workflowCount": 46,
+  "contractTestCount": 226,
+  "tsTestFileCount": 1260,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 247
+      "codeFileCount": 248
     },
     {
       "name": "agrimo",
@@ -528,7 +528,58 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3180
+      "codeFileCount": 3187
+    },
+    {
+      "name": "veridian-admin",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3012,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 18
+    },
+    {
+      "name": "veridian-care",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3011,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 21
+    },
+    {
+      "name": "veridian-site",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3010,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 21
     },
     {
       "name": "web",
@@ -552,7 +603,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 82
+      "codeFileCount": 81
     },
     {
       "name": "weekone",
@@ -645,6 +696,7 @@
     "doc-hygiene.yml",
     "dr-drill-reminder.yml",
     "e2e.yml",
+    "flow-shopmoica-cutover-gate.yml",
     "game-day.yml",
     "gitops-deploy.yml",
     "lighthouse.yml",

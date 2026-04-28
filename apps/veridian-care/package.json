@@ -15,7 +15,6 @@
     "@heroicons/react": "^2.2.0",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
-    "@nzila/health-ui": "workspace:*",
     "next": "16.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
