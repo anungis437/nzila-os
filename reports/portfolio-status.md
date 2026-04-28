@@ -14,6 +14,7 @@ Authority: governance/portfolio/product-catalog.json
 | Partners | 2 | pilot | maintain | pre-revenue | none | medium |
 | Console | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
+| Nzila HQ | 3 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
@@ -34,7 +35,7 @@ Authority: governance/portfolio/product-catalog.json
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
-- Internal only: console, control-plane, orchestrator-api
+- Internal only: console, control-plane, nzila-hq, orchestrator-api
 - Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
 
 ## Score Engine
@@ -50,6 +51,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Partners | 4.8 | HOLD | PILOT | pilot-safe |
 | Console | 5.0 | HOLD | PRODUCTION | internal-only |
 | Control Plane | 5.0 | HOLD | PILOT | internal-only |
+| Nzila HQ | 5.0 | HOLD | EXPERIMENTAL | internal-only |
 | Orchestrator API | 4.8 | HOLD | EXPERIMENTAL | internal-only |
 | Web | 5.0 | HOLD | PRODUCTION | pilot-safe |
 | Agrimo | 3.6 | HOLD | INCUBATING | internal-only |

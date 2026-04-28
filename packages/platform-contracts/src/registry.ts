@@ -817,6 +817,37 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     policyBindings: [],
     supportedOrgScopes: ['*'],
   },
+
+  {
+    id: 'nzila-hq',
+    name: 'Nzila HQ',
+    description: 'Executive intelligence cockpit — portfolio scoring, domain health, venture snapshot, and capital allocation',
+    basePath: '/hq',
+    tier: 'EXPERIMENTAL',
+    appType: 'web-app',
+    iconToken: 'chart-bar',
+    enabledByDefault: false,
+    requiresOrgScope: false,
+    showInNav: false,
+    navOrder: 98,
+    owner: 'platform-core',
+    packageName: '@nzila/nzila-hq',
+    devPort: 3005,
+    domains: ['finance', 'governance'],
+    enabledCapabilities: ['auth', 'health-check'],
+    governanceRequirements: [],
+    integrationDependencies: [
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID', 'AZURE_AD_TENANT_ID'] },
+      { provider: 'postgresql', required: false, type: 'storage', envVars: ['DATABASE_URL'] },
+    ],
+    healthBinding: {
+      healthPath: '/api/health',
+      criticalDeps: [],
+    },
+    deployment: { environments: ['local'], requiresDatabase: true },
+    policyBindings: [],
+    supportedOrgScopes: ['*'],
+  },
 ]
 
 /** Parsed registry with Zod defaults filled in. */

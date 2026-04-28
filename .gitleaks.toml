@@ -110,6 +110,15 @@ regex = '''postgres(ql)?://[^:]+:[^@]+@[^/]+/'''
 tags = ["database"]
 keywords = ["postgresql://", "postgres://"]
 
+  [rules.allowlist]
+  description = "Localhost and Docker-compose dev URLs are not real secrets"
+  regexes = [
+    '''@localhost''',
+    '''@127\.0\.0\.1''',
+    '''@db:''',
+    '''@postgres:''',
+  ]
+
 [[rules]]
 id = "nzila-qbo-client-secret"
 description = "QuickBooks Online client secret"

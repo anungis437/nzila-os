@@ -1,14 +1,14 @@
 {
-  "generated_from": "apps/nzila-hq/control-manifest.json",
+  "generated_from": "governance/portfolio/product-catalog.json",
   "generated_at": "2026-04-28",
-  "status": "active",
+  "status": "incubating",
   "exposure": "internal",
-  "data_integrity": "seeded",
+  "data_integrity": "minimal",
   "contracts_complete": false,
   "observability": "partial",
-  "portfolio_tier": "TIER 1",
+  "portfolio_tier": "TIER 3",
   "gtm_posture": "internal-only",
-  "proof_level": "phase-1",
-  "revenue_status": "internal-tooling",
+  "proof_level": "internal-proof",
+  "revenue_status": "internal-cost-center",
   "last_validated": "2026-04-28"
 }

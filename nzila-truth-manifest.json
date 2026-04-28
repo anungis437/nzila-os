@@ -25,6 +25,7 @@
     "partners": "pilot",
     "console": "internal",
     "control-plane": "internal",
+    "nzila-hq": "incubating",
     "orchestrator-api": "internal",
     "web": "pilot",
     "agrimo": "incubating",
@@ -111,6 +112,17 @@
     "control-plane": {
       "registry_tier": "PILOT",
       "deployment_status": "internal",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 3,
+      "gtm_posture": "internal-only",
+      "proof_level": "internal-proof",
+      "revenue_status": "internal-cost-center",
+      "priority": "high"
+    },
+    "nzila-hq": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "incubating",
       "readiness_tier": "internal-only",
       "exposure": "internal",
       "portfolio_tier": 3,
@@ -305,6 +317,7 @@
       "TIER 3 — Maintain": [
         "console",
         "control-plane",
+        "nzila-hq",
         "orchestrator-api",
         "web"
       ],
@@ -342,6 +355,7 @@
       "maintain": [
         "console",
         "control-plane",
+        "nzila-hq",
         "orchestrator-api",
         "web"
       ],
@@ -365,6 +379,7 @@
       "internal_only": [
         "console",
         "control-plane",
+        "nzila-hq",
         "orchestrator-api"
       ]
     }

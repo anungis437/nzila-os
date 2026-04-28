@@ -80,6 +80,8 @@ const EXEMPT_PATHS = [
   // Control Plane — db-bridge for internal admin operations
   'apps/control-plane/server/',
   'apps/control-plane/db/',
+  // Nzila HQ — db setup files exempt (lazy singleton client + schema definitions)
+  'apps/nzila-hq/server/',
 ]
 
 function isExempt(filePath: string): boolean {

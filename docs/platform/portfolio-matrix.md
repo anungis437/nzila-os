@@ -13,6 +13,7 @@
 | Partners | 2 | pilot | maintain | pre-revenue | none | medium |
 | Console | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
+| Nzila HQ | 3 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
@@ -40,6 +41,7 @@
 | Partners | PILOT | pilot-safe | internal | HOLD |
 | Console | PRODUCTION | internal-only | internal | HOLD |
 | Control Plane | PILOT | internal-only | internal | HOLD |
+| Nzila HQ | EXPERIMENTAL | internal-only | internal | HOLD |
 | Orchestrator API | EXPERIMENTAL | internal-only | internal | HOLD |
 | Web | PRODUCTION | pilot-safe | external | HOLD |
 | Agrimo | INCUBATING | internal-only | internal | HOLD |

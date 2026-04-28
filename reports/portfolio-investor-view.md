@@ -34,6 +34,7 @@ Authority: governance/portfolio/product-catalog.json
 | --- | --- | --- | --- | --- |
 | Console | internal | Primary operating control surface for governance, finance, and portfolio execution. | internal-proof | HOLD |
 | Control Plane | internal | Operational governance engine supporting all products and control loops. | internal-proof | HOLD |
+| Nzila HQ | incubating | Executive intelligence cockpit — portfolio scoring, domain health, venture snapshot, and capital allocation. | internal-proof | HOLD |
 | Orchestrator API | internal | Shared orchestration backbone that remains important operationally but is not a standalone commercial SKU. | internal-proof | HOLD |
 
 ## Frozen Assets
