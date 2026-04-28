@@ -67,7 +67,7 @@
     {
       "name": "cfo",
       "path": "apps/cfo",
-      "tier": "PILOT",
+      "tier": "PRODUCTION",
       "owner": "finance",
       "domain": "finance",
       "health_endpoint": true,

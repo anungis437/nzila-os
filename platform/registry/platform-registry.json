@@ -5,7 +5,7 @@
     { "name": "flow", "path": "apps/flow", "tier": "PRODUCTION", "owner": "commerce", "domain": "commerce" },
     { "name": "web", "path": "apps/web", "tier": "PRODUCTION", "owner": "platform", "domain": "platform" },
     { "name": "partners", "path": "apps/partners", "tier": "PILOT", "owner": "commerce", "domain": "commerce" },
-    { "name": "cfo", "path": "apps/cfo", "tier": "PILOT", "owner": "finance", "domain": "finance" },
+    { "name": "cfo", "path": "apps/cfo", "tier": "PRODUCTION", "owner": "finance", "domain": "finance" },
     { "name": "console", "path": "apps/console", "tier": "PILOT", "owner": "platform", "domain": "platform" },
     { "name": "control-plane", "path": "apps/control-plane", "tier": "PILOT", "owner": "platform", "domain": "platform" },
     { "name": "zonga", "path": "apps/zonga", "tier": "INCUBATING", "owner": "media", "domain": "media" },

@@ -6,5 +6,5 @@
   "migration_status": "initial",
   "priority_migrations": [],
   "completed_migrations": [],
-  "app_tier": "MVP"
+  "app_tier": "EXPERIMENTAL"
 }

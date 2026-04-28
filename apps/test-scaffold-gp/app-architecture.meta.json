@@ -13,5 +13,5 @@
   "exceptions": [],
   "migration_status": "new",
   "priority_migrations": [],
-  "app_tier": "DEVELOPMENT"
+  "app_tier": "EXPERIMENTAL"
 }
