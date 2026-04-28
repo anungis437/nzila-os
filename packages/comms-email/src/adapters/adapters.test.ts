@@ -38,7 +38,14 @@ describe('comms-email adapters', () => {
   it('fails fast on send when required credentials are missing', async () => {
     await expect(
       sendgridAdapter.send(
-        { to: 'user@nzila.app', subject: 'Hello', body: 'Body' },
+        {
+          orgId: '00000000-0000-0000-0000-000000000001',
+          channel: 'email',
+          to: 'user@nzila.app',
+          subject: 'Hello',
+          body: 'Body',
+          correlationId: '00000000-0000-0000-0000-000000000002',
+        },
         { fromAddress: 'noreply@nzila.app' },
       ),
     ).rejects.toThrow('Missing SendGrid apiKey')

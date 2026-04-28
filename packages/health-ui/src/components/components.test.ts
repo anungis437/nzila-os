@@ -6,7 +6,9 @@ function toText(node: unknown): string {
   if (node == null || typeof node === 'boolean') return ''
   if (typeof node === 'string' || typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map((child) => toText(child)).join('')
-  if (React.isValidElement(node)) return toText(node.props.children)
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return toText(node.props.children)
+  }
   return ''
 }
 

@@ -22,8 +22,11 @@ describe('crm-hubspot adapter and client', () => {
   it('returns explicit error for unknown CRM operation', async () => {
     const result = await hubspotAdapter.send(
       {
+        orgId: '00000000-0000-0000-0000-000000000001',
+        channel: 'crm',
         to: 'ignored@nzila.app',
         body: '{}',
+        correlationId: '00000000-0000-0000-0000-000000000002',
         metadata: { operation: 'unknown_operation' },
       },
       { apiKey: 'hs_test_key' },
