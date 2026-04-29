@@ -124,12 +124,18 @@ export default async function CfoPage() {
             <div key={c.clientOrgId} className="flex items-center justify-between gap-3 text-sm">
               <span className="min-w-0 truncate text-slate-700">{c.clientName}</span>
               <div className="flex w-1/2 items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className={`h-full rounded-full ${c.share > 0.4 ? 'bg-rose-500' : c.share > 0.2 ? 'bg-amber-500' : 'bg-sky-500'}`}
-                    style={{ width: `${Math.round(c.share * 100)}%` }}
-                  />
-                </div>
+                <progress
+                  aria-label={`${c.clientName} revenue share`}
+                  className={`h-1.5 flex-1 overflow-hidden rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-slate-200 [&::-webkit-progress-value]:rounded-full ${
+                    c.share > 0.4
+                      ? '[&::-moz-progress-bar]:bg-rose-500 [&::-webkit-progress-value]:bg-rose-500'
+                      : c.share > 0.2
+                        ? '[&::-moz-progress-bar]:bg-amber-500 [&::-webkit-progress-value]:bg-amber-500'
+                        : '[&::-moz-progress-bar]:bg-sky-500 [&::-webkit-progress-value]:bg-sky-500'
+                  }`}
+                  max={100}
+                  value={Math.round(c.share * 100)}
+                />
                 <span className="w-16 text-right text-xs tabular-nums text-slate-700">
                   {(c.share * 100).toFixed(1)}%
                 </span>

@@ -225,12 +225,12 @@ export default async function AllocationPage() {
                         </span>
                         <span className="text-[10px] text-slate-400">w {axis.weight}</span>
                       </div>
-                      <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200">
-                        <div
-                          className="h-full rounded-full bg-slate-700"
-                          style={{ width: `${axis.score}%` }}
-                        />
-                      </div>
+                      <progress
+                        aria-label={`${humanizeAxis(key)} score`}
+                        className="mt-2 h-1 w-full overflow-hidden rounded-full [&::-moz-progress-bar]:bg-slate-700 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-slate-200 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-slate-700"
+                        max={100}
+                        value={axis.score}
+                      />
                     </div>
                   ))}
                 </div>
