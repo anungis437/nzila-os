@@ -28,7 +28,7 @@ Required when this PR touches data flows, schemas, APIs, logging, exports,
 or any feature that processes personal data. Skip with "n/a" lines if
 purely internal/no-data change.
 
-- [ ] Data tier of all inputs/outputs identified per [`governance/privacy/policies/data-classification-standard.md`](governance/privacy/policies/data-classification-standard.md)
+- [ ] Data tier of all inputs/outputs identified per [`governance/privacy/policies/data-classification-standard.md`](../governance/privacy/policies/data-classification-standard.md)
 - [ ] Minimization — only the fields required for the purpose are collected/processed
 - [ ] Retention — data lifetime fits the published retention schedule
 - [ ] No Restricted-tier data in logs, error messages, or non-prod stores
@@ -52,22 +52,22 @@ purely internal/no-data change.
 Required if this PR touches `@nzila/ai-sdk`, `@nzila/ml-sdk`, prompts,
 evals, model providers, RAG indexes, or AI-driven actions. Skip otherwise.
 
-- [ ] AI access goes through `@nzila/ai-sdk` / `@nzila/ml-sdk` (no raw provider SDKs in app code) — enforced by [`tooling/contract-tests/ai-integration.test.ts`](tooling/contract-tests/ai-integration.test.ts)
-- [ ] [`governance/ai/inventory.json`](governance/ai/inventory.json) updated for any new/changed surface
-- [ ] Risk classification applied per [`governance/ai/risk-classification.md`](governance/ai/risk-classification.md)
-- [ ] PIA created/updated under [`governance/privacy/ai-pia/`](governance/privacy/ai-pia/) for surfaces processing personal data
+- [ ] AI access goes through `@nzila/ai-sdk` / `@nzila/ml-sdk` (no raw provider SDKs in app code) — enforced by [`tooling/contract-tests/ai-integration.test.ts`](../tooling/contract-tests/ai-integration.test.ts)
+- [ ] [`governance/ai/inventory.json`](../governance/ai/inventory.json) updated for any new/changed surface
+- [ ] Risk classification applied per [`governance/ai/risk-classification.md`](../governance/ai/risk-classification.md)
+- [ ] PIA created/updated under [`governance/privacy/ai-pia/`](../governance/privacy/ai-pia/) for surfaces processing personal data
 - [ ] AIGC approval recorded if Tier-1 (in inventory `approval` block + minutes link)
-- [ ] Reasoning envelope (`AiTrace.correlationId` / `requestId`) propagated — enforced by [`tooling/contract-tests/ai-reasoning-envelope.test.ts`](tooling/contract-tests/ai-reasoning-envelope.test.ts)
+- [ ] Reasoning envelope (`AiTrace.correlationId` / `requestId`) propagated — enforced by [`tooling/contract-tests/ai-reasoning-envelope.test.ts`](../tooling/contract-tests/ai-reasoning-envelope.test.ts)
 - [ ] Eval suite added/updated under `tooling/ai-evals/datasets/<app>/`
 - [ ] Prompt templates versioned in source control (no inline prompt mutation)
 - [ ] User-facing AI disclosure present (Tier ≤ 2 with UI surface)
 - [ ] Kill switch / feature flag in place (G15)
-- [ ] Cost / token budget acknowledged in [`governance/ai/inventory.json`](governance/ai/inventory.json)
+- [ ] Cost / token budget acknowledged in [`governance/ai/inventory.json`](../governance/ai/inventory.json)
 
 ## Synthetic data checklist
 
 - [ ] No production data committed in fixtures or seed packages
-- [ ] If generating new synthetic data: decision framework in [`governance/ai/synthetic-data-policy.md`](governance/ai/synthetic-data-policy.md) followed
+- [ ] If generating new synthetic data: decision framework in [`governance/ai/synthetic-data-policy.md`](../governance/ai/synthetic-data-policy.md) followed
 - [ ] Re-identification risk assessed if generator consumes real data
 
 ---

@@ -3,7 +3,7 @@
 This INDEX organizes the adaptive AI governance program documents added in
 2026-Q2. They complement (not replace) the existing
 [`README.md`](README.md) (Companion Engine architecture & engineering
-standards) and [`AI_GOVERNANCE_FRAMEWORK.md`](AI_GOVERNANCE_FRAMEWORK.md)
+standards) and [`principles.md`](principles.md)
 (higher-level ethics charter).
 
 Derived from Info-Tech's "Establish Your Adaptive AI Governance Program"

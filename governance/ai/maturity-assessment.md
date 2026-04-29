@@ -23,7 +23,7 @@ Maturity scale: **1 Initial · 2 Repeatable · 3 Defined · 4 Managed · 5 Optim
 | 11 | Adversarial Testing | 1 | 3 | None today | Adopt prompt-injection regression suite |
 | 12 | Reasoning Traceability | 2 | 4 | Envelope contract designed (per memory note); not enforced | Add contract test gate |
 | 13 | Vendor / Model Management | 3 | 4 | Azure-only; documented | Build provider review template; sub-processor watch |
-| 14 | Incident Response (AI-specific) | 2 | 4 | [assurance-program.md §4](assurance-program.md#4-ai-incident-playbook-addendum-to-privacyincidentssecurity-incident-management-planmd) | Add tabletop scenario |
+| 14 | Incident Response (AI-specific) | 2 | 4 | [assurance-program.md §4](assurance-program.md#4-ai-incident-playbook-addendum-to-security-incident-management-plan) | Add tabletop scenario |
 | 15 | Transparency to Users | 1 | 3 | Privacy notice draft mentions AI; UI surfaces inconsistent | Standardize "AI assisted" badge |
 | 16 | Training & Awareness | 1 | 3 | None today | Annual AI policy training |
 | 17 | Metrics & Reporting | 1 | 3 | None today | Monthly AIGC report from assurance program |

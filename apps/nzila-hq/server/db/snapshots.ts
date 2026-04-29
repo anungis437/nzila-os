@@ -14,6 +14,7 @@
  */
 import 'server-only'
 import { sql } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core/telemetry'
 import { getHqDb } from './client'
 import { allocationsHistory, dependencyScores, metricsSnapshots } from './schema'
 import type {
@@ -21,6 +22,8 @@ import type {
   DependencyScore,
   PortfolioSnapshot,
 } from '@nzila/hq-domain'
+
+const logger = createLogger('nzila-hq:snapshots')
 
 export interface SnapshotWriteInput {
   capturedAt: string // ISO
@@ -73,8 +76,7 @@ export async function persistCurrentSnapshot(
 
     return { written: true }
   } catch (err) {
-     
-    console.error('[snapshot] persist failed', String(err))
+    logger.error('persist failed', err instanceof Error ? err : { error: String(err) })
     return { written: false, reason: String(err) }
   }
 }
@@ -118,8 +120,7 @@ export async function readPersistedHistory(opts: {
       cashRunwayMonths: r.cash_runway_months == null ? null : Number(r.cash_runway_months),
     }))
   } catch (err) {
-     
-    console.error('[snapshot] read failed', String(err))
+    logger.error('read failed', err instanceof Error ? err : { error: String(err) })
     return []
   }
 }

@@ -832,7 +832,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     navOrder: 98,
     owner: 'platform-core',
     packageName: '@nzila/nzila-hq',
-    devPort: 3005,
+    devPort: 3020,
     domains: ['finance', 'governance'],
     enabledCapabilities: ['auth', 'health-check'],
     governanceRequirements: [],

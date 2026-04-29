@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-21T16:46:39.031Z",
-  "totalPackages": 170,
-  "criticalPackages": 87,
+  "generatedAt": "2026-04-29T00:31:50.246Z",
+  "totalPackages": 181,
+  "criticalPackages": 89,
   "criticalMissing": [],
   "criticalStub": [],
   "nonCriticalMissing": [
@@ -27,6 +27,7 @@
     "clc-decision-intelligence",
     "clc-executive-intelligence",
     "cli",
+    "clinical-timeline",
     "commerce-audit",
     "commerce-core",
     "commerce-db",
@@ -40,6 +41,7 @@
     "comms-email",
     "comms-push",
     "comms-sms",
+    "consent-engine",
     "crm-hubspot",
     "data-lifecycle",
     "deal-engine",
@@ -50,11 +52,16 @@
     "fx",
     "governance",
     "governed-workflow",
+    "health-analytics",
+    "health-connectors",
+    "health-governance",
+    "health-ui",
     "ingestion-core",
     "intelligence",
     "itsm-core",
     "nacp-core",
     "onboarding-core",
+    "patient-identity",
     "pilot-mode",
     "pricing-engine",
     "quebec-vocabulary",
@@ -68,6 +75,7 @@
     "trade-core",
     "trade-db",
     "ue-assistant",
+    "ue-cognition",
     "union-claims-financial",
     "webhooks",
     "workload-intelligence",
@@ -248,6 +256,12 @@
       "readmeLength": 0
     },
     {
+      "package": "clinical-timeline",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "commerce-audit",
       "critical": false,
       "hasReadme": false,
@@ -330,6 +344,12 @@
       "critical": true,
       "hasReadme": true,
       "readmeLength": 679
+    },
+    {
+      "package": "consent-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
     },
     {
       "package": "contracts",
@@ -420,6 +440,36 @@
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0
+    },
+    {
+      "package": "health-analytics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-connectors",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-governance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-ui",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "hq-domain",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 1240
     },
     {
       "package": "ingestion-core",
@@ -572,6 +622,12 @@
       "readmeLength": 1328
     },
     {
+      "package": "patient-identity",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
       "package": "payments-stripe",
       "critical": true,
       "hasReadme": true,
@@ -636,6 +692,12 @@
       "critical": true,
       "hasReadme": true,
       "readmeLength": 1164
+    },
+    {
+      "package": "platform-cognition-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 4135
     },
     {
       "package": "platform-commerce-org",
@@ -746,6 +808,12 @@
       "readmeLength": 2226
     },
     {
+      "package": "platform-growth-os",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 4730
+    },
+    {
       "package": "platform-integrations",
       "critical": true,
       "hasReadme": true,
@@ -779,7 +847,7 @@
       "package": "platform-intelligence-home",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 268
+      "readmeLength": 264
     },
     {
       "package": "platform-isolation",
@@ -803,7 +871,7 @@
       "package": "platform-lakehouse",
       "critical": true,
       "hasReadme": true,
-      "readmeLength": 251
+      "readmeLength": 247
     },
     {
       "package": "platform-marketplace",
@@ -1005,6 +1073,12 @@
     },
     {
       "package": "ue-assistant",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ue-cognition",
       "critical": false,
       "hasReadme": false,
       "readmeLength": 0

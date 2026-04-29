@@ -48,7 +48,7 @@ Monitor weekly:
 Any signal opens an investigation ticket; AIGC reviews unresolved drift
 monthly.
 
-## 4. AI incident playbook (addendum to [`../privacy/incidents/security-incident-management-plan.md`](../privacy/incidents/security-incident-management-plan.md))
+## 4. AI incident playbook (addendum to security incident management plan)
 
 ### 4.1 Trigger types
 

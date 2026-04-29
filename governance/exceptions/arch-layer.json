@@ -44,6 +44,12 @@
       "owner": "platform-team",
       "justification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
       "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/nzila-hq/**",
+      "owner": "platform-core",
+      "justification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion.",
+      "expiresOn": "2026-10-01"
     }
   ]
 }

@@ -61,7 +61,7 @@ Six roles, capability-gated:
 | `finance`      | Portfolio (rollup), finance, documents, reports           |
 | `board-viewer` | Executive home + finance summary only                     |
 
-Capabilities are defined in [lib/rbac.ts](apps/nzila-hq/lib/rbac.ts).
+Capabilities are defined in [lib/rbac.ts](../../apps/nzila-hq/lib/rbac.ts).
 
 ## Local dev
 
@@ -74,7 +74,7 @@ In dev, `resolveOrgContext()` falls back to `userId='user-founder'` / `orgId='or
 
 ### Required env vars (production)
 
-See [.env.example](apps/nzila-hq/.env.example). The boot assertion lives in [lib/boot-env.ts](apps/nzila-hq/lib/boot-env.ts).
+See [.env.example](../../apps/nzila-hq/.env.example). The boot assertion lives in [lib/boot-env.ts](../../apps/nzila-hq/lib/boot-env.ts).
 
 ## Tests
 

@@ -28,7 +28,7 @@
 
 - **Primary intended uses:**
 - **Primary intended users:**
-- **Out-of-scope use cases:** (must include any prohibited use under [`governance/ai/policy.md`](../policy.md))
+- **Out-of-scope use cases:** (must include any prohibited use under [`governance/ai/ai-policy.md`](../ai-policy.md))
 
 ## 3. Factors
 

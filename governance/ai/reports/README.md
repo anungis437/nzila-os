@@ -38,7 +38,7 @@ incident review.
 - Minutes and monthly reports: retained for the life of the company
   (auditable trail).
 - Drafts: kept until ratified, then either committed or deleted.
-- Per [`governance/privacy/policies/retention-schedule.md`](../../privacy/policies/retention-schedule.md).
+- Per [`governance/privacy/policies/data-retention-schedule.md`](../../privacy/policies/data-retention-schedule.md).
 
 ## Templates
 
@@ -49,6 +49,6 @@ incident review.
 
 ## See also
 
-- Charter: [`governance/ai/aigc-charter.md`](../aigc-charter.md)
+- Charter: [`governance/ai/governance-committee-charter.md`](../governance-committee-charter.md)
 - Lifecycle gates: [`governance/ai/lifecycle-gates.md`](../lifecycle-gates.md)
 - Inventory (machine-readable): [`governance/ai/inventory.json`](../inventory.json)

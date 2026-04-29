@@ -72,3 +72,12 @@ exceptions:
       platform-auth for identity. Full platform-shell adoption planned pre-PILOT.
     owner: health-team
     reviewDate: "2027-04-01"
+
+  - app: nzila-hq
+    missing: platform-shell
+    reason: >-
+      INCUBATING executive intelligence cockpit with a bespoke portfolio
+      dashboard shell. Uses platform-auth for identity. Full platform-shell
+      adoption tracked for PILOT promotion.
+    owner: platform-core
+    reviewDate: "2027-01-01"

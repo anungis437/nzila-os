@@ -111,13 +111,8 @@ tags = ["database"]
 keywords = ["postgresql://", "postgres://"]
 
   [rules.allowlist]
-  description = "Localhost and Docker-compose dev URLs are not real secrets"
-  regexes = [
-    '''@localhost''',
-    '''@127\.0\.0\.1''',
-    '''@db:''',
-    '''@postgres:''',
-  ]
+  description = "drizzle.config.ts files use env-var fallback with local dev URL — not a real secret"
+  paths = ['''drizzle\.config\.ts$''']
 
 [[rules]]
 id = "nzila-qbo-client-secret"

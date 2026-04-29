@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-28
 **Scope:** All 23 apps under `apps/`
-**Foundation:** [`@nzila/ui` v6 design language](packages/ui/UX_DESIGN_SYSTEM.md)
+**Foundation:** [`@nzila/ui` v6 design language](UX_DESIGN_SYSTEM.md)
 
 > Phase 1 of the portfolio UX mission shipped the design language. This
 > report records its first portfolio-wide adoption pass: what was wired

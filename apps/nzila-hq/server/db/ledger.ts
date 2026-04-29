@@ -15,10 +15,12 @@ import 'server-only'
 import { cache } from 'react'
 import { and, desc, gt, isNull, sql } from 'drizzle-orm'
 import type { CashEvent, Invoice, InvoiceStatus, CashEventCategory, CashEventKind } from '@nzila/hq-domain'
+import { createLogger } from '@nzila/os-core/telemetry'
 import { getHqDb } from '../db/client'
 import { invoices as invoicesTable, cashEvents as cashEventsTable } from '../db/schema'
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
+const logger = createLogger('nzila-hq:ledger')
 
 export interface LedgerReadResult<T> {
   rows: readonly T[]
@@ -50,7 +52,7 @@ export const readLedgerInvoices = cache(async (): Promise<LedgerReadResult<Invoi
     }))
     return { rows: mapped, source: 'live' }
   } catch (err) {
-    console.error('[ledger] readLedgerInvoices failed', String(err))
+    logger.error('readLedgerInvoices failed', err instanceof Error ? err : { error: String(err) })
     return { rows: [], source: 'no-db' }
   }
 })
@@ -78,7 +80,7 @@ export const readLedgerCashEvents = cache(async (): Promise<LedgerReadResult<Cas
     }))
     return { rows: mapped, source: 'live' }
   } catch (err) {
-    console.error('[ledger] readLedgerCashEvents failed', String(err))
+    logger.error('readLedgerCashEvents failed', err instanceof Error ? err : { error: String(err) })
     return { rows: [], source: 'no-db' }
   }
 })

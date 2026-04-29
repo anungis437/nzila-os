@@ -8,22 +8,32 @@
  *
  * Response body shape: `{ stripe: SyncResult, qbo: SyncResult }`.
  */
+import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { syncAll } from '@/server/integrations/billing-sync'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+function hasValidBearerToken(req: Request, expected: string): boolean {
+  const presented = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? ''
+  const presentedBytes = Buffer.from(presented)
+  const expectedBytes = Buffer.from(expected)
+  return (
+    presentedBytes.length === expectedBytes.length &&
+    timingSafeEqual(presentedBytes, expectedBytes)
+  )
+}
+
 export async function POST(req: Request) {
-  const expected = process.env.NZILA_HQ_SNAPSHOT_TOKEN
-  if (!expected) {
+  const CRON_SECRET = process.env.NZILA_HQ_SNAPSHOT_TOKEN
+  if (!CRON_SECRET) {
     return NextResponse.json(
       { ok: false, reason: 'snapshot-endpoint-disabled' },
       { status: 503 },
     )
   }
-  const presented = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? ''
-  if (presented !== expected) {
+  if (!hasValidBearerToken(req, CRON_SECRET)) {
     return NextResponse.json({ ok: false, reason: 'unauthorized' }, { status: 401 })
   }
   const result = await syncAll()

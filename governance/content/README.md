@@ -33,7 +33,7 @@ audit** envelope that the other domains rely on.
 Eleven baseline information-governance policies are derived from the
 Info-Tech ECM IG policy template pack at
 `infotech/Reporting/_extracted/_ecm-policy-templates/`. Each is a
-candidate Nzila policy under [`policies/`](policies/) once tailored:
+candidate Nzila policy under `policies/` once tailored:
 
 | # | Source template | Nzila policy | Status |
 |---|----------------|--------------|--------|
@@ -60,7 +60,7 @@ Until each policy is ratified, the following minimums apply:
 1. **Classification first.** Every content store has a documented
    highest data tier in [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json).
 2. **Retention defaults.** Default retention follows
-   [`governance/privacy/policies/retention-schedule.md`](../privacy/policies/retention-schedule.md) unless a
+   [`governance/privacy/policies/data-retention-schedule.md`](../privacy/policies/data-retention-schedule.md) unless a
    container-specific overlay is added.
 3. **Access by RBAC + RLS.** No direct blob URLs to Confidential or
    Restricted content; access is mediated by app routes that enforce

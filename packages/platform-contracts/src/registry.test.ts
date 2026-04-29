@@ -11,7 +11,7 @@ import {
 
 describe('APP_REGISTRY', () => {
   it('contains all 22 apps', () => {
-    expect(APP_REGISTRY.length).toBe(22)
+    expect(APP_REGISTRY.length).toBe(23)
   })
 
   it('has unique ids', () => {

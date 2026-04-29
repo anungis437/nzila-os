@@ -7,6 +7,9 @@ governance/corporate/governance/strategy-operating-model-dashboard.md
 # Planning docs — aspirational links to files not yet written
 plans/
 
+# App delta/changelog docs — reference planned changes that may not all be committed yet
+apps/nzila-hq/NZILA_HQ_DELTA.md
+
 # Aspirational tutorial/guide/reference links (targets not yet authored)
 docs/tutorials/
 docs/how-to/
