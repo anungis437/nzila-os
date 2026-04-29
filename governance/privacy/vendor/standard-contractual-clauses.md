@@ -41,7 +41,7 @@ attach them by reference.
 
 ### Annex II — Technical and organizational measures
 
-Adopts measures from [DPA Annex II](data-processing-agreement-template.md#8-annex-ii--technical-and-organizational-measures).
+Adopts measures from [DPA Annex II](data-processing-agreement-template.md).
 
 ### Annex III — Sub-processors (Module 2 only)
 

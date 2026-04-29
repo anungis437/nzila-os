@@ -36,6 +36,7 @@ export interface RouteSample {
 
 const vitals: VitalSample[] = []
 const routes: RouteSample[] = []
+// ga-check:exempt bounded in-process telemetry ring support, not source-of-truth persistence
 const failedActions = new Map<string, { count: number; lastAt: number }>()
 
 export function recordVital(sample: VitalSample): void {

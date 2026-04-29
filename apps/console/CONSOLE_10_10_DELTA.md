@@ -12,11 +12,11 @@ The previous memo (`READINESS_MEMO.md`) shipped the structural 10/10 — primiti
 
 | Gap from delta prompt | Closed by | Files |
 |---|---|---|
-| **Phase 1 — Real telemetry wiring** | Native `PerformanceObserver`-based RUM beacon + in-process ring buffer + 24h/7d/30d window switcher | [components/web-vitals-reporter.tsx](apps/console/components/web-vitals-reporter.tsx) · [lib/perf/store.ts](apps/console/lib/perf/store.ts) · [app/api/_perf/vitals/route.ts](apps/console/app/api/_perf/vitals/route.ts) · [app/(dashboard)/ops/performance/page.tsx](apps/console/app/(dashboard)/ops/performance/page.tsx) |
-| **Phase 2 — Bundle budget enforcement** | Optional `@next/bundle-analyzer` wrapper, env-gated, no-op when not installed | [next.config.ts](apps/console/next.config.ts) |
-| **Phase 7 — Command Palette V2** | Recents (localStorage, last 6), subsequence fuzzy scoring, keyboard shortcut hints | [components/command-palette.tsx](apps/console/components/command-palette.tsx) |
-| **Phase 9 — Resilience excellence** | Copy-incident-reference button, 1.5s "Copied" confirmation | [components/ui/ErrorPanel.tsx](apps/console/components/ui/ErrorPanel.tsx) |
-| **Locked contract for telemetry** | 6-test suite for the perf store | [lib/perf/store.test.ts](apps/console/lib/perf/store.test.ts) |
+| **Phase 1 — Real telemetry wiring** | Native `PerformanceObserver`-based RUM beacon + in-process ring buffer + 24h/7d/30d window switcher | [components/web-vitals-reporter.tsx](components/web-vitals-reporter.tsx) · [lib/perf/store.ts](lib/perf/store.ts) · [app/api/_perf/vitals/route.ts](app/api/_perf/vitals/route.ts) · `app/(dashboard)/ops/performance/page.tsx` |
+| **Phase 2 — Bundle budget enforcement** | Optional `@next/bundle-analyzer` wrapper, env-gated, no-op when not installed | [next.config.ts](next.config.ts) |
+| **Phase 7 — Command Palette V2** | Recents (localStorage, last 6), subsequence fuzzy scoring, keyboard shortcut hints | [components/command-palette.tsx](components/command-palette.tsx) |
+| **Phase 9 — Resilience excellence** | Copy-incident-reference button, 1.5s "Copied" confirmation | [components/ui/ErrorPanel.tsx](components/ui/ErrorPanel.tsx) |
+| **Locked contract for telemetry** | 6-test suite for the perf store | [lib/perf/store.test.ts](lib/perf/store.test.ts) |
 
 ---
 
@@ -24,10 +24,10 @@ The previous memo (`READINESS_MEMO.md`) shipped the structural 10/10 — primiti
 
 Built end-to-end with **zero new dependencies**:
 
-1. **In-page reporter** ([web-vitals-reporter.tsx](apps/console/components/web-vitals-reporter.tsx)): captures LCP, FCP, CLS, TTFB, INP using the native `PerformanceObserver` API. Batches samples and sends them to `/api/_perf/vitals` via `navigator.sendBeacon` on `visibilitychange` + `pagehide` — survives navigation cleanly and stays off the critical path. Mounted once in `(dashboard)/layout.tsx`. Renders nothing.
-2. **Beacon endpoint** ([api/_perf/vitals/route.ts](apps/console/app/api/_perf/vitals/route.ts)): Node runtime. Validates incoming payloads (max 4 KB, max 16 samples per beacon, allowed metric names only, value range 0–60s, route prefix). No auth header required (sendBeacon can't send them); rate-limited by payload size and shape.
-3. **In-process ring buffer** ([lib/perf/store.ts](apps/console/lib/perf/store.ts)): bounded at 2 000 vital samples + 1 000 route samples. O(1) push. Computes p75 / p95 on read. Auto-derives 5xx routes into a `failedActions` map. Honest about multi-replica caveat (each replica holds its own ring).
-4. **/ops/performance page** ([page.tsx](apps/console/app/(dashboard)/ops/performance/page.tsx)): now reads real data. Window switcher (24h / 7d / 30d) wired via search params. Per-vital health classification (good / needs-improvement / poor against Web Vitals budgets). "Top 10 slowest routes" table sorted by p95. Failed-routes card with last-seen timestamps. Bundle budget targets card pointing operators at the analyzer command. Empty-state copy explains exactly how to populate the surface ("open another tab, navigate, refresh"). **No fabricated numbers, ever.**
+1. **In-page reporter** ([web-vitals-reporter.tsx](components/web-vitals-reporter.tsx)): captures LCP, FCP, CLS, TTFB, INP using the native `PerformanceObserver` API. Batches samples and sends them to `/api/_perf/vitals` via `navigator.sendBeacon` on `visibilitychange` + `pagehide` — survives navigation cleanly and stays off the critical path. Mounted once in `(dashboard)/layout.tsx`. Renders nothing.
+2. **Beacon endpoint** ([api/_perf/vitals/route.ts](app/api/_perf/vitals/route.ts)): Node runtime. Validates incoming payloads (max 4 KB, max 16 samples per beacon, allowed metric names only, value range 0–60s, route prefix). No auth header required (sendBeacon can't send them); rate-limited by payload size and shape.
+3. **In-process ring buffer** ([lib/perf/store.ts](lib/perf/store.ts)): bounded at 2 000 vital samples + 1 000 route samples. O(1) push. Computes p75 / p95 on read. Auto-derives 5xx routes into a `failedActions` map. Honest about multi-replica caveat (each replica holds its own ring).
+4. **/ops/performance page** (`app/(dashboard)/ops/performance/page.tsx`): now reads real data. Window switcher (24h / 7d / 30d) wired via search params. Per-vital health classification (good / needs-improvement / poor against Web Vitals budgets). "Top 10 slowest routes" table sorted by p95. Failed-routes card with last-seen timestamps. Bundle budget targets card pointing operators at the analyzer command. Empty-state copy explains exactly how to populate the surface ("open another tab, navigate, refresh"). **No fabricated numbers, ever.**
 
 Threshold mapping (per official Web Vitals guidance):
 

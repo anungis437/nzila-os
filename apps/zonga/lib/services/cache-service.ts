@@ -31,6 +31,7 @@ interface MemoryEntry {
   value: string
   expiresAt: number
 }
+// ga-check:exempt explicit fallback cache with TTL; Redis remains the primary cache backend
 const memoryStore = new Map<string, MemoryEntry>()
 
 function buildKey(key: string, namespace?: string): string {

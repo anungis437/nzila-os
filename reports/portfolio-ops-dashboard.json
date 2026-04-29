@@ -162,7 +162,7 @@
       "weighted_score": 5,
       "readiness_tier": "internal-only",
       "registry_tier": "EXPERIMENTAL",
-      "dev_port": 3005
+      "dev_port": 3020
     },
     {
       "id": "orchestrator-api",
