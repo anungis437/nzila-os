@@ -209,7 +209,7 @@ importers:
         version: 9.39.4(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.2.2
-        version: 16.2.2(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+        version: 16.2.2(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
       prettier:
         specifier: ^3.2.0
         version: 3.8.1
@@ -4093,6 +4093,156 @@ importers:
       '@types/node':
         specifier: ^25
         version: 25.5.2
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-analytics:
+    dependencies:
+      '@nzila/finance-core':
+        specifier: workspace:*
+        version: link:../finance-core
+      '@nzila/finance-governance':
+        specifier: workspace:*
+        version: link:../finance-governance
+      '@nzila/finance-ledger':
+        specifier: workspace:*
+        version: link:../finance-ledger
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-compliance:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-core:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-governance:
+    dependencies:
+      '@nzila/finance-core':
+        specifier: workspace:*
+        version: link:../finance-core
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-identity:
+    dependencies:
+      '@nzila/finance-compliance':
+        specifier: workspace:*
+        version: link:../finance-compliance
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/finance-ledger:
+    dependencies:
+      '@nzila/finance-core':
+        specifier: workspace:*
+        version: link:../finance-core
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
       typescript:
         specifier: ^6
         version: 6.0.2
