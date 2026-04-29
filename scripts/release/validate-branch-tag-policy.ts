@@ -18,6 +18,7 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^release\/[0-9]+\.[0-9]+\.[0-9]+$/,
   /^dependabot\/.+/,
   /^renovate\/.+/,
+  /^copilot\/.+/,
 ]
 
 const TAG_PATTERN = /^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/
@@ -40,7 +41,7 @@ function validateBranch(ref: string): void {
   const matched = BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, release/X.Y.Z, main, develop, dependabot/*, renovate/*`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, release/X.Y.Z, main, develop, dependabot/*, renovate/*, copilot/*`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)

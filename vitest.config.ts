@@ -202,6 +202,13 @@ export default defineConfig({
       'packages/governed-workflow',
       // System boundary tests
       'tests/system',
+      // Finance capability layer
+      'packages/finance-core',
+      'packages/finance-ledger',
+      'packages/finance-compliance',
+      'packages/finance-governance',
+      'packages/finance-analytics',
+      'packages/finance-identity',
     ],
   },
 })
