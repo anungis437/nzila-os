@@ -84,9 +84,14 @@ export type ApprovalLevel = 'auto_approve' | 'single_approval' | 'dual_approval'
  * This is separate from checkSpendingControl (which enforces hard limits).
  * Use both: spending controls to gate whether a transaction proceeds at all,
  * and checkThreshold to determine how many approvers are required when it does.
+ *
+ * Tier logic:
+ *   amount > requiresDualApprovalAboveCents → dual_approval
+ *   amount > requiresApprovalAboveCents     → single_approval
+ *   otherwise                               → auto_approve
  */
 export function checkThreshold(amountCents: number, control: SpendingControl): ApprovalLevel {
   if (amountCents > control.requiresDualApprovalAboveCents) return 'dual_approval'
-  if (amountCents > control.perTransactionLimitCents) return 'single_approval'
+  if (amountCents > control.requiresApprovalAboveCents) return 'single_approval'
   return 'auto_approve'
 }

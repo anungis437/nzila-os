@@ -14,6 +14,7 @@ const mockControl: SpendingControl = {
   dailyLimitCents: 1000000,
   monthlyLimitCents: 5000000,
   perTransactionLimitCents: 100000,
+  requiresApprovalAboveCents: 20000,
   requiresDualApprovalAboveCents: 50000,
   currency: 'ZAR',
   createdBy: 'admin-1',
@@ -89,11 +90,15 @@ describe('recordDenial', () => {
 })
 
 describe('checkThreshold', () => {
-  it('returns auto_approve for small amounts', () => {
+  it('returns auto_approve for small amounts below requiresApprovalAboveCents', () => {
     expect(checkThreshold(10000, mockControl)).toBe('auto_approve')
   })
 
-  it('returns dual_approval for amounts above dual approval threshold', () => {
+  it('returns single_approval for amounts between requiresApprovalAboveCents and requiresDualApprovalAboveCents', () => {
+    expect(checkThreshold(30000, mockControl)).toBe('single_approval')
+  })
+
+  it('returns dual_approval for amounts above requiresDualApprovalAboveCents', () => {
     expect(checkThreshold(60000, mockControl)).toBe('dual_approval')
   })
 })

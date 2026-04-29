@@ -8,6 +8,7 @@ const control: SpendingControl = {
   dailyLimitCents: 500000,
   monthlyLimitCents: 2000000,
   perTransactionLimitCents: 100000,
+  requiresApprovalAboveCents: 20000,
   requiresDualApprovalAboveCents: 50000,
   currency: 'ZAR',
   createdBy: 'admin-1',

@@ -30,6 +30,9 @@ export interface SpendingControl {
   dailyLimitCents: number
   monthlyLimitCents: number
   perTransactionLimitCents: number
+  /** Amounts above this value require at least single approval. Must be ≤ requiresDualApprovalAboveCents. */
+  requiresApprovalAboveCents: number
+  /** Amounts above this value require dual approval. Must be ≥ requiresApprovalAboveCents. */
   requiresDualApprovalAboveCents: number
   currency: string
   createdBy: string
