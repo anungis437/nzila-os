@@ -79,6 +79,12 @@ export function isFullyApproved(request: ApprovalRequest): boolean {
 
 export type ApprovalLevel = 'auto_approve' | 'single_approval' | 'dual_approval'
 
+/**
+ * Determines the governance approval tier required for a transaction amount.
+ * This is separate from checkSpendingControl (which enforces hard limits).
+ * Use both: spending controls to gate whether a transaction proceeds at all,
+ * and checkThreshold to determine how many approvers are required when it does.
+ */
 export function checkThreshold(amountCents: number, control: SpendingControl): ApprovalLevel {
   if (amountCents > control.requiresDualApprovalAboveCents) return 'dual_approval'
   if (amountCents > control.perTransactionLimitCents) return 'single_approval'
