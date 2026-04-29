@@ -9,6 +9,15 @@ interface BaseProps {
   className?: string
 }
 
+const TABLE_GRID_COLUMNS: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
+  5: 'grid-cols-5',
+  6: 'grid-cols-6',
+}
+
 export function SkeletonLine({ className }: BaseProps) {
   return (
     <div
@@ -63,10 +72,18 @@ export function SkeletonCard({ lines = 4 }: { lines?: number }) {
 
 /** A skeleton table — header row + N body rows. */
 export function SkeletonTable({ rows = 6, cols = 4 }: { rows?: number; cols?: number }) {
+  const columnCount = Math.min(Math.max(Math.trunc(cols), 1), 6)
+  const gridColumns = TABLE_GRID_COLUMNS[columnCount]
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <div className="grid gap-4 border-b border-slate-100 bg-slate-50 px-6 py-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-        {Array.from({ length: cols }).map((_, i) => (
+      <div
+        className={cn(
+          'grid gap-4 border-b border-slate-100 bg-slate-50 px-6 py-3',
+          gridColumns,
+        )}
+      >
+        {Array.from({ length: columnCount }).map((_, i) => (
           <div key={i} className="h-2.5 animate-pulse rounded bg-slate-200" />
         ))}
       </div>
@@ -74,10 +91,9 @@ export function SkeletonTable({ rows = 6, cols = 4 }: { rows?: number; cols?: nu
         {Array.from({ length: rows }).map((_, r) => (
           <div
             key={r}
-            className="grid gap-4 px-6 py-4"
-            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+            className={cn('grid gap-4 px-6 py-4', gridColumns)}
           >
-            {Array.from({ length: cols }).map((_, c) => (
+            {Array.from({ length: columnCount }).map((_, c) => (
               <div key={c} className="h-3 animate-pulse rounded bg-slate-100" />
             ))}
           </div>
