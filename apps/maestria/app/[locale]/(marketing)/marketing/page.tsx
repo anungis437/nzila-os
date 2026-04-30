@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { listFlowEngineModules } from '@nzila/flow-engine'
 import { featureCards, getMarketingCopy } from './content'
 import styles from './marketing.module.css'
@@ -19,9 +20,53 @@ export default async function MarketingHomePage({ params }: { params: Promise<Pa
         <p className={styles.subtitle}>{copy.hero.subtitle}</p>
         <div className={styles.row}>
           <Link href={`/${locale}/marketing/trial`} className={styles.primary}>{copy.hero.primaryCta}</Link>
-          <Link href={`/${locale}/demo/shopmoica`} className={styles.secondary}>{copy.hero.secondaryCta}</Link>
+          <Link href={`/${locale}/marketing/features`} className={styles.secondary}>{copy.hero.secondaryCta}</Link>
+        </div>
+
+        <div className={styles.heroPreview}>
+          <div className={styles.mockupWindow}>
+            <div className={styles.mockupHeader}>
+              <div className={styles.mockupDots}><span /><span /><span /></div>
+              <span className={styles.mockupTitle}>Maestria · Live dashboard</span>
+            </div>
+            <div className={styles.mockupBody}>
+              <div className={styles.mockupStats}>
+                <div className={styles.mockupStat}>
+                  <span className={styles.mockupValue}>$124k</span>
+                  <span className={styles.mockupLabel}>Monthly revenue</span>
+                </div>
+                <div className={styles.mockupStat}>
+                  <span className={styles.mockupValue}>+38%</span>
+                  <span className={styles.mockupLabel}>Quote throughput</span>
+                </div>
+                <div className={styles.mockupStat}>
+                  <span className={styles.mockupValue}>72%</span>
+                  <span className={styles.mockupLabel}>Conversion rate</span>
+                </div>
+              </div>
+              <div className={styles.mockupChart}>
+                <div className={styles.mockupBars}>
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className={styles.mockupBar} />
+                  ))}
+                </div>
+                <span className={styles.mockupChartLabel}>Quote → Invoice · Last 7 weeks</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
+      <div className={styles.heroShot}>
+        <Image
+          src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1800&q=85&auto=format&fit=crop"
+          alt="Commerce operations powered by Maestria — unified workflow from quote to delivery"
+          fill
+          className={styles.heroShotImg}
+          sizes="100vw"
+          priority
+        />
+      </div>
 
       <section className={`${styles.container} ${styles.stats}`}>
         {copy.stats.map((stat) => (
@@ -33,12 +78,27 @@ export default async function MarketingHomePage({ params }: { params: Promise<Pa
         ))}
       </section>
 
+      <div className={styles.visualBand}>
+        <Image
+          src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=85&auto=format&fit=crop"
+          alt="Premium boutique interior — commerce operations powered by Maestria"
+          fill
+          className={styles.visualBandImg}
+          sizes="100vw"
+        />
+        <div className={styles.visualBandOverlay}>
+          <p className={styles.visualBandQuote}>&ldquo;Commerce, orchestrated.&rdquo;</p>
+          <p className={styles.visualBandSub}>From first quote to final delivery — in one unified flow.</p>
+        </div>
+      </div>
+
       <section className={`${styles.container} ${styles.section}`}>
         <h2 className={styles.sectionTitle}>{copy.modulesTitle}</h2>
         <p className={styles.sectionSubtitle}>{copy.modulesSubtitle}</p>
         <div className={styles.grid}>
           {featureCards.map((card) => (
             <article key={card.titleEn} className={styles.card}>
+              {card.icon && <span className={styles.cardIcon}>{card.icon}</span>}
               <h3 className={styles.cardTitle}>{isFr ? card.titleFr : card.titleEn}</h3>
               <p className={styles.cardText}>{isFr ? card.descriptionFr : card.descriptionEn}</p>
             </article>
@@ -47,15 +107,27 @@ export default async function MarketingHomePage({ params }: { params: Promise<Pa
       </section>
 
       <section className={`${styles.container} ${styles.section}`}>
-        <div className={styles.mission}>
-          <p className={styles.eyebrow}>{copy.mission.eyebrow}</p>
-          <h3 className={styles.missionTitle}>{copy.mission.title}</h3>
-          <p className={styles.missionText}>{copy.mission.body}</p>
-          <ul className={styles.list}>
-            {copy.mission.bullets.map((bullet) => (
-              <li key={bullet}>{bullet}</li>
-            ))}
-          </ul>
+        <div className={styles.missionSplit}>
+          <div className={styles.mission}>
+            <p className={styles.eyebrow}>{copy.mission.eyebrow}</p>
+            <h3 className={styles.missionTitle}>{copy.mission.title}</h3>
+            <p className={styles.missionText}>{copy.mission.body}</p>
+            <ul className={styles.list}>
+              {copy.mission.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
+            </ul>
+          </div>
+          <div className={styles.missionImageWrap}>
+            <Image
+              src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=85&auto=format&fit=crop"
+              alt="Commerce team reviewing Maestria analytics and workflows"
+              width={560}
+              height={440}
+              className={styles.missionImage}
+              sizes="(max-width: 768px) 100vw, 45vw"
+            />
+          </div>
         </div>
       </section>
 

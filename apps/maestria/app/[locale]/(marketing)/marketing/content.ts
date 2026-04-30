@@ -33,36 +33,42 @@ export type MarketingCopy = {
 
 export const featureCards = [
   {
+    icon: '📊',
     titleEn: 'Executive command center',
     titleFr: 'Centre de commande executif',
     descriptionEn: 'Owner-grade visibility on margin, campaign ROI, bottlenecks, and conversion health in one board.',
     descriptionFr: 'Visibilite direction sur la marge, le ROI campagne, les goulots et la conversion dans un seul tableau.',
   },
   {
+    icon: '💼',
     titleEn: 'Quote to cash orchestration',
     titleFr: 'Orchestration devis a encaissement',
     descriptionEn: 'From quote to deposit to fulfillment, every gate is enforced with auditable transitions.',
     descriptionFr: 'Du devis au depot puis a la livraison, chaque etape est appliquee avec transitions auditables.',
   },
   {
-    titleEn: 'Shop Moi Ca buyer journeys',
-    titleFr: 'Parcours acheteurs Shop Moi Ca',
+    icon: '✨',
+    titleEn: 'Premium buyer journeys',
+    titleFr: 'Parcours acheteurs premium',
     descriptionEn: 'Guided gifting, trusted delivery tracking, and premium proposal packaging for high-value clients.',
     descriptionFr: 'Cadeaux guides, suivi de livraison fiable et propositions premium pour clients a forte valeur.',
   },
   {
+    icon: '🔗',
     titleEn: 'Connector resilience',
     titleFr: 'Resilience des connecteurs',
-    descriptionEn: 'Shopify, Google Ads, and Zoho synchronization with health states and fallback operations.',
-    descriptionFr: 'Synchronisation Shopify, Google Ads et Zoho avec etats de sante et plans de repli.',
+    descriptionEn: 'Commerce platform, Google Ads, and CRM synchronization with health states and fallback operations.',
+    descriptionFr: 'Synchronisation plateforme commerce, Google Ads et CRM avec etats de sante et plans de repli.',
   },
   {
+    icon: '🔒',
     titleEn: 'Role-safe collaboration',
     titleFr: 'Collaboration securisee par role',
     descriptionEn: 'Public pages, internal operations, and buyer portals coexist without policy leaks.',
     descriptionFr: 'Pages publiques, operations internes et portails clients coexistent sans fuite de politique.',
   },
   {
+    icon: '📈',
     titleEn: 'Investor-ready proof packs',
     titleFr: 'Dossiers de preuve prets investisseurs',
     descriptionEn: 'Live demos, ROI narratives, and operating evidence packaged for fundraising confidence.',
@@ -74,8 +80,8 @@ export const pricingPlans = [
   {
     name: 'Launch',
     monthly: '$79',
-    featuresEn: ['Up to 5 team members', 'Shop Moi Ca starter playbook', 'Core quote + deposit workflow'],
-    featuresFr: ['Jusqu a 5 membres', 'Playbook de demarrage Shop Moi Ca', 'Workflow de base devis + depot'],
+    featuresEn: ['Up to 5 team members', 'Guided onboarding playbook', 'Core quote + deposit workflow'],
+    featuresFr: ['Jusqu a 5 membres', 'Playbook de demarrage guide', 'Workflow de base devis + depot'],
   },
   {
     name: 'Growth',
@@ -102,11 +108,11 @@ const EN: MarketingCopy = {
   },
   hero: {
     eyebrow: 'Maestria Commerce Edition',
-    title: 'The marketing and commerce operating system built around Shop Moi Ca.',
+    title: 'The marketing and commerce operating system for ambitious service brands.',
     subtitle:
       'Maestria combines public growth pages, operator-grade execution, and buyer-safe experiences powered by Flow Engine. One platform, no workflow drift.',
     primaryCta: 'Start 14-day trial',
-    secondaryCta: 'Open Shop Moi Ca demo',
+    secondaryCta: 'See a live walkthrough',
   },
   stats: [
     { value: '-62%', label: 'Quote cycle time', note: 'After replacing fragmented manual workflows.' },
@@ -121,12 +127,12 @@ const EN: MarketingCopy = {
     eyebrow: 'Why Maestria',
     title: 'Operational clarity without enterprise overhead.',
     body:
-      'Maestria was designed for teams that have outgrown spreadsheets but still need speed. Shop Moi Ca is the flagship proving ground: premium UX outside, rigorous workflow controls inside.',
+      'Maestria was designed for teams that have outgrown spreadsheets but still need speed. The platform is the proving ground: premium UX outside, rigorous workflow controls inside.',
     bullets: ['Owner mission control by default', 'Client-safe surfaces with no policy leaks', 'Evidence-ready operations for investor conversations'],
   },
   cta: {
     title: 'Launch your premium commerce lane in days, not quarters.',
-    subtitle: 'Use the Shop Moi Ca blueprint, then adapt modules to your catalog, market, and operating model.',
+    subtitle: 'Start from a proven operational blueprint, then adapt modules to your catalog, market, and operating model.',
     primary: 'Start Trial',
     secondary: 'Talk to Maestria team',
   },
@@ -143,11 +149,11 @@ const FR: MarketingCopy = {
   },
   hero: {
     eyebrow: 'Edition Commerce Maestria',
-    title: 'Le systeme marketing et commerce construit autour de Shop Moi Ca.',
+    title: 'Le systeme marketing et commerce pour les marques de services ambitieuses.',
     subtitle:
       'Maestria combine pages de croissance publiques, execution operationnelle et experiences clients securisees, propulsees par Flow Engine. Une plateforme, sans derive de workflow.',
     primaryCta: 'Demarrer essai 14 jours',
-    secondaryCta: 'Ouvrir la demo Shop Moi Ca',
+    secondaryCta: 'Voir une demonstration en direct',
   },
   stats: [
     { value: '-62%', label: 'Cycle de devis', note: 'Apres remplacement des workflows manuels fragmentes.' },
@@ -162,12 +168,12 @@ const FR: MarketingCopy = {
     eyebrow: 'Pourquoi Maestria',
     title: 'Clarte operationnelle sans surcharge enterprise.',
     body:
-      'Maestria est concu pour les equipes qui depassent les feuilles de calcul mais gardent le besoin de vitesse. Shop Moi Ca est le terrain phare: UX premium a l exterieur, controles stricts a l interieur.',
+      'Maestria est concu pour les equipes qui depassent les feuilles de calcul mais gardent le besoin de vitesse. La plateforme est le terrain phare: UX premium a l exterieur, controles stricts a l interieur.',
     bullets: ['Mission control direction par defaut', 'Surfaces client sans fuite de politique', 'Operations prouvees pour les discussions investisseurs'],
   },
   cta: {
     title: 'Lancez votre corridor commerce premium en quelques jours, pas en trimestres.',
-    subtitle: 'Utilisez le blueprint Shop Moi Ca puis adaptez les modules a votre catalogue, marche et mode operatoire.',
+    subtitle: 'Partez d un blueprint operationnel eprouve puis adaptez les modules a votre catalogue, marche et mode operatoire.',
     primary: 'Demarrer essai',
     secondary: 'Parler a l equipe Maestria',
   },

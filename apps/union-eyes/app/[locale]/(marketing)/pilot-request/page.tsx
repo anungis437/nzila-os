@@ -59,11 +59,11 @@ const GOALS = [
 ] as const;
 
 const MODULES = [
-  { value: 'Case & Grievance Management', key: 'caseGrievance' },
-  { value: 'Member Portal & Engagement', key: 'memberPortal' },
-  { value: 'Financial Allocation & Billing', key: 'financialBilling' },
-  { value: 'Intelligence & Insights', key: 'intelligenceInsights' },
-  { value: 'Governance & Oversight', key: 'governanceOversight' },
+  { value: 'Inbox', key: 'caseGrievance' },
+  { value: 'Priorities', key: 'memberPortal' },
+  { value: 'Work', key: 'financialBilling' },
+  { value: 'Intelligence', key: 'intelligenceInsights' },
+  { value: 'Outcomes', key: 'governanceOversight' },
 ] as const;
 
 export default function LocalePilotRequestPage() {
@@ -230,6 +230,8 @@ export default function LocalePilotRequestPage() {
                   value={formData.contactName ?? ''}
                   onChange={(e) => set('contactName', e.target.value)}
                   className={inputCls}
+                  aria-label={t('step1.contactNameLabel')}
+                  placeholder={t('step1.contactNameLabel')}
                 />
               </Field>
 
@@ -239,6 +241,8 @@ export default function LocalePilotRequestPage() {
                   value={formData.contactEmail ?? ''}
                   onChange={(e) => set('contactEmail', e.target.value)}
                   className={inputCls}
+                  aria-label={t('step1.contactEmailLabel')}
+                  placeholder={t('step1.contactEmailLabel')}
                 />
               </Field>
 
@@ -248,6 +252,8 @@ export default function LocalePilotRequestPage() {
                   value={formData.contactPhone ?? ''}
                   onChange={(e) => set('contactPhone', e.target.value)}
                   className={inputCls}
+                  aria-label={t('step1.contactPhoneLabel')}
+                  placeholder={t('step1.contactPhoneLabel')}
                 />
               </Field>
 
@@ -343,7 +349,7 @@ export default function LocalePilotRequestPage() {
                       checked={(((formData.responses as Record<string, unknown>)?.modules as string[]) ?? []).includes(mod.value)}
                       onChange={() => toggleModule(mod.value)}
                     />
-                    <span>{t(`modules.${mod.key}` as 'modules.caseGrievance')}</span>
+                    <span>{mod.value}</span>
                   </label>
                 ))}
               </Field>
@@ -418,6 +424,7 @@ export default function LocalePilotRequestPage() {
                     }))
                   }
                   className={inputCls}
+                  aria-label={t('step4.timelineLabel')}
                 >
                   <option value="">{t('step4.timelineSelect')}</option>
                   <option value="immediate">{t('step4.timelineImmediate')}</option>

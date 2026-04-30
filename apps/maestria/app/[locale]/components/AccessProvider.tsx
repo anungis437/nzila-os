@@ -25,14 +25,16 @@ export function AccessProvider({ children, defaultActorKey = 'lissa' }: { childr
   const searchParams = useSearchParams()
   const actorParam = searchParams.get('as')
   const actorKey = actorParam ?? defaultActorKey
-  const [personaMode, setPersonaModeState] = useState<PersonaMode>('mission-control')
-
-  useEffect(() => {
-    const savedMode = window.localStorage.getItem(PERSONA_MODE_KEY)
-    if (savedMode === 'mission-control' || savedMode === 'concierge') {
-      setPersonaModeState(savedMode)
+  const [personaMode, setPersonaModeState] = useState<PersonaMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'mission-control'
     }
-  }, [])
+
+    const savedMode = window.localStorage.getItem(PERSONA_MODE_KEY)
+    return savedMode === 'mission-control' || savedMode === 'concierge'
+      ? savedMode
+      : 'mission-control'
+  })
 
   useEffect(() => {
     if (actorParam) {

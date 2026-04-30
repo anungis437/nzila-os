@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@nzila/flow-engine": "workspace:*",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
     "@types/pdfkit": "^0.17.6",
     "next": "16.2.3",
     "next-intl": "^4.9.1",

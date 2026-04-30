@@ -121,8 +121,8 @@ function EnginePills({ ids }: { ids: string[] }) {
   return (
     <div className={styles.pillRow}>
       {ids.map((id) => {
-        const module = engineSurfaceMap.get(id)
-        return <span key={id} className={styles.pill}>{module ? `${module.icon} ${module.name}` : id}</span>
+        const surface = engineSurfaceMap.get(id)
+        return <span key={id} className={styles.pill}>{surface ? `${surface.icon} ${surface.name}` : id}</span>
       })}
     </div>
   )
@@ -274,7 +274,7 @@ function nextProductionStage(current: ProductionJob['stage'], stages: readonly s
 }
 
 function ExecutiveDashboardSurface({ locale, actor, actorKey }: { locale: string; actor: ActorContext; actorKey: string }) {
-  const module = getCommerceModule('internal', 'executive-dashboard')!
+  const surface = getCommerceModule('internal', 'executive-dashboard')!
   const quoteWinRate = Math.round((quoteWorkspaces.filter((quote) => quote.stage === 'won').length / Math.max(quoteWorkspaces.length, 1)) * 100)
   const repeatRevenue = customerProfiles.filter((customer) => customer.vipStatus).reduce((sum, customer) => sum + customer.lifetimeValue, 0)
   const canSeeExports = hasPermission(actor, 'export.download')
@@ -289,7 +289,7 @@ function ExecutiveDashboardSurface({ locale, actor, actorKey }: { locale: string
     'Assign CS team to follow up two pending corporate deposits.',
   ]
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary} actor={actor} actorKey={actorKey}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary} actor={actor} actorKey={actorKey}>
       <SpotlightStrip
         items={[
           { label: 'Premium command', value: 'Live founder cockpit', note: 'Revenue, risk, campaigns, and handoffs render in one glance.' },
@@ -356,7 +356,7 @@ function ExecutiveDashboardSurface({ locale, actor, actorKey }: { locale: string
 
       <section className={styles.panel}>
         <SectionHeader title="Flow Engine alignment" subtitle="Risk, work, and shipping updates stay on shared orchestration boundaries rather than ad hoc staff memory." />
-        <EnginePills ids={module.engineModules} />
+        <EnginePills ids={surface.engineModules} />
       </section>
 
       <section className={styles.dualGrid}>
@@ -441,7 +441,7 @@ function ExecutiveDashboardSurface({ locale, actor, actorKey }: { locale: string
 }
 
 function QuotePipelineSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'quote-pipeline')!
+  const surface = getCommerceModule('internal', 'quote-pipeline')!
   const [quotes, setQuotes] = useState<QuoteWorkspace[]>(quoteWorkspaces)
   const [roiInputs, setRoiInputs] = useState({
     recipients: 200,
@@ -455,7 +455,7 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
     setQuotes((current) =>
       current.map((quote) => {
         if (quote.id !== quoteId) return quote
-        const next = nextQuoteStage(quote.stage, module.stages)
+        const next = nextQuoteStage(quote.stage, surface.stages)
         if (!next) return quote
         return {
           ...quote,
@@ -479,7 +479,7 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
   const founderTimeValue = roiInputs.founderHoursSaved * 165
 
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Luxury quoting', value: `${quotes.length} live opportunities`, note: 'The board keeps premium quoting moving without margin drift.' },
@@ -490,7 +490,7 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
       <section className={styles.panel}>
         <SectionHeader title="Stage board" subtitle="Quotes grouped by stage with margin control, approvals, and bilingual client-ready status copy." />
         <div className={styles.boardGrid}>
-          {module.stages.map((stage) => {
+          {surface.stages.map((stage) => {
             const stageQuotes = quotes.filter((quote) => quote.stage === stage)
             return (
               <article key={stage} className={styles.boardColumn}>
@@ -508,9 +508,9 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
                         {quote.marginPercent < 25 ? <span className={styles.warnPill}>Margin watch</span> : <span className={styles.successPill}>Margin safe</span>}
                         {quote.corporate ? <span className={styles.pill}>Corporate</span> : <span className={styles.pill}>Concierge</span>}
                       </div>
-                      {nextQuoteStage(quote.stage, module.stages) ? (
+                      {nextQuoteStage(quote.stage, surface.stages) ? (
                         <button className={styles.secondaryButton} type="button" onClick={() => advanceQuote(quote.id)}>
-                          Move to {nextQuoteStage(quote.stage, module.stages)}
+                          Move to {nextQuoteStage(quote.stage, surface.stages)}
                         </button>
                       ) : null}
                     </div>
@@ -535,8 +535,8 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
         </article>
         <article className={styles.panel}>
           <SectionHeader title="Flow Engine alignment" subtitle="Quote routing, approval, and follow-up automation remain shared under the premium edition surface." />
-          <EnginePills ids={module.engineModules} />
-          <StagePills stages={module.stages} />
+          <EnginePills ids={surface.engineModules} />
+          <StagePills stages={surface.stages} />
           <StateGallery
             loading={{ label: 'Rendering branded quote PDF preview', note: 'The premium deck is preparing pricing, margins, and bilingual status copy.' }}
             empty={{ label: 'No quotes waiting in lost recovery', note: 'The empty state still points the team to follow-up quality and reuse patterns.' }}
@@ -597,9 +597,9 @@ function QuotePipelineSurface({ locale }: { locale: string }) {
 }
 
 function CustomOrderManagementSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'custom-order-management')!
+  const surface = getCommerceModule('internal', 'custom-order-management')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.cardGrid}>
         {customOrders.map((order) => {
           const gates = getPaymentGateSummary(order)
@@ -627,21 +627,21 @@ function CustomOrderManagementSurface({ locale }: { locale: string }) {
       </section>
       <section className={styles.panel}>
         <SectionHeader title="Real production path" subtitle="Custom gifting needs payment, reservation, assembly, QA, and delivery gates in the correct order." />
-        <StagePills stages={module.stages} />
+        <StagePills stages={surface.stages} />
       </section>
     </SurfaceFrame>
   )
 }
 
 function ProductionTrackerSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'production-tracker')!
+  const surface = getCommerceModule('internal', 'production-tracker')!
   const [jobs, setJobs] = useState<ProductionJob[]>(productionJobs)
 
   function advanceJob(jobId: string) {
     setJobs((current) =>
       current.map((job) => {
         if (job.id !== jobId) return job
-        const next = nextProductionStage(job.stage, module.stages)
+        const next = nextProductionStage(job.stage, surface.stages)
         if (!next) return job
         return { ...job, stage: next, blocker: next === 'completed' ? undefined : job.blocker, atRisk: next === 'completed' ? false : job.atRisk }
       }),
@@ -649,9 +649,9 @@ function ProductionTrackerSurface({ locale }: { locale: string }) {
   }
 
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.boardGrid}>
-        {module.stages.map((stage) => {
+        {surface.stages.map((stage) => {
           const jobsInStage = jobs.filter((job) => job.stage === stage)
           return (
             <article key={stage} className={styles.boardColumn}>
@@ -663,9 +663,9 @@ function ProductionTrackerSurface({ locale }: { locale: string }) {
                     <div className={styles.infoRow}><span>Proof: {job.proofStatus}</span><span>{job.shipDate}</span></div>
                     <div className={styles.infoRow}><span>{job.slaHoursRemaining}h remaining</span><span>{job.atRisk ? 'At risk' : 'Healthy'}</span></div>
                     {job.blocker ? <p className={styles.alertText}>{job.blocker}</p> : null}
-                    {nextProductionStage(job.stage, module.stages) ? (
+                    {nextProductionStage(job.stage, surface.stages) ? (
                       <button className={styles.secondaryButton} type="button" onClick={() => advanceJob(job.id)}>
-                        Mark {nextProductionStage(job.stage, module.stages)}
+                        Mark {nextProductionStage(job.stage, surface.stages)}
                       </button>
                     ) : null}
                   </div>
@@ -688,11 +688,11 @@ function ProductionTrackerSurface({ locale }: { locale: string }) {
 }
 
 function InventoryCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'inventory-center')!
+  const surface = getCommerceModule('internal', 'inventory-center')!
   const topSellers = catalogSkus.filter((sku) => sku.topSeller)
   const deadStock = catalogSkus.filter((sku) => sku.deadStock)
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.statsGrid}>
         <article className={styles.statCard}><span className={styles.statLabel}>Component availability</span><strong className={styles.statValue}>{catalogSkus.filter((sku) => sku.available > 0).length}</strong><p className={styles.statNote}>SKUs currently ready for allocation into curated baskets and premium orders.</p></article>
         <article className={styles.statCard}><span className={styles.statLabel}>Bundle shortages</span><strong className={styles.statValue}>{inventorySkus.filter((sku) => sku.bundleShortage).length}</strong><p className={styles.statNote}>Partial component gaps that break assembly on otherwise sellable bundles.</p></article>
@@ -754,9 +754,9 @@ function InventoryCenterSurface({ locale }: { locale: string }) {
 }
 
 function SupplierPoCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'supplier-po-center')!
+  const surface = getCommerceModule('internal', 'supplier-po-center')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.dualGrid}>
         <article className={styles.panel}>
           <SectionHeader title="Vendor directory and readiness" subtitle="Lead time, MOQ, artisan status, quality memory, and seasonal confidence in one place." />
@@ -811,9 +811,9 @@ function SupplierPoCenterSurface({ locale }: { locale: string }) {
 }
 
 function ShippingCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'shipping-center')!
+  const surface = getCommerceModule('internal', 'shipping-center')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.statsGrid}>
         <article className={styles.statCard}><span className={styles.statLabel}>Local delivery queue</span><strong className={styles.statValue}>{shippingOperations.filter((item) => item.mode === 'Local delivery').length}</strong><p className={styles.statNote}>Same-day and concierge handoffs needing driver control.</p></article>
         <article className={styles.statCard}><span className={styles.statLabel}>Carrier shipments</span><strong className={styles.statValue}>{shippingOperations.filter((item) => item.mode === 'Carrier shipment').length}</strong><p className={styles.statNote}>Label creation, release timing, and proactive tracking updates.</p></article>
@@ -854,9 +854,9 @@ function ShippingCenterSurface({ locale }: { locale: string }) {
 }
 
 function FinanceSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'finance-surface')!
+  const surface = getCommerceModule('internal', 'finance-surface')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.statsGrid}>
         <article className={styles.statCard}><span className={styles.statLabel}>Cash collected</span><strong className={styles.statValue}>{formatCurrency(profitabilityRecords.reduce((sum, record) => sum + record.collected, 0))}</strong><p className={styles.statNote}>Collected against deposits and invoice balances across live work.</p></article>
         <article className={styles.statCard}><span className={styles.statLabel}>Bad deals</span><strong className={styles.statValue}>{profitabilityRecords.filter((record) => record.marginFlag === 'Blocked').length}</strong><p className={styles.statNote}>Orders that should be challenged before future approvals repeat the mistake.</p></article>
@@ -881,9 +881,9 @@ function FinanceSurface({ locale }: { locale: string }) {
 }
 
 function CrmInternalViewSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'crm-internal-view')!
+  const surface = getCommerceModule('internal', 'crm-internal-view')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.dualGrid}>
         <article className={styles.panel}>
           <SectionHeader title="Customer memory" subtitle="What they buy, how they buy, and which language or service pattern keeps trust high." />
@@ -910,11 +910,11 @@ function CrmInternalViewSurface({ locale }: { locale: string }) {
 }
 
 function SmartQuoteRequestPortalSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'smart-quote-request-portal')!
+  const surface = getCommerceModule('client', 'smart-quote-request-portal')!
   const [requestState, setRequestState] = useState(quoteRequestBrief)
   const [submissionState, setSubmissionState] = useState<'idle' | 'submitted' | 'concierge'>('idle')
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Client intake polish', value: 'Concierge-ready form', note: 'The brief captures luxury, logistics, and brand detail in one pass.' },
@@ -962,7 +962,7 @@ function SmartQuoteRequestPortalSurface({ locale }: { locale: string }) {
 }
 
 function CorporateClientPortalSurface({ locale, actor, actorKey }: { locale: string; actor: ActorContext; actorKey: string }) {
-  const module = getCommerceModule('client', 'corporate-client-portal')!
+  const surface = getCommerceModule('client', 'corporate-client-portal')!
   const [campaigns, setCampaigns] = useState<CorporateCampaignRecord[]>(filterCorporateRowsForActor(actor, corporateCampaigns))
 
   function reorderCampaign(campaignId: string) {
@@ -976,7 +976,7 @@ function CorporateClientPortalSurface({ locale, actor, actorKey }: { locale: str
   }
 
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary} actor={actor} actorKey={actorKey}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary} actor={actor} actorKey={actorKey}>
       <SpotlightStrip
         items={[
           { label: 'Account view', value: `${campaigns.length} visible campaigns`, note: 'Row-level RBAC stays intact while the portal still looks premium.' },
@@ -1031,9 +1031,9 @@ function CorporateClientPortalSurface({ locale, actor, actorKey }: { locale: str
 }
 
 function OrderTrackingExperienceSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'order-tracking-experience')!
+  const surface = getCommerceModule('client', 'order-tracking-experience')!
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Tracking posture', value: orderTrackingStory.stage, note: 'The customer sees clarity without exposing internal noise.' },
@@ -1068,7 +1068,7 @@ function OrderTrackingExperienceSurface({ locale }: { locale: string }) {
         </article>
         <article className={styles.panel}>
           <SectionHeader title="Flow Engine alignment" subtitle="Customer tracking remains grounded in shared status progression and shipping events." />
-          <EnginePills ids={module.engineModules} />
+          <EnginePills ids={surface.engineModules} />
           <StateGallery
             loading={{ label: 'Courier checkpoint is syncing', note: 'Desktop users get responsive progress language while delivery proof refreshes.' }}
             empty={{ label: 'No exception notes on this shipment', note: 'An empty exception state reads calm and premium instead of vacant.' }}
@@ -1081,11 +1081,11 @@ function OrderTrackingExperienceSurface({ locale }: { locale: string }) {
 }
 
 function SeasonalCampaignEngineSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'seasonal-campaign-engine')!
+  const surface = getCommerceModule('client', 'seasonal-campaign-engine')!
   const [filter, setFilter] = useState<'All' | 'Building' | 'Ready to launch' | 'Live' | 'Follow-up'>('All')
   const visibleCampaigns = filter === 'All' ? seasonalCampaigns : seasonalCampaigns.filter((campaign) => campaign.status === filter)
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Campaign command', value: `${visibleCampaigns.length} visible programs`, note: 'The filter system is ready for screenshot and live demo use.' },
@@ -1127,9 +1127,9 @@ function SeasonalCampaignEngineSurface({ locale }: { locale: string }) {
 }
 
 function ShopifyIntelligenceHubSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'shopify-intelligence-hub')!
+  const surface = getCommerceModule('internal', 'shopify-intelligence-hub')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Storefront intelligence', value: `${shopifyMetrics.length} metrics live`, note: 'The team can narrate demand quality from real commerce signals.' },
@@ -1183,9 +1183,9 @@ function ShopifyIntelligenceHubSurface({ locale }: { locale: string }) {
 }
 
 function GoogleAdsCommandCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'google-ads-command-center')!
+  const surface = getCommerceModule('internal', 'google-ads-command-center')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Spend posture', value: formatCurrency(adsCampaigns.reduce((sum, campaign) => sum + campaign.spend, 0)), note: 'Search and Performance Max are now visually merchandised for exec review.' },
@@ -1223,9 +1223,9 @@ function GoogleAdsCommandCenterSurface({ locale }: { locale: string }) {
 }
 
 function CampaignCommandCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'campaign-command-center')!
+  const surface = getCommerceModule('internal', 'campaign-command-center')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.panel}>
         <SectionHeader title={t(locale, 'Campaign execution board', 'Tableau execution campagnes')} subtitle={t(locale, 'Integrate and orchestrate Shopify, Ads, and CRM without replacing existing tools.', 'Integrer et orchestrer Shopify, Ads et CRM sans remplacer les outils existants.')} />
         {campaignExecution.map((record) => (
@@ -1257,9 +1257,9 @@ function CampaignCommandCenterSurface({ locale }: { locale: string }) {
 }
 
 function SocialPresencePlannerSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'social-presence-planner')!
+  const surface = getCommerceModule('internal', 'social-presence-planner')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.panel}>
         <SectionHeader title={t(locale, 'Content and collaborator planner', 'Planificateur contenu et collaborateurs')} />
         {socialPlanner.map((item) => (
@@ -1275,9 +1275,9 @@ function SocialPresencePlannerSurface({ locale }: { locale: string }) {
 }
 
 function WebsiteConversionCenterSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('internal', 'website-conversion-center')!
+  const surface = getCommerceModule('internal', 'website-conversion-center')!
   return (
-    <SurfaceFrame locale={locale} lane="internal" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="internal" title={surface.title} subtitle={surface.summary}>
       <section className={styles.cardGrid}>
         {websiteFunnel.map((entry) => (
           <article key={entry.page} className={styles.card}>
@@ -1294,9 +1294,9 @@ function WebsiteConversionCenterSurface({ locale }: { locale: string }) {
 }
 
 function GuidedGiftBuilderSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'guided-gift-builder')!
+  const surface = getCommerceModule('client', 'guided-gift-builder')!
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <SpotlightStrip
         items={[
           { label: 'Builder presets', value: `${guidedBuilderPresets.length} curated flows`, note: 'Budget, luxury level, and local preference now feel premium and real.' },
@@ -1332,9 +1332,9 @@ function GuidedGiftBuilderSurface({ locale }: { locale: string }) {
   )
 }
 function LoyaltyVipSystemSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'loyalty-vip-system')!
+  const surface = getCommerceModule('client', 'loyalty-vip-system')!
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <section className={styles.cardGrid}>
         {loyaltyProfiles.map((profile) => {
           const customer = customerProfiles.find((entry) => entry.id === profile.customerId)
@@ -1357,9 +1357,9 @@ function LoyaltyVipSystemSurface({ locale }: { locale: string }) {
 }
 
 function ConciergeRequestsSurface({ locale }: { locale: string }) {
-  const module = getCommerceModule('client', 'concierge-requests')!
+  const surface = getCommerceModule('client', 'concierge-requests')!
   return (
-    <SurfaceFrame locale={locale} lane="client" title={module.title} subtitle={module.summary}>
+    <SurfaceFrame locale={locale} lane="client" title={surface.title} subtitle={surface.summary}>
       <section className={styles.panel}>
         <SectionHeader title={t(locale, 'Concierge operating queue', 'File operationnelle concierge')} subtitle={t(locale, 'Urgent, premium, and founder-level requests routed with SLA confidence.', 'Demandes urgentes, premium et niveau fondateur routees avec confiance SLA.')} />
         {customOrders.filter((order) => order.rush || order.atRisk).map((order) => (

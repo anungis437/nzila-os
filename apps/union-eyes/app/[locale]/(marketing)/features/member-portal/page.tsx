@@ -1,34 +1,59 @@
 /**
- * Member Portal & Engagement module page.
- * Accessible at /{locale}/features/member-portal — fully translated.
+ * Member Intake feature page.
+ * Accessible at /{locale}/features/member-portal.
+ * Members submit intake and follow lightweight status only.
  */
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
 import {
-  Users,
-  UserPlus,
-  CreditCard,
+  ClipboardList,
+  Eye,
   FileUp,
+  Bell,
   MessageSquare,
-  BarChart3,
   ArrowRight,
-  FolderOpen,
 } from 'lucide-react';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'marketing.features.memberPortal' });
-  return { title: t('pageTitle'), description: t('pageDescription') };
-}
+export const metadata: Metadata = {
+  title: 'Member Intake & Follow-up | UnionEyes',
+  description:
+    'Member-facing intake submission and lightweight case follow-up, while stewards and LROs manage the full UnionEyes workflow.',
+};
 
-const featureIcons = [Users, UserPlus, FolderOpen, CreditCard, FileUp, MessageSquare, BarChart3];
+const features = [
+  {
+    icon: ClipboardList,
+    title: 'Structured intake submission',
+    description:
+      'Members submit a clear intake with issue details, desired outcome, and supporting context before a steward turns it into formal casework.',
+  },
+  {
+    icon: FileUp,
+    title: 'Secure document handoff',
+    description:
+      'Photos, letters, and supporting files move into the representative workflow without relying on scattered email threads.',
+  },
+  {
+    icon: Eye,
+    title: 'Lightweight case follow-up',
+    description:
+      'Members can check status and recent updates without needing access to Inbox, Priorities, Work, Intelligence, or Outcomes.',
+  },
+  {
+    icon: Bell,
+    title: 'Update notifications',
+    description:
+      'Status changes and follow-up requests surface as simple notifications so members know when action is needed from them.',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Representative handoff',
+    description:
+      'Once intake is reviewed, stewards and LROs take over inside the core app while members stay in a narrow, controlled follow-up flow.',
+  },
+];
 
 export default async function LocaleMemberPortalPage({
   params,
@@ -36,27 +61,22 @@ export default async function LocaleMemberPortalPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'marketing.features.memberPortal' });
-
-  const features = featureIcons.map((icon, i) => ({
-    icon,
-    title: t(`feat${i + 1}Title`),
-    description: t(`feat${i + 1}Desc`),
-  }));
 
   return (
     <div className="min-h-screen bg-white">
       <header className="bg-slate-50 border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium mb-6">
-            <Users className="h-4 w-4" />
-            <span>{t('badge')}</span>
+            <ClipboardList className="h-4 w-4" />
+            <span>Member-Facing Entry</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
-            {t('heroHeading')}
+            Submit intake. Follow progress. Leave the casework to your union team.
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            {t('heroDescription')}
+            Members do not work inside the full UnionEyes application. They submit intake,
+            share supporting material, and follow lightweight updates while stewards and
+            LROs operate Inbox, Priorities, Work, Intelligence, and Outcomes.
           </p>
         </div>
       </header>
@@ -81,48 +101,44 @@ export default async function LocaleMemberPortalPage({
 
         <section className="mb-20 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-blue-50 rounded-xl p-8">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              {t('forMembers')}
-            </h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">For members</h3>
             <ul className="space-y-2 text-slate-700 text-sm">
-              <li>• {t('member1')}</li>
-              <li>• {t('member2')}</li>
-              <li>• {t('member3')}</li>
-              <li>• {t('member4')}</li>
+              <li>• Submit a new issue without navigating the full admin workflow.</li>
+              <li>• Upload supporting documents from any device.</li>
+              <li>• See current status and recent requests for information.</li>
+              <li>• Receive simple updates when the union team needs follow-up.</li>
             </ul>
           </div>
           <div className="bg-violet-50 rounded-xl p-8">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              {t('forStewards')}
-            </h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">For stewards and LROs</h3>
             <ul className="space-y-2 text-slate-700 text-sm">
-              <li>• {t('steward1')}</li>
-              <li>• {t('steward2')}</li>
-              <li>• {t('steward3')}</li>
-              <li>• {t('steward4')}</li>
+              <li>• Triage intake from Inbox without exposing the rest of the app to members.</li>
+              <li>• Request missing information without falling back to email chaos.</li>
+              <li>• Convert qualified intake into governed casework inside Work.</li>
+              <li>• Keep member follow-up narrow, auditable, and easy to understand.</li>
             </ul>
           </div>
         </section>
 
         <section className="text-center bg-slate-50 rounded-2xl border border-slate-200 p-10">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            {t('ctaHeading')}
+            See how member intake feeds the steward workflow
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            {t('ctaDescription')}
+            The member-facing flow stays narrow by design. Inbox and Work pick it up from there.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors text-sm"
             >
-              {t('ctaPrimary')} <ArrowRight className="h-4 w-4" />
+              Request a Demo <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href={`/${locale}/features/grievance-tracking`}
+              href={`/${locale}/features/inbox`}
               className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
             >
-              {t('ctaSecondary')}
+              See Inbox
             </Link>
           </div>
         </section>

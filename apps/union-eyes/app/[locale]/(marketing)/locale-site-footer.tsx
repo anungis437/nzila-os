@@ -62,15 +62,15 @@ export default function LocaleSiteFooter() {
 
   const footerLinks = {
     System: [
-      { name: t('governance'),          href: `/${locale}/trust` },
-      { name: t('grievanceTracking'),  href: `/${locale}/features/grievance-tracking` },
-      { name: t('memberPortal'),       href: `/${locale}/features/member-portal` },
-      { name: t('aiWorkbench'),        href: `/${locale}/features/ai-workbench` },
-      { name: t('analyticsReporting'), href: `/${locale}/features/analytics` },
+      { name: 'Inbox',                 href: `/${locale}/features/inbox` },
+      { name: 'Priorities',            href: `/${locale}/features/priorities` },
+      { name: 'Work',                  href: `/${locale}/features/grievance-tracking` },
+      { name: 'Intelligence',          href: `/${locale}/features/ai-workbench` },
+      { name: 'Outcomes',              href: `/${locale}/features/analytics` },
       { name: t('pricing'),            href: `/${locale}/pricing` },
       { name: t('systemStatus'),       href: `/${locale}/trust#system-status` },
     ],
-    'Who It\'s For': [
+    'Use Cases': [
       { name: 'Representatives',  href: `/${locale}/for-representatives` },
       { name: 'Leadership',       href: `/${locale}/for-leadership` },
       { name: 'Federations',      href: `/${locale}/for-federations` },
@@ -79,6 +79,7 @@ export default function LocaleSiteFooter() {
     ],
     [t('resources')]: [
       { name: t('caseStudies'),  href: `/${locale}/case-studies` },
+      { name: t('trust'),        href: `/${locale}/trust` },
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('pilotProgram'), href: `/${locale}/pilot-request` },
       { name: t('contact'),      href: `/${locale}/contact` },

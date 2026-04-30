@@ -20,7 +20,7 @@ export default async function MarketingLayout({
     <div className={styles.page}>
       <header className={styles.topNav}>
         <div className={`${styles.container} ${styles.navInner}`}>
-          <p className={styles.brand}>Maestria <span>x</span> Shop Moi Ca</p>
+          <p className={styles.brand}><span className={styles.brandMark}>✦</span> Maestria</p>
           <nav className={styles.navLinks}>
             <Link href={`/${locale}/marketing`} className={styles.navLink}>{copy.nav.product}</Link>
             <Link href={`/${locale}/marketing/features`} className={styles.navLink}>{copy.nav.features}</Link>
@@ -35,7 +35,7 @@ export default async function MarketingLayout({
       <footer className={styles.footer}>
         <div className={`${styles.container} ${styles.footerInner}`}>
           <span>{year} Maestria Commerce Edition</span>
-          <span>Flagship implementation: Shop Moi Ca</span>
+          <span>Commerce intelligence platform</span>
         </div>
       </footer>
     </div>

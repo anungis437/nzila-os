@@ -22,15 +22,15 @@ const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.co
 
 const footerLinks = {
   System: [
-    { name: 'Governance & Oversight', href: '/en-CA/trust' },
-    { name: 'Case Management',       href: '/features/grievance-tracking' },
-    { name: 'Member Portal',         href: '/features/member-portal' },
+    { name: 'Inbox',                 href: '/features/inbox' },
+    { name: 'Priorities',            href: '/features/priorities' },
+    { name: 'Work',                  href: '/features/grievance-tracking' },
     { name: 'Intelligence',          href: '/features/ai-workbench' },
-    { name: 'Financial Allocation',  href: '/features/analytics' },
+    { name: 'Outcomes',              href: '/features/analytics' },
     { name: 'Pricing',              href: '/pricing' },
     { name: 'System Status',        href: '/en-CA/trust#system-status' },
   ],
-  'Who It\'s For': [
+  'Use Cases': [
     { name: 'Representatives',  href: '/en-CA/for-representatives' },
     { name: 'Leadership',       href: '/en-CA/for-leadership' },
     { name: 'Federations',      href: '/en-CA/for-federations' },
@@ -39,6 +39,7 @@ const footerLinks = {
   ],
   Resources: [
     { name: 'Case Studies',   href: '/case-studies' },
+    { name: 'Trust',          href: '/en-CA/trust' },
     { name: 'Our Story',      href: '/story' },
     { name: 'Request a Demo', href: '/pilot-request' },
     { name: 'Contact Us',     href: '/contact' },

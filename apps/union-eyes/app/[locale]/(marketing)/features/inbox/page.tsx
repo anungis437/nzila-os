@@ -1,0 +1,134 @@
+/**
+ * Inbox feature page.
+ * Accessible at /{locale}/features/inbox.
+ */
+export const dynamic = 'force-dynamic';
+
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import {
+  Inbox,
+  Bell,
+  ClipboardList,
+  MessagesSquare,
+  ShieldCheck,
+  ArrowRight,
+} from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Inbox | UnionEyes',
+  description:
+    'Inbox is the steward and LRO signal hub for intake, follow-up requests, and time-sensitive representation work.',
+};
+
+const features = [
+  {
+    icon: ClipboardList,
+    title: 'Intake arrives in context',
+    description:
+      'New intake lands where stewards and LROs can review it with the right organizational context instead of chasing email threads.',
+  },
+  {
+    icon: Bell,
+    title: 'Urgent signals stay visible',
+    description:
+      'Inbox surfaces overdue follow-up, new member updates, and the work that needs attention now.',
+  },
+  {
+    icon: MessagesSquare,
+    title: 'Follow-up stays contained',
+    description:
+      'Requests for clarification and member responses stay connected to the record that triggered them.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Role-appropriate visibility',
+    description:
+      'Inbox is for stewards, LROs, and admins. Members use the intake and follow-up flow instead of the full signal queue.',
+  },
+];
+
+export default async function LocaleInboxPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="bg-slate-50 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 border border-sky-200 rounded-full text-sm text-sky-700 font-medium mb-6">
+            <Inbox className="h-4 w-4" />
+            <span>Steward / LRO Signal Hub</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
+            Inbox is where the union team sees what needs attention first
+          </h1>
+          <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
+            Inbox is not a member portal. It is the governed signal queue for stewards,
+            LROs, and admins reviewing new intake, follow-up requests, and time-sensitive updates.
+          </p>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="p-6 rounded-xl border border-slate-200 hover:border-sky-200 hover:shadow-sm transition-all"
+            >
+              <feature.icon className="h-8 w-8 text-sky-600 mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{feature.title}</h3>
+              <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <section className="mb-20 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-sky-50 rounded-xl p-8">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">What lands here</h3>
+            <ul className="space-y-2 text-slate-700 text-sm">
+              <li>• New intake submitted by members.</li>
+              <li>• Responses to follow-up requests.</li>
+              <li>• Signals that need triage or reassignment.</li>
+              <li>• Updates that should move into Priorities or Work.</li>
+            </ul>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-8">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">What members see instead</h3>
+            <ul className="space-y-2 text-slate-700 text-sm">
+              <li>• A narrow intake form.</li>
+              <li>• Lightweight case follow-up.</li>
+              <li>• Status updates and requests for information.</li>
+              <li>• No access to the full steward workflow.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="text-center bg-slate-50 rounded-2xl border border-slate-200 p-10">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">See how Inbox feeds action</h2>
+          <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+            Inbox collects signals. Priorities decides what moves next.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href={`/${locale}/pilot-request`}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition-colors text-sm"
+            >
+              Request a Demo <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href={`/${locale}/features/priorities`}
+              className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
+            >
+              See Priorities
+            </Link>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
