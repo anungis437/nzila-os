@@ -22,6 +22,14 @@ import {
 import { WorkflowTriggerRequestSchema, ExecutionStatusSchema } from '@nzila/platform-contracts/control-system'
 import { createLogger } from '@nzila/os-core'
 import { PlaybookName } from '../contract.js'
+import {
+  evaluateDomainPolicies,
+  evaluatePoliciesWithResolution,
+  toPolicyContext,
+  type DomainName,
+  type PolicyDecisionLevel,
+} from '@nzila/policies'
+import { getOperatingEvidenceService } from '@nzila/operating-evidence'
 
 const logger = createLogger('orchestrator:routes:execute')
 
@@ -37,6 +45,24 @@ const ListQuerySchema = z.object({
   status: ExecutionStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),
 })
+
+function inferDomain(workflowId: string): DomainName {
+  const value = workflowId.toLowerCase()
+  if (value.includes('labour') || value.includes('payroll') || value.includes('pension')) return 'labour'
+  if (value.includes('legal') || value.includes('compliance') || value.includes('contract')) return 'legal'
+  if (value.includes('media') || value.includes('rights') || value.includes('content')) return 'media-rights'
+  return 'commerce'
+}
+
+function buildEnforcementRequirements(level: PolicyDecisionLevel) {
+  return {
+    requiresConfirmationText: level === 'CHALLENGE',
+    requiresJustification: level === 'CHALLENGE',
+    requiresApproval: level === 'CHALLENGE',
+    explicitOverrideHeader: level === 'BLOCK' ? 'x-policy-override-explicit' : null,
+    explicitOverrideAcceptedValue: level === 'BLOCK' ? 'true' : null,
+  }
+}
 
 export async function executeRoutes(app: FastifyInstance) {
   /**
@@ -72,6 +98,129 @@ export async function executeRoutes(app: FastifyInstance) {
     }
 
     const body = parsed.data
+    const requestedPolicyVersion = getHeader(req.headers['x-policy-version']) ?? process.env.NZILA_POLICY_VERSION ?? 'v1'
+    const actorRole = getHeader(req.headers['x-actor-role']) ?? 'ops'
+    const domainHeader = getHeader(req.headers['x-policy-domain'])
+    const overrideReason = getHeader(req.headers['x-policy-override-reason'])
+    const ticketRef = getHeader(req.headers['x-policy-ticket-ref'])
+    const domain = (domainHeader as DomainName | null) ?? inferDomain(body.workflowId)
+    const explicitOverrideHeader = getHeader(req.headers['x-policy-override-explicit'])
+    const confirmationText = getHeader(req.headers['x-policy-confirmation'])
+    const justification = getHeader(req.headers['x-policy-justification'])
+
+    const domainEval = evaluateDomainPolicies({
+      orgId: body.orgId,
+      actorId: body.initiatedBy.actorId,
+      actorRole,
+      domain,
+      action: `execute:${body.workflowId}`,
+      resource: `workflow:${body.workflowId}`,
+      payload: body.payload as Record<string, unknown> | undefined,
+      environment: (process.env.NODE_ENV === 'development' ? 'dev' : process.env.NODE_ENV === 'test' ? 'staging' : 'production'),
+      overrideReason: overrideReason ?? undefined,
+      ticketRef: ticketRef ?? undefined,
+    })
+
+    const contextual = evaluatePoliciesWithResolution(
+      toPolicyContext({
+        orgId: body.orgId,
+        actorId: body.initiatedBy.actorId,
+        actorRole,
+        domain,
+        action: `execute:${body.workflowId}`,
+        resource: `workflow:${body.workflowId}`,
+        payload: {
+          ...(body.payload as Record<string, unknown> | undefined),
+          sensitivity: String((body.payload as Record<string, unknown> | undefined)?.['sensitivity'] ?? 'high'),
+          app: 'orchestrator-api',
+          anomalyScore: Number((body.payload as Record<string, unknown> | undefined)?.['anomalyScore'] ?? 0),
+          previousActions: Array.isArray((body.payload as Record<string, unknown> | undefined)?.['previousActions'])
+            ? ((body.payload as Record<string, unknown> | undefined)?.['previousActions'] as string[])
+            : [],
+          overrideHistory: Array.isArray((body.payload as Record<string, unknown> | undefined)?.['overrideHistory'])
+            ? ((body.payload as Record<string, unknown> | undefined)?.['overrideHistory'] as unknown[])
+            : [],
+          sessionId: String((body.payload as Record<string, unknown> | undefined)?.['sessionId'] ?? body.requestId),
+        },
+        environment:
+          process.env.NODE_ENV === 'development'
+            ? 'dev'
+            : process.env.NODE_ENV === 'test'
+              ? 'staging'
+              : 'production',
+        policyVersion: requestedPolicyVersion,
+        overrideReason: overrideReason ?? undefined,
+        ticketRef: ticketRef ?? undefined,
+      }),
+    )
+
+    let finalDecision: PolicyDecisionLevel = contextual.resolution.finalDecision.level
+    if (domainEval.blocked) {
+      finalDecision = 'BLOCK'
+    } else if (domainEval.requiresOverride && finalDecision !== 'BLOCK') {
+      finalDecision = 'CHALLENGE'
+    }
+
+    const enforcementRequirements = buildEnforcementRequirements(finalDecision)
+    const expectedConfirmation = `CONFIRM execute:${body.workflowId} workflow:${body.workflowId}`
+
+    if (finalDecision === 'BLOCK' && explicitOverrideHeader !== 'true') {
+      await getOperatingEvidenceService().record({
+        app: 'orchestrator-api',
+        domain,
+        type: 'policy_violation',
+        policyVersion: requestedPolicyVersion,
+        severity: 'critical',
+        payload: {
+          workflowId: body.workflowId,
+          orgId: body.orgId,
+          actorId: body.initiatedBy.actorId,
+          finalDecision,
+          details: contextual.resolution,
+        },
+      })
+
+      return reply.status(403).send({
+        ok: false,
+        error: {
+          code: 'POLICY_BLOCKED',
+          message: 'Execution blocked by policy. Explicit override header required.',
+          details: {
+            finalDecision,
+            enforcementRequirements,
+            trace: contextual.resolution.explanationTrace,
+          },
+        },
+      })
+    }
+
+    if (finalDecision === 'CHALLENGE') {
+      if (confirmationText !== expectedConfirmation || !justification) {
+        return reply.status(409).send({
+          ok: false,
+          error: {
+            code: 'POLICY_CHALLENGE_REQUIRED',
+            message: 'Challenge decision requires confirmation and justification.',
+            details: {
+              expectedConfirmation,
+              enforcementRequirements,
+              trace: contextual.resolution.explanationTrace,
+            },
+          },
+        })
+      }
+    }
+
+    if (domainEval.requiresOverride && (!overrideReason || !ticketRef) && finalDecision !== 'CHALLENGE') {
+      return reply.status(409).send({
+        ok: false,
+        error: {
+          code: 'DOMAIN_OVERRIDE_REQUIRED',
+          message: 'Override reason and ticket reference are required for governed override paths',
+          details: domainEval,
+        },
+      })
+    }
     if (orgHeader !== body.orgId) {
       return reply.status(403).send({
         ok: false,
@@ -123,6 +272,31 @@ export async function executeRoutes(app: FastifyInstance) {
       initiatedBy: body.initiatedBy.actorId,
       dryRun: body.executionContext?.dryRun,
       correlationId,
+      domain,
+      domainRequiresOverride: domainEval.requiresOverride,
+      policyDecision: finalDecision,
+    })
+
+    await getOperatingEvidenceService().record({
+      app: 'orchestrator-api',
+      domain,
+      type: finalDecision === 'CHALLENGE' ? 'override' : 'request',
+      policyVersion: requestedPolicyVersion,
+      severity: finalDecision === 'WARN' ? 'high' : finalDecision === 'CHALLENGE' ? 'high' : 'low',
+      payload: {
+        workflowId: body.workflowId,
+        dryRun: body.executionContext?.dryRun ?? false,
+        actorId: body.initiatedBy.actorId,
+        overrideApplied: Boolean(overrideReason && ticketRef),
+        finalDecision,
+        trace: contextual.resolution.explanationTrace,
+      },
+    })
+
+    logger.info('Policy decision trace attached', {
+      workflowId: body.workflowId,
+      finalDecision,
+      traceCount: contextual.resolution.explanationTrace.length,
     })
 
     const result = await executeWorkflow({
@@ -137,7 +311,22 @@ export async function executeRoutes(app: FastifyInstance) {
     })
 
     const httpStatus = result.status === 'failed' || result.status === 'dead_lettered' ? 500 : 202
-    return reply.status(result.idempotent ? 200 : httpStatus).send({ ok: true, data: result })
+    return reply.status(result.idempotent ? 200 : httpStatus).send({
+      ok: true,
+      data: {
+        ...result,
+        policy: {
+          domain,
+          policyVersion: requestedPolicyVersion,
+          requiresOverride: domainEval.requiresOverride,
+          overrideApplied: Boolean(overrideReason && ticketRef),
+          findings: domainEval.findings,
+          finalDecision,
+          trace: contextual.resolution.explanationTrace,
+          enforcementRequirements,
+        },
+      },
+    })
   })
 
   /**

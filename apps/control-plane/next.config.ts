@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
     "@nzila/platform-evidence-pack",
     "@nzila/platform-compliance-snapshots",
     "@nzila/platform-policy-engine",
+    "@nzila/operating-evidence",
+    "@nzila/metrics-commercial",
+    "@nzila/policies",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

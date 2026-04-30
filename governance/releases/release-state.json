@@ -1,0 +1,9 @@
+{
+  "version": "0.1.0",
+  "commit": "seed",
+  "lastDeploymentAt": "2026-01-01T00:00:00.000Z",
+  "rollbackAvailable": true,
+  "semverCompliant": true,
+  "stagingGate": "pending",
+  "productionApproval": "pending"
+}

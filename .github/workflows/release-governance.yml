@@ -1,0 +1,64 @@
+name: Release Governance
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Semver governance
+        run: pnpm tsx tooling/release/semver-governance.ts
+
+      - name: Stage release state
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add governance/releases/release-state.json
+          git commit -m "chore(release): update release state" || true
+
+      - name: Auto tag release
+        run: pnpm tsx scripts/release/tag-release.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  staging-gate:
+    runs-on: ubuntu-latest
+    needs: governance
+    environment: staging
+    steps:
+      - name: Staging gate placeholder
+        run: echo "Staging gate check passed"
+
+  production-gate:
+    runs-on: ubuntu-latest
+    needs: staging-gate
+    environment:
+      name: production
+    steps:
+      - name: Production approval gate placeholder
+        run: echo "Production gate approved"

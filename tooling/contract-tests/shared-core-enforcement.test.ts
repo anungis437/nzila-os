@@ -2,35 +2,37 @@
  * Contract test: Shared Core Enforcement (PHASE 1)
  *
  * CORE-001: Apps must NOT contain duplicate platform logic implementations
+ */
+/* eslint-disable security/detect-non-literal-fs-filename */
+/**
  * CORE-002: Apps must NOT import from other apps (arch boundary)
  * CORE-003: Shared packages must have stable exports (no circular deps)
  * CORE-004: Auth guards must delegate to @nzila/platform-auth primitives
  * CORE-005: Evidence modules must delegate to @nzila/os-core auditedAction
  */
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-const ROOT = join(__dirname, '..', '..')
-const APPS_DIR = join(ROOT, 'apps')
-const PKGS_DIR = join(ROOT, 'packages')
+import { ROOT as REPO_ROOT, walkSync, readContent, relPath, safeJoin } from './governance-helpers'
 
-function walkFiles(dir: string, acc: string[] = []): string[] {
-  try {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
-      const full = join(dir, e.name)
-      if (e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules' && e.name !== '.next') {
-        walkFiles(full, acc)
-      } else if (e.isFile() && (e.name.endsWith('.ts') || e.name.endsWith('.tsx'))) {
-        acc.push(full)
-      }
-    }
-  } catch { /* skip */ }
-  return acc
+const ROOT = REPO_ROOT
+
+function mustJoin(base: string, ...parts: string[]): string {
+  const path = safeJoin(base, ...parts)
+  if (!path) throw new Error(`Invalid path under ${base}: ${parts.join('/')}`)
+  return path
+}
+
+const APPS_DIR = mustJoin(ROOT, 'apps')
+const PKGS_DIR = mustJoin(ROOT, 'packages')
+
+function walkFiles(dir: string): string[] {
+  return walkSync(dir, ['.ts', '.tsx'])
 }
 
 function readSafe(path: string): string {
-  return existsSync(path) ? readFileSync(path, 'utf-8') : ''
+  return readContent(path)
 }
 
 function listApps(): string[] {
@@ -78,7 +80,7 @@ describe('CORE-001: No duplicate platform logic patterns', () => {
         const appDir = join(APPS_DIR, app)
         const files = walkFiles(appDir)
         for (const f of files) {
-          const rel = f.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/')
+          const rel = relPath(f)
           if (rule.allowed.some(a => rel.startsWith(a))) continue
           if (rel.includes('node_modules')) continue
           if (rel.includes('.test.') || rel.includes('__tests__')) continue
@@ -117,7 +119,7 @@ describe('CORE-002: No cross-app imports in source code', () => {
             src.includes(`from '${pkg}'`) || src.includes(`from '${pkg}/`) ||
             src.includes(`from "${pkg}"`) || src.includes(`from "${pkg}/`)
           if (matches) {
-            const rel = f.replace(ROOT + '\\', '').replace(ROOT + '/', '')
+            const rel = relPath(f)
             violations.push(`${rel} imports ${pkg}`)
           }
         }
@@ -138,7 +140,7 @@ describe('CORE-002: No cross-app imports in source code', () => {
         const crossAppPattern = /from\s+['"]\.\.\/\.\.\/(?:\.\.\/)*apps\//g
         const matches = src.match(crossAppPattern)
         if (matches) {
-          const rel = f.replace(ROOT + '\\', '').replace(ROOT + '/', '')
+          const rel = relPath(f)
           violations.push(`${rel}: ${matches.join(', ')}`)
         }
       }
@@ -173,7 +175,7 @@ describe('CORE-003: Shared packages have stable barrel exports', () => {
       for (const f of files) {
         const src = readSafe(f)
         if (/from\s+['"].*apps\//.test(src) || /from\s+['"]@nzila\/(web|console|union-eyes|flow|partners|zonga|cfo|abr|agrimo|trade|cora|nacp-exams|mobility|control-plane|platform-admin|orchestrator-api)['"]/.test(src)) {
-          violations.push(f.replace(ROOT + '\\', '').replace(ROOT + '/', ''))
+          violations.push(relPath(f))
         }
       }
       expect(violations, `${pkg} imports from apps:\n${violations.join('\n')}`).toEqual([])

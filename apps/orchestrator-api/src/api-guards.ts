@@ -5,7 +5,7 @@ import { timingSafeEqual } from 'node:crypto'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export function isPublicOrchestratorRoute(url: string): boolean {
-  return url === '/health' || url === '/metrics'
+  return url === '/health' || url === '/health/deep' || url === '/metrics'
 }
 
 function matchesApiKey(provided: string | undefined, expected: string): boolean {
@@ -51,7 +51,7 @@ export function requireIdempotencyKey(
   reply: FastifyReply,
   nodeEnv = process.env.NODE_ENV ?? 'development',
 ): boolean {
-  if (req.url === '/health') return true
+  if (req.url === '/health' || req.url === '/health/deep') return true
 
   const mutationMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
   if (!mutationMethods.has(req.method)) return true

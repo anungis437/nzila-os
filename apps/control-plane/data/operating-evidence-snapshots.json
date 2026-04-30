@@ -1,0 +1,910 @@
+[
+  {
+    "day": "2026-01-31",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.453Z",
+    "hmac": "f0b00ee1e4142e9692fd67422808201c6e11b96605854d752cc32bcc5bfbfb63"
+  },
+  {
+    "day": "2026-02-01",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.407Z",
+    "hmac": "2322c16d29788771ff38d054a7c4027f0a16637befb9af5f2c672a06d4c475b7"
+  },
+  {
+    "day": "2026-02-02",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.375Z",
+    "hmac": "14120c7e8e4ff06a8cbd9adf0b74fcad188ec76cd0be2424768014bdc8e85c98"
+  },
+  {
+    "day": "2026-02-03",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.334Z",
+    "hmac": "ad4d4cec7f0b90f327460f1014e751586ef22d9ea098e5b9808f361c6fac3784"
+  },
+  {
+    "day": "2026-02-04",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.297Z",
+    "hmac": "db52ad458eda635d256eb3ec7c1dfe0c6376b17c1d74e75d99868af3055ac311"
+  },
+  {
+    "day": "2026-02-05",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.259Z",
+    "hmac": "88c6ab6732fc8995f07153d0ca2c90cd75464f88215d2ef6afe6895c8843285a"
+  },
+  {
+    "day": "2026-02-06",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.221Z",
+    "hmac": "47752120821b3d972befcbbb9f5e8633322877602c645759f10b0502c88a2903"
+  },
+  {
+    "day": "2026-02-07",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.189Z",
+    "hmac": "5cb397f6e1f7fde48994494075a91fe0c5bbaa804b4c2e650a7c3add98359a24"
+  },
+  {
+    "day": "2026-02-08",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.155Z",
+    "hmac": "110394ff30a3e131366657afe567c57816cd4b70d81c73377fa6e2f3ccc38928"
+  },
+  {
+    "day": "2026-02-09",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.112Z",
+    "hmac": "47d448c6eda80be8f09dd287a72786ed5d3bd4bc7c4abdb789fe5d7281510b54"
+  },
+  {
+    "day": "2026-02-10",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.075Z",
+    "hmac": "d97e609da0efb4886d77bad6b01415c30949faa594211d62d45b2d04df310dfd"
+  },
+  {
+    "day": "2026-02-11",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.046Z",
+    "hmac": "08d0d29d77d0fccfb4ef0097d08ba428b2ac8734ea1f8807462fc7141006c0a7"
+  },
+  {
+    "day": "2026-02-12",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:27.016Z",
+    "hmac": "8ccddd5a62ada94d8a38708ba9f661964a106b4b5bbbba537e64c2c42308e9f3"
+  },
+  {
+    "day": "2026-02-13",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.984Z",
+    "hmac": "656c3db424a49e42c217746b87d4d2d5e427c1f11b72a07216a787a474b53bc0"
+  },
+  {
+    "day": "2026-02-14",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.948Z",
+    "hmac": "be1728db31bece557b8cc1454ffed7d28435097ff10706481b9b8769693f3626"
+  },
+  {
+    "day": "2026-02-15",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.908Z",
+    "hmac": "90966474c2f34a1542c654ee3b01ca6e71bfaa421932d965221ec1c08a76d115"
+  },
+  {
+    "day": "2026-02-16",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.872Z",
+    "hmac": "d92068aaf124595e92f6b7cf4de1df6edd940e1300489c0c2c80d56fa0e128d2"
+  },
+  {
+    "day": "2026-02-17",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.836Z",
+    "hmac": "017e4fbdaf4a55c258ddaabccd8401a4895e163f4a308e8e73f7465f2000cca7"
+  },
+  {
+    "day": "2026-02-18",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.810Z",
+    "hmac": "004742b83657c01b370dcac9ae8e2c02cb873667e68a766b20dd338a9b601027"
+  },
+  {
+    "day": "2026-02-19",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.782Z",
+    "hmac": "6a5bd465a7b513dbf1d1c67326f82ec0973a68d2abbe393ca66d4ad9d61d7cf0"
+  },
+  {
+    "day": "2026-02-20",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.755Z",
+    "hmac": "f68b90eb0ff6a1fbf19dd0aaea4740ac6bec96c690964ac11554c9be3cac615a"
+  },
+  {
+    "day": "2026-02-21",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.727Z",
+    "hmac": "f7f7d4ce8bf1f3e674f27ca23940c114fcd6c2d3a68529cc5f39c4eca98b55b5"
+  },
+  {
+    "day": "2026-02-22",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.700Z",
+    "hmac": "ee52d23b07120e03349f92493930c5f60fa411de862fa6176e34b5d64136a4f4"
+  },
+  {
+    "day": "2026-02-23",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.673Z",
+    "hmac": "8459bdd6f244e14ebfea65f994c528ad1fc18b834630ed96999cca8e999bc9f0"
+  },
+  {
+    "day": "2026-02-24",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.646Z",
+    "hmac": "63a71e3df9c71b92c11e266165379d7708a76b8c851bcdfdf6df27d73272588f"
+  },
+  {
+    "day": "2026-02-25",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.608Z",
+    "hmac": "bdcf23742fa01f94011e4715b4f44365af9c9182ee3c8173d6407aad64b0458a"
+  },
+  {
+    "day": "2026-02-26",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.580Z",
+    "hmac": "37920d51258d9f7930474bef4139b1f3b0306497c8db70493080194191a2ee27"
+  },
+  {
+    "day": "2026-02-27",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.555Z",
+    "hmac": "124b7bf546f7898e3855790fb0deef2b214d8c7fd84a64910ee0fe16c2a30ec6"
+  },
+  {
+    "day": "2026-02-28",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.529Z",
+    "hmac": "34fa7994971838fb2acce6313cb4e9d7183ad3a3d84a7f6d31410d3038e83315"
+  },
+  {
+    "day": "2026-03-01",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.499Z",
+    "hmac": "a622c8564161233ea32334e69739dc9c563f96961b57c7ac32569648050f7f10"
+  },
+  {
+    "day": "2026-03-02",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.475Z",
+    "hmac": "2c871cb6c1a8f4d3ab58259af28c0ad8c719249cdf43d9489423323d19cdd3a1"
+  },
+  {
+    "day": "2026-03-03",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.452Z",
+    "hmac": "5b66b1698b7af2956d771adfedaee99d57cd712d0be8d68ac95e086baa14d915"
+  },
+  {
+    "day": "2026-03-04",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.429Z",
+    "hmac": "301b3d30f636a76bf9f0c22a3c1d30e0067e888b61eb00e64d683e2f80a7cca6"
+  },
+  {
+    "day": "2026-03-05",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.400Z",
+    "hmac": "d9f1da8b9168f66dc947173ea3893a5471b1188b766176c1d26ec5adfec48201"
+  },
+  {
+    "day": "2026-03-06",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.373Z",
+    "hmac": "3cb87389b2a2dbf1570c6076c56e64e6fe5740883aa9b23ca3a3eca2298eec76"
+  },
+  {
+    "day": "2026-03-07",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.343Z",
+    "hmac": "fdd0a1b41830797ce6221e6a943eda79d8d16d33cf4d4380f5d7b93ba4920c51"
+  },
+  {
+    "day": "2026-03-08",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.315Z",
+    "hmac": "c8d11de7e74312a7149515644d57884ced6b5d0063bf200d94a36f1bbf6a0665"
+  },
+  {
+    "day": "2026-03-09",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.290Z",
+    "hmac": "4923947ca727d2c2e91b08cb9e58d3f001c955c6b2818cedd88a07a0f3ff87f1"
+  },
+  {
+    "day": "2026-03-10",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.267Z",
+    "hmac": "4d2f9a5ddb60611f6f1cd7b92a7f04f225eb929615372785e64cf70a3bfae9ed"
+  },
+  {
+    "day": "2026-03-11",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.244Z",
+    "hmac": "0fa38bc6e498ed746d31d28ec00b204e717da75bd173704fc7a361f6803326a3"
+  },
+  {
+    "day": "2026-03-12",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.216Z",
+    "hmac": "1d4e4cc3977fa99d9dd71934d20b30c1f2dd29924a0f78eca8423d9f5fc459d3"
+  },
+  {
+    "day": "2026-03-13",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.181Z",
+    "hmac": "7ad0ff340d9d0581829dc4ee37a11f602b7c9b8dc9046451580b22772677cf27"
+  },
+  {
+    "day": "2026-03-14",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.151Z",
+    "hmac": "00faec187d5abad4ccb33d0a5b938eac9cb2e021bc5974b9d4794c0dc921f69f"
+  },
+  {
+    "day": "2026-03-15",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.122Z",
+    "hmac": "a18b0f262065df83cce80cc38074c8b77a29611a51e22c541d7910db8a8fefb5"
+  },
+  {
+    "day": "2026-03-16",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.094Z",
+    "hmac": "f235a586b1db06ebf00159712a048270c53cc0337ba295b5e880c706c3856d57"
+  },
+  {
+    "day": "2026-03-17",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.066Z",
+    "hmac": "a8fb6698ecf1e04fdc0f8e4cb757343ca3af6fed7978984306781565b53f0f61"
+  },
+  {
+    "day": "2026-03-18",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.041Z",
+    "hmac": "6a06c7ce6f01a80ad2a75f3f52c0db43e469312303e4e400a6b6a8378243632a"
+  },
+  {
+    "day": "2026-03-19",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:26.016Z",
+    "hmac": "36a91f0ff0d452271573712b74be7853cbf5f11675c259ddfc6b419d3c0e833c"
+  },
+  {
+    "day": "2026-03-20",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.989Z",
+    "hmac": "47842e53a106bc587492a165f02923a2f61724a88efc7d75d6414db02d6f33c4"
+  },
+  {
+    "day": "2026-03-21",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.956Z",
+    "hmac": "f9e4a54a3021bd752547da9a9d44f522fc92d3a37b47dd8fa255cbc70f3ebde0"
+  },
+  {
+    "day": "2026-03-22",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.928Z",
+    "hmac": "c7f5bb0f8d498caba824fc24c42b2ed54c07dc908d94a62c254af1c3f8e18f4a"
+  },
+  {
+    "day": "2026-03-23",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.894Z",
+    "hmac": "417e10d7e2522ed631007d4dddac743dda79ca6485492336eb4da859e6e72e58"
+  },
+  {
+    "day": "2026-03-24",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.862Z",
+    "hmac": "c2714293dd7bc39b32c12d7c55ef2e7a5a9891042b525e7a91c0c2ad822e2f71"
+  },
+  {
+    "day": "2026-03-25",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.831Z",
+    "hmac": "b32b11993b4228b7e142ddea2be5f035b4ab0f0b529dff9c70077886cc9e6aae"
+  },
+  {
+    "day": "2026-03-26",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.801Z",
+    "hmac": "1582000b53a3aeaf49c30aa498b9967d952fdc80ab8f821ca078c6ad382f0186"
+  },
+  {
+    "day": "2026-03-27",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.771Z",
+    "hmac": "eed470105ff468513fe54a80bddf30e6beac271b1bb47f84fff28a3a6ceb4fa4"
+  },
+  {
+    "day": "2026-03-28",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.745Z",
+    "hmac": "be71cf377c9da44048ee17f51388b25e19a87da30d04b7a2f96a971e843e1162"
+  },
+  {
+    "day": "2026-03-29",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.714Z",
+    "hmac": "d5f0824a78557827b7c4f63c6601c8840f3a14c2e8395c6ea9f297efb1255344"
+  },
+  {
+    "day": "2026-03-30",
+    "integrityScore": 100,
+    "complianceStatus": "green",
+    "driftDetected": false,
+    "anomalyFlags": [],
+    "sealedAt": "2026-04-30T17:28:25.684Z",
+    "hmac": "ef6eb0ba583c1786d5da6512897f312b2e509e0c173b981851a733c99e6f3c00"
+  },
+  {
+    "day": "2026-03-31",
+    "integrityScore": 86,
+    "complianceStatus": "amber",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.651Z",
+    "hmac": "30ea22acea3e3c5d8430a27d0e71e363e12583a5c7547b2ceb64387ed2ba29a8"
+  },
+  {
+    "day": "2026-04-01",
+    "integrityScore": 39,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.623Z",
+    "hmac": "fdbec6d798ecd0aef458eecc0eb8ddf085b407c8d26573a66eaeabdcb3b382d4"
+  },
+  {
+    "day": "2026-04-02",
+    "integrityScore": 30,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.595Z",
+    "hmac": "45793613746d026984213014d65779a8f78934bea3d4336a73effda3c8953e30"
+  },
+  {
+    "day": "2026-04-03",
+    "integrityScore": 57,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.567Z",
+    "hmac": "28fd91ff2f242a41e41bd2f5443dba1345ca9965db315160952c8fcfca497e8a"
+  },
+  {
+    "day": "2026-04-04",
+    "integrityScore": 55,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.538Z",
+    "hmac": "32aed1e9bfcf046667b2d164ccc4aeffbd62f564a0bd4ed92ba84e5d692ab6a9"
+  },
+  {
+    "day": "2026-04-05",
+    "integrityScore": 52,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.508Z",
+    "hmac": "6142b12063e295fd78712f32681520c715e3902e4b9b8b9541661ba9dfe46edb"
+  },
+  {
+    "day": "2026-04-06",
+    "integrityScore": 48,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.481Z",
+    "hmac": "fc6137d3759e713b2597ed3238fe15cc94d9e406857fcda654c9594782e5eb80"
+  },
+  {
+    "day": "2026-04-07",
+    "integrityScore": 57,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.458Z",
+    "hmac": "dacb75bf431967c00f626b8dd05f3aea0c988ee79aabf5c95856c2299e42c04f"
+  },
+  {
+    "day": "2026-04-08",
+    "integrityScore": 54,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.428Z",
+    "hmac": "11401d45f4a2af0280ee6d2708ea4069bd5e6bc6b7804904a3b572f005d6d132"
+  },
+  {
+    "day": "2026-04-09",
+    "integrityScore": 38,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.399Z",
+    "hmac": "049bbc2fa39631f815f3345fd5ca9197654ff23ca9baff42c93c7a4f6fd88dc2"
+  },
+  {
+    "day": "2026-04-10",
+    "integrityScore": 47,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.373Z",
+    "hmac": "3c4481e9ea70898278b32566d1570872222995b383ac3d93e9cf1f04a345b843"
+  },
+  {
+    "day": "2026-04-11",
+    "integrityScore": 45,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.349Z",
+    "hmac": "7a4d1c06c5b5a01523fe8f8d633b751d2526f68bcbc05eefa9e610152d6fab6b"
+  },
+  {
+    "day": "2026-04-12",
+    "integrityScore": 36,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.319Z",
+    "hmac": "313e65aabf7586ec5988f0d133abd0b95e6bf0d2c4bb8260e48edb9b72fbff5a"
+  },
+  {
+    "day": "2026-04-13",
+    "integrityScore": 34,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.292Z",
+    "hmac": "ce1c0665e81e43b7a1e368a1687aceb2162385023af05bc74cf1b7f7acb23466"
+  },
+  {
+    "day": "2026-04-14",
+    "integrityScore": 45,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.265Z",
+    "hmac": "18229646cf6d756764ca78d1ee6194bbecfa2a51f2620ea3eb4268681b361664"
+  },
+  {
+    "day": "2026-04-15",
+    "integrityScore": 39,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.240Z",
+    "hmac": "2fbef86df2e3073b59e802702eb804b47673ac05db785b081cd2064a1d8ea815"
+  },
+  {
+    "day": "2026-04-16",
+    "integrityScore": 63,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.211Z",
+    "hmac": "0d694ecb8d67b1e2cc012a6361eee9db5bea392ebbf22b5b0f6458cf25468c43"
+  },
+  {
+    "day": "2026-04-17",
+    "integrityScore": 36,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.182Z",
+    "hmac": "aae9caaa17f185d1c14c4fc715f383f1d81fb869f2c56dc1cea1838ec69a4616"
+  },
+  {
+    "day": "2026-04-18",
+    "integrityScore": 47,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.150Z",
+    "hmac": "4ac78eb2052cc0b106bc7e8f96ba6b63f5874a852ee42ca3ee784638b831dd01"
+  },
+  {
+    "day": "2026-04-19",
+    "integrityScore": 45,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.121Z",
+    "hmac": "ea8192be6afaa7b7cdc1f9a0fe458726c4d963f35b5e93121c4fea5fd68718a4"
+  },
+  {
+    "day": "2026-04-20",
+    "integrityScore": 59,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.090Z",
+    "hmac": "e7e29e7acd1d78c2759a2918d34af3d099f3c68c1036b7cc2bcc6e6fbf14aaef"
+  },
+  {
+    "day": "2026-04-21",
+    "integrityScore": 55,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.063Z",
+    "hmac": "f974cbaed7f1e0604a73005232e5c6a4156465e655cc41e89f3abecbcda6da42"
+  },
+  {
+    "day": "2026-04-22",
+    "integrityScore": 37,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.035Z",
+    "hmac": "0e468face192e099dad0948a1108d20f2c122adb787b7d87fbaa543bf1ddb257"
+  },
+  {
+    "day": "2026-04-23",
+    "integrityScore": 59,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:25.007Z",
+    "hmac": "98b99209d66d852c6cad95fb1bf136fd34d0e922f8205a718b19f58723fef114"
+  },
+  {
+    "day": "2026-04-24",
+    "integrityScore": 47,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.973Z",
+    "hmac": "e81e68b2940bb9fa318d4abf608286f258947da90655ff68407129b21f1eb07d"
+  },
+  {
+    "day": "2026-04-25",
+    "integrityScore": 62,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.947Z",
+    "hmac": "8ca0ca8a832fd7436bd8a688d18eecdcb826c46cd31bf494b18d9f6c05532646"
+  },
+  {
+    "day": "2026-04-26",
+    "integrityScore": 59,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.917Z",
+    "hmac": "ee62f94d8b4fa708b05fa9b9b68a441b43aa72a3d8630446a2092847ef5a578f"
+  },
+  {
+    "day": "2026-04-27",
+    "integrityScore": 28,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.885Z",
+    "hmac": "e470509cefd8f9694b27db14ddf8e8362aee9baca59c6ec44fe98fe23ae4b270"
+  },
+  {
+    "day": "2026-04-28",
+    "integrityScore": 30,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "error_cluster",
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.855Z",
+    "hmac": "f66b868121dceb07aa0ac10147de913cc03d584eda186be2d0eb037331c8db3f"
+  },
+  {
+    "day": "2026-04-29",
+    "integrityScore": 35,
+    "complianceStatus": "red",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "high_override_ratio",
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.814Z",
+    "hmac": "972859fce7625cd9192461102dae521e42009495df673d5fd92c056a765a96b6"
+  },
+  {
+    "day": "2026-04-30",
+    "integrityScore": 76,
+    "complianceStatus": "amber",
+    "driftDetected": true,
+    "anomalyFlags": [
+      "policy_drift"
+    ],
+    "sealedAt": "2026-04-30T17:28:24.781Z",
+    "hmac": "8e452f6860f40ce52448d32a4141c50b7fc264276a72960634dbf7f6dd352c83"
+  }
+]

@@ -20,6 +20,12 @@ import {
   requiresApproval,
   type PolicyDefinition,
 } from '@nzila/platform-policy-engine'
+import {
+  evaluatePoliciesWithResolution,
+  resolvePolicyDecisions,
+  toPolicyContext,
+  type PolicyDecision,
+} from '@nzila/policies'
 import type {
   WorkflowTriggerRequest,
   WorkflowAuthorization,
@@ -110,8 +116,62 @@ export async function authorizeWorkflowTrigger(
     const evaluations = evaluatePolicies(policies, policyInput)
     const blocked = isBlocked(evaluations)
     const needsApproval = requiresApproval(evaluations)
+    const contextual = evaluatePoliciesWithResolution(
+      toPolicyContext({
+        orgId: request.orgId,
+        actorId: request.initiatedBy.actorId,
+        actorRole: request.initiatedBy.actorType,
+        domain: 'commerce',
+        action: 'workflow.trigger',
+        resource: `workflow:${request.workflowId}`,
+        payload: {
+          ...(request.payload as Record<string, unknown> | undefined),
+          app: 'control-plane',
+          sensitivity: String((request.payload as Record<string, unknown> | undefined)?.['sensitivity'] ?? 'high'),
+          anomalyScore: Number((request.payload as Record<string, unknown> | undefined)?.['anomalyScore'] ?? 0),
+          previousActions: Array.isArray((request.payload as Record<string, unknown> | undefined)?.['previousActions'])
+            ? ((request.payload as Record<string, unknown> | undefined)?.['previousActions'] as string[])
+            : [],
+          overrideHistory: Array.isArray((request.payload as Record<string, unknown> | undefined)?.['overrideHistory'])
+            ? ((request.payload as Record<string, unknown> | undefined)?.['overrideHistory'] as unknown[])
+            : [],
+          sessionId: request.requestId,
+        },
+        environment: process.env.NODE_ENV === 'development' ? 'dev' : 'production',
+        policyVersion: process.env.NZILA_POLICY_VERSION ?? 'v1',
+      }),
+    )
+    const policyVersion = process.env.NZILA_POLICY_VERSION ?? 'v1'
+    const legacyMapped: PolicyDecision[] = []
+    for (const evaluation of evaluations) {
+      for (const decision of evaluation.decisions) {
+        if (decision.result === 'fail') {
+          legacyMapped.push({
+            level: 'BLOCK',
+            reason: decision.reason,
+            policyId: evaluation.policyId,
+            policyVersion,
+            auditSeverity: 'high',
+          })
+        }
+        if (decision.result === 'require_approval') {
+          legacyMapped.push({
+            level: 'CHALLENGE',
+            reason: decision.reason,
+            policyId: evaluation.policyId,
+            policyVersion,
+            auditSeverity: 'medium',
+            requiresApproval: true,
+            requiresJustification: true,
+          })
+        }
+      }
+    }
+    const resolved = resolvePolicyDecisions([...contextual.decisions, ...legacyMapped])
+    const contextualBlocked = resolved.finalDecision.level === 'BLOCK'
+    const contextualChallenge = resolved.finalDecision.level === 'CHALLENGE'
 
-    if (blocked) {
+    if (blocked || contextualBlocked) {
       const reason = 'Workflow trigger blocked by platform policy'
       await recordDecisionEvent({
         type: 'workflow.denied',
@@ -130,7 +190,7 @@ export async function authorizeWorkflowTrigger(
       return { authorized: false, reason }
     }
 
-    if (needsApproval) {
+    if (needsApproval || contextualChallenge) {
       await recordDecisionEvent({
         type: 'workflow.authorized',
         orgId: request.orgId,
@@ -147,7 +207,7 @@ export async function authorizeWorkflowTrigger(
       return {
         authorized: false,
         requiresApproval: true,
-        reason: 'Workflow requires governance approval before execution',
+        reason: resolved.finalDecision.reason || 'Workflow requires governance approval before execution',
       }
     }
 

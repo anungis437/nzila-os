@@ -1,5 +1,8 @@
 /**
  * Phase 3 — Telemetry Enforcement (Manifest-Driven)
+ */
+/* eslint-disable security/detect-non-literal-fs-filename */
+/**
  *
  * For every product whose manifest sets `telemetryRequired: true`
  * (sourced from /platform/products/<slug>.json — i.e. flagship/growth tier),
@@ -17,10 +20,17 @@
  * `@nzila/os-core/telemetry` (OTel → OTLP). Either satisfies the gate.
  */
 import { describe, it, expect } from 'vitest'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 
-const ROOT = resolve(__dirname, '../..')
+import { ROOT as REPO_ROOT, safeJoin, readContent } from './governance-helpers'
+
+const ROOT = REPO_ROOT
+
+function mustJoin(base: string, ...parts: string[]): string {
+  const path = safeJoin(base, ...parts)
+  if (!path) throw new Error(`Invalid path under ${base}: ${parts.join('/')}`)
+  return path
+}
 
 interface TelemetryRequirements {
   generatedAt: string
@@ -29,42 +39,41 @@ interface TelemetryRequirements {
 }
 
 function loadRequiredApps(): string[] {
-  const p = join(ROOT, 'platform', 'products', '_telemetry-requirements.json')
-  if (!existsSync(p)) {
+  const filePath = mustJoin(ROOT, 'platform', 'products', '_telemetry-requirements.json')
+  const content = readContent(filePath)
+  if (!content) {
     throw new Error(
       'Missing platform/products/_telemetry-requirements.json — run `pnpm tsx scripts/generate-platform-products.ts`',
     )
   }
-  const data = JSON.parse(readFileSync(p, 'utf-8')) as TelemetryRequirements
+  const data = JSON.parse(content) as TelemetryRequirements
   return data.requiredApps
 }
 
 function appRoot(slug: string): string {
-  return join(ROOT, 'apps', slug)
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    throw new Error(`Invalid app slug: ${slug}`)
+  }
+  return mustJoin(ROOT, 'apps', slug)
 }
 
 function fileContains(path: string, needle: RegExp | string): boolean {
-  if (!existsSync(path)) return false
-  const content = readFileSync(path, 'utf-8')
+  const content = readContent(path)
+  if (!content) return false
   return typeof needle === 'string' ? content.includes(needle) : needle.test(content)
-}
-
-function dirHasFile(dir: string, name: string): boolean {
-  if (!existsSync(dir)) return false
-  return readdirSync(dir).includes(name)
 }
 
 function hasErrorMonitoring(slug: string): boolean {
   const root = appRoot(slug)
   // Sentry — Next.js convention
-  if (existsSync(join(root, 'sentry.server.config.ts')) || existsSync(join(root, 'sentry.server.config.js'))) return true
-  if (existsSync(join(root, 'sentry.edge.config.ts')) || existsSync(join(root, 'sentry.edge.config.js'))) return true
+  if (existsSync(mustJoin(root, 'sentry.server.config.ts')) || existsSync(mustJoin(root, 'sentry.server.config.js'))) return true
+  if (existsSync(mustJoin(root, 'sentry.edge.config.ts')) || existsSync(mustJoin(root, 'sentry.edge.config.js'))) return true
   // Sentry / OTel referenced from instrumentation.ts (Next.js apps)
-  const instr = join(root, 'instrumentation.ts')
+  const instr = mustJoin(root, 'instrumentation.ts')
   if (fileContains(instr, /sentry|@sentry/i)) return true
   if (fileContains(instr, /(@nzila\/os-core\/telemetry|initOtel|createAppBoot)/)) return true
   // Fastify-style: src/index.ts boots OTel directly
-  const srcIndex = join(root, 'src', 'index.ts')
+  const srcIndex = mustJoin(root, 'src', 'index.ts')
   if (fileContains(srcIndex, /(@nzila\/os-core\/telemetry|initOtel|@sentry)/)) return true
   return false
 }
@@ -73,42 +82,43 @@ function hasHealthRoute(slug: string): boolean {
   const root = appRoot(slug)
   const candidates = [
     // Next.js app-router
-    join(root, 'app', 'api', 'health', 'route.ts'),
-    join(root, 'app', 'api', 'healthz', 'route.ts'),
-    join(root, 'app', '[locale]', 'api', 'health', 'route.ts'),
-    join(root, 'app', '(api)', 'health', 'route.ts'),
+    mustJoin(root, 'app', 'api', 'health', 'route.ts'),
+    mustJoin(root, 'app', 'api', 'healthz', 'route.ts'),
+    mustJoin(root, 'app', '[locale]', 'api', 'health', 'route.ts'),
+    mustJoin(root, 'app', '(api)', 'health', 'route.ts'),
     // Fastify-style apps
-    join(root, 'src', 'routes', 'health.ts'),
-    join(root, 'src', 'routes', 'health.js'),
-    join(root, 'src', 'routes', 'healthz.ts'),
+    mustJoin(root, 'src', 'routes', 'health.ts'),
+    mustJoin(root, 'src', 'routes', 'health.js'),
+    mustJoin(root, 'src', 'routes', 'healthz.ts'),
   ]
-  return candidates.some((p) => existsSync(p))
+  return candidates.some((path) => existsSync(path))
 }
 
 function hasMetricsRoute(slug: string): boolean {
   const root = appRoot(slug)
   const candidates = [
-    join(root, 'app', 'api', 'metrics', 'route.ts'),
-    join(root, 'app', 'api', 'telemetry', 'route.ts'),
-    join(root, 'app', '[locale]', 'api', 'metrics', 'route.ts'),
-    join(root, 'src', 'routes', 'metrics.ts'),
-    join(root, 'src', 'routes', 'metrics.js'),
+    mustJoin(root, 'app', 'api', 'metrics', 'route.ts'),
+    mustJoin(root, 'app', 'api', 'telemetry', 'route.ts'),
+    mustJoin(root, 'app', '[locale]', 'api', 'metrics', 'route.ts'),
+    mustJoin(root, 'src', 'routes', 'metrics.ts'),
+    mustJoin(root, 'src', 'routes', 'metrics.js'),
   ]
-  if (candidates.some((p) => existsSync(p))) return true
+  if (candidates.some((path) => existsSync(path))) return true
   // Fallback: instrumentation.ts that wires OTel/metrics is acceptable.
   return (
-    fileContains(join(root, 'instrumentation.ts'), /(@nzila\/os-core\/telemetry|OTLPMetricExporter|prom-client|MetricExporter|initMetrics)/) ||
-    fileContains(join(root, 'src', 'index.ts'), /(initMetrics|OTLPMetricExporter|prom-client)/)
+    fileContains(mustJoin(root, 'instrumentation.ts'), /(@nzila\/os-core\/telemetry|OTLPMetricExporter|prom-client|MetricExporter|initMetrics)/) ||
+    fileContains(mustJoin(root, 'src', 'index.ts'), /(initMetrics|OTLPMetricExporter|prom-client)/)
   )
 }
 
 function hasReleaseVersion(slug: string): boolean {
   const root = appRoot(slug)
-  const pkg = join(root, 'package.json')
-  if (!existsSync(pkg)) return false
-  const json = JSON.parse(readFileSync(pkg, 'utf-8')) as { version?: string }
+  const pkg = mustJoin(root, 'package.json')
+  const content = readContent(pkg)
+  if (!content) return false
+  const json = JSON.parse(content) as { version?: string }
   if (typeof json.version === 'string' && json.version.length > 0) return true
-  return fileContains(join(root, '.env.example'), /(NEXT_PUBLIC_RELEASE|SENTRY_RELEASE)/)
+  return fileContains(mustJoin(root, '.env.example'), /(NEXT_PUBLIC_RELEASE|SENTRY_RELEASE)/)
 }
 
 describe('Phase 3 — Telemetry enforcement (manifest-driven)', () => {
