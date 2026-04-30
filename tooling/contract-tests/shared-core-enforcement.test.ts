@@ -111,7 +111,12 @@ describe('CORE-002: No cross-app imports in source code', () => {
         const src = readSafe(f)
         for (const pkg of appPackageNames) {
           if (pkg === `@nzila/${app}`) continue // self-import is fine
-          if (src.includes(`from '${pkg}`) || src.includes(`from "${pkg}`)) {
+          // Use word-boundary check: must be followed by quote or / to avoid
+          // matching @nzila/flow as a substring of @nzila/flow-engine etc.
+          const matches =
+            src.includes(`from '${pkg}'`) || src.includes(`from '${pkg}/`) ||
+            src.includes(`from "${pkg}"`) || src.includes(`from "${pkg}/`)
+          if (matches) {
             const rel = f.replace(ROOT + '\\', '').replace(ROOT + '/', '')
             violations.push(`${rel} imports ${pkg}`)
           }
