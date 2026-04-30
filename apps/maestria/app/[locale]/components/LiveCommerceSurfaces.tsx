@@ -937,13 +937,13 @@ function SmartQuoteRequestPortalSurface({ locale }: { locale: string }) {
         </article>
         <article className={styles.panel}>
           <SectionHeader title="What happens next" subtitle="The request is credible because the system understands fulfillment, not just form fields." />
-          <StagePills stages={module.stages} />
+          <StagePills stages={surface.stages} />
           <ul className={styles.bulletList}>
             <li>Recipient and delivery complexity route into quote and shipping preparation together.</li>
             <li>Bilingual service expectations are carried into client comms and insert planning.</li>
             <li>Corporate-style address splits and branded insert needs show up before quoting mistakes happen.</li>
           </ul>
-          <EnginePills ids={module.engineModules} />
+          <EnginePills ids={surface.engineModules} />
           <StateGallery
             loading={{ label: 'Personalization options are syncing from curated catalog rules', note: 'The form can present rich loading feedback while pricing and logistics resolve together.' }}
             empty={{ label: 'No recipient CSV uploaded yet', note: 'The empty state nudges the buyer toward the next premium input instead of reading as blank.' }}

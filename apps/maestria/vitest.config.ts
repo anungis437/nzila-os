@@ -5,6 +5,5 @@ export default defineProject({
     name: '@nzila/maestria',
     environment: 'jsdom',
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    passWithNoTests: true,
   },
 })
