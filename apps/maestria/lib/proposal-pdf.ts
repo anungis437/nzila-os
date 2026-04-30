@@ -15,9 +15,9 @@ export async function renderProposalPdf(input: ProposalPdfInput): Promise<Buffer
   const chunks: Buffer[] = []
 
   return await new Promise<Buffer>((resolve, reject) => {
-    doc.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
+    doc.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)))
     doc.on('end', () => resolve(Buffer.concat(chunks)))
-    doc.on('error', (error) => reject(error))
+    doc.on('error', (error: Error) => reject(error))
 
     doc.fontSize(20).text(input.locale === 'fr-CA' ? 'Proposition commerciale' : 'Commercial Proposal')
     doc.moveDown(0.5)
