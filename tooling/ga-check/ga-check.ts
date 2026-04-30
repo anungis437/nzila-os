@@ -73,15 +73,20 @@ function canonicalPath(path: string): string {
 
 const ROOT_CANONICAL = canonicalPath(ROOT)
 
-function isWithinRoot(path: string): boolean {
+function isWithinBase(path: string, base: string): boolean {
   const candidate = canonicalPath(path)
-  return candidate === ROOT_CANONICAL || candidate.startsWith(`${ROOT_CANONICAL}/`)
+  const baseCanonical = canonicalPath(base)
+  return candidate === baseCanonical || candidate.startsWith(`${baseCanonical}/`)
+}
+
+function isWithinRoot(path: string): boolean {
+  return isWithinBase(path, ROOT_CANONICAL)
 }
 
 function safeJoinUnder(base: string, ...parts: string[]): string | null {
   if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
   const candidate = normalizePath([base, ...parts].join('/'))
-  return isWithinRoot(candidate) ? candidate : null
+  return isWithinBase(candidate, base) ? candidate : null
 }
 
 function safeResolveUnderRoot(...segments: string[]): string {

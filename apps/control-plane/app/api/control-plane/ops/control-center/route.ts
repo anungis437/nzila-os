@@ -7,6 +7,7 @@ import { ingestOperatingEvidenceEvent } from '@/server/operating-evidence-data'
 const DESTRUCTIVE_ACTIONS = new Set(['restart_service', 'simulate_failure'])
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 20
+// ga-check:exempt transient in-memory rate-limit window (not primary persistence)
 const requestWindow = new Map<string, number[]>()
 
 const actionMeta: Record<string, { severity: 'medium' | 'high' | 'critical'; blastRadius: string }> = {
