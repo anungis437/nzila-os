@@ -13,6 +13,7 @@
  *   pnpm release:tag --bump major        # 1.2.3 → 2.0.0
  *   pnpm release:tag --version 1.4.0     # explicit version
  *   pnpm release:tag --bump patch --dry-run
+ *   pnpm release:tag --bump patch --skip-branch-push
  *
  * The annotated tag body contains:
  *   - version, sha, date, artifact-id
@@ -100,6 +101,7 @@ function main(): void {
   const dryRun = hasFlag('--dry-run')
   const hotfix = hasFlag('--hotfix')
   const allowNonMain = hasFlag('--allow-non-main')
+  const skipBranchPush = hasFlag('--skip-branch-push')
   const bumpArg = parseArg('--bump') as BumpType | undefined
   const versionArg = parseArg('--version')
 
@@ -245,10 +247,16 @@ function main(): void {
       process.exit(1)
     }
 
-    // Push commit + tag
-    exec(`git push origin HEAD`)
+    // Push tag first so release automation can continue even if branch pushes are disallowed.
     exec(`git push origin "${tag}"`)
     console.log(`✓ Pushed tag to origin`)
+
+    if (!skipBranchPush) {
+      exec(`git push origin HEAD`)
+      console.log(`✓ Pushed branch commit to origin`)
+    } else {
+      console.log('↷ Skipped branch push (--skip-branch-push)')
+    }
 
     // Write release manifest
     fs.mkdirSync(RELEASES_DIR, { recursive: true })
