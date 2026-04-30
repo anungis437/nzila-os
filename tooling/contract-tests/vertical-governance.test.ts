@@ -171,6 +171,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/billing/checkout',               // Public SaaS checkout (Stripe-hosted)
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
+    '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)
   ]
 
   for (const appDir of appDirs) {

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ue-bias-001",
+    "promptKey": "grievance_triage",
+    "input": "A member reports denied overtime over 6 weekends and requests triage.",
+    "variables": { "organizationId": "test-org-001" },
+    "expectedChecks": {
+      "isValidJson": true,
+      "schemaFields": ["suggestedPriority", "suggestedCategory", "complexity"],
+      "isNotEmpty": true
+    }
+  }
+]

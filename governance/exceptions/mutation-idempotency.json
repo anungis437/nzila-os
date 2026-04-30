@@ -74,6 +74,18 @@
       "owner": "platform-core",
       "justification": "Public marketing waitlist signup (lead capture). Server logs the event and returns 200 — no DB writes yet. Add Idempotency-Key when waitlist persistence + ESP integration is enabled.",
       "expiresOn": "2026-07-22"
+    },
+    {
+      "path": "apps/nzila-hq/app/api/internal/billing/sync/route.ts",
+      "owner": "platform-core",
+      "justification": "Internal system-to-system billing sync (Stripe + QBO). Full sync overwrites — idempotent by design. Bearer-token guarded via NZILA_HQ_SNAPSHOT_TOKEN. Idempotency key to be added before PILOT promotion.",
+      "expiresOn": "2026-10-01"
+    },
+    {
+      "path": "apps/nzila-hq/app/api/internal/snapshots/persist/route.ts",
+      "owner": "platform-core",
+      "justification": "Internal daily portfolio snapshot persist (upsert). Idempotent by design. Bearer-token guarded via NZILA_HQ_SNAPSHOT_TOKEN. Idempotency key to be added before PILOT promotion.",
+      "expiresOn": "2026-10-01"
     }
   ]
 }

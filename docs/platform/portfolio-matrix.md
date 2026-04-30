@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-29
+> Generated: 2026-04-30
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -13,10 +13,12 @@
 | Partners | 2 | pilot | maintain | pre-revenue | none | medium |
 | Console | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
+| Nzila HQ | 3 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
+| Maestria | 4 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
@@ -40,10 +42,12 @@
 | Partners | PILOT | pilot-safe | internal | HOLD |
 | Console | PRODUCTION | internal-only | internal | HOLD |
 | Control Plane | PILOT | internal-only | internal | HOLD |
+| Nzila HQ | EXPERIMENTAL | internal-only | internal | HOLD |
 | Orchestrator API | EXPERIMENTAL | internal-only | internal | HOLD |
 | Web | PRODUCTION | pilot-safe | external | HOLD |
 | Agrimo | INCUBATING | internal-only | internal | HOLD |
 | Cora | INCUBATING | internal-only | internal | HOLD |
+| Maestria | INCUBATING | internal-only | internal | HOLD |
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |

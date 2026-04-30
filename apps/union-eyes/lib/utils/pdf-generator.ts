@@ -316,17 +316,18 @@ function renderTable(
 
     columns.forEach((col) => {
       const rowRecord = row as Record<string, unknown>;
-      let value = rowRecord[col.key];
+      let valueText = '';
+      const rawValue = rowRecord[col.key];
       
       // Format dates
-      if (value instanceof Date) {
-        value = value.toLocaleDateString();
-      } else if (typeof value === 'object' && value !== null) {
-        value = JSON.stringify(value);
-      } else if (value === null || value === undefined) {
-        value = '';
+      if (rawValue instanceof Date) {
+        valueText = rawValue.toLocaleDateString();
+      } else if (typeof rawValue === 'object' && rawValue !== null) {
+        valueText = JSON.stringify(rawValue);
+      } else if (rawValue === null || rawValue === undefined) {
+        valueText = '';
       } else {
-        value = String(value);
+        valueText = String(rawValue);
       }
 
       // Draw cell border
@@ -335,7 +336,7 @@ function renderTable(
         .stroke('#cccccc');
 
       // Draw cell text
-      doc.text(value, x + 5, y + 5, {
+      doc.text(valueText, x + 5, y + 5, {
         width: (col.width || 100) - 10,
         align: col.align || 'left',
         ellipsis: true,
@@ -358,7 +359,7 @@ function renderTable(
 export function addHeader(
   doc: typeof PDFDocument,
   text: string,
-  options?: { fontSize?: number; align?: unknown }
+  options?: { fontSize?: number; align?: 'left' | 'center' | 'right' | 'justify' }
 ) {
   doc
     .fontSize(options?.fontSize || 12)

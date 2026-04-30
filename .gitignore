@@ -8,6 +8,9 @@ legacy-codebases/
 notion_export/
 *.zip
 
+# ----- External advisory / reference material (commercial-licensed; not redistributable) ------
+infotech/
+
 # ----- Generated output (not committed) ------
 demo-output/
 logs/

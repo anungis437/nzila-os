@@ -731,6 +731,32 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     supportedOrgScopes: ['*'],
   },
 
+  {
+    id: 'maestria',
+    name: 'Maestria',
+    description: 'Premium Canadian SME operating system built on the Flow Engine public SDK',
+    basePath: '/maestria',
+    tier: 'INCUBATING',
+    appType: 'web-app',
+    iconToken: 'briefcase-business',
+    enabledByDefault: false,
+    requiresOrgScope: true,
+    navOrder: 57,
+    owner: 'platform-core',
+    packageName: '@nzila/maestria',
+    devPort: 3021,
+    domains: ['commerce', 'operations', 'sme'],
+    enabledCapabilities: ['auth', 'org-scope', 'telemetry', 'canonical-reporting'],
+    governanceRequirements: [],
+    integrationDependencies: [
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
+      { provider: 'postgresql', required: false, type: 'storage', envVars: ['DATABASE_URL'] },
+    ],
+    deployment: { environments: ['local'], requiresDatabase: false },
+    policyBindings: ['platform-governance'],
+    supportedOrgScopes: ['*'],
+  },
+
   // ── Experimental Apps ───────────────────────────────────────────────────
 
   {
@@ -812,6 +838,37 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     healthBinding: {
       healthPath: '/health',
       criticalDeps: ['postgresql'],
+    },
+    deployment: { environments: ['local'], requiresDatabase: true },
+    policyBindings: [],
+    supportedOrgScopes: ['*'],
+  },
+
+  {
+    id: 'nzila-hq',
+    name: 'Nzila HQ',
+    description: 'Executive intelligence cockpit — portfolio scoring, domain health, venture snapshot, and capital allocation',
+    basePath: '/hq',
+    tier: 'EXPERIMENTAL',
+    appType: 'web-app',
+    iconToken: 'chart-bar',
+    enabledByDefault: false,
+    requiresOrgScope: false,
+    showInNav: false,
+    navOrder: 98,
+    owner: 'platform-core',
+    packageName: '@nzila/nzila-hq',
+    devPort: 3020,
+    domains: ['finance', 'governance'],
+    enabledCapabilities: ['auth', 'health-check'],
+    governanceRequirements: [],
+    integrationDependencies: [
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID', 'AZURE_AD_TENANT_ID'] },
+      { provider: 'postgresql', required: false, type: 'storage', envVars: ['DATABASE_URL'] },
+    ],
+    healthBinding: {
+      healthPath: '/api/health',
+      criticalDeps: [],
     },
     deployment: { environments: ['local'], requiresDatabase: true },
     policyBindings: [],

@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <AuthProvider>
-      <html lang={locale}>
+      <html lang={locale} data-product="agrimo">
         <body>
           <NzilaAppShell moduleId="agrimo">
             <NextIntlClientProvider locale={locale} messages={messages}>

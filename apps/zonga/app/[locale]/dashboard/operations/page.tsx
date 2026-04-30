@@ -8,7 +8,7 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
-import { getAdminDashboard } from '@/features/admin/observability-dashboard'
+import { getZongaOperationsDashboard } from '@/lib/services/dashboard-kpi-service'
 import { getRecentSyncEvents } from '@/features/nzila-integration/sync-service'
 
 const statusColors: Record<string, string> = {
@@ -35,7 +35,7 @@ export default async function OperationsPage({
   const { locale } = await params
 
   const [dashboard, recentSync] = await Promise.all([
-    getAdminDashboard(orgId),
+    getZongaOperationsDashboard({ organizationId: orgId }),
     getRecentSyncEvents(orgId, 10),
   ])
 

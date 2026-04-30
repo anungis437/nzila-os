@@ -10,8 +10,8 @@ import {
 } from './registry.js'
 
 describe('APP_REGISTRY', () => {
-  it('contains all 22 apps', () => {
-    expect(APP_REGISTRY.length).toBe(22)
+  it('contains all 23 apps', () => {
+    expect(APP_REGISTRY.length).toBe(24)
   })
 
   it('has unique ids', () => {

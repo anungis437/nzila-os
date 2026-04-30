@@ -1,101 +1,71 @@
 {
   "_meta": {
-    "schema_version": "2.1.0",
-    "generated_at": "2026-04-22T21:00:00.000Z",
-    "generator": "manual-ops-pass / github-actions-api + azure-cli",
+    "schema_version": "2.0.0",
+    "generated_at": "2026-04-30T13:03:54.747Z",
+    "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30
   },
   "metrics": {
     "deploy_frequency_30d": {
-      "value": 10,
-      "unit": "successful deployments",
-      "source": "GitHub Actions: Deploy/GitOps workflows, 30d window (2026-03-23 to 2026-04-22)",
+      "value": 10.47,
+      "source": "ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)",
       "source_needed": null
     },
     "build_success_rate_30d": {
-      "value": 81.5,
-      "unit": "%",
-      "source": "GitHub Actions API: 163 success / 200 total completed runs, 30d window",
-      "source_needed": null
+      "value": null,
+      "source": "GitHub Actions API (not available in current execution context)",
+      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
     },
     "median_build_minutes": {
-      "value": 41,
-      "unit": "minutes",
-      "source": "GitHub Actions CI workflow run durations, sampled from recent runs",
-      "source_needed": null
+      "value": null,
+      "source": "GitHub Actions API (not available in current execution context)",
+      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
     },
     "change_failure_rate_30d": {
       "value": 0,
-      "unit": "%",
-      "source": "ops/outputs/dora-metrics.json: no rollback events or hotfixes recorded",
+      "source": "ops/outputs/dora-metrics.json: metrics.change_failure_rate.value",
       "source_needed": null
     },
     "mttr_minutes": {
       "value": null,
-      "source": "No incident tracker integration configured",
-      "source_needed": "Wire PagerDuty or GitHub incident label to ops/outputs/incidents.json."
+      "source": "ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)",
+      "source_needed": "Incident tracker integration required; dora-metrics currently reports null mttr."
     },
     "uptime_30d": {
       "value": null,
-      "source": "Azure Monitor SLO export not yet configured",
-      "source_needed": "Wire Azure Monitor export to ops/outputs/uptime.json."
+      "source": "Azure Monitor / Application Insights uptime SLO exporter",
+      "source_needed": "No committed uptime export in repository. Wire Azure Monitor export to ops/outputs/uptime.json."
     },
     "p50_latency_ms": {
       "value": null,
-      "source": "Application Insights latency export not configured",
-      "source_needed": "Publish p50/p95 rollup to ops/outputs/latency.json."
+      "source": "Application Insights latency export",
+      "source_needed": "No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json."
     },
     "p95_latency_ms": {
       "value": null,
-      "source": "Application Insights latency export not configured",
-      "source_needed": "Publish p50/p95 rollup to ops/outputs/latency.json."
+      "source": "Application Insights latency export",
+      "source_needed": "No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json."
     },
     "auth_success_rate": {
       "value": null,
-      "source": "platform-auth event rollup not yet exported",
-      "source_needed": "Add monthly auth success export to ops/outputs/auth-metrics.json."
+      "source": "platform-auth auth event rollup",
+      "source_needed": "No auth rollup artifact found. Add monthly auth success export to ops/outputs/auth-metrics.json."
     },
     "error_rate": {
       "value": null,
-      "source": "Application Insights error-rate export not configured",
-      "source_needed": "Add monthly app error export to ops/outputs/error-rate.json."
+      "source": "Application Insights / Sentry error metric export",
+      "source_needed": "No error-rate rollup artifact found. Add monthly app error export to ops/outputs/error-rate.json."
     },
     "monthly_infra_cost_estimate": {
       "value": null,
-      "source": "Azure Cost Management API — not queried in this pass",
-      "source_needed": "Run `az consumption usage list` with subscription scope."
+      "source": "ops/outputs/cost-allocation.json: total_monthly_cost_usd",
+      "source_needed": "Run pnpm collect:cost with Azure API enabled to populate real monthly cost."
     },
     "incidents_last_30d": {
-      "value": 0,
-      "unit": "count",
-      "source": "GitHub issues: no issues labeled 'incident' found in 30d window",
-      "source_needed": null
+      "value": null,
+      "source": "Incident registry export (GitHub issues/PagerDuty)",
+      "source_needed": "No incident registry artifact found in repository for 30d count."
     }
-  },
-  "service_health": {
-    "as_of": "2026-04-22T21:00:00.000Z",
-    "method": "HTTPS probe (HTTP 200 = operational)",
-    "services": {
-      "nzilaventures.com": "operational",
-      "console.nzilaventures.com": "operational",
-      "partners.nzilaventures.com": "operational",
-      "unioneyes.app": "operational"
-    }
-  },
-  "certificate_status": {
-    "as_of": "2026-04-22T21:00:00.000Z",
-    "method": "TLS handshake success on HTTPS probe",
-    "domains": {
-      "nzilaventures.com": "valid",
-      "console.nzilaventures.com": "valid",
-      "partners.nzilaventures.com": "valid",
-      "unioneyes.app": "valid"
-    }
-  },
-  "dns_status": {
-    "as_of": "2026-04-22T21:00:00.000Z",
-    "overall": "healthy",
-    "detail": "All production domains resolve and return 200 via HTTPS"
   }
 }

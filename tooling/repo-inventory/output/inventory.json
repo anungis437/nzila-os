@@ -1,11 +1,11 @@
 {
   "generatedAt": "2026-04-28T00:00:00.000Z",
-  "appCount": 22,
-  "packageCount": 180,
-  "workspacePackageCount": 206,
+  "appCount": 23,
+  "packageCount": 181,
+  "workspacePackageCount": 208,
   "workflowCount": 46,
-  "contractTestCount": 226,
-  "tsTestFileCount": 1260,
+  "contractTestCount": 233,
+  "tsTestFileCount": 1278,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 248
+      "codeFileCount": 247
     },
     {
       "name": "agrimo",
@@ -163,7 +163,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 318
+      "codeFileCount": 355
     },
     {
       "name": "control-plane",
@@ -362,6 +362,27 @@
       ],
       "purpose": "National Anti-Corruption Programme examination and assessment platform.",
       "codeFileCount": 61
+    },
+    {
+      "name": "nzila-hq",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3020,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "hq-domain",
+        "os-core",
+        "payments-stripe",
+        "platform-auth",
+        "qbo",
+        "ui"
+      ],
+      "purpose": "",
+      "codeFileCount": 105
     },
     {
       "name": "orchestrator-api",
@@ -603,7 +624,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 82
     },
     {
       "name": "weekone",
@@ -666,7 +687,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 446
+      "codeFileCount": 450
     }
   ],
   "workflows": [

@@ -237,3 +237,10 @@
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* ── @nzila/ui — per-product accent (Phase 1 portfolio adoption) ── */
+[data-product="zonga"] {
+  --color-accent: #7c3aed;
+  --color-accent-soft: #ede9fe;
+  --color-accent-fg: #ffffff;
+}

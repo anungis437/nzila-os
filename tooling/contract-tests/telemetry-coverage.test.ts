@@ -64,6 +64,7 @@ function isApiRoute(filePath: string): boolean {
     !rel.includes('/api/ready/') && // Readiness probe (k8s/infra)
     !rel.includes('/api/auth_core/') && // Django auth core health/status
     !rel.includes('/api/rights/terms/') && // Public rights/terms routes
+    !rel.includes('/api/_perf/') && // Web vitals beacon — lightweight, no telemetry infra needed
     (rel.endsWith('route.ts') || rel.endsWith('route.tsx'))
   )
 }

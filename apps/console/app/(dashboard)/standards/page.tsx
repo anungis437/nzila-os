@@ -4,7 +4,9 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
-export const dynamic = 'force-dynamic'
+// Static reference content — same for every viewer; revalidate hourly so
+// edits to the chapter list propagate without a full deploy.
+export const revalidate = 3600
 
 export const metadata = {
   title: 'Standards | Nzila Console',

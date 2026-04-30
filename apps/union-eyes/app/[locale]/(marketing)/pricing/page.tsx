@@ -32,13 +32,7 @@ export default async function LocalePricingPage({
   const t = await getTranslations({ locale, namespace: 'marketing.pricingBody' });
   const _tp = await getTranslations({ locale, namespace: 'marketing.pricing' });
 
-  const modules = [
-    t('moduleList.caseManagement'),
-    t('moduleList.memberPortal'),
-    t('moduleList.intelligence'),
-    t('moduleList.financialAllocation'),
-    t('moduleList.governanceOversight'),
-  ];
+  const modules = ['Inbox', 'Priorities', 'Work', 'Intelligence', 'Outcomes'];
 
   const included = [
     t('included1'), t('included2'), t('included3'), t('included4'),

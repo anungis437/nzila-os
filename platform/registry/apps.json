@@ -173,6 +173,18 @@
       "docs_complete": false
     },
     {
+      "name": "nzila-hq",
+      "path": "apps/nzila-hq",
+      "tier": "EXPERIMENTAL",
+      "owner": "founders",
+      "domain": "executive",
+      "health_endpoint": true,
+      "metrics_endpoint": false,
+      "evidence_export": false,
+      "demo_seed": false,
+      "docs_complete": true
+    },
+    {
       "name": "orchestrator-api",
       "path": "apps/orchestrator-api",
       "tier": "INCUBATING",

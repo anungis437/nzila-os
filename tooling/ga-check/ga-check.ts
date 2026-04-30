@@ -620,11 +620,13 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/mobility-client-portal': 3, // Pre-GA — thin client portal
     'apps/platform-admin': 3, // Pre-GA — internal admin tooling
     'apps/trade': 4,          // Pre-GA — trade vertical
+    'apps/nzila-hq': 4,       // INCUBATING — internal HQ shell, platform wiring staged pre-PILOT
     'apps/weekone': 3,        // INCUBATING — founder-internal OS, platform wiring planned pre-PILOT
     'apps/test-scaffold-gp': 3, // FROZEN — sunset reference scaffold, minimal platform wiring by design
     'apps/veridian-admin': 3, // INCUBATING — health admin portal, platform wiring planned pre-PILOT
     'apps/veridian-care': 3,  // INCUBATING — health care portal, platform wiring planned pre-PILOT
     'apps/veridian-site': 3,  // INCUBATING — health public site, platform wiring planned pre-PILOT
+    'apps/maestria': 4,  // INCUBATING — platform wiring staged pre-PILOT
   }
 
   for (const appDir of appDirs) {

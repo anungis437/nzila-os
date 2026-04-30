@@ -62,6 +62,8 @@ const TS_AUTHORITATIVE_APPS = [
   'web',
   'weekone',
   'orchestrator-api',
+  'nzila-hq',
+  'maestria',
 ]
 
 /** Temporary scaffold test apps — excluded from classification checks */

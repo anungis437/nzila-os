@@ -8,10 +8,7 @@
     },
     "platform_services": {
       "label": "Layer 2 — Platform Services",
-      "paths": [
-        "platform/*",
-        "packages/platform-*"
-      ],
+      "paths": ["platform/*", "packages/platform-*"],
       "description": "Reusable platform capabilities"
     },
     "shared_packages": {
@@ -22,13 +19,7 @@
     },
     "infrastructure": {
       "label": "Layer 4 — Infrastructure / Tooling",
-      "paths": [
-        "scripts/*",
-        "tooling/*",
-        "ops/*",
-        "infrastructure/*",
-        "governance/*"
-      ],
+      "paths": ["scripts/*", "tooling/*", "ops/*", "infrastructure/*", "governance/*"],
       "description": "Scripts, tooling, ops, infrastructure adapters"
     }
   },

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark theme-dark" suppressHydrationWarning data-product="zonga">
       <body className={poppins.className} suppressHydrationWarning>
         <AuthProvider>
           <ServiceWorkerRegister />

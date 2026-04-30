@@ -116,6 +116,7 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/analytics',                  // Public marketing analytics events (anonymous)
   '/api/monday-reset',               // Public weekly checklist (static content)
   '/api/billing/checkout',           // Public SaaS checkout (Stripe-hosted)
+  '/_perf/',                         // Web vitals sendBeacon (anonymous, no org context)
 ]
 
 function isPublicRoute(path: string): boolean {

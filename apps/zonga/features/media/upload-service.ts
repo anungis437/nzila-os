@@ -11,6 +11,7 @@ import { logger } from '@/lib/logger'
 import { uploadBuffer, computeSha256 } from '@nzila/blob'
 import { uploadToS3, computeRawStorageKey } from '@nzila/zonga-streaming-aws/s3-storage'
 import { resolveS3Config } from '@nzila/zonga-streaming-aws'
+import { assertBufferSafeForUpload, isMalwareScanError } from '@/lib/security/clamav'
 import { ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from './types'
 import type { ArtworkAsset } from './types'
 import { enqueueProcessingJobs } from './processing-pipeline'
@@ -46,6 +47,27 @@ export async function uploadTrackAudio(params: {
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const sha256 = await computeSha256(buffer)
+
+  // Malware scan — must run before any S3/blob persistence
+  try {
+    await assertBufferSafeForUpload(buffer, file.name)
+  } catch (error) {
+    if (isMalwareScanError(error)) {
+      logger.warn('Audio upload blocked by malware scanner', {
+        contentAssetId,
+        reason: error.result.reason ?? error.result.signature,
+        status: error.result.status,
+      })
+      return {
+        ok: false,
+        error:
+          error.result.status === 'infected'
+            ? 'File blocked: malware detected'
+            : 'File could not be scanned right now. Please try again later.',
+      }
+    }
+    throw error
+  }
 
   // Check for duplicate fingerprint
   const dupCheck = await checkForDuplicate({
@@ -154,6 +176,8 @@ export async function uploadArtwork(params: {
   const storageKey = `artwork/${entityType}/${resourceId}/${Date.now()}.${ext}`
 
   try {
+    await assertBufferSafeForUpload(buffer, storageKey)
+
     await uploadBuffer({
       container: 'zonga-covers',
       blobPath: storageKey,
@@ -186,6 +210,21 @@ export async function uploadArtwork(params: {
 
     return { ok: true, artworkId, storageKey }
   } catch (error) {
+    if (isMalwareScanError(error)) {
+      logger.warn('Artwork upload blocked by malware scanner', {
+        entityType,
+        resourceId,
+        reason: error.result.reason ?? error.result.signature,
+        status: error.result.status,
+      })
+      return {
+        ok: false,
+        error:
+          error.result.status === 'infected'
+            ? 'Image blocked: malware detected'
+            : 'Image could not be scanned right now. Please try again later.',
+      }
+    }
     logger.error('Artwork upload failed', { error, entityType, resourceId })
     return { ok: false, error: 'Artwork upload failed' }
   }

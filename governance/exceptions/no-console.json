@@ -115,7 +115,23 @@
       "path": "apps/zonga/lib/stripe.ts",
       "owner": "platform-team",
       "justification": "Payment integration logs missing secrets at startup — will migrate to os-core logger.",
+      "expiresOn": "2026-09-01"    },
+    {
+      "path": "apps/console/components/ui/ErrorPanel.tsx",
+      "owner": "platform-team",
+      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available \u2014 console.error is the browser RUM sink for Next.js error digest reporting.",
       "expiresOn": "2026-09-01"
-    }
+    },
+    {
+      "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+      "owner": "platform-core",
+      "justification": "Client error boundary runs in browser context where @nzila/os-core is not available \u2014 console.error surfaces incident IDs via devtools. Will adopt os-core browser logger before PILOT promotion.",
+      "expiresOn": "2026-10-01"
+    },
+    {
+      "path": "apps/nzila-hq/server/db/audit.ts",
+      "owner": "platform-core",
+      "justification": "Server-side audit logger in incubating app \u2014 console.error used as fallback when DB insert fails. Will adopt os-core structured logger before PILOT promotion.",
+      "expiresOn": "2026-10-01"    }
   ]
 }

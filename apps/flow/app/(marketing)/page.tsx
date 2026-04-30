@@ -9,18 +9,21 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { listFlowEngineModules } from "@nzila/flow-engine";
 import { ScrollReveal } from "@/components/public/scroll-reveal";
 import AnimatedFeatures from "./components/animated-features";
 import AnimatedCTA from "./components/animated-cta";
 
+const workflowModules = listFlowEngineModules();
+
 export const metadata: Metadata = {
-  title: "Flow — Order-Centric Commerce Engine",
+  title: "Flow — Order-Centric Commerce Product",
   description:
-    "Quote, order, produce, ship, deliver — every workflow enforced by state machines, every payment gated, every event tracked. Powered by Nzila.",
+    "Quote, order, produce, ship, deliver — Flow is the Nzila commerce product powered by Flow Engine, with enforced workflows, payment gates, and auditable events.",
   openGraph: {
-    title: "Flow — Order-Centric Commerce Engine",
+    title: "Flow — Order-Centric Commerce Product",
     description:
-      "State-machine-enforced trade operations with payment gating, domain events, and real-time shipment tracking. Built on NzilaOS.",
+      "State-machine-enforced trade operations with payment gating, domain events, and real-time shipment tracking. Built on Flow Engine within NzilaOS.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=630&fit=crop&q=80",
@@ -46,13 +49,7 @@ export default function MarketingPage() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-linear-to-b from-navy/95 via-navy/90 to-navy/95" />
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 50%, rgba(37,99,235,0.3) 0%, transparent 50%), radial-gradient(circle at 75% 30%, rgba(212,168,67,0.2) 0%, transparent 50%)",
-          }}
-        />
+        <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_25%_50%,rgba(37,99,235,0.3)_0%,transparent_50%),radial-gradient(circle_at_75%_30%,rgba(212,168,67,0.2)_0%,transparent_50%)]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-32 sm:px-6 lg:px-8">
           <ScrollReveal>
@@ -61,14 +58,14 @@ export default function MarketingPage() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald" />
               </span>
-              NzilaOS Commerce Engine
+              NzilaOS Commerce Product
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="max-w-3xl font-poppins text-5xl font-bold leading-tight text-white drop-shadow-lg md:text-7xl lg:text-8xl">
               Trade Operations,{" "}
-              <span className="bg-gradient-to-r from-gold-light via-gold to-electric-light bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x drop-shadow-none" style={{ filter: 'drop-shadow(0 0 12px rgba(212,168,67,0.4))' }}>
+              <span className="bg-linear-to-r from-gold-light via-gold to-electric-light bg-size-[200%_auto] bg-clip-text text-transparent animate-gradient-x drop-shadow-[0_0_12px_rgba(212,168,67,0.4)]">
                 Fully Enforced
               </span>
             </h1>
@@ -110,13 +107,7 @@ export default function MarketingPage() {
 
       {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
       <section className="relative overflow-hidden bg-navy-light py-16">
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 50%, rgba(37,99,235,0.15) 0%, transparent 50%)",
-          }}
-        />
+        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_25%_50%,rgba(37,99,235,0.15)_0%,transparent_50%)]" />
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
@@ -241,24 +232,16 @@ export default function MarketingPage() {
             </p>
           </ScrollReveal>
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-            {[
-              { step: "Quote", icon: "📋" },
-              { step: "Order", icon: "📦" },
-              { step: "Payment", icon: "💰" },
-              { step: "PO", icon: "📄" },
-              { step: "Production", icon: "🏭" },
-              { step: "Shipment", icon: "🚚" },
-              { step: "Delivery", icon: "✅" },
-            ].map((s, i) => (
-              <ScrollReveal key={s.step} delay={i * 0.08}>
+            {workflowModules.map((module, i) => (
+              <ScrollReveal key={module.id} delay={i * 0.08}>
                 <div className="flex items-center gap-3">
                   <div className="flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-lg">
-                    <span className="text-2xl">{s.icon}</span>
+                    <span className="text-2xl">{module.icon}</span>
                     <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-navy">
-                      {s.step}
+                      {module.name}
                     </span>
                   </div>
-                  {i < 6 && (
+                  {i < workflowModules.length - 1 && (
                     <span className="hidden text-navy/30 md:inline">→</span>
                   )}
                 </div>
@@ -270,13 +253,7 @@ export default function MarketingPage() {
 
       {/* ═══════════════════════ CTA ═══════════════════════ */}
       <section className="relative overflow-hidden bg-navy py-24">
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 30% 50%, rgba(37,99,235,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 50%, rgba(212,168,67,0.3) 0%, transparent 50%)",
-          }}
-        />
+        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_30%_50%,rgba(37,99,235,0.4)_0%,transparent_50%),radial-gradient(circle_at_70%_50%,rgba(212,168,67,0.3)_0%,transparent_50%)]" />
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <AnimatedCTA />
         </div>

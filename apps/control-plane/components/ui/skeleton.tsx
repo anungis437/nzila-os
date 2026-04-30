@@ -1,15 +1,4 @@
-import { cn } from "@/lib/utils";
-
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
-      {...props}
-    />
-  );
-}
-
-export { Skeleton };
+// Adapter: delegate to canonical @nzila/ui Skeleton.
+// Local file kept so existing `@/components/ui/skeleton` import paths keep working
+// without churn. The base Skeleton accepts the same HTMLAttributes signature.
+export { Skeleton } from "@nzila/ui";

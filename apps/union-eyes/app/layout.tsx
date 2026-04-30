@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const site = getUnionEyesSiteTopology();
 
   return (
-    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth" data-product="union-eyes">
       <body className={poppins.className} suppressHydrationWarning>
         {site.isStaging ? (
           <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">

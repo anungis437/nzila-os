@@ -1,0 +1,33 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "nzila-hq",
+  "version": "0.1.0",
+  "role": "executive-cockpit",
+  "description": "Executive operating cockpit for Nzila Ventures. Read-only aggregator across Console, Platform Admin, and Control Plane. Surfaces portfolio health, founder dependency, opportunity pipeline, and delegation queues. Does not own operational data and does not bypass authoritative systems.",
+  "riskLevel": "low",
+  "policyProfile": "advisory",
+  "controls": {
+    "enforcement": false,
+    "governance": false,
+    "audit": true,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": false,
+    "events": false
+  },
+  "orgScoped": true,
+  "systemControl": false,
+  "businessLogic": false,
+  "routesMutationsThroughControlPlane": true,
+  "nonNegotiableRules": [
+    "Nzila HQ MUST NOT duplicate Console operational dashboards",
+    "Nzila HQ MUST NOT replace Platform Admin tenant/user/billing flows",
+    "Nzila HQ MUST NOT replace Control Plane policy/approval/evidence flows",
+    "All cross-app data is read-only or deep-linked",
+    "All API routes must call resolveOrgContext() before processing",
+    "All mutations must be routed through Control Plane (no shadow writes)",
+    "RBAC roles enforced via @nzila/hq-domain HqRole and lib/rbac.ts"
+  ],
+  "exceptions": []
+}

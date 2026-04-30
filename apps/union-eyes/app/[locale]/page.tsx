@@ -70,11 +70,26 @@ export default async function LocaleRootPage({
   ];
 
   const modules = [
-    { name: t('module1'), desc: t('module1Desc') },
-    { name: t('module2'), desc: t('module2Desc') },
-    { name: t('module3'), desc: t('module3Desc') },
-    { name: t('module4'), desc: t('module4Desc') },
-    { name: t('module5'), desc: t('module5Desc') },
+    {
+      name: 'Inbox',
+      desc: 'Steward and LRO signal hub for incoming intake, follow-up requests, and time-sensitive alerts.',
+    },
+    {
+      name: 'Priorities',
+      desc: 'Role-routed queue of next actions, assignments, escalations, and overdue work across the organization.',
+    },
+    {
+      name: 'Work',
+      desc: 'The core representation surface for steward-led casework, evidence management, deadlines, and grievance handling.',
+    },
+    {
+      name: 'Intelligence',
+      desc: 'Research, analytics, and AI-assisted decision support for precedent review, reporting, and CBA analysis.',
+    },
+    {
+      name: 'Outcomes',
+      desc: 'Resolution tracking, follow-through, and pattern reporting so leadership can see what representation actually delivered.',
+    },
   ];
 
   return (

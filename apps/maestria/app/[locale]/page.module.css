@@ -1,0 +1,82 @@
+.page {
+  padding: 3rem;
+  font-family: Georgia, serif;
+  display: grid;
+  gap: 2rem;
+}
+
+.hero {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 56rem;
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7a5a2b;
+  margin: 0;
+}
+
+.title {
+  font-size: 3rem;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+}
+
+.moduleList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.moduleCard {
+  border: 1px solid #d7c8ab;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  background: #faf5eb;
+}
+
+.moduleHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.moduleIcon {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #efe2c6;
+}
+
+.moduleDescription {
+  margin: 0.5rem 0 0;
+  color: #57452f;
+}
+
+.moduleBullets {
+  margin: 0.9rem 0 0;
+  padding-left: 1.1rem;
+  color: #57452f;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.moduleBullet {
+  line-height: 1.5;
+}

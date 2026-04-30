@@ -9,7 +9,7 @@
 |-------------|--------------------------|-------------|---------------|---------------------|
 | Log in | Sign In | auth surfaces | User Guide §1 | `user_login`, `session_started` |
 | Enter the app | Role-based landing | `/dashboard` redirector | User Guide §2 | `session_started` |
-| Member sees updates | Inbox | `/dashboard/inbox` | User Guide §2, FAQ | signal-driven member flow |
+| Steward / LRO sees signal queue | Inbox | `/dashboard/inbox` | User Guide §2, FAQ | signal-driven steward/LRO landing; admin and above only |
 | Rep sees next actions | Priorities | `/dashboard/priorities` | User Guide §2, Developer Index | role-routed workflow entry |
 | Rep manages active casework | Work | `/dashboard/work` | User Guide §5, Developer Index | steward-led casework surface |
 | Review results | Outcomes | `/dashboard/outcomes` | User Guide §7 | outcome-oriented follow-through |
@@ -24,11 +24,12 @@
 1. **"Intake"** is the correct member-facing entry concept for a new issue.
 2. **"Case"** is official representative-managed casework.
 3. **"Grievance"** is used for formal grievance-style representation workflows.
-4. **"Inbox"** is the member default landing surface.
+4. **"Inbox"** is the Steward / LRO default landing surface — admin and above roles only.
 5. **"Priorities"** is the steward and officer default landing surface.
 6. **"Work"** is the consolidated casework surface and replaces older queue-first language.
 7. **"Outcomes"** is the correct label for results and follow-through.
 8. Avoid documenting members as directly creating or opening official cases.
+9. Members do NOT access the full app. Member-facing features are limited to: the intake submission form and a lightweight case follow-up view.
 9. Avoid documenting `/dashboard/claims` or `/dashboard/grievances` as canonical surfaces. They are legacy redirects.
 
 ## Flow Verification
@@ -36,8 +37,10 @@
 ### Member path
 
 ```
-Login -> Inbox -> Submit intake -> Follow requests and updates -> Review outcome
+Submit intake (form, no full app login required) -> Lightweight case follow-up view
 ```
+
+> Members do not access the full application. The app (Inbox, Priorities, Work, Intelligence, Outcomes) is for admin and above roles.
 
 ### Steward path
 

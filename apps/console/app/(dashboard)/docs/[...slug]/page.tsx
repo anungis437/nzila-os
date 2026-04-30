@@ -4,7 +4,9 @@ import { getInternalDocBySlug, getAllInternalDocSlugs } from '@/lib/docs'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { sanitizeHtml } from '@/lib/sanitize'
 
-export const dynamic = 'force-dynamic'
+// Per-doc page reads from the file system; revalidate every 5 minutes.
+// `generateStaticParams` below pre-renders all known slugs at build time.
+export const revalidate = 300
 
 interface Props {
   params: Promise<{ slug: string[] }>

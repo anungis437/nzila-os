@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedAt": "2026-04-30T00:00:00.000Z",
   "requiredApps": [
     "abr",
     "cfo",
@@ -7,6 +7,8 @@
     "control-plane",
     "cora",
     "flow",
+    "maestria",
+    "nzila-hq",
     "orchestrator-api",
     "trade",
     "union-eyes",

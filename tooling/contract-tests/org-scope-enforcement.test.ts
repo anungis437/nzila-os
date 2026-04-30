@@ -75,6 +75,7 @@ const EXEMPT_ROUTES = new Set([
   'analytics',      // Public marketing analytics events (anonymous)
   'monday-reset',   // Public weekly checklist (static content)
   'billing/checkout', // Public SaaS checkout (Stripe-hosted)
+  '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
 ])
 
 function isExemptRoute(filePath: string): boolean {

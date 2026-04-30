@@ -1,0 +1,109 @@
+{
+  "description": "Machine-readable route governance manifest for Nzila HQ — executive cockpit",
+  "routes": [
+    {
+      "route": "/",
+      "purpose": "Redirect to executive home",
+      "feature_class": "navigation",
+      "owning_surface": "nzila-hq",
+      "primary_user": "founder",
+      "source_systems": []
+    },
+    {
+      "route": "/home",
+      "purpose": "Executive home dashboard — portfolio snapshot, weekly priorities, founder/operator queues, strategic timeline (Phase 1)",
+      "feature_class": "executive_dashboard",
+      "owning_surface": "nzila-hq",
+      "primary_user": "founder",
+      "source_systems": ["hq-domain", "platform-metrics", "deal-engine"]
+    },
+    {
+      "route": "/portfolio",
+      "purpose": "Venture portfolio module — list of all ventures with key metrics (Phase 2)",
+      "feature_class": "portfolio_management",
+      "owning_surface": "nzila-hq",
+      "primary_user": "president",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/portfolio/[ventureSlug]",
+      "purpose": "Per-venture detail — mission, ICP, owner, MRR, pipeline, blockers, dependency",
+      "feature_class": "portfolio_management",
+      "owning_surface": "nzila-hq",
+      "primary_user": "ops-lead",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/crm",
+      "purpose": "Relationship intelligence — organizations, contacts, partners, investors, advisors (Phase 3)",
+      "feature_class": "relationship_intelligence",
+      "owning_surface": "nzila-hq",
+      "primary_user": "partnerships",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/pipeline",
+      "purpose": "Opportunity pipeline across all ventures (Phase 4)",
+      "feature_class": "pipeline_management",
+      "owning_surface": "nzila-hq",
+      "primary_user": "founder",
+      "source_systems": ["hq-domain", "deal-engine"]
+    },
+    {
+      "route": "/dependency",
+      "purpose": "Founder Dependency Engine output — per-venture risk score with reasons (Phase 5)",
+      "feature_class": "dependency_intelligence",
+      "owning_surface": "nzila-hq",
+      "primary_user": "president",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/delegation",
+      "purpose": "Delegation operating system — task queues by owner role (Phase 6)",
+      "feature_class": "delegation",
+      "owning_surface": "nzila-hq",
+      "primary_user": "ops-lead",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/finance",
+      "purpose": "Finance & value dashboard — MRR, ARR, pipeline, runway, concentration (Phase 7)",
+      "feature_class": "finance_intelligence",
+      "owning_surface": "nzila-hq",
+      "primary_user": "finance",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/documents",
+      "purpose": "Strategic document hub — decks, proposals, term sheets per venture (Phase 8)",
+      "feature_class": "document_hub",
+      "owning_surface": "nzila-hq",
+      "primary_user": "founder",
+      "source_systems": ["hq-domain"]
+    },
+    {
+      "route": "/integrations/control-plane",
+      "purpose": "Read-only Control Plane integration view — approvals, evidence, risk (Phase 9)",
+      "feature_class": "integration_view",
+      "owning_surface": "nzila-hq",
+      "primary_user": "president",
+      "source_systems": ["control-plane"]
+    },
+    {
+      "route": "/integrations/platform-admin",
+      "purpose": "Read-only Platform Admin integration view — orgs, tenants, seats, billing (Phase 10)",
+      "feature_class": "integration_view",
+      "owning_surface": "nzila-hq",
+      "primary_user": "ops-lead",
+      "source_systems": ["platform-admin"]
+    },
+    {
+      "route": "/integrations/console",
+      "purpose": "Read-only Console integration view — product health, usage, support (Phase 11)",
+      "feature_class": "integration_view",
+      "owning_surface": "nzila-hq",
+      "primary_user": "founder",
+      "source_systems": ["console"]
+    }
+  ]
+}

@@ -779,6 +779,7 @@ CREATE TABLE IF NOT EXISTS zonga_listeners (
   const placeholderPatterns = [
     "user_id LIKE 'user_clc_%'",
     "user_id LIKE 'user_cape_%'",
+    "user_id LIKE 'user_cupe_%'",
     "user_id LIKE 'cupe-natl-%'",
     "user_id LIKE 'usr-l123-%'",
   ];
@@ -826,7 +827,7 @@ CREATE TABLE IF NOT EXISTS zonga_listeners (
 
   // Count total Clerk-linked members (no placeholders)
   const totalMembers = runSQL(
-    `SELECT count(*) FROM organization_members WHERE user_id LIKE 'user_%' AND user_id NOT LIKE 'user_clc_%' AND user_id NOT LIKE 'user_cape_%'`,
+    `SELECT count(*) FROM organization_members WHERE user_id LIKE 'user_%' AND user_id NOT LIKE 'user_clc_%' AND user_id NOT LIKE 'user_cape_%' AND user_id NOT LIKE 'user_cupe_%' AND user_id NOT LIKE 'cupe-natl-%' AND user_id NOT LIKE 'usr-l123-%'`,
   );
   console.log(`\n  Total real Clerk-linked UE members: ${totalMembers}`);
 

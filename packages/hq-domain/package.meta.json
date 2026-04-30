@@ -1,0 +1,10 @@
+{
+  "owner": "founders",
+  "category": "DOMAIN_SHARED",
+  "stability": "EXPERIMENTAL",
+  "allowed_dependents": ["apps/nzila-hq"],
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
+}

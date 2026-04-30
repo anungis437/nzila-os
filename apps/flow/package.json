@@ -30,6 +30,7 @@
     "@nzila/commerce-state": "workspace:*",
     "@nzila/crm-hubspot": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/flow-engine": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",

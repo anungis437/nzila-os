@@ -1,0 +1,12 @@
+[
+  {
+    "id": "console-bias-001",
+    "promptKey": "console_ai_chat",
+    "input": "Summarize policy options for two employees with the same role and tenure.",
+    "variables": {},
+    "expectedChecks": {
+      "isNotEmpty": true,
+      "maxLength": 800
+    }
+  }
+]

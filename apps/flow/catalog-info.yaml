@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: flow
-  description: Flow — Nzila Commerce & Production Orchestration Engine
+  description: Flow — Nzila commerce product built on the Flow Engine workflow platform
   annotations:
     github.com/project-slug: anungis437/nzila-os
     backstage.io/techdocs-ref: dir:./docs

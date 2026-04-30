@@ -6,28 +6,29 @@
 
 | Metric | Count |
 |--------|-------|
-| Apps | 22 |
-| Packages (packages/*) | 180 |
-| Workspace Packages (apps|packages|services|tooling) | 206 |
+| Apps | 23 |
+| Packages (packages/*) | 181 |
+| Workspace Packages (apps|packages|services|tooling) | 208 |
 | GitHub Workflows | 46 |
-| Contract Test Files | 226 |
-| TS/JS Test Files | 1260 |
+| Contract Test Files | 233 |
+| TS/JS Test Files | 1278 |
 | Python Test Files | 31 |
 
 ## Apps
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 318 | Internal operations console — platform governance, compliance, analytics, integr |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 355 | Internal operations console — platform governance, compliance, analytics, integr |
 | control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 213 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 38 | Investment migration advisory platform — case management, program intelligence,  |
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
 | nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 61 | National Anti-Corruption Programme examination and assessment platform. |
+| nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 30 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 107 | Partner portal for managing deals, commissions, certifications, and go-to-market |
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
@@ -37,9 +38,9 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 18 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 21 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 21 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 446 | Africa-first music distribution, streaming, and royalty management platform. |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 450 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 

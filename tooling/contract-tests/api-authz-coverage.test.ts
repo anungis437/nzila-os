@@ -76,6 +76,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/analytics(?:\/|$)/,    // Public marketing analytics events (anonymous)
       /\/api\/monday-reset/,         // Public weekly checklist (static content)
       /\/api\/billing\/checkout/,    // Public SaaS checkout (Stripe-hosted)
+      /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 
     const AUTH_PATTERNS = [
@@ -95,6 +96,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /verifyShopifySignature\(/, // Shopify webhook signature verification
       /CRON_SECRET/,             // Cron job secret verification
       /withOrgScope\(/,           // Org-scoped composite guard (auth + context + org)
+      /NZILA_HQ_SNAPSHOT_TOKEN/,  // HQ cron/internal routes protected by shared bearer token
     ]
 
     const violations: string[] = []

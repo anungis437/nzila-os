@@ -1,1 +1,166 @@
 @import "tailwindcss";
+
+/**
+ * Nzila Design Language — CSS layer.
+ *
+ * `@theme` exposes design tokens to Tailwind 4 utilities. Themes
+ * (`.theme-dark`, `.theme-enterprise`) and product accents
+ * (`[data-product="zonga"]`, etc.) are flipped via root attributes.
+ *
+ * Mirror of `tokens.ts` — change one, change both.
+ */
+
+@theme {
+  /* Type */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* Elevation */
+  --shadow-flat: 0 0 0 1px rgb(0 0 0 / 0.05);
+  --shadow-low: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-mid: 0 4px 6px -2px rgb(15 23 42 / 0.05), 0 8px 16px -4px rgb(15 23 42 / 0.08);
+  --shadow-high: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 20px 40px -10px rgb(15 23 42 / 0.16);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Surfaces (light defaults) */
+  --color-bg: #f8fafc;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-surface-3: #e2e8f0;
+  --color-overlay: rgb(15 23 42 / 0.45);
+  --color-inverse: #0f172a;
+
+  /* Foregrounds */
+  --color-fg: #0f172a;
+  --color-fg-muted: #475569;
+  --color-fg-subtle: #94a3b8;
+  --color-fg-inverse: #f8fafc;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-ring: #2563eb;
+
+  /* Status (role-based) */
+  --color-status-ok: #047857;
+  --color-status-ok-soft: #d1fae5;
+  --color-status-info: #1d4ed8;
+  --color-status-info-soft: #dbeafe;
+  --color-status-warning: #b45309;
+  --color-status-warning-soft: #fef3c7;
+  --color-status-critical: #b91c1c;
+  --color-status-critical-soft: #fee2e2;
+  --color-status-neutral: #475569;
+  --color-status-neutral-soft: #f1f5f9;
+
+  /* Product accent (default = hq) */
+  --color-accent: #1d4ed8;
+  --color-accent-soft: #dbeafe;
+  --color-accent-fg: #ffffff;
+
+  /* Chart palette (color-blind safe rotation) */
+  --color-chart-1: #2563eb;
+  --color-chart-2: #0891b2;
+  --color-chart-3: #059669;
+  --color-chart-4: #d97706;
+  --color-chart-5: #7c3aed;
+  --color-chart-6: #db2777;
+  --color-chart-7: #475569;
+  --color-chart-8: #0f766e;
+}
+
+.theme-dark {
+  --color-bg: #0b1220;
+  --color-surface-1: #111827;
+  --color-surface-2: #1f2937;
+  --color-surface-3: #374151;
+  --color-overlay: rgb(0 0 0 / 0.6);
+  --color-inverse: #f8fafc;
+  --color-fg: #f1f5f9;
+  --color-fg-muted: #94a3b8;
+  --color-fg-subtle: #64748b;
+  --color-fg-inverse: #0f172a;
+  --color-border: #1f2937;
+  --color-border-strong: #334155;
+  --color-status-ok: #34d399;
+  --color-status-ok-soft: #064e3b;
+  --color-status-info: #60a5fa;
+  --color-status-info-soft: #1e3a8a;
+  --color-status-warning: #fbbf24;
+  --color-status-warning-soft: #78350f;
+  --color-status-critical: #f87171;
+  --color-status-critical-soft: #7f1d1d;
+  --color-status-neutral: #cbd5e1;
+  --color-status-neutral-soft: #1f2937;
+}
+
+.theme-enterprise {
+  --color-bg: #f5f5f4;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f5f5f4;
+  --color-surface-3: #e7e5e4;
+  --color-fg: #1c1917;
+  --color-fg-muted: #57534e;
+  --color-fg-subtle: #a8a29e;
+  --color-border: #e7e5e4;
+  --color-border-strong: #d6d3d1;
+}
+
+/* Per-product accent — set `data-product` on <html> or app root. */
+[data-product="hq"]          { --color-accent: #1d4ed8; --color-accent-soft: #dbeafe; }
+[data-product="console"]     { --color-accent: #0f766e; --color-accent-soft: #ccfbf1; }
+[data-product="union-eyes"]  { --color-accent: #1e3a8a; --color-accent-soft: #dbeafe; }
+[data-product="zonga"]       { --color-accent: #7c3aed; --color-accent-soft: #ede9fe; }
+[data-product="veridian"]    { --color-accent: #047857; --color-accent-soft: #d1fae5; }
+[data-product="flow"]        { --color-accent: #0284c7; --color-accent-soft: #e0f2fe; }
+[data-product="agrimo"]      { --color-accent: #4d7c0f; --color-accent-soft: #ecfccb; }
+[data-product="first-stone"] { --color-accent: #b45309; --color-accent-soft: #fef3c7; }
+
+/* Base reset / defaults */
+html, body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Reduced-motion respect (Phase 11 a11y). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Calm, always-visible focus ring. */
+:where(:focus-visible) {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Tabular numerals — apply on every KPI / money cell. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}

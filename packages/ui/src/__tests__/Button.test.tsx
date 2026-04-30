@@ -9,48 +9,48 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument()
   })
 
-  it('applies primary variant by default', () => {
+  it('default primary variant uses accent tokens', () => {
     render(<Button>Primary</Button>)
-    const btn = screen.getByRole('button', { name: 'Primary' })
-    expect(btn.className).toContain('bg-blue-600')
+    expect(screen.getByRole('button', { name: 'Primary' }).className).toContain('var(--color-accent)')
   })
 
-  it('applies secondary variant', () => {
+  it('secondary variant uses surface + border tokens', () => {
     render(<Button variant="secondary">Secondary</Button>)
     const btn = screen.getByRole('button', { name: 'Secondary' })
-    expect(btn.className).toContain('border-blue-600')
+    expect(btn.className).toContain('var(--color-surface-1)')
+    expect(btn.className).toContain('var(--color-border-strong)')
   })
 
-  it('applies ghost variant', () => {
+  it('ghost variant is transparent by default', () => {
     render(<Button variant="ghost">Ghost</Button>)
-    const btn = screen.getByRole('button', { name: 'Ghost' })
-    expect(btn.className).toContain('bg-transparent')
+    expect(screen.getByRole('button', { name: 'Ghost' }).className).toContain('bg-transparent')
   })
 
-  it('applies danger variant', () => {
+  it('danger variant uses critical status token', () => {
     render(<Button variant="danger">Danger</Button>)
-    const btn = screen.getByRole('button', { name: 'Danger' })
-    expect(btn.className).toContain('bg-red-600')
+    expect(screen.getByRole('button', { name: 'Danger' }).className).toContain('var(--color-status-critical)')
   })
 
-  it('applies sm size', () => {
+  it('sm size produces a 28px-tall button', () => {
     render(<Button size="sm">Small</Button>)
-    const btn = screen.getByRole('button', { name: 'Small' })
-    expect(btn.className).toContain('px-3')
-    expect(btn.className).toContain('py-1.5')
+    expect(screen.getByRole('button', { name: 'Small' }).className).toContain('h-7')
   })
 
-  it('applies lg size', () => {
+  it('lg size produces a 44px-tall button', () => {
     render(<Button size="lg">Large</Button>)
-    const btn = screen.getByRole('button', { name: 'Large' })
-    expect(btn.className).toContain('px-6')
-    expect(btn.className).toContain('py-3')
+    expect(screen.getByRole('button', { name: 'Large' }).className).toContain('h-11')
+  })
+
+  it('loading state sets aria-busy and disables interaction', () => {
+    render(<Button loading>Saving</Button>)
+    const btn = screen.getByRole('button', { name: /Saving/ })
+    expect(btn).toHaveAttribute('aria-busy', 'true')
+    expect(btn).toBeDisabled()
   })
 
   it('merges custom className', () => {
     render(<Button className="my-custom">Styled</Button>)
-    const btn = screen.getByRole('button', { name: 'Styled' })
-    expect(btn.className).toContain('my-custom')
+    expect(screen.getByRole('button', { name: 'Styled' }).className).toContain('my-custom')
   })
 
   it('forwards native button props', () => {

@@ -144,6 +144,138 @@
       "source": "architecture-checks",
       "source_contracts_used": [],
       "duplication_risk": "low"
+    },
+    {
+      "path": "/accounts",
+      "name": "Accounts",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Unified account view across deals, pilots, health, blockers",
+      "actionability_score": 4,
+      "source": "@nzila/platform-growth-os",
+      "source_contracts_used": ["accounts", "deals"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/ai",
+      "name": "AI Ops",
+      "bucket": "HEALTH",
+      "primary_user": "platform-operator",
+      "actionability": "Monitor cost, performance, quality, ops pressure, monthly governance evidence across apps",
+      "actionability_score": 3,
+      "source": "@nzila/platform-ai-ops",
+      "source_contracts_used": ["ai", "evidence"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/follow-ups",
+      "name": "Follow-ups",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Resolve automated follow-ups triggered by deal stage transitions and checklist gaps",
+      "actionability_score": 5,
+      "source": "@nzila/platform-growth-os",
+      "source_contracts_used": ["deals", "automation"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/ingestion",
+      "name": "Ingestion",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Monitor data ingestion runs for pilot accounts; act on failures",
+      "actionability_score": 4,
+      "source": "@nzila/platform-ingestion",
+      "source_contracts_used": ["ingestion"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/integrations",
+      "name": "Integration Fabric",
+      "bucket": "ATTENTION",
+      "primary_user": "platform-operator",
+      "actionability": "Manage external connections, event subscriptions, deliveries, identity links",
+      "actionability_score": 5,
+      "source": "@nzila/platform-integration-fabric",
+      "source_contracts_used": ["integration"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/partners",
+      "name": "Partners",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Manage partner referral pipeline and commission tracking",
+      "actionability_score": 4,
+      "source": "@nzila/platform-growth-os",
+      "source_contracts_used": ["partners"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/pilots",
+      "name": "Pilots",
+      "bucket": "HEALTH",
+      "primary_user": "platform-operator",
+      "actionability": "View pilot proof overview from live pilot metrics",
+      "actionability_score": 3,
+      "source": "@nzila/platform-pilots",
+      "source_contracts_used": ["pilots", "metrics"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/pipeline",
+      "name": "Pipeline",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Manage Lead → Demo → Pilot → Conversion lifecycle for all products",
+      "actionability_score": 5,
+      "source": "@nzila/platform-growth-os",
+      "source_contracts_used": ["deals", "pipeline"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/proof",
+      "name": "Proof",
+      "bucket": "HEALTH",
+      "primary_user": "deal-operator",
+      "actionability": "Review account health, evidence packs, governance posture for conversion readiness",
+      "actionability_score": 3,
+      "source": "@nzila/platform-procurement-proof",
+      "source_contracts_used": ["evidence", "governance"],
+      "duplication_risk": "medium_with_console_proof_center"
+    },
+    {
+      "path": "/proposals",
+      "name": "Proposals",
+      "bucket": "ATTENTION",
+      "primary_user": "deal-operator",
+      "actionability": "Manage deal proposals, pricing models, conversion readiness",
+      "actionability_score": 4,
+      "source": "@nzila/platform-growth-os",
+      "source_contracts_used": ["deals", "pricing"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/revenue",
+      "name": "Revenue",
+      "bucket": "HEALTH",
+      "primary_user": "platform-operator",
+      "actionability": "View platform-wide revenue breakdown, per-app attribution, subscription metrics",
+      "actionability_score": 3,
+      "source": "@nzila/platform-revenue",
+      "source_contracts_used": ["revenue", "subscription"],
+      "duplication_risk": "low"
+    },
+    {
+      "path": "/streaming",
+      "name": "Streaming",
+      "bucket": "HEALTH",
+      "primary_user": "platform-operator",
+      "actionability": "Monitor live streaming (AWS IVS) and media processing (MediaConvert) infrastructure",
+      "actionability_score": 3,
+      "source": "@nzila/platform-streaming",
+      "source_contracts_used": ["streaming", "media"],
+      "duplication_risk": "low"
     }
   ]
 }

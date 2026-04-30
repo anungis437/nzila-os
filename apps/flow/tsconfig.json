@@ -6,6 +6,7 @@
     "paths": {
       "@/*": ["./*"],
       "@nzila/db": ["../../packages/db/src"],
+      "@nzila/flow-engine": ["../../packages/flow-engine/src"],
       "@nzila/ui": ["../../packages/ui/src"],
       "@nzila/os-core": ["../../packages/os-core/src"],
       "@nzila/os-core/*": ["../../packages/os-core/src/*"],

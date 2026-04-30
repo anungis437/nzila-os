@@ -1,28 +1,167 @@
 {
   "description": "Canonical platform registry for Nzila OS. Source of truth for apps, platform services, shared packages, governance surfaces, and control-plane surfaces.",
   "apps": [
-    { "name": "union-eyes", "path": "apps/union-eyes", "tier": "PRODUCTION", "owner": "union", "domain": "union" },
-    { "name": "flow", "path": "apps/flow", "tier": "PRODUCTION", "owner": "commerce", "domain": "commerce" },
-    { "name": "web", "path": "apps/web", "tier": "PRODUCTION", "owner": "platform", "domain": "platform" },
-    { "name": "partners", "path": "apps/partners", "tier": "PILOT", "owner": "commerce", "domain": "commerce" },
-    { "name": "cfo", "path": "apps/cfo", "tier": "PRODUCTION", "owner": "finance", "domain": "finance" },
-    { "name": "console", "path": "apps/console", "tier": "PILOT", "owner": "platform", "domain": "platform" },
-    { "name": "control-plane", "path": "apps/control-plane", "tier": "PILOT", "owner": "platform", "domain": "platform" },
-    { "name": "zonga", "path": "apps/zonga", "tier": "INCUBATING", "owner": "media", "domain": "media" },
-    { "name": "abr", "path": "apps/abr", "tier": "INCUBATING", "owner": "platform", "domain": "audit" },
-    { "name": "cora", "path": "apps/cora", "tier": "INCUBATING", "owner": "platform", "domain": "compliance" },
-    { "name": "trade", "path": "apps/trade", "tier": "INCUBATING", "owner": "commerce", "domain": "trade" },
-    { "name": "agrimo", "path": "apps/agrimo", "tier": "INCUBATING", "owner": "platform", "domain": "analytics" },
-    { "name": "platform-admin", "path": "apps/platform-admin", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
-    { "name": "orchestrator-api", "path": "apps/orchestrator-api", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
-    { "name": "veridian-admin", "path": "apps/veridian-admin", "tier": "INCUBATING", "owner": "health", "domain": "health" },
-    { "name": "veridian-care", "path": "apps/veridian-care", "tier": "INCUBATING", "owner": "health", "domain": "health" },
-    { "name": "veridian-site", "path": "apps/veridian-site", "tier": "INCUBATING", "owner": "health", "domain": "health" },
-    { "name": "nacp-exams", "path": "apps/nacp-exams", "tier": "EXPERIMENTAL", "owner": "education", "domain": "education" },
-    { "name": "mobility", "path": "apps/mobility", "tier": "EXPERIMENTAL", "owner": "mobility", "domain": "mobility" },
-    { "name": "mobility-client-portal", "path": "apps/mobility-client-portal", "tier": "EXPERIMENTAL", "owner": "mobility", "domain": "mobility" },
-    { "name": "test-scaffold-gp", "path": "apps/test-scaffold-gp", "tier": "EXPERIMENTAL", "owner": "platform", "domain": "testing" },
-    { "name": "weekone", "path": "apps/weekone", "tier": "EXPERIMENTAL", "owner": "platform", "domain": "testing" }
+    {
+      "name": "union-eyes",
+      "path": "apps/union-eyes",
+      "tier": "PRODUCTION",
+      "owner": "union",
+      "domain": "union"
+    },
+    {
+      "name": "flow",
+      "path": "apps/flow",
+      "tier": "PRODUCTION",
+      "owner": "commerce",
+      "domain": "commerce"
+    },
+    {
+      "name": "web",
+      "path": "apps/web",
+      "tier": "PRODUCTION",
+      "owner": "platform",
+      "domain": "platform"
+    },
+    {
+      "name": "partners",
+      "path": "apps/partners",
+      "tier": "PILOT",
+      "owner": "commerce",
+      "domain": "commerce"
+    },
+    {
+      "name": "cfo",
+      "path": "apps/cfo",
+      "tier": "PRODUCTION",
+      "owner": "finance",
+      "domain": "finance"
+    },
+    {
+      "name": "console",
+      "path": "apps/console",
+      "tier": "PILOT",
+      "owner": "platform",
+      "domain": "platform"
+    },
+    {
+      "name": "control-plane",
+      "path": "apps/control-plane",
+      "tier": "PILOT",
+      "owner": "platform",
+      "domain": "platform"
+    },
+    {
+      "name": "zonga",
+      "path": "apps/zonga",
+      "tier": "INCUBATING",
+      "owner": "media",
+      "domain": "media"
+    },
+    {
+      "name": "abr",
+      "path": "apps/abr",
+      "tier": "INCUBATING",
+      "owner": "platform",
+      "domain": "audit"
+    },
+    {
+      "name": "cora",
+      "path": "apps/cora",
+      "tier": "INCUBATING",
+      "owner": "platform",
+      "domain": "compliance"
+    },
+    {
+      "name": "trade",
+      "path": "apps/trade",
+      "tier": "INCUBATING",
+      "owner": "commerce",
+      "domain": "trade"
+    },
+    {
+      "name": "agrimo",
+      "path": "apps/agrimo",
+      "tier": "INCUBATING",
+      "owner": "platform",
+      "domain": "analytics"
+    },
+    {
+      "name": "platform-admin",
+      "path": "apps/platform-admin",
+      "tier": "INCUBATING",
+      "owner": "platform",
+      "domain": "platform"
+    },
+    {
+      "name": "nzila-hq",
+      "path": "apps/nzila-hq",
+      "tier": "EXPERIMENTAL",
+      "owner": "founders",
+      "domain": "executive"
+    },
+    {
+      "name": "orchestrator-api",
+      "path": "apps/orchestrator-api",
+      "tier": "INCUBATING",
+      "owner": "platform",
+      "domain": "platform"
+    },
+    {
+      "name": "veridian-admin",
+      "path": "apps/veridian-admin",
+      "tier": "INCUBATING",
+      "owner": "health",
+      "domain": "health"
+    },
+    {
+      "name": "veridian-care",
+      "path": "apps/veridian-care",
+      "tier": "INCUBATING",
+      "owner": "health",
+      "domain": "health"
+    },
+    {
+      "name": "veridian-site",
+      "path": "apps/veridian-site",
+      "tier": "INCUBATING",
+      "owner": "health",
+      "domain": "health"
+    },
+    {
+      "name": "nacp-exams",
+      "path": "apps/nacp-exams",
+      "tier": "EXPERIMENTAL",
+      "owner": "education",
+      "domain": "education"
+    },
+    {
+      "name": "mobility",
+      "path": "apps/mobility",
+      "tier": "EXPERIMENTAL",
+      "owner": "mobility",
+      "domain": "mobility"
+    },
+    {
+      "name": "mobility-client-portal",
+      "path": "apps/mobility-client-portal",
+      "tier": "EXPERIMENTAL",
+      "owner": "mobility",
+      "domain": "mobility"
+    },
+    {
+      "name": "test-scaffold-gp",
+      "path": "apps/test-scaffold-gp",
+      "tier": "EXPERIMENTAL",
+      "owner": "platform",
+      "domain": "testing"
+    },
+    {
+      "name": "weekone",
+      "path": "apps/weekone",
+      "tier": "EXPERIMENTAL",
+      "owner": "platform",
+      "domain": "testing"
+    }
   ],
   "platform_services": [
     {
@@ -474,78 +613,363 @@
     { "name": "org", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
     { "name": "blob", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
     { "name": "ui", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "otel-core", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "otel-core",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     { "name": "secrets", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
     { "name": "evidence", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "contracts", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
+    {
+      "name": "contracts",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
     { "name": "events", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "observability", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "analytics", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "data-lifecycle", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "tools-runtime", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "ai-core", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "observability",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "analytics",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "data-lifecycle",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "tools-runtime",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "ai-core",
+      "category": "AI_INTELLIGENCE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     { "name": "ai-sdk", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "STABLE" },
-    { "name": "ai-registry", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "ml-core", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "ml-sdk", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "commerce-core", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-audit", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-db", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-events", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-evidence", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-governance", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-integration-tests", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-observability", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-services", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
-    { "name": "commerce-state", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "STABLE" },
+    {
+      "name": "ai-registry",
+      "category": "AI_INTELLIGENCE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "ml-core",
+      "category": "AI_INTELLIGENCE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "ml-sdk",
+      "category": "AI_INTELLIGENCE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "commerce-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-audit",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-db",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-events",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-evidence",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-governance",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-integration-tests",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-observability",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-services",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "commerce-state",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
     { "name": "agri-core", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
-    { "name": "agri-adapters", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
+    {
+      "name": "agri-adapters",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
     { "name": "agri-db", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
-    { "name": "agri-events", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
-    { "name": "agri-intelligence", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
-    { "name": "agri-traceability", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
-    { "name": "trade-core", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "EVOLVING" },
-    { "name": "trade-adapters", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "EVOLVING" },
-    { "name": "trade-cars", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "EVOLVING" },
-    { "name": "trade-db", "category": "DOMAIN_SHARED", "owner": "commerce", "stability": "EVOLVING" },
-    { "name": "mobility-core", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "mobility-ai", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "mobility-case-engine", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "mobility-compliance", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "mobility-family", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "mobility-programs", "category": "DOMAIN_SHARED", "owner": "mobility", "stability": "EXPERIMENTAL" },
-    { "name": "nacp-core", "category": "DOMAIN_SHARED", "owner": "education", "stability": "EXPERIMENTAL" },
-    { "name": "zonga-core", "category": "DOMAIN_SHARED", "owner": "media", "stability": "EVOLVING" },
-    { "name": "payments-stripe", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
+    {
+      "name": "agri-events",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "agri-intelligence",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "agri-traceability",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "trade-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "trade-adapters",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "trade-cars",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "trade-db",
+      "category": "DOMAIN_SHARED",
+      "owner": "commerce",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "mobility-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "mobility-ai",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "mobility-case-engine",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "mobility-compliance",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "mobility-family",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "mobility-programs",
+      "category": "DOMAIN_SHARED",
+      "owner": "mobility",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "nacp-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "education",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "name": "zonga-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "media",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "payments-stripe",
+      "category": "APP_SUPPORT",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
     { "name": "fx", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
     { "name": "tax", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
     { "name": "finops", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
     { "name": "qbo", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
-    { "name": "pricing-engine", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
+    {
+      "name": "pricing-engine",
+      "category": "APP_SUPPORT",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
     { "name": "webhooks", "category": "APP_SUPPORT", "owner": "platform", "stability": "STABLE" },
-    { "name": "comms-email", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "comms-sms", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "comms-push", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "crm-hubspot", "category": "APP_SUPPORT", "owner": "commerce", "stability": "EVOLVING" },
-    { "name": "chatops-slack", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "chatops-teams", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-core", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-db", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-hubspot", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-m365", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-runtime", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "integrations-whatsapp", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "automation", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
+    {
+      "name": "comms-email",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "comms-sms",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "comms-push",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "crm-hubspot",
+      "category": "APP_SUPPORT",
+      "owner": "commerce",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "chatops-slack",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "chatops-teams",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-core",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-db",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-hubspot",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-m365",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-runtime",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "integrations-whatsapp",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "automation",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
     { "name": "cli", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
-    { "name": "scripts-book", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" }
+    {
+      "name": "scripts-book",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    }
   ],
   "governance_surfaces": [
-    { "name": "governance-profiles", "path": "governance/profiles", "purpose": "Governance profile definitions and evaluation" },
-    { "name": "governance-exceptions", "path": "governance/exceptions", "purpose": "Exception schemas and active waivers" },
-    { "name": "governance-reports", "path": "governance/reports", "purpose": "Alignment and enforcement audit reports" },
-    { "name": "governance-ai", "path": "governance/ai", "purpose": "AI governance policies, data governance, safety protocols" },
-    { "name": "governance-security", "path": "governance/security", "purpose": "HSM, mTLS, and threat model documentation" }
+    {
+      "name": "governance-profiles",
+      "path": "governance/profiles",
+      "purpose": "Governance profile definitions and evaluation"
+    },
+    {
+      "name": "governance-exceptions",
+      "path": "governance/exceptions",
+      "purpose": "Exception schemas and active waivers"
+    },
+    {
+      "name": "governance-reports",
+      "path": "governance/reports",
+      "purpose": "Alignment and enforcement audit reports"
+    },
+    {
+      "name": "governance-ai",
+      "path": "governance/ai",
+      "purpose": "AI governance policies, data governance, safety protocols"
+    },
+    {
+      "name": "governance-security",
+      "path": "governance/security",
+      "purpose": "HSM, mTLS, and threat model documentation"
+    }
   ],
   "control_plane_surfaces": [
     { "route": "/overview", "bucket": "HEALTH", "source": "aggregated" },
@@ -560,6 +984,18 @@
     { "route": "/agents", "bucket": "ACTION", "source": "platform-agent-workflows" },
     { "route": "/modules", "bucket": "HEALTH", "source": "module-registry" },
     { "route": "/procurement", "bucket": "ACTION", "source": "platform-procurement-proof" },
-    { "route": "/architecture", "bucket": "HEALTH", "source": "architecture-checks" }
+    { "route": "/architecture", "bucket": "HEALTH", "source": "architecture-checks" },
+    { "route": "/accounts", "bucket": "ATTENTION", "source": "platform-growth-os" },
+    { "route": "/ai", "bucket": "HEALTH", "source": "platform-ai-ops" },
+    { "route": "/follow-ups", "bucket": "ATTENTION", "source": "platform-growth-os" },
+    { "route": "/ingestion", "bucket": "ATTENTION", "source": "platform-ingestion" },
+    { "route": "/integrations", "bucket": "ATTENTION", "source": "platform-integration-fabric" },
+    { "route": "/partners", "bucket": "ATTENTION", "source": "platform-growth-os" },
+    { "route": "/pilots", "bucket": "HEALTH", "source": "platform-pilots" },
+    { "route": "/pipeline", "bucket": "ATTENTION", "source": "platform-growth-os" },
+    { "route": "/proof", "bucket": "HEALTH", "source": "platform-procurement-proof" },
+    { "route": "/proposals", "bucket": "ATTENTION", "source": "platform-growth-os" },
+    { "route": "/revenue", "bucket": "HEALTH", "source": "platform-revenue" },
+    { "route": "/streaming", "bucket": "HEALTH", "source": "platform-streaming" }
   ]
 }

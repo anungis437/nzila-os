@@ -1,6 +1,6 @@
 {
   "generated_from": "governance/portfolio/product-catalog.json",
-  "generated_at": "2026-04-29",
+  "generated_at": "2026-04-30",
   "status": "frozen",
   "exposure": "internal",
   "data_integrity": "partial",
@@ -10,5 +10,5 @@
   "gtm_posture": "sunset",
   "proof_level": "none",
   "revenue_status": "sunsetting",
-  "last_validated": "2026-04-29"
+  "last_validated": "2026-04-30"
 }

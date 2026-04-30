@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 22,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 24,
   "products": [
     {
       "slug": "abr",
@@ -45,6 +45,12 @@
       "publicVisible": true
     },
     {
+      "slug": "maestria",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
       "slug": "mobility",
       "tier": 4,
       "tierLabel": "lab",
@@ -60,6 +66,12 @@
       "slug": "nacp-exams",
       "tier": 4,
       "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "nzila-hq",
+      "tier": 3,
+      "tierLabel": "component",
       "publicVisible": false
     },
     {

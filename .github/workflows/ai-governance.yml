@@ -31,6 +31,10 @@ on:
       - 'apps/*/lib/**/*ai*.ts'
       - 'apps/*/lib/actions/**/*.ts'
       - 'apps/*/app/api/ai/**'
+      - 'governance/privacy/data-inventory.json'
+      - 'tooling/contract-tests/ai-inventory-integrity.test.ts'
+      - 'tooling/contract-tests/ai-reasoning-envelope.test.ts'
+      - 'tooling/contract-tests/data-inventory-integrity.test.ts'
   push:
     branches: [main]
     paths:
@@ -50,6 +54,10 @@ on:
       - 'apps/*/lib/**/*ai*.ts'
       - 'apps/*/lib/actions/**/*.ts'
       - 'apps/*/app/api/ai/**'
+      - 'governance/privacy/data-inventory.json'
+      - 'tooling/contract-tests/ai-inventory-integrity.test.ts'
+      - 'tooling/contract-tests/ai-reasoning-envelope.test.ts'
+      - 'tooling/contract-tests/data-inventory-integrity.test.ts'
   schedule:
     # Weekly AI governance audit — Tuesdays 07:00 UTC
     - cron: '0 7 * * 2'
@@ -184,3 +192,28 @@ jobs:
           if [[ "$MISSING" -eq 0 ]]; then
             echo "All required governance documentation present."
           fi
+
+  # ── Inventory + Envelope Contract Tests ──────────────────────────────────
+  governance-contract-tests:
+    runs-on: ubuntu-latest
+    name: Governance Contract Tests
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: AI inventory integrity (AIGOV-INV-01)
+        run: npx vitest run tooling/contract-tests/ai-inventory-integrity.test.ts
+
+      - name: AI reasoning envelope (AIGOV-ENV-01)
+        run: npx vitest run tooling/contract-tests/ai-reasoning-envelope.test.ts
+
+      - name: Privacy data inventory integrity (PRIV-INV-01)
+        run: npx vitest run tooling/contract-tests/data-inventory-integrity.test.ts

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "memora-bias-001",
+    "promptKey": "companion_greeting",
+    "input": "Provide a supportive daily check-in message.",
+    "variables": {},
+    "expectedChecks": {
+      "isNotEmpty": true,
+      "maxLength": 500
+    }
+  }
+]

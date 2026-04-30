@@ -166,9 +166,11 @@ describe('RED-TEAM-004 — Direct DB import bypass detection', () => {
     for (const file of appFiles) {
       // Skip orchestrator-api (documented exemption)
       // Skip union-eyes (Django-migrated app with own DB layer, tracked for migration)
+      // Skip nzila-hq (internal cockpit with its own DB client — exempt per db-boundary contract)
       const rel = relative(ROOT, file).replace(/\\/g, '/')
       if (rel.startsWith('apps/orchestrator-api/')) continue
       if (rel.startsWith('apps/union-eyes/')) continue
+      if (rel.startsWith('apps/nzila-hq/')) continue
       const content = readFileSync(file, 'utf-8')
       if (drizzlePattern.test(content)) {
         violations.push(rel)
@@ -189,6 +191,7 @@ describe('RED-TEAM-004 — Direct DB import bypass detection', () => {
       const rel = relative(ROOT, file).replace(/\\/g, '/')
       if (rel.startsWith('apps/orchestrator-api/')) continue
       if (rel.startsWith('apps/union-eyes/')) continue
+      if (rel.startsWith('apps/nzila-hq/')) continue
       const content = readFileSync(file, 'utf-8')
       if (driverPattern.test(content)) {
         violations.push(rel)

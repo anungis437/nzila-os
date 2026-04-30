@@ -10,5 +10,8 @@
     "apps/web",
     "packages/platform-*"
   ],
-  "forbidden_dependents": []
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
 }

@@ -38,6 +38,7 @@ audit trails, and lets contract tests enforce structural invariants.
 | **veridian-site** | **TS/Drizzle** | Next.js app router + platform-shared packages | — | Public-facing Veridian marketing and trust surface |
 | **web** | **None** | No DB | — | Static/marketing |
 | **orchestrator-api** | **TS/Drizzle** | Lazy `getDb()` (Fastify) | — | API-key authed, not a business app |
+| **nzila-hq** | **TS/Drizzle** | `server/db/client.ts` (Drizzle) | — | INCUBATING executive cockpit — scoped DB, PILOT promotion gate |
 | **union-eyes** | **Django** | Django ORM (12 apps) | TS/Drizzle (read proxy) | See §2 |
 | **abr** | **Django** | Django ORM (10 apps) | TS wired but not active | See §2 |
 

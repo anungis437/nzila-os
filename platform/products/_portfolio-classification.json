@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedAt": "2026-04-30T00:00:00.000Z",
   "flagship": [
     "abr",
     "flow",
@@ -12,12 +12,14 @@
   "component": [
     "console",
     "control-plane",
+    "nzila-hq",
     "orchestrator-api",
     "web"
   ],
   "lab": [
     "agrimo",
     "cora",
+    "maestria",
     "mobility",
     "nacp-exams",
     "trade",

@@ -1,12 +1,11 @@
 /**
- * Intelligence & Insights module page.
- * Accessible at /{locale}/features/ai-workbench — fully translated.
+ * Intelligence feature page.
+ * Accessible at /{locale}/features/ai-workbench.
  */
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
 import {
   Brain,
   Search,
@@ -18,18 +17,65 @@ import {
   Scale,
 } from 'lucide-react';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'marketing.features.aiWorkbench' });
-  return { title: t('pageTitle'), description: t('pageDescription') };
-}
+export const metadata: Metadata = {
+  title: 'Intelligence | UnionEyes',
+  description:
+    'Research, analytics, reporting, and AI-assisted decision support for union teams that need better context before they act.',
+};
 
-const capIcons = [Scale, Search, FileText, Brain, Eye];
-const safeIcons = [ToggleRight, ShieldCheck, Scale];
+const capabilities = [
+  {
+    icon: Search,
+    title: 'Precedent and pattern research',
+    description:
+      'Search similar matters, supporting materials, and recurring issues faster than manual review across disconnected records.',
+  },
+  {
+    icon: FileText,
+    title: 'CBA and document analysis',
+    description:
+      'Pull clauses, obligations, and key references into context so representatives do not lose time searching for the right language.',
+  },
+  {
+    icon: Brain,
+    title: 'AI-assisted decision support',
+    description:
+      'Optional AI helps summarize records, draft working notes, and surface useful signals without replacing human judgment.',
+  },
+  {
+    icon: Scale,
+    title: 'Case brief preparation',
+    description:
+      'Turn case history into structured briefings that are easier to review, discuss, and defend internally.',
+  },
+  {
+    icon: Eye,
+    title: 'Leadership reporting',
+    description:
+      'Executives and officers get the context behind trends, not just dashboards without explanation.',
+  },
+];
+
+const safeguards = [
+  {
+    icon: ToggleRight,
+    title: 'Human controlled',
+    description:
+      'Recommendations assist stewards, LROs, and officers. They do not decide outcomes for them.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Governed access',
+    description:
+      'Admins decide which intelligence capabilities are enabled and who can use them.',
+  },
+  {
+    icon: Scale,
+    title: 'Auditable use',
+    description:
+      'Research and generated support remain visible within the governed operating model instead of becoming black-box advice.',
+  },
+];
 
 export default async function LocaleAIWorkbenchPage({
   params,
@@ -37,19 +83,6 @@ export default async function LocaleAIWorkbenchPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'marketing.features.aiWorkbench' });
-
-  const capabilities = capIcons.map((icon, i) => ({
-    icon,
-    title: t(`cap${i + 1}Title`),
-    description: t(`cap${i + 1}Desc`),
-  }));
-
-  const safeguards = safeIcons.map((icon, i) => ({
-    icon,
-    title: t(`safe${i + 1}Title`),
-    description: t(`safe${i + 1}Desc`),
-  }));
 
   return (
     <div className="min-h-screen bg-white">
@@ -57,13 +90,15 @@ export default async function LocaleAIWorkbenchPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-sm text-emerald-700 font-medium mb-6">
             <Brain className="h-4 w-4" />
-            <span>{t('badge')}</span>
+            <span>Research & Reporting Surface</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
-            {t('heroHeading')}
+            Intelligence gives union teams better context before they act
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            {t('heroDescription')}
+            This is not just an AI workbench. Intelligence brings together research,
+            reporting, document analysis, and optional AI assistance to support better
+            stewardship and leadership decisions.
           </p>
         </div>
       </header>
@@ -71,7 +106,7 @@ export default async function LocaleAIWorkbenchPage({
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <section className="mb-20">
           <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
-            {t('capabilitiesHeading')}
+            What Intelligence is for
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {capabilities.map((cap) => (
@@ -93,10 +128,10 @@ export default async function LocaleAIWorkbenchPage({
 
         <section className="mb-20 bg-slate-50 rounded-2xl border border-slate-200 p-10">
           <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">
-            {t('safeguardsHeading')}
+            Governed by design
           </h2>
           <p className="text-slate-600 text-center mb-8 max-w-2xl mx-auto">
-            {t('safeguardsDescription')}
+            Intelligence is advisory and role-controlled. UnionEyes keeps human judgment, entitlements, and traceability at the center.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {safeguards.map((s) => (
@@ -111,23 +146,23 @@ export default async function LocaleAIWorkbenchPage({
 
         <section className="text-center bg-slate-50 rounded-2xl border border-slate-200 p-10">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            {t('ctaHeading')}
+            See how Intelligence supports real representation work
           </h2>
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
-            {t('ctaDescription')}
+            Intelligence is valuable because it is connected to Inbox, Work, and Outcomes, not because it is a standalone AI demo.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm"
             >
-              {t('ctaPrimary')} <ArrowRight className="h-4 w-4" />
+              Request a Demo <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href={`/${locale}/features/grievance-tracking`}
+              href={`/${locale}/features/analytics`}
               className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-sm"
             >
-              {t('ctaSecondary')}
+              See Outcomes
             </Link>
           </div>
         </section>

@@ -36,7 +36,7 @@ pnpm build              # Build everything
 ## Repo Structure
 
 ```
-apps/              22 applications
+apps/              24 applications
 packages/          170 shared libraries (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools

@@ -16,40 +16,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '@/components/language-switcher';
 
 const navigation = [
-  { name: 'Home',                href: '/' },
-  { name: 'Story',               href: '/story' },
-  { name: 'Pricing',             href: '/pricing' },
-  { name: 'Trust & Compliance',  href: '/en-CA/trust' },
-  { name: 'Case Studies',        href: '/case-studies' },
-  { name: 'Contact',             href: '/contact' },
+  { name: 'Story',   href: '/story' },
+  { name: 'Pricing', href: '/pricing' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 const platformLinks = [
-  { name: 'Governance & Oversight', href: '/en-CA/trust' },
-  { name: 'Case Management',       href: '/features/grievance-tracking' },
-  { name: 'Member Portal',         href: '/features/member-portal' },
-  { name: 'Intelligence',          href: '/features/ai-workbench' },
-  { name: 'Financial Allocation',  href: '/features/analytics' },
+  { name: 'Inbox',        href: '/features/inbox' },
+  { name: 'Priorities',   href: '/features/priorities' },
+  { name: 'Work',         href: '/features/grievance-tracking' },
+  { name: 'Intelligence', href: '/features/ai-workbench' },
+  { name: 'Outcomes',     href: '/features/analytics' },
 ];
 
-const roleLinks = [
-  { name: 'For Representatives',  href: '/en-CA/for-representatives' },
-  { name: 'For Leadership',       href: '/en-CA/for-leadership' },
-  { name: 'For Federations',      href: '/en-CA/for-federations' },
-  { name: 'For CLC',              href: '/en-CA/for-clc' },
-  { name: 'For Members',          href: '/en-CA/for-members' },
-];
 
 export default function SiteNavigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [platformOpen, setPlatformOpen] = useState(false);
-  const [rolesOpen, setRolesOpen] = useState(false);
   const [mobilePlatformOpen, setMobilePlatformOpen] = useState(false);
-  const [mobileRolesOpen, setMobileRolesOpen] = useState(false);
   const platformTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const rolesTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   /* ── Scroll-aware glass effect ── */
   useEffect(() => {
@@ -110,10 +97,8 @@ export default function SiteNavigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden xl:flex items-center space-x-5 whitespace-nowrap">
-            {navigation.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== '/' && pathname?.startsWith(item.href));
+            {navigation.slice(0, 1).map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(item.href);
               return (
                 <Link
                   key={item.name}
@@ -139,7 +124,7 @@ export default function SiteNavigation() {
               );
             })}
 
-            {/* Platform dropdown */}
+            {/* Modules dropdown */}
             <div
               className="relative"
               onMouseEnter={() => { clearTimeout(platformTimeout.current); setPlatformOpen(true); }}
@@ -188,54 +173,32 @@ export default function SiteNavigation() {
               </AnimatePresence>
             </div>
 
-            {/* Who It's For dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => { clearTimeout(rolesTimeout.current); setRolesOpen(true); }}
-              onMouseLeave={() => { rolesTimeout.current = setTimeout(() => setRolesOpen(false), 150); }}
-            >
-              <button
-                className={`text-sm font-medium transition-colors relative py-1 inline-flex items-center gap-1 ${
-                  pathname?.startsWith('/en-CA/for-')
-                    ? scrolled ? 'text-electric' : 'text-white'
-                    : scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'
-                }`}
-              >
-                Who It&apos;s For
-                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${rolesOpen ? 'rotate-180' : ''}`} />
-                {pathname?.startsWith('/en-CA/for-') && (
-                  <motion.div
-                    layoutId="ue-nav-roles-indicator"
-                    className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-electric rounded-full"
-                  />
-                )}
-              </button>
-              <AnimatePresence>
-                {rolesOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
-                  >
-                    {roleLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`block px-4 py-2.5 text-sm truncate transition-colors ${
-                          pathname === link.href
-                            ? 'text-electric bg-electric/5 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-navy'
-                        }`}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {navigation.slice(1).map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(item.href);
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors relative py-1 ${
+                    isActive
+                      ? scrolled
+                        ? 'text-electric'
+                        : 'text-white'
+                      : scrolled
+                      ? 'text-gray-600 hover:text-navy'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  {item.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="ue-nav-indicator"
+                      className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-electric rounded-full"
+                    />
+                  )}
+                </Link>
+              );
+            })}
 
             <div className="w-px h-6 bg-gray-300/30" />
 
@@ -269,7 +232,6 @@ export default function SiteNavigation() {
                 scrolled ? 'text-gray-700' : 'text-white'
               }`}
               aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -304,10 +266,8 @@ export default function SiteNavigation() {
               className="xl:hidden bg-white border-t border-gray-100 shadow-2xl relative z-50"
             >
               <div className="px-4 pt-3 pb-5 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
-                {navigation.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== '/' && pathname?.startsWith(item.href));
+                {navigation.slice(0, 1).map((item) => {
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href);
                   return (
                     <Link
                       key={item.name}
@@ -324,7 +284,7 @@ export default function SiteNavigation() {
                   );
                 })}
 
-                {/* Platform section (mobile) */}
+                {/* Modules section (mobile) */}
                 <button
                   onClick={() => setMobilePlatformOpen(!mobilePlatformOpen)}
                   className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors ${
@@ -355,36 +315,23 @@ export default function SiteNavigation() {
                   </div>
                 )}
 
-                {/* Who It's For (mobile) */}
-                <button
-                  onClick={() => setMobileRolesOpen(!mobileRolesOpen)}
-                  className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                    pathname?.startsWith('/en-CA/for-')
-                      ? 'bg-electric/10 text-electric'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Who It&apos;s For
-                  <ChevronDown className={`h-4 w-4 transition-transform ${mobileRolesOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {mobileRolesOpen && (
-                  <div className="pl-4 space-y-1">
-                    {roleLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                          pathname === link.href
-                            ? 'text-electric bg-electric/5 font-medium'
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                {navigation.slice(1).map((item) => {
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                        isActive
+                          ? 'bg-electric/10 text-electric'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
 
                 <div className="pt-2 mt-2 border-t border-gray-100 space-y-1">
                   <Link

@@ -1,0 +1,22 @@
+{
+  "slug": "maestria",
+  "name": "Maestria",
+  "tier": 4,
+  "tierLabel": "lab",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "growth",
+  "telemetryRequired": true,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "internal-only",
+  "proofLevel": "internal-proof",
+  "strategicRole": "Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs.",
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}
