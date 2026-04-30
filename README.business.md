@@ -14,7 +14,7 @@ Nzila OS is **not a SaaS product we sell**. It is the internal operating fabric 
 | **17 production apps** | Customer-facing products + internal control surfaces |
 | **170+ shared packages** | 57 platform-* primitives + 113 domain libraries |
 | **8,000+ contract tests** | Architectural invariants enforced on every commit |
-| **41 CI/CD workflows** | Governance, security, deployment, compliance |
+| **47 CI/CD workflows** | Governance, security, deployment, compliance |
 | **5 governance gates** | Dependency audit, secret scan, CodeQL, Trivy, AI red-team |
 | **One auth authority** | `@nzila/platform-auth` (Argon2id passwords + optional Entra SSO) |
 | **One audit substrate** | Hash-chained, evidence-sealed, residency-scoped |
@@ -274,7 +274,7 @@ Recommendations are **ranked, deduped, and tracked**. Each recommendation has a 
 Every Nzila product ships with three things that most internal platforms never produce:
 
 1. **A continuous evidence trail** — hash-chained audit + sealed evidence packs that an external auditor can verify independently.
-2. **A green CI pipeline as the contract** — 8,000+ invariant tests + 41 governance workflows must pass before any change reaches production.
+2. **A green CI pipeline as the contract** — 8,000+ invariant tests + 47 governance workflows must pass before any change reaches production.
 3. **A residency & retention declaration** — every dataset has a published retention class, deletion method, and residency region, and the contract tests fail if a new table sneaks in without one.
 
 That is the Nzila OS commitment: **operate with the audit trail of a regulated bank and the velocity of a startup.**

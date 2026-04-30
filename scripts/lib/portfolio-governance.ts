@@ -1,5 +1,5 @@
 /* eslint-disable security/detect-non-literal-fs-filename */
-import { mkdirSync, existsSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { mkdirSync, existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { dirname, join, relative } from 'node:path'
 
@@ -955,15 +955,19 @@ export function detectArtifactDrift(
       continue
     }
 
-    const expected = ignoreDailyStamps
-      ? artifact.content
-          .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
-          .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
-      : artifact.content
+    const normalize = (s: string): string =>
+      s
+        .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
+        .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
 
-    const actualSize = statSync(absolutePath).size
-    const expectedSize = Buffer.byteLength(expected, 'utf8')
-    if (actualSize !== expectedSize) drift.push(artifactPath)
+    if (ignoreDailyStamps) {
+      const actual = readFileSync(absolutePath, 'utf8')
+      if (normalize(actual) !== normalize(artifact.content)) drift.push(artifactPath)
+    } else {
+      const actualSize = statSync(absolutePath).size
+      const expectedSize = Buffer.byteLength(artifact.content, 'utf8')
+      if (actualSize !== expectedSize) drift.push(artifactPath)
+    }
   }
 
   return drift

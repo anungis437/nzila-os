@@ -1,1 +1,2 @@
-export { default, metadata, dynamic } from '../../../../(dashboard)/governance/policy-regression/page'
+export { default, metadata } from '../../../../(dashboard)/governance/policy-regression/page'
+export const dynamic = 'force-dynamic'

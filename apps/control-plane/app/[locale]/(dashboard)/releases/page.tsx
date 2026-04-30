@@ -1,1 +1,2 @@
-export { default, metadata, dynamic } from '../../../(dashboard)/releases/page'
+export { default, metadata } from '../../../(dashboard)/releases/page'
+export const dynamic = 'force-dynamic'
