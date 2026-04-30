@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-25T16:44:39.978Z",
-  "commitSha": "b452107a",
+  "timestamp": "2026-04-30T12:53:53.238Z",
+  "commitSha": "1e4b5e08",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,28 +14,28 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 2077
+      "durationMs": 2938
     },
     {
       "id": "ORG-REGISTRY",
       "name": "Org boundary: Org-scoped registry exists and consistent",
       "status": "PASS",
       "details": "Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "HASH-CHAIN",
       "name": "Hash chain: Module + append-only tables tracked",
       "status": "PASS",
       "details": "Hash module exists, 3 append-only tables tracked",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "GOVERNANCE-PROFILES",
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUTH-MIDDLEWARE",
@@ -51,28 +51,28 @@
       "status": "PASS",
       "details": "All apps use withAudit in API guards",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUDIT-MANDATORY",
       "name": "Audited writes: Audit module blocks on failure",
       "status": "PASS",
       "details": "Audit emission is mandatory (blocks on failure)",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-SEALING",
       "name": "Evidence: verifySeal exported from seal module",
       "status": "PASS",
       "details": "generateSeal + verifySeal both exported",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-WORKFLOW-SEAL",
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -96,14 +96,14 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 30
+      "durationMs": 9
     },
     {
       "id": "CI-GOVERNANCE-WF",
       "name": "CI gates: Governance workflow exists",
       "status": "PASS",
       "details": "nzila-governance.yml + ci.yml both present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "TRIVY-BLOCKING",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 7
+      "durationMs": 8
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -133,8 +133,8 @@
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "220 contract test files (require ≥20)",
-      "durationMs": 3
+      "details": "233 contract test files (require ≥20)",
+      "durationMs": 4
     },
     {
       "id": "CODEOWNERS",
@@ -142,29 +142,29 @@
       "status": "PASS",
       "details": "All governance paths have code ownership",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "RED-TEAM-WORKFLOW",
       "name": "Red-team: Nightly red-team workflow exists",
       "status": "PASS",
       "details": "Red-team nightly workflow with schedule trigger present",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "RED-TEAM-EVIDENCE",
       "name": "Red-team: Outputs included as evidence artifacts",
       "status": "PASS",
       "details": "Red-team outputs uploaded as artifacts, test files present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "STUDIO-PLATFORM-SCORE",
       "name": "Studio maturity: Every app scores ≥ 7/10 on platform integration",
       "status": "PASS",
-      "details": "All 19 apps score ≥ 7/10 on platform integration",
+      "details": "All 24 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 13
+      "durationMs": 14
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -172,7 +172,7 @@
       "status": "PASS",
       "details": "All apps with AI claims have runtime ai-sdk wiring",
       "violations": [],
-      "durationMs": 19
+      "durationMs": 20
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -180,7 +180,7 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 2680
+      "durationMs": 3392
     }
   ],
   "environment": {
@@ -189,5 +189,5 @@
     "ci": false,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 4956
+  "totalDurationMs": 6511
 }
