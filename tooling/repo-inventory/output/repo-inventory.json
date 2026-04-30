@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-04-28T00:00:00.000Z",
-  "appCount": 23,
-  "packageCount": 181,
-  "workspacePackageCount": 208,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "appCount": 24,
+  "packageCount": 188,
+  "workspacePackageCount": 216,
   "workflowCount": 46,
   "contractTestCount": 233,
-  "tsTestFileCount": 1278,
+  "tsTestFileCount": 1290,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 247
+      "codeFileCount": 248
     },
     {
       "name": "agrimo",
@@ -266,6 +266,7 @@
         "config",
         "crm-hubspot",
         "db",
+        "flow-engine",
         "governed-workflow",
         "ml-sdk",
         "os-core",
@@ -282,6 +283,24 @@
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
       "codeFileCount": 346
+    },
+    {
+      "name": "maestria",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3021,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "flow-engine",
+        "os-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 73
     },
     {
       "name": "mobility",
@@ -549,7 +568,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3187
+      "codeFileCount": 3191
     },
     {
       "name": "veridian-admin",
@@ -624,7 +643,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 82
+      "codeFileCount": 81
     },
     {
       "name": "weekone",
