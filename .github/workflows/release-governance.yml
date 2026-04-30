@@ -36,8 +36,8 @@ jobs:
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add governance/releases/release-state.json
-          git commit -m "chore(release): update release state" || true
+          git add -A
+          git diff --cached --quiet || git commit -m "chore(release): update release state [skip ci]"
 
       - name: Auto tag release
         run: pnpm release:tag --bump patch --allow-unsigned
