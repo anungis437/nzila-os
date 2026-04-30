@@ -40,6 +40,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git add -A
           git diff --cached --quiet || git commit -m "chore(release): update release state [skip ci]"
+          git push origin main
 
       - name: Auto tag release
         run: pnpm release:tag --bump patch --allow-unsigned
