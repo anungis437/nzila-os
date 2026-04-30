@@ -3,7 +3,6 @@ import { authorize } from '@/lib/api-authorization'
 
 const requireOrgAccess = authorize
 import { listOperationalRecords } from '@/lib/maestria-persistence'
-import { renderProposalPdf } from '@/lib/proposal-pdf'
 
 export async function GET(
   request: NextRequest,
@@ -23,6 +22,8 @@ export async function GET(
   const total = typeof payload.total === 'number' ? payload.total : 0
   const depositRequired = typeof payload.depositRequired === 'number' ? payload.depositRequired : total * 0.4
   const locale = searchParams.locale === 'fr-CA' ? 'fr-CA' : 'en-CA'
+
+  const { renderProposalPdf } = await import('@/lib/proposal-pdf')
 
   const pdf = await renderProposalPdf({
     proposalId: proposal.id,

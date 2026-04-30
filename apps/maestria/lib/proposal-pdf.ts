@@ -1,4 +1,4 @@
-import PDFDocument from 'pdfkit'
+import PDFDocument from 'pdfkit/js/pdfkit.js'
 
 export interface ProposalPdfInput {
   proposalId: string
