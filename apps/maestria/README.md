@@ -1,6 +1,6 @@
 # Maestria
 
-Premium Canadian SME operating system built on Flow Engine. Maestria provides a portfolio-grade commerce and operations platform for small and medium-sized enterprises, with integrated flow automation, connector management, and AI-assisted readiness tooling.
+Premium Canadian SME operating system built on Flow Engine. Maestria provides a portfolio-grade commerce and operations platform for small and medium-sized enterprises, with integrated flow automation, connector management, and automated readiness tooling.
 
 - **Port**: 3021
 - **Stack**: Next.js 16 + next-intl + Flow Engine

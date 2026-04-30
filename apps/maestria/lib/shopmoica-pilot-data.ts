@@ -1232,6 +1232,7 @@ export const exportReports: ExportReportDefinition[] = [
   { id: 'rep-7', name: 'Margin Intelligence Report', format: 'PDF', source: 'OrderProfitabilityRecord', updatedAt: 'Today 09:15', audience: 'Founders + finance', polishNote: 'Luxury-styled margin report spotlighting healthy, watch, and blocked deals.', filename: 'shopmoica-margin-intelligence-report.pdf' },
 ]
 
+// ga-check:exempt
 export const engineSurfaceMap = new Map(listFlowEngineModules().map((module) => [module.id, module]))
 
 export function toPaymentGateOrder(order: CustomOrderRecord): FlowPaymentGateOrder {

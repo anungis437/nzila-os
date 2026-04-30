@@ -60,7 +60,7 @@ export default function AnimatedFeatures() {
               </p>
               <ul className="mt-4 space-y-2">
                 {module.bullets.map((bullet) => (
-                  <li key={b} className="flex items-center gap-2 text-sm text-gray-700">
+                  <li key={bullet} className="flex items-center gap-2 text-sm text-gray-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-electric" />
                     {bullet}
                   </li>
