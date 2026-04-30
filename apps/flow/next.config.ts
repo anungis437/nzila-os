@@ -55,6 +55,7 @@ const nextConfig: NextConfig = {
     "@nzila/commerce-core",
     "@nzila/commerce-services",
     "@nzila/commerce-audit",
+    "@nzila/flow-engine",
     "@nzila/pricing-engine",
   ],
   output: process.platform === 'win32' ? undefined : 'standalone',

@@ -17,6 +17,93 @@
     ],
     "operational_registry_source": "packages/platform-contracts/src/registry.ts"
   },
+  "engines": [
+    {
+      "id": "flow-engine",
+      "name": "Flow Engine",
+      "status": "incubating",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Reusable internal workflow engine for intake, routing, approvals, quoting, fulfilment tasks, and automations.",
+      "capabilities": [
+        "flow.intake",
+        "flow.routing",
+        "flow.approvals",
+        "flow.quoting",
+        "flow.po-invoice",
+        "flow.tasks",
+        "flow.status",
+        "flow.automations"
+      ],
+      "consumers": [
+        "flow",
+        "maestria"
+      ],
+      "lifecycle_notes": [
+        "Extracted from apps/flow as the canonical workflow engine.",
+        "Products may consume only the public SDK surface."
+      ]
+    },
+    {
+      "id": "cognition-engine",
+      "name": "Cognition Engine",
+      "status": "incubating",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Shared reasoning, anomaly, and decision-support engine consumed by portfolio products.",
+      "capabilities": [
+        "cognition.reasoning",
+        "cognition.decisioning",
+        "cognition.anomaly-detection",
+        "cognition.policy-support"
+      ],
+      "consumers": [
+        "union-eyes",
+        "veridian-care",
+        "maestria",
+        "console"
+      ],
+      "lifecycle_notes": []
+    },
+    {
+      "id": "ledger-engine",
+      "name": "Ledger Engine",
+      "status": "stable",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Tamper-evident financial and operational evidence ledger for regulated workflows.",
+      "capabilities": [
+        "ledger.audit-trail",
+        "ledger.retention",
+        "ledger.reconciliation"
+      ],
+      "consumers": [
+        "union-eyes",
+        "flow",
+        "cfo",
+        "maestria"
+      ],
+      "lifecycle_notes": []
+    },
+    {
+      "id": "identity-engine",
+      "name": "Identity Engine",
+      "status": "stable",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Platform identity, session, and organization-resolution engine for all products.",
+      "capabilities": [
+        "identity.authentication",
+        "identity.organization-resolution",
+        "identity.authorization"
+      ],
+      "consumers": [
+        "web",
+        "console",
+        "flow",
+        "maestria",
+        "union-eyes",
+        "partners"
+      ],
+      "lifecycle_notes": []
+    }
+  ],
   "apps": {
     "abr": "pilot",
     "flow": "pilot",
@@ -30,6 +117,7 @@
     "web": "pilot",
     "agrimo": "incubating",
     "cora": "incubating",
+    "maestria": "incubating",
     "mobility": "incubating",
     "nacp-exams": "incubating",
     "trade": "incubating",
@@ -174,6 +262,17 @@
       "proof_level": "none",
       "revenue_status": "pre-revenue",
       "priority": "low"
+    },
+    "maestria": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "internal-only",
+      "proof_level": "internal-proof",
+      "revenue_status": "internal-cost-center",
+      "priority": "high"
     },
     "mobility": {
       "registry_tier": "INCUBATING",
@@ -324,6 +423,7 @@
       "TIER 4 — Incubate": [
         "agrimo",
         "cora",
+        "maestria",
         "mobility",
         "nacp-exams",
         "trade",
@@ -362,6 +462,7 @@
       "incubate": [
         "agrimo",
         "cora",
+        "maestria",
         "mobility",
         "nacp-exams",
         "trade",
@@ -380,7 +481,8 @@
         "console",
         "control-plane",
         "nzila-hq",
-        "orchestrator-api"
+        "orchestrator-api",
+        "maestria"
       ]
     }
   }

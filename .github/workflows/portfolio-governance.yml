@@ -31,6 +31,9 @@ jobs:
       - name: Validate canonical catalog schema
         run: pnpm validate:product-catalog
 
+      - name: Enforce engine and product brand isolation
+        run: pnpm brand:leakage:check
+
       - name: Check generated artifact freshness
         run: pnpm generate:portfolio-artifacts -- --check
 

@@ -2,18 +2,19 @@
   "generated_at": "2026-04-29",
   "authority": "governance/portfolio/product-catalog.json",
   "summary": {
-    "total_products": 23,
+    "total_products": 24,
+    "total_engines": 4,
     "by_tier": {
       "TIER 1 — Sell Now": 3,
       "TIER 2 — Strategic Growth": 2,
       "TIER 3 — Maintain": 5,
-      "TIER 4 — Incubate": 10,
+      "TIER 4 — Incubate": 11,
       "TIER 5 — Sunset": 3
     },
     "by_status": {
       "production": 0,
       "pilot": 6,
-      "incubating": 11,
+      "incubating": 12,
       "internal": 3,
       "frozen": 3,
       "sunset": 0
@@ -22,7 +23,7 @@
       "sell-now": 3,
       "hold": 10,
       "maintain": 3,
-      "internal-only": 4,
+      "internal-only": 5,
       "sunset": 3
     },
     "sell_now": [
@@ -36,6 +37,93 @@
       "test-scaffold-gp"
     ]
   },
+  "engines": [
+    {
+      "id": "flow-engine",
+      "name": "Flow Engine",
+      "status": "incubating",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Reusable internal workflow engine for intake, routing, approvals, quoting, fulfilment tasks, and automations.",
+      "capabilities": [
+        "flow.intake",
+        "flow.routing",
+        "flow.approvals",
+        "flow.quoting",
+        "flow.po-invoice",
+        "flow.tasks",
+        "flow.status",
+        "flow.automations"
+      ],
+      "consumers": [
+        "flow",
+        "maestria"
+      ],
+      "lifecycle_notes": [
+        "Extracted from apps/flow as the canonical workflow engine.",
+        "Products may consume only the public SDK surface."
+      ]
+    },
+    {
+      "id": "cognition-engine",
+      "name": "Cognition Engine",
+      "status": "incubating",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Shared reasoning, anomaly, and decision-support engine consumed by portfolio products.",
+      "capabilities": [
+        "cognition.reasoning",
+        "cognition.decisioning",
+        "cognition.anomaly-detection",
+        "cognition.policy-support"
+      ],
+      "consumers": [
+        "union-eyes",
+        "veridian-care",
+        "maestria",
+        "console"
+      ],
+      "lifecycle_notes": []
+    },
+    {
+      "id": "ledger-engine",
+      "name": "Ledger Engine",
+      "status": "stable",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Tamper-evident financial and operational evidence ledger for regulated workflows.",
+      "capabilities": [
+        "ledger.audit-trail",
+        "ledger.retention",
+        "ledger.reconciliation"
+      ],
+      "consumers": [
+        "union-eyes",
+        "flow",
+        "cfo",
+        "maestria"
+      ],
+      "lifecycle_notes": []
+    },
+    {
+      "id": "identity-engine",
+      "name": "Identity Engine",
+      "status": "stable",
+      "owner": "Nzila Ventures",
+      "strategic_role": "Platform identity, session, and organization-resolution engine for all products.",
+      "capabilities": [
+        "identity.authentication",
+        "identity.organization-resolution",
+        "identity.authorization"
+      ],
+      "consumers": [
+        "web",
+        "console",
+        "flow",
+        "maestria",
+        "union-eyes",
+        "partners"
+      ],
+      "lifecycle_notes": []
+    }
+  ],
   "scoring": {
     "weights": {
       "revenue": 0.2,
@@ -845,6 +933,90 @@
       },
       "registry_tier": "INCUBATING",
       "dev_port": 3009
+    },
+    {
+      "id": "maestria",
+      "name": "Maestria",
+      "tier": 4,
+      "status": "incubating",
+      "deployment": "internal",
+      "gtm_posture": "internal-only",
+      "revenue_status": "internal-cost-center",
+      "customers": 0,
+      "pilots": 0,
+      "proof_level": "internal-proof",
+      "owner": "Nzila Ventures",
+      "priority": "high",
+      "strategic_role": "Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs.",
+      "last_reviewed": "2026-04-29",
+      "monthly_burn": 12000,
+      "monthly_revenue": 0,
+      "annual_recurring_revenue": 0,
+      "pipeline_value": 95000,
+      "expected_12m_revenue": 180000,
+      "gross_margin_pct": 76,
+      "eng_hours_required_monthly": 72,
+      "founder_attention_hours": 20,
+      "support_hours": 10,
+      "customer_concentration_risk": 4,
+      "execution_risk": 5,
+      "churn_risk": 4,
+      "moat_score": 8,
+      "strategic_option_value": 10,
+      "ecosystem_synergy": 10,
+      "probability_of_close": 0.24,
+      "runway_priority": 8,
+      "pipeline_assumptions": "Phase-one incubation focused on proving the reusable workflow engine boundary through a premium Canadian SME experience before external launch.",
+      "data_quality": "estimated",
+      "commercial_motion": "founder_led",
+      "avg_deal_size": 18000,
+      "sales_cycle_days": 75,
+      "close_rate_pct": 16,
+      "renewal_rate_pct": 72,
+      "expansion_rate_pct": 18,
+      "gross_logo_target_12m": 4,
+      "primary_buyer": "Owner-operator",
+      "proof_stage": "prototype",
+      "market_pull_score": 6,
+      "tagline": "Less chaos, more control, better margins.",
+      "brand_lines": [
+        "Maestria - run your business like a maestro.",
+        "Maestria - l'art de diriger."
+      ],
+      "vertical_packs": [
+        "Maestria Boutique",
+        "Maestria Comptoir",
+        "Maestria Atelier",
+        "Maestria Réseau"
+      ],
+      "metric_classifications": {
+        "monthly_revenue": "scenario",
+        "annual_recurring_revenue": "scenario",
+        "pipeline_value": "estimated",
+        "expected_12m_revenue": "forecast",
+        "monthly_burn": "estimated",
+        "gross_margin_pct": "estimated",
+        "avg_deal_size": "scenario",
+        "close_rate_pct": "scenario",
+        "probability_of_close": "scenario"
+      },
+      "tier_label": "TIER 4 — Incubate",
+      "gtm_label": "internal-only",
+      "proof_label": "internal-proof",
+      "exposure": "internal",
+      "readiness_tier": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 4.8,
+      "score_inputs": {
+        "revenue": 2,
+        "traction": 2,
+        "strategic_fit": 3,
+        "maintenance_burden": 3,
+        "readiness": 3,
+        "margin_potential": 1
+      },
+      "registry_tier": "INCUBATING",
+      "dev_port": 3021
     },
     {
       "id": "mobility",

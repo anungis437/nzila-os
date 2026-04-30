@@ -25,6 +25,7 @@ export type MaturityExposure = 'public' | 'internal'
 export type DataIntegrity = 'enforced' | 'partial' | 'minimal'
 export type ObservabilityLevel = 'complete' | 'partial' | 'minimal'
 export type ScoreDimension = 'revenue' | 'traction' | 'strategic_fit' | 'maintenance_burden' | 'readiness' | 'margin_potential'
+export type EngineStatus = 'incubating' | 'stable' | 'deprecated'
 
 export interface ScoringWeights {
   revenue: number
@@ -52,6 +53,17 @@ export interface CanonicalProduct {
   last_reviewed: string
 }
 
+export interface CanonicalEngine {
+  id: string
+  name: string
+  status: EngineStatus
+  owner: string
+  strategic_role: string
+  lifecycle_notes?: string[]
+  capabilities: string[]
+  consumers: string[]
+}
+
 export interface PortfolioCatalog {
   schema_version: string
   authority: {
@@ -63,6 +75,7 @@ export interface PortfolioCatalog {
   scoring: {
     weights: ScoringWeights
   }
+  engines?: CanonicalEngine[]
   products: CanonicalProduct[]
 }
 
@@ -122,6 +135,7 @@ const REVENUE_VALUES = new Set<RevenueStatus>(['revenue-active', 'pilot-contract
 const PRIORITY_VALUES = new Set<Priority>(['critical', 'high', 'medium', 'low'])
 const DATA_INTEGRITY_VALUES = new Set<DataIntegrity>(['enforced', 'partial', 'minimal'])
 const OBSERVABILITY_VALUES = new Set<ObservabilityLevel>(['complete', 'partial', 'minimal'])
+const ENGINE_STATUS_VALUES = new Set<EngineStatus>(['incubating', 'stable', 'deprecated'])
 const SCORE_DIMENSIONS: ScoreDimension[] = ['revenue', 'traction', 'strategic_fit', 'maintenance_burden', 'readiness', 'margin_potential']
 
 const TIER_LABELS: Record<PortfolioTier, string> = {
@@ -185,6 +199,68 @@ export function loadPortfolioContext(root = findRepoRoot()): PortfolioContext {
 
 function push(result: ValidationResult, level: 'error' | 'warning', message: string): void {
   result[level === 'error' ? 'errors' : 'warnings'].push(message)
+}
+
+export function validateEngines(catalog: PortfolioCatalog, appIds: string[]): ValidationResult {
+  const result: ValidationResult = { errors: [], warnings: [] }
+
+  if (!catalog.engines) return result
+  if (!Array.isArray(catalog.engines) || catalog.engines.length === 0) {
+    push(result, 'error', 'Catalog engines must be a non-empty array when present')
+    return result
+  }
+
+  const engineIds = new Set<string>()
+  const productIds = new Set(catalog.products.map((product) => product.id))
+  const capabilityOwners = new Map<string, string>()
+
+  for (const engine of catalog.engines) {
+    if (!engine.id?.trim()) {
+      push(result, 'error', 'Engine missing id')
+      continue
+    }
+    if (engineIds.has(engine.id)) push(result, 'error', `Duplicate engine id ${engine.id}`)
+    engineIds.add(engine.id)
+
+    if (!engine.name?.trim()) push(result, 'error', `${engine.id}: missing name`)
+    if (!ENGINE_STATUS_VALUES.has(engine.status)) push(result, 'error', `${engine.id}: invalid status ${String(engine.status)}`)
+    if (!engine.owner?.trim()) push(result, 'error', `${engine.id}: missing owner`)
+    if (!engine.strategic_role?.trim()) push(result, 'error', `${engine.id}: missing strategic_role`)
+    if (!Array.isArray(engine.capabilities) || engine.capabilities.length === 0) {
+      push(result, 'error', `${engine.id}: capabilities must be a non-empty array`)
+    }
+    if (!Array.isArray(engine.consumers) || engine.consumers.length === 0) {
+      push(result, 'error', `${engine.id}: consumers must be a non-empty array`)
+    }
+
+    for (const capability of engine.capabilities ?? []) {
+      const normalized = capability.trim()
+      if (!normalized) {
+        push(result, 'error', `${engine.id}: capabilities cannot contain empty values`)
+        continue
+      }
+      const existingOwner = capabilityOwners.get(normalized)
+      if (existingOwner) {
+        push(result, 'error', `Capability ${normalized} is assigned to both ${existingOwner} and ${engine.id}`)
+        continue
+      }
+      capabilityOwners.set(normalized, engine.id)
+    }
+
+    for (const consumer of engine.consumers ?? []) {
+      if (!productIds.has(consumer) && !appIds.includes(consumer)) {
+        push(result, 'error', `${engine.id}: consumer ${consumer} is not a known product/app`)
+      }
+    }
+  }
+
+  for (const engineId of engineIds) {
+    if (productIds.has(engineId)) {
+      push(result, 'error', `Engine id ${engineId} collides with a product id`)
+    }
+  }
+
+  return result
 }
 
 export function validateCatalogData(catalog: PortfolioCatalog, appIds: string[], now = new Date()): ValidationResult {
@@ -302,6 +378,10 @@ export function validateCatalogData(catalog: PortfolioCatalog, appIds: string[],
   for (const productId of seen) {
     if (!appIds.includes(productId)) push(result, 'error', `Catalog entry not present in apps/: ${productId}`)
   }
+
+  const engineValidation = validateEngines(catalog, appIds)
+  result.errors.push(...engineValidation.errors)
+  result.warnings.push(...engineValidation.warnings)
 
   return result
 }
@@ -456,8 +536,22 @@ function classifyProducts(products: PortfolioProductView[]): Record<string, stri
   }
 }
 
+function buildEngineTopology(catalog: PortfolioCatalog): Record<string, unknown>[] {
+  return (catalog.engines ?? []).map((engine) => ({
+    id: engine.id,
+    name: engine.name,
+    status: engine.status,
+    owner: engine.owner,
+    strategic_role: engine.strategic_role,
+    capabilities: engine.capabilities,
+    consumers: engine.consumers,
+    lifecycle_notes: engine.lifecycle_notes ?? [],
+  }))
+}
+
 function buildTruthManifest(context: PortfolioContext, products: PortfolioProductView[]): Record<string, unknown> {
   const apps = Object.fromEntries(products.map((product) => [product.id, product.status]))
+  const engines = buildEngineTopology(context.catalog)
   const app_status = Object.fromEntries(products.map((product) => [product.id, {
     registry_tier: product.registry_tier,
     deployment_status: product.status,
@@ -501,6 +595,7 @@ function buildTruthManifest(context: PortfolioContext, products: PortfolioProduc
       ],
       operational_registry_source: 'packages/platform-contracts/src/registry.ts',
     },
+    engines,
     apps,
     app_status,
     blocking_gaps,
@@ -520,18 +615,21 @@ function buildStatusJson(context: PortfolioContext, products: PortfolioProductVi
   const byTier = Object.fromEntries([1, 2, 3, 4, 5].map((tier) => [tierHeading(tier as PortfolioTier), products.filter((product) => product.tier === tier).length]))
   const byStatus = Object.fromEntries(Array.from(STATUS_VALUES.values()).map((status) => [status, products.filter((product) => product.status === status).length]))
   const byGtm = Object.fromEntries(Array.from(GTM_VALUES.values()).map((gtm) => [gtm, products.filter((product) => product.gtm_posture === gtm).length]))
+  const engines = buildEngineTopology(context.catalog)
 
   return {
     generated_at: context.today,
     authority: PORTFOLIO_CATALOG_PATH,
     summary: {
       total_products: products.length,
+      total_engines: engines.length,
       by_tier: byTier,
       by_status: byStatus,
       by_gtm_posture: byGtm,
       sell_now: products.filter((product) => product.gtm_posture === 'sell-now').map((product) => product.id),
       frozen_assets: products.filter((product) => product.gtm_posture === 'sunset').map((product) => product.id),
     },
+    engines,
     scoring: {
       weights: context.catalog.scoring.weights,
     },
@@ -549,6 +647,7 @@ function markdownTable(products: PortfolioProductView[]): string[] {
 
 function buildStatusMarkdown(context: PortfolioContext, products: PortfolioProductView[]): string {
   const scoringWeights = context.catalog.scoring.weights
+  const engines = context.catalog.engines ?? []
   const lines = [
     '# Portfolio Status',
     '',
@@ -565,6 +664,13 @@ function buildStatusMarkdown(context: PortfolioContext, products: PortfolioProdu
     `- Strategic growth: ${products.filter((product) => product.tier === 2).map((product) => product.id).join(', ') || 'none'}`,
     `- Internal only: ${products.filter((product) => product.gtm_posture === 'internal-only').map((product) => product.id).join(', ') || 'none'}`,
     `- Frozen / sunset: ${products.filter((product) => product.gtm_posture === 'sunset').map((product) => product.id).join(', ') || 'none'}`,
+    '',
+    '## Engine Topology',
+    '',
+    '| Engine | Status | Consumers |',
+    '| --- | --- | --- |',
+    ...engines.map((engine) => `| ${engine.name} | ${engine.status} | ${engine.consumers.join(', ')} |`),
+    ...(engines.length === 0 ? ['| _None_ | _n/a_ | _n/a_ |'] : []),
     '',
     '## Score Engine',
     '',
@@ -610,15 +716,18 @@ function buildInvestorView(context: PortfolioContext, products: PortfolioProduct
 }
 
 function buildOpsDashboard(context: PortfolioContext, products: PortfolioProductView[]): Record<string, unknown> {
+  const engines = buildEngineTopology(context.catalog)
   return {
     generated_at: context.today,
     authority: PORTFOLIO_CATALOG_PATH,
     kpis: {
       total_products: products.length,
+      total_engines: engines.length,
       sell_now_count: products.filter((product) => product.gtm_posture === 'sell-now').length,
       internal_only_count: products.filter((product) => product.gtm_posture === 'internal-only').length,
       frozen_count: products.filter((product) => product.gtm_posture === 'sunset').length,
     },
+    engines,
     charts: {
       by_tier: [1, 2, 3, 4, 5].map((tier) => ({ tier, count: products.filter((product) => product.tier === tier).length })),
       by_status: Array.from(STATUS_VALUES.values()).map((status) => ({ status, count: products.filter((product) => product.status === status).length })),

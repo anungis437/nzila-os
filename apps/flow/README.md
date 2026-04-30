@@ -8,7 +8,7 @@
 - **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
 - **UI:** `@nzila/ui` + Tailwind CSS v4
 - **AI:** `@nzila/ai-sdk`
-- **Packages:** `@nzila/commerce-core`, `commerce-db`, `commerce-services`, `commerce-audit`, `pricing-engine`, `platform-contracts`, `platform-policy-engine`
+- **Packages:** `@nzila/commerce-core`, `commerce-db`, `commerce-services`, `commerce-audit`, `pricing-engine`, `@nzila/flow-engine`, `platform-contracts`, `platform-policy-engine`
 - **Port:** 3007
 - **Seeding:** `pnpm demo:seed` / `pnpm seed:staging`
 
@@ -45,3 +45,5 @@ Copy `.env.example` → `.env.local` and fill required values.
 ## Domain
 
 Flow is the commerce vertical — managing the full order-to-cash and procure-to-pay lifecycle including quoting, order management, invoicing, inventory, production tracking, and integrations with Shopify, Zoho, and WhatsApp.
+
+The product now consumes shared workflow primitives from `@nzila/flow-engine`; end-user UI and product-specific operating language stay inside `apps/flow`.

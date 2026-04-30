@@ -19,6 +19,7 @@ Authority: governance/portfolio/product-catalog.json
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
+| Maestria | 4 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
@@ -35,8 +36,17 @@ Authority: governance/portfolio/product-catalog.json
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
-- Internal only: console, control-plane, nzila-hq, orchestrator-api
+- Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria
 - Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
+
+## Engine Topology
+
+| Engine | Status | Consumers |
+| --- | --- | --- |
+| Flow Engine | incubating | flow, maestria |
+| Cognition Engine | incubating | union-eyes, veridian-care, maestria, console |
+| Ledger Engine | stable | union-eyes, flow, cfo, maestria |
+| Identity Engine | stable | web, console, flow, maestria, union-eyes, partners |
 
 ## Score Engine
 
@@ -56,6 +66,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Web | 5.0 | HOLD | PRODUCTION | pilot-safe |
 | Agrimo | 3.6 | HOLD | INCUBATING | internal-only |
 | Cora | 3.6 | HOLD | INCUBATING | internal-only |
+| Maestria | 4.8 | HOLD | INCUBATING | internal-only |
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |
 | NACP Exams | 3.6 | HOLD | INCUBATING | internal-only |
 | Trade | 3.6 | HOLD | INCUBATING | internal-only |

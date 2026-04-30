@@ -29,6 +29,11 @@ pre-commit:
       run: pnpm typecheck --filter "...[HEAD]" --output-logs errors-only
       fail_text: "Type errors found. Run `pnpm typecheck` to see details."
 
+    brand-leakage:
+      glob: "*.{ts,tsx,js,jsx,json,md}"
+      run: pnpm brand:leakage:check
+      fail_text: "Engine/product boundary violations detected. Run `pnpm brand:leakage:check` to see details."
+
     link-check:
       glob: "*.md"
       run: npx tsx scripts/link-check.ts {staged_files}
