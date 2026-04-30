@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedAt": "2026-04-30T00:00:00.000Z",
   "byPricingTier": {
     "enterprise": [
       "abr",
@@ -11,6 +11,7 @@
       "cfo",
       "cora",
       "flow",
+      "maestria",
       "nacp-exams",
       "trade"
     ],
@@ -18,6 +19,7 @@
       "console",
       "control-plane",
       "mobility-client-portal",
+      "nzila-hq",
       "orchestrator-api",
       "partners",
       "platform-admin",
