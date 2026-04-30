@@ -144,6 +144,7 @@ export interface GovernanceAuditTimelineEntry {
   event_type: GovernanceEventType
   actor: string
   policy_result: 'pass' | 'fail' | 'warn'
+  policy_version?: string
   commit_hash: string
   source: string
 }
@@ -164,6 +165,7 @@ export const governanceAuditTimelineEntrySchema = z.object({
   ]),
   actor: z.string(),
   policy_result: z.enum(['pass', 'fail', 'warn']),
+  policy_version: z.string().optional(),
   commit_hash: z.string(),
   source: z.string(),
 })

@@ -86,8 +86,12 @@ interface ProductManifest {
   generatedFrom: string[]
 }
 
-function readJson<T>(p: string): T {
-  return JSON.parse(readFileSync(p, 'utf-8')) as T
+function readCatalogJson(): Catalog {
+  return JSON.parse(readFileSync(CATALOG_PATH, 'utf-8')) as Catalog
+}
+
+function readEnvelopeJson(): Envelope {
+  return JSON.parse(readFileSync(ENVELOPE_PATH, 'utf-8')) as Envelope
 }
 
 function stableJson(value: unknown): string {
@@ -207,8 +211,8 @@ function main(): void {
   const checkOnly = process.argv.includes('--check')
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true })
 
-  const catalog = readJson<Catalog>(CATALOG_PATH)
-  const envelope = readJson<Envelope>(ENVELOPE_PATH)
+  const catalog = readCatalogJson()
+  const envelope = readEnvelopeJson()
   const generatedAt = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
 
   // Cross-check: every catalog product must have an envelope entry.

@@ -64,6 +64,7 @@ export function buildGovernanceAuditTimeline(filters?: {
     event_type: entry.eventType,
     actor: entry.actor,
     policy_result: entry.policyResult,
+    policy_version: typeof entry.details?.['policyVersion'] === 'string' ? String(entry.details['policyVersion']) : undefined,
     commit_hash: entry.commitHash,
     source: entry.app,
   }))

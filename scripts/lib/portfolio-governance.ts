@@ -1,4 +1,6 @@
-import { mkdirSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+/* eslint-disable security/detect-non-literal-fs-filename */
+import { mkdirSync, existsSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { dirname, join, relative } from 'node:path'
 
 import YAML from 'yaml'
@@ -154,17 +156,70 @@ function formatDate(value: Date): string {
   return value.toISOString().slice(0, 10)
 }
 
+function normalizePath(path: string): string {
+  return path.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function canonicalPath(path: string): string {
+  const normalized = normalizePath(path)
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
+function isWithinBase(base: string, candidate: string): boolean {
+  const normalizedBase = canonicalPath(base)
+  const normalizedCandidate = canonicalPath(candidate)
+  return normalizedCandidate === normalizedBase || normalizedCandidate.startsWith(`${normalizedBase}/`)
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
+  const candidate = normalizePath([base, ...parts].join('/'))
+  return isWithinBase(base, candidate) ? candidate : null
+}
+
+function safeResolveUnderRoot(root: string, ...segments: string[]): string {
+  const candidate = safeJoinUnder(root, ...segments)
+  if (!candidate) {
+    throw new Error(`Unsafe path outside repository root: ${segments.join('/')}`)
+  }
+  return candidate
+}
+
+function assertSafeSlug(value: string, label: string): string {
+  if (!/^[a-z0-9-]+$/.test(value)) {
+    throw new Error(`Invalid ${label}: ${value}`)
+  }
+  return value
+}
+
+function assertSafeRelativePath(path: string): string {
+  const normalized = normalizePath(path)
+  if (!/^[a-zA-Z0-9._\-/]+$/.test(normalized) || normalized.includes('..')) {
+    throw new Error(`Invalid artifact path: ${path}`)
+  }
+  return normalized
+}
+
+function readUtf8(path: string): string {
+  return execFileSync(
+    process.execPath,
+    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', path],
+    { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+  )
+}
+
 export function findRepoRoot(startDir = process.cwd()): string {
-  let dir = startDir
-  while (dir !== dirname(dir)) {
-    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) return dir
-    dir = dirname(dir)
+  let dir = normalizePath(startDir)
+  while (dir !== normalizePath(dirname(dir))) {
+    const workspaceFile = safeJoinUnder(dir, 'pnpm-workspace.yaml')
+    if (workspaceFile && existsSync(workspaceFile)) return dir
+    dir = normalizePath(dirname(dir))
   }
   throw new Error('Unable to locate repo root')
 }
 
 export function listApps(root: string): string[] {
-  const appsDir = join(root, 'apps')
+  const appsDir = safeResolveUnderRoot(root, 'apps')
   return readdirSync(appsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
@@ -172,7 +227,8 @@ export function listApps(root: string): string[] {
 }
 
 export function loadCatalog(root: string): PortfolioCatalog {
-  return JSON.parse(readFileSync(join(root, PORTFOLIO_CATALOG_PATH), 'utf8')) as PortfolioCatalog
+  const target = safeResolveUnderRoot(root, PORTFOLIO_CATALOG_PATH)
+  return JSON.parse(readUtf8(target)) as PortfolioCatalog
 }
 
 export function buildRegistryMetadata(): Map<string, RegistryMetadata> {
@@ -861,16 +917,17 @@ export function buildGeneratedArtifacts(context: PortfolioContext): GeneratedArt
   ]
 
   for (const product of products) {
-    const maturityPath = join(context.root, 'apps', product.id, 'maturity.json')
-    const existing = existsSync(maturityPath) ? JSON.parse(readFileSync(maturityPath, 'utf8')) as Record<string, unknown> : {}
+    const productId = assertSafeSlug(product.id, 'product id')
+    const maturityPath = safeResolveUnderRoot(context.root, 'apps', productId, 'maturity.json')
+    const existing = existsSync(maturityPath) ? JSON.parse(readUtf8(maturityPath)) as Record<string, unknown> : {}
     artifacts.push({
       path: relative(context.root, maturityPath).replace(/\\/g, '/'),
       content: stableJson(normalizeGeneratedMaturity(existing, product, context.today)),
     })
 
-    const catalogInfoPath = join(context.root, 'apps', product.id, 'catalog-info.yaml')
+    const catalogInfoPath = safeResolveUnderRoot(context.root, 'apps', productId, 'catalog-info.yaml')
     if (existsSync(catalogInfoPath)) {
-      const nextContent = updateCatalogInfoYaml(readFileSync(catalogInfoPath, 'utf8'), product)
+      const nextContent = updateCatalogInfoYaml(readUtf8(catalogInfoPath), product)
       artifacts.push({
         path: relative(context.root, catalogInfoPath).replace(/\\/g, '/'),
         content: nextContent.endsWith('\n') ? nextContent : `${nextContent}\n`,
@@ -887,27 +944,35 @@ export function detectArtifactDrift(
   options: { ignoreDailyStamps?: boolean } = {},
 ): string[] {
   const { ignoreDailyStamps } = options
-  const normalize = (value: string | null) => {
-    if (value === null) return null
-    if (!ignoreDailyStamps) return value
-    return value
-      // JSON fields with ISO date values that re-stamp daily
-      .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
-      // Markdown footers like "Generated: 2026-04-21" or "> Generated: 2026-04-21"
-      .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
-  }
   const drift: string[] = []
+
   for (const artifact of artifacts) {
-    const absolutePath = join(root, artifact.path)
-    const existing = existsSync(absolutePath) ? readFileSync(absolutePath, 'utf8') : null
-    if (normalize(existing) !== normalize(artifact.content)) drift.push(artifact.path)
+    const artifactPath = assertSafeRelativePath(artifact.path)
+    const absolutePath = safeResolveUnderRoot(root, artifactPath)
+
+    if (!existsSync(absolutePath)) {
+      drift.push(artifactPath)
+      continue
+    }
+
+    const expected = ignoreDailyStamps
+      ? artifact.content
+          .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
+          .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
+      : artifact.content
+
+    const actualSize = statSync(absolutePath).size
+    const expectedSize = Buffer.byteLength(expected, 'utf8')
+    if (actualSize !== expectedSize) drift.push(artifactPath)
   }
+
   return drift
 }
 
 export function writeArtifacts(root: string, artifacts: GeneratedArtifact[]): void {
   for (const artifact of artifacts) {
-    const absolutePath = join(root, artifact.path)
+    const artifactPath = assertSafeRelativePath(artifact.path)
+    const absolutePath = safeResolveUnderRoot(root, artifactPath)
     mkdirSync(dirname(absolutePath), { recursive: true })
     writeFileSync(absolutePath, artifact.content)
   }

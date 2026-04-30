@@ -93,12 +93,11 @@ export default function OnboardingPage() {
           <span>Progress</span>
           <span>{completed.size} / {STEPS.length} steps complete</span>
         </div>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all"
-            style={{ width: `${(completed.size / STEPS.length) * 100}%` }}
-          />
-        </div>
+        <progress
+          className="h-2 w-full overflow-hidden rounded-full bg-muted [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:bg-primary"
+          value={completed.size}
+          max={STEPS.length}
+        />
       </div>
     </div>
   )

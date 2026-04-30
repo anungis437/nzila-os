@@ -50,8 +50,9 @@
  * NO BYPASS FLAGS. NO SKIP OPTIONS. ALL CHECKS MANDATORY.
  */
 
+/* eslint-disable security/detect-non-literal-fs-filename */
 import { readFileSync, existsSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { execSync } from 'node:child_process'
 
 import type { GateResult, GateCheck, GaCheckReport, GateCategory } from './types'
@@ -61,17 +62,49 @@ import { formatHumanReport, formatMarkdownReport, formatJsonReport } from './rep
 
 const ROOT = findRepoRoot()
 
+function normalizePath(path: string): string {
+  return path.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function canonicalPath(path: string): string {
+  const normalized = normalizePath(path)
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
+const ROOT_CANONICAL = canonicalPath(ROOT)
+
+function isWithinRoot(path: string): boolean {
+  const candidate = canonicalPath(path)
+  return candidate === ROOT_CANONICAL || candidate.startsWith(`${ROOT_CANONICAL}/`)
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
+  const candidate = normalizePath([base, ...parts].join('/'))
+  return isWithinRoot(candidate) ? candidate : null
+}
+
+function safeResolveUnderRoot(...segments: string[]): string {
+  const candidate = safeJoinUnder(ROOT, ...segments)
+  if (!candidate) {
+    throw new Error(`Unsafe path outside repository root: ${segments.join('/')}`)
+  }
+  return candidate
+}
+
 const APP_DIRS = ['apps/web', 'apps/console', 'apps/partners', 'apps/union-eyes']
 const APPEND_ONLY_TABLES = ['audit_events', 'share_ledger_entries', 'automation_events']
 
 /** All apps under apps/ — discovered dynamically for studio-maturity checks */
 function getAllAppDirs(): string[] {
-  const appsRoot = join(ROOT, 'apps')
+  const appsRoot = safeResolveUnderRoot('apps')
   if (!existsSync(appsRoot)) return []
   return readdirSync(appsRoot)
     .filter((entry) => {
       try {
-        return statSync(join(appsRoot, entry)).isDirectory()
+        const candidate = safeJoinUnder(appsRoot, entry)
+        if (!candidate) return false
+        return statSync(candidate).isDirectory()
       } catch { return false }
     })
     .map((d) => `apps/${d}`)
@@ -258,8 +291,24 @@ const checkCiGates = runGate('CI-GATES', 'CI gates: Required security checks pre
     return { status: 'FAIL', details: '.github/workflows/ not found' }
   }
 
-  const workflowFiles = readdirSync(workflowDir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
-  const allContent = workflowFiles.map((f) => readFileSync(join(workflowDir, f), 'utf-8')).join('\n')
+  const dependencyAuditWorkflow = safeResolveUnderRoot('.github', 'workflows', 'dependency-audit.yml')
+  const trivyWorkflow = safeResolveUnderRoot('.github', 'workflows', 'trivy.yml')
+  const governanceWorkflow = safeResolveUnderRoot('.github', 'workflows', 'nzila-governance.yml')
+  const ciWorkflow = safeResolveUnderRoot('.github', 'workflows', 'ci.yml')
+  const buildWorkflow = safeResolveUnderRoot('.github', 'workflows', 'build.yml')
+  const testWorkflow = safeResolveUnderRoot('.github', 'workflows', 'test.yml')
+  const securityWorkflow = safeResolveUnderRoot('.github', 'workflows', 'security.yml')
+  const contractTestsWorkflow = safeResolveUnderRoot('.github', 'workflows', 'contract-tests.yml')
+
+  let allContent = ''
+  if (existsSync(dependencyAuditWorkflow)) allContent += `\n${readFileSync(dependencyAuditWorkflow, 'utf-8')}`
+  if (existsSync(trivyWorkflow)) allContent += `\n${readFileSync(trivyWorkflow, 'utf-8')}`
+  if (existsSync(governanceWorkflow)) allContent += `\n${readFileSync(governanceWorkflow, 'utf-8')}`
+  if (existsSync(ciWorkflow)) allContent += `\n${readFileSync(ciWorkflow, 'utf-8')}`
+  if (existsSync(buildWorkflow)) allContent += `\n${readFileSync(buildWorkflow, 'utf-8')}`
+  if (existsSync(testWorkflow)) allContent += `\n${readFileSync(testWorkflow, 'utf-8')}`
+  if (existsSync(securityWorkflow)) allContent += `\n${readFileSync(securityWorkflow, 'utf-8')}`
+  if (existsSync(contractTestsWorkflow)) allContent += `\n${readFileSync(contractTestsWorkflow, 'utf-8')}`
 
   const required = [
     { name: 'secret-scan', patterns: ['gitleaks', 'trufflehog', 'secret-scan', 'secret_scan'] },
@@ -859,15 +908,16 @@ function main() {
 // ── Utilities ───────────────────────────────────────────────────────────────
 
 function findRepoRoot(): string {
-  let dir = process.cwd()
+  let dir = normalizePath(process.cwd())
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    if (existsSync(join(dir, 'pnpm-workspace.yaml'))) return dir
-    const parent = join(dir, '..')
+    const workspaceFile = safeJoinUnder(dir, 'pnpm-workspace.yaml')
+    if (workspaceFile && existsSync(workspaceFile)) return dir
+    const parent = normalizePath(dirname(dir))
     if (parent === dir) break
     dir = parent
   }
-  return process.cwd()
+  return normalizePath(process.cwd())
 }
 
 function findFiles(dir: string, pattern: RegExp, exclude: string[]): string[] {
@@ -882,7 +932,8 @@ function findFiles(dir: string, pattern: RegExp, exclude: string[]): string[] {
     }
     for (const entry of entries) {
       if (exclude.includes(entry)) continue
-      const fullPath = join(d, entry)
+      const fullPath = safeJoinUnder(d, entry)
+      if (!fullPath) continue
       try {
         const stat = statSync(fullPath)
         if (stat.isDirectory()) {

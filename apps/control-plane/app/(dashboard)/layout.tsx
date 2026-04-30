@@ -28,11 +28,17 @@ import {
   DollarSign,
   Cable,
   MailWarning,
+  ShieldAlert,
+  Crosshair,
+  FolderKanban,
 } from "lucide-react";
 
 const navItems = [
   { href: "/overview", label: "Overview", icon: LayoutDashboard },
   { href: "/governance", label: "Governance", icon: Shield },
+  { href: "/governance/history", label: "Gov History", icon: ShieldAlert },
+  { href: "/governance/policy-performance", label: "Policy Performance", icon: ShieldCheck },
+  { href: "/governance/policy-regression", label: "Policy Regression", icon: ShieldCheck },
   { href: "/decisions", label: "Decisions", icon: Scale },
   { href: "/decision-summary", label: "Decision Summary", icon: PieChart },
   { href: "/changes", label: "Changes", icon: GitPullRequest },
@@ -49,6 +55,11 @@ const navItems = [
   { href: "/revenue", label: "Revenue", icon: DollarSign },
   { href: "/integrations", label: "Integrations", icon: Cable },
   { href: "/integrations/dead-letters", label: "Dead Letters", icon: MailWarning },
+  { href: "/ops/evidence", label: "Ops Evidence", icon: ShieldCheck },
+  { href: "/ops/control-center", label: "Control Center", icon: Crosshair },
+  { href: "/business/metrics", label: "Business Metrics", icon: TrendingUp },
+  { href: "/business/simulated-economics", label: "Simulated Economics", icon: DollarSign },
+  { href: "/releases", label: "Releases", icon: FolderKanban },
 ] as const;
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };

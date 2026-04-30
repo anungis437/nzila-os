@@ -19,6 +19,8 @@ import {
   Landmark,
   TrendingUp,
   Crosshair,
+  ShieldAlert,
+  FolderKanban,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +28,9 @@ const navItems = [
   { href: "/revenue", label: "Revenue", icon: TrendingUp },
   { href: "/command-center", label: "Command Center", icon: Crosshair },
   { href: "/governance", label: "Governance", icon: Shield },
+  { href: "/governance/history", label: "Gov History", icon: ShieldAlert },
+  { href: "/governance/policy-performance", label: "Policy Performance", icon: Shield },
+  { href: "/governance/policy-regression", label: "Policy Regression", icon: Shield },
   { href: "/decisions", label: "Decisions", icon: Scale },
   { href: "/decision-summary", label: "Decision Summary", icon: PieChart },
   { href: "/changes", label: "Changes", icon: GitPullRequest },
@@ -37,6 +42,11 @@ const navItems = [
   { href: "/procurement", label: "Procurement", icon: FileCheck },
   { href: "/environments", label: "Environments", icon: Server },
   { href: "/architecture", label: "Architecture", icon: Landmark },
+  { href: "/ops/evidence", label: "Ops Evidence", icon: Shield },
+  { href: "/ops/control-center", label: "Control Center", icon: Crosshair },
+  { href: "/business/metrics", label: "Business Metrics", icon: TrendingUp },
+  { href: "/business/simulated-economics", label: "Simulated Economics", icon: TrendingUp },
+  { href: "/releases", label: "Releases", icon: FolderKanban },
 ] as const;
 
 export default function DashboardLayout({
