@@ -44,6 +44,7 @@ jobs:
       - name: Auto tag release
         run: pnpm release:tag --bump patch --allow-unsigned --allow-non-main
         env:
+          LEFTHOOK: "0"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   staging-gate:
