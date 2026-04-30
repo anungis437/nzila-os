@@ -81,3 +81,12 @@ exceptions:
       adoption tracked for PILOT promotion.
     owner: platform-core
     reviewDate: "2027-01-01"
+
+  - app: maestria
+    missing: platform-shell
+    reason: >-
+      INCUBATING commerce orchestration surface with a bespoke growth and
+      marketing shell. Uses platform-auth for identity. Full platform-shell
+      adoption is staged before PILOT promotion.
+    owner: platform-core
+    reviewDate: "2027-04-01"

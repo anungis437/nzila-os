@@ -64,6 +64,13 @@
       "owner": "platform-core",
       "justification": "INCUBATING executive intelligence cockpit with a bespoke portfolio dashboard shell. Uses platform-auth for identity. Full platform-shell adoption tracked for PILOT promotion.",
       "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/maestria",
+      "package": "platform-shell",
+      "owner": "platform-core",
+      "justification": "INCUBATING commerce orchestration surface with a bespoke growth and marketing shell. Uses platform-auth for identity. Full platform-shell adoption is staged before PILOT promotion.",
+      "expiresOn": "2027-04-01"
     }
   ]
 }
