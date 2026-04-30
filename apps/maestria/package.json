@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "assets:screenshots": "node scripts/generate-screenshot-assets.mjs",
     "onboarding:readiness": "node -e \"fetch('http://localhost:3021/api/maestria/onboarding/readiness?as=lissa').then(r=>r.text()).then(t=>console.log(t))\"",
     "db:backup": "node --import tsx/esm scripts/db-backup.mjs",
