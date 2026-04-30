@@ -48,6 +48,7 @@ function collectPackageJsonPaths(root: string): string[] {
 
   scanRoot('apps')
   scanRoot('packages')
+  scanRoot('services')
   scanRoot('tooling')
 
   const rootPackage = join(root, 'package.json')
