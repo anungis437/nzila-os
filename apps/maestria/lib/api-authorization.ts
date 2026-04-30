@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { hasPermission, resolveActor, type Permission, type SearchParamRecord } from '@/lib/access-control'
 import { recordAudit } from '@/lib/audit-log'
 
-export function authorizeRequest(searchParams: SearchParamRecord, permission: Permission, action: string, resource: string) {
+export function authorize(searchParams: SearchParamRecord, permission: Permission, action: string, resource: string) {
   const actor = resolveActor(searchParams)
   const allowed = hasPermission(actor, permission)
 
@@ -29,3 +29,5 @@ export function authorizeRequest(searchParams: SearchParamRecord, permission: Pe
 
   return { actor, allowed, response: null }
 }
+
+export const authorizeRequest = authorize

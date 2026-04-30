@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { listOperationalRecords } from '@/lib/maestria-persistence'
 import { renderProposalPdf } from '@/lib/proposal-pdf'
 
@@ -9,7 +11,7 @@ export async function GET(
 ) {
   const { id } = await params
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'proposal.pdf.generate', `proposal:${id}`)
+  const auth = requireOrgAccess(searchParams, 'quote.manage', 'proposal.pdf.generate', `proposal:${id}`)
   if (auth.response) return auth.response
 
   const proposal = listOperationalRecords('proposal', 200).find((item) => item.id === id)

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
 
+
+const requireOrgAccess = authorize
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'user.manage', 'access.mutation', 'workspace:user-access')
+  const auth = requireOrgAccess(searchParams, 'user.manage', 'access.mutation', 'workspace:user-access')
   if (auth.response) return auth.response
 
   const body = (await request.json()) as {

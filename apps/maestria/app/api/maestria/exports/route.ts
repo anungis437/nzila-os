@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { exportReports } from '@/lib/shopmoica-pilot-data'
 
 export async function GET(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'export.download', 'export.download', 'report:commerce-operating-pack')
+  const auth = requireOrgAccess(searchParams, 'export.download', 'export.download', 'report:commerce-operating-pack')
   if (auth.response) return auth.response
 
   const requestedReport = exportReports.find((report) => report.id === searchParams.report) ?? exportReports[0]

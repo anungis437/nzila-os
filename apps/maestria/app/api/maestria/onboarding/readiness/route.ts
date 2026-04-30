@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { getConnectorAccount, listNotifications, listOperationalRecords } from '@/lib/maestria-persistence'
 import { getKpiWarehouseSummary } from '@/lib/maestria-analytics'
 
 export async function GET(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'module.internal.view', 'onboarding.readiness.read', 'onboarding:readiness')
+  const auth = requireOrgAccess(searchParams, 'module.internal.view', 'onboarding.readiness.read', 'onboarding:readiness')
   if (auth.response) return auth.response
 
   const systems = ['shopify', 'google-ads', 'zoho'] as const

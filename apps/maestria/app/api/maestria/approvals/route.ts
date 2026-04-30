@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { evaluateApproval, type ApprovalAction } from '@/lib/approval-policy'
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'approval.evaluate', 'policy:threshold-check')
+  const auth = requireOrgAccess(searchParams, 'quote.manage', 'approval.evaluate', 'policy:threshold-check')
   if (auth.response) return auth.response
 
   const body = (await request.json()) as {

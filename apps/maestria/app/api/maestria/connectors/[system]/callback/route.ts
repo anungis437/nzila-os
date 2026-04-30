@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { completeConnectorAuth } from '@/lib/maestria-connectors'
 import { type ConnectorSystem } from '@/lib/connector-stubs'
 
@@ -10,6 +13,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ system: string }> },
 ) {
+  const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
+  const auth = requireOrgAccess(searchParams, 'module.internal.view', 'connector.auth.callback', 'connector:oauth-callback')
+  if (auth.response) return auth.response
+
   const { system } = await params
   if (!isConnectorSystem(system)) {
     return NextResponse.json({ ok: false, error: 'unknown_connector' }, { status: 404 })

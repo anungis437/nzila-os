@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
 import { recordOperationalEvent } from '@/lib/maestria-analytics'
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'analytics.event.create', 'analytics:kpi-events')
+  const auth = authorize(searchParams, 'quote.manage', 'analytics.event.create', 'analytics:kpi-events')
   if (auth.response) return auth.response
 
   let body: unknown

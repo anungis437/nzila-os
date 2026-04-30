@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { buildPricingQuote } from '@/lib/maestria-pricing'
 import { createOperationalRecord } from '@/lib/maestria-persistence'
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'pricing.quote.generate', 'pricing:configurator')
+  const auth = requireOrgAccess(searchParams, 'quote.manage', 'pricing.quote.generate', 'pricing:configurator')
   if (auth.response) return auth.response
 
   let body: unknown

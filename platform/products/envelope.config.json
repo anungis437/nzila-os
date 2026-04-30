@@ -185,6 +185,22 @@
       "trustProfile": "tier-2-public",
       "launchStage": "incubating",
       "publicVisible": true
+    },
+    "maestria": {
+      "pricingTier": "growth",
+      "telemetryRequired": true,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
+    "nzila-hq": {
+      "pricingTier": "n/a",
+      "telemetryRequired": true,
+      "finopsEnabled": false,
+      "trustProfile": "internal-control-plane",
+      "launchStage": "internal-only",
+      "publicVisible": false
     }
   }
 }

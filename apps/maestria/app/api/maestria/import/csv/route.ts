@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { parseMaestriaCsv } from '@/lib/maestria-csv-import'
 
 const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'shopify.view', 'csv-import', 'product')
+  const auth = requireOrgAccess(searchParams, 'shopify.view', 'csv-import', 'product')
   if (auth.response) return auth.response
 
   const contentType = request.headers.get('content-type') ?? ''

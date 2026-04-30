@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { createScreenshotAsset } from '@/lib/maestria-persistence'
 
 const captureTargets = [
@@ -12,7 +14,7 @@ const captureTargets = [
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'module.internal.view', 'assets.screenshot.queue', 'assets:screenshot-pack')
+  const auth = requireOrgAccess(searchParams, 'module.internal.view', 'assets.screenshot.queue', 'assets:screenshot-pack')
   if (auth.response) return auth.response
 
   const locale = request.nextUrl.searchParams.get('locale') === 'fr-CA' ? 'fr-CA' : 'en-CA'

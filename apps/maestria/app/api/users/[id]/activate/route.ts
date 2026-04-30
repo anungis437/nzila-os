@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resolveActor, hasPermission } from '@/lib/access-control'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { getMaestriaDb } from '@/lib/maestria-persistence'
 
 interface RouteContext {
@@ -8,10 +10,8 @@ interface RouteContext {
 
 export async function POST(req: NextRequest, { params }: RouteContext) {
   const searchParams = Object.fromEntries(req.nextUrl.searchParams)
-  const actor = resolveActor(searchParams)
-  if (!hasPermission(actor, 'user.manage')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const auth = requireOrgAccess(searchParams, 'user.manage', 'users.activate', 'workspace:user-access')
+  if (auth.response) return auth.response
 
   const { id } = await params
 

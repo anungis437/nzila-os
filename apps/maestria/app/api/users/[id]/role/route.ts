@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resolveActor, hasPermission, type ActorRole } from '@/lib/access-control'
+import { type ActorRole } from '@/lib/access-control'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { getMaestriaDb } from '@/lib/maestria-persistence'
 
 interface RouteContext {
@@ -18,10 +21,8 @@ const VALID_ROLES: ActorRole[] = [
 
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
   const searchParams = Object.fromEntries(req.nextUrl.searchParams)
-  const actor = resolveActor(searchParams)
-  if (!hasPermission(actor, 'user.manage')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const auth = requireOrgAccess(searchParams, 'user.manage', 'users.role.update', 'workspace:user-access')
+  if (auth.response) return auth.response
 
   const { id } = await params
 

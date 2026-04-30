@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { listNotifications } from '@/lib/maestria-persistence'
 import { deliverNotification } from '@/lib/maestria-notifications'
 
 export async function GET(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'module.internal.view', 'notifications.read', 'notifications:delivery')
+  const auth = requireOrgAccess(searchParams, 'module.internal.view', 'notifications.read', 'notifications:delivery')
   if (auth.response) return auth.response
 
   return NextResponse.json({
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'notifications.send', 'notifications:delivery')
+  const auth = requireOrgAccess(searchParams, 'quote.manage', 'notifications.send', 'notifications:delivery')
   if (auth.response) return auth.response
 
   let body: unknown

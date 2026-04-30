@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resolveActor, hasPermission } from '@/lib/access-control'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { getMaestriaDb } from '@/lib/maestria-persistence'
 
 export async function POST(req: NextRequest) {
   const searchParams = Object.fromEntries(req.nextUrl.searchParams)
-  const actor = resolveActor(searchParams)
-  if (!hasPermission(actor, 'user.manage')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const auth = requireOrgAccess(searchParams, 'user.manage', 'users.invite', 'workspace:user-access')
+  if (auth.response) return auth.response
 
   let body: { email?: string; role?: string }
   try {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   db.prepare(
     `INSERT INTO pending_users (id, email, role, status, invited_by, created_at, updated_at)
      VALUES (?, ?, ?, 'pending', ?, ?, ?)`,
-  ).run(id, email, role, actor.id ?? 'system', now, now)
+  ).run(id, email, role, auth.actor.id ?? 'system', now, now)
 
   return NextResponse.json({ id, email, role, status: 'pending' }, { status: 201 })
 }

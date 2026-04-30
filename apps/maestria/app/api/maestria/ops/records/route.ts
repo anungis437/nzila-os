@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { createOperationalRecord, listOperationalRecords, type RecordType } from '@/lib/maestria-persistence'
 import { recordOperationalEvent } from '@/lib/maestria-analytics'
 
@@ -11,7 +13,7 @@ function parseRecordType(input: string | null): RecordType | undefined {
 
 export async function GET(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'module.internal.view', 'ops.records.read', 'ops:records')
+  const auth = requireOrgAccess(searchParams, 'module.internal.view', 'ops.records.read', 'ops:records')
   if (auth.response) return auth.response
 
   const type = parseRecordType(request.nextUrl.searchParams.get('type'))
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(searchParams, 'quote.manage', 'ops.records.create', 'ops:records')
+  const auth = requireOrgAccess(searchParams, 'quote.manage', 'ops.records.create', 'ops:records')
   if (auth.response) return auth.response
 
   let body: unknown

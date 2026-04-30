@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { getMaestriaDb } from '@/lib/maestria-persistence'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url)
+  const auth = requireOrgAccess(Object.fromEntries(url.searchParams), 'module.internal.view', 'readiness.read', 'maestria:readiness')
+  if (auth.response) return auth.response
+
   let databaseReady = false
 
   try {

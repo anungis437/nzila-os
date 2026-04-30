@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorizeRequest } from '@/lib/api-authorization'
+import { authorize } from '@/lib/api-authorization'
+
+const requireOrgAccess = authorize
 import { type ConnectorSystem } from '@/lib/connector-stubs'
 import { buildConnectorAuthUrl, getConnectorOperationalSnapshot } from '@/lib/maestria-connectors'
 import { recordOperationalEvent } from '@/lib/maestria-analytics'
@@ -22,7 +24,7 @@ export async function GET(
 
   const connectorSystem = system as ConnectorSystem
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(
+  const auth = requireOrgAccess(
     searchParams,
     permissionMap[connectorSystem],
     `${connectorSystem}.sync.read`,
@@ -51,7 +53,7 @@ export async function POST(
 
   const connectorSystem = system as ConnectorSystem
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const auth = authorizeRequest(
+  const auth = requireOrgAccess(
     searchParams,
     permissionMap[connectorSystem],
     `${connectorSystem}.sync.write`,
