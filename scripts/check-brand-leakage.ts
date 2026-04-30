@@ -69,7 +69,7 @@ function scanEnginePackage(): void {
     const lines = content.split('\n')
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index]
-      if (/<[A-Z][A-Za-z0-9]*|return\s*\(/.test(line) && file.startsWith(ENGINE_SRC_ROOT)) {
+      if (/<[A-Z][A-Za-z0-9]*[\s/>]|return\s*\(/.test(line) && file.startsWith(ENGINE_SRC_ROOT)) {
         addViolation('ENGINE_UI_PATTERN', file, index + 1, line)
       }
       if (/from ['"].*apps\//.test(line) || /from ['"]@\//.test(line)) {

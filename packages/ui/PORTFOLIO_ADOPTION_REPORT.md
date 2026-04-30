@@ -1,7 +1,7 @@
 # Nzila Portfolio UX — Phase 1 Adoption Report
 
 **Date:** 2026-04-28
-**Scope:** All 23 apps under `apps/`
+**Scope:** All 24 apps under `apps/`
 **Foundation:** [`@nzila/ui` v6 design language](UX_DESIGN_SYSTEM.md)
 
 > Phase 1 of the portfolio UX mission shipped the design language. This

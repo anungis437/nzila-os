@@ -288,7 +288,7 @@ v6 shipped the design language. v7 turns it on across the seven priority apps wi
 - **`data-product="..."` on 7 root layouts** — `nzila-hq`, `console`, `union-eyes`, `zonga`, `veridian-care`, `flow`, `agrimo`. Each app now responds to its assigned accent (executive blue, operator teal, institutional navy, cultural violet, clinical emerald, commercial sky, field moss). Zonga also gained the `theme-dark` class to activate the canonical dark theme.
 - **`@import "@nzila/ui/globals.css"` in 5 bare-tailwind apps** (HQ, Console, Veridian Care, Agrimo, Flow) — exposes every semantic token (`bg-surface-*`, `text-fg-muted`, `text-status-*`, `bg-accent`, the 8-slot chart palette, motion + radius + elevation tokens) to those apps' Tailwind v4 pipelines.
 - **Accent-only delta on 2 self-themed apps** — Union Eyes and Zonga already ship complete in-app design systems. To avoid disturbing them, only the `[data-product="..."]` accent variables were appended to their `globals.css`; all other tokens stay app-owned.
-- **Full audit map** — 23 apps inventoried. 18 duplicate primitive files across 4 apps (HQ 7, Console 5, control-plane 2, weekone 1). 7 apps already on `@nzila/ui`. 12 clean apps with no UI yet. Migration batches A–E ordered for subsequent increments.
+- **Full audit map** — 24 apps inventoried. 18 duplicate primitive files across 4 apps (HQ 7, Console 5, control-plane 2, weekone 1). 7 apps already on `@nzila/ui`. 12 clean apps with no UI yet. Migration batches A–E ordered for subsequent increments.
 
 ### What was deliberately NOT done
 
