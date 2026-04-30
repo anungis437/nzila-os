@@ -40,7 +40,7 @@ jobs:
           git commit -m "chore(release): update release state" || true
 
       - name: Auto tag release
-        run: pnpm tsx scripts/release/tag-release.ts
+        run: pnpm release:tag --bump patch --allow-unsigned
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
