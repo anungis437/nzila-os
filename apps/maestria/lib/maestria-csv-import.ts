@@ -57,7 +57,7 @@ export function parseMaestriaCsv(csvText: string): CsvImportResult {
     const sku = cols[idx.sku] ?? ''
     const name = cols[idx.name] ?? ''
     const quantityRaw = cols[idx.quantity] ?? ''
-    const unitPriceRaw = cols[idx.unit_price ?? idx.unitprice ?? idx.unitPrice] ?? quantityRaw
+    const unitPriceRaw = cols[idx.unit_price ?? idx.unitprice ?? idx.unitPrice] ?? '0'
     const currency = (cols[idx.currency] ?? 'CAD').toUpperCase()
 
     if (!sku || !name) {
@@ -67,7 +67,7 @@ export function parseMaestriaCsv(csvText: string): CsvImportResult {
     }
 
     const quantity = parseInt(quantityRaw, 10)
-    const unitPrice = parseFloat(cols[idx.unit_price ?? idx.unitprice ?? idx.unitPrice] ?? '0')
+    const unitPrice = parseFloat(unitPriceRaw)
 
     if (isNaN(quantity) || quantity < 0) {
       warnings.push(`Row ${i + 1} (${sku}): invalid quantity "${quantityRaw}" — skipped`)
@@ -76,7 +76,7 @@ export function parseMaestriaCsv(csvText: string): CsvImportResult {
     }
 
     if (isNaN(unitPrice) || unitPrice < 0) {
-      warnings.push(`Row ${i + 1} (${sku}): invalid unitPrice — skipped`)
+      warnings.push(`Row ${i + 1} (${sku}): invalid unitPrice "${unitPriceRaw}" — skipped`)
       skipped++
       continue
     }

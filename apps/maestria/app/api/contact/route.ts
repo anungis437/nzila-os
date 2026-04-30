@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ ok: true, accepted: true, recordId: created.id })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ ok: false, error: 'Failed to process contact request' }, { status: 500 })
   }
 }

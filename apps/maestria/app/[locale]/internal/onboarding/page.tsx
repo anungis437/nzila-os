@@ -21,8 +21,6 @@ export default function OnboardingPage() {
     if (next) setActiveStep(next)
   }
 
-  const stepIndex = STEPS.findIndex((s) => s.id === activeStep)
-
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-8">
       <div>
