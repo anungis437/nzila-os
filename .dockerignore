@@ -61,6 +61,15 @@ reports
 plans
 tech-repo-scaffold
 templates
+artifacts
+proof-artifacts
+coverage_html
+coverage.xml
+logs
+fixtures
+infotech
+migrations
+ops/outputs
 audit-report.json
 contract-test-output.txt
 security
