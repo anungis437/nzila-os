@@ -102,6 +102,7 @@ function main(): void {
   const hotfix = hasFlag('--hotfix')
   const allowNonMain = hasFlag('--allow-non-main')
   const skipBranchPush = hasFlag('--skip-branch-push')
+  const skipIfExists = hasFlag('--skip-if-exists')
   const bumpArg = parseArg('--bump') as BumpType | undefined
   const versionArg = parseArg('--version')
 
@@ -115,9 +116,16 @@ function main(): void {
     process.exit(1)
   }
 
-  // Read current version
+  // Determine the base version: when bumping, prefer the latest semver git tag over
+  // package.json so the workflow stays correct even when --skip-branch-push prevents
+  // the version-bump commit from reaching the remote.
   const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')) as { version: string }
-  const previousVersion = pkg.version
+  const latestTag = exec(
+    'git tag --list "v*" --sort=-version:refname',
+    { capture: true },
+  ).split('\n').map((t) => t.trim()).filter(Boolean)[0]
+  const latestTagVersion = latestTag ? latestTag.replace(/^v/, '') : undefined
+  const previousVersion = latestTagVersion ?? pkg.version
   const newVersion = versionArg ?? bumpVersion(previousVersion, bumpArg!)
   validateSemver(newVersion)
 
@@ -143,9 +151,13 @@ function main(): void {
     process.exit(1)
   }
 
-  // Reject if tag already exists
+  // Check if tag already exists
   const existingTags = exec('git tag --list', { capture: true }).split('\n').map((t) => t.trim())
   if (existingTags.includes(tag)) {
+    if (skipIfExists) {
+      console.log(`ℹ Tag ${tag} already exists — skipping (--skip-if-exists).`)
+      process.exit(0)
+    }
     console.error(`✗ Tag ${tag} already exists. Did you mean to bump further?`)
     process.exit(1)
   }
