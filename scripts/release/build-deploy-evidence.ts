@@ -131,7 +131,7 @@ async function main() {
 
   // ── Load drift signals ─────────────────────────────────────────────────────
   type VersionDriftReport = {
-    apps: Array<{
+    results: Array<{
       app: string
       driftState: string
       deployedSha?: string
@@ -151,10 +151,12 @@ async function main() {
   type SmokeReport = {
     results?: Array<{
       app: string
-      endpoints?: Array<{ name: string; httpStatus: number | null; failureClass?: string }>
+      ok: boolean
+      probes?: Array<{ endpoint: string; status: number; ok: boolean }>
     }>
-    healthScore?: number
-    failedApps?: string[]
+    appsChecked?: number
+    passed?: number
+    failed?: number
   }
 
   const versionDrift: VersionDriftReport | null = (() => {
@@ -181,7 +183,7 @@ async function main() {
   const ACR = 'nzilacanadaacr.azurecr.io'
   const allApps = [
     ...new Set([
-      ...(versionDrift?.apps ?? []).map((a) => a.app),
+      ...(versionDrift?.results ?? []).map((a) => a.app),
       ...(envDrift?.apps ?? []).map((a) => a.app),
     ]),
   ]
@@ -190,7 +192,7 @@ async function main() {
   }
 
   const vByApp = new Map(
-    (versionDrift?.apps ?? []).map((a) => [a.app, a]),
+    (versionDrift?.results ?? []).map((a) => [a.app, a]),
   )
   const eByApp = new Map(
     (envDrift?.apps ?? []).map((a) => [a.app, a]),
@@ -204,9 +206,9 @@ async function main() {
     const e = eByApp.get(app)
     const s = smokeByApp.get(app)
 
-    const healthEndpoint = s?.endpoints?.find((ep) => ep.name === 'health')
-    const readyEndpoint = s?.endpoints?.find((ep) => ep.name === 'ready')
-    const versionEndpoint = s?.endpoints?.find((ep) => ep.name === 'version')
+    const healthProbe = s?.probes?.find((p) => p.endpoint === 'health')
+    const readyProbe = s?.probes?.find((p) => p.endpoint === 'ready')
+    const versionProbe = s?.probes?.find((p) => p.endpoint === 'version')
 
     return {
       app,
@@ -217,9 +219,9 @@ async function main() {
       envDriftScore: e?.envDriftScore ?? 0,
       hasEnvGaps: e?.hasBlockingGaps ?? false,
       smokeTriad: {
-        health: healthEndpoint?.httpStatus ?? null,
-        ready: readyEndpoint?.httpStatus ?? null,
-        version: versionEndpoint?.httpStatus ?? null,
+        health: healthProbe?.status ?? null,
+        ready: readyProbe?.status ?? null,
+        version: versionProbe?.status ?? null,
       },
     }
   })
@@ -232,8 +234,11 @@ async function main() {
           const v = vByApp.get(app)
           return v?.driftState === 'current'
         }).length,
-        failedApps: smokeRaw.failedApps ?? [],
-        healthScore: smokeRaw.healthScore ?? 0,
+        failedApps: (smokeRaw.results ?? []).filter((r) => !r.ok).map((r) => r.app),
+        healthScore:
+          smokeRaw.appsChecked && smokeRaw.appsChecked > 0
+            ? Math.round(((smokeRaw.passed ?? 0) / smokeRaw.appsChecked) * 100)
+            : 0,
       }
     : null
 
