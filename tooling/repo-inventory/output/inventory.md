@@ -1,15 +1,15 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-04-30 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-05-01 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Apps | 24 |
-| Packages (packages/*) | 188 |
-| Workspace Packages (apps|packages|services|tooling) | 216 |
-| GitHub Workflows | 46 |
+| Packages (packages/*) | 189 |
+| Workspace Packages (apps|packages|services|tooling) | 219 |
+| GitHub Workflows | 47 |
 | Contract Test Files | 233 |
 | TS/JS Test Files | 1290 |
 | Python Test Files | 31 |
@@ -18,11 +18,11 @@
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 355 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 213 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 250 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
@@ -39,7 +39,7 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 18 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 21 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 21 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 450 | Africa-first music distribution, streaming, and royalty management platform. |
 
@@ -83,6 +83,7 @@
 - portfolio-governance.yml
 - preview-deploy.yml
 - red-team.yml
+- release-governance.yml
 - release-train.yml
 - reliability-guard.yml
 - repo-inventory-check.yml

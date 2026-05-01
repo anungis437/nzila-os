@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "generatedAt": "2026-05-01T00:00:00.000Z",
   "appCount": 24,
-  "packageCount": 188,
-  "workspacePackageCount": 216,
-  "workflowCount": 46,
+  "packageCount": 189,
+  "workspacePackageCount": 219,
+  "workflowCount": 47,
   "contractTestCount": 233,
   "tsTestFileCount": 1290,
   "pythonTestFileCount": 31,
@@ -34,7 +34,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 248
+      "codeFileCount": 247
     },
     {
       "name": "agrimo",
@@ -179,7 +179,9 @@
         "db",
         "deal-engine",
         "governed-workflow",
+        "metrics-commercial",
         "observability",
+        "operating-evidence",
         "os-core",
         "platform-agent-workflows",
         "platform-ai-governance",
@@ -205,11 +207,12 @@
         "platform-procurement-proof",
         "platform-revenue",
         "platform-shell",
+        "policies",
         "schema-core",
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 213
+      "codeFileCount": 250
     },
     {
       "name": "cora",
@@ -416,12 +419,14 @@
         "db",
         "fsm-core",
         "itsm-core",
+        "operating-evidence",
         "os-core",
         "platform-event-fabric",
         "platform-observability",
         "platform-ops",
         "platform-procurement-proof",
-        "platform-utils"
+        "platform-utils",
+        "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
       "codeFileCount": 30
@@ -643,7 +648,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 81
+      "codeFileCount": 82
     },
     {
       "name": "weekone",
@@ -748,6 +753,7 @@
     "portfolio-governance.yml",
     "preview-deploy.yml",
     "red-team.yml",
+    "release-governance.yml",
     "release-train.yml",
     "reliability-guard.yml",
     "repo-inventory-check.yml",
