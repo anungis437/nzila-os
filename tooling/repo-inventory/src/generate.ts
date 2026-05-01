@@ -11,6 +11,7 @@
 
 import { readdirSync, readFileSync, existsSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { validateInventorySchema } from './schema';
 
 // ── Types ───────────────────────────────────────────────
@@ -78,6 +79,24 @@ function countFiles(dir: string, pattern: RegExp, visited = new Set<string>()): 
   return count;
 }
 
+function countTrackedFiles(relativeDir: string, pattern: RegExp): number {
+  const result = spawnSync('git', ['ls-files', '--', relativeDir], {
+    cwd: ROOT,
+    encoding: 'utf-8',
+  });
+
+  if (result.status !== 0 || !result.stdout) {
+    return countFiles(join(ROOT, relativeDir), pattern);
+  }
+
+  return result.stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((file) => pattern.test(file))
+    .length;
+}
+
 // ── Scanners ────────────────────────────────────────────
 
 function scanApps(): AppMeta[] {
@@ -141,7 +160,8 @@ function scanApps(): AppMeta[] {
       dependsOnPlatformAuth: '@nzila/platform-auth' in deps,
       nzilaDeps,
       purpose,
-      codeFileCount: countFiles(appDir, /\.(ts|tsx|js|jsx|py)$/),
+      // Use tracked files to keep counts stable across CI/local environments.
+      codeFileCount: countTrackedFiles(`apps/${d.name}`, /\.(ts|tsx|js|jsx|py)$/),
     };
   });
 }

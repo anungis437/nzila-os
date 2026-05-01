@@ -18,7 +18,7 @@
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 247 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 355 | Internal operations console — platform governance, compliance, analytics, integr |
@@ -39,7 +39,7 @@
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 18 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 21 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 21 |  |
-| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 82 | Public marketing site for the Nzila platform — landing pages, resource library,  |
+| web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
 | zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 450 | Africa-first music distribution, streaming, and royalty management platform. |
 
