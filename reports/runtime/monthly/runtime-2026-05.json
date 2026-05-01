@@ -1,115 +1,176 @@
 {
-  "proofId": "rp-2026-05-f8d50657",
-  "timestamp": "2026-05-01T02:34:00.565Z",
+  "schemaVersion": 2,
+  "proofId": "178918d6-cfff-4ea6-bbe0-a77ddac6c135",
+  "timestamp": "2026-05-01T17:11:54.444Z",
   "period": "2026-05",
   "periodType": "monthly",
   "metrics": [
     {
-      "name": "deploy_success_rate",
+      "name": "deploy_count",
+      "value": 1,
+      "unit": "deployments",
+      "status": "healthy"
+    },
+    {
+      "name": "rollback_count",
       "value": 0,
-      "unit": "%",
-      "status": "critical"
+      "unit": "rollbacks",
+      "status": "healthy"
     },
     {
       "name": "hotfix_count",
       "value": 0,
-      "unit": "count",
+      "unit": "hotfixes",
       "status": "healthy"
     },
     {
-      "name": "rollback_candidates",
-      "value": 0,
-      "unit": "count",
+      "name": "ci_success_rate",
+      "value": 100,
+      "unit": "%",
       "status": "healthy"
     },
     {
-      "name": "drift_reports_generated",
-      "value": 1,
-      "unit": "count",
-      "status": "healthy"
-    },
-    {
-      "name": "evidence_pack_continuity",
-      "value": false,
-      "unit": "boolean",
-      "status": "degraded"
-    },
-    {
-      "name": "evidence_pack_total_months",
-      "value": 1,
-      "unit": "count",
-      "status": "healthy"
-    },
-    {
-      "name": "restore_drill_count",
-      "value": 1,
-      "unit": "count",
-      "status": "healthy"
-    },
-    {
-      "name": "release_manifests",
-      "value": 1,
-      "unit": "count",
-      "status": "healthy"
-    },
-    {
-      "name": "signature_verification",
-      "value": "not-run",
+      "name": "azure_runtime_status",
+      "value": "healthy",
       "unit": "status",
-      "status": "unknown"
+      "status": "healthy"
     },
     {
-      "name": "migration_file_count",
-      "value": 12,
-      "unit": "count",
+      "name": "health_check_status",
+      "value": "pass",
+      "unit": "status",
       "status": "healthy"
     }
   ],
   "sources": [
     {
       "name": "release-ledger",
-      "path": "reports/releases/release-ledger.jsonl",
+      "path": "reports\\releases\\release-ledger.jsonl",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "drift-reports",
-      "path": "ops/drift/",
+      "name": "ci-runs",
+      "path": "reports\\runtime\\ci-runs.jsonl",
+      "exists": true,
+      "entries": 2
+    },
+    {
+      "name": "azure-runtime",
+      "path": "reports\\runtime\\azure-runtime-latest.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "smoke-reports",
-      "path": "ops/smoke/",
+      "name": "health",
+      "path": "reports\\runtime\\health-latest.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "evidence-packs",
-      "path": "proof-artifacts/evidence-packs/",
+      "name": "security",
+      "path": "reports\\runtime\\security-proof-latest.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "restore-drills",
-      "path": "reports/db/",
+      "name": "drift",
+      "path": "ops\\drift\\drift-2026-05.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "release-manifests",
-      "path": "ops/releases/",
+      "name": "restore-drill",
+      "path": "reports\\db\\restore-drill-2026-05.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "signature-reports",
-      "path": "reports/release/",
-      "exists": false,
-      "entries": 0
+      "name": "snapshot",
+      "path": "proof-artifacts\\evidence-packs\\2026-05\\snapshot.json",
+      "exists": true,
+      "entries": 1
     }
   ],
-  "overallHealth": "critical",
-  "generatedBy": "AubertNungisa",
-  "schemaVersion": 1
+  "overallHealth": "healthy",
+  "score": 100,
+  "maxScore": 100,
+  "grade": "A",
+  "scoringBreakdown": [
+    {
+      "dimension": "release",
+      "weight": 20,
+      "earned": 20,
+      "rationale": "1 real ledger entries + 1 manifests",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "deploy",
+      "weight": 20,
+      "earned": 20,
+      "rationale": "CI: 1/1 success; Azure: healthy",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "health",
+      "weight": 15,
+      "earned": 15,
+      "rationale": "all health checks pass",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "drift",
+      "weight": 15,
+      "earned": 15,
+      "rationale": "drift report: 0 items",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "restore",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "restore drill passed; age 1d",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "security",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "security checks pass",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "seal",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "snapshot present with sha256 integrity",
+      "bootstrapEvidence": false
+    }
+  ],
+  "blockingFindings": [],
+  "advisoryFindings": [],
+  "unknowns": [],
+  "nextRequiredEvidence": [],
+  "bootstrapSources": [],
+  "restoreProof": {
+    "hasReport": true,
+    "overallStatus": "pass",
+    "passedChecks": 8,
+    "totalChecks": 9,
+    "drillTimestamp": "2026-05-01T04:04:25.285Z",
+    "drillAgeDays": 1,
+    "freshnessScore": 10
+  },
+  "securityProof": {
+    "earned": 10,
+    "rationale": "security checks pass",
+    "bootstrapEvidence": false,
+    "criticalMissing": false
+  },
+  "sealVerification": {
+    "earned": 10,
+    "rationale": "snapshot present with sha256 integrity",
+    "verified": true
+  },
+  "generatedBy": "scripts/proof/generate-runtime-proof.ts@v3"
 }

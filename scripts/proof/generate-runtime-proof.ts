@@ -365,7 +365,7 @@ function nextRequiredEvidence(
 }
 
 export function generateRuntimeProof(periodInput?: string): RuntimeProofV2 {
-  const rawPeriod = periodInput ?? parseArg('--month') ?? getCurrentMonth()
+  const rawPeriod = periodInput ?? parseArg('--period') ?? parseArg('--month') ?? getCurrentMonth()
   const period = assertPeriod(rawPeriod)
 
   const ledgerPath = safeResolveUnderRoot('reports', 'releases', 'release-ledger.jsonl')

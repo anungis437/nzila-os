@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-01T03:51:25.400Z",
+  "generatedAt": "2026-05-01T17:51:00.015Z",
   "securityDir": "C:\\APPS\\nzila-automation\\reports\\security",
   "artifacts": [
     {
       "kind": "audit",
-      "path": "C:\\APPS\\nzila-automation\\reports\\security\\dependency-audit-high.json",
+      "path": "C:/APPS/nzila-automation/reports/security/dependency-audit-high.json",
       "relativePath": "reports/security/dependency-audit-high.json",
       "sizeBytes": 1571,
       "sha256": "f7072ded21221765",
@@ -14,7 +14,7 @@
     },
     {
       "kind": "gitleaks",
-      "path": "C:\\APPS\\nzila-automation\\reports\\security\\gitleaks-report.json",
+      "path": "C:/APPS/nzila-automation/reports/security/gitleaks-report.json",
       "relativePath": "reports/security/gitleaks-report.json",
       "sizeBytes": 59997,
       "sha256": "5e7178fbea6855cc",
@@ -24,7 +24,7 @@
     },
     {
       "kind": "sbom",
-      "path": "C:\\APPS\\nzila-automation\\reports\\security\\sbom.json",
+      "path": "C:/APPS/nzila-automation/reports/security/sbom.json",
       "relativePath": "reports/security/sbom.json",
       "sizeBytes": 1456144,
       "sha256": "74d555136020b3ce",
@@ -34,7 +34,7 @@
     },
     {
       "kind": "audit",
-      "path": "C:\\APPS\\nzila-automation\\reports\\security\\secret-audit.json",
+      "path": "C:/APPS/nzila-automation/reports/security/secret-audit.json",
       "relativePath": "reports/security/secret-audit.json",
       "sizeBytes": 7566,
       "sha256": "71ac7daa3dbeb331",

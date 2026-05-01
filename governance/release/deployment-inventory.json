@@ -72,7 +72,7 @@
         "mitigation": "FairCase (internal: ABR) is deployed in staging via nzila-os-abr. Production route reserved as faircase.nzilaventures.com; blocked until promotion criteria are met and DNS record created in Cloudflare."
       },
       "routing": {
-        "staging": "https://staging-faircase.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://faircase.nzilaventures.com",
         "productionState": "reserved-not-yet-promoted",
@@ -131,7 +131,7 @@
         "mitigation": "No inactive healthy revision retained yet; rollback executed by redeploying prior approved image digest from release manifest."
       },
       "routing": {
-        "staging": "https://staging.nzilaventures.com",
+        "staging": "blocked",
         "production": "https://www.nzilaventures.com",
         "healthPath": "/api/health",
         "ingress": "external",
@@ -186,7 +186,7 @@
         "mitigation": "CFO is deployed in staging (nzila-os-cfo) but staging DNS record staging-cfo.nzilaventures.com is not yet created. Remains staging-only until domain cutover and promotion approval."
       },
       "routing": {
-        "staging": "https://staging-cfo.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -214,7 +214,7 @@
         "platform-ops"
       ],
       "routing": {
-        "staging": "https://staging-zonga.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://zonga.nzilaventures.com",
         "productionState": "reserved-tls-pending",
@@ -253,7 +253,7 @@
         "mitigation": "Agrimo deployed in staging (nzila-os-agrimo); staging DNS pending manual Cloudflare action."
       },
       "routing": {
-        "staging": "https://staging-agrimo.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -286,7 +286,7 @@
         "mitigation": "Cora is incubating; deployed in staging (nzila-os-cora) but not production-ready. Staging DNS pending."
       },
       "routing": {
-        "staging": "https://staging-cora.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-cora.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -319,7 +319,7 @@
         "mitigation": "Trade is incubating; deployed in staging (nzila-os-trade) but not production-ready. Staging DNS pending."
       },
       "routing": {
-        "staging": "https://staging-trade.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-trade.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -352,7 +352,7 @@
         "mitigation": "Mobility deployed in staging (nzila-os-mobility); staging DNS pending manual Cloudflare action."
       },
       "routing": {
-        "staging": "https://staging-mobility.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-mobility.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -391,9 +391,9 @@
       "prodPromotionEligible": true,
       "containerAppName": "nzila-os-control-plane",
       "stagingDeployed": true,
-      "stagingDnsStatus": "pending-manual-cloudflare",
-      "productionDnsStatus": "pending-manual-cloudflare",
-      "dnsPendingAction": "Add CNAME records in Cloudflare nzilaventures.com zone: control -> nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io, staging-control -> same",
+      "stagingDnsStatus": "active",
+      "productionDnsStatus": "active",
+      "dnsPendingAction": null,
       "owners": [
         "platform-admin",
         "platform-ops"
@@ -408,7 +408,7 @@
         "staging": "https://staging-control.nzilaventures.com",
         "stagingFallback": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://control.nzilaventures.com",
-        "productionState": "dns-pending",
+        "productionState": "active",
         "healthPath": "/",
         "ingress": "restricted",
         "tls": "managed"
@@ -438,7 +438,7 @@
         "mitigation": "Orchestrator API is deployed in staging (nzila-os-orchestrator-api) but staging DNS record staging-api.nzilaventures.com is not yet created. Promotion deferred until DNS cutover and service rollout complete."
       },
       "routing": {
-        "staging": "https://staging-api.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
@@ -509,7 +509,7 @@
         "mitigation": "ABR (public: FairCase) is deployed in staging (nzila-os-abr). Served under staging-faircase.nzilaventures.com; production reserved as faircase.nzilaventures.com. Blocked pending DNS creation and promotion approval."
       },
       "routing": {
-        "staging": "https://staging-faircase.nzilaventures.com",
+        "staging": "blocked",
         "stagingFallback": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://faircase.nzilaventures.com",
         "productionState": "reserved-not-yet-promoted",
@@ -551,3 +551,4 @@
     ]
   }
 }
+
