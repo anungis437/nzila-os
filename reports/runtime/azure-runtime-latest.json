@@ -1,0 +1,969 @@
+{
+  "ingestedAt": "2026-05-01T14:48:27.569Z",
+  "subscriptionId": null,
+  "topologyDecision": {
+    "strategy": "shared-resource-group-environment",
+    "expectedShared": true,
+    "stagingResourceGroup": "nzila-canada-staging-rg",
+    "productionResourceGroup": "nzila-canada-staging-rg",
+    "stagingEnvironment": "nzila-canada-staging-env",
+    "productionEnvironment": "nzila-canada-staging-env"
+  },
+  "environments": [
+    {
+      "environment": "staging",
+      "expectedResourceGroup": "nzila-canada-staging-rg",
+      "expectedContainerAppEnvironment": "nzila-canada-staging-env",
+      "resourceGroupExists": false,
+      "containerAppEnvironmentExists": null,
+      "topologyStrategy": "shared-resource-group-environment",
+      "sharedWithStaging": false,
+      "expectedApps": [
+        "union-eyes",
+        "flow",
+        "web",
+        "partners",
+        "cfo",
+        "zonga",
+        "agrimo",
+        "cora",
+        "trade",
+        "mobility",
+        "console",
+        "control-plane",
+        "orchestrator-api",
+        "abr"
+      ],
+      "deployedAppsInResourceGroup": [],
+      "assessments": [
+        {
+          "expectedAppName": "union-eyes",
+          "expectedContainerAppName": "nzila-os-union-eyes",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging.unioneyes.app",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "flow",
+          "expectedContainerAppName": "nzila-os-flow",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-flow.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "web",
+          "expectedContainerAppName": "nzila-os-web",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "partners",
+          "expectedContainerAppName": "nzila-os-partners",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-partners.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "cfo",
+          "expectedContainerAppName": "nzila-os-cfo",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-cfo.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "zonga",
+          "expectedContainerAppName": "nzila-os-zonga",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-zonga.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "agrimo",
+          "expectedContainerAppName": "nzila-os-agrimo",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-agrimo.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "cora",
+          "expectedContainerAppName": "nzila-os-cora",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-cora.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "trade",
+          "expectedContainerAppName": "nzila-os-trade",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-trade.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "mobility",
+          "expectedContainerAppName": "nzila-os-mobility",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-mobility.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "console",
+          "expectedContainerAppName": "nzila-os-console",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-console.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "control-plane",
+          "expectedContainerAppName": "nzila-os-control-plane",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-control.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "orchestrator-api",
+          "expectedContainerAppName": "nzila-os-orchestrator-api",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-api.nzilaventures.com",
+          "expectedHealthPath": "/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "abr",
+          "expectedContainerAppName": "nzila-os-abr",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://staging-faircase.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        }
+      ],
+      "summary": {
+        "expectedCount": 14,
+        "deployedCount": 0,
+        "passCount": 0,
+        "warnCount": 0,
+        "failCount": 0,
+        "missingExpectedCount": 14,
+        "blockerCount": 0
+      },
+      "overallStatus": "unknown",
+      "blockingFindings": [],
+      "advisoryFindings": [
+        "bootstrap mode: Azure footprint not validated"
+      ]
+    },
+    {
+      "environment": "production",
+      "expectedResourceGroup": "nzila-canada-staging-rg",
+      "expectedContainerAppEnvironment": "nzila-canada-staging-env",
+      "resourceGroupExists": false,
+      "containerAppEnvironmentExists": null,
+      "topologyStrategy": "shared-resource-group-environment",
+      "sharedWithStaging": true,
+      "expectedApps": [
+        "union-eyes",
+        "web",
+        "partners",
+        "console",
+        "control-plane"
+      ],
+      "deployedAppsInResourceGroup": [],
+      "assessments": [
+        {
+          "expectedAppName": "union-eyes",
+          "expectedContainerAppName": "nzila-os-union-eyes",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://app.unioneyes.app",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "web",
+          "expectedContainerAppName": "nzila-os-web",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://www.nzilaventures.com",
+          "expectedHealthPath": "/api/health",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "partners",
+          "expectedContainerAppName": "nzila-os-partners",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://partners.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "console",
+          "expectedContainerAppName": "nzila-os-console",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://console.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        },
+        {
+          "expectedAppName": "control-plane",
+          "expectedContainerAppName": "nzila-os-control-plane",
+          "expectedResourceGroup": "nzila-canada-staging-rg",
+          "expectedRoute": "https://control.nzilaventures.com",
+          "expectedHealthPath": "/",
+          "exists": false,
+          "provisioningState": null,
+          "runningState": null,
+          "latestRevision": null,
+          "latestReadyRevision": null,
+          "image": null,
+          "ingressFqdn": null,
+          "trafficWeights": [],
+          "identity": {
+            "present": false,
+            "type": null,
+            "principalId": null,
+            "tenantId": null
+          },
+          "rollbackCandidateCount": 0,
+          "rollbackCandidates": [],
+          "customDomain": null,
+          "dnsStatus": null,
+          "secretPosture": {
+            "totalEnvVars": 0,
+            "secretRefCount": 0,
+            "plainValueCount": 0,
+            "sensitivePlainValueCount": 0,
+            "sensitivePlainValueKeys": []
+          },
+          "status": "unknown",
+          "severity": "none",
+          "issues": [
+            "bootstrap mode: live Azure ingestion not requested"
+          ]
+        }
+      ],
+      "summary": {
+        "expectedCount": 5,
+        "deployedCount": 0,
+        "passCount": 0,
+        "warnCount": 0,
+        "failCount": 0,
+        "missingExpectedCount": 5,
+        "blockerCount": 0
+      },
+      "overallStatus": "unknown",
+      "blockingFindings": [],
+      "advisoryFindings": [
+        "bootstrap mode: Azure footprint not validated"
+      ]
+    }
+  ],
+  "apps": [
+    {
+      "name": "nzila-os-union-eyes",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-flow",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-web",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-partners",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-cfo",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-zonga",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-agrimo",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-cora",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-trade",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-mobility",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-console",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-control-plane",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-orchestrator-api",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    },
+    {
+      "name": "nzila-os-abr",
+      "provisioningState": null,
+      "runningState": null,
+      "fqdn": null,
+      "revision": null,
+      "image": null,
+      "trafficWeight": null,
+      "healthResult": "unknown",
+      "bootstrapEvidence": false,
+      "status": "unknown"
+    }
+  ],
+  "blockingFindings": [],
+  "advisoryFindings": [
+    "bootstrap mode: Azure footprint not validated",
+    "bootstrap mode: Azure footprint not validated"
+  ],
+  "overallStatus": "unknown",
+  "bootstrapEvidence": true
+}

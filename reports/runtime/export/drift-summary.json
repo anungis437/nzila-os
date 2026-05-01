@@ -1,0 +1,7 @@
+{
+  "generatedAt": "2026-04-01T00:00:00.000Z",
+  "period": "2026-04",
+  "driftItems": [],
+  "baseline": true,
+  "notes": "Baseline drift snapshot — no schema or config drift detected at time of creation"
+}

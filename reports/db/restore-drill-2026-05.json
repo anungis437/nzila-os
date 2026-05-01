@@ -1,0 +1,82 @@
+{
+  "drillId": "drill-2026-05-bac5a057",
+  "timestamp": "2026-05-01T04:04:25.285Z",
+  "mode": "execute",
+  "environment": "local",
+  "backupSources": [
+    {
+      "type": "pitr",
+      "location": "Azure PostgreSQL Flexible Server — Point-in-Time Recovery",
+      "exists": true,
+      "lastModified": "continuous"
+    },
+    {
+      "type": "blob_snapshot",
+      "location": "nzilacanadastore/backups (Azure Blob)",
+      "exists": false
+    }
+  ],
+  "checks": [
+    {
+      "check": "backup-sources",
+      "status": "pass",
+      "message": "Found 2 backup source(s): 1 available"
+    },
+    {
+      "check": "migration-files",
+      "status": "pass",
+      "message": "110 migration files across 3 directories"
+    },
+    {
+      "check": "db-connectivity",
+      "status": "pass",
+      "message": "PostgreSQL accepting connections (localhost:5433)",
+      "durationMs": 186
+    },
+    {
+      "check": "restore-execute",
+      "status": "pass",
+      "message": "Migrations applied successfully to nzila_drill (110 files)",
+      "durationMs": 40739
+    },
+    {
+      "check": "restore-table-count",
+      "status": "pass",
+      "message": "111 tables in restored database"
+    },
+    {
+      "check": "ready-endpoint",
+      "status": "skip",
+      "message": "Skipped — set DR_READY_URL or pass --ready-url to validate app readiness"
+    },
+    {
+      "check": "dr-documentation",
+      "status": "pass",
+      "message": "DR plan present with RTO, RPO, and restore procedures"
+    },
+    {
+      "check": "db-doctor",
+      "status": "pass",
+      "message": "db:doctor passed (baseline-aware)",
+      "durationMs": 2417
+    },
+    {
+      "check": "migration-safety",
+      "status": "pass",
+      "message": "migration-safety passed (baseline-aware)",
+      "durationMs": 2163
+    }
+  ],
+  "timing": {
+    "totalDurationMs": 47863,
+    "restoreDurationMs": 40739,
+    "healthCheckDurationMs": 45505
+  },
+  "overallStatus": "pass",
+  "rtoTarget": "4 hours",
+  "rtoActual": "41s",
+  "rpoTarget": "1 hour",
+  "operator": "anungis437",
+  "migrationCount": 110,
+  "schemaVersion": 1
+}

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAnomalyById } from "@/server/data";
-import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
+import { requireApiAuth, handleAuthError, parseUuidParam } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,8 @@ export async function GET(
 ) {
   try {
     await requireApiAuth(request);
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = parseUuidParam(rawId, "id");
     const anomaly = await getAnomalyById(id);
 
     if (!anomaly) {

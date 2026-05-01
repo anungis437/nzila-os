@@ -26,6 +26,12 @@ import * as path from 'node:path'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 
+interface MigrationSafetyBaseline {
+  tool: 'migration-safety'
+  generatedAt: string
+  allowBlockKeys: string[]
+}
+
 interface SafetyFinding {
   severity: 'block' | 'review' | 'info'
   rule: string
@@ -35,6 +41,39 @@ interface SafetyFinding {
 }
 
 const findings: SafetyFinding[] = []
+
+function findingKey(finding: SafetyFinding): string {
+  return [finding.rule, finding.message, finding.file, String(finding.line ?? '')].join('|')
+}
+
+function readBaseline(filePath: string): MigrationSafetyBaseline | null {
+  const resolved = path.resolve(filePath)
+  if (!resolved.startsWith(ROOT) || !fs.existsSync(resolved)) return null
+  try {
+    const parsed = JSON.parse(fs.readFileSync(resolved, 'utf8')) as MigrationSafetyBaseline
+    if (parsed.tool !== 'migration-safety' || !Array.isArray(parsed.allowBlockKeys)) {
+      return null
+    }
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function writeBaseline(filePath: string, blockers: SafetyFinding[]): string {
+  const resolved = path.resolve(filePath)
+  if (!resolved.startsWith(ROOT)) {
+    throw new Error(`Refusing to write baseline outside repository: ${filePath}`)
+  }
+  fs.mkdirSync(path.dirname(resolved), { recursive: true })
+  const payload: MigrationSafetyBaseline = {
+    tool: 'migration-safety',
+    generatedAt: new Date().toISOString(),
+    allowBlockKeys: blockers.map((item) => findingKey(item)),
+  }
+  fs.writeFileSync(resolved, JSON.stringify(payload, null, 2) + '\n', 'utf8')
+  return resolved
+}
 
 // ── Safety rules ──────────────────────────────────────────────────────────────
 
@@ -178,6 +217,7 @@ function analyzeFile(filePath: string): void {
 
 function main(): void {
   console.log('\n── Migration Safety Analysis ────────────────────────────')
+  const reviewOk = process.argv.includes('--review-ok')
 
   const files = getMigrationFiles()
   console.log(`  Scanning ${files.length} migration file(s)...\n`)
@@ -186,17 +226,56 @@ function main(): void {
     analyzeFile(file)
   }
 
+  const baselineArg = parseArg('--baseline')
+  const writeBaselineArg = parseArg('--write-baseline')
+
   if (findings.length === 0) {
     console.log('  ✓ All migrations safe — no destructive patterns detected')
+    if (writeBaselineArg) {
+      const written = writeBaseline(writeBaselineArg, [])
+      console.log(`  Baseline written: ${path.relative(ROOT, written)}`)
+    }
     process.exit(0)
   }
 
   const blockers = findings.filter((f) => f.severity === 'block')
   const reviews = findings.filter((f) => f.severity === 'review')
 
-  if (blockers.length > 0) {
+  if (writeBaselineArg) {
+    const written = writeBaseline(writeBaselineArg, blockers)
+    console.log(`  Baseline written: ${path.relative(ROOT, written)}`)
+  }
+
+  let unmatchedBlockers = blockers
+  if (baselineArg) {
+    const baseline = readBaseline(baselineArg)
+    if (!baseline) {
+      findings.push({
+        severity: 'review',
+        rule: 'BASELINE_UNREADABLE',
+        message: `Baseline file unreadable: ${baselineArg}`,
+        file: path.relative(ROOT, path.resolve(baselineArg)),
+      })
+    } else {
+      const allowed = new Set(baseline.allowBlockKeys)
+      unmatchedBlockers = blockers.filter((item) => !allowed.has(findingKey(item)))
+      const suppressed = blockers.length - unmatchedBlockers.length
+      if (suppressed > 0) {
+        findings.push({
+          severity: 'review',
+          rule: 'BASELINE_SUPPRESSED',
+          message: `Suppressed ${suppressed} known blocking finding(s) from baseline`,
+          file: path.relative(ROOT, path.resolve(baselineArg)),
+        })
+      }
+    }
+  }
+
+  const effectiveReviews = findings.filter((f) => f.severity === 'review')
+
+  if (unmatchedBlockers.length > 0) {
     console.log('  BLOCKING issues:')
-    for (const f of blockers) {
+    for (const f of unmatchedBlockers) {
       const loc = f.line ? `:${f.line}` : ''
       console.log(`    ✗ [${f.rule}] ${f.file}${loc}`)
       console.log(`      ${f.message}`)
@@ -204,9 +283,9 @@ function main(): void {
     console.log()
   }
 
-  if (reviews.length > 0) {
+  if (effectiveReviews.length > 0) {
     console.log('  REVIEW required:')
-    for (const f of reviews) {
+    for (const f of effectiveReviews) {
       const loc = f.line ? `:${f.line}` : ''
       console.log(`    ⚠ [${f.rule}] ${f.file}${loc}`)
       console.log(`      ${f.message}`)
@@ -214,15 +293,15 @@ function main(): void {
     console.log()
   }
 
-  console.log(`  Summary: ${blockers.length} blocking, ${reviews.length} review`)
+  console.log(`  Summary: ${unmatchedBlockers.length} blocking, ${effectiveReviews.length} review`)
 
-  if (blockers.length > 0) {
+  if (unmatchedBlockers.length > 0) {
     console.log('\n  ✗ UNSAFE — resolve blocking issues before deploy')
     process.exit(1)
   }
 
   console.log('\n  ⚠ REVIEW NEEDED — no blockers, but items require human approval')
-  process.exit(2)
+  process.exit(reviewOk ? 0 : 2)
 }
 
 main()

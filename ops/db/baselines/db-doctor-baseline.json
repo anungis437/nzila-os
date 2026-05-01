@@ -1,0 +1,14 @@
+{
+  "tool": "db-doctor",
+  "generatedAt": "2026-05-01T04:03:10.849Z",
+  "allowFailKeys": [
+    "migration-ordering|Gap detected: 1 → 1|0001_phase5b_inter_union_features.sql",
+    "migration-ordering|Gap detected: 8 → 19|0019_lonely_stephen_strange.sql",
+    "migration-ordering|Gap detected: 21 → 25|0025_pilot_enrollments.sql",
+    "migration-ordering|Gap detected: 25 → 51|0051_add_messaging_rls_policies.sql",
+    "migration-ordering|Gap detected: 70 → 70|0070_predeployment_hardening.sql",
+    "migration-ordering|Gap detected: 80 → 80|0080_audit_remediation.sql",
+    "migration-ordering|Duplicate indices: 1, 70, 80|",
+    "drizzle-journal|Journal entry 8 has mismatched idx=29|"
+  ]
+}

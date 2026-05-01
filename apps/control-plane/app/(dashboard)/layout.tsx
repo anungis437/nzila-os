@@ -56,6 +56,7 @@ const navItems = [
   { href: "/integrations", label: "Integrations", icon: Cable },
   { href: "/integrations/dead-letters", label: "Dead Letters", icon: MailWarning },
   { href: "/ops/evidence", label: "Ops Evidence", icon: ShieldCheck },
+  { href: "/runtime-proof", label: "Runtime Proof", icon: ShieldCheck },
   { href: "/ops/control-center", label: "Control Center", icon: Crosshair },
   { href: "/business/metrics", label: "Business Metrics", icon: TrendingUp },
   { href: "/business/simulated-economics", label: "Simulated Economics", icon: DollarSign },

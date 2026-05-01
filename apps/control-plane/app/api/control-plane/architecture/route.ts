@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { execFileSync } from "node:child_process";
 import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
@@ -9,10 +10,39 @@ function fileExists(p: string): boolean {
   return fs.existsSync(p);
 }
 
+function normalizePath(value: string): string {
+  return value.replace(/\\/g, "/").replace(/\/+/g, "/").replace(/\/$/, "");
+}
+
+function canonicalPath(value: string): string {
+  const normalized = normalizePath(value);
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
+}
+
+function isWithinBase(candidate: string, base: string): boolean {
+  const candidateCanonical = canonicalPath(candidate);
+  const baseCanonical = canonicalPath(base);
+  return candidateCanonical === baseCanonical || candidateCanonical.startsWith(`${baseCanonical}/`);
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes("\0") || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null;
+  const candidate = normalizePath([base, ...parts].join("/"));
+  return isWithinBase(candidate, base) ? candidate : null;
+}
+
+function readUtf8(filePath: string): string {
+  return execFileSync(
+    process.execPath,
+    ["-e", 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
+    { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 }
+  );
+}
+
 function readJsonSafe<T>(filePath: string): T | null {
   try {
     if (!fs.existsSync(filePath)) return null;
-    return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    return JSON.parse(readUtf8(filePath));
   } catch {
     return null;
   }
@@ -23,7 +53,8 @@ function countTestFiles(dirPath: string): number {
   let count = 0;
   const walk = (dir: string) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
+      const full = safeJoinUnder(dir, entry.name);
+      if (!full) continue;
       if (
         entry.isDirectory() &&
         entry.name !== "node_modules" &&
@@ -44,7 +75,7 @@ export async function GET(request: Request) {
     await requireApiAuth(request);
 
     const root = path.resolve(/* turbopackIgnore: true */ process.cwd(), "../..");
-    const packagesDir = path.join(root, "packages");
+    const packagesDir = safeJoinUnder(root, "packages") ?? "";
 
   // ── Load registries ───────────────────────────
 
@@ -56,12 +87,12 @@ export async function GET(request: Request) {
       owner: string;
       domain: string;
     }>;
-  }>(path.join(root, "platform", "registry", "apps.json"));
+  }>(safeJoinUnder(root, "platform", "registry", "apps.json") ?? "");
 
   const platformRegistry = readJsonSafe<{
     platform_services: Array<{ name: string; lifecycle: string }>;
     shared_packages: Array<{ name: string; category: string; stability: string }>;
-  }>(path.join(root, "platform", "registry", "platform-registry.json"));
+  }>(safeJoinUnder(root, "platform", "registry", "platform-registry.json") ?? "");
 
   // ── Package stats ─────────────────────────────
 
@@ -77,16 +108,20 @@ export async function GET(request: Request) {
       .filter(
         (d) =>
           d.isDirectory() &&
-          fs.existsSync(path.join(packagesDir, d.name, "package.json"))
+          (() => {
+            const pkgPath = safeJoinUnder(packagesDir, d.name, "package.json");
+            return pkgPath ? fs.existsSync(pkgPath) : false;
+          })()
       );
 
     totalPackages = dirs.length;
 
     for (const dir of dirs) {
-      const metaPath = path.join(packagesDir, dir.name, "package.meta.json");
+      const metaPath = safeJoinUnder(packagesDir, dir.name, "package.meta.json");
+      if (!metaPath) continue;
       if (fs.existsSync(metaPath)) {
         withMeta++;
-        const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+        const meta = JSON.parse(readUtf8(metaPath));
         const cat = meta.category || "UNKNOWN";
         categories[cat] = (categories[cat] || 0) + 1;
         const stab = meta.stability || "UNKNOWN";
@@ -105,14 +140,17 @@ export async function GET(request: Request) {
   }
 
   // Detect filesystem apps not in registry
-  const appsDir = path.join(root, "apps");
+  const appsDir = safeJoinUnder(root, "apps") ?? "";
   const fsAppNames = fs.existsSync(appsDir)
     ? fs
         .readdirSync(appsDir, { withFileTypes: true })
         .filter(
           (d) =>
             d.isDirectory() &&
-            fs.existsSync(path.join(appsDir, d.name, "package.json"))
+            (() => {
+              const pkgPath = safeJoinUnder(appsDir, d.name, "package.json");
+              return pkgPath ? fs.existsSync(pkgPath) : false;
+            })()
         )
         .map((d) => d.name)
     : [];
@@ -123,7 +161,18 @@ export async function GET(request: Request) {
   // ── App compliance (gold standard checks) ────
 
   const apps = registeredApps.map((regApp) => {
-    const appDir = path.join(/* turbopackIgnore: true */ root, "apps", regApp.name);
+    const appDir = safeJoinUnder(/* turbopackIgnore: true */ root, "apps", regApp.name);
+    if (!appDir) {
+      return {
+        app: regApp.name,
+        tier: regApp.tier,
+        owner: regApp.owner,
+        domain: regApp.domain,
+        checks: 0,
+        passed: 0,
+        level: "MISSING" as const,
+      };
+    }
     if (!fs.existsSync(appDir)) {
       return {
         app: regApp.name,
@@ -145,23 +194,39 @@ export async function GET(request: Request) {
     };
 
     assert(
-      fileExists(path.join(appDir, "app", "api", "health", "route.ts"))
+      (() => {
+        const filePath = safeJoinUnder(appDir, "app", "api", "health", "route.ts");
+        return filePath ? fileExists(filePath) : false;
+      })()
     );
     assert(
-      fileExists(path.join(appDir, "app", "api", "metrics", "route.ts")) ||
-        fileExists(path.join(appDir, "app", "api", "analytics", "route.ts"))
+      (() => {
+        const metricsPath = safeJoinUnder(appDir, "app", "api", "metrics", "route.ts");
+        const analyticsPath = safeJoinUnder(appDir, "app", "api", "analytics", "route.ts");
+        return (metricsPath ? fileExists(metricsPath) : false) || (analyticsPath ? fileExists(analyticsPath) : false);
+      })()
     );
     assert(
-      fileExists(
-        path.join(appDir, "app", "api", "evidence", "export", "route.ts")
-      ) || fileExists(path.join(appDir, "lib", "evidence.ts"))
+      (() => {
+        const evidenceApiPath = safeJoinUnder(appDir, "app", "api", "evidence", "export", "route.ts");
+        const evidenceLibPath = safeJoinUnder(appDir, "lib", "evidence.ts");
+        return (evidenceApiPath ? fileExists(evidenceApiPath) : false) || (evidenceLibPath ? fileExists(evidenceLibPath) : false);
+      })()
     );
     assert(
-      fileExists(path.join(appDir, "lib", "policy-enforcement.ts")) ||
-        fileExists(path.join(appDir, "lib", "policyEnforcement.ts")) ||
-        fileExists(path.join(appDir, "lib", "services", "policy-engine.ts"))
+      (() => {
+        const policyEnforcementPath = safeJoinUnder(appDir, "lib", "policy-enforcement.ts");
+        const policyCamelPath = safeJoinUnder(appDir, "lib", "policyEnforcement.ts");
+        const policyEnginePath = safeJoinUnder(appDir, "lib", "services", "policy-engine.ts");
+        return (policyEnforcementPath ? fileExists(policyEnforcementPath) : false)
+          || (policyCamelPath ? fileExists(policyCamelPath) : false)
+          || (policyEnginePath ? fileExists(policyEnginePath) : false);
+      })()
     );
-    assert(fileExists(path.join(appDir, "docs", "DOMAIN_MODEL.md")));
+    assert((() => {
+      const domainModelPath = safeJoinUnder(appDir, "docs", "DOMAIN_MODEL.md");
+      return domainModelPath ? fileExists(domainModelPath) : false;
+    })());
     assert(countTestFiles(appDir) >= 3);
 
     const pct = checks > 0 ? Math.round((passed / checks) * 100) : 0;
@@ -189,13 +254,14 @@ export async function GET(request: Request) {
 
   // ── Contract tests ────────────────────────────
 
-  const contractDir = path.join(root, "tooling", "contract-tests");
+  const contractDir = safeJoinUnder(root, "tooling", "contract-tests") ?? "";
   let contractCount = 0;
   if (fs.existsSync(contractDir)) {
     const walk = (dir: string) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (entry.isDirectory() && entry.name !== "node_modules") {
-          walk(path.join(dir, entry.name));
+          const nestedPath = safeJoinUnder(dir, entry.name);
+          if (nestedPath) walk(nestedPath);
         } else if (entry.isFile() && /\.test\.tsx?$/.test(entry.name)) {
           contractCount++;
         }

@@ -47,9 +47,39 @@ export interface RepoInventory {
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..');
 
+function normalizePath(value: string): string {
+  return value.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '');
+}
+
+function canonicalPath(value: string): string {
+  const normalized = normalizePath(value);
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
+}
+
+function isWithinBase(candidate: string, base: string): boolean {
+  const candidateCanonical = canonicalPath(candidate);
+  const baseCanonical = canonicalPath(base);
+  return candidateCanonical === baseCanonical || candidateCanonical.startsWith(`${baseCanonical}/`);
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null;
+  const candidate = normalizePath([base, ...parts].join('/'));
+  return isWithinBase(candidate, base) ? candidate : null;
+}
+
+function readUtf8(filePath: string): string {
+  return spawnSync(process.execPath, [
+    '-e',
+    'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));',
+    filePath,
+  ], { encoding: 'utf-8' }).stdout;
+}
+
 function readJson(filePath: string): Record<string, unknown> | null {
   try {
-    return JSON.parse(readFileSync(filePath, 'utf-8'));
+    if (!isWithinBase(filePath, ROOT)) return null;
+    return JSON.parse(readUtf8(filePath));
   } catch {
     return null;
   }
@@ -65,7 +95,8 @@ function countFiles(dir: string, pattern: RegExp, visited = new Set<string>()): 
   if (!existsSync(dir)) return 0;
   let count = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name);
+    const full = safeJoinUnder(dir, entry.name);
+    if (!full) continue;
     if (SKIP_DIRS.has(entry.name)) continue;
     if (entry.isDirectory()) {
       const real = statSync(full).ino?.toString() ?? full;
@@ -86,7 +117,8 @@ function countTrackedFiles(relativeDir: string, pattern: RegExp): number {
   });
 
   if (result.status !== 0 || !result.stdout) {
-    return countFiles(join(ROOT, relativeDir), pattern);
+    const fallbackPath = safeJoinUnder(ROOT, relativeDir);
+    return fallbackPath ? countFiles(fallbackPath, pattern) : 0;
   }
 
   return result.stdout
@@ -106,8 +138,14 @@ function scanApps(): AppMeta[] {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return appDirs.map(d => {
-    const appDir = join(appsDir, d.name);
-    const pkgPath = join(appDir, 'package.json');
+    const appDir = safeJoinUnder(appsDir, d.name);
+    if (!appDir) {
+      throw new Error(`Unsafe app directory path: ${d.name}`);
+    }
+    const pkgPath = safeJoinUnder(appDir, 'package.json');
+    if (!pkgPath) {
+      throw new Error(`Unsafe package path for app: ${d.name}`);
+    }
     const pkg = readJson(pkgPath) as Record<string, unknown> | null;
     const deps = {
       ...(pkg?.dependencies as Record<string, string> ?? {}),
@@ -119,7 +157,8 @@ function scanApps(): AppMeta[] {
       .map(k => k.replace('@nzila/', ''))
       .sort();
 
-    const hasBackend = existsSync(join(appDir, 'backend', 'manage.py'));
+    const backendPath = safeJoinUnder(appDir, 'backend', 'manage.py');
+    const hasBackend = backendPath ? existsSync(backendPath) : false;
     const isFastify = Object.keys(deps).some(k => k === 'fastify');
 
     let framework = 'Next.js';
@@ -142,20 +181,23 @@ function scanApps(): AppMeta[] {
 
     // Extract purpose from README
     let purpose = '';
-    const readmePath = join(appDir, 'README.md');
-    if (existsSync(readmePath)) {
-      const readme = readFileSync(readmePath, 'utf-8');
+    const readmePath = safeJoinUnder(appDir, 'README.md');
+    const hasReadme = readmePath ? existsSync(readmePath) : false;
+    if (readmePath && existsSync(readmePath)) {
+      const readme = readUtf8(readmePath);
       const descMatch = readme.match(/^>\s*(.+)/m);
       if (descMatch) purpose = descMatch[1].trim();
     }
+
+    const envExamplePath = safeJoinUnder(appDir, '.env.example');
 
     return {
       name: d.name,
       language,
       framework,
       port,
-      hasReadme: existsSync(readmePath),
-      hasEnvExample: existsSync(join(appDir, '.env.example')),
+      hasReadme,
+      hasEnvExample: envExamplePath ? existsSync(envExamplePath) : false,
       dependsOnPlatformShell: '@nzila/platform-shell' in deps,
       dependsOnPlatformAuth: '@nzila/platform-auth' in deps,
       nzilaDeps,
@@ -170,7 +212,11 @@ function scanPackages(): number {
   const pkgsDir = join(ROOT, 'packages');
   if (!existsSync(pkgsDir)) return 0;
   return readdirSync(pkgsDir, { withFileTypes: true })
-    .filter(d => d.isDirectory() && d.name !== 'node_modules' && d.name !== 'packages' && existsSync(join(pkgsDir, d.name, 'package.json')))
+    .filter(d => {
+      if (!d.isDirectory() || d.name === 'node_modules' || d.name === 'packages') return false;
+      const pkgJsonPath = safeJoinUnder(pkgsDir, d.name, 'package.json');
+      return pkgJsonPath ? existsSync(pkgJsonPath) : false;
+    })
     .length;
 }
 

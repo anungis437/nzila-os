@@ -93,7 +93,8 @@ export async function getInsights(): Promise<CrossAppInsight[]> {
   } catch { /* fall through to seed */ }
 
   const raw = seedInsights();
-  return z.array(crossAppInsightSchema).parse(raw) as CrossAppInsight[];
+  const parsed = z.array(crossAppInsightSchema).safeParse(raw);
+  return parsed.success ? (parsed.data as CrossAppInsight[]) : [];
 }
 
 export async function getSignals(): Promise<OperationalSignal[]> {
@@ -114,7 +115,8 @@ export async function getSignals(): Promise<OperationalSignal[]> {
   } catch { /* fall through to seed */ }
 
   const raw = seedSignals();
-  return z.array(operationalSignalSchema).parse(raw) as OperationalSignal[];
+  const parsed = z.array(operationalSignalSchema).safeParse(raw);
+  return parsed.success ? (parsed.data as OperationalSignal[]) : [];
 }
 
 // ── Anomalies ───────────────────────────────────────────
@@ -130,7 +132,8 @@ export async function getAnomalies(): Promise<Anomaly[]> {
   } catch { /* fall through to seed */ }
 
   const raw = seedAnomalies();
-  return z.array(anomalySchema).parse(raw) as Anomaly[];
+  const parsed = z.array(anomalySchema).safeParse(raw);
+  return parsed.success ? (parsed.data as Anomaly[]) : [];
 }
 
 export async function getAnomalyById(id: string): Promise<Anomaly | undefined> {
@@ -172,7 +175,8 @@ export async function getRecommendations(): Promise<Recommendation[]> {
   } catch { /* fall through to seed */ }
 
   const raw = seedRecommendations();
-  return z.array(recommendationSchema).parse(raw) as Recommendation[];
+  const parsed = z.array(recommendationSchema).safeParse(raw);
+  return parsed.success ? (parsed.data as Recommendation[]) : [];
 }
 
 // ── Modules ─────────────────────────────────────────────

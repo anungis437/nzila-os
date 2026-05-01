@@ -154,6 +154,7 @@ export const appManifestSchema = moduleRegistrationSchema.extend({
     'webhooks',
     'health-check',
   ])).default([]),
+  lifecycleNote: z.string().optional(),
 })
 
 export type AppManifest = z.infer<typeof appManifestSchema>

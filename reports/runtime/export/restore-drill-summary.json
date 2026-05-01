@@ -1,0 +1,71 @@
+{
+  "drillId": "drill-2026-04-4a32d2fc",
+  "timestamp": "2026-04-24T12:36:15.176Z",
+  "mode": "evidence",
+  "environment": "local",
+  "backupSources": [
+    {
+      "type": "pitr",
+      "location": "Azure PostgreSQL Flexible Server — Point-in-Time Recovery",
+      "exists": true,
+      "lastModified": "continuous"
+    },
+    {
+      "type": "blob_snapshot",
+      "location": "nzilacanadastore/backups (Azure Blob)",
+      "exists": false
+    }
+  ],
+  "checks": [
+    {
+      "check": "backup-sources",
+      "status": "pass",
+      "message": "Found 2 backup source(s): 1 available"
+    },
+    {
+      "check": "migration-files",
+      "status": "pass",
+      "message": "103 migration files across 3 directories"
+    },
+    {
+      "check": "db-connectivity",
+      "status": "skip",
+      "message": "PostgreSQL not available locally — skipping live checks",
+      "durationMs": 145
+    },
+    {
+      "check": "restore-execute",
+      "status": "skip",
+      "message": "Skipped — use --execute for live restore drill"
+    },
+    {
+      "check": "dr-documentation",
+      "status": "pass",
+      "message": "DR plan present with RTO, RPO, and restore procedures"
+    },
+    {
+      "check": "db-doctor",
+      "status": "fail",
+      "message": "db:doctor failed",
+      "durationMs": 1528
+    },
+    {
+      "check": "migration-safety",
+      "status": "fail",
+      "message": "migration-safety failed",
+      "durationMs": 1555
+    }
+  ],
+  "timing": {
+    "totalDurationMs": 3231,
+    "restoreDurationMs": null,
+    "healthCheckDurationMs": 3228
+  },
+  "overallStatus": "fail",
+  "rtoTarget": "4 hours",
+  "rtoActual": null,
+  "rpoTarget": "1 hour",
+  "operator": "copilot-swe-agent[bot]",
+  "migrationCount": 103,
+  "schemaVersion": 1
+}

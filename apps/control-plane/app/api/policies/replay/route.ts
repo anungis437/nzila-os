@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('control-plane:api:policies:replay')
 import { evaluatePoliciesWithResolution, toPolicyContext, type PolicyDecisionLevel } from '@nzila/policies'
 
 const HistoricalDecisionSchema = z.object({
@@ -36,7 +39,10 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    await requireApiAuth(request)
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+    }
     const parsed = ReplayRequestSchema.safeParse(await request.json().catch(() => ({})))
 
     if (!parsed.success) {
@@ -90,6 +96,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    return handleAuthError(error)
+    logger.error('[replay] Unexpected error', { error })
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 })
   }
 }

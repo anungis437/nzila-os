@@ -20,7 +20,8 @@ export const proxy = (req: any) => {
       !pathname.startsWith('/api/auth') &&
       !pathname.startsWith('/api/webhooks') &&
       !pathname.startsWith('/api/health') &&
-      !pathname.startsWith('/api/cron')
+      !pathname.startsWith('/api/cron') &&
+      !pathname.startsWith('/api/policies/replay')
     ) {
       if (!req.headers.get('idempotency-key')) {
         return NextResponse.json(

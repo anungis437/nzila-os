@@ -7,7 +7,7 @@
 - **Framework:** Next.js 16 (App Router)
 - **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
 - **UI:** `@nzila/ui` + Tailwind CSS
-- **Port:** 3005
+- **Port:** 3015
 
 ## Quick Start
 
@@ -38,4 +38,4 @@ Internal operations dashboard exposing all platform intelligence subsystems. Use
 
 ## Environment Variables
 
-See `.env.example` in this directory for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).
+See `@nzila/os-core` env schema for required variables (`AUTH_SECRET`, `DATABASE_URL`, Entra SSO config).

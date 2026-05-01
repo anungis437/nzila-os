@@ -1,0 +1,24 @@
+{
+  "version": "1.0.2",
+  "tag": "v1.0.2",
+  "previousVersion": "1.0.1",
+  "bumpType": "patch",
+  "gitSha": "ad217b4b0479cf1e350679d454288393abc49748",
+  "gitBranch": "main",
+  "date": "2026-04-30T23:28:45.366Z",
+  "artifactId": "nzila-os-1.0.2-ad217b4b",
+  "releaseType": "standard",
+  "signed": false,
+  "signMethod": "none",
+  "changelogUrl": "https://github.com/anungis437/nzila-os/blob/main/CHANGELOG.md#102",
+  "approvedApps": [
+    "web",
+    "console",
+    "partners",
+    "union-eyes",
+    "cfo",
+    "flow",
+    "abr"
+  ],
+  "createdBy": "AubertNungisa"
+}

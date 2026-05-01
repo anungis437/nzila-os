@@ -1,0 +1,39 @@
+{
+  "period": "2026-04",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "releaseId": "bootstrap-2026-04",
+      "timestamp": "2026-04-01T00:00:00.000Z",
+      "apps": [],
+      "deployedBy": "platform",
+      "environment": "staging",
+      "status": "success",
+      "notes": "Bootstrap entry — ledger initialised for release tracking"
+    },
+    {
+      "version": "1.0.2",
+      "releaseId": "staging-2026-04-v1.0.2",
+      "timestamp": "2026-04-30T23:28:45.366Z",
+      "apps": [
+        "web",
+        "console",
+        "partners",
+        "union-eyes",
+        "cfo",
+        "flow",
+        "abr"
+      ],
+      "deployedBy": "AubertNungisa",
+      "environment": "staging",
+      "status": "success",
+      "commitSha": "ad217b4b0479cf1e350679d454288393abc49748",
+      "imageDigest": "unknown-local-no-acr-digest",
+      "healthCheckResult": "pass",
+      "rollbackTarget": "1.0.1",
+      "linkedEvidencePack": "proof-artifacts/evidence-packs/2026-04",
+      "workflowRunId": "unknown-local-no-github-actions-context",
+      "notes": "Release manifest backed staging entry; health validated via proof:health; unresolved fields are explicitly marked unknown in local context"
+    }
+  ]
+}

@@ -91,7 +91,7 @@ export function PolicyReplayPanel() {
       try {
         const res = await fetch('/api/policies/replay', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
           body: JSON.stringify({ historicalDecision, newPolicyVersion: targetVersion }),
         })
         const payload: ReplayResult = await res.json()

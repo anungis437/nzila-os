@@ -236,6 +236,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
@@ -267,6 +277,16 @@ jobs:
 
       - name: Post-deploy smoke tests
         run: pnpm tsx scripts/release/run-smoke.ts --env production --apps "${{ needs.verify-artifact.outputs.approved_apps }}"
+
+      - name: Ingest GitHub Actions CI evidence
+        env:
+          CI_CONCLUSION: ${{ job.status }}
+        run: pnpm proof:ingest:ci
+
+      - name: Ingest Azure runtime evidence (live)
+        env:
+          AZ_LIVE_INGEST: 'true'
+        run: pnpm proof:ingest:azure
 
       - name: Record governance snapshot + release manifest
         run: |
@@ -322,6 +342,8 @@ jobs:
             ops/evidence/*.json
             ops/governance-snapshots/governance-snapshot-prod-*.json
             ops/releases/release-*.json
+            reports/runtime/ci-runs.jsonl
+            reports/runtime/azure-runtime-latest.json
           retention-days: 365
 
   # ── Post-deploy: Generate changelog + update dashboard ─────────────────────

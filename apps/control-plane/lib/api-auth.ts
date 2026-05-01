@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 /**
  * Validates that incoming API requests include the correct internal API key.
@@ -38,6 +39,29 @@ export class ApiAuthError extends Error {
   }
 }
 
+export class RequestValidationError extends Error {
+  status: number;
+  details?: Record<string, unknown>;
+
+  constructor(message: string, details?: Record<string, unknown>, status = 400) {
+    super(message);
+    this.name = "RequestValidationError";
+    this.status = status;
+    this.details = details;
+  }
+}
+
+export function parseUuidParam(value: string | null | undefined, field: string): string {
+  const result = z.string().uuid().safeParse(value);
+  if (!result.success) {
+    throw new RequestValidationError(`${field} must be a valid UUID`, {
+      field,
+      reason: "invalid_uuid",
+    });
+  }
+  return result.data;
+}
+
 export function handleAuthError(error: unknown) {
   if (error instanceof ApiAuthError) {
     return NextResponse.json(
@@ -45,5 +69,19 @@ export function handleAuthError(error: unknown) {
       { status: error.status },
     );
   }
-  throw error;
+  if (error instanceof RequestValidationError) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error.message,
+        details: error.details,
+      },
+      { status: error.status },
+    );
+  }
+
+  return NextResponse.json(
+    { ok: false, error: "Internal server error" },
+    { status: 500 },
+  );
 }

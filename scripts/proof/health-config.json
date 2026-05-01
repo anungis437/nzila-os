@@ -1,0 +1,25 @@
+{
+  "endpoints": [
+    {
+      "name": "web",
+      "url": "${WEB_URL:-https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io}",
+      "path": "/",
+      "expectedStatus": 200,
+      "timeoutMs": 10000
+    },
+    {
+      "name": "console",
+      "url": "${CONSOLE_URL:-https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io}",
+      "path": "/",
+      "expectedStatus": 200,
+      "timeoutMs": 10000
+    },
+    {
+      "name": "union-eyes-health",
+      "url": "${UNION_EYES_URL:-https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io}",
+      "path": "/api/auth_core/health/",
+      "expectedStatus": 200,
+      "timeoutMs": 10000
+    }
+  ]
+}

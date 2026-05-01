@@ -1,8 +1,23 @@
 {
-  "version": "2026-04-20",
+  "version": "2026-05-01T15:30:00Z",
   "sourceOfTruth": {
     "portfolioCatalog": "governance/portfolio/product-catalog.json",
     "runtimeManifest": "nzila-truth-manifest.json"
+  },
+  "topology": {
+    "strategy": "shared-resource-group-environment",
+    "staging": {
+      "resourceGroup": "nzila-canada-staging-rg",
+      "containerAppEnvironment": "nzila-canada-staging-env"
+    },
+    "production": {
+      "resourceGroup": "nzila-canada-staging-rg",
+      "containerAppEnvironment": "nzila-canada-staging-env",
+      "sharedWithStaging": true
+    }
+  },
+  "verificationPolicy": {
+    "stagingMissingExpected": "warn"
   },
   "apps": {
     "union-eyes": {
@@ -10,9 +25,18 @@
       "releaseStatus": "prod-approved",
       "track": "external",
       "prodPromotionEligible": true,
-      "owners": ["union-eyes", "platform-ops"],
+      "owners": [
+        "union-eyes",
+        "platform-ops"
+      ],
+      "rollbackException": true,
+      "rollbackPolicy": {
+        "owner": "platform-ops",
+        "expiry": "2026-06-30",
+        "mitigation": "Single-revision production profile currently active; fallback is image-tag rollback via deploy-production workflow and transactional deploy script."
+      },
       "routing": {
-        "staging": "https://staging-app.unioneyes.app",
+        "staging": "https://staging.unioneyes.app",
         "production": "https://app.unioneyes.app",
         "healthPath": "/api/health",
         "ingress": "external",
@@ -21,13 +45,37 @@
     },
     "faircase": {
       "tier": "tier-1",
-      "releaseStatus": "prod-approved",
-      "track": "external",
-      "prodPromotionEligible": true,
-      "owners": ["faircase", "platform-ops"],
+      "releaseStatus": "blocked",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "publicProductName": "FairCase",
+      "internalAlias": "abr",
+      "containerAppName": "nzila-os-abr",
+      "owners": [
+        "faircase",
+        "platform-ops"
+      ],
+      "aliasOf": "abr",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "Product review sign-off by faircase team",
+        "staging-faircase.nzilaventures.com DNS CNAME resolved and healthy",
+        "faircase.nzilaventures.com DNS CNAME resolved and healthy",
+        "ACA custom domain binding and managed TLS active",
+        "Platform team go-live approval"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "FairCase (internal: ABR) is deployed in staging via nzila-os-abr. Production route reserved as faircase.nzilaventures.com; blocked until promotion criteria are met and DNS record created in Cloudflare."
+      },
       "routing": {
-        "staging": "n/a",
-        "production": "n/a",
+        "staging": "https://staging-faircase.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://faircase.nzilaventures.com",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -35,13 +83,33 @@
     },
     "flow": {
       "tier": "tier-1",
-      "releaseStatus": "prod-approved",
+      "releaseStatus": "staging-only",
       "track": "external",
-      "prodPromotionEligible": true,
-      "owners": ["flow", "platform-ops"],
+      "prodPromotionEligible": false,
+      "containerAppName": "nzila-os-flow",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-flow.nzilaventures.com DNS CNAME resolved and healthy",
+        "flow.nzilaventures.com DNS CNAME created and healthy",
+        "ACA custom domain binding and managed TLS active",
+        "Product team sign-off"
+      ],
+      "owners": [
+        "flow",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "Flow is deployed in staging (nzila-os-flow) but staging DNS record staging-flow.nzilaventures.com is not yet created. Remains staging-only until service and domain cutover are complete."
+      },
       "routing": {
-        "staging": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://flow.nzila.ai",
+        "staging": "https://staging-flow.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -52,10 +120,19 @@
       "releaseStatus": "prod-approved",
       "track": "external",
       "prodPromotionEligible": true,
-      "owners": ["web", "platform-ops"],
+      "owners": [
+        "web",
+        "platform-ops"
+      ],
+      "rollbackException": true,
+      "rollbackPolicy": {
+        "owner": "platform-ops",
+        "expiry": "2026-06-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback executed by redeploying prior approved image digest from release manifest."
+      },
       "routing": {
-        "staging": "https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://www.nzila.ai",
+        "staging": "https://staging.nzilaventures.com",
+        "production": "https://www.nzilaventures.com",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -66,24 +143,53 @@
       "releaseStatus": "prod-approved",
       "track": "external",
       "prodPromotionEligible": true,
-      "owners": ["partners", "platform-ops"],
+      "owners": [
+        "partners",
+        "platform-ops"
+      ],
+      "rollbackException": true,
+      "rollbackPolicy": {
+        "owner": "platform-ops",
+        "expiry": "2026-06-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback executed through approved rollback target in release manifest."
+      },
       "routing": {
-        "staging": "https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://partners.nzila.ai",
-        "healthPath": "/api/health",
+        "staging": "https://staging-partners.nzilaventures.com",
+        "production": "https://partners.nzilaventures.com",
+        "healthPath": "/",
         "ingress": "external",
         "tls": "managed"
       }
     },
     "cfo": {
       "tier": "tier-1",
-      "releaseStatus": "prod-approved",
+      "releaseStatus": "staging-only",
       "track": "external",
-      "prodPromotionEligible": true,
-      "owners": ["cfo", "platform-ops"],
+      "prodPromotionEligible": false,
+      "containerAppName": "nzila-os-cfo",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-cfo.nzilaventures.com DNS CNAME resolved and healthy",
+        "cfo.nzilaventures.com DNS CNAME created",
+        "ACA custom domain binding and managed TLS active",
+        "Product team sign-off"
+      ],
+      "owners": [
+        "cfo",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "CFO is deployed in staging (nzila-os-cfo) but staging DNS record staging-cfo.nzilaventures.com is not yet created. Remains staging-only until domain cutover and promotion approval."
+      },
       "routing": {
-        "staging": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://cfo.nzila.ai",
+        "staging": "https://staging-cfo.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -95,13 +201,32 @@
       "track": "pilot",
       "prodPromotionEligible": false,
       "requiresExplicitProdOverride": true,
-      "owners": ["zonga", "platform-ops"],
+      "containerAppName": "nzila-os-zonga",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-zonga.nzilaventures.com DNS CNAME resolved and healthy",
+        "zonga.nzilaventures.com TLS managed cert active (cert provisioning in progress)",
+        "Explicit go-live approval from platform-ops"
+      ],
+      "owners": [
+        "zonga",
+        "platform-ops"
+      ],
       "routing": {
-        "staging": "https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "pilot-only",
+        "staging": "https://staging-zonga.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://zonga.nzilaventures.com",
+        "productionState": "reserved-tls-pending",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
+      },
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "zonga.nzilaventures.com DNS CNAME exists; managed TLS cert is provisioning (may take up to 20 min). Promotion requires explicit override, TLS activation, and go-live approval. staging-zonga.nzilaventures.com DNS record still required."
       }
     },
     "agrimo": {
@@ -109,10 +234,29 @@
       "releaseStatus": "staging-only",
       "track": "pilot",
       "prodPromotionEligible": false,
-      "owners": ["agrimo", "platform-ops"],
+      "containerAppName": "nzila-os-agrimo",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-agrimo.nzilaventures.com DNS CNAME resolved and healthy",
+        "agrimo.nzilaventures.com DNS CNAME created",
+        "Product and pilot sign-off"
+      ],
+      "owners": [
+        "agrimo",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-07-31",
+        "mitigation": "Agrimo deployed in staging (nzila-os-agrimo); staging DNS pending manual Cloudflare action."
+      },
       "routing": {
-        "staging": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-agrimo.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -123,10 +267,29 @@
       "releaseStatus": "incubating",
       "track": "pilot",
       "prodPromotionEligible": false,
-      "owners": ["cora", "platform-ops"],
+      "containerAppName": "nzila-os-cora",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "Incubation phase complete (product review, MVP sign-off)",
+        "staging-cora.nzilaventures.com DNS CNAME resolved and healthy",
+        "cora.nzilaventures.com DNS CNAME created"
+      ],
+      "owners": [
+        "cora",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-09-30",
+        "mitigation": "Cora is incubating; deployed in staging (nzila-os-cora) but not production-ready. Staging DNS pending."
+      },
       "routing": {
-        "staging": "https://nzila-os-cora.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-cora.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-cora.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -137,10 +300,29 @@
       "releaseStatus": "incubating",
       "track": "pilot",
       "prodPromotionEligible": false,
-      "owners": ["trade", "platform-ops"],
+      "containerAppName": "nzila-os-trade",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "Incubation phase complete",
+        "staging-trade.nzilaventures.com DNS CNAME resolved and healthy",
+        "trade.nzilaventures.com DNS CNAME created"
+      ],
+      "owners": [
+        "trade",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-09-30",
+        "mitigation": "Trade is incubating; deployed in staging (nzila-os-trade) but not production-ready. Staging DNS pending."
+      },
       "routing": {
-        "staging": "https://nzila-os-trade.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-trade.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-trade.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -151,10 +333,29 @@
       "releaseStatus": "staging-only",
       "track": "pilot",
       "prodPromotionEligible": false,
-      "owners": ["mobility", "platform-ops"],
+      "containerAppName": "nzila-os-mobility",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-mobility.nzilaventures.com DNS CNAME resolved and healthy",
+        "mobility.nzilaventures.com DNS CNAME created",
+        "Product sign-off"
+      ],
+      "owners": [
+        "mobility",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-07-31",
+        "mitigation": "Mobility deployed in staging (nzila-os-mobility); staging DNS pending manual Cloudflare action."
+      },
       "routing": {
-        "staging": "https://nzila-os-mobility.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-mobility.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-mobility.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
@@ -165,11 +366,20 @@
       "releaseStatus": "internal-only",
       "track": "internal",
       "prodPromotionEligible": true,
-      "owners": ["platform-admin", "platform-ops"],
+      "owners": [
+        "platform-admin",
+        "platform-ops"
+      ],
+      "rollbackException": true,
+      "rollbackPolicy": {
+        "owner": "platform-ops",
+        "expiry": "2026-06-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback performed via transactional redeploy to prior signed release."
+      },
       "routing": {
-        "staging": "https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://console.nzila.ai",
-        "healthPath": "/api/health",
+        "staging": "https://staging-console.nzilaventures.com",
+        "production": "https://console.nzilaventures.com",
+        "healthPath": "/",
         "ingress": "restricted",
         "tls": "managed"
       }
@@ -179,24 +389,59 @@
       "releaseStatus": "internal-only",
       "track": "internal",
       "prodPromotionEligible": true,
-      "owners": ["platform-admin", "platform-ops"],
+      "containerAppName": "nzila-os-control-plane",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "productionDnsStatus": "pending-manual-cloudflare",
+      "dnsPendingAction": "Add CNAME records in Cloudflare nzilaventures.com zone: control -> nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io, staging-control -> same",
+      "owners": [
+        "platform-admin",
+        "platform-ops"
+      ],
+      "rollbackException": true,
+      "rollbackPolicy": {
+        "owner": "platform-ops",
+        "expiry": "2026-06-30",
+        "mitigation": "No inactive healthy revision retained yet; rollback performed by pinned previous image + control-plane smoke validation."
+      },
       "routing": {
-        "staging": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://control.nzila.ai",
-        "healthPath": "/api/health",
+        "staging": "https://staging-control.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://control.nzilaventures.com",
+        "productionState": "dns-pending",
+        "healthPath": "/",
         "ingress": "restricted",
         "tls": "managed"
       }
     },
     "orchestrator-api": {
       "tier": "internal",
-      "releaseStatus": "internal-only",
+      "releaseStatus": "staging-only",
       "track": "internal",
-      "prodPromotionEligible": true,
-      "owners": ["platform-admin", "platform-ops"],
+      "prodPromotionEligible": false,
+      "containerAppName": "nzila-os-orchestrator-api",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-api.nzilaventures.com DNS CNAME resolved and healthy",
+        "api.nzilaventures.com DNS CNAME created",
+        "Internal rollout sign-off"
+      ],
+      "owners": [
+        "platform-admin",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "Orchestrator API is deployed in staging (nzila-os-orchestrator-api) but staging DNS record staging-api.nzilaventures.com is not yet created. Promotion deferred until DNS cutover and service rollout complete."
+      },
       "routing": {
-        "staging": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://orchestrator.nzila.ai",
+        "staging": "https://staging-api.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "blocked",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/health",
         "readyPath": "/ready",
         "versionPath": "/version",
@@ -209,9 +454,12 @@
       "releaseStatus": "frozen",
       "track": "legacy",
       "prodPromotionEligible": false,
-      "owners": ["mobility", "platform-ops"],
+      "owners": [
+        "mobility",
+        "platform-ops"
+      ],
       "routing": {
-        "staging": "https://nzila-os-mobility-client-portal.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-mobility-client-portal.nzilaventures.com",
         "production": "blocked",
         "healthPath": "/api/health",
         "ingress": "external",
@@ -223,10 +471,13 @@
       "releaseStatus": "frozen",
       "track": "legacy",
       "prodPromotionEligible": false,
-      "owners": ["platform-admin", "platform-ops"],
+      "owners": [
+        "platform-admin",
+        "platform-ops"
+      ],
       "routing": {
-        "staging": "https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "blocked",
+        "staging": "https://staging-admin.nzilaventures.com",
+        "production": "https://admin.nzilaventures.com",
         "healthPath": "/api/health",
         "ingress": "restricted",
         "tls": "managed"
@@ -234,31 +485,69 @@
     },
     "abr": {
       "tier": "tier-1",
-      "releaseStatus": "prod-approved",
+      "releaseStatus": "staging-only",
       "track": "external",
-      "prodPromotionEligible": true,
-      "owners": ["abr", "platform-ops"],
+      "prodPromotionEligible": false,
+      "publicProductName": "FairCase",
+      "containerAppName": "nzila-os-abr",
+      "stagingDeployed": true,
+      "stagingDnsStatus": "pending-manual-cloudflare",
+      "promotionCriteria": [
+        "staging-faircase.nzilaventures.com DNS CNAME resolved and healthy",
+        "faircase.nzilaventures.com DNS CNAME created",
+        "ACA custom domain binding with managed TLS active",
+        "Platform team go-live approval"
+      ],
+      "owners": [
+        "abr",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "declassified",
+        "owner": "platform-ops",
+        "reviewBy": "2026-06-30",
+        "mitigation": "ABR (public: FairCase) is deployed in staging (nzila-os-abr). Served under staging-faircase.nzilaventures.com; production reserved as faircase.nzilaventures.com. Blocked pending DNS creation and promotion approval."
+      },
       "routing": {
-        "staging": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
-        "production": "https://abr.nzila.ai",
+        "staging": "https://staging-faircase.nzilaventures.com",
+        "stagingFallback": "https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "production": "https://faircase.nzilaventures.com",
+        "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
-      }
+      },
+      "publicRoute": "faircase"
     },
     "nacp-exams": {
       "tier": "tier-2",
       "releaseStatus": "blocked",
       "track": "pilot",
       "prodPromotionEligible": false,
-      "owners": ["nacp-exams", "platform-ops"],
+      "owners": [
+        "nacp-exams",
+        "platform-ops"
+      ],
       "routing": {
-        "staging": "https://nzila-os-nacp-exams.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+        "staging": "https://staging-nacp-exams.nzilaventures.com",
         "production": "blocked",
         "healthPath": "/api/health",
         "ingress": "external",
         "tls": "managed"
       }
     }
+  },
+  "domainPolicy": {
+    "ownedDomains": [
+      "nzilaventures.com",
+      "unioneyes.app"
+    ],
+    "invalidOrUnownedDomains": [
+      "nzila.ai"
+    ],
+    "notes": [
+      "Runtime proof and health checks must target owned domains only.",
+      "Use nzila.ai only as an explicitly labeled legacy/non-owned reference."
+    ]
   }
 }

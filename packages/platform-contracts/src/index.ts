@@ -270,3 +270,31 @@ export {
   type BreakGlassAction,
   type ControlSystemHealth,
 } from './control-system.js'
+
+// ── Runtime Evidence ──
+export {
+  proofTypeSchema,
+  evidenceStatusSchema,
+  driftClassificationSchema,
+  runtimeEvidenceRecordSchema,
+  releaseLedgerEntrySchema,
+  releaseManifestSchema,
+  driftItemSchema,
+  driftReportSchema,
+  restoreDrillRecordSchema,
+  securityProofSummarySchema,
+  evidenceSealVerificationSchema,
+  runtimeProofScoreSchema,
+  type ProofType,
+  type EvidenceStatus,
+  type DriftClassification,
+  type RuntimeEvidenceRecord,
+  type ReleaseLedgerEntry,
+  type ReleaseManifest,
+  type DriftItem,
+  type DriftReport,
+  type RestoreDrillRecord,
+  type SecurityProofSummary,
+  type EvidenceSealVerification,
+  type RuntimeProofScore,
+} from './runtime-evidence.js'

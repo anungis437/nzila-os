@@ -70,7 +70,7 @@ export function seedGovernanceTimeline(): GovernanceAuditTimelineEntry[] {
 export function seedInsights(): CrossAppInsight[] {
   return [
     {
-      id: "ins-001",
+      id: "11111111-1111-4111-8111-111111111111",
       timestamp: NOW,
       category: "usage",
       severity: "info",
@@ -85,7 +85,7 @@ export function seedInsights(): CrossAppInsight[] {
       ],
     },
     {
-      id: "ins-002",
+      id: "11111111-1111-4111-8111-111111111112",
       timestamp: "2026-03-10T14:00:00.000Z",
       category: "cost",
       severity: "warning",
@@ -100,7 +100,7 @@ export function seedInsights(): CrossAppInsight[] {
       ],
     },
     {
-      id: "ins-003",
+      id: "11111111-1111-4111-8111-111111111113",
       timestamp: "2026-03-09T10:00:00.000Z",
       category: "compliance",
       severity: "info",
@@ -117,7 +117,7 @@ export function seedInsights(): CrossAppInsight[] {
 export function seedSignals(): OperationalSignal[] {
   return [
     {
-      id: "sig-001",
+      id: "22222222-2222-4222-8222-222222222221",
       timestamp: NOW,
       signalType: "spike",
       app: "union-eyes",
@@ -128,7 +128,7 @@ export function seedSignals(): OperationalSignal[] {
       confidence: 0.89,
     },
     {
-      id: "sig-002",
+      id: "22222222-2222-4222-8222-222222222222",
       timestamp: "2026-03-10T12:00:00.000Z",
       signalType: "trend_change",
       app: "shop-quoter",
@@ -146,7 +146,7 @@ export function seedSignals(): OperationalSignal[] {
 export function seedAnomalies(): Anomaly[] {
   return [
     {
-      id: "ano-001",
+      id: "33333333-3333-4333-8333-333333333331",
       timestamp: NOW,
       anomalyType: "grievance_spike",
       severity: "medium",
@@ -161,7 +161,7 @@ export function seedAnomalies(): Anomaly[] {
         "Review local 412 CBA amendments and confirm representative availability.",
     },
     {
-      id: "ano-002",
+      id: "33333333-3333-4333-8333-333333333332",
       timestamp: "2026-03-10T16:00:00.000Z",
       anomalyType: "pricing_outlier",
       severity: "high",
@@ -176,7 +176,7 @@ export function seedAnomalies(): Anomaly[] {
         "Flag quote for manager review before order conversion.",
     },
     {
-      id: "ano-003",
+      id: "33333333-3333-4333-8333-333333333333",
       timestamp: "2026-03-09T08:00:00.000Z",
       anomalyType: "partner_performance_drop",
       severity: "low",
@@ -198,7 +198,7 @@ export function seedAnomalies(): Anomaly[] {
 export function seedRecommendations(): Recommendation[] {
   return [
     {
-      id: "rec-001",
+      id: "44444444-4444-4444-8444-444444444441",
       workflowId: "wf-grievance-triage",
       timestamp: NOW,
       title: "Increase representative allocation for local 412",
@@ -208,11 +208,11 @@ export function seedRecommendations(): Recommendation[] {
       actionable: true,
       suggestedAction:
         "Notify HR to assign additional representatives to local 412.",
-      evidenceRefs: ["ano-001", "ins-001"],
+      evidenceRefs: ["33333333-3333-4333-8333-333333333331", "11111111-1111-4111-8111-111111111111"],
       humanReviewRequired: true,
     },
     {
-      id: "rec-002",
+      id: "44444444-4444-4444-8444-444444444442",
       workflowId: "wf-pricing-review",
       timestamp: "2026-03-10T16:30:00.000Z",
       title: "Quarantine anomalous quote QT-2026-0451",
@@ -222,11 +222,11 @@ export function seedRecommendations(): Recommendation[] {
       actionable: true,
       suggestedAction:
         "Place quote in review queue and notify pricing manager.",
-      evidenceRefs: ["ano-002"],
+      evidenceRefs: ["33333333-3333-4333-8333-333333333332"],
       humanReviewRequired: true,
     },
     {
-      id: "rec-003",
+      id: "44444444-4444-4444-8444-444444444443",
       workflowId: "wf-partner-sla",
       timestamp: "2026-03-09T09:00:00.000Z",
       title: "Send SLA warning to Acme Supplies",
@@ -236,7 +236,7 @@ export function seedRecommendations(): Recommendation[] {
       actionable: true,
       suggestedAction:
         "Trigger SLA warning email via partner portal.",
-      evidenceRefs: ["ano-003"],
+      evidenceRefs: ["33333333-3333-4333-8333-333333333333"],
       humanReviewRequired: false,
     },
   ];

@@ -1,115 +1,219 @@
 {
-  "proofId": "rp-2026-04-0f5f8e68",
-  "timestamp": "2026-04-20T15:25:05.773Z",
+  "schemaVersion": 2,
+  "proofId": "5ba0c13b-019e-49f9-a33a-d068acca0536",
+  "timestamp": "2026-05-01T13:15:03.328Z",
   "period": "2026-04",
   "periodType": "monthly",
   "metrics": [
     {
-      "name": "deploy_success_rate",
-      "value": null,
-      "unit": "%",
-      "status": "unknown"
+      "name": "deploy_count",
+      "value": 2,
+      "unit": "deployments",
+      "status": "healthy"
+    },
+    {
+      "name": "rollback_count",
+      "value": 0,
+      "unit": "rollbacks",
+      "status": "healthy"
     },
     {
       "name": "hotfix_count",
       "value": 0,
-      "unit": "count",
+      "unit": "hotfixes",
       "status": "healthy"
     },
     {
-      "name": "rollback_candidates",
-      "value": 0,
-      "unit": "count",
+      "name": "ci_success_rate",
+      "value": 100,
+      "unit": "%",
       "status": "healthy"
     },
     {
-      "name": "drift_reports_generated",
-      "value": 0,
-      "unit": "count",
-      "status": "unknown"
-    },
-    {
-      "name": "evidence_pack_continuity",
-      "value": true,
-      "unit": "boolean",
-      "status": "healthy"
-    },
-    {
-      "name": "evidence_pack_total_months",
-      "value": 1,
-      "unit": "count",
-      "status": "healthy"
-    },
-    {
-      "name": "restore_drill_count",
-      "value": 0,
-      "unit": "count",
+      "name": "azure_runtime_status",
+      "value": "critical",
+      "unit": "status",
       "status": "critical"
     },
     {
-      "name": "release_manifests",
-      "value": 0,
-      "unit": "count",
-      "status": "unknown"
-    },
-    {
-      "name": "signature_verification",
-      "value": "not-run",
+      "name": "health_check_status",
+      "value": "fail",
       "unit": "status",
-      "status": "unknown"
-    },
-    {
-      "name": "migration_file_count",
-      "value": 8,
-      "unit": "count",
-      "status": "healthy"
+      "status": "critical"
     }
   ],
   "sources": [
     {
       "name": "release-ledger",
-      "path": "reports/releases/release-ledger.jsonl",
-      "exists": false,
-      "entries": []
+      "path": "reports\\releases\\release-ledger.jsonl",
+      "exists": true,
+      "entries": 2
     },
     {
-      "name": "drift-reports",
-      "path": "ops/drift/",
-      "exists": false,
-      "entries": 0
+      "name": "ci-runs",
+      "path": "reports\\runtime\\ci-runs.jsonl",
+      "exists": true,
+      "entries": 2
     },
     {
-      "name": "smoke-reports",
-      "path": "ops/smoke/",
+      "name": "azure-runtime",
+      "path": "reports\\runtime\\azure-runtime-latest.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "evidence-packs",
-      "path": "proof-artifacts/evidence-packs/",
+      "name": "health",
+      "path": "reports\\runtime\\health-latest.json",
       "exists": true,
       "entries": 1
     },
     {
-      "name": "restore-drills",
-      "path": "reports/db/",
-      "exists": false,
-      "entries": 0
+      "name": "security",
+      "path": "reports\\runtime\\security-proof-latest.json",
+      "exists": true,
+      "entries": 1
     },
     {
-      "name": "release-manifests",
-      "path": "ops/releases/",
-      "exists": false,
-      "entries": 0
+      "name": "drift",
+      "path": "ops\\drift\\drift-2026-04.json",
+      "exists": true,
+      "entries": 1
     },
     {
-      "name": "signature-reports",
-      "path": "reports/release/",
-      "exists": false,
-      "entries": 0
+      "name": "restore-drill",
+      "path": "reports\\db\\restore-drill-2026-05.json",
+      "exists": true,
+      "entries": 1
+    },
+    {
+      "name": "snapshot",
+      "path": "proof-artifacts\\evidence-packs\\2026-04\\snapshot.json",
+      "exists": true,
+      "entries": 1
     }
   ],
   "overallHealth": "critical",
-  "generatedBy": "AubertNungisa",
-  "schemaVersion": 1
+  "score": 75,
+  "maxScore": 100,
+  "grade": "B",
+  "scoringBreakdown": [
+    {
+      "dimension": "release",
+      "weight": 20,
+      "earned": 20,
+      "rationale": "1 real ledger entries + 1 manifests",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "deploy",
+      "weight": 20,
+      "earned": 10,
+      "rationale": "CI: 1/1 success; Azure: critical",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "health",
+      "weight": 15,
+      "earned": 0,
+      "rationale": "health status: fail",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "drift",
+      "weight": 15,
+      "earned": 15,
+      "rationale": "drift report: 0 items",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "restore",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "restore drill passed; age 0d",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "security",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "security checks pass",
+      "bootstrapEvidence": false
+    },
+    {
+      "dimension": "seal",
+      "weight": 10,
+      "earned": 10,
+      "rationale": "snapshot present with sha256 integrity",
+      "bootstrapEvidence": false
+    }
+  ],
+  "blockingFindings": [
+    "[deploy] [production] control-plane custom domain DNS unresolved: control.nzilaventures.com",
+    "[health] [production] production:control-plane:root failed (dns)",
+    "[metric:azure_runtime_status] critical (critical status)",
+    "[metric:health_check_status] critical (fail status)"
+  ],
+  "advisoryFindings": [
+    "[health] health status: fail",
+    "[deploy] partial — CI: 1/1 success; Azure: critical",
+    "[deploy] [staging] expected app missing: flow (nzila-os-flow)",
+    "[deploy] [staging] expected app missing: cfo (nzila-os-cfo)",
+    "[deploy] [staging] expected app missing: agrimo (nzila-os-agrimo)",
+    "[deploy] [staging] expected app missing: cora (nzila-os-cora)",
+    "[deploy] [staging] expected app missing: trade (nzila-os-trade)",
+    "[deploy] [staging] expected app missing: mobility (nzila-os-mobility)",
+    "[deploy] [staging] expected app missing: orchestrator-api (nzila-os-orchestrator-api)",
+    "[deploy] [staging] expected app missing: abr (nzila-os-abr)",
+    "[health] [staging] staging:flow:root failed (dns)",
+    "[health] [staging] staging:flow:health failed (dns)",
+    "[health] [staging] staging:web:root failed (dns)",
+    "[health] [staging] staging:web:health failed (dns)",
+    "[health] [staging] staging:partners:root failed (dns)",
+    "[health] [staging] staging:cfo:root failed (dns)",
+    "[health] [staging] staging:cfo:health failed (dns)",
+    "[health] [staging] staging:zonga:root failed (dns)",
+    "[health] [staging] staging:zonga:health failed (dns)",
+    "[health] [staging] staging:agrimo:root failed (dns)",
+    "[health] [staging] staging:agrimo:health failed (dns)",
+    "[health] [staging] staging:cora:root failed (dns)",
+    "[health] [staging] staging:cora:health failed (dns)",
+    "[health] [staging] staging:trade:root failed (dns)",
+    "[health] [staging] staging:trade:health failed (dns)",
+    "[health] [staging] staging:mobility:root failed (dns)",
+    "[health] [staging] staging:mobility:health failed (dns)",
+    "[health] [staging] staging:console:root failed (dns)",
+    "[health] [staging] staging:control-plane:root failed (dns)",
+    "[health] [staging] staging:orchestrator-api:root failed (dns)",
+    "[health] [staging] staging:orchestrator-api:health failed (dns)",
+    "[health] [staging] staging:abr:root failed (dns)",
+    "[health] [staging] staging:abr:health failed (dns)"
+  ],
+  "unknowns": [],
+  "nextRequiredEvidence": [
+    "CI: record a successful non-bootstrap run in reports/runtime/ci-runs.jsonl",
+    "Azure: update reports/runtime/azure-runtime-latest.json with overallStatus=\"healthy\"",
+    "Health: run check-health.ts and resolve any failing checks"
+  ],
+  "bootstrapSources": [],
+  "restoreProof": {
+    "hasReport": true,
+    "overallStatus": "pass",
+    "passedChecks": 8,
+    "totalChecks": 9,
+    "drillTimestamp": "2026-05-01T04:04:25.285Z",
+    "drillAgeDays": 0,
+    "freshnessScore": 10
+  },
+  "securityProof": {
+    "earned": 10,
+    "rationale": "security checks pass",
+    "bootstrapEvidence": false,
+    "criticalMissing": false
+  },
+  "sealVerification": {
+    "earned": 10,
+    "rationale": "snapshot present with sha256 integrity",
+    "verified": true
+  },
+  "generatedBy": "scripts/proof/generate-runtime-proof.ts@v3"
 }

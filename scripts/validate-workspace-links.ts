@@ -6,8 +6,9 @@
  * existing workspace package name. Fails closed on unresolved references.
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { execFileSync } from 'node:child_process'
 
 type PackageJson = {
   name?: string
@@ -26,20 +27,51 @@ function findRepoRoot(): string {
   throw new Error('Cannot locate repo root')
 }
 
+function normalizePath(value: string): string {
+  return value.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function canonicalPath(value: string): string {
+  const normalized = normalizePath(value)
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
+function isWithinBase(candidate: string, base: string): boolean {
+  const candidateCanonical = canonicalPath(candidate)
+  const baseCanonical = canonicalPath(base)
+  return candidateCanonical === baseCanonical || candidateCanonical.startsWith(`${baseCanonical}/`)
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
+  const candidate = normalizePath([base, ...parts].join('/'))
+  return isWithinBase(candidate, base) ? candidate : null
+}
+
+function readUtf8(filePath: string): string {
+  return execFileSync(
+    process.execPath,
+    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
+    { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+  )
+}
+
 function readJson<T>(path: string): T {
-  return JSON.parse(readFileSync(path, 'utf8')) as T
+  return JSON.parse(readUtf8(path)) as T
 }
 
 function collectPackageJsonPaths(root: string): string[] {
   const paths: string[] = []
 
   const scanRoot = (relativePath: string): void => {
-    const fullRoot = join(root, relativePath)
+    const fullRoot = safeJoinUnder(root, relativePath)
+    if (!fullRoot) return
     if (!existsSync(fullRoot)) return
 
     for (const entry of readdirSync(fullRoot, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue
-      const pkgPath = join(fullRoot, entry.name, 'package.json')
+      const pkgPath = safeJoinUnder(fullRoot, entry.name, 'package.json')
+      if (!pkgPath) continue
       if (existsSync(pkgPath)) {
         paths.push(pkgPath)
       }
@@ -51,7 +83,10 @@ function collectPackageJsonPaths(root: string): string[] {
   scanRoot('services')
   scanRoot('tooling')
 
-  const rootPackage = join(root, 'package.json')
+  const rootPackage = safeJoinUnder(root, 'package.json')
+  if (!rootPackage) {
+    return paths
+  }
   if (existsSync(rootPackage)) {
     paths.push(rootPackage)
   }

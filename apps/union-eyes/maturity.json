@@ -12,7 +12,7 @@
   "revenue_status": "pilot-contracting",
   "last_validated": "2026-04-30",
   "runbooks": "complete",
-  "backup_restore": "ready-for-live-drill",
+  "backup_restore": "complete",
   "analytics_readiness": "partial",
   "access_reviews": "partial",
   "orchestrator_integration": true,
@@ -43,10 +43,12 @@
     "backup_restore": {
       "status": "closed",
       "owner": "sre-team",
-      "blocker": "Gap 6 closed for live restore readiness: DR runbooks aligned to execute flow, restore drill now supports explicit staging DB/ready-url parameters, pre-flight live mode enforces DB env prerequisites, evidence reports include readiness/sign-off structure, and CI contract guard added (tooling/contract-tests/union-eyes-dr-restore-readiness.test.ts). Live staging execution with measured RTO remains an operational drill step and is now reproducible and auditable via pnpm dr:drill:checklist --live; pnpm db:restore-drill:execute; pnpm dr:drill:report.",
+      "blocker": "Live staging drill completed 2026-05-01. Measured RTO: 41s. Evidence: reports\\db\\restore-drill-2026-05.json",
       "target": "2026-04-27",
-      "severity": "low",
-      "evidence": "reports/dr/restore-drill-2026-04-24.json"
+      "severity": "none",
+      "evidence": "reports/dr/restore-drill-2026-04-24.json",
+      "rtoActual": "41s",
+      "drillDate": "2026-05-01"
     },
     "analytics_readiness": {
       "status": "closed",

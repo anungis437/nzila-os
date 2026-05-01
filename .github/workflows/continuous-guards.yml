@@ -35,34 +35,39 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # ── Staging Truth Gate ──────────────────────────────────
+      # ── Staging Truth Gate ── [ADVISORY] ───────────────────
       - name: Staging truth
         run: pnpm staging:truth --ci || echo "::warning::Staging truth check reported issues"
 
-      # ── Drift Detection ─────────────────────────────────────
+      # ── Drift Detection ── [ADVISORY] ───────────────────────
       - name: Version drift
         run: pnpm drift:version:staging || echo "::warning::Version drift detected"
 
       - name: Env drift
         run: pnpm drift:env:staging || echo "::warning::Env drift detected"
 
-      # ── Environment Truth Crosscheck ────────────────────────
+      # ── Environment Truth Crosscheck ── [ADVISORY] ──────────
       - name: Environment truth (structural)
         run: pnpm release:env-truth || echo "::warning::Environment truth check failed"
 
-      # ── Runtime Proof Generation ────────────────────────────
+      # ── Runtime Proof Generation ── [BLOCKING] ──────────────
+      - name: Ingest GitHub Actions CI evidence
+        env:
+          CI_CONCLUSION: ${{ job.status }}
+        run: pnpm proof:ingest:ci
+
       - name: Generate runtime proof
         run: pnpm proof:runtime
 
-      # ── DB Health ───────────────────────────────────────────
+      # ── DB Health ── [ADVISORY] ─────────────────────────────
       - name: DB doctor
         run: pnpm db:doctor || echo "::warning::DB doctor reported issues"
 
-      # ── Migration Safety ────────────────────────────────────
+      # ── Migration Safety ── [ADVISORY] ──────────────────────
       - name: Migration safety
         run: pnpm db:migration-safety || echo "::warning::Migration safety issues"
 
-      # ── Evidence Pack Continuity ────────────────────────────
+      # ── Evidence Pack Continuity ── [ADVISORY] ──────────────
       - name: Check evidence pack exists for current month
         run: |
           MONTH=$(date -u +%Y-%m)
@@ -72,6 +77,25 @@ jobs:
             echo "::warning::No evidence pack for $MONTH — run: pnpm evidence:pack:monthly"
           fi
 
+      # ── Job Summary ─────────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Continuous Guards — Run #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Classification | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Staging truth | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version drift | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Env drift | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment truth | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Runtime proof | BLOCKING | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| DB doctor | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Migration safety | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "| Evidence pack | ADVISORY | see step logs |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Advisory gates warn but do not fail the run. The runtime proof gate is blocking._" >> $GITHUB_STEP_SUMMARY
+
       # ── Upload Reports ──────────────────────────────────────
       - name: Upload guard reports
         if: always()
@@ -79,6 +103,7 @@ jobs:
         with:
           name: guard-reports-${{ github.run_number }}
           path: |
+            reports/runtime/ci-runs.jsonl
             reports/runtime/runtime-latest.json
             reports/release/environment-truth.json
             ops/staging/staging-truth-latest.json

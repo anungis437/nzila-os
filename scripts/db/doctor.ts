@@ -27,6 +27,21 @@ const ROOT = path.resolve(__dirname, '..', '..')
 const strict = process.argv.includes('--strict')
 const verbose = process.argv.includes('--verbose')
 
+function parseArg(name: string): string | undefined {
+  const idx = process.argv.indexOf(name)
+  if (idx < 0) return undefined
+  return process.argv[idx + 1]
+}
+
+const baselineArg = parseArg('--baseline')
+const writeBaselineArg = parseArg('--write-baseline')
+
+interface DoctorBaseline {
+  tool: 'db-doctor'
+  generatedAt: string
+  allowFailKeys: string[]
+}
+
 interface DiagnosticResult {
   check: string
   status: 'pass' | 'warn' | 'fail'
@@ -35,6 +50,41 @@ interface DiagnosticResult {
 }
 
 const results: DiagnosticResult[] = []
+
+function resultKey(result: DiagnosticResult): string {
+  return [result.check, result.message, result.file ?? ''].join('|')
+}
+
+function readBaseline(filePath: string): DoctorBaseline | null {
+  const resolved = path.resolve(filePath)
+  if (!resolved.startsWith(ROOT) || !fs.existsSync(resolved)) return null
+  try {
+    const parsed = JSON.parse(fs.readFileSync(resolved, 'utf8')) as DoctorBaseline
+    if (parsed.tool !== 'db-doctor' || !Array.isArray(parsed.allowFailKeys)) {
+      return null
+    }
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function writeBaseline(filePath: string, fails: DiagnosticResult[]): string {
+  const resolved = path.resolve(filePath)
+  if (!resolved.startsWith(ROOT)) {
+    throw new Error(`Refusing to write baseline outside repository: ${filePath}`)
+  }
+  const dir = path.dirname(resolved)
+  fs.mkdirSync(dir, { recursive: true })
+
+  const payload: DoctorBaseline = {
+    tool: 'db-doctor',
+    generatedAt: new Date().toISOString(),
+    allowFailKeys: fails.map((item) => resultKey(item)),
+  }
+  fs.writeFileSync(resolved, JSON.stringify(payload, null, 2) + '\n', 'utf8')
+  return resolved
+}
 
 // ── Migration paths ───────────────────────────────────────────────────────────
 
@@ -253,6 +303,35 @@ function main(): void {
   const warns = results.filter((r) => r.status === 'warn')
   const fails = results.filter((r) => r.status === 'fail')
 
+  if (writeBaselineArg) {
+    const written = writeBaseline(writeBaselineArg, fails)
+    console.log(`  Baseline written: ${path.relative(ROOT, written)}`)
+  }
+
+  let unmatchedFails = fails
+  if (baselineArg) {
+    const baseline = readBaseline(baselineArg)
+    if (!baseline) {
+      results.push({
+        check: 'baseline',
+        status: 'warn',
+        message: `Baseline file unreadable: ${baselineArg}`,
+      })
+    } else {
+      const allowed = new Set(baseline.allowFailKeys)
+      unmatchedFails = fails.filter((item) => !allowed.has(resultKey(item)))
+      const suppressed = fails.length - unmatchedFails.length
+      results.push({
+        check: 'baseline',
+        status: suppressed > 0 ? 'warn' : 'pass',
+        message:
+          suppressed > 0
+            ? `Suppressed ${suppressed} known fail finding(s) from baseline`
+            : 'No baseline suppressions applied',
+      })
+    }
+  }
+
   for (const r of results) {
     const icon = r.status === 'pass' ? '✓' : r.status === 'warn' ? '⚠' : '✗'
     if (verbose || r.status !== 'pass') {
@@ -262,8 +341,11 @@ function main(): void {
 
   console.log()
   console.log(`  Results: ${passes.length} pass, ${warns.length} warn, ${fails.length} fail`)
+  if (baselineArg) {
+    console.log(`  New failures (post-baseline): ${unmatchedFails.length}`)
+  }
 
-  if (fails.length > 0) {
+  if (unmatchedFails.length > 0) {
     console.log('\n  ✗ DB Doctor FAILED — resolve critical issues before deploy')
     process.exit(1)
   }

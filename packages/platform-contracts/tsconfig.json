@@ -7,8 +7,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": "src",
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "noEmit": true
   ,"types": ["node"]

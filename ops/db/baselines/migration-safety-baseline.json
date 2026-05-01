@@ -1,0 +1,17 @@
+{
+  "tool": "migration-safety",
+  "generatedAt": "2026-05-01T04:03:13.265Z",
+  "allowBlockKeys": [
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0000_flippant_luke_cage.sql|484",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0001_phase5b_inter_union_features.sql|1121",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0002_true_selene.sql|434",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0005_lazy_kate_bishop.sql|80",
+    "DROP_TABLE|DROP TABLE without IF EXISTS|apps\\union-eyes\\db\\migrations\\0008_lean_mother_askani.sql|2746",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0008_lean_mother_askani.sql|81061",
+    "DROP_TABLE|DROP TABLE without IF EXISTS|apps\\union-eyes\\db\\migrations\\0019_lonely_stephen_strange.sql|216",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\0062_add_immutable_transition_history.sql|77",
+    "DROP_TABLE|DROP TABLE without IF EXISTS|apps\\union-eyes\\db\\migrations\\1770880372830_consolidate_chart_of_accounts_fixed.sql|10",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\20260402_audit_immutability.sql|85",
+    "DROP_COLUMN|DROP COLUMN — data loss, app may still reference it|apps\\union-eyes\\db\\migrations\\manual\\068_add_encrypted_pii_fields.sql|246"
+  ]
+}

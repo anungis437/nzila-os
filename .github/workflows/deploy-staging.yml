@@ -158,6 +158,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Azure login
         uses: azure/login@v3
         with:
@@ -174,6 +184,16 @@ jobs:
       - name: Run smoke tests
         run: pnpm tsx scripts/release/run-smoke.ts --env staging --apps "${{ github.event.inputs.apps || 'all' }}"
 
+      - name: Ingest GitHub Actions CI evidence
+        env:
+          CI_CONCLUSION: ${{ job.status }}
+        run: pnpm proof:ingest:ci
+
+      - name: Ingest Azure runtime evidence (live)
+        env:
+          AZ_LIVE_INGEST: 'true'
+        run: pnpm proof:ingest:azure
+
       - name: Record governance snapshot
         run: |
           mkdir -p ops/governance-snapshots
@@ -188,3 +208,13 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
           }
           EOF
+
+      - name: Upload runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-runtime-evidence-${{ github.run_id }}
+          path: |
+            reports/runtime/ci-runs.jsonl
+            reports/runtime/azure-runtime-latest.json
+          retention-days: 365

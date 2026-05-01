@@ -1,0 +1,61 @@
+{
+  "advisories": {
+    "1116957": {
+      "id": 1116957,
+      "url": "https://github.com/advisories/GHSA-gh4j-gqv2-49f6",
+      "title": "fast-xml-parser XMLBuilder: XML Comment and CDATA Injection via Unescaped Delimiters",
+      "severity": "moderate",
+      "vulnerable_versions": "<5.7.0",
+      "cwe": [
+        "CWE-91"
+      ],
+      "cvss": {
+        "score": 6.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+      },
+      "package": "fast-xml-parser"
+    },
+    "1116970": {
+      "id": 1116970,
+      "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+      "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+      "severity": "moderate",
+      "vulnerable_versions": "<14.0.0",
+      "cwe": [
+        "CWE-787",
+        "CWE-1285"
+      ],
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "package": "uuid"
+    },
+    "1117015": {
+      "id": 1117015,
+      "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+      "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
+      "severity": "moderate",
+      "vulnerable_versions": "<8.5.10",
+      "cwe": [
+        "CWE-79"
+      ],
+      "cvss": {
+        "score": 6.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+      },
+      "package": "postcss"
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 3,
+      "high": 0,
+      "critical": 0,
+      "total": 3
+    },
+    "totalDependencies": 1208
+  }
+}

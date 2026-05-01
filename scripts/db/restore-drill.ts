@@ -35,6 +35,8 @@ import * as crypto from 'node:crypto'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const REPORTS_DIR = path.join(ROOT, 'reports', 'db')
+const DOCTOR_BASELINE_PATH = path.join(ROOT, 'ops', 'db', 'baselines', 'db-doctor-baseline.json')
+const MIGRATION_SAFETY_BASELINE_PATH = path.join(ROOT, 'ops', 'db', 'baselines', 'migration-safety-baseline.json')
 const MIGRATION_DIRS = [
   'migrations',
   'migrations/platform',
@@ -385,21 +387,40 @@ function checkDrDocs(): void {
 
 // Check 6: Doctor and migration safety pass
 function checkDoctorAndSafety(): void {
+  const doctorBaselineArg = fs.existsSync(DOCTOR_BASELINE_PATH)
+    ? ` --baseline "${DOCTOR_BASELINE_PATH}"`
+    : ''
+  const migrationSafetyBaselineArg = fs.existsSync(MIGRATION_SAFETY_BASELINE_PATH)
+    ? ` --baseline "${MIGRATION_SAFETY_BASELINE_PATH}"`
+    : ''
+
   console.log('  Running db:doctor...')
-  const { ok: doctorOk, durationMs: doctorMs } = exec('npx tsx scripts/db/doctor.ts', 60_000, dbEnv)
+  const { ok: doctorOk, durationMs: doctorMs } = exec(
+    `npx tsx scripts/db/doctor.ts${doctorBaselineArg}`,
+    60_000,
+    dbEnv,
+  )
   checks.push({
     check: 'db-doctor',
     status: doctorOk ? 'pass' : 'fail',
-    message: doctorOk ? 'db:doctor passed' : 'db:doctor failed',
+    message: doctorOk
+      ? `db:doctor passed${doctorBaselineArg ? ' (baseline-aware)' : ''}`
+      : 'db:doctor failed',
     durationMs: doctorMs,
   })
 
   console.log('  Running migration-safety...')
-  const { ok: safetyOk, durationMs: safetyMs } = exec('npx tsx scripts/db/migration-safety.ts', 60_000, dbEnv)
+  const { ok: safetyOk, durationMs: safetyMs } = exec(
+    `npx tsx scripts/db/migration-safety.ts --review-ok${migrationSafetyBaselineArg}`,
+    60_000,
+    dbEnv,
+  )
   checks.push({
     check: 'migration-safety',
     status: safetyOk ? 'pass' : 'fail',
-    message: safetyOk ? 'migration-safety passed' : 'migration-safety failed',
+    message: safetyOk
+      ? `migration-safety passed${migrationSafetyBaselineArg ? ' (baseline-aware)' : ''}`
+      : 'migration-safety failed',
     durationMs: safetyMs,
   })
 }

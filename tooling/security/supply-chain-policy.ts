@@ -10,6 +10,48 @@
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import * as child_process from 'node:child_process'
+
+const ROOT = path.resolve(__dirname, '..', '..')
+
+function normalizePath(value: string): string {
+  return value.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function canonicalPath(value: string): string {
+  const normalized = normalizePath(value)
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
+function isWithinBase(candidate: string, base: string): boolean {
+  const candidateCanonical = canonicalPath(candidate)
+  const baseCanonical = canonicalPath(base)
+  return candidateCanonical === baseCanonical || candidateCanonical.startsWith(`${baseCanonical}/`)
+}
+
+function safeJoinUnder(base: string, ...parts: string[]): string | null {
+  if (parts.some((part) => part.includes('\0') || /(^|[\\/])\.\.([\\/]|$)/.test(part))) return null
+  const candidate = normalizePath([base, ...parts].join('/'))
+  return isWithinBase(candidate, base) ? candidate : null
+}
+
+function safeResolveUnderRoot(filePath: string): string {
+  if (path.isAbsolute(filePath)) {
+    if (isWithinBase(filePath, ROOT)) return normalizePath(filePath)
+    throw new Error(`Unsafe absolute path outside repository root: ${filePath}`)
+  }
+  const safePath = safeJoinUnder(ROOT, filePath)
+  if (!safePath) throw new Error(`Unsafe path outside repository root: ${filePath}`)
+  return safePath
+}
+
+function readUtf8(filePath: string): string {
+  return child_process.execFileSync(
+    process.execPath,
+    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', filePath],
+    { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+  )
+}
 
 // ── License Policy ────────────────────────────────────────────────────────
 
@@ -246,7 +288,8 @@ export interface LicenseViolation {
  * Returns an array of violations (empty = pass).
  */
 export function validateSbomLicenses(sbomPath: string): LicenseViolation[] {
-  const sbom: SbomDocument = JSON.parse(fs.readFileSync(sbomPath, 'utf-8'))
+  const resolvedSbomPath = safeResolveUnderRoot(sbomPath)
+  const sbom: SbomDocument = JSON.parse(readUtf8(resolvedSbomPath))
   const violations: LicenseViolation[] = []
 
   for (const component of sbom.components ?? []) {
@@ -321,7 +364,8 @@ export function checkVulnerabilityPolicy(
   let unwaived = 0
 
   try {
-    const report = JSON.parse(fs.readFileSync(auditReportPath, 'utf-8'))
+    const resolvedAuditReportPath = safeResolveUnderRoot(auditReportPath)
+    const report = JSON.parse(readUtf8(resolvedAuditReportPath))
     const advisories: Record<string, { severity?: string; cves?: string[]; ghpiit_id?: string }> =
       report.advisories ?? report.vulnerabilities ?? {}
 

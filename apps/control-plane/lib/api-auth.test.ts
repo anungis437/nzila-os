@@ -90,8 +90,14 @@ describe('handleAuthError', () => {
     expect(response).toBeDefined()
   })
 
-  it('rethrows non-ApiAuthError errors', () => {
+  it('returns sanitized 500 for non-ApiAuthError errors', async () => {
+    const { NextResponse } = await import('next/server')
     const err = new Error('Something else')
-    expect(() => handleAuthError(err)).toThrow('Something else')
+    const response = handleAuthError(err)
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      { ok: false, error: 'Internal server error' },
+      { status: 500 },
+    )
+    expect(response).toEqual({ body: { ok: false, error: 'Internal server error' }, status: 500 })
   })
 })

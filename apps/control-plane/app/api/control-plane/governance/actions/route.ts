@@ -12,7 +12,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
+import { requireApiAuth, handleAuthError, parseUuidParam, RequestValidationError } from '@/lib/api-auth'
 import {
   createGovernanceAction,
   submitGovernanceAction,
@@ -160,7 +160,16 @@ export async function POST(request: NextRequest) {
       }
     }
   } catch (error) {
-    logger.error('Governance action API error', { error })
+    if (error instanceof RequestValidationError) {
+      logger.warn('Governance action validation failed', {
+        details: error.details,
+      })
+    } else {
+      logger.error('Governance action API error', {
+        errorName: error instanceof Error ? error.name : 'unknown_error',
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
     return handleAuthError(error)
   }
 }
@@ -171,10 +180,11 @@ export async function GET(request: NextRequest) {
   try {
     await requireApiAuth(request)
 
-    const orgId = request.nextUrl.searchParams.get('orgId')
-    if (!orgId) {
+    const rawOrgId = request.nextUrl.searchParams.get('orgId')
+    if (!rawOrgId) {
       return NextResponse.json({ ok: false, error: 'orgId query param required' }, { status: 400 })
     }
+    const orgId = parseUuidParam(rawOrgId, 'orgId')
 
     const actions = await platformDb
       .select()
@@ -184,6 +194,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ ok: true, data: actions })
   } catch (error) {
+    if (error instanceof RequestValidationError) {
+      logger.warn('Governance action list validation failed', {
+        details: error.details,
+      })
+    }
     return handleAuthError(error)
   }
 }
