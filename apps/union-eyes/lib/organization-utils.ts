@@ -8,6 +8,7 @@
 import { db } from "@/db/db";
 import { organizations, organizationMembers } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
+import { authOrganizationUsers } from '@nzila/db/schema'
 import { cookies } from "next/headers";
 import { logger } from "./logger";
 /**
@@ -153,6 +154,21 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
     
     if (userOrgs.length > 0 && userOrgs[0].organizationId) {
       return userOrgs[0].organizationId;
+    }
+
+    const authUserOrgs = await db
+      .select({ organizationId: authOrganizationUsers.organizationId })
+      .from(authOrganizationUsers)
+      .where(
+        and(
+          eq(authOrganizationUsers.userId, userId),
+          eq(authOrganizationUsers.isActive, true),
+        )
+      )
+      .limit(1)
+
+    if (authUserOrgs.length > 0 && authUserOrgs[0].organizationId) {
+      return authUserOrgs[0].organizationId
     }
     
     // Final fallback to default organization

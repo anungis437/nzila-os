@@ -11,6 +11,8 @@ on:
   schedule:
     # Daily FinOps analysis at 06:00 UTC
     - cron: '0 6 * * *'
+    # Hourly incremental decision-aggregate materialization
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       task:
@@ -23,6 +25,7 @@ on:
           - quota-audit
           - org-health
           - cost-recommendations
+          - aggregate-materialization
         default: all
 
 permissions:
@@ -40,7 +43,7 @@ jobs:
     if: >
       github.event.inputs.task == 'all' ||
       github.event.inputs.task == 'finops-report' ||
-      github.event_name == 'schedule'
+      github.event.schedule == '0 6 * * *'
 
     steps:
       - uses: actions/checkout@v5
@@ -117,7 +120,7 @@ jobs:
     if: >
       github.event.inputs.task == 'all' ||
       github.event.inputs.task == 'quota-audit' ||
-      github.event_name == 'schedule'
+      github.event.schedule == '0 6 * * *'
 
     steps:
       - uses: actions/checkout@v5
@@ -183,7 +186,7 @@ jobs:
     if: >
       github.event.inputs.task == 'all' ||
       github.event.inputs.task == 'org-health' ||
-      github.event_name == 'schedule'
+      github.event.schedule == '0 6 * * *'
 
     steps:
       - uses: actions/checkout@v5
@@ -234,3 +237,33 @@ jobs:
           name: org-health-${{ github.run_id }}
           path: evidence/org-health.md
           retention-days: 365
+
+  # ── Materialize Decision Aggregates ───────────────────────────────────
+  aggregate-materialization:
+    runs-on: ubuntu-latest
+    name: Materialize Decision Aggregates
+    if: >
+      github.event.inputs.task == 'all' ||
+      github.event.inputs.task == 'aggregate-materialization' ||
+      github.event.schedule == '0 * * * *'
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build decision-intelligence
+        run: pnpm --filter @nzila/decision-intelligence build
+
+      - name: Materialize decision aggregates (incremental)
+        run: pnpm aggregates:materialize -- --mode=incremental
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

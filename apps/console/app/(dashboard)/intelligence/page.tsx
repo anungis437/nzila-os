@@ -7,8 +7,10 @@
  *
  * Server Component — all data loaded at request time, zero client JS.
  */
+import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
+import { desc, eq } from 'drizzle-orm'
 import {
   getDashboardKpis,
   getFundingOpportunities,
@@ -35,6 +37,9 @@ import type {
   FounderDecision,
   MichelAction,
 } from '@nzila/platform-intelligence-home'
+import { platformDb } from '@nzila/db/platform'
+import { decisionPipelineCheckpoints, decisionPipelineRuns } from '@nzila/db/schema'
+import { computeFreshnessLag, evaluateFreshnessSla } from '@nzila/decision-intelligence'
 
 export const dynamic = 'force-dynamic'
 
@@ -126,6 +131,34 @@ function michelTypeConfig(type: MichelAction['actionType']): { icon: string; col
   }
   return m[type] ?? { icon: '•', color: 'text-gray-700 bg-gray-50' }
 }
+
+const phase4IntelligenceCards = [
+  {
+    label: 'Basic',
+    title: 'Decision Metrics',
+    href: '/api/intelligence/metrics?orgId=ORG_ID&tier=basic',
+    detail: 'Volumes, outcomes, latency, and intervention rates derived from irreversible records.',
+  },
+  {
+    label: 'Pro',
+    title: 'Policy Insights',
+    href: '/api/intelligence/policy-insights?orgId=ORG_ID&decisionType=flow.quote.created&tier=pro',
+    detail: 'Effectiveness scores, drift deltas, and production policy recommendations.',
+  },
+  {
+    label: 'Enterprise',
+    title: 'Benchmarks',
+    href: '/api/intelligence/benchmarks?orgId=ORG_ID&decisionType=flow.quote.created&domain=commerce&tier=enterprise',
+    detail: 'Anonymized cross-org benchmarks and percentile positioning reserved for premium access.',
+  },
+]
+
+const phase4RevenueAxes = [
+  'Decision volume billed per 1,000 decisions',
+  'Audit storage billed per retained record',
+  'Intelligence access billed by tier',
+  'API usage billed per intelligence request',
+]
 
 // ── Tab Nav ───────────────────────────────────────────────────────────────────
 
@@ -886,6 +919,204 @@ function RisksSection({ risks }: { risks: Risk[] }) {
   )
 }
 
+// ── Pipeline Health ───────────────────────────────────────────────────────────
+
+type PipelineHealth = {
+  healthy: boolean
+  checkpoint: {
+    lastRunStatus: string | null
+    lastRunCompletedAt: Date | null
+    recordsScanned: number
+    recordsMaterialized: number
+    failureReason: string | null
+  } | null
+  lastRun: {
+    id: string
+    mode: string
+    status: string
+    recordsScanned: number
+    recordsMaterialized: number
+    freshnessLagMs: number | null
+    errorCode: string | null
+  } | null
+  freshness: { lagMs: number; status: 'healthy' | 'warning' | 'breached' } | null
+}
+
+const PIPELINE_NAME = 'decision-aggregate-materialization'
+
+async function getPipelineHealth(): Promise<PipelineHealth> {
+  const [checkpoint] = await platformDb
+    .select()
+    .from(decisionPipelineCheckpoints)
+    .where(eq(decisionPipelineCheckpoints.pipelineName, PIPELINE_NAME))
+    .limit(1)
+
+  const [lastRun] = await platformDb
+    .select()
+    .from(decisionPipelineRuns)
+    .where(eq(decisionPipelineRuns.pipelineName, PIPELINE_NAME))
+    .orderBy(desc(decisionPipelineRuns.startedAt))
+    .limit(1)
+
+  let freshness: PipelineHealth['freshness'] = null
+  if (checkpoint?.lastSuccessfulAuditCreatedAt && checkpoint.lastRunCompletedAt) {
+    const { lagMs } = computeFreshnessLag({
+      latestAuditRecordAt: checkpoint.lastSuccessfulAuditCreatedAt,
+      latestAggregateWindowEnd: checkpoint.lastRunCompletedAt,
+    })
+    const { status } = evaluateFreshnessSla({ lagMs })
+    freshness = { lagMs, status }
+  }
+
+  const healthy =
+    checkpoint?.lastRunStatus === 'success' &&
+    (freshness === null || freshness.status !== 'breached')
+
+  return {
+    healthy: healthy ?? false,
+    checkpoint: checkpoint
+      ? {
+          lastRunStatus: checkpoint.lastRunStatus ?? null,
+          lastRunCompletedAt: checkpoint.lastRunCompletedAt ?? null,
+          recordsScanned: checkpoint.recordsScanned ?? 0,
+          recordsMaterialized: checkpoint.recordsMaterialized ?? 0,
+          failureReason: checkpoint.failureReason ?? null,
+        }
+      : null,
+    lastRun: lastRun
+      ? {
+          id: lastRun.id,
+          mode: lastRun.mode,
+          status: lastRun.status,
+          recordsScanned: lastRun.recordsScanned ?? 0,
+          recordsMaterialized: lastRun.recordsMaterialized ?? 0,
+          freshnessLagMs:
+            lastRun.freshnessLagMs !== null ? Number(lastRun.freshnessLagMs) : null,
+          errorCode: lastRun.errorCode ?? null,
+        }
+      : null,
+    freshness,
+  }
+}
+
+function PipelineHealthCard({ health }: { health: PipelineHealth }) {
+  const { healthy, checkpoint, lastRun, freshness } = health
+
+  function fmtLag(ms: number): string {
+    const h = Math.floor(ms / 3_600_000)
+    const m = Math.floor((ms % 3_600_000) / 60_000)
+    return h > 0 ? `${h}h ${m}m` : `${m}m`
+  }
+
+  const overallStatus =
+    !checkpoint
+      ? 'never_run'
+      : freshness?.status === 'breached'
+      ? 'failed'
+      : freshness?.status === 'warning'
+      ? 'stale'
+      : healthy
+      ? 'healthy'
+      : 'failed'
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full shrink-0 ${statusDot(overallStatus)}`} />
+            <h3 className="text-sm font-semibold text-gray-900">Decision Aggregate Pipeline</h3>
+          </div>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusBadge(overallStatus)}`}>
+            {overallStatus.replace('_', ' ')}
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 mt-0.5 ml-4">
+          {PIPELINE_NAME} · freshness lag: {freshness ? fmtLag(freshness.lagMs) : '—'}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-100">
+        {[
+          {
+            label: 'Last Run Status',
+            value: checkpoint?.lastRunStatus?.replace('_', ' ') ?? '—',
+          },
+          {
+            label: 'Completed At',
+            value: checkpoint?.lastRunCompletedAt
+              ? new Date(checkpoint.lastRunCompletedAt).toLocaleString('en-CA', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '—',
+          },
+          {
+            label: 'Records Scanned',
+            value: checkpoint ? checkpoint.recordsScanned.toLocaleString() : '—',
+          },
+          {
+            label: 'Materialized',
+            value: checkpoint ? checkpoint.recordsMaterialized.toLocaleString() : '—',
+          },
+        ].map(({ label, value }) => (
+          <div key={label} className="bg-white px-4 py-3">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+              {label}
+            </p>
+            <p className="mt-1 text-sm font-semibold text-gray-900 tabular-nums">{value}</p>
+          </div>
+        ))}
+      </div>
+      {lastRun && (
+        <div className="px-5 py-3 border-t border-gray-100">
+          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mb-2">
+            Last Run
+          </p>
+          <div className="flex flex-wrap gap-4 text-xs text-gray-600">
+            <span>
+              Mode:{' '}
+              <span className="font-medium text-gray-900">{lastRun.mode.replace('_', ' ')}</span>
+            </span>
+            <span>
+              Status:{' '}
+              <span className={`font-medium ${lastRun.status === 'success' ? 'text-emerald-700' : 'text-rose-600'}`}>
+                {lastRun.status}
+              </span>
+            </span>
+            <span>
+              Materialized:{' '}
+              <span className="font-medium text-gray-900 tabular-nums">
+                {lastRun.recordsMaterialized.toLocaleString()}
+              </span>
+            </span>
+            {lastRun.errorCode && (
+              <span className="text-rose-600">Error: {lastRun.errorCode}</span>
+            )}
+          </div>
+        </div>
+      )}
+      {checkpoint?.failureReason && (
+        <div className="px-5 pb-4">
+          <p className="text-xs bg-rose-50 text-rose-700 rounded-lg px-3 py-2 border border-rose-100">
+            <span className="font-semibold">Failure:</span> {checkpoint.failureReason}
+          </p>
+        </div>
+      )}
+      {!checkpoint && (
+        <div className="px-5 py-3 text-xs text-gray-400 italic border-t border-gray-50">
+          No pipeline runs recorded yet. Run{' '}
+          <code className="font-mono text-[11px] text-gray-600">
+            tsx jobs/materialize-decision-aggregates.ts
+          </code>{' '}
+          in control-plane to seed.
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Data Sources ──────────────────────────────────────────────────────────────
 
 function DataSourcesSection({ syncHealth }: { syncHealth: DataSourceHealth[] }) {
@@ -964,7 +1195,7 @@ export default async function IntelligencePage({
 
   const { section = 'overview' } = await searchParams
 
-  const [kpis, funding, deals, partners, scored, risks, briefing, syncHealth, insights, decisions, michelActions] =
+  const [kpis, funding, deals, partners, scored, risks, briefing, syncHealth, insights, decisions, michelActions, pipelineHealth] =
     await Promise.all([
       getDashboardKpis(),
       getFundingOpportunities(),
@@ -977,6 +1208,7 @@ export default async function IntelligencePage({
       generateExecutiveInsights(),
       getFounderDecisions(),
       getMichelWeeklyActions(),
+      getPipelineHealth(),
     ])
 
   const now = new Date()
@@ -1054,6 +1286,49 @@ export default async function IntelligencePage({
       )}
 
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        <section className="mb-8 grid gap-4 xl:grid-cols-[1.2fr,0.8fr]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Phase 4</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900">Data Moat + Revenue Layer</h2>
+              </div>
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-800">
+                Intelligence stays inside Nzila
+              </span>
+            </div>
+            <p className="mt-3 max-w-3xl text-sm text-slate-600">
+              Raw records can leave. Benchmarks, policy tuning guidance, and compounding intelligence cannot.
+              That is the monetization boundary and the switching-cost mechanism.
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {phase4IntelligenceCards.map((card) => (
+                <article key={card.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{card.label}</p>
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">{card.title}</h3>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">{card.detail}</p>
+                  <Link className="mt-3 inline-block text-xs font-semibold text-blue-700 hover:text-blue-900" href={card.href}>
+                    Endpoint →
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-slate-100 shadow-sm">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Commercial Model</p>
+            <h2 className="mt-1 text-lg font-semibold text-white">Monetization Axes</h2>
+            <ul className="mt-4 space-y-2 text-sm text-slate-300">
+              {phase4RevenueAxes.map((axis) => (
+                <li key={axis}>{axis}</li>
+              ))}
+            </ul>
+            <p className="mt-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-xs leading-5 text-slate-400">
+              Sales line: We optimize and prove your decisions using real operational data.
+            </p>
+          </div>
+        </section>
+
         {section === 'overview' && (
           <OverviewSection
             briefing={briefing}
@@ -1073,7 +1348,12 @@ export default async function IntelligencePage({
         {section === 'partners' && <PartnersSection partners={partners} />}
         {section === 'products' && <ProductsSection scored={scored} />}
         {section === 'risks' && <RisksSection risks={risks} />}
-        {section === 'data-sources' && <DataSourcesSection syncHealth={syncHealth} />}
+        {section === 'data-sources' && (
+          <div className="space-y-4">
+            <PipelineHealthCard health={pipelineHealth} />
+            <DataSourcesSection syncHealth={syncHealth} />
+          </div>
+        )}
       </div>
     </div>
   )

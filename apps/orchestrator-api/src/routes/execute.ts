@@ -30,8 +30,55 @@ import {
   type PolicyDecisionLevel,
 } from '@nzila/policies'
 import { getOperatingEvidenceService } from '@nzila/operating-evidence'
+import { enforceDecision } from '@nzila/decision-core'
+import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar'
+import { platformDb } from '@nzila/db/platform'
+import { auditRecords } from '@nzila/db/schema'
+import { desc, eq } from 'drizzle-orm'
 
 const logger = createLogger('orchestrator:routes:execute')
+
+const narProofAdapter = createNarProofAdapter({
+  keyId: process.env.NAR_SIGNING_KEY_ID,
+  getPreviousHash: async (organizationId) => {
+    const rows = await platformDb
+      .select({ hash: auditRecords.narHash })
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, organizationId))
+      .orderBy(desc(auditRecords.createdAt))
+      .limit(1)
+    return rows[0]?.hash
+  },
+  persistRecord: async (record) => {
+    await platformDb.insert(auditRecords).values({
+      id: record.id,
+      decisionRecordId: record.decisionRecordId,
+      organizationId: record.organizationId,
+      decisionType: record.decisionType,
+      actionType: record.actionType,
+      actorId: record.actorId,
+      actorType: record.actorType,
+      resourceType: record.resourceType,
+      resourceId: record.resourceId,
+      policyId: record.policyId,
+      policyVersion: record.policyVersion,
+      inputHash: record.inputHash,
+      outcomeHash: record.outcomeHash,
+      payload: record.payload,
+      narHash: record.seal.hash,
+      narSignature: record.seal.signature,
+      previousHash: record.seal.previousHash,
+      keyId: record.seal.keyId,
+      storageType: record.storage?.type,
+      storageUri: record.storage?.uri,
+      immutable: record.storage?.immutable,
+      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
+      createdAt: new Date(record.createdAt),
+    })
+    return { auditRecordId: record.id }
+  },
+  getSigningSecret: getNarSigningSecret,
+})
 
 const ExecuteBodySchema = WorkflowTriggerRequestSchema.extend({
   workflowId: PlaybookName,
@@ -261,6 +308,48 @@ export async function executeRoutes(app: FastifyInstance) {
       })
     }
 
+    const actorType = body.initiatedBy.actorType === 'system'
+      ? 'system'
+      : body.initiatedBy.actorType === 'service'
+        ? 'api'
+        : 'user'
+
+    const preflightDecision = await enforceDecision({
+      decisionType: 'platform.workflow.executed',
+      organizationId: body.orgId,
+      resourceId: 'pending',
+      actor: {
+        id: body.initiatedBy.actorId,
+        type: actorType,
+        role: body.initiatedBy.actorType,
+        authorityScope: ['workflow:execute'],
+      },
+      authorityScope: ['workflow:execute'],
+      input: {
+        workflowId: body.workflowId,
+        requestId: body.requestId,
+      },
+      policy: {
+        id: 'platform.workflow.execution',
+        version: requestedPolicyVersion,
+        domain: 'platform',
+      },
+      actionType: 'workflow:execute',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    })
+
+    if (!preflightDecision.allowed) {
+      return reply.status(422).send({
+        ok: false,
+        error: {
+          code: 'DECISION_VALIDATION_FAILED',
+          message: 'Decision validation failed before workflow execution',
+        },
+        decision: preflightDecision.decision,
+      })
+    }
+
     const correlationId = (req.headers['x-correlation-id'] as string | undefined)
       ?? body.correlationEnvelope?.correlationId
       ?? randomUUID()
@@ -311,10 +400,37 @@ export async function executeRoutes(app: FastifyInstance) {
     })
 
     const httpStatus = result.status === 'failed' || result.status === 'dead_lettered' ? 500 : 202
+
+    const recordedDecision = await enforceDecision({
+      decisionType: 'platform.workflow.executed',
+      organizationId: body.orgId,
+      resourceId: result.runId,
+      actor: {
+        id: body.initiatedBy.actorId,
+        type: actorType,
+        role: body.initiatedBy.actorType,
+        authorityScope: ['workflow:execute'],
+      },
+      authorityScope: ['workflow:execute'],
+      input: {
+        workflowId: body.workflowId,
+        requestId: body.requestId,
+      },
+      policy: {
+        id: 'platform.workflow.execution',
+        version: requestedPolicyVersion,
+        domain: 'platform',
+      },
+      actionType: 'workflow:execute',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    })
+
     return reply.status(result.idempotent ? 200 : httpStatus).send({
       ok: true,
       data: {
         ...result,
+        decision: recordedDecision.decision,
         policy: {
           domain,
           policyVersion: requestedPolicyVersion,

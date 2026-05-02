@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-05-02T02:06:44.056Z",
+  "steps": [
+    {
+      "name": "Seed deterministic UE test environment",
+      "command": "pnpm.cmd",
+      "args": [
+        "ue:seed:test-env"
+      ],
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "name": "Run UE API QA suite",
+      "command": "pnpm.cmd",
+      "args": [
+        "ue:qa:api"
+      ],
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "name": "Run UE E2E QA suite",
+      "command": "pnpm.cmd",
+      "args": [
+        "ue:qa:e2e"
+      ],
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "name": "Run control-plane pipeline dry-run",
+      "command": "pnpm.cmd",
+      "args": [
+        "--filter",
+        "@nzila/control-plane",
+        "job:aggregate-dry-run"
+      ],
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "name": "Verify NAR chain job",
+      "command": "pnpm.cmd",
+      "args": [
+        "--filter",
+        "@nzila/control-plane",
+        "job:verify-nar-chain"
+      ],
+      "passed": true,
+      "exitCode": 0
+    }
+  ],
+  "failures": []
+}

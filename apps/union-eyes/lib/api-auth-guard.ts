@@ -49,6 +49,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
 import { users } from '@/db/schema/domains/member';
+import { authOrganizationUsers } from '@nzila/db/schema'
 import {
   getMemberRoles,
   getMemberHighestRoleLevel,
@@ -850,7 +851,23 @@ async function getUserRoleFromDatabase(userId: string): Promise<string> {
   const membership = await db.query.organizationMembers.findFirst({
     where: (om, { eq }) => eq(om.userId, userId),
   });
-  return membership?.role || 'member';
+
+  if (membership?.role) {
+    return membership.role
+  }
+
+  const [authMembership] = await db
+    .select({ role: authOrganizationUsers.role })
+    .from(authOrganizationUsers)
+    .where(
+      and(
+        eq(authOrganizationUsers.userId, userId),
+        eq(authOrganizationUsers.isActive, true),
+      ),
+    )
+    .limit(1)
+
+  return authMembership?.role || 'member';
 }
 
 /**

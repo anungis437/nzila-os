@@ -19,6 +19,7 @@ export default defineProject({
       "**/.git/**",
       "**/.next/**",
       "e2e/**",
+      "tests/e2e/**",
       "services/financial-service/**",
     ],
   },

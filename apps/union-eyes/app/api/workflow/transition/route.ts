@@ -31,6 +31,18 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+function statusForAuthError(message: string): number {
+  if (message.startsWith('Unauthorized')) {
+    return 401
+  }
+
+  if (message.startsWith('Forbidden')) {
+    return 403
+  }
+
+  return 500
+}
+
 const transitionSchema = z.object({
   claimNumber: z.string().min(1).max(100),
   targetStatus: z.enum([
@@ -198,9 +210,11 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     logger.error('Workflow transition failed', { error: String(err) })
+    const message = err instanceof Error ? err.message : 'Internal error'
+
     return NextResponse.json(
-      { success: false, error: 'Internal error' },
-      { status: 500 },
+      { success: false, error: message.startsWith('Unauthorized') || message.startsWith('Forbidden') ? message : 'Internal error' },
+      { status: statusForAuthError(message) },
     )
   }
 }

@@ -44,10 +44,14 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   currentUser: mocks.mockClerkCurrentUser,
 }));
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-}));
+vi.mock('drizzle-orm', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('drizzle-orm')>();
+  return {
+    ...actual,
+    eq: vi.fn((...a: unknown[]) => a),
+    and: vi.fn((...a: unknown[]) => a),
+  };
+});
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => ({ get: mocks.mockCookiesGet })),

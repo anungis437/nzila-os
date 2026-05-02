@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-05-02T02:06:44.960Z",
+  "userStoryCoveragePercent": 77,
+  "rbacCoveragePercent": 100,
+  "apiCoverage": 4,
+  "e2eCoverage": 1,
+  "auditCoverage": 0,
+  "pipelineHealth": "healthy",
+  "failures": [],
+  "decision": "GO"
+}

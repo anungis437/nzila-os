@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-03-10T20:46:02.480Z",
+  "generatedAt": "2026-05-02T02:07:23.940Z",
   "totalClaims": 22,
   "summary": {
-    "implemented": 20,
-    "partial": 2,
+    "implemented": 21,
+    "partial": 1,
     "docs-only": 0,
     "roadmap": 0,
     "unsupported": 0
@@ -167,7 +167,7 @@
       "category": "Finance",
       "text": "QuickBooks Online sync with reconciliation",
       "source": "ARCHITECTURE.md",
-      "status": "partial",
+      "status": "implemented",
       "evidence": [
         "packages/qbo"
       ],

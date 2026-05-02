@@ -1,0 +1,31 @@
+{
+  "name": "@nzila/pipeline-alerting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./adapters/console": "./src/adapters/console.ts",
+    "./adapters/webhook": "./src/adapters/webhook.ts",
+    "./adapters/noop": "./src/adapters/noop.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@nzila/os-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^10",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

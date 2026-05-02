@@ -25,8 +25,55 @@ import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { eq } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { enforceDecision } from '@nzila/decision-core';
+import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
+import { platformDb } from '@nzila/db/platform';
+import { auditRecords } from '@nzila/db/schema';
+import { desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
+
+const narProofAdapter = createNarProofAdapter({
+  keyId: process.env.NAR_SIGNING_KEY_ID,
+  getPreviousHash: async (organizationId) => {
+    const rows = await platformDb
+      .select({ hash: auditRecords.narHash })
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, organizationId))
+      .orderBy(desc(auditRecords.createdAt))
+      .limit(1);
+    return rows[0]?.hash;
+  },
+  persistRecord: async (record) => {
+    await platformDb.insert(auditRecords).values({
+      id: record.id,
+      decisionRecordId: record.decisionRecordId,
+      organizationId: record.organizationId,
+      decisionType: record.decisionType,
+      actionType: record.actionType,
+      actorId: record.actorId,
+      actorType: record.actorType,
+      resourceType: record.resourceType,
+      resourceId: record.resourceId,
+      policyId: record.policyId,
+      policyVersion: record.policyVersion,
+      inputHash: record.inputHash,
+      outcomeHash: record.outcomeHash,
+      payload: record.payload,
+      narHash: record.seal.hash,
+      narSignature: record.seal.signature,
+      previousHash: record.seal.previousHash,
+      keyId: record.seal.keyId,
+      storageType: record.storage?.type,
+      storageUri: record.storage?.uri,
+      immutable: record.storage?.immutable,
+      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
+      createdAt: new Date(record.createdAt),
+    });
+    return { auditRecordId: record.id };
+  },
+  getSigningSecret: getNarSigningSecret,
+});
 
 export async function POST(request: Request) {
   try {
@@ -86,6 +133,33 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (existing) {
+      const duplicateDecision = await enforceDecision({
+        decisionType: 'union.grievance.intake.submitted',
+        organizationId: orgId,
+        resourceId: existing.claimId,
+        actor: {
+          id: userId,
+          type: 'user',
+          authorityScope: ['grievance:create'],
+        },
+        authorityScope: ['grievance:create'],
+        input: {
+          memberId: data.memberId,
+          caseType: data.caseType,
+          incidentDate: data.incidentDate,
+          title: data.title,
+          priority: data.priority,
+        },
+        policy: {
+          id: 'labour.grievance.intake',
+          version: '1.0.0',
+          domain: 'labour',
+        },
+        actionType: 'claim:intake',
+        proofAdapter: narProofAdapter,
+        emitAuditPayload: true,
+      });
+
       return NextResponse.json(
         {
           success: true,
@@ -93,8 +167,47 @@ export async function POST(request: Request) {
           claimNumber: existing.claimNumber,
           status: 'duplicate',
           message: 'A case with identical details already exists.',
+          decision: duplicateDecision.decision,
         },
         { status: 200 },
+      );
+    }
+
+    const preflightDecision = await enforceDecision({
+      decisionType: 'union.grievance.intake.submitted',
+      organizationId: orgId,
+      resourceId: 'pending',
+      actor: {
+        id: userId,
+        type: 'user',
+        authorityScope: ['grievance:create'],
+      },
+      authorityScope: ['grievance:create'],
+      input: {
+        memberId: data.memberId,
+        caseType: data.caseType,
+        incidentDate: data.incidentDate,
+        title: data.title,
+        priority: data.priority,
+      },
+      policy: {
+        id: 'labour.grievance.intake',
+        version: '1.0.0',
+        domain: 'labour',
+      },
+      actionType: 'claim:intake',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
+
+    if (!preflightDecision.allowed) {
+      return NextResponse.json(
+        {
+          error: 'DECISION_VALIDATION_FAILED',
+          message: 'Decision validation failed before case creation.',
+          decision: preflightDecision.decision,
+        },
+        { status: 422 },
       );
     }
 
@@ -169,12 +282,40 @@ export async function POST(request: Request) {
       isFirst: memberClaims.length <= 1,
     }, { organizationId: orgId, userId });
 
+    const recordedDecision = await enforceDecision({
+      decisionType: 'union.grievance.intake.submitted',
+      organizationId: orgId,
+      resourceId: claim.claimId,
+      actor: {
+        id: userId,
+        type: 'user',
+        authorityScope: ['grievance:create'],
+      },
+      authorityScope: ['grievance:create'],
+      input: {
+        memberId: data.memberId,
+        caseType: data.caseType,
+        incidentDate: data.incidentDate,
+        title: data.title,
+        priority: data.priority,
+      },
+      policy: {
+        id: 'labour.grievance.intake',
+        version: '1.0.0',
+        domain: 'labour',
+      },
+      actionType: 'claim:intake',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
+
     return NextResponse.json(
       {
         success: true,
         claimId: claim.claimId,
         claimNumber: claim.claimNumber,
         status: 'submitted',
+        decision: recordedDecision.decision,
       },
       { status: 201 },
     );

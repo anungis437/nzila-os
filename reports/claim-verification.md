@@ -1,18 +1,18 @@
 # NzilaOS Claim Verification Report
 
-> Generated: 2026-03-10T17:33:54.133Z
+> Generated: 2026-05-02T02:07:23.940Z
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
-| ✅ implemented | 20 |
-| 🟡 partial | 2 |
+| ✅ implemented | 21 |
+| 🟡 partial | 1 |
 | 📄 docs-only | 0 |
 | 🗺️ roadmap | 0 |
 | 🔴 unsupported | 0 |
 
-## PARTIAL (2)
+## PARTIAL (1)
 
 ### CFG-001: Zod-validated config with fail-fast at startup
 - **Category:** Configuration
@@ -21,13 +21,7 @@
 - **Evidence:** packages/config
 - **Notes:** Zod validation not confirmed
 
-### FIN-001: QuickBooks Online sync with reconciliation
-- **Category:** Finance
-- **Source:** ARCHITECTURE.md
-- **Status:** partial
-- **Evidence:** packages/qbo
-
-## IMPLEMENTED (20)
+## IMPLEMENTED (21)
 
 ### SEC-001: Org-level tenant isolation with row-level security
 - **Category:** Security
@@ -100,6 +94,12 @@
 - **Source:** procurement-pack.md
 - **Status:** implemented
 - **Evidence:** package.json#generate:sbom, package.json#attest:build
+
+### FIN-001: QuickBooks Online sync with reconciliation
+- **Category:** Finance
+- **Source:** ARCHITECTURE.md
+- **Status:** implemented
+- **Evidence:** packages/qbo
 
 ### FIN-002: Stripe payment processing with reconciliation
 - **Category:** Finance

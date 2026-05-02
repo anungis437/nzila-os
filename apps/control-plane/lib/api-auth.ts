@@ -1,5 +1,21 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { verifyAuditorAccessToken } from "./auditor-token";
+
+export type ApiAccessContext = {
+  authenticated: true;
+  role: "admin";
+};
+
+export type AuditReadAccessContext =
+  | ApiAccessContext
+  | {
+      authenticated: true;
+      role: "auditor";
+      organizationId: string;
+      tokenId: string;
+      expiresAt: string;
+    };
 
 /**
  * Validates that incoming API requests include the correct internal API key.
@@ -14,7 +30,7 @@ export async function requireApiAuth(request?: Request) {
 
   // In development without a key configured, allow access
   if (!apiKey && process.env.NODE_ENV === "development") {
-    return { authenticated: true };
+    return { authenticated: true, role: "admin" } as ApiAccessContext;
   }
 
   if (!apiKey) {
@@ -27,7 +43,32 @@ export async function requireApiAuth(request?: Request) {
     throw new ApiAuthError("Unauthorized", 401);
   }
 
-  return { authenticated: true };
+  return { authenticated: true, role: "admin" } as ApiAccessContext;
+}
+
+export async function requireAuditReadAuth(request?: Request): Promise<AuditReadAccessContext> {
+  const providedApiKey = request?.headers.get("x-api-key");
+  if (providedApiKey) {
+    return requireApiAuth(request);
+  }
+
+  const authHeader = request?.headers.get("authorization") ?? "";
+  const token = authHeader.toLowerCase().startsWith("bearer ")
+    ? authHeader.slice(7).trim()
+    : "";
+
+  if (!token) {
+    throw new ApiAuthError("Unauthorized", 401);
+  }
+
+  const payload = verifyAuditorAccessToken(token);
+  return {
+    authenticated: true,
+    role: "auditor",
+    organizationId: payload.organizationId,
+    tokenId: payload.tokenId,
+    expiresAt: payload.expiresAt,
+  };
 }
 
 export class ApiAuthError extends Error {
