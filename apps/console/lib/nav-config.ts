@@ -114,6 +114,8 @@ export const navGroups: NavGroupConfig[] = [
       { name: 'Corporate Gov', href: '/business/governance', icon: 'EyeIcon', description: 'Corporate governance structure and board meeting management.' },
       { name: 'Equity & Cap Table', href: '/business/equity', icon: 'DocumentDuplicateIcon', description: 'Equity tracking, cap table, and share distribution across ventures.' },
       { name: 'Evidence Packs', href: '/evidence-packs', icon: 'DocumentArrowDownIcon', description: 'Compliance evidence and audit documentation for regulatory requirements.' },
+      { name: 'Decision Audit', href: '/audit', icon: 'ClipboardDocumentCheckIcon', description: 'Signed decision ledger and verification/export entry points.' },
+      { name: 'Decision Intelligence', href: '/intelligence', icon: 'ChartBarSquareIcon', description: 'Decision analytics, policy drift, and benchmark intelligence monetized by tier.' },
       { name: 'Proof Center', href: '/proof-center', icon: 'FingerPrintIcon', description: 'Cryptographic proof and attestation center for audit trail.' },
       { name: 'Compliance', href: '/compliance-snapshots', icon: 'ClipboardDocumentCheckIcon', description: 'Compliance status snapshots and regulatory requirement tracking.' },
     ],

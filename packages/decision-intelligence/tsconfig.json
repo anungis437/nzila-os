@@ -1,0 +1,12 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@nzila/decision-core": ["../decision-core/src/index.ts"],
+      "@nzila/nar": ["../nar/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

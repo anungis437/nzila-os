@@ -72,6 +72,7 @@ const nextConfig: NextConfig = {
     '@nzila/blob',
     '@nzila/commerce-observability',
     '@nzila/db',
+    '@nzila/decision-intelligence',
     '@nzila/ml-sdk',
     '@nzila/os-core',
     '@nzila/payments-stripe',

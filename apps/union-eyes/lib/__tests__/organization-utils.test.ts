@@ -40,12 +40,16 @@ vi.mock('next/headers', () => ({
   })),
 }));
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
-  and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
-  or: vi.fn(),
-  relations: vi.fn(() => ({})),
-}));
+vi.mock('drizzle-orm', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('drizzle-orm')>();
+  return {
+    ...actual,
+    eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
+    and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
+    or: vi.fn(),
+    relations: vi.fn(() => ({})),
+  };
+});
 
 vi.mock('../logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },

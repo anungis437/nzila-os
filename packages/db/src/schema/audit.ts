@@ -1,0 +1,38 @@
+import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core'
+
+export const auditRecords = pgTable(
+  'audit_records',
+  {
+    id: text('id').primaryKey(),
+    decisionRecordId: text('decision_record_id').notNull(),
+    organizationId: text('organization_id').notNull(),
+    decisionType: varchar('decision_type', { length: 255 }).notNull(),
+    actionType: varchar('action_type', { length: 255 }).notNull(),
+    actorId: text('actor_id').notNull(),
+    actorType: varchar('actor_type', { length: 32 }).notNull(),
+    resourceType: varchar('resource_type', { length: 128 }).notNull(),
+    resourceId: text('resource_id').notNull(),
+    policyId: varchar('policy_id', { length: 255 }).notNull(),
+    policyVersion: varchar('policy_version', { length: 64 }).notNull(),
+    inputHash: varchar('input_hash', { length: 128 }).notNull(),
+    outcomeHash: varchar('outcome_hash', { length: 128 }).notNull(),
+    payload: jsonb('payload').notNull(),
+    narHash: varchar('nar_hash', { length: 128 }).notNull(),
+    narSignature: text('nar_signature').notNull(),
+    previousHash: varchar('previous_hash', { length: 128 }),
+    keyId: varchar('key_id', { length: 128 }).notNull(),
+    storageType: varchar('storage_type', { length: 32 }),
+    storageUri: text('storage_uri'),
+    immutable: boolean('immutable'),
+    retentionUntil: timestamp('retention_until', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('audit_records_decision_record_id_uidx').on(table.decisionRecordId),
+    index('audit_records_org_created_idx').on(table.organizationId, table.createdAt),
+    index('audit_records_org_decision_idx').on(table.organizationId, table.decisionType),
+    index('audit_records_org_action_idx').on(table.organizationId, table.actionType),
+    index('audit_records_org_resource_idx').on(table.organizationId, table.resourceType, table.resourceId),
+    index('audit_records_hash_idx').on(table.narHash),
+  ],
+)

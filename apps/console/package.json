@@ -20,6 +20,7 @@
     "@nzila/blob": "workspace:*",
     "@nzila/commerce-observability": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/decision-intelligence": "workspace:*",
     "@nzila/executive-os": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/os-core": "workspace:*",

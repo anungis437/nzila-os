@@ -23,8 +23,54 @@ import { platformDb } from '@nzila/db/platform'
 import { governanceActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
+import { enforceDecision } from '@nzila/decision-core'
+import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar'
+import { auditRecords } from '@nzila/db/schema'
+import { desc } from 'drizzle-orm'
 
 const logger = createLogger('control-plane:api:governance:actions')
+
+const narProofAdapter = createNarProofAdapter({
+  keyId: process.env.NAR_SIGNING_KEY_ID,
+  getPreviousHash: async (organizationId) => {
+    const rows = await platformDb
+      .select({ hash: auditRecords.narHash })
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, organizationId))
+      .orderBy(desc(auditRecords.createdAt))
+      .limit(1)
+    return rows[0]?.hash
+  },
+  persistRecord: async (record) => {
+    await platformDb.insert(auditRecords).values({
+      id: record.id,
+      decisionRecordId: record.decisionRecordId,
+      organizationId: record.organizationId,
+      decisionType: record.decisionType,
+      actionType: record.actionType,
+      actorId: record.actorId,
+      actorType: record.actorType,
+      resourceType: record.resourceType,
+      resourceId: record.resourceId,
+      policyId: record.policyId,
+      policyVersion: record.policyVersion,
+      inputHash: record.inputHash,
+      outcomeHash: record.outcomeHash,
+      payload: record.payload,
+      narHash: record.seal.hash,
+      narSignature: record.seal.signature,
+      previousHash: record.seal.previousHash,
+      keyId: record.seal.keyId,
+      storageType: record.storage?.type,
+      storageUri: record.storage?.uri,
+      immutable: record.storage?.immutable,
+      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
+      createdAt: new Date(record.createdAt),
+    })
+    return { auditRecordId: record.id }
+  },
+  getSigningSecret: getNarSigningSecret,
+})
 
 // ── Request schemas ──────────────────────────────────────────────────────────
 
@@ -93,6 +139,46 @@ export async function POST(request: NextRequest) {
 
     const req = parsed.data
 
+    const actorId = req.operation === 'create'
+      ? req.createdBy
+      : req.operation === 'submit'
+        ? req.submittedBy
+        : req.operation === 'decide'
+          ? req.decidedBy
+          : req.executedBy
+
+    const preflightDecision = await enforceDecision({
+      decisionType: 'platform.governance.action.executed',
+      organizationId: req.orgId,
+      resourceId: req.operation === 'create' ? 'pending' : req.actionId,
+      actor: {
+        id: actorId,
+        type: 'api',
+        role: 'control-plane',
+        authorityScope: ['governance:action:execute'],
+      },
+      authorityScope: ['governance:action:execute'],
+      input: {
+        operation: req.operation,
+        orgId: req.orgId,
+      },
+      policy: {
+        id: 'platform.governance.action',
+        version: '1.0.0',
+        domain: 'platform',
+      },
+      actionType: `governance:${req.operation}`,
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    })
+
+    if (!preflightDecision.allowed) {
+      return NextResponse.json(
+        { ok: false, error: { code: 'DECISION_VALIDATION_FAILED', message: 'Decision validation failed' }, decision: preflightDecision.decision },
+        { status: 422 },
+      )
+    }
+
     switch (req.operation) {
       case 'create': {
         const result = await createGovernanceAction({
@@ -105,7 +191,24 @@ export async function POST(request: NextRequest) {
         if (!result.ok) {
           return NextResponse.json({ ok: false, error: result.error }, { status: 422 })
         }
-        return NextResponse.json({ ok: true, data: result.data }, { status: 201 })
+        const recordedDecision = await enforceDecision({
+          decisionType: 'platform.governance.action.executed',
+          organizationId: req.orgId,
+          resourceId: result.data.id,
+          actor: {
+            id: req.createdBy,
+            type: 'api',
+            role: 'control-plane',
+            authorityScope: ['governance:action:execute'],
+          },
+          authorityScope: ['governance:action:execute'],
+          input: { operation: req.operation, orgId: req.orgId },
+          policy: { id: 'platform.governance.action', version: '1.0.0', domain: 'platform' },
+          actionType: 'governance:create',
+          proofAdapter: narProofAdapter,
+          emitAuditPayload: true,
+        })
+        return NextResponse.json({ ok: true, data: result.data, decision: recordedDecision.decision }, { status: 201 })
       }
 
       case 'submit': {
@@ -119,7 +222,19 @@ export async function POST(request: NextRequest) {
           const status = result.error.code === 'POLICY_BLOCKED' ? 422 : result.error.code === 'NOT_FOUND' ? 404 : 409
           return NextResponse.json({ ok: false, error: result.error }, { status })
         }
-        return NextResponse.json({ ok: true, data: result.data })
+        const recordedDecision = await enforceDecision({
+          decisionType: 'platform.governance.action.executed',
+          organizationId: req.orgId,
+          resourceId: req.actionId,
+          actor: { id: req.submittedBy, type: 'api', role: 'control-plane', authorityScope: ['governance:action:execute'] },
+          authorityScope: ['governance:action:execute'],
+          input: { operation: req.operation, orgId: req.orgId },
+          policy: { id: 'platform.governance.action', version: '1.0.0', domain: 'platform' },
+          actionType: 'governance:submit',
+          proofAdapter: narProofAdapter,
+          emitAuditPayload: true,
+        })
+        return NextResponse.json({ ok: true, data: result.data, decision: recordedDecision.decision })
       }
 
       case 'decide': {
@@ -135,7 +250,19 @@ export async function POST(request: NextRequest) {
           const status = result.error.code === 'NOT_FOUND' ? 404 : 409
           return NextResponse.json({ ok: false, error: result.error }, { status })
         }
-        return NextResponse.json({ ok: true, data: result.data })
+        const recordedDecision = await enforceDecision({
+          decisionType: 'platform.governance.action.executed',
+          organizationId: req.orgId,
+          resourceId: req.actionId,
+          actor: { id: req.decidedBy, type: 'api', role: 'control-plane', authorityScope: ['governance:action:execute'] },
+          authorityScope: ['governance:action:execute'],
+          input: { operation: req.operation, orgId: req.orgId },
+          policy: { id: 'platform.governance.action', version: '1.0.0', domain: 'platform' },
+          actionType: 'governance:decide',
+          proofAdapter: narProofAdapter,
+          emitAuditPayload: true,
+        })
+        return NextResponse.json({ ok: true, data: result.data, decision: recordedDecision.decision })
       }
 
       case 'execute': {
@@ -152,7 +279,19 @@ export async function POST(request: NextRequest) {
             : 500
           return NextResponse.json({ ok: false, error: result.error }, { status })
         }
-        return NextResponse.json({ ok: true, data: result.data })
+        const recordedDecision = await enforceDecision({
+          decisionType: 'platform.governance.action.executed',
+          organizationId: req.orgId,
+          resourceId: req.actionId,
+          actor: { id: req.executedBy, type: 'api', role: 'control-plane', authorityScope: ['governance:action:execute'] },
+          authorityScope: ['governance:action:execute'],
+          input: { operation: req.operation, orgId: req.orgId },
+          policy: { id: 'platform.governance.action', version: '1.0.0', domain: 'platform' },
+          actionType: 'governance:execute',
+          proofAdapter: narProofAdapter,
+          emitAuditPayload: true,
+        })
+        return NextResponse.json({ ok: true, data: result.data, decision: recordedDecision.decision })
       }
 
       default: {

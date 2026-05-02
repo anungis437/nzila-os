@@ -1,0 +1,113 @@
+# Nzila AI Agent Runner Report
+
+- Generated: 2026-05-02T02:07:25.004Z
+- Phase: validate
+- Decision: GO
+- Risk Level: low
+
+## Stages
+- implementation (PASS)
+  - pnpm.cmd typecheck => PASS
+  - pnpm.cmd lint => PASS
+- security-governance (PASS)
+  - pnpm.cmd typecheck => PASS
+  - pnpm.cmd lint => PASS
+  - pnpm.cmd test:fast => PASS
+  - pnpm.cmd governance:check => PASS
+  - pnpm.cmd decision:coverage:strict => PASS
+  - pnpm.cmd ue:qa:gate => PASS
+  - pnpm.cmd intelligence:pipeline-health => PASS
+  - pnpm.cmd nar:chain:verify => PASS
+  - pnpm.cmd validate:claims => PASS
+  - pnpm.cmd sre:alerts:dry-run => PASS
+
+## Changed Files
+- github/workflows/nzila-governance.yml
+- github/workflows/platform-automation.yml
+- EADME.md
+- pps/abr/app/api/abr/incidents/route.ts
+- pps/abr/package.json
+- pps/console/app/(dashboard)/intelligence/page.tsx
+- pps/console/app/(dashboard)/system-health/page.tsx
+- pps/console/lib/nav-config.ts
+- pps/console/next.config.ts
+- pps/console/package.json
+- pps/control-plane/app/api/control-plane/authority/authorize-workflow/route.ts
+- pps/control-plane/app/api/control-plane/governance/actions/route.ts
+- pps/control-plane/lib/api-auth.test.ts
+- pps/control-plane/lib/api-auth.ts
+- pps/control-plane/package.json
+- pps/control-plane/tsconfig.json
+- pps/flow/app/api/quotes/route.ts
+- pps/flow/package.json
+- pps/orchestrator-api/package.json
+- pps/orchestrator-api/src/routes/execute.ts
+- pps/platform-admin/app/api/admin/org/route.ts
+- pps/platform-admin/package.json
+- pps/union-eyes/app/api/cases/[caseId]/escalate/route.ts
+- pps/union-eyes/app/api/cases/intake/route.ts
+- pps/union-eyes/app/api/workflow/transition/route.ts
+- pps/union-eyes/lib/__tests__/api-auth-guard.test.ts
+- pps/union-eyes/lib/__tests__/organization-utils.test.ts
+- pps/union-eyes/lib/api-auth-guard.ts
+- pps/union-eyes/lib/organization-utils.ts
+- pps/union-eyes/package.json
+- pps/union-eyes/vitest.config.ts
+- pps/zonga/app/api/payouts/route.ts
+- pps/zonga/package.json
+- ps/outputs/url-reachability-matrix-2026-05.md
+- ackage.json
+- ackages/db/src/schema/index.ts
+- npm-lock.yaml
+- eports/claim-verification.json
+- eports/claim-verification.md
+- eports/sre-alert-routing-dry-run.json
+- eports/unsafe-claims.md
+- itest.config.ts
+- apps/console/app/(dashboard)/audit/
+- apps/control-plane/app/api/audit/
+- apps/control-plane/app/api/intelligence/
+- apps/control-plane/app/api/pipeline-health/
+- apps/control-plane/jobs/
+- apps/control-plane/lib/auditor-token.ts
+- apps/control-plane/lib/intelligence-access.test.ts
+- apps/control-plane/lib/intelligence-access.ts
+- apps/union-eyes/e2e/ue-workflow.spec.ts
+- apps/union-eyes/scripts/seed-test-env.ts
+- apps/union-eyes/tests/
+- artifacts/ai-dev-agent/
+- artifacts/ue-qa/
+- docs/ai-dev-agents/
+- docs/architecture/ARCHITECTURE_MAP.md
+- docs/architecture/decision-infrastructure-map.md
+- docs/governance/README.md
+- docs/governance/decision-coverage-inventory.md
+- docs/governance/decision-intelligence-revenue.md
+- docs/intelligence/
+- docs/runbooks/pipeline-alerting-incident-playbook.md
+- docs/union-eyes/qa/
+- migrations/platform/20260501_nar_audit_records.sql
+- migrations/platform/20260502_nar_phase3_hardening.sql
+- migrations/platform/20260503_decision_aggregates.sql
+- migrations/platform/20260504_decision_pipeline_checkpoints.sql
+- migrations/platform/20260504_decision_pipeline_runs.sql
+- packages/db/drizzle/0016_pipeline_alerts.sql
+- packages/db/src/schema/audit.ts
+- packages/db/src/schema/decision-aggregates.ts
+- packages/db/src/schema/decision-pipeline-checkpoints.ts
+- packages/db/src/schema/decision-pipeline-runs.ts
+- packages/db/src/schema/pipeline-alerts.ts
+- packages/decision-core/
+- packages/decision-intelligence/
+- packages/nar/
+- packages/pipeline-alerting/
+- packages/policy-intelligence/
+- scripts/ai-agent-runner.ts
+- scripts/check-decision-coverage.ts
+- scripts/ue-qa-gate.ts
+- scripts/ue-qa-report.ts
+- scripts/verify-audit-pack.test.ts
+- scripts/verify-audit-pack.ts
+
+## Remaining Gaps
+- none

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { requireApiAuth, ApiAuthError, handleAuthError } from './api-auth'
+import { requireApiAuth, requireAuditReadAuth, ApiAuthError, handleAuthError } from './api-auth'
+import { createAuditorAccessToken } from './auditor-token'
 
 // We need to mock next/server for NextResponse.json
 vi.mock('next/server', () => ({
@@ -28,7 +29,7 @@ describe('requireApiAuth', () => {
     delete process.env.CONTROL_PLANE_API_KEY
     ;(process.env as any).NODE_ENV = 'development'
     const result = await requireApiAuth(makeRequest())
-    expect(result).toEqual({ authenticated: true })
+    expect(result).toEqual({ authenticated: true, role: 'admin' })
   })
 
   it('throws 500 when key not set in non-development', async () => {
@@ -57,14 +58,48 @@ describe('requireApiAuth', () => {
     ;(process.env as any).NODE_ENV = 'production'
     const req = makeRequest({ 'x-api-key': 'my-key' })
     const result = await requireApiAuth(req)
-    expect(result).toEqual({ authenticated: true })
+    expect(result).toEqual({ authenticated: true, role: 'admin' })
   })
 
   it('works without request argument in dev mode', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
     ;(process.env as any).NODE_ENV = 'development'
     const result = await requireApiAuth(undefined)
-    expect(result).toEqual({ authenticated: true })
+    expect(result).toEqual({ authenticated: true, role: 'admin' })
+  })
+})
+
+describe('requireAuditReadAuth', () => {
+  const originalEnv = { ...process.env }
+
+  afterEach(() => {
+    process.env.CONTROL_PLANE_API_KEY = originalEnv.CONTROL_PLANE_API_KEY
+    process.env.AUDITOR_TOKEN_SECRET = originalEnv.AUDITOR_TOKEN_SECRET
+    ;(process.env as any).NODE_ENV = originalEnv.NODE_ENV
+  })
+
+  it('accepts admin api key', async () => {
+    process.env.CONTROL_PLANE_API_KEY = 'admin-key'
+    ;(process.env as any).NODE_ENV = 'production'
+    const result = await requireAuditReadAuth(makeRequest({ 'x-api-key': 'admin-key' }))
+    expect(result).toEqual({ authenticated: true, role: 'admin' })
+  })
+
+  it('accepts valid auditor bearer token', async () => {
+    process.env.AUDITOR_TOKEN_SECRET = 'auditor-secret'
+    ;(process.env as any).NODE_ENV = 'production'
+
+    const token = createAuditorAccessToken({
+      organizationId: 'org-auditor',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      issuedBy: 'tester',
+    })
+
+    const result = await requireAuditReadAuth(makeRequest({ authorization: `Bearer ${token}` }))
+    expect(result.role).toBe('auditor')
+    if (result.role === 'auditor') {
+      expect(result.organizationId).toBe('org-auditor')
+    }
   })
 })
 

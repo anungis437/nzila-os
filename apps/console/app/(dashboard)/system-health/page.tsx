@@ -9,8 +9,8 @@
  */
 import { requireRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
-import { automationCommands, zongaOutbox, nacpOutbox } from '@nzila/db/schema'
-import { count, eq, sql, or } from 'drizzle-orm'
+import { automationCommands, zongaOutbox, nacpOutbox, pipelineAlerts } from '@nzila/db/schema'
+import { and, count, eq, gte, isNull, or, sql } from 'drizzle-orm'
 import { getOutboxBacklogs, getWorkerMetrics } from '@nzila/platform-ops'
 import {
   ServerIcon,
@@ -19,6 +19,7 @@ import {
   ArrowPathIcon,
   FingerPrintIcon,
   ClockIcon,
+  BellAlertIcon,
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
@@ -136,6 +137,35 @@ async function gatherHealthChecks(): Promise<HealthCheck[]> {
   })
 
   return checks
+
+  // 7. Pipeline alerting — unresolved critical alerts in last 24h
+  try {
+    const recentAlerts = await platformDb
+      .select({ id: pipelineAlerts.id, severity: pipelineAlerts.severity })
+      .from(pipelineAlerts)
+      .where(and(gte(pipelineAlerts.createdAt, sql`now() - interval '24 hours'`), isNull(pipelineAlerts.resolvedAt)))
+
+    const criticalCount = recentAlerts.filter((a) => a.severity === 'critical').length
+    const warningCount = recentAlerts.filter((a) => a.severity === 'warning').length
+    checks.push({
+      label: 'Pipeline Alerts (24h)',
+      status: criticalCount > 0 ? 'error' : warningCount > 0 ? 'warning' : 'healthy',
+      value:
+        criticalCount > 0
+          ? `${criticalCount} critical`
+          : warningCount > 0
+            ? `${warningCount} warning`
+            : 'No active alerts',
+      icon: BellAlertIcon,
+    })
+  } catch {
+    checks.push({
+      label: 'Pipeline Alerts (24h)',
+      status: 'error',
+      value: 'Query failed',
+      icon: BellAlertIcon,
+    })
+  }
 }
 
 const statusColors = {
@@ -162,6 +192,20 @@ export default async function SystemHealthPage({
   const checks = await gatherHealthChecks()
   const outboxBacklogs = await getOutboxBacklogs()
   const workerMetrics = await getWorkerMetrics()
+
+  // Pipeline alerts detail for the alerts section
+  const recentPipelineAlerts = await platformDb
+    .select({
+      id: pipelineAlerts.id,
+      pipelineName: pipelineAlerts.pipelineName,
+      errorCode: pipelineAlerts.errorCode,
+      severity: pipelineAlerts.severity,
+      message: pipelineAlerts.message,
+      createdAt: pipelineAlerts.createdAt,
+    })
+    .from(pipelineAlerts)
+    .where(and(gte(pipelineAlerts.createdAt, sql`now() - interval '24 hours'`), isNull(pipelineAlerts.resolvedAt)))
+    .catch(() => [] as typeof pipelineAlerts.$inferSelect[])
 
   const overallHealthy = checks.every((c) => c.status === 'healthy')
 
@@ -245,6 +289,57 @@ export default async function SystemHealthPage({
                     >
                       {b.status}
                     </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pipeline Alerts */}
+      {recentPipelineAlerts.length > 0 && (
+        <div className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+            <BellAlertIcon className="h-5 w-5 text-amber-500" />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Pipeline Alerts (24h)</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Unresolved alerts from the decision-aggregate materialization pipeline
+              </p>
+            </div>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-left">
+              <tr>
+                <th className="px-6 py-3 font-medium">Pipeline</th>
+                <th className="px-6 py-3 font-medium">Error Code</th>
+                <th className="px-6 py-3 font-medium">Severity</th>
+                <th className="px-6 py-3 font-medium">Message</th>
+                <th className="px-6 py-3 font-medium">Raised At</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {recentPipelineAlerts.map((alert) => (
+                <tr key={alert.id} className="text-gray-700">
+                  <td className="px-6 py-3 font-mono text-xs">{alert.pipelineName}</td>
+                  <td className="px-6 py-3 font-mono text-xs">{alert.errorCode}</td>
+                  <td className="px-6 py-3">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        alert.severity === 'critical'
+                          ? 'bg-red-100 text-red-800'
+                          : alert.severity === 'warning'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {alert.severity}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3 max-w-xs truncate">{alert.message}</td>
+                  <td className="px-6 py-3 text-xs text-gray-500">
+                    {alert.createdAt ? new Date(alert.createdAt).toLocaleString() : '—'}
                   </td>
                 </tr>
               ))}

@@ -13,6 +13,11 @@ import {
   listIncidents,
 } from '@/modules/incidents/service';
 import type { IncidentCreateInput } from '@/modules/incidents/types';
+import { enforceDecision } from '@nzila/decision-core';
+import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
+import { platformDb } from '@nzila/db/platform';
+import { auditRecords } from '@nzila/db/schema';
+import { desc, eq } from 'drizzle-orm';
 
 function parseCreateBody(payload: unknown): IncidentCreateInput | null {
   if (!payload || typeof payload !== 'object') return null;
@@ -72,6 +77,48 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 }
 
+const narProofAdapter = createNarProofAdapter({
+  keyId: process.env.NAR_SIGNING_KEY_ID,
+  getPreviousHash: async (organizationId) => {
+    const rows = await platformDb
+      .select({ hash: auditRecords.narHash })
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, organizationId))
+      .orderBy(desc(auditRecords.createdAt))
+      .limit(1);
+    return rows[0]?.hash;
+  },
+  persistRecord: async (record) => {
+    await platformDb.insert(auditRecords).values({
+      id: record.id,
+      decisionRecordId: record.decisionRecordId,
+      organizationId: record.organizationId,
+      decisionType: record.decisionType,
+      actionType: record.actionType,
+      actorId: record.actorId,
+      actorType: record.actorType,
+      resourceType: record.resourceType,
+      resourceId: record.resourceId,
+      policyId: record.policyId,
+      policyVersion: record.policyVersion,
+      inputHash: record.inputHash,
+      outcomeHash: record.outcomeHash,
+      payload: record.payload,
+      narHash: record.seal.hash,
+      narSignature: record.seal.signature,
+      previousHash: record.seal.previousHash,
+      keyId: record.seal.keyId,
+      storageType: record.storage?.type,
+      storageUri: record.storage?.uri,
+      immutable: record.storage?.immutable,
+      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
+      createdAt: new Date(record.createdAt),
+    });
+    return { auditRecordId: record.id };
+  },
+  getSigningSecret: getNarSigningSecret,
+});
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   return withRequestContext(request, async () => {
     const authz = await requireOrgAccess(request);
@@ -92,7 +139,64 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const preflightDecision = await enforceDecision({
+      decisionType: 'faircase.case.classified',
+      organizationId: authz.orgId,
+      resourceId: 'pending',
+      actor: {
+        id: authz.userId,
+        type: 'user',
+        role: permission.role,
+        authorityScope: ['case:classify'],
+      },
+      authorityScope: ['case:classify'],
+      input: {
+        caseId: 'pending',
+        classification: payload.category,
+      },
+      policy: {
+        id: 'legal.case.classification',
+        version: '1.0.0',
+        domain: 'legal',
+      },
+      actionType: 'case:classify',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
+
+    if (!preflightDecision.allowed) {
+      return NextResponse.json(
+        { error: 'Decision validation failed', code: 'DECISION_VALIDATION_FAILED', decision: preflightDecision.decision },
+        { status: 422 },
+      );
+    }
+
     const incident = await createIncident(authz.orgId || getDefaultOrgId(), authz.userId, payload);
+
+    const recordedDecision = await enforceDecision({
+      decisionType: 'faircase.case.classified',
+      organizationId: authz.orgId,
+      resourceId: incident.id,
+      actor: {
+        id: authz.userId,
+        type: 'user',
+        role: permission.role,
+        authorityScope: ['case:classify'],
+      },
+      authorityScope: ['case:classify'],
+      input: {
+        caseId: incident.id,
+        classification: payload.category,
+      },
+      policy: {
+        id: 'legal.case.classification',
+        version: '1.0.0',
+        domain: 'legal',
+      },
+      actionType: 'case:classify',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
 
     logAuditEvent({
       action: 'incident.create',
@@ -112,6 +216,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       orgSource: authz.orgSource,
       dataSource: process.env.DATABASE_URL ? 'database' : 'seeded-memory',
       item: incident,
+      decision: recordedDecision.decision,
     });
   });
 }

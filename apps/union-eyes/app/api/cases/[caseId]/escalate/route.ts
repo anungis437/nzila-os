@@ -16,8 +16,55 @@ import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { updateClaimStatusById } from '@/lib/workflow-engine';
+import { enforceDecision } from '@nzila/decision-core';
+import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
+import { platformDb } from '@nzila/db/platform';
+import { auditRecords } from '@nzila/db/schema';
+import { desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
+
+const narProofAdapter = createNarProofAdapter({
+  keyId: process.env.NAR_SIGNING_KEY_ID,
+  getPreviousHash: async (organizationId) => {
+    const rows = await platformDb
+      .select({ hash: auditRecords.narHash })
+      .from(auditRecords)
+      .where(eq(auditRecords.organizationId, organizationId))
+      .orderBy(desc(auditRecords.createdAt))
+      .limit(1);
+    return rows[0]?.hash;
+  },
+  persistRecord: async (record) => {
+    await platformDb.insert(auditRecords).values({
+      id: record.id,
+      decisionRecordId: record.decisionRecordId,
+      organizationId: record.organizationId,
+      decisionType: record.decisionType,
+      actionType: record.actionType,
+      actorId: record.actorId,
+      actorType: record.actorType,
+      resourceType: record.resourceType,
+      resourceId: record.resourceId,
+      policyId: record.policyId,
+      policyVersion: record.policyVersion,
+      inputHash: record.inputHash,
+      outcomeHash: record.outcomeHash,
+      payload: record.payload,
+      narHash: record.seal.hash,
+      narSignature: record.seal.signature,
+      previousHash: record.seal.previousHash,
+      keyId: record.seal.keyId,
+      storageType: record.storage?.type,
+      storageUri: record.storage?.uri,
+      immutable: record.storage?.immutable,
+      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
+      createdAt: new Date(record.createdAt),
+    });
+    return { auditRecordId: record.id };
+  },
+  getSigningSecret: getNarSigningSecret,
+});
 
 /** Map claim types to grievance types */
 const claimTypeToGrievanceType: Record<string, string> = {
@@ -101,6 +148,38 @@ export const POST = withApi(
     const { priority, notes, cbaArticle } = parsed.data;
     const grievanceType = claimTypeToGrievanceType[claim.claimType ?? 'other'] ?? 'other';
     const orgId = claim.organizationId ?? ctx.organizationId ?? '';
+
+    const preflightDecision = await enforceDecision({
+      decisionType: 'union.case.escalated',
+      organizationId: orgId,
+      resourceId: caseId,
+      actor: {
+        id: ctx.userId ?? 'system',
+        type: 'user',
+        role: 'steward',
+        authorityScope: ['case:escalate'],
+      },
+      authorityScope: ['case:escalate'],
+      input: {
+        caseId,
+        reason: notes ?? 'escalated_to_grievance',
+      },
+      policy: {
+        id: 'labour.case.escalation',
+        version: '1.0.0',
+        domain: 'labour',
+      },
+      actionType: 'case:escalate',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
+
+    if (!preflightDecision.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Decision validation failed', decision: preflightDecision.decision },
+        { status: 422 },
+      );
+    }
 
     // Create the grievance
     const escalationResult = await withRLSContext(async (tx) => {
@@ -191,6 +270,31 @@ export const POST = withApi(
       outcome: 'success',
     });
 
+    const recordedDecision = await enforceDecision({
+      decisionType: 'union.case.escalated',
+      organizationId: orgId,
+      resourceId: caseId,
+      actor: {
+        id: ctx.userId ?? 'system',
+        type: 'user',
+        role: 'steward',
+        authorityScope: ['case:escalate'],
+      },
+      authorityScope: ['case:escalate'],
+      input: {
+        caseId,
+        reason: notes ?? 'escalated_to_grievance',
+      },
+      policy: {
+        id: 'labour.case.escalation',
+        version: '1.0.0',
+        domain: 'labour',
+      },
+      actionType: 'case:escalate',
+      proofAdapter: narProofAdapter,
+      emitAuditPayload: true,
+    });
+
     return {
       claim: { claimId: caseId, status: 'resolved', resolutionOutcome: 'escalated_to_grievance' },
       grievance: {
@@ -199,6 +303,7 @@ export const POST = withApi(
         status: grievance.status,
         type: grievance.type,
       },
+      decision: recordedDecision.decision,
     };
   },
 );

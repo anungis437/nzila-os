@@ -152,6 +152,10 @@ export default defineConfig({
       'packages/platform-feature-flags',
       // Decision engine
       'packages/platform-decision-engine',
+      'packages/decision-core',
+      'packages/nar',
+      'packages/decision-intelligence',
+      'packages/policy-intelligence',
       // AI contract types
       'packages/platform-ai-contract',
       // Control Plane

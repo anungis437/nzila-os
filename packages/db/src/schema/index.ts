@@ -29,6 +29,11 @@ export * from './executive'
 export * from './itsm'
 export * from './exec-data'
 export * from './grants'
+export * from './audit'
+export * from './decision-aggregates'
+export * from './decision-pipeline-checkpoints'
+export * from './decision-pipeline-runs'
+export * from './pipeline-alerts'
 
 // Platform OS schemas (re-exported from dedicated packages)
 export {

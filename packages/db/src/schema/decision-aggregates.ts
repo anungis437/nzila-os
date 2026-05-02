@@ -1,0 +1,40 @@
+import { index, jsonb, pgTable, text, timestamp, uniqueIndex, varchar, integer, decimal } from 'drizzle-orm/pg-core'
+
+export const decisionAggregates = pgTable(
+  'decision_aggregates',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id').notNull(),
+    domain: varchar('domain', { length: 64 }).notNull(),
+    decisionType: varchar('decision_type', { length: 255 }).notNull(),
+    policyVersion: varchar('policy_version', { length: 64 }).notNull(),
+    windowStart: timestamp('window_start', { withTimezone: true }).notNull(),
+    windowEnd: timestamp('window_end', { withTimezone: true }).notNull(),
+    total: integer('total').notNull(),
+    approvals: integer('approvals').notNull(),
+    rejections: integer('rejections').notNull(),
+    escalations: integer('escalations').notNull(),
+    pending: integer('pending').notNull(),
+    avgDecisionTimeMs: integer('avg_decision_time_ms').notNull(),
+    overrideRate: decimal('override_rate', { precision: 8, scale: 4 }).notNull(),
+    humanInterventionRate: decimal('human_intervention_rate', { precision: 8, scale: 4 }).notNull(),
+    effectivenessScore: decimal('effectiveness_score', { precision: 8, scale: 4 }).notNull(),
+    source: varchar('source', { length: 32 }).notNull().default('audit_records'),
+    metrics: jsonb('metrics').notNull(),
+    behavior: jsonb('behavior').notNull(),
+    meta: jsonb('meta').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('decision_aggregates_org_type_window_uidx').on(
+      table.organizationId,
+      table.decisionType,
+      table.policyVersion,
+      table.windowStart,
+      table.windowEnd,
+    ),
+    index('decision_aggregates_org_window_idx').on(table.organizationId, table.windowStart, table.windowEnd),
+    index('decision_aggregates_type_window_idx').on(table.decisionType, table.windowStart, table.windowEnd),
+    index('decision_aggregates_domain_window_idx').on(table.domain, table.windowStart, table.windowEnd),
+  ],
+)

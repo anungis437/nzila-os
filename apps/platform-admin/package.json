@@ -14,10 +14,12 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@nzila/db": "workspace:*",
+    "@nzila/decision-core": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-core": "workspace:*",
     "@nzila/integrations-runtime": "workspace:*",
     "@nzila/itsm-core": "workspace:*",
+    "@nzila/nar": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",

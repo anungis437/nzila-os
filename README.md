@@ -1,8 +1,14 @@
 # Nzila OS
 
-A governed multi-product software platform for labour, commerce, agriculture, and operations across emerging markets.
+NzilaOS is decision infrastructure: a shared system for capturing, evaluating, proving, replaying, and governing organizational decisions across multiple domains.
 
-## Products
+Every product surface is a thin interface over a shared decision core:
+
+```ts
+Decision = Input + Policy + Actor Authority + Outcome + Proof
+```
+
+## Domain Interfaces
 
 | Product | Domain | Status | Tier |
 |---------|--------|--------|------|
@@ -23,6 +29,14 @@ A governed multi-product software platform for labour, commerce, agriculture, an
 
 Portfolio truth source: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
 
+## Decision Core
+
+- `packages/decision-core` defines the canonical decision primitives, registry, and enforcement helper
+- Control Plane governs decision integrity and policy evaluation
+- Orchestrator executes approved decision workflows
+- Console reviews proof, replay, and operating risk
+- Platform Admin governs tenants, authority, and policy activation
+
 ## Quick Start
 
 ```bash
@@ -37,7 +51,7 @@ pnpm build              # Build everything
 
 ```
 apps/              24 applications
-packages/          189 packages (platform, domain, infra)
+packages/          190 packages (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
 governance/        Portfolio catalog, capital model, commercial data
@@ -78,6 +92,9 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 |---------|---------|
 | `pnpm validate:governance` | Full governance gate |
 | `pnpm governance:audit` | Doc, ownership, release, and repo audit |
+| `pnpm decision:coverage` | Warn-only decision registration coverage check |
+| `pnpm decision:coverage:strict` | Blocking decision-proof coverage gate |
+| `pnpm audit:pack:verify -- --input=<pack.json|pack.zip>` | External audit-pack integrity verification |
 | `pnpm repo:audit` | Repo excellence audit |
 | `pnpm docs:index` | Rebuild documentation index |
 
@@ -122,13 +139,28 @@ CI enforces portfolio-governance, compliance drift, and reliability checks on ev
 
 ## Architecture
 
+- **Decision infrastructure**: `@nzila/decision-core` defines canonical decision records, registry entries, and route-level enforcement helpers
 - **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO. All apps use `@nzila/platform-auth` as the canonical auth authority; legacy Clerk references in `apps/union-eyes` are compatibility-only.
 - **Database**: PostgreSQL + Drizzle ORM
 - **Infra**: Azure Container Apps (Canada Central staging)
 - **CI**: 47 GitHub Actions workflows covering governance, security, deployment, and compliance
 - **Monorepo**: pnpm workspaces + Turborepo
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md) for the decision-infrastructure architecture map, and [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md) for product-to-decision mapping.
+
+## Audit Guarantees
+
+- Decisions are immutable: each NAR is persisted to append-only storage and immutable Azure Blob retention.
+- Proofs are independently verifiable: records include hash, signature, and chain linkage for external validation.
+- Records are retained under policy: immutable retention defaults to 7 years with legal-hold support.
+- System is audit-ready: scoped auditor tokens can verify and export signed evidence packs without mutation access.
+
+## Decision Intelligence
+
+- `@nzila/decision-intelligence` aggregates irreversible decision records into analytics-ready models.
+- `@nzila/policy-intelligence` scores production policies, detects drift, and suggests rule improvements.
+- `/api/intelligence/*` exposes tiered intelligence APIs: Basic for metrics, Pro for policy insights, Enterprise for anonymized benchmarks.
+- Intelligence is the moat: exports remain raw; benchmark and recommendation layers are only available inside Nzila.
 
 ## Documentation
 

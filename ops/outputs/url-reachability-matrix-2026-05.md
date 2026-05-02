@@ -17,7 +17,7 @@
 | partners | https://partners.nzilaventures.com | 200 ✓ | Managed ✓ | active | prod-approved |
 | union-eyes | https://app.unioneyes.app | 200 ✓ | Managed ✓ | active | prod-approved |
 | union-eyes (health) | https://app.unioneyes.app/api/auth_core/health/ | 200 ✓ | Managed ✓ | active | prod-approved |
-| faircase | https://faircase.nzilaventures.com | — BLOCKED | — | reserved-not-yet-promoted | blocked |
+| faircase (abr) | https://faircase.nzilaventures.com | — BLOCKED | — | reserved-not-yet-promoted | blocked |
 | flow | https://flow.nzilaventures.com | — BLOCKED | — | reserved-not-yet-promoted | staging-only |
 | zonga | https://zonga.nzilaventures.com | — RESERVED | Provisioning | reserved-tls-pending | staging-only |
 | cfo | https://cfo.nzilaventures.com | — BLOCKED | — | reserved-not-yet-promoted | staging-only |

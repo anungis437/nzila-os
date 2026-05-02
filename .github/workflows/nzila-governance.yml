@@ -173,6 +173,21 @@ jobs:
       - name: Run contract tests
         run: pnpm contract-tests
 
+      - name: Enforce strict decision coverage
+        run: pnpm decision:coverage:strict
+
+      - name: Run NAR chain and tamper tests
+        run: pnpm --filter @nzila/nar test
+
+      - name: Run decision replay and drift tests
+        run: pnpm --filter @nzila/decision-core test
+
+      - name: Run decision intelligence tests
+        run: pnpm --filter @nzila/decision-intelligence test
+
+      - name: Run policy intelligence tests
+        run: pnpm --filter @nzila/policy-intelligence test
+
   # ── UnionEyes Evidence Seal (app-level) ────────────────────────────────
   # Runs UE's own evidence scripts — separate from the monorepo-level pack.
   ue-evidence:
