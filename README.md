@@ -51,7 +51,7 @@ pnpm build              # Build everything
 
 ```
 apps/              24 applications
-packages/          190 packages (platform, domain, infra)
+packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
 governance/        Portfolio catalog, capital model, commercial data

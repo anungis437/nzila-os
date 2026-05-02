@@ -12,7 +12,7 @@ Nzila OS is **not a SaaS product we sell**. It is the internal operating fabric 
 | | |
 |---|---|
 | **17 production apps** | Customer-facing products + internal control surfaces |
-| **170+ shared packages** | 57 platform-* primitives + 113 domain libraries |
+| **194 shared packages** | Platform, domain, and infrastructure libraries across the monorepo |
 | **8,000+ contract tests** | Architectural invariants enforced on every commit |
 | **47 CI/CD workflows** | Governance, security, deployment, compliance |
 | **5 governance gates** | Dependency audit, secret scan, CodeQL, Trivy, AI red-team |

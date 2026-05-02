@@ -208,24 +208,15 @@ function readUtf8(path: string): string {
   )
 }
 
-function normalizedContentMatches(filePath: string, expected: string): boolean {
-  const script = [
-    'const fs=require("node:fs");',
-    'const [filePath, expectedBase64] = process.argv.slice(1);',
-    'const expected = Buffer.from(expectedBase64, "base64").toString("utf8");',
-    'const normalize=(s)=>s',
-    '.replace(/"(generated_at|last_validated|last_audit)"\\s*:\\s*"\\d{4}-\\d{2}-\\d{2}"/g, "\"$1\":\"<TODAY>\"")',
-    '.replace(/(Generated:\\s*)\\d{4}-\\d{2}-\\d{2}/g, "$1<TODAY>");',
-    'const actual = fs.readFileSync(filePath, "utf8");',
-    'process.stdout.write(normalize(actual) === normalize(expected) ? "1" : "0");',
-  ].join("")
+function normalizedContentMatches(root: string, artifactPath: string, expected: string): boolean {
+  const normalize = (value: string): string =>
+    value
+      .replace(/"(generated_at|last_validated|last_audit)"\s*:\s*"\d{4}-\d{2}-\d{2}"/g, '"$1":"<TODAY>"')
+      .replace(/(Generated:\s*)\d{4}-\d{2}-\d{2}/g, '$1<TODAY>')
 
-  const output = execFileSync(process.execPath, ['-e', script, filePath, Buffer.from(expected, 'utf8').toString('base64')], {
-    encoding: 'utf8',
-    maxBuffer: 20 * 1024 * 1024,
-  }).trim()
-
-  return output === '1'
+  const absolutePath = safeResolveUnderRoot(root, assertSafeRelativePath(artifactPath))
+  const actual = readUtf8(absolutePath)
+  return normalize(actual) === normalize(expected)
 }
 
 export function findRepoRoot(startDir = process.cwd()): string {
@@ -976,7 +967,7 @@ export function detectArtifactDrift(
     }
 
     if (ignoreDailyStamps) {
-      if (!normalizedContentMatches(absolutePath, artifact.content)) drift.push(artifactPath)
+      if (!normalizedContentMatches(root, artifactPath, artifact.content)) drift.push(artifactPath)
     } else {
       const actualSize = statSync(absolutePath).size
       const expectedSize = Buffer.byteLength(artifact.content, 'utf8')

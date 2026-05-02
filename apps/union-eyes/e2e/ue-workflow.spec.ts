@@ -13,6 +13,8 @@ async function loginAs(request: APIRequestContext, email: string): Promise<void>
 }
 
 test.describe('Union Eyes QA E2E Flows', () => {
+  test.skip(process.env.GITHUB_ACTOR === 'dependabot[bot]', 'Dependabot PR runs do not provide seeded UE auth/backend state for this workflow suite.')
+
   test('1) intake -> review -> assign -> escalate -> resolve', async ({ request }) => {
     await loginAs(request, UE_TEST_USERS.stewardPrimary.email)
 
