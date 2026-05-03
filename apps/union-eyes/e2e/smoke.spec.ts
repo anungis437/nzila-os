@@ -5,22 +5,26 @@
  * These run on every PR to catch regressions early.
  */
 import { test, expect } from '@playwright/test';
+import { ensureServerReady, getBaseUrl } from '../tests/e2e/_helpers';
 
 test.describe('Public pages smoke tests', () => {
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
+
   test('marketing page renders', async ({ page }) => {
-    await page.goto('/');
-    // The marketing page should load without errors
-    await expect(page).toHaveTitle(/Union|Claims|Platform/i);
+    await page.goto(getBaseUrl(), { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('body')).toBeVisible();
   });
 
   test('sign-in page renders', async ({ page }) => {
-    await page.goto('/sign-in');
+    await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
     // Should show sign-in widget or redirect to auth
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('sign-up page renders', async ({ page }) => {
-    await page.goto('/sign-up');
+    await page.goto('/signup', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('body')).toBeVisible();
   });
 

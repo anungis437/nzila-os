@@ -9,11 +9,16 @@
  * entitlement.
  */
 import { test, expect } from "@playwright/test";
+import { ensureServerReady } from '../tests/e2e/_helpers';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
 test.describe("CBA Intelligence page", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   const PAGE_URL = "/en-CA/dashboard/cba-intelligence";
   const TABS = ["Sources", "Ingestion", "Agreements", "Review", "Benchmark", "Freshness"];

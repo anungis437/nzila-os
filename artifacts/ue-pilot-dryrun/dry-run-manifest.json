@@ -1,0 +1,61 @@
+{
+  "dryRunId": "ue-pilot-dryrun-2026-05-03",
+  "environment": "ue-pilot-dryrun",
+  "executedAt": "2026-05-03T13:29:00Z",
+  "gateBaselineTimestamp": "2026-05-03T13:02:27.549Z",
+  "components": {
+    "environmentValidation": { "status": "PASS" },
+    "seedExecution": { "status": "PASS", "orgs": 4, "users": 8, "cases": 3 },
+    "systemValidation": { "status": "PASS", "readinessStatus": "GO_FOR_PRODUCTION" },
+    "pipelineHealth": { "status": "PASS", "pipelineHealthStatus": "healthy" },
+    "narChainVerification": { "status": "PASS" },
+    "aggregateDryRun": { "status": "PASS", "mode": "dry_run" },
+    "sreHealthContracts": { "status": "PASS", "appsMissingContracts": 0 },
+    "sreSyntheticChecks": { "status": "PASS", "targetCount": 6 },
+    "sreAlertRouting": { "status": "PASS", "routes": 14, "ownerlessAlerts": 0 },
+    "sreReliabilityScores": {
+      "status": "PASS",
+      "reliability": 10,
+      "observability": 10,
+      "incidentReadiness": 10,
+      "costGovernance": 10,
+      "mttrReadiness": 10
+    },
+    "externalTesterContainment": { "status": "PASS" },
+    "crossOrgLeak": { "status": "PASS" },
+    "governanceCheck": { "status": "PASS", "passed": 54, "failed": 0 },
+    "decisionCoverage": { "status": "PASS", "score": "100%", "criticalRoutes": "9/9" },
+    "apiQA": { "status": "PASS", "tests": 44, "files": 7 },
+    "e2eQA": { "status": "PASS", "tests": 25 },
+    "aiValidate": { "status": "PASS", "finalDecision": "GO" }
+  },
+  "auditConstraintFixes": [
+    {
+      "constraint": "valid_outcome",
+      "status": "COMPLETE",
+      "filesFixed": 4,
+      "occurrences": 6,
+      "change": "'denied' → 'failure'",
+      "testsValidating": 27
+    },
+    {
+      "constraint": "valid_severity",
+      "status": "COMPLETE",
+      "issue": "AuditSeverity enum used wrong scale ('high') incompatible with audit_logs constraint",
+      "change": "AuditSeverity.HIGH 'high' → 'error', AuditSeverity.MEDIUM 'medium' → 'warning', AuditSeverity.LOW 'low' → 'info'",
+      "filesFixed": 1
+    }
+  ],
+  "warnings": [
+    "RBAC map declares critical blockers that require human resolution.",
+    "pilot_definitions query fails for test org UUIDs — pilot metrics emit fails silently during E2E (non-blocking)"
+  ],
+  "humanApproval": {
+    "status": "PENDING",
+    "requiredForPilot": true,
+    "requiredForProduction": true,
+    "approver": null,
+    "approvalDate": null
+  },
+  "decision": "DRY_RUN_SUCCESS"
+}

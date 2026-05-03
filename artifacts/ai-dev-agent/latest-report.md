@@ -1,6 +1,6 @@
 # Nzila AI Agent Runner Report
 
-- Generated: 2026-05-02T02:07:25.004Z
+- Generated: 2026-05-03T13:40:37.539Z
 - Phase: validate
 - Decision: GO
 - Risk Level: low
@@ -15,99 +15,72 @@
   - pnpm.cmd test:fast => PASS
   - pnpm.cmd governance:check => PASS
   - pnpm.cmd decision:coverage:strict => PASS
-  - pnpm.cmd ue:qa:gate => PASS
+  - pnpm.cmd ue:qa:gate -- --target ux => PASS
   - pnpm.cmd intelligence:pipeline-health => PASS
   - pnpm.cmd nar:chain:verify => PASS
   - pnpm.cmd validate:claims => PASS
   - pnpm.cmd sre:alerts:dry-run => PASS
 
 ## Changed Files
-- github/workflows/nzila-governance.yml
-- github/workflows/platform-automation.yml
-- EADME.md
-- pps/abr/app/api/abr/incidents/route.ts
-- pps/abr/package.json
-- pps/console/app/(dashboard)/intelligence/page.tsx
-- pps/console/app/(dashboard)/system-health/page.tsx
-- pps/console/lib/nav-config.ts
-- pps/console/next.config.ts
-- pps/console/package.json
-- pps/control-plane/app/api/control-plane/authority/authorize-workflow/route.ts
-- pps/control-plane/app/api/control-plane/governance/actions/route.ts
-- pps/control-plane/lib/api-auth.test.ts
-- pps/control-plane/lib/api-auth.ts
-- pps/control-plane/package.json
-- pps/control-plane/tsconfig.json
-- pps/flow/app/api/quotes/route.ts
-- pps/flow/package.json
-- pps/orchestrator-api/package.json
-- pps/orchestrator-api/src/routes/execute.ts
-- pps/platform-admin/app/api/admin/org/route.ts
-- pps/platform-admin/package.json
-- pps/union-eyes/app/api/cases/[caseId]/escalate/route.ts
-- pps/union-eyes/app/api/cases/intake/route.ts
-- pps/union-eyes/app/api/workflow/transition/route.ts
-- pps/union-eyes/lib/__tests__/api-auth-guard.test.ts
-- pps/union-eyes/lib/__tests__/organization-utils.test.ts
-- pps/union-eyes/lib/api-auth-guard.ts
-- pps/union-eyes/lib/organization-utils.ts
-- pps/union-eyes/package.json
-- pps/union-eyes/vitest.config.ts
-- pps/zonga/app/api/payouts/route.ts
-- pps/zonga/package.json
-- ps/outputs/url-reachability-matrix-2026-05.md
+- pps/union-eyes/e2e/cape-features.spec.ts
+- pps/union-eyes/e2e/cba-intelligence.spec.ts
+- pps/union-eyes/e2e/dashboard.spec.ts
+- pps/union-eyes/e2e/pilot-journey.spec.ts
+- pps/union-eyes/e2e/smoke.spec.ts
+- pps/union-eyes/e2e/ue-workflow.spec.ts
+- pps/union-eyes/lib/__tests__/clc-governance.test.ts
+- pps/union-eyes/lib/audit-logger.ts
+- pps/union-eyes/lib/clc/governance.ts
+- pps/union-eyes/playwright.config.ts
+- pps/union-eyes/scripts/seed-test-env.ts
+- pps/union-eyes/services/platform-economics/entitlement-guard.ts
+- pps/union-eyes/tests/api/_qa-route-inventory.ts
+- pps/union-eyes/tests/api/audit.spec.ts
+- pps/union-eyes/tests/api/cases.spec.ts
+- pps/union-eyes/tests/api/intelligence.spec.ts
+- pps/union-eyes/tests/api/rbac.spec.ts
+- pps/union-eyes/tests/e2e/ue-workflow.spec.ts
+- pps/union-eyes/tests/fixtures/test-orgs.ts
+- pps/union-eyes/tests/fixtures/test-permissions.ts
+- pps/union-eyes/tests/fixtures/test-users.ts
+- rtifacts/ai-dev-agent/latest-report.json
+- rtifacts/ai-dev-agent/latest-report.md
+- rtifacts/ue-qa/latest-results.json
+- rtifacts/ue-qa/qa-report.json
+- ocs/ops/sre/executive-reliability-dashboard.md
+- ocs/ops/sre/portfolio-reliability-audit.md
+- ocs/union-eyes/qa/external-tester-containment.md
+- ocs/union-eyes/qa/rbac-reality-map.md
+- ocs/union-eyes/qa/user-story-coverage-matrix.md
 - ackage.json
-- ackages/db/src/schema/index.ts
-- npm-lock.yaml
+- ackages/platform-auth/src/risk/assess.ts
 - eports/claim-verification.json
 - eports/claim-verification.md
 - eports/sre-alert-routing-dry-run.json
+- eports/sre-executive-dashboard.json
+- eports/sre-reliability-audit.json
+- eports/sre-synthetic-dry-run.json
 - eports/unsafe-claims.md
-- itest.config.ts
-- apps/console/app/(dashboard)/audit/
-- apps/control-plane/app/api/audit/
-- apps/control-plane/app/api/intelligence/
-- apps/control-plane/app/api/pipeline-health/
-- apps/control-plane/jobs/
-- apps/control-plane/lib/auditor-token.ts
-- apps/control-plane/lib/intelligence-access.test.ts
-- apps/control-plane/lib/intelligence-access.ts
-- apps/union-eyes/e2e/ue-workflow.spec.ts
-- apps/union-eyes/scripts/seed-test-env.ts
-- apps/union-eyes/tests/
-- artifacts/ai-dev-agent/
-- artifacts/ue-qa/
-- docs/ai-dev-agents/
-- docs/architecture/ARCHITECTURE_MAP.md
-- docs/architecture/decision-infrastructure-map.md
-- docs/governance/README.md
-- docs/governance/decision-coverage-inventory.md
-- docs/governance/decision-intelligence-revenue.md
-- docs/intelligence/
-- docs/runbooks/pipeline-alerting-incident-playbook.md
-- docs/union-eyes/qa/
-- migrations/platform/20260501_nar_audit_records.sql
-- migrations/platform/20260502_nar_phase3_hardening.sql
-- migrations/platform/20260503_decision_aggregates.sql
-- migrations/platform/20260504_decision_pipeline_checkpoints.sql
-- migrations/platform/20260504_decision_pipeline_runs.sql
-- packages/db/drizzle/0016_pipeline_alerts.sql
-- packages/db/src/schema/audit.ts
-- packages/db/src/schema/decision-aggregates.ts
-- packages/db/src/schema/decision-pipeline-checkpoints.ts
-- packages/db/src/schema/decision-pipeline-runs.ts
-- packages/db/src/schema/pipeline-alerts.ts
-- packages/decision-core/
-- packages/decision-intelligence/
-- packages/nar/
-- packages/pipeline-alerting/
-- packages/policy-intelligence/
-- scripts/ai-agent-runner.ts
-- scripts/check-decision-coverage.ts
-- scripts/ue-qa-gate.ts
-- scripts/ue-qa-report.ts
-- scripts/verify-audit-pack.test.ts
-- scripts/verify-audit-pack.ts
+- cripts/ai-agent-runner.ts
+- cripts/ue-qa-gate.ts
+- cripts/ue-qa-report.ts
+- apps/union-eyes/tests/api/concurrency.spec.ts
+- apps/union-eyes/tests/api/external-tester-containment.spec.ts
+- apps/union-eyes/tests/api/state-machine.spec.ts
+- apps/union-eyes/tests/e2e/.env.test.example
+- apps/union-eyes/tests/e2e/_helpers.ts
+- apps/union-eyes/tests/e2e/admin-assignment.spec.ts
+- apps/union-eyes/tests/e2e/auditor-readonly.spec.ts
+- apps/union-eyes/tests/e2e/case-escalation.spec.ts
+- apps/union-eyes/tests/e2e/case-resolution.spec.ts
+- apps/union-eyes/tests/e2e/cross-org-block.spec.ts
+- apps/union-eyes/tests/e2e/e2e-env.ts
+- apps/union-eyes/tests/e2e/external-ux-tester.spec.ts
+- apps/union-eyes/tests/e2e/member-intake.spec.ts
+- apps/union-eyes/tests/e2e/steward-review.spec.ts
+- artifacts/ue-qa/qa-report.md
+- artifacts/ue-qa/readiness-summary.md
+- docs/union-eyes/qa/qa-readiness-model.md
 
 ## Remaining Gaps
 - none

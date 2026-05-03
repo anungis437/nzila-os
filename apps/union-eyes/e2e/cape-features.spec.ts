@@ -11,6 +11,7 @@
  * Requires: PLAYWRIGHT_TEST_AUTH=true, TEST_USER_ID
  */
 import { test, expect } from "@playwright/test";
+import { ensureServerReady } from '../tests/e2e/_helpers';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -18,6 +19,10 @@ const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
 test.describe("Grievance draft save & resume", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   test("intake page renders form with required fields", async ({ page }) => {
     await page.goto("/grievances/new");
@@ -109,6 +114,10 @@ test.describe("Grievance draft save & resume", () => {
 test.describe("Grievance submission flow", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
 
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
+
   test("grievance queue page loads with content", async ({ page }) => {
     await page.goto("/grievances");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
@@ -144,6 +153,10 @@ test.describe("Grievance submission flow", () => {
 
 test.describe("Pilot readiness checklist", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   test("onboarding page renders checklist with 7 items", async ({ page }) => {
     await page.goto("/dashboard/pilot/onboarding");
@@ -203,6 +216,10 @@ test.describe("Pilot readiness checklist", () => {
 test.describe("Leadership dashboard", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
 
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
+
   test("dashboard renders 6 KPI cards", async ({ page }) => {
     await page.goto("/dashboard/leadership");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
@@ -259,6 +276,10 @@ test.describe("Leadership dashboard", () => {
 test.describe("Employer communications", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
 
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
+
   test("contacts API endpoint is reachable", async ({ request }) => {
     const response = await request.get(
       "/api/employers/communications/contacts"
@@ -276,6 +297,10 @@ test.describe("Employer communications", () => {
 
 test.describe("Steward workbench", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   test("dashboard page loads with content", async ({ page }) => {
     await page.goto("/en-CA/dashboard");

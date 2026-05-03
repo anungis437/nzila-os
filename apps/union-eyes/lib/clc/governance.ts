@@ -243,7 +243,7 @@ export async function runGovernedCrossUnionAggregation<T>(
       organizationId: opts.context.organizationId ?? undefined,
       resource: 'clc-intelligence',
       action: opts.operationLabel,
-      outcome: 'denied',
+      outcome: 'failure',
       details: {
         reason: `Missing permission: ${opts.requiredPermission}`,
         dimension: opts.participationDimension,
@@ -262,7 +262,7 @@ export async function runGovernedCrossUnionAggregation<T>(
       organizationId: opts.context.organizationId ?? undefined,
       resource: 'clc-intelligence',
       action: opts.operationLabel,
-      outcome: 'denied',
+      outcome: 'failure',
       details: {
         reason: check.reason,
         dimension: opts.participationDimension,

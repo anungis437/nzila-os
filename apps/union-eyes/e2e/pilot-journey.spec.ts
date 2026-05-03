@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { ensureServerReady } from '../tests/e2e/_helpers';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
 
 test.describe('CUPE pilot journey', () => {
   test.skip(!isTestAuth, 'Requires PLAYWRIGHT_TEST_AUTH=true');
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   test('member intake uses the approved intake and evidence endpoints', async ({ page }) => {
     const intakeRequests: Array<Record<string, unknown>> = [];

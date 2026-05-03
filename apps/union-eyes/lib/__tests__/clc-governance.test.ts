@@ -262,7 +262,7 @@ describe('CLC Governance', () => {
 
       expect(mockAuditLog).toHaveBeenCalledWith(
         expect.objectContaining({
-          outcome: 'denied',
+          outcome: 'failure',
           action: 'test-aggregation',
           details: expect.objectContaining({
             reason: expect.stringContaining('Missing permission'),
@@ -280,7 +280,7 @@ describe('CLC Governance', () => {
 
       expect(mockAuditLog).toHaveBeenCalledWith(
         expect.objectContaining({
-          outcome: 'denied',
+          outcome: 'failure',
           action: 'test-aggregation',
         }),
       );

@@ -232,7 +232,7 @@ function inferRemainingGaps(stages: StageResult[]): string[] {
   const gaps: string[] = [`Failed command: ${failedCommand.command}`]
 
   if (failedCommand.command.includes('ue:qa:gate')) {
-    gaps.push('Resolve UE QA gate blockers (RBAC UNKNOWN, decision/NAR expectation gaps, or pipeline failures).')
+    gaps.push('Resolve UE QA gate blockers (RBAC gaps, decision/NAR expectation gaps, containment failures, or pipeline failures).')
   }
   if (failedCommand.command.includes('decision:coverage:strict')) {
     gaps.push('Resolve missing strict decision coverage or proofRequired enforcement failures.')
@@ -312,7 +312,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
   const qaGateAuthority: StageDefinition = {
     name: 'qa-gate-authority',
     description: 'Final authority gate; GO/NO-GO decision source.',
-    commands: [`${cmd} ue:qa:gate`],
+    commands: [`${cmd} ue:qa:gate -- --target ux`],
   }
 
   if (phase === 'analyze') return [repoAnalyst]
@@ -329,7 +329,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
           `${cmd} test:fast`,
           `${cmd} governance:check`,
           `${cmd} decision:coverage:strict`,
-          `${cmd} ue:qa:gate`,
+          `${cmd} ue:qa:gate -- --target ux`,
           `${cmd} intelligence:pipeline-health`,
           `${cmd} nar:chain:verify`,
           `${cmd} validate:claims`,

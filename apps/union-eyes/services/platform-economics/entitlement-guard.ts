@@ -226,7 +226,7 @@ export async function requireEntitlement(
       resource: 'entitlement',
       resourceId: result.entitlementId,
       action: 'entitlement_check_failed',
-      outcome: 'denied',
+      outcome: 'failure',
       metadata: {
         featureKey,
         reason: result.reason,
@@ -271,7 +271,7 @@ export function withEntitlement(
         userId,
         resource: 'entitlement',
         action: 'module_access_denied',
-        outcome: 'denied',
+        outcome: 'failure',
         metadata: { featureKey, reason: result.reason },
       });
 

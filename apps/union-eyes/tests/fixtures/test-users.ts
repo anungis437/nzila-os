@@ -53,6 +53,40 @@ export const UE_TEST_USERS = {
       sandboxOnly: true,
     },
   },
+  auditorReadOnly: {
+    userId: 'ue-qa-auditor-readonly',
+    email: 'ue.qa.auditor.readonly@nzila.test',
+    firstName: 'QA',
+    lastName: 'AuditorReadOnly',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'compliance_manager',
+    status: 'active',
+    metadata: {
+      readOnly: true,
+      auditPersona: true,
+    },
+  },
+  wrongOrgSteward: {
+    userId: 'ue-qa-steward-secondary',
+    email: 'ue.qa.steward.secondary@nzila.test',
+    firstName: 'QA',
+    lastName: 'StewardSecondary',
+    orgId: UE_TEST_ORGS.secondary.id,
+    role: 'steward',
+    status: 'active',
+  },
+  suspendedMember: {
+    userId: 'ue-qa-member-suspended',
+    email: 'ue.qa.member.suspended@nzila.test',
+    firstName: 'QA',
+    lastName: 'MemberSuspended',
+    orgId: UE_TEST_ORGS.primary.id,
+    role: 'member',
+    status: 'inactive',
+    metadata: {
+      suspended: true,
+    },
+  },
 } as const
 
 export type UeTestUserKey = keyof typeof UE_TEST_USERS

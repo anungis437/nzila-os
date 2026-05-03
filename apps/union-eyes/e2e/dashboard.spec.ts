@@ -8,12 +8,17 @@
  * In CI, set PLAYWRIGHT_TEST_AUTH=true and TEST_USER_ID.
  */
 import { test, expect } from '@playwright/test';
+import { ensureServerReady } from '../tests/e2e/_helpers';
 
 // Skip dashboard tests if test auth mode is not enabled
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
 
 test.describe('Dashboard flows', () => {
   test.skip(!isTestAuth, 'Requires PLAYWRIGHT_TEST_AUTH=true');
+
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request);
+  });
 
   test('dashboard loads with navigation sidebar', async ({ page }) => {
     await page.goto('/en-CA/dashboard');

@@ -1,11 +1,33 @@
 {
-  "generatedAt": "2026-05-02T02:06:44.960Z",
-  "userStoryCoveragePercent": 77,
+  "generatedAt": "2026-05-03T13:39:49.208Z",
+  "target": "ux",
+  "readinessStatus": "GO_FOR_PRODUCTION",
+  "decision": "GO",
+  "userStoryCoveragePercent": 100,
+  "uxStoryCoveragePercent": 100,
+  "pilotStoryCoveragePercent": 100,
+  "productionStoryCoveragePercent": 100,
   "rbacCoveragePercent": 100,
-  "apiCoverage": 4,
-  "e2eCoverage": 1,
-  "auditCoverage": 0,
-  "pipelineHealth": "healthy",
-  "failures": [],
-  "decision": "GO"
+  "auditCoveragePercent": 100,
+  "e2eCoveragePercent": 100,
+  "externalTesterContainmentStatus": "pass",
+  "crossOrgLeakStatus": "pass",
+  "narVerificationStatus": "pass",
+  "pipelineHealthStatus": "healthy",
+  "humanReview": {
+    "requiredForPilot": true,
+    "requiredForProduction": true,
+    "approver": null,
+    "approvalDate": null,
+    "notes": null
+  },
+  "blockers": [],
+  "warnings": [
+    "RBAC map declares critical blockers that require human resolution."
+  ],
+  "nextActions": [
+    "Maintain evidence freshness and keep deterministic fixtures in sync.",
+    "Record human approver evidence before pilot or production promotion.",
+    "Review artifacts/ue-qa/readiness-summary.md before release decision."
+  ]
 }

@@ -100,9 +100,9 @@ export enum AuditEventType {
  * Audit event severity levels
  */
 export enum AuditSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
+  LOW = 'info',
+  MEDIUM = 'warning',
+  HIGH = 'error',
   CRITICAL = 'critical',
 }
 
@@ -120,7 +120,7 @@ export interface AuditLogEntry {
   details?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
-  outcome?: 'success' | 'failure' | 'denied';
+  outcome?: 'success' | 'failure' | 'error';
   errorMessage?: string;
   metadata?: Record<string, unknown>;
 }
@@ -279,7 +279,7 @@ export async function auditSecurityEvent(params: {
   severity?: AuditSeverity;
   details: Record<string, unknown>;
   ipAddress?: string;
-  outcome?: 'success' | 'failure' | 'denied';
+  outcome?: 'success' | 'failure' | 'error';
 }): Promise<void> {
   return auditLog({
     severity: AuditSeverity.HIGH,

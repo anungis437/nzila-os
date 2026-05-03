@@ -19,3 +19,26 @@ export const UE_QA_MIN_ROLE_ENDPOINTS = [
 ] as const
 
 export const UE_QA_MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'] as const
+
+export const UE_EXTERNAL_TESTER_CONTAINMENT = {
+  userId: 'ue-qa-ux-tester-001',
+  isolatedOrgId: '33333333-3333-4333-8333-333333333333',
+  allowedRoutes: ['/api/auth/user-role', '/api/claims', '/api/claims/[id]', '/api/claims/[id]/updates'],
+  deniedRoutes: [
+    '/api/admin/update-role',
+    '/api/admin/users',
+    '/api/exports',
+    '/api/audits',
+    '/api/workbench/assign',
+  ],
+  allowedUiFlows: ['login', 'submit-intake', 'view-own-case', 'view-own-updates'],
+  blockedUiFlows: ['admin-user-management', 'cross-org-audit-export', 'role-management', 'platform-settings'],
+  auditTrackingExpectation:
+    'Every external tester mutation must emit request id, org id, actor id, and route-level authorization decision evidence.',
+  revocationChecklist: [
+    'Disable auth user account',
+    'Remove org membership in isolated UX org',
+    'Rotate test credential and invalidate sessions',
+    'Export post-run audit pack and attach to QA evidence',
+  ],
+} as const

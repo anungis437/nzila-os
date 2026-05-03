@@ -1,5 +1,6 @@
 {
-  "timestamp": "2026-05-02T02:06:44.056Z",
+  "timestamp": "2026-05-03T13:39:47.504Z",
+  "target": "ux",
   "steps": [
     {
       "name": "Seed deterministic UE test environment",

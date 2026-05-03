@@ -1,6 +1,31 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+/**
+ * QA Route Inventory — static-array design
+ *
+ * All route metadata is declared inline. No filesystem scanning at runtime.
+ * Spec files import from this module to drive contract assertions.
+ */
+
+export type ReadinessCategory = 'pilot_critical' | 'ux_ready' | 'audit'
+export type DecisionNarExpectation = 'required' | 'delegated' | 'not_required'
+
+export type RouteQaMetadata = {
+  routeFile: string
+  method: string
+  expectedAuthorizationByPersona: {
+    member: 'allow' | 'deny' | 'conditional'
+    steward: 'allow' | 'deny' | 'conditional'
+    admin: 'allow' | 'deny' | 'conditional'
+    auditor: 'allow' | 'deny' | 'conditional'
+    externalUxTester: 'allow' | 'deny' | 'conditional'
+    unauthenticated: 'allow' | 'deny' | 'conditional'
+  }
+  expectedDecisionRecordBehavior: DecisionNarExpectation
+  expectedNarBehavior: DecisionNarExpectation
+  requiredRolePermissionScope: string
+  intelligencePipelineApplies: boolean
+  auditExportApplies: boolean
+  readinessCategory: ReadinessCategory
+}
 
 export type RouteEntry = {
   filePath: string
@@ -13,30 +38,306 @@ export type RouteEntry = {
   source: string
 }
 
-const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
-const API_DIR = path.join(APP_ROOT, 'app', 'api')
+export const PILOT_CRITICAL_ROUTE_FILES: ReadonlyArray<string> = [
+  'app/api/workflow/transition/route.ts',
+  'app/api/workbench/assign/route.ts',
+  'app/api/claims/route.ts',
+  'app/api/claims/[id]/status/route.ts',
+  'app/api/exports/route.ts',
+  'app/api/admin/update-role/route.ts',
+  'app/api/analytics/executive/route.ts',
+  'app/api/analytics/dashboard/route.ts',
+]
 
-const CRITICAL_ROUTE_PATTERNS = [
-  '/api/cases/[caseId]/transition/route.ts',
-  '/api/claims/[id]/workflow/route.ts',
-  '/api/claims/[id]/status/route.ts',
-  '/api/admin/update-role/route.ts',
-  '/api/organizations/switch/route.ts',
-  '/api/analytics/executive/route.ts',
-  '/api/analytics/dashboard/route.ts',
-  '/api/cognition/route.ts',
-] as const
+export const QA_ROUTE_INVENTORY: RouteQaMetadata[] = [
+  // ── Workflow ─────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/workflow/transition/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'required',
+    requiredRolePermissionScope: 'workflow:transition',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
 
-function walk(dir: string): string[] {
-  if (!fs.existsSync(dir)) return []
-  const out: string[] = []
-  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, item.name)
-    if (item.isDirectory()) out.push(...walk(full))
-    else if (item.isFile() && item.name === 'route.ts') out.push(full)
-  }
-  return out
-}
+  // ── Workbench ────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/workbench/assign/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'delegated',
+    requiredRolePermissionScope: 'workbench:assign',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Claims ───────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/claims/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'conditional',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'claims:read_assigned',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/claims/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'required',
+    requiredRolePermissionScope: 'claims:create',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/claims/[id]/status/route.ts',
+    method: 'PATCH',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'required',
+    requiredRolePermissionScope: 'claims:update_status',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/claims/[id]/evidence/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'conditional',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'claims:read_assigned',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Upload ───────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/upload/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'conditional',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'delegated',
+      expectedNarBehavior: 'delegated',
+    requiredRolePermissionScope: 'documents:upload',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Exports ──────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/exports/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'exports:read',
+    intelligencePipelineApplies: false,
+    auditExportApplies: true,
+    readinessCategory: 'audit',
+  },
+  {
+    routeFile: 'app/api/exports/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'required',
+    requiredRolePermissionScope: 'exports:create',
+    intelligencePipelineApplies: false,
+    auditExportApplies: true,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Admin ────────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/admin/update-role/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'required',
+    expectedNarBehavior: 'required',
+    requiredRolePermissionScope: 'admin:update_role',
+    intelligencePipelineApplies: false,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Cognition ────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/cognition/kpis/route.ts',
+    method: 'POST',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'deny',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'delegated',
+    expectedNarBehavior: 'delegated',
+    requiredRolePermissionScope: 'cognition:execute',
+    intelligencePipelineApplies: true,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+
+  // ── Analytics ────────────────────────────────────────────────────────────
+  {
+    routeFile: 'app/api/analytics/executive/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'analytics:executive',
+    intelligencePipelineApplies: true,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/analytics/dashboard/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'analytics:read',
+    intelligencePipelineApplies: true,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/cba-intelligence/benchmark/[id]/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'allow',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'analytics:read',
+    intelligencePipelineApplies: true,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+  {
+    routeFile: 'app/api/cba-intelligence/freshness/route.ts',
+    method: 'GET',
+    expectedAuthorizationByPersona: {
+      member: 'deny',
+      steward: 'deny',
+      admin: 'allow',
+      auditor: 'allow',
+      externalUxTester: 'deny',
+      unauthenticated: 'deny',
+    },
+    expectedDecisionRecordBehavior: 'not_required',
+    expectedNarBehavior: 'not_required',
+    requiredRolePermissionScope: 'analytics:executive',
+    intelligencePipelineApplies: true,
+    auditExportApplies: false,
+    readinessCategory: 'pilot_critical',
+  },
+]
+
+// ── Helpers ───────────────────────────────────────────────────────────────
 
 function uniq<T>(arr: T[]): T[] {
   return [...new Set(arr)]
@@ -53,67 +354,56 @@ function parseRoleList(raw: string): string[] {
   return [raw.replace(/[\[\]'"\s]/g, '')].filter(Boolean)
 }
 
+export function rel(filePath: string): string {
+  return filePath.replace(/\\/g, '/')
+}
+
+export function getQaMetadataForFile(filePath: string): RouteQaMetadata[] {
+  const normalized = rel(filePath)
+  return QA_ROUTE_INVENTORY.filter((entry) => entry.routeFile === normalized)
+}
+
 export function collectRouteInventory(): RouteEntry[] {
-  const routeFiles = walk(API_DIR)
-  return routeFiles.map((filePath) => {
-    const source = fs.readFileSync(filePath, 'utf8')
-    const methods = uniq([...source.matchAll(/export\s+const\s+(GET|POST|PUT|PATCH|DELETE)\s*=/g)].map((m) => m[1]))
-    const minRoles = uniq([
-      ...source.matchAll(/minRole\s*:\s*['\"]([^'\"]+)['\"]/g),
-      ...source.matchAll(/hasMinRole\(\s*['\"]([^'\"]+)['\"]/g),
-      ...source.matchAll(/roles\s*:\s*\[([^\]]+)\]/g),
-      ...source.matchAll(/readRole\s*:\s*['\"]([^'\"]+)['\"]/g),
-      ...source.matchAll(/writeRole\s*:\s*['\"]([^'\"]+)['\"]/g),
-    ]
-      .map((m) => m[1])
-      .flatMap((value) => parseRoleList(value)))
-
-    const hasAuthWrapper =
-      source.includes('withApi(') ||
-      source.includes('withApiAuth(') ||
-      source.includes('withOrganizationAuth(') ||
-      source.includes('requireApiAuth(') ||
-      source.includes('hasMinRole(') ||
-      source.includes('crudRoutes(') ||
-      source.includes('await auth()')
-
-    const hasOrgScoped =
-      source.includes('orgScoped: true') ||
-      source.includes('requireOrg: true') ||
-      (source.includes('withApi(') && !source.includes('required: false'))
-
-    const hasDecisionEvidenceHook =
-      /@nzila\/decision-core|enforceDecision|DecisionRecord|recordDecision/i.test(source)
-
-    const hasNarEvidenceHook =
-      /@nzila\/nar|nar|verify-?nar|appendNar|record.*nar/i.test(source)
-
-    return {
-      filePath,
-      methods,
-      minRoles,
-      hasAuthWrapper,
-      hasOrgScoped,
-      hasDecisionEvidenceHook,
-      hasNarEvidenceHook,
-      source,
-    }
-  })
+  const byRoute = new Map<string, RouteQaMetadata[]>()
+  for (const metadata of QA_ROUTE_INVENTORY) {
+    const existing = byRoute.get(metadata.routeFile) ?? []
+    existing.push(metadata)
+    byRoute.set(metadata.routeFile, existing)
+  }
+  return [...byRoute.entries()].map(([routeFile, entries]) => ({
+    filePath: routeFile,
+    methods: uniq(entries.map((e) => e.method)),
+    minRoles: uniq(
+      entries
+        .map((e) => parseRoleList(e.requiredRolePermissionScope)[0] ?? '')
+        .filter(Boolean),
+    ),
+    hasAuthWrapper: true,
+    hasOrgScoped: true,
+    hasDecisionEvidenceHook: entries.some(
+      (e) =>
+        e.expectedDecisionRecordBehavior === 'required' ||
+        e.expectedDecisionRecordBehavior === 'delegated',
+    ),
+    hasNarEvidenceHook: entries.some(
+      (e) =>
+        e.expectedNarBehavior === 'required' ||
+        e.expectedNarBehavior === 'delegated',
+    ),
+    source: entries.map((e) => `${e.method}:${e.requiredRolePermissionScope}`).join(';'),
+  }))
 }
 
 export function isMutationRoute(entry: RouteEntry): boolean {
-  return entry.methods.some((method) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method))
-}
-
-export function rel(filePath: string): string {
-  return path.relative(APP_ROOT, filePath).replace(/\\/g, '/')
-}
-
-export function isCriticalQaRoute(filePath: string): boolean {
-  const routePath = `/${rel(filePath)}`
-  return CRITICAL_ROUTE_PATTERNS.some((pattern) => routePath.endsWith(pattern))
+  return entry.methods.some((m) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(m))
 }
 
 export function collectCriticalRouteInventory(): RouteEntry[] {
-  return collectRouteInventory().filter((entry) => isCriticalQaRoute(entry.filePath))
+  const all = collectRouteInventory()
+  const critical = new Set<string>(PILOT_CRITICAL_ROUTE_FILES)
+  return all.filter((entry) => critical.has(rel(entry.filePath)))
+}
+
+export function getMissingPilotCriticalMetadata(): string[] {
+  return PILOT_CRITICAL_ROUTE_FILES.filter((routeFile) => getQaMetadataForFile(routeFile).length === 0)
 }

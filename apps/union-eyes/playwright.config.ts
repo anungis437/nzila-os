@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { getE2EEnv } from './tests/e2e/e2e-env';
+
+process.env.PLAYWRIGHT_TEST_AUTH ??= 'true';
 
 /**
  * Union-Eyes Playwright E2E Configuration
@@ -7,20 +10,25 @@ import { defineConfig, devices } from '@playwright/test';
  * Debug with: pnpm -C apps/union-eyes e2e --headed
  */
 export default defineConfig({
-  testDir: './e2e',
-  fullyParallel: true,
+  testDir: '.',
+  testMatch: ['e2e/smoke.spec.ts', 'e2e/ue-workflow.spec.ts', 'tests/e2e/**/*.spec.ts'],
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
+  timeout: 60_000,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
+  testIgnore: ['tests/e2e/ue-workflow.spec.ts'],
   reporter: process.env.CI
     ? [['html', { open: 'never' }], ['github']]
     : [['html', { open: 'on-failure' }]],
 
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3002',
+    baseURL: getE2EEnv().PLAYWRIGHT_BASE_URL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    navigationTimeout: 45_000,
+    actionTimeout: 20_000,
   },
 
   projects: [
@@ -39,6 +47,14 @@ export default defineConfig({
           port: 3002,
           reuseExistingServer: true,
           timeout: 120_000,
+          env: {
+            ...process.env,
+            ...getE2EEnv(),
+            QA_TEST_ENV: 'true',
+            NODE_ENV: 'test',
+            PLAYWRIGHT_TEST_AUTH: process.env.PLAYWRIGHT_TEST_AUTH ?? 'true',
+            UE_E2E_RISK_BYPASS: 'true',
+          },
         },
       }),
 });

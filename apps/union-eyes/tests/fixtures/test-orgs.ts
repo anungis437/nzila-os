@@ -23,6 +23,14 @@ export const UE_TEST_ORGS = {
     hierarchyPath: ['ue-qa-ux-sandbox'],
     hierarchyLevel: 0,
   },
+  productionLike: {
+    id: '44444444-4444-4444-8444-444444444444',
+    name: 'UE Production Like Guardrail Org',
+    slug: 'ue-prod-like-guardrail',
+    organizationType: 'local' as const,
+    hierarchyPath: ['ue-prod-like-guardrail'],
+    hierarchyLevel: 0,
+  },
 } as const
 
 export type UeTestOrgKey = keyof typeof UE_TEST_ORGS

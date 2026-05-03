@@ -4,13 +4,36 @@ import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
 import { users, organizationUsers } from '@/db/schema/domains/member/user-management'
-import { authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
+import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '@/tests/fixtures/test-users'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
 
 const NOW = new Date('2026-05-01T00:00:00.000Z')
+
+function assertSafeRuntime(): void {
+  const qaTestEnv = (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true'
+
+  if (!qaTestEnv) {
+    throw new Error(
+      '[ue:seed:test-env] Safety check failed: QA_TEST_ENV=true is required for deterministic reset operations.',
+    )
+  }
+
+  const databaseUrl = (process.env.DATABASE_URL ?? '').toLowerCase()
+  if (!databaseUrl) {
+    throw new Error('[ue:seed:test-env] Safety check failed: DATABASE_URL is required')
+  }
+
+  const forbiddenHints = ['prod', 'production', 'azure.com', 'rds.amazonaws.com']
+  const allowProd = (process.env.QA_TEST_ENV_ALLOW_PROD_URL ?? '').toLowerCase() === 'true'
+  if (!allowProd && forbiddenHints.some((hint) => databaseUrl.includes(hint))) {
+    throw new Error(
+      '[ue:seed:test-env] Safety check failed: DATABASE_URL appears production-like. Refusing to continue without QA_TEST_ENV_ALLOW_PROD_URL=true.',
+    )
+  }
+}
 
 function isMissingColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
@@ -30,6 +53,7 @@ function assertDeterministicInputs(): void {
 }
 
 async function seed(): Promise<void> {
+  assertSafeRuntime()
   assertDeterministicInputs()
 
   const qaPasswordHash = await hashPassword(UE_TEST_USER_PASSWORD)
@@ -51,6 +75,7 @@ async function seed(): Promise<void> {
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
     await tx.delete(authUsers).where(inArray(authUsers.userId, userIds))
+    await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
@@ -80,7 +105,7 @@ async function seed(): Promise<void> {
         firstName: u.firstName,
         lastName: u.lastName,
         displayName: `${u.firstName} ${u.lastName}`,
-        isActive: true,
+        isActive: u.status === 'active',
         isSystemAdmin: false,
         createdAt: NOW,
         updatedAt: NOW,
@@ -102,7 +127,7 @@ async function seed(): Promise<void> {
           isActive: true,
           isSystemAdmin: false,
           accountSource: 'local',
-          lifecycleState: 'active',
+          lifecycleState: u.status === 'active' ? 'active' : 'suspended',
           passwordChangedAt: NOW,
           createdAt: NOW,
           updatedAt: NOW,
@@ -120,7 +145,7 @@ async function seed(): Promise<void> {
           isActive: true,
           isSystemAdmin: false,
           accountSource: 'local',
-          lifecycleState: 'active',
+          lifecycleState: sql`excluded.lifecycle_state`,
           passwordChangedAt: NOW,
           updatedAt: NOW,
         },
@@ -132,7 +157,7 @@ async function seed(): Promise<void> {
         userId: u.userId,
         role: u.role,
         permissions: [],
-        isActive: true,
+        isActive: u.status === 'active',
         isPrimary: true,
         joinedAt: NOW,
         createdAt: NOW,
@@ -148,7 +173,7 @@ async function seed(): Promise<void> {
           userId: u.userId,
           role: u.role,
           permissions: [],
-          isActive: true,
+          isActive: u.status === 'active',
           isPrimary: true,
           joinedAt: NOW,
           createdAt: NOW,
@@ -160,12 +185,29 @@ async function seed(): Promise<void> {
         set: {
           role: sql`excluded.role`,
           permissions: sql`excluded.permissions`,
-          isActive: true,
+          isActive: sql`excluded.is_active`,
           isPrimary: true,
           joinedAt: NOW,
           updatedAt: NOW,
         },
       })
+
+    await tx.insert(authOrgPolicies).values(
+      orgs.map((org) => ({
+        organizationId: org.id,
+        allowLocalAuth: true,
+        allowMagicLink: true,
+        allowSso: true,
+        requireSso: false,
+        requireInvite: false,
+        passwordResetAllowed: true,
+        allowedEmailDomains: [],
+        mfaRequiredForRoles: [],
+        updatedBy: 'ue:seed:test-env',
+        updatedAt: NOW,
+        createdAt: NOW,
+      })),
+    )
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
@@ -249,6 +291,8 @@ async function seed(): Promise<void> {
         testCases: claimIds.length,
         externalTesterOrg: UE_TEST_ORGS.uxTesterIsolated.id,
         externalTesterUser: UE_TEST_USERS.restrictedUxTester.userId,
+        suspendedUser: UE_TEST_USERS.suspendedMember.userId,
+        productionLikeOrgGuardrail: UE_TEST_ORGS.productionLike.id,
         qaPassword: UE_TEST_USER_PASSWORD,
       },
       null,

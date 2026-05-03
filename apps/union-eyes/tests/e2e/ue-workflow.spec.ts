@@ -1,20 +1,21 @@
-import { expect, test, type APIRequestContext } from '@playwright/test'
-import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '../fixtures/test-users'
-
-async function loginAs(request: APIRequestContext, email: string): Promise<void> {
-  const response = await request.post('/api/auth/login', {
-    data: {
-      email,
-      password: UE_TEST_USER_PASSWORD,
-    },
-  })
-
-  expect(response.ok(), await response.text()).toBeTruthy()
-}
+import { expect, test } from '@playwright/test'
+import {
+  assertNoCrossOrgLeak,
+  assertPermissionDenied,
+  ensureServerReady,
+  loginAsTestUser,
+  seedOrVerifyTestState,
+} from './_helpers'
+import { UE_TEST_USERS } from '../fixtures/test-users'
 
 test.describe('Union Eyes QA E2E Flows', () => {
+  test.beforeAll(async ({ request }) => {
+    await ensureServerReady(request)
+    await seedOrVerifyTestState(request)
+  })
+
   test('1) intake -> review -> assign -> escalate -> resolve', async ({ request }) => {
-    await loginAs(request, UE_TEST_USERS.stewardPrimary.email)
+    await loginAsTestUser(request, UE_TEST_USERS.stewardPrimary.email)
 
     const response = await request.post('/api/workflow/transition', {
       data: {
@@ -29,11 +30,11 @@ test.describe('Union Eyes QA E2E Flows', () => {
 
   test('2) unauthorized access attempt is blocked', async ({ request }) => {
     const response = await request.get('/api/workbench/assigned')
-    expect([401, 403]).toContain(response.status())
+    assertPermissionDenied(response.status())
   })
 
   test('3) cross-org access attempt is blocked', async ({ request }) => {
-    await loginAs(request, UE_TEST_USERS.memberPrimary.email)
+    await loginAsTestUser(request, UE_TEST_USERS.memberPrimary.email)
 
     const response = await request.post('/api/workflow/transition', {
       data: {
@@ -43,11 +44,11 @@ test.describe('Union Eyes QA E2E Flows', () => {
       },
     })
 
-    expect([403, 404]).toContain(response.status())
+    await assertNoCrossOrgLeak(response)
   })
 
   test('4) read-only journey blocks mutation', async ({ request }) => {
-    await loginAs(request, UE_TEST_USERS.memberPrimary.email)
+    await loginAsTestUser(request, UE_TEST_USERS.memberPrimary.email)
 
     const readResponse = await request.get('/api/auth/user-role')
     expect([200, 401, 403]).toContain(readResponse.status())
@@ -55,11 +56,11 @@ test.describe('Union Eyes QA E2E Flows', () => {
     const mutationResponse = await request.post('/api/workbench/assign', {
       data: { claimId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2', assignedTo: 'ue-qa-steward-primary' },
     })
-    expect([401, 403]).toContain(mutationResponse.status())
+    assertPermissionDenied(mutationResponse.status())
   })
 
   test('5) intelligence dashboard endpoint is tier-gated', async ({ request }) => {
-    await loginAs(request, UE_TEST_USERS.stewardPrimary.email)
+    await loginAsTestUser(request, UE_TEST_USERS.stewardPrimary.email)
 
     const response = await request.get('/api/cognition/kpis?windowDays=30')
 
@@ -67,7 +68,7 @@ test.describe('Union Eyes QA E2E Flows', () => {
   })
 
   test('6) export audit pack route is role and org constrained', async ({ request }) => {
-    await loginAs(request, UE_TEST_USERS.memberPrimary.email)
+    await loginAsTestUser(request, UE_TEST_USERS.memberPrimary.email)
 
     const response = await request.get('/api/exports')
 
