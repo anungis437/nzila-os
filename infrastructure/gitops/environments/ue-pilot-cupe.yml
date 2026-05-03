@@ -1,0 +1,89 @@
+# UE Pilot — CUPE Local 123
+# Nzila OS — GitOps
+#
+# Controlled-access pilot environment for CUPE Local 123 (1-3 internal users).
+# Scoped to union-eyes only; all other apps remain on the staging revision.
+# Org isolation: row-level security via app.org_id = 'cupe-local-123'.
+# Data residency: Canada Central primary / Canada East DR (PIPEDA / Québec Law 25).
+#
+# SECRETS: Do NOT store secrets here. Use KeyVault nzila-staging-kv.
+
+environment: ue-pilot-cupe
+region: canadacentral
+resource_group: nzila-canada-staging-rg
+dr_region: canadaeast
+
+container_apps:
+  environment: nzila-canada-staging-env
+  revision_mode: Single
+  min_replicas: 1
+  max_replicas: 2
+
+apps:
+  union-eyes:
+    image_tag: "${VERSION}"
+    port: 3000
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "10"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: ue-pilot-cupe
+      - name: PILOT_ORG_ID
+        value: cupe-local-123
+      - name: PILOT_ORG_SLUG
+        value: cupe-local-123
+      - name: ALLOW_MASS_ONBOARDING
+        value: "false"
+      - name: WEB_CONCURRENCY
+        value: "2"
+      - name: CONN_MAX_AGE
+        value: "600"
+      - name: DATABASE_POOL_SIZE
+        value: "10"
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-union-eyes-pilot-cupe
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "1.0"
+
+database:
+  # Reuses the staging PostgreSQL instance. Org data is isolated at the
+  # application layer via RLS (app.org_id = 'cupe-local-123'). There is
+  # no separate database or schema for this pilot.
+  name: nzila-staging-db
+  sku: GP_Standard_D2ds_v5
+  tier: GeneralPurpose
+  version: '15'
+  storage_gb: 32
+  backup_retention_days: 14
+  high_availability: false
+  pgbouncer:
+    enabled: true
+    # Session mode required: RLS uses SET LOCAL which must survive for the
+    # duration of the transaction; transaction mode resets session state.
+    pool_mode: session
+    default_pool_size: 10
+    max_client_connections: 100
+
+# No Redis — removed from staging infra 2026-04-05.
+
+acr:
+  name: nzilacanadaacr
+  sku: Basic
