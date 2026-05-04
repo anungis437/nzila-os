@@ -176,11 +176,11 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     version: '1.0.0',
     lastUpdated: '2026-04-14',
     dataCategories: [
-      { name: 'Platform Metrics', description: 'Performance, health, and operational metrics', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Platform Metrics', description: 'Performance, health, and operational metrics including decision_aggregates, decision_pipeline_checkpoints, decision_pipeline_runs, and pipeline_alerts', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Pilot Metrics & Alerts', description: 'Pilot telemetry and alerting state stored in pilot_definitions, pilot_metric_events, pilot_metric_rollups, pilot_health_scores, pilot_alerts, pilot_alert_rules, and pilot_alert_escalations', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
       { name: 'Executive Operating System Data', description: 'Executive operating cadence data in founder_time_logs, weekly_focus_targets, treasury_snapshots, runway_assumptions, execution_initiatives, executive_decisions, decision_scorebacks, founder_priorities, product_health_snapshots, customer_onboarding_milestones, budget_lines, cs_accounts, security_findings, security_waivers, erp_invoices, job_postings, job_applications, grants, grant_reports, revenue_events, renewal_tasks, command_alerts, ops_clients, and ITSM tables (itsm_tickets, itsm_ticket_events, itsm_assets, itsm_problems, itsm_changes, itsm_approvals, itsm_kb_articles)', containsPii: false, containsFinancial: true, storageEngine: 'PostgreSQL' },
       { name: 'Proof Packs', description: 'Generated governance proof packs', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
-      { name: 'Audit Logs', description: 'Console operation audit trail', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Audit Logs', description: 'Console operation audit trail including audit_records export and verification telemetry', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
     ],
     retentionSchedules: [
       { category: 'Platform Metrics', retentionClass: '1_YEAR', retentionPeriod: '1 year', legalBasis: 'Operational monitoring — rolling window' },

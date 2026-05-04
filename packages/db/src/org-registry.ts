@@ -367,6 +367,12 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'platformProofPacks', reason: 'System-level governance proof packs' },
   { table: 'platformDeploymentProfiles', reason: 'System-level deployment profile configurations (no Org context)' },
   { table: 'idempotencyCache', reason: 'System-level idempotency cache — keyed by composite key containing orgId' },
+  // Decision/audit pipeline tables — system or cross-org scope (no org_id column)
+  { table: 'auditRecords', reason: 'Uses organization_id (text) and supports cross-org audit ingestion/export' },
+  { table: 'decisionAggregates', reason: 'Uses organization_id (text) for aggregate analytics windows, not org_id UUID scoping' },
+  { table: 'decisionPipelineCheckpoints', reason: 'Global pipeline cursor/state table (one row per pipeline)' },
+  { table: 'decisionPipelineRuns', reason: 'Global run log table with optional organization_id for org-specific replays' },
+  { table: 'pipelineAlerts', reason: 'Global operational alert table emitted by pipeline infrastructure' },
   // ── zonga.ts (no org_id) ────────────────────────────────
   { table: 'zongaReleaseTracks', reason: 'Scoped via release_id FK → zongaReleases (Org-scoped)' },
   { table: 'zongaPlaylistItems', reason: 'Scoped via playlist_id FK → zongaPlaylists (Org-scoped)' },

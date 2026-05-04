@@ -46,6 +46,24 @@
       "expiresOn": "2026-09-01"
     },
     {
+      "path": "apps/abr/app/api/abr/incidents/route.ts",
+      "owner": "faircase-team",
+      "justification": "Legacy NAR proof adapter in route still imports @nzila/db/schema. Service-layer extraction tracked in ENFORCEMENT_UPGRADE backlog.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/platform-admin/app/api/admin/org/route.ts",
+      "owner": "platform-team",
+      "justification": "Legacy NAR proof adapter currently defined in route. Planned move to repository/service module.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/zonga/app/api/payouts/route.ts",
+      "owner": "zonga-team",
+      "justification": "Route-local NAR proof adapter still uses schema import pending service-layer migration.",
+      "expiresOn": "2026-09-01"
+    },
+    {
       "path": "apps/nzila-hq/**",
       "owner": "platform-core",
       "justification": "Nzila HQ is INCUBATING with its own DB client in server/db/. Migration to shared service layer tracked before PILOT promotion.",

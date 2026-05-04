@@ -1,28 +1,19 @@
 {
-  "generatedAt": "2026-05-04T00:00:37.252Z",
+  "generatedAt": "2026-05-04T01:55:10.643Z",
   "phase": "validate",
   "deterministicOrder": [
     "implementation",
     "security-governance"
   ],
   "changedFiles": [
-    "pps/union-eyes/scripts/seed-test-env.ts",
-    "rtifacts/ai-dev-agent/latest-report.json",
-    "rtifacts/ai-dev-agent/latest-report.md",
     "rtifacts/ue-qa/latest-results.json",
     "rtifacts/ue-qa/qa-report.json",
     "rtifacts/ue-qa/qa-report.md",
     "rtifacts/ue-qa/readiness-summary.md",
-    "ocs/ops/sre/executive-reliability-dashboard.md",
-    "ocs/ops/sre/portfolio-reliability-audit.md",
     "eports/claim-verification.json",
     "eports/claim-verification.md",
     "eports/sre-alert-routing-dry-run.json",
-    "eports/sre-executive-dashboard.json",
-    "eports/sre-reliability-audit.json",
-    "eports/sre-synthetic-dry-run.json",
-    "eports/unsafe-claims.md",
-    "cripts/ue-qa-gate.ts"
+    "eports/unsafe-claims.md"
   ],
   "summaryOfChanges": "Pipeline completed without blocking failures.",
   "stages": [
@@ -33,13 +24,13 @@
         {
           "command": "pnpm.cmd typecheck",
           "exitCode": 0,
-          "durationMs": 7635,
+          "durationMs": 12317,
           "passed": true
         },
         {
           "command": "pnpm.cmd lint",
           "exitCode": 0,
-          "durationMs": 6486,
+          "durationMs": 8493,
           "passed": true
         }
       ],
@@ -50,63 +41,69 @@
       "description": "RBAC, org isolation, decision/NAR, and pipeline integrity enforcement.",
       "results": [
         {
+          "command": "pnpm.cmd prod:region:validate",
+          "exitCode": 0,
+          "durationMs": 1482,
+          "passed": true
+        },
+        {
           "command": "pnpm.cmd typecheck",
           "exitCode": 0,
-          "durationMs": 5407,
+          "durationMs": 4370,
           "passed": true
         },
         {
           "command": "pnpm.cmd lint",
           "exitCode": 0,
-          "durationMs": 5247,
+          "durationMs": 4634,
           "passed": true
         },
         {
           "command": "pnpm.cmd test:fast",
           "exitCode": 0,
-          "durationMs": 101853,
+          "durationMs": 93454,
           "passed": true
         },
         {
           "command": "pnpm.cmd governance:check",
           "exitCode": 0,
-          "durationMs": 1736,
+          "durationMs": 1313,
           "passed": true
         },
         {
           "command": "pnpm.cmd decision:coverage:strict",
           "exitCode": 0,
-          "durationMs": 7499,
+          "durationMs": 4955,
           "passed": true
         },
         {
           "command": "pnpm.cmd ue:qa:gate -- --target ux",
           "exitCode": 0,
-          "durationMs": 127229,
+          "durationMs": 133600,
           "passed": true
         },
         {
           "command": "pnpm.cmd intelligence:pipeline-health",
           "exitCode": 0,
-          "durationMs": 5113,
+          "durationMs": 5003,
           "passed": true
         },
         {
           "command": "pnpm.cmd nar:chain:verify",
           "exitCode": 0,
-          "durationMs": 35269,
+          "durationMs": 34906,
           "passed": true
         },
         {
           "command": "pnpm.cmd validate:claims",
           "exitCode": 0,
-          "durationMs": 1470,
+          "durationMs": 1508,
           "passed": true
         },
         {
           "command": "pnpm.cmd sre:alerts:dry-run",
           "exitCode": 0,
-          "durationMs": 1419,
+          "durationMs": 1392,
           "passed": true
         }
       ],
@@ -116,6 +113,7 @@
   "validationCommandsRun": [
     "pnpm.cmd typecheck",
     "pnpm.cmd lint",
+    "pnpm.cmd prod:region:validate",
     "pnpm.cmd typecheck",
     "pnpm.cmd lint",
     "pnpm.cmd test:fast",
@@ -135,6 +133,11 @@
     },
     {
       "command": "pnpm.cmd lint",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "command": "pnpm.cmd prod:region:validate",
       "exitCode": 0,
       "passed": true
     },

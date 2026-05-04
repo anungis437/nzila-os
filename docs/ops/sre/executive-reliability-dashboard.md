@@ -1,6 +1,6 @@
 # Executive Reliability Dashboard
 
-Generated: 2026-05-04T00:00:50.847Z
+Generated: 2026-05-04T02:02:47.934Z
 
 ## Score Summary (0-10)
 

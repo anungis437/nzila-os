@@ -1,6 +1,6 @@
 # ⚠ Unsafe Claims — Buyer Risk Register
 
-> Generated: 2026-05-04T00:00:35.766Z
+> Generated: 2026-05-04T01:55:09.188Z
 
 These claims appear in customer-facing materials but lack sufficient code evidence.
 Each must be resolved before being included in procurement packs.

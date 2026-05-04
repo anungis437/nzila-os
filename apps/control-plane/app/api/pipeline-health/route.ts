@@ -8,22 +8,22 @@
  *   200 { status: 'ok' }                  — no active alerts
  *   200 { status: 'warning', alerts: [] } — warning/info alerts only
  *   503 { status: 'critical', alerts: [] } — one or more critical alerts
- *
- * Public route — safe for external uptime monitors and internal health dashboards.
- * Listed in proxy.ts allowlist (no auth required).
  */
 import { NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { pipelineAlerts } from '@nzila/db/schema'
 import { and, gte, isNull } from 'drizzle-orm'
+import { requireApiAuth } from '@/lib/api-auth'
 
 const LOOKBACK_HOURS = 24
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    await requireApiAuth(request)
+
     const since = new Date(Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000)
 
-    const alerts = await db
+    const alerts = await platformDb
       .select({
         id: pipelineAlerts.id,
         pipelineName: pipelineAlerts.pipelineName,
