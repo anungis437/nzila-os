@@ -52,6 +52,8 @@ interface HealthConfig {
 type InventoryRouting = {
   staging?: string
   production?: string
+  stagingFallback?: string
+  productionFallback?: string
   healthPath?: string
 }
 
@@ -163,11 +165,20 @@ function buildInventoryEndpoints(inventory: DeploymentInventory): EndpointConfig
     const approvedApps = resolveApprovedApps(env)
     for (const appName of approvedApps) {
       const app = inventory.apps[appName]
-      const route = normalizeRoute(app?.routing?.[env])
+      const canonicalRoute = normalizeRoute(app?.routing?.[env])
+      // When canonical route is blocked/n/a but a *Fallback URL exists (e.g. ACA URL while custom DNS
+      // is pending), still monitor the deployed surface as advisory evidence. This keeps inventory-driven
+      // generation policy-correct: blocked apps are NOT prod-critical, but their fallback surface is
+      // observed for runtime drift.
+      const fallbackKey = env === 'staging' ? 'stagingFallback' : 'productionFallback'
+      const fallbackRoute = normalizeRoute(app?.routing?.[fallbackKey])
+      const route = canonicalRoute ?? fallbackRoute
       if (!route) continue
+      const usedFallback = !canonicalRoute && Boolean(fallbackRoute)
       const healthPath = app?.routing?.healthPath ?? '/api/health'
       const appAlias = aliasLogicalApp(appName)
-      const baseName = `${env}:${appAlias}`
+      const baseName = `${env}:${appAlias}${usedFallback ? ':fallback' : ''}`
+      const policyCritical = env === 'production' && !usedFallback
 
       const rootUrl = route.replace(/\/$/, '')
       const rootKey = `${env}|${rootUrl}|/`
@@ -180,7 +191,7 @@ function buildInventoryEndpoints(inventory: DeploymentInventory): EndpointConfig
           timeoutMs: 15_000,
           environment: env,
           source: 'inventory',
-          policyCritical: env === 'production',
+          policyCritical,
         })
         seen.add(rootKey)
       }
@@ -196,7 +207,7 @@ function buildInventoryEndpoints(inventory: DeploymentInventory): EndpointConfig
           timeoutMs: 15_000,
           environment: env,
           source: 'inventory',
-          policyCritical: env === 'production',
+          policyCritical,
         })
         seen.add(healthKey)
       }

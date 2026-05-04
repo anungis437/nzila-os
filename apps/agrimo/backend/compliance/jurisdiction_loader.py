@@ -69,8 +69,27 @@ class JurisdictionConfig:
                     logger.warning(f"Failed to load from {path}: {e}")
                     continue
 
-        # Fallback: return hardcoded policies
-        logger.warning("Using hardcoded policies (compiled JS module not found)")
+        # No policy artifact found. In production/staging this is a P0 drift risk:
+        # the embedded _HARDCODED_POLICIES are stale by definition (KE/UG/NG only, no
+        # version tracking) and silently using them would mask compliance regressions.
+        # Fail loud so deployments cannot run without the canonical policy bundle.
+        env = (
+            os.getenv("AGRIMO_ENV")
+            or os.getenv("NODE_ENV")
+            or os.getenv("DJANGO_ENV")
+            or "development"
+        ).lower()
+        if env in ("production", "staging"):
+            searched = [str(p) for p in policy_paths if str(p)]
+            raise RuntimeError(
+                "Jurisdiction policies file not found in "
+                f"{env}. Build @nzila/platform-jurisdiction-compliance or set "
+                "JURISDICTION_POLICIES_PATH. Refusing to fall back to embedded "
+                f"hardcoded policies. Searched: {searched}"
+            )
+        logger.warning(
+            "Using hardcoded policies (compiled JS module not found) \u2014 DEV ONLY"
+        )
         cls._policies_data = _HARDCODED_POLICIES
         return cls._policies_data
 
