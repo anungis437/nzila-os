@@ -11,7 +11,7 @@ metadata:
     nzila.app/org-scoped: "true"
     nzila.app/generated-from: governance/portfolio/product-catalog.json
     nzila.app/portfolio-tier: "4"
-    nzila.app/portfolio-status: incubating
+    nzila.app/portfolio-status: pilot
     nzila.app/deployment: internal
     nzila.app/gtm-posture: hold
     nzila.app/proof-level: internal-proof
@@ -21,7 +21,7 @@ metadata:
     - commerce
 spec:
   type: service
-  lifecycle: incubating
+  lifecycle: pilot
   owner: platform-team
   system: nzila-os
   dependsOn:

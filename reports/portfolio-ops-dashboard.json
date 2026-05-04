@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-30",
+  "generated_at": "2026-05-04",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
     "total_products": 24,
     "total_engines": 4,
     "sell_now_count": 3,
-    "internal_only_count": 5,
+    "internal_only_count": 6,
     "frozen_count": 3
   },
   "engines": [
@@ -125,11 +125,11 @@
       },
       {
         "status": "pilot",
-        "count": 6
+        "count": 7
       },
       {
         "status": "incubating",
-        "count": 12
+        "count": 10
       },
       {
         "status": "internal",
@@ -137,7 +137,7 @@
       },
       {
         "status": "frozen",
-        "count": 3
+        "count": 4
       },
       {
         "status": "sunset",
@@ -388,8 +388,8 @@
       "id": "weekone",
       "name": "WeekOne",
       "tier": 4,
-      "status": "incubating",
-      "gtm_posture": "hold",
+      "status": "frozen",
+      "gtm_posture": "internal-only",
       "recommendation": "HOLD",
       "weighted_score": 4.6,
       "readiness_tier": "internal-only",
@@ -400,11 +400,11 @@
       "id": "zonga",
       "name": "Zonga",
       "tier": 4,
-      "status": "incubating",
+      "status": "pilot",
       "gtm_posture": "hold",
       "recommendation": "HOLD",
       "weighted_score": 4.4,
-      "readiness_tier": "internal-only",
+      "readiness_tier": "pilot-safe",
       "registry_tier": "INCUBATING",
       "dev_port": 3006
     },

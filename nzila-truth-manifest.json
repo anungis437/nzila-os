@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-04-30",
+  "last_audit": "2026-05-04",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -124,8 +124,8 @@
     "veridian-admin": "incubating",
     "veridian-care": "incubating",
     "veridian-site": "incubating",
-    "weekone": "incubating",
-    "zonga": "incubating",
+    "weekone": "frozen",
+    "zonga": "pilot",
     "mobility-client-portal": "frozen",
     "platform-admin": "frozen",
     "test-scaffold-gp": "frozen"
@@ -342,19 +342,19 @@
     },
     "weekone": {
       "registry_tier": "INCUBATING",
-      "deployment_status": "incubating",
+      "deployment_status": "frozen",
       "readiness_tier": "internal-only",
       "exposure": "internal",
       "portfolio_tier": 4,
-      "gtm_posture": "hold",
+      "gtm_posture": "internal-only",
       "proof_level": "internal-proof",
       "revenue_status": "pre-revenue",
       "priority": "medium"
     },
     "zonga": {
       "registry_tier": "INCUBATING",
-      "deployment_status": "incubating",
-      "readiness_tier": "internal-only",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
       "exposure": "internal",
       "portfolio_tier": 4,
       "gtm_posture": "hold",
@@ -482,7 +482,8 @@
         "control-plane",
         "nzila-hq",
         "orchestrator-api",
-        "maestria"
+        "maestria",
+        "weekone"
       ]
     }
   }

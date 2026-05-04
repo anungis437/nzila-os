@@ -535,6 +535,83 @@
         "ingress": "external",
         "tls": "managed"
       }
+    },
+    "veridian-site": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "requiresExplicitProdOverride": true,
+      "owners": [
+        "veridian",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "synthetic-demo",
+        "owner": "veridian",
+        "reviewBy": "2026-09-30",
+        "mitigation": "Marketing/demand-gen surface for the Veridian suite. Synthetic-demo pilot-ready; no live PHI. Production promotion gated by clinical-go-live approval and DNS/TLS binding."
+      },
+      "routing": {
+        "staging": "https://staging-veridian-site.nzilaventures.com",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed",
+        "demoBanner": "synthetic-demo"
+      }
+    },
+    "veridian-care": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "requiresExplicitProdOverride": true,
+      "owners": [
+        "veridian",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "synthetic-demo",
+        "owner": "veridian",
+        "reviewBy": "2026-09-30",
+        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only \u2014 no live PHI is ingested or stored. Production promotion gated by HIPAA/PHI readiness review, DPIA sign-off, and explicit prod override."
+      },
+      "routing": {
+        "staging": "https://staging-veridian-care.nzilaventures.com",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "external",
+        "tls": "managed",
+        "demoBanner": "synthetic-demo",
+        "phiMode": "disabled"
+      }
+    },
+    "veridian-admin": {
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "prodPromotionEligible": false,
+      "requiresExplicitProdOverride": true,
+      "owners": [
+        "veridian",
+        "platform-ops"
+      ],
+      "productionReadiness": {
+        "state": "internal-demo",
+        "owner": "veridian",
+        "reviewBy": "2026-09-30",
+        "mitigation": "Internal governance/admin console for the Veridian suite. Internal-demo only; no live PHI. Production promotion gated by access-control review and explicit prod override."
+      },
+      "routing": {
+        "staging": "https://staging-veridian-admin.nzilaventures.com",
+        "production": "blocked",
+        "healthPath": "/api/health",
+        "ingress": "restricted",
+        "tls": "managed",
+        "demoBanner": "internal-demo",
+        "phiMode": "disabled"
+      }
     }
   },
   "domainPolicy": {

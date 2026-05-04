@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-04-30
+> Generated: 2026-05-04
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -25,8 +25,8 @@
 | Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Care | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Site | 4 | incubating | hold | pre-revenue | internal-proof | medium |
-| WeekOne | 4 | incubating | hold | pre-revenue | internal-proof | medium |
-| Zonga | 4 | incubating | hold | pre-revenue | internal-proof | low |
+| WeekOne | 4 | frozen | internal-only | pre-revenue | internal-proof | medium |
+| Zonga | 4 | pilot | hold | pre-revenue | internal-proof | low |
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
 | Test Scaffold GP | 5 | frozen | sunset | sunsetting | none | low |
@@ -55,7 +55,7 @@
 | Veridian Care | INCUBATING | internal-only | internal | HOLD |
 | Veridian Site | INCUBATING | internal-only | internal | HOLD |
 | WeekOne | INCUBATING | internal-only | internal | HOLD |
-| Zonga | INCUBATING | internal-only | internal | HOLD |
+| Zonga | INCUBATING | pilot-safe | internal | HOLD |
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Platform Admin | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Test Scaffold GP | DEPRECATED | internal-only | internal | SUNSET |
