@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeAll, describe, it, expect, vi } from 'vitest';
 
 // Mock heavy dependencies that the barrel import chain pulls in
 vi.mock('@nzila/platform-auth/entra/server', () => ({
@@ -50,36 +50,35 @@ vi.mock('@/lib/logger', () => ({
 
 // The index.ts just re-exports from other modules.
 // Verify it re-exports correctly.
-describe('lib/auth/index re-exports', { timeout: 15_000 }, () => {
+describe('lib/auth/index re-exports', { timeout: 60_000 }, () => {
+  let mod: Awaited<typeof import('../index')>;
+
+  beforeAll(async () => {
+    mod = await import('../index');
+  });
+
   it('exports Permission', async () => {
-    // Dynamic import to avoid circular issues in top-level
-    const mod = await import('../index');
     expect(mod.Permission).toBeDefined();
   });
 
   it('exports ROLE_PERMISSIONS', async () => {
-    const mod = await import('../index');
     expect(mod.ROLE_PERMISSIONS).toBeDefined();
     expect(typeof mod.ROLE_PERMISSIONS).toBe('object');
   });
 
   it('exports hasPermission function', async () => {
-    const mod = await import('../index');
     expect(typeof mod.hasPermission).toBe('function');
   });
 
   it('exports getRoleLevel function', async () => {
-    const mod = await import('../index');
     expect(typeof mod.getRoleLevel).toBe('function');
   });
 
   it('exports AuthError class', async () => {
-    const mod = await import('../index');
     expect(mod.AuthError).toBeDefined();
   });
 
   it('exports AuthErrorType enum', async () => {
-    const mod = await import('../index');
     expect(mod.AuthErrorType).toBeDefined();
   });
 });

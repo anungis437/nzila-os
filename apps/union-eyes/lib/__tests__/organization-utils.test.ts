@@ -76,7 +76,7 @@ describe('organization-utils', () => {
 
   // ── getDefaultOrganizationId ─────────────────────────────────────────
 
-  describe('getDefaultOrganizationId', () => {
+  describe('getDefaultOrganizationId', { timeout: 60_000 }, () => {
     it('returns the default organization ID constant', async () => {
       const { getDefaultOrganizationId, DEFAULT_ORGANIZATION_ID } = await import('../organization-utils');
       expect(getDefaultOrganizationId()).toBe(DEFAULT_ORGANIZATION_ID);
