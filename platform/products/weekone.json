@@ -3,7 +3,7 @@
   "name": "WeekOne",
   "tier": 4,
   "tierLabel": "lab",
-  "status": "incubating",
+  "status": "frozen",
   "owner": "Nzila Ventures",
   "pricingTier": "n/a",
   "telemetryRequired": false,
@@ -11,10 +11,10 @@
   "trustProfile": "tier-3-internal",
   "launchStage": "incubating",
   "publicVisible": false,
-  "gtmPosture": "hold",
+  "gtmPosture": "internal-only",
   "proofLevel": "internal-proof",
-  "strategicRole": "Onboarding and first-week activation surface for new tenants across the portfolio.",
-  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "strategicRole": "Onboarding and first-week activation surface for new tenants across the portfolio. Parked / successor-track; excluded from active commercial scorecards.",
+  "generatedAt": "2026-05-04T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

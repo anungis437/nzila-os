@@ -13,8 +13,8 @@
   "publicVisible": false,
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
-  "strategicRole": "Clinical workflow operating system for piloting care-team coordination and patient timeline intelligence.",
-  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "strategicRole": "Clinical workflow operating system for piloting care-team coordination and patient timeline intelligence. Synthetic-demo pilot-ready; no live PHI.",
+  "generatedAt": "2026-05-04T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

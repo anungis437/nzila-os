@@ -13,8 +13,8 @@
   "publicVisible": true,
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
-  "strategicRole": "Healthcare trust and demand-generation surface validating market pull for the Veridian suite.",
-  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "strategicRole": "Healthcare trust and demand-generation surface validating market pull for the Veridian suite. Synthetic-demo pilot-ready; no live PHI.",
+  "generatedAt": "2026-05-04T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"
