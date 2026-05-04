@@ -289,7 +289,7 @@ export async function logAiActionTaken(params: {
   aiReferenceId: string;
   actionType: 'accept' | 'modify' | 'reject';
   entityType: 'grievance' | 'recommendation' | 'insight';
-  entityId: string;
+  targetEntityId: string;
   timestamp?: string;
 }): Promise<void> {
   await auditLog({
@@ -298,14 +298,14 @@ export async function logAiActionTaken(params: {
     userId: params.userId,
     organizationId: params.organizationId,
     resource: params.entityType,
-    resourceId: params.entityId,
+    resourceId: params.targetEntityId,
     action: params.actionType,
     details: { aiReferenceId: params.aiReferenceId, actionType: params.actionType },
     outcome: 'success',
     metadata: {
       aiReferenceId: params.aiReferenceId,
       entityType: params.entityType,
-      entityId: params.entityId,
+      targetEntityId: params.targetEntityId,
       timestamp: params.timestamp ?? new Date().toISOString(),
     },
   });

@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { getAuditedDb } from '@/lib/api-guards';
 
 const overrideSchema = z.object({
   newPriority: z.enum(["low", "medium", "high", "urgent"]),
@@ -78,6 +79,11 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "New priority must differ from current priority");
     }
 
+    const auditedDbResult = await getAuditedDb(organizationId);
+    if (!auditedDbResult.ok) {
+      return auditedDbResult.response;
+    }
+
     // Apply the override
     const [updated] = await withRLSContext(async () => {
       const [u] = await db
@@ -86,7 +92,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         .where(eq(grievances.id, params.id))
         .returning();
 
-      await db.insert(grievanceEvents).values({
+      await auditedDbResult.db.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: 'priority_overridden',
         actorUserId: userId,

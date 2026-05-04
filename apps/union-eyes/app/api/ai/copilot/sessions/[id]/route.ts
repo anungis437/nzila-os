@@ -66,7 +66,7 @@ export const PATCH = withRoleAuth('steward', async (request: NextRequest, contex
       : parsed.data.outcome === 'edited' ? 'modify'
       : 'reject',
     entityType: 'recommendation',
-    entityId: id,
+    targetEntityId: id,
   });
 
   return standardSuccessResponse({ sessionId: id, ...parsed.data });

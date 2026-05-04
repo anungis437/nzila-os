@@ -481,7 +481,16 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "role";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "is_system_admin";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "organization_id";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "permissions";
+DO $$ BEGIN
+ IF EXISTS (
+	SELECT 1
+	FROM information_schema.tables
+	WHERE table_schema = 'public'
+		AND table_name = 'profiles'
+ ) THEN
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "role";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "is_system_admin";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "organization_id";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "permissions";
+ END IF;
+END $$;

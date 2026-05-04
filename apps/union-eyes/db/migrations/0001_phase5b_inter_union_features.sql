@@ -1118,7 +1118,16 @@ END $$;
 CREATE INDEX IF NOT EXISTS "idx_sharing_grants_resource" ON "organization_sharing_grants" USING btree ("resource_type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_sharing_grants_expires" ON "organization_sharing_grants" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_sharing_settings_org" ON "organization_sharing_settings" USING btree ("organization_id");--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "role";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "is_system_admin";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "organization_id";--> statement-breakpoint
-ALTER TABLE "profiles" DROP COLUMN IF EXISTS "permissions";
+DO $$ BEGIN
+ IF EXISTS (
+	SELECT 1
+	FROM information_schema.tables
+	WHERE table_schema = 'public'
+		AND table_name = 'profiles'
+ ) THEN
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "role";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "is_system_admin";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "organization_id";
+	ALTER TABLE "profiles" DROP COLUMN IF EXISTS "permissions";
+ END IF;
+END $$;
