@@ -18,7 +18,7 @@
 import { writeFile, readFile, mkdir } from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { promises as dns } from 'node:dns'
@@ -40,7 +40,7 @@ interface EndpointConfig {
   path: string
   expectedStatus: number | number[]
   timeoutMs: number
-  environment?: EnvironmentName
+  environment?: EnvironmentName | 'unknown'
   source?: 'inventory' | 'config'
   policyCritical?: boolean
 }
@@ -55,10 +55,12 @@ type InventoryRouting = {
   stagingFallback?: string
   productionFallback?: string
   healthPath?: string
+  readyPath?: string
 }
 
 type InventoryApp = {
   routing?: InventoryRouting
+  stagingDnsStatus?: string
 }
 
 type InventoryTopology = {
@@ -156,65 +158,112 @@ function loadInventory(): DeploymentInventory {
   return JSON.parse(readFileSync(INVENTORY_PATH, 'utf8')) as DeploymentInventory
 }
 
-function buildInventoryEndpoints(inventory: DeploymentInventory): EndpointConfig[] {
+function isLiveStagingDnsStatus(status: string | undefined): boolean {
+  const normalized = (status ?? '').trim().toLowerCase()
+  return ['active', 'resolved', 'wired', 'healthy', 'live'].includes(normalized)
+}
+
+function canonicalStagingPolicyCritical(app: InventoryApp, env: EnvironmentName): boolean {
+  return env === 'staging' && isLiveStagingDnsStatus(app.stagingDnsStatus)
+}
+
+export function buildInventoryEndpointsForApproved(
+  inventory: DeploymentInventory,
+  approvedAppsByEnv: Record<EnvironmentName, string[]>,
+): EndpointConfig[] {
   const endpoints: EndpointConfig[] = []
   const seen = new Set<string>()
 
   const envs: EnvironmentName[] = ['staging', 'production']
   for (const env of envs) {
-    const approvedApps = resolveApprovedApps(env)
+    const approvedApps = approvedAppsByEnv[env] ?? []
     for (const appName of approvedApps) {
       const app = inventory.apps[appName]
       const canonicalRoute = normalizeRoute(app?.routing?.[env])
-      // When canonical route is blocked/n/a but a *Fallback URL exists (e.g. ACA URL while custom DNS
-      // is pending), still monitor the deployed surface as advisory evidence. This keeps inventory-driven
-      // generation policy-correct: blocked apps are NOT prod-critical, but their fallback surface is
-      // observed for runtime drift.
       const fallbackKey = env === 'staging' ? 'stagingFallback' : 'productionFallback'
       const fallbackRoute = normalizeRoute(app?.routing?.[fallbackKey])
-      const route = canonicalRoute ?? fallbackRoute
-      if (!route) continue
-      const usedFallback = !canonicalRoute && Boolean(fallbackRoute)
-      const healthPath = app?.routing?.healthPath ?? '/api/health'
-      const appAlias = aliasLogicalApp(appName)
-      const baseName = `${env}:${appAlias}${usedFallback ? ':fallback' : ''}`
-      const policyCritical = env === 'production' && !usedFallback
 
-      const rootUrl = route.replace(/\/$/, '')
-      const rootKey = `${env}|${rootUrl}|/`
-      if (!seen.has(rootKey)) {
-        endpoints.push({
-          name: `${baseName}:root`,
-          url: rootUrl,
-          path: '/',
-          expectedStatus: [200, 204],
-          timeoutMs: 15_000,
-          environment: env,
-          source: 'inventory',
-          policyCritical,
-        })
-        seen.add(rootKey)
+      const routes: Array<{ route: string; usedFallback: boolean }> = []
+      if (canonicalRoute) {
+        routes.push({ route: canonicalRoute, usedFallback: false })
       }
+      if (fallbackRoute && fallbackRoute !== canonicalRoute) {
+        routes.push({ route: fallbackRoute, usedFallback: true })
+      }
+      if (routes.length === 0) continue
 
-      const normalizedHealthPath = healthPath.startsWith('/') ? healthPath : `/${healthPath}`
-      const healthKey = `${env}|${rootUrl}|${normalizedHealthPath}`
-      if (!seen.has(healthKey)) {
-        endpoints.push({
-          name: `${baseName}:health`,
-          url: rootUrl,
-          path: normalizedHealthPath,
-          expectedStatus: [200, 204],
-          timeoutMs: 15_000,
-          environment: env,
-          source: 'inventory',
-          policyCritical,
-        })
-        seen.add(healthKey)
+      const healthPath = app?.routing?.healthPath ?? '/api/health'
+      const readyPath = app?.routing?.readyPath
+      const appAlias = aliasLogicalApp(appName)
+
+      for (const target of routes) {
+        const baseName = `${env}:${appAlias}${target.usedFallback ? ':fallback' : ''}`
+        const policyCritical = target.usedFallback
+          ? false
+          : env === 'production' || canonicalStagingPolicyCritical(app, env)
+        const rootUrl = target.route.replace(/\/$/, '')
+
+        const rootKey = `${env}|${rootUrl}|/`
+        if (!seen.has(rootKey)) {
+          endpoints.push({
+            name: `${baseName}:root`,
+            url: rootUrl,
+            path: '/',
+            expectedStatus: [200, 204],
+            timeoutMs: 15_000,
+            environment: env,
+            source: 'inventory',
+            policyCritical,
+          })
+          seen.add(rootKey)
+        }
+
+        const normalizedHealthPath = healthPath.startsWith('/') ? healthPath : `/${healthPath}`
+        const healthKey = `${env}|${rootUrl}|${normalizedHealthPath}`
+        if (!seen.has(healthKey)) {
+          endpoints.push({
+            name: `${baseName}:health`,
+            url: rootUrl,
+            path: normalizedHealthPath,
+            expectedStatus: [200, 204],
+            timeoutMs: 15_000,
+            environment: env,
+            source: 'inventory',
+            policyCritical,
+          })
+          seen.add(healthKey)
+        }
+
+        if (readyPath) {
+          const normalizedReadyPath = readyPath.startsWith('/') ? readyPath : `/${readyPath}`
+          const readyKey = `${env}|${rootUrl}|${normalizedReadyPath}`
+          if (!seen.has(readyKey)) {
+            endpoints.push({
+              name: `${baseName}:ready`,
+              url: rootUrl,
+              path: normalizedReadyPath,
+              expectedStatus: [200, 204],
+              timeoutMs: 15_000,
+              environment: env,
+              source: 'inventory',
+              policyCritical,
+            })
+            seen.add(readyKey)
+          }
+        }
       }
     }
   }
 
   return endpoints
+}
+
+function buildInventoryEndpoints(inventory: DeploymentInventory): EndpointConfig[] {
+  const approvedAppsByEnv: Record<EnvironmentName, string[]> = {
+    staging: resolveApprovedApps('staging'),
+    production: resolveApprovedApps('production'),
+  }
+  return buildInventoryEndpointsForApproved(inventory, approvedAppsByEnv)
 }
 
 /** Resolve ${VAR:-default} placeholders from process.env */
@@ -450,7 +499,13 @@ async function main(): Promise<void> {
   process.exit(failCount > 0 && !skipNetwork ? 1 : 0)
 }
 
-main().catch((err: unknown) => {
-  console.error('[check-health] Fatal error:', err)
-  process.exit(1)
-})
+const isMain =
+  typeof process.argv[1] === 'string' &&
+  pathToFileURL(process.argv[1]).href === import.meta.url
+
+if (isMain) {
+  main().catch((err: unknown) => {
+    console.error('[check-health] Fatal error:', err)
+    process.exit(1)
+  })
+}

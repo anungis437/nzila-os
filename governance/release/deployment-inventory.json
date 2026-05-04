@@ -236,7 +236,7 @@
       "prodPromotionEligible": false,
       "containerAppName": "nzila-os-agrimo",
       "stagingDeployed": true,
-      "stagingDnsStatus": "pending-manual-cloudflare",
+      "stagingDnsStatus": "resolved",
       "promotionCriteria": [
         "staging-agrimo.nzilaventures.com DNS CNAME resolved and healthy",
         "agrimo.nzilaventures.com DNS CNAME created",
@@ -253,11 +253,12 @@
         "mitigation": "Agrimo deployed in staging (nzila-os-agrimo); staging DNS pending manual Cloudflare action."
       },
       "routing": {
-        "staging": "blocked",
+        "staging": "https://staging-agrimo.nzilaventures.com",
         "stagingFallback": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "blocked",
         "productionState": "reserved-not-yet-promoted",
         "healthPath": "/api/health",
+        "readyPath": "/api/ready",
         "ingress": "external",
         "tls": "managed"
       }
