@@ -93,6 +93,7 @@ jobs:
         run: pnpm --filter @nzila/${{ matrix.app }} e2e
         env:
           CI: true
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           # Override env vars used by spec files that construct their own URLs
           WEB_URL: http://localhost:${{ matrix.port }}
           CONSOLE_URL: http://localhost:${{ matrix.port }}
