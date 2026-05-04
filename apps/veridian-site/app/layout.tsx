@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Nav } from '@/components/nav'
 import { Footer } from '@/components/footer'
+import { SyntheticWarning } from '@/components/synthetic-warning'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen flex flex-col">
+        <SyntheticWarning />
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -60,3 +60,40 @@ spec:
   type: cache
   owner: platform-team
   system: nzila-os
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: veridian-site
+  description: Veridian Care marketing site (synthetic demo, no live data)
+  tags: [nextjs, marketing, synthetic-demo, no-phi]
+spec:
+  type: website
+  lifecycle: experimental
+  owner: platform-team
+  system: nzila-os
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: veridian-care
+  description: Veridian Care patient interoperability portal (synthetic demo, no PHI)
+  tags: [nextjs, healthcare, synthetic-demo, no-phi]
+spec:
+  type: service
+  lifecycle: experimental
+  owner: platform-team
+  system: nzila-os
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: veridian-admin
+  description: Veridian Care internal admin portal (synthetic demo, no PHI)
+  tags: [nextjs, admin, internal, synthetic-demo, no-phi]
+spec:
+  type: service
+  lifecycle: experimental
+  owner: platform-team
+  system: nzila-os
