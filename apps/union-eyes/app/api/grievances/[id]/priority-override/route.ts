@@ -92,7 +92,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         .where(eq(grievances.id, params.id))
         .returning();
 
-      await auditedDbResult.db.insert(grievanceEvents).values({
+      await auditedDbResult.db.insert(grievanceEvents, {
         grievanceId: params.id,
         eventType: 'priority_overridden',
         actorUserId: userId,
