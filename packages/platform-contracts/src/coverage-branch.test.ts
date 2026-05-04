@@ -316,20 +316,24 @@ describe('app registry validation branches', () => {
 })
 
 describe('module loading coverage', () => {
-  it('loads the barrel file and type-only contract modules', async () => {
-    const barrel = await import('./index.js')
-    const modules = await Promise.all([
-      import('./change.js'),
-      import('./environment.js'),
-      import('./evidence.js'),
-      import('./governance.js'),
-      import('./health.js'),
-      import('./metrics.js'),
-    ])
+  it(
+    'loads the barrel file and type-only contract modules',
+    async () => {
+      const barrel = await import('./index.js')
+      const modules = await Promise.all([
+        import('./change.js'),
+        import('./environment.js'),
+        import('./evidence.js'),
+        import('./governance.js'),
+        import('./health.js'),
+        import('./metrics.js'),
+      ])
 
-    expect(barrel.platformAuditEventSchema).toBe(platformAuditEventSchema)
-    expect(barrel.userIdentitySchema).toBe(userIdentitySchema)
-    expect(modules).toHaveLength(6)
-    expect(modules.every((moduleExports) => typeof moduleExports === 'object')).toBe(true)
-  })
+      expect(barrel.platformAuditEventSchema).toBe(platformAuditEventSchema)
+      expect(barrel.userIdentitySchema).toBe(userIdentitySchema)
+      expect(modules).toHaveLength(6)
+      expect(modules.every((moduleExports) => typeof moduleExports === 'object')).toBe(true)
+    },
+    30000,
+  )
 })

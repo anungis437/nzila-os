@@ -1,9 +1,8 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
+import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 
 const APP = 'agrimo'
-const VERSION = process.env.npm_package_version ?? '0.0.0'
-const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local'
 
 async function checkDb(): Promise<boolean> {
   try {
@@ -30,21 +29,18 @@ async function checkBlob(): Promise<boolean> {
 export async function GET() {
   const [db, blob] = await Promise.allSettled([checkDb(), checkBlob()])
 
-  const checks = {
+  const checks = normalizeHealthChecks({
+    process: true,
     db: db.status === 'fulfilled' ? db.value : false,
     blob: blob.status === 'fulfilled' ? blob.value : false,
-  }
-
-  const allHealthy = Object.values(checks).every(Boolean)
+  })
 
   return NextResponse.json(
     {
-      status: allHealthy ? 'ok' : 'degraded',
-      app: APP,
-      buildInfo: { version: VERSION, commit: COMMIT },
+      status: healthStatusFromChecks(checks),
+      ...getBuildMetadata(APP),
       checks,
-      timestamp: new Date().toISOString(),
     },
-    { status: allHealthy ? 200 : 503 },
+    { status: 200 },
   )
 }

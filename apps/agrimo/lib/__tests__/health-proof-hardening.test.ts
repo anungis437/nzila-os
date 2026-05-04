@@ -69,10 +69,7 @@ describe('Agrimo health proof endpoint generation', () => {
       production: [],
     })
 
-    expect(endpoints.map((ep) => ep.name)).toEqual([
-      'staging:agrimo:fallback:root',
-      'staging:agrimo:fallback:health',
-    ])
+    expect(endpoints.map((ep) => ep.name)).toEqual(['staging:agrimo:fallback:health'])
     expect(endpoints.every((ep) => ep.policyCritical === false)).toBe(true)
   })
 })

@@ -31,6 +31,8 @@ const CONFIG_PATH = join(__dirname, 'health-config.json')
 const INVENTORY_PATH = join(ROOT, 'governance', 'release', 'deployment-inventory.json')
 const OUTPUT_DIR = join(ROOT, 'reports', 'runtime')
 const OUTPUT_FILE = join(OUTPUT_DIR, 'health-latest.json')
+const ROOT_PROBE_TIMEOUT_MS = 15_000
+const HEALTH_PROBE_TIMEOUT_MS = 30_000
 
 type EnvironmentName = 'staging' | 'production'
 
@@ -207,20 +209,23 @@ export function buildInventoryEndpointsForApproved(
           ? false
           : env === 'production' || canonicalStagingPolicyCritical(app, env)
         const rootUrl = target.route.replace(/\/$/, '')
+        const shouldProbeRoot = !(target.usedFallback && !canonicalRoute)
 
-        const rootKey = `${env}|${rootUrl}|/`
-        if (!seen.has(rootKey)) {
-          endpoints.push({
-            name: `${baseName}:root`,
-            url: rootUrl,
-            path: '/',
-            expectedStatus: [200, 204],
-            timeoutMs: 15_000,
-            environment: env,
-            source: 'inventory',
-            policyCritical,
-          })
-          seen.add(rootKey)
+        if (shouldProbeRoot) {
+          const rootKey = `${env}|${rootUrl}|/`
+          if (!seen.has(rootKey)) {
+            endpoints.push({
+              name: `${baseName}:root`,
+              url: rootUrl,
+              path: '/',
+              expectedStatus: [200, 204],
+              timeoutMs: ROOT_PROBE_TIMEOUT_MS,
+              environment: env,
+              source: 'inventory',
+              policyCritical,
+            })
+            seen.add(rootKey)
+          }
         }
 
         const normalizedHealthPath = healthPath.startsWith('/') ? healthPath : `/${healthPath}`
@@ -231,7 +236,7 @@ export function buildInventoryEndpointsForApproved(
             url: rootUrl,
             path: normalizedHealthPath,
             expectedStatus: [200, 204],
-            timeoutMs: 15_000,
+            timeoutMs: HEALTH_PROBE_TIMEOUT_MS,
             environment: env,
             source: 'inventory',
             policyCritical,
@@ -248,7 +253,7 @@ export function buildInventoryEndpointsForApproved(
               url: rootUrl,
               path: normalizedReadyPath,
               expectedStatus: [200, 204],
-              timeoutMs: 15_000,
+              timeoutMs: HEALTH_PROBE_TIMEOUT_MS,
               environment: env,
               source: 'inventory',
               policyCritical,

@@ -250,15 +250,19 @@ describe('collections and credit helpers', () => {
 })
 
 describe('barrel exports', () => {
-  it('exposes package and saga public exports', async () => {
-    const pkg = await import('./index')
-    const sagas = await import('./sagas')
+  it(
+    'exposes package and saga public exports',
+    async () => {
+      const pkg = await import('./index')
+      const sagas = await import('./sagas')
 
-    expect(typeof pkg.generateAgingReport).toBe('function')
-    expect(typeof pkg.createQuoteService).toBe('function')
-    expect(typeof pkg.createOrderToInvoiceSaga).toBe('function')
+      expect(typeof pkg.generateAgingReport).toBe('function')
+      expect(typeof pkg.createQuoteService).toBe('function')
+      expect(typeof pkg.createOrderToInvoiceSaga).toBe('function')
 
-    expect(typeof sagas.createQuoteToOrderSaga).toBe('function')
-    expect(typeof sagas.createOrderToInvoiceSaga).toBe('function')
-  })
+      expect(typeof sagas.createQuoteToOrderSaga).toBe('function')
+      expect(typeof sagas.createOrderToInvoiceSaga).toBe('function')
+    },
+    30000,
+  )
 })

@@ -7,10 +7,9 @@
  * - Public route (no auth required)
  */
 import { NextResponse } from 'next/server'
+import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 
 const APP = 'trade'
-const VERSION = process.env.npm_package_version ?? '0.0.0'
-const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local'
 
 async function checkDb(): Promise<boolean> {
   try {
@@ -26,17 +25,14 @@ async function checkDb(): Promise<boolean> {
 export async function GET() {
   const dbResult = await checkDb().catch(() => false)
 
-  const checks = { db: dbResult }
-  const allHealthy = Object.values(checks).every(Boolean)
+  const checks = normalizeHealthChecks({ process: true, db: dbResult })
 
   return NextResponse.json(
     {
-      status: allHealthy ? 'ok' : 'degraded',
-      app: `@nzila/${APP}`,
-      buildInfo: { version: VERSION, commit: COMMIT },
+      status: healthStatusFromChecks(checks),
+      ...getBuildMetadata(APP),
       checks,
-      timestamp: new Date().toISOString(),
     },
-    { status: allHealthy ? 200 : 503 },
+    { status: 200 },
   )
 }

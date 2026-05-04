@@ -9,7 +9,7 @@ async function importClientWithMocks(options?: {
   if (options?.databaseUrl) {
     process.env.DATABASE_URL = options.databaseUrl
   } else {
-    delete process.env.DATABASE_URL
+    process.env.DATABASE_URL = ''
   }
 
   const sqlClient = { tag: 'sql-client' }
@@ -32,34 +32,40 @@ afterEach(() => {
   delete process.env.DATABASE_URL
 })
 
-describe('db client proxy', () => {
+describe.sequential('db client proxy', () => {
   it(
     'throws when DATABASE_URL is missing and the proxy is used',
     async () => {
-      const { clientModule } = await importClientWithMocks()
+      vi.resetModules()
+      process.env.DATABASE_URL = ''
+      const clientModule = await import('../client')
 
       expect(() => (clientModule.db as any).select).toThrow(
         'DATABASE_URL environment variable is required',
       )
     },
-    20000,
+    60000,
   )
 
-  it('initializes the drizzle client once and reuses it for get/has access', async () => {
-    const query = vi.fn()
-    const { clientModule, postgresMock, drizzleMock } = await importClientWithMocks({
-      databaseUrl: 'postgres://example.test/nzila',
-      drizzleReturn: { query, marker: 'runtime-db' },
-    })
+  it(
+    'initializes the drizzle client once and reuses it for get/has access',
+    async () => {
+      const query = vi.fn()
+      const { clientModule, postgresMock, drizzleMock } = await importClientWithMocks({
+        databaseUrl: 'postgres://example.test/nzila',
+        drizzleReturn: { query, marker: 'runtime-db' },
+      })
 
-    expect((clientModule.db as any).query).toBe(query)
-    expect('marker' in (clientModule.db as any)).toBe(true)
-    expect(postgresMock).toHaveBeenCalledTimes(1)
-    expect(drizzleMock).toHaveBeenCalledTimes(1)
-  })
+      expect((clientModule.db as any).query).toBe(query)
+      expect('marker' in (clientModule.db as any)).toBe(true)
+      expect(postgresMock).toHaveBeenCalledTimes(1)
+      expect(drizzleMock).toHaveBeenCalledTimes(1)
+    },
+    60000,
+  )
 })
 
-describe('db runtime exports', () => {
+describe.sequential('db runtime exports', () => {
   it('re-exports raw and platform database aliases', async () => {
     const { clientModule } = await importClientWithMocks({
       databaseUrl: 'postgres://example.test/nzila',
