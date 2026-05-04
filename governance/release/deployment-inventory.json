@@ -543,6 +543,8 @@
       "track": "pilot",
       "prodPromotionEligible": false,
       "requiresExplicitProdOverride": true,
+      "stagingDeployed": false,
+      "stagingDnsStatus": "not-deployed",
       "owners": [
         "veridian",
         "platform-ops"
@@ -551,7 +553,7 @@
         "state": "synthetic-demo",
         "owner": "veridian",
         "reviewBy": "2026-09-30",
-        "mitigation": "Marketing/demand-gen surface for the Veridian suite. Synthetic-demo pilot-ready; no live PHI. Production promotion gated by clinical-go-live approval and DNS/TLS binding."
+        "mitigation": "Marketing/demand-gen surface for the Veridian suite. Synthetic-demo only; staging container app is not currently deployed in ACA. Keep staging DNS unresolved advisory until deployment and custom-domain binding are complete."
       },
       "routing": {
         "staging": "https://staging-veridian-site.nzilaventures.com",
@@ -568,6 +570,8 @@
       "track": "pilot",
       "prodPromotionEligible": false,
       "requiresExplicitProdOverride": true,
+      "stagingDeployed": false,
+      "stagingDnsStatus": "not-deployed",
       "owners": [
         "veridian",
         "platform-ops"
@@ -576,7 +580,7 @@
         "state": "synthetic-demo",
         "owner": "veridian",
         "reviewBy": "2026-09-30",
-        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only \u2014 no live PHI is ingested or stored. Production promotion gated by HIPAA/PHI readiness review, DPIA sign-off, and explicit prod override."
+        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only \u2014 no live PHI is ingested or stored. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
       },
       "routing": {
         "staging": "https://staging-veridian-care.nzilaventures.com",
@@ -594,6 +598,8 @@
       "track": "pilot",
       "prodPromotionEligible": false,
       "requiresExplicitProdOverride": true,
+      "stagingDeployed": false,
+      "stagingDnsStatus": "not-deployed",
       "owners": [
         "veridian",
         "platform-ops"
@@ -602,7 +608,7 @@
         "state": "internal-demo",
         "owner": "veridian",
         "reviewBy": "2026-09-30",
-        "mitigation": "Internal governance/admin console for the Veridian suite. Internal-demo only; no live PHI. Production promotion gated by access-control review and explicit prod override."
+        "mitigation": "Internal governance/admin console for the Veridian suite. Internal-demo only; no live PHI. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
       },
       "routing": {
         "staging": "https://staging-veridian-admin.nzilaventures.com",

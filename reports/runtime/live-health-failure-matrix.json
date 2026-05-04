@@ -1,17 +1,5 @@
 [
   {
-    "endpoint_id": "staging:cfo:fallback:root",
-    "resolved_url": "https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/",
-    "dns_result": "A:20.175.163.48",
-    "http_status": "",
-    "error": "This operation was aborted",
-    "policyCritical": false,
-    "app": "cfo",
-    "suspected_cause": "Ingress timeout or upstream cold/unhealthy",
-    "owner": "cfo, platform-ops",
-    "action": "Platform-Ops: inspect ACA ingress/revision health and timeouts"
-  },
-  {
     "endpoint_id": "staging:zonga:fallback:health",
     "resolved_url": "https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
     "dns_result": "A:20.175.163.48",
@@ -153,7 +141,7 @@
     "app": "veridian-site",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   },
   {
     "endpoint_id": "staging:veridian-site:health",
@@ -165,7 +153,7 @@
     "app": "veridian-site",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   },
   {
     "endpoint_id": "staging:veridian-care:root",
@@ -177,7 +165,7 @@
     "app": "veridian-care",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   },
   {
     "endpoint_id": "staging:veridian-care:health",
@@ -189,7 +177,7 @@
     "app": "veridian-care",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   },
   {
     "endpoint_id": "staging:veridian-admin:root",
@@ -201,7 +189,7 @@
     "app": "veridian-admin",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   },
   {
     "endpoint_id": "staging:veridian-admin:health",
@@ -213,6 +201,6 @@
     "app": "veridian-admin",
     "suspected_cause": "Custom DNS / domain binding unresolved",
     "owner": "veridian, platform-ops",
-    "action": "Platform-Ops: validate DNS target and domain binding before promotion"
+    "action": "Platform-Ops: validate DNS target/domain binding or mark app not deployed"
   }
 ]
