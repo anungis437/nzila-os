@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-04T01:59:16.203Z",
+  "generatedAt": "2026-05-04T13:44:08.927Z",
   "target": "production",
   "readinessStatus": "GO_FOR_PRODUCTION",
   "decision": "GO",
@@ -10,6 +10,11 @@
   "rbacCoveragePercent": 100,
   "auditCoveragePercent": 100,
   "e2eCoveragePercent": 100,
+  "aiUxCoveragePercent": 0,
+  "aiAuditCoveragePercent": 0,
+  "aiDecisionTraceCoveragePercent": 0,
+  "aiBannerPresent": true,
+  "aiUsageViewerPresent": true,
   "externalTesterContainmentStatus": "pass",
   "crossOrgLeakStatus": "pass",
   "narVerificationStatus": "pass",

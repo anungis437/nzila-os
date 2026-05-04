@@ -1,6 +1,6 @@
 # Union Eyes QA Readiness Report
 
-- Generated: 2026-05-04T01:59:16.203Z
+- Generated: 2026-05-04T13:44:08.927Z
 - Target: production
 - Readiness: GO_FOR_PRODUCTION
 - Decision: GO
@@ -13,6 +13,11 @@
 - RBAC coverage: 100%
 - Audit coverage: 100%
 - E2E coverage: 100%
+- AI UX coverage: 0%
+- AI audit coverage: 0%
+- AI decision trace coverage: 0%
+- AI banner present: true
+- AI usage viewer present: true
 
 ## Status
 - External tester containment: pass

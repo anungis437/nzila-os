@@ -2109,6 +2109,9 @@ importers:
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
+      '@nzila/policies':
+        specifier: workspace:*
+        version: link:../../packages/policies
       '@nzila/ue-cognition':
         specifier: workspace:*
         version: link:../../packages/ue-cognition
