@@ -73,6 +73,17 @@ jobs:
           AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
           NEXT_PUBLIC_APP_URL: http://localhost:${{ matrix.port }}
 
+      - name: Bootstrap Union Eyes E2E database
+        if: matrix.app == 'union-eyes'
+        run: |
+          docker run --name ci-e2e-postgres -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e -p 5432:5432 -d postgres:16
+          timeout 60 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
+          pnpm --filter @nzila/union-eyes db:migrate
+          pnpm --filter @nzila/union-eyes seed:test-env
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          QA_TEST_ENV: 'true'
+
       - name: Start app
         run: |
           node apps/${{ matrix.app }}/.next/standalone/apps/${{ matrix.app }}/server.js &
@@ -83,6 +94,9 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           NODE_ENV: production
           PORT: ${{ matrix.port }}
+          QA_TEST_ENV: 'true'
+          PLAYWRIGHT_TEST_AUTH: 'true'
+          UE_E2E_RISK_BYPASS: 'true'
           # boot-env requires these in production mode (control-plane, console)
           CONTROL_PLANE_API_KEY: ci-e2e-placeholder-key
           CONTROL_PLANE_URL: http://localhost:3010
@@ -94,6 +108,7 @@ jobs:
         env:
           CI: true
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          PLAYWRIGHT_TEST_AUTH: 'true'
           # Override env vars used by spec files that construct their own URLs
           WEB_URL: http://localhost:${{ matrix.port }}
           CONSOLE_URL: http://localhost:${{ matrix.port }}

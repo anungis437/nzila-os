@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: ZAP Baseline Scan — ${{ matrix.target.name }}
-        uses: zaproxy/action-baseline@7cea08522cd386f6c7671dd71b8d5cebe5e7a009 # v0.14.0
+        uses: zaproxy/action-baseline@v0.14.0
         with:
           target: ${{ matrix.target.url }}
           rules_file_name: '.zap/rules.tsv'
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: ZAP API Scan — orchestrator-api
-        uses: zaproxy/action-api-scan@8a8b3b4db4fe0e1c102e0ccfa49c5e7a2cc1dce0 # v0.9.0
+        uses: zaproxy/action-api-scan@v0.9.0
         with:
           target: https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health
           format: openapi
