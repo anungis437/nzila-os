@@ -85,6 +85,37 @@ A `requireRole()` guard has been added to `lib/api-guards.ts` that reads the `ro
 
 > **File**: `apps/zonga/app/api/payouts/route.ts` — role check added.
 
+### 4c. Edge Proxy Fail-Closed (P0-2)
+
+The edge proxy (`apps/zonga/proxy.ts`) previously caught all middleware errors
+and returned `NextResponse.next()` — silently bypassing `auth.protect()` whenever
+the upstream auth/rate-limit pipeline failed. This was a **critical fail-open**
+that made the entire app reachable unauthenticated during any transient outage.
+
+The catch block now returns **HTTP 503 `MIDDLEWARE_FAILURE`** in non-development
+environments, preserving the dev-mode pass-through for local work.
+
+> **File**: `apps/zonga/proxy.ts` — final `catch` block hardened.
+
+### 4d. Org Resolution No Longer Trusts AD GUID (P0-2)
+
+A new helper `apps/zonga/lib/organization-utils.ts` resolves the **app-level**
+organization UUID for a user via:
+
+1. `selected_org_id` / `selected_organization_id` cookie (verified against
+   `org_members` for active membership), then
+2. Most-recently-updated active `org_members` row,
+3. `PLATFORM_ADMIN_USER_IDS` env override for break-glass platform operators.
+
+`withOrgScope()` in `lib/api-guards.ts` now calls `getOrganizationIdForUser()`
+instead of using `auth().orgId` (which returned the user's first Entra AD
+security-group GUID and **never matched** `org_members.org_id`). Once the
+correct UUID flows through `withOrgScope`, every downstream `requireRole()` /
+`getAuditedDb()` call enforces the intended org-and-role check.
+
+> **Files**: `apps/zonga/lib/organization-utils.ts` (new),
+> `apps/zonga/lib/api-guards.ts` (`withOrgScope` body refactored).
+
 ---
 
 ## 5. Remaining Risks
@@ -92,7 +123,6 @@ A `requireRole()` guard has been added to `lib/api-guards.ts` that reads the `ro
 | Risk | Severity | Mitigation |
 |---|---|---|
 | `org_members.role` column: schema must have `role` column populated | 🔴 | Confirm DB migration; default role to `creator` on insert |
-| Entra `orgId` returns AD group GUID, not app org UUID | 🟠 | Already documented — `getOrganizationIdForUser()` must be used, not `auth().orgId` |
 | UI-only permission checks on admin pages | 🟡 | Route-level middleware or layout guards needed; API layer is gated |
 | No session revocation endpoint | 🟡 | Use session expiry (15 min account lockout); add `/api/auth/logout` route if not present |
 | Magic-link not present | 🟢 | Not required for launch |
@@ -109,6 +139,8 @@ A `requireRole()` guard has been added to `lib/api-guards.ts` that reads the `ro
 | `/api/analytics/*` | ❓ Needs verification | ❌ Role missing |
 | `/api/moderation/*` | ❓ Needs verification | ❌ Role missing |
 | `/[locale]/dashboard/*` | Layout-level auth assumed | ❌ No middleware RBAC |
+
+**Edge proxy posture**: fail-CLOSED in production (503) as of P0-2; fail-open retained only in `NODE_ENV=development`.
 
 ---
 

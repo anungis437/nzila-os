@@ -33,6 +33,7 @@ import {
   createRequestContext,
   runWithContext,
 } from '@nzila/os-core/telemetry'
+import { getOrganizationIdForUser } from './organization-utils'
 
 // ── Re-exports for route convenience ────────────────────────────────────────
 export { withAudit, createAuditedScopedDb }
@@ -232,7 +233,10 @@ export async function withOrgScope(
     const authResult = await authenticateUser()
     if (!authResult.ok) return authResult.response
 
-    const { orgId } = await auth()
+    // IMPORTANT: do NOT use `auth().orgId` — it returns the user's first
+    // Entra (Azure AD) security-group GUID, not the app-level `orgs.id`.
+    // Resolve the real organization UUID from `org_members`.
+    const orgId = await getOrganizationIdForUser(authResult.userId)
     if (!orgId) {
       return NextResponse.json(
         {

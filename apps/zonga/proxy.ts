@@ -153,12 +153,25 @@ export const proxy = authMiddleware(async (auth, request: NextRequest) => {
     response.headers.set('x-request-id', crypto.randomUUID());
     return response;
   } catch (err) {
-    // Fail-open: log and let the request through rather than returning a 500
-    // that blocks every page load when an upstream service (Redis, auth) is down.
+    // Fail-CLOSED: an upstream failure (auth, rate-limit) must NOT silently
+    // bypass authentication. In dev we still let the request through so
+    // local work isn't blocked by Redis/Entra hiccups.
     void err
-    const fallback = NextResponse.next()
-    fallback.headers.set('x-request-id', crypto.randomUUID())
-    return fallback
+    const requestId = crypto.randomUUID()
+    if (process.env.NODE_ENV === 'development') {
+      const fallback = NextResponse.next()
+      fallback.headers.set('x-request-id', requestId)
+      return fallback
+    }
+    return NextResponse.json(
+      {
+        error: 'Service Unavailable',
+        message:
+          'A required upstream service is temporarily unavailable. Please retry.',
+        code: 'MIDDLEWARE_FAILURE',
+      },
+      { status: 503, headers: { 'x-request-id': requestId } },
+    )
   }
 });
 
