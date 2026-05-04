@@ -13,6 +13,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireUser } from '@/lib/api-auth-guard';
 import { isFeatureEnabled, AI_FEATURES } from '@/lib/services/feature-flags';
 import { AIChatbot } from '@/components/ai/ai-chatbot';
+import { AIBanner } from '@/components/ai';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,8 +42,13 @@ export default async function DashboardAIAssistantPage() {
   }
 
   return (
-    <div className="h-full overflow-hidden">
-      <AIChatbot />
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="shrink-0 px-4 pt-4">
+        <AIBanner context="summary" />
+      </div>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <AIChatbot />
+      </div>
     </div>
   );
 }

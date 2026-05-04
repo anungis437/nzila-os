@@ -1,6 +1,8 @@
 /**
  * AI Components — barrel export
  */
+export { AIBanner } from "./AIBanner";
+export type { AIBannerProps } from "./AIBanner";
 export { AiDisclaimer } from "./ai-disclaimer";
 export { ClauseReasoningPanel } from "./clause-reasoning-panel";
 export { EmployerRiskCard } from "./employer-risk-card";

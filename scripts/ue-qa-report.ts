@@ -47,6 +47,10 @@ type Summary = {
   rbacCoveragePercent: number
   auditCoveragePercent: number
   e2eCoveragePercent: number
+  aiUxCoveragePercent: number
+  aiAuditCoveragePercent: number
+  aiBannerPresent: boolean
+  aiUsageViewerPresent: boolean
   externalTesterContainmentStatus: 'pass' | 'fail' | 'warning'
   crossOrgLeakStatus: 'pass' | 'fail' | 'unknown'
   narVerificationStatus: 'pass' | 'fail' | 'unknown'
@@ -216,6 +220,10 @@ function writeMarkdownReport(summary: Summary, outPath: string): void {
     `- RBAC coverage: ${summary.rbacCoveragePercent}%`,
     `- Audit coverage: ${summary.auditCoveragePercent}%`,
     `- E2E coverage: ${summary.e2eCoveragePercent}%`,
+    `- AI UX coverage: ${summary.aiUxCoveragePercent}%`,
+    `- AI audit coverage: ${summary.aiAuditCoveragePercent}%`,
+    `- AI banner present: ${summary.aiBannerPresent}`,
+    `- AI usage viewer present: ${summary.aiUsageViewerPresent}`,
     '',
     '## Status',
     `- External tester containment: ${summary.externalTesterContainmentStatus}`,
@@ -377,6 +385,29 @@ function main(): void {
     blockers.push('No required Union Eyes E2E maturity flows found.')
   }
 
+  const aiBannerPresent = fs.existsSync(
+    path.join(repoRoot, 'apps', 'union-eyes', 'components', 'ai', 'AIBanner.tsx'),
+  )
+  const aiUsageViewerPresent = fs.existsSync(
+    path.join(repoRoot, 'apps', 'union-eyes', 'app', '[locale]', 'dashboard', 'admin', 'ai-usage', 'page.tsx'),
+  )
+
+  const aiStories = stories.filter((story) => story.storyId.startsWith('AI-'))
+  const aiUxCoverage = coverageForStories(aiStories)
+  const aiUxCoveragePercent = aiStories.length > 0 ? aiUxCoverage.percent : 0
+
+  const aiMutationStories = mutationStories.filter((story) => story.storyId.startsWith('AI-'))
+  const aiMutationTested = aiMutationStories.filter((story) => story.tested === 'yes').length
+  const aiAuditCoveragePercent =
+    aiMutationStories.length > 0 ? safePercent(aiMutationTested, aiMutationStories.length) : 0
+
+  if (!aiBannerPresent) {
+    blockers.push('AI disclosure banner component is missing.')
+  }
+  if (!aiUsageViewerPresent) {
+    blockers.push('AI usage audit viewer page is missing.')
+  }
+
   const externalContainmentSpecExists = fs.existsSync(externalContainmentSpecPath)
   if (!externalContainmentSpecExists) {
     blockers.push('External tester containment API test is missing.')
@@ -458,6 +489,10 @@ function main(): void {
     rbacCoveragePercent: rbacUnknownCount === 0 ? 100 : Math.max(0, 100 - rbacUnknownCount * 10),
     auditCoveragePercent,
     e2eCoveragePercent: e2eCoverage.percent,
+    aiUxCoveragePercent,
+    aiAuditCoveragePercent,
+    aiBannerPresent,
+    aiUsageViewerPresent,
     externalTesterContainmentStatus,
     crossOrgLeakStatus,
     narVerificationStatus,

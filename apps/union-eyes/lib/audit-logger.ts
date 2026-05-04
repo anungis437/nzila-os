@@ -94,6 +94,9 @@ export enum AuditEventType {
 
   // Authority Violations
   AUTHORITY_VIOLATION = 'authority.violation',
+
+    // AI / ML Invocations
+    AI_INVOCATION = 'ai.invocation',
 }
 
 /**
@@ -239,6 +242,41 @@ export async function auditDataMutation(params: {
     outcome: 'success',
   });
 }
+
+  /**
+   * Audit log for AI / ML route invocations.
+   * Returns an opaque audit reference ID that can be embedded in API responses.
+   */
+  export async function auditAIInvocation(params: {
+    userId?: string;
+    organizationId?: string;
+    origin: string;
+    model: string;
+    dataClass: string;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<string> {
+    const auditRefId = crypto.randomUUID();
+    await auditLog({
+      eventType: AuditEventType.AI_INVOCATION,
+      severity: AuditSeverity.LOW,
+      userId: params.userId,
+      organizationId: params.organizationId,
+      resource: 'ai-route',
+      resourceId: params.origin,
+      action: 'invoke',
+      details: { origin: params.origin },
+      outcome: 'success',
+      metadata: {
+        model: params.model,
+        dataClass: params.dataClass,
+        auditRefId,
+      },
+      ipAddress: params.ipAddress,
+      userAgent: params.userAgent,
+    });
+    return auditRefId;
+  }
 
 /**
  * Audit log for PII access (special handling for sensitive data)

@@ -528,11 +528,13 @@ function generatePredictionRecommendations(
  */
 export async function saveInsights(
   organizationId: string,
-  insights: GeneratedInsight[]
+  insights: GeneratedInsight[],
+  auditRefId?: string
 ): Promise<void> {
   try {
     for (const insight of insights) {
       await db.insert(insightRecommendations).values({
+        ...(auditRefId ? { aiReferenceId: auditRefId } : {}),
         organizationId,
         insightType: insight.insightType,
         category: 'claims', // Default category

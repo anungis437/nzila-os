@@ -2,7 +2,7 @@ import { withApi, RATE_LIMITS, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { insightRecommendations } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { auditLog, AuditEventType, AuditSeverity, auditAIInvocation } from '@/lib/audit-logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const POST = withApi(
@@ -67,6 +67,14 @@ export const POST = withApi(
       'Review org-level case SLA trend and escalate high-risk queues proactively.',
     ];
 
+    const aiRefId = await auditAIInvocation({
+      userId: userId ?? undefined,
+      organizationId,
+      origin: 'analytics/insights/weekly-summary',
+      model: 'analytics-engine',
+      dataClass: 'internal',
+    });
+
     const [insight] = await db
       .insert(insightRecommendations)
       .values({
@@ -76,6 +84,7 @@ export const POST = withApi(
         priority: topFrictionPoints.length > 0 ? 'high' : 'medium',
         title: 'Weekly Engagement and Friction Summary',
         description: 'Automated weekly synthesis of adoption, usage intensity, and feedback friction points.',
+        aiReferenceId: aiRefId,
         dataSource: {
           source: 'pilot_events + pilot_feedback',
           window: '7d',

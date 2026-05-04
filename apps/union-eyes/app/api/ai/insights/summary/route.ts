@@ -15,9 +15,9 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { auditAIInvocation } from '@/lib/audit-logger';
 
 export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
-  // Rate limit — AI_COMPLETION is the most expensive tier (20/hr per user)
   const rl = await checkRateLimit(`ai-insights-summary:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
   if (!rl.allowed) {
     return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
@@ -38,7 +38,6 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
   enforceAISafety({ origin: 'ai-insights-summary', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
 
   try {
-    // Fetch latest report for each type
     const [trends, hotspots, capacity, escalations, summaries] = await Promise.all([
       getInsightReports(context.organizationId!, 'trend_forecast', 1),
       getInsightReports(context.organizationId!, 'employer_hotspots', 1),
@@ -47,12 +46,27 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
       getInsightReports(context.organizationId!, 'executive_summary', 1),
     ]);
 
+    const auditRefId = await auditAIInvocation({
+      userId: context.userId,
+      organizationId: context.organizationId,
+      origin: 'ai-insights-summary',
+      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+      dataClass: 'confidential',
+    });
+
     return standardSuccessResponse({
       latestTrendForecast: trends[0] ?? null,
       latestEmployerHotspots: hotspots[0] ?? null,
       latestStewardCapacity: capacity[0] ?? null,
       latestArbitrationEscalation: escalations[0] ?? null,
       latestExecutiveSummary: summaries[0] ?? null,
+    }, {
+      aiGenerated: true,
+      reviewRequired: true,
+      source: 'ai',
+      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+      timestamp: new Date().toISOString(),
+      auditRefId,
     });
   } catch (_error) {
     return standardErrorResponse(

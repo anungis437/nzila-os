@@ -11,6 +11,8 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { standardSuccessResponse } from '@/lib/api/standardized-responses';
+import { auditAIInvocation } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +43,13 @@ export const POST = withApi(
       userRole: 'member',
       dataClass: 'internal',
     });
+    const auditRefId = await auditAIInvocation({
+      userId: userId ?? undefined,
+      organizationId: organizationId ?? undefined,
+      origin: 'chatbot',
+      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+      dataClass: 'internal',
+    });
     const assistantMessage = await chatbotService.sendMessage({
       sessionId: body.sessionId,
       userId: userId!,
@@ -48,6 +57,13 @@ export const POST = withApi(
       useRAG: body.useRAG,
     });
 
-    return { data: assistantMessage };
+    return standardSuccessResponse({ data: assistantMessage }, {
+      aiGenerated: true,
+      reviewRequired: false,
+      source: 'ai',
+      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+      timestamp: new Date().toISOString(),
+      auditRefId,
+    });
   },
 );

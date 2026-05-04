@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { CbaIntelligenceClient } from "./cba-intelligence-client";
+import { AIBanner } from "@/components/ai";
 
 export const dynamic = "force-dynamic";
 
@@ -45,4 +46,10 @@ export default async function CbaIntelligencePage() {
   }
 
   return <CbaIntelligenceClient />;
+  return (
+    <div className="flex flex-col gap-4">
+      <AIBanner context="analysis" />
+      <CbaIntelligenceClient />
+    </div>
+  );
 }

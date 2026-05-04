@@ -25,7 +25,9 @@ import { predictChurnRisk } from '@/lib/ml/models/churn-prediction-model';
 import {
   ErrorCode,
   standardErrorResponse,
+  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
+import { auditAIInvocation } from '@/lib/audit-logger';
 interface ChurnPrediction {
   memberId: string;
   memberName: string;
@@ -63,6 +65,14 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
   enforceAISafety({ origin: 'churn-risk', action: 'GET', organizationId: organizationId ?? '', userId: userId ?? '', userRole: 'officer', dataClass: 'confidential' });
 
   try {
+    const auditRefId = await auditAIInvocation({
+      userId: userId ?? undefined,
+      organizationId: organizationId ?? undefined,
+      origin: 'churn-risk',
+      model: 'churn-prediction-model',
+      dataClass: 'confidential',
+    });
+
     const searchParams = request.nextUrl.searchParams;
     const riskLevel = searchParams.get('riskLevel'); // 'low', 'medium', 'high'
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -151,10 +161,13 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
       riskLevel: riskLevel || 'all',
     });
 
-    return NextResponse.json({
-      predictions,
-      summary,
-      generatedAt: new Date()
+    return standardSuccessResponse({ predictions, summary, generatedAt: new Date().toISOString() }, {
+      aiGenerated: true,
+      reviewRequired: true,
+      source: 'ml',
+      model: 'churn-prediction-model',
+      timestamp: new Date().toISOString(),
+      auditRefId,
     });
 
   } catch (err) {
@@ -191,6 +204,13 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
 
     try {
       const body = await request.json();
+    const auditRefId = await auditAIInvocation({
+      userId: userId ?? undefined,
+      organizationId: organizationId ?? undefined,
+      origin: 'churn-risk',
+      model: 'churn-prediction-model',
+      dataClass: 'confidential',
+    });
     // Validate request body
     const validation = mlPredictionsChurnRiskSchema.safeParse(body);
     if (!validation.success) {
@@ -402,10 +422,10 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
     const lastActivity = new Date();
     lastActivity.setDate(lastActivity.getDate() - daysSinceLastActivity);
 
-    return NextResponse.json({
+    return standardSuccessResponse({
       prediction: {
         memberId,
-        memberName: String(features?. full_name || ''),
+        memberName: String(features?.full_name || ''),
         riskScore,
         riskLevel,
         contributingFactors: factors.slice(0, 3),
@@ -413,8 +433,15 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
         lastActivity,
         unionTenure: parseFloat(String(features?.union_tenure_years || '0')),
         totalCases: parseInt(String(features?.total_cases || '0')),
-        predictedAt: new Date()
+        predictedAt: new Date().toISOString(),
       }
+    }, {
+      aiGenerated: true,
+      reviewRequired: true,
+      source: 'ml',
+      model: 'churn-prediction-model',
+      timestamp: new Date().toISOString(),
+      auditRefId,
     });
 
   } catch (err) {

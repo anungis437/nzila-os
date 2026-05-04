@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { IntelligenceShell } from "@/components/intelligence/intelligence-shell";
+import { AIBanner } from "@/components/ai";
 
 export const dynamic = "force-dynamic";
 
@@ -39,4 +40,10 @@ export default async function IntelligencePage() {
   const userRole = user.roles?.[0] || "steward";
 
   return <IntelligenceShell userRole={userRole} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <AIBanner context="analysis" />
+      <IntelligenceShell userRole={userRole} />
+    </div>
+  );
 }

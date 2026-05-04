@@ -134,6 +134,7 @@ export const insightRecommendations = pgTable('insight_recommendations', {
   actionDeadline: timestamp('action_deadline'),
   estimatedBenefit: text('estimated_benefit'),
   confidenceScore: numeric('confidence_score'), // 0-1, AI confidence in this insight
+  aiReferenceId: text('ai_reference_id'), // Opaque audit ref ID from auditAIInvocation
   relatedEntities: jsonb('related_entities'), // Links to specific claims, members, etc.
   status: text('status').default('new'), // 'new', 'acknowledged', 'in_progress', 'completed', 'dismissed'
   acknowledgedBy: varchar('acknowledged_by', { length: 255 }).references(() => users.userId),

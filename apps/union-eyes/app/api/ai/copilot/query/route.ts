@@ -17,6 +17,7 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders as _createRateLimitHeaders } from '@/lib/rate-limiter';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { enforceAISafety } from '@nzila/policies';
+import { auditAIInvocation } from '@/lib/audit-logger';
 
 const copilotSchema = z.object({
   actionType: z.enum(['timeline_summary', 'suggest_action', 'draft_response', 'explain_clause', 'risk_brief', 'custom_query']),
@@ -59,7 +60,21 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       userRole: 'steward', // derived from RBAC
       ...parsed.data,
     });
-    return standardSuccessResponse(result);
+      const auditRefId = await auditAIInvocation({
+        userId: context.userId,
+        organizationId: context.organizationId,
+        origin: 'copilot-query',
+        model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+        dataClass: 'internal',
+      });
+      return standardSuccessResponse(result, {
+        aiGenerated: true,
+        reviewRequired: true,
+        source: 'ai',
+        model: process.env.AZURE_OPENAI_DEPLOYMENT ?? 'gpt-4',
+        timestamp: new Date().toISOString(),
+        auditRefId,
+      });
   } catch (_error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

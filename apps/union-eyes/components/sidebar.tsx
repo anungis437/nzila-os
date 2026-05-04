@@ -52,6 +52,7 @@ import {
   Database,
   TrendingUp,
   Send,
+  Bot,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -215,6 +216,7 @@ export default function Sidebar({ profile, userEmail, whopMonthlyPlanId: _whopMo
         { href: `/${locale}/dashboard/admin/members`, icon: <Users size={16} />, label: t('sidebar.memberManagement'), roles: ["app_owner", "coo", "platform_lead", "support_manager"] },
         { href: `/${locale}/dashboard/admin/rewards`, icon: <DollarSign size={16} />, label: t('sidebar.rewardsAdministration'), roles: ["app_owner", "coo", "customer_success_director"] },
         { href: `/${locale}/dashboard/admin/scheduled-reports`, icon: <Bell size={16} />, label: t('sidebar.scheduledReports'), roles: ["app_owner", "coo", "cto", "data_analytics_manager"] },
+          { href: `/${locale}/dashboard/admin/ai-usage`, icon: <Bot size={16} />, label: t('sidebar.aiUsage'), roles: ["app_owner", "cto", "platform_lead", "data_analytics_manager"] },
         { href: `/${locale}/dashboard/compliance-admin`, icon: <FileBarChart size={16} />, label: t('sidebar.complianceAudit'), roles: ["app_owner", "coo", "cto", "compliance_manager", "security_manager"] },
         { href: `/${locale}/dashboard/compliance`, icon: <FileBarChart size={16} />, label: t('sidebar.complianceReports'), roles: ["app_owner", "coo", "cto", "platform_lead"] },
         { href: `/${locale}/dashboard/sector-analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.sectorAnalytics'), roles: ["app_owner", "coo", "cto", "data_analytics_manager", "data_analyst"] },
