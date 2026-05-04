@@ -496,7 +496,9 @@ async function main(): Promise<void> {
     `  overall=${overallStatus} (${results.length} endpoints, ${failCount} failures, ${blockingFindings.length} blocking)`,
   )
 
-  process.exit(failCount > 0 && !skipNetwork ? 1 : 0)
+  const failOnAdvisory = process.env.HEALTH_FAIL_ON_ADVISORY === 'true'
+  const shouldFail = !skipNetwork && (blockingFindings.length > 0 || (failOnAdvisory && advisoryFindings.length > 0))
+  process.exit(shouldFail ? 1 : 0)
 }
 
 const isMain =
