@@ -38,11 +38,32 @@ class JurisdictionConfig:
             # Explicit env override for deployment/runtime.
             Path(os.getenv("JURISDICTION_POLICIES_PATH", "")),
             # Monorepo workspace path.
-            cwd / "packages" / "platform-jurisdiction-compliance" / "src" / "policies.json",
-            cwd / ".." / ".." / "packages" / "platform-jurisdiction-compliance" / "src" / "policies.json",
+            cwd
+            / "packages"
+            / "platform-jurisdiction-compliance"
+            / "src"
+            / "policies.json",
+            cwd
+            / ".."
+            / ".."
+            / "packages"
+            / "platform-jurisdiction-compliance"
+            / "src"
+            / "policies.json",
             # Installed package artifact path (when backend is deployed standalone).
-            cwd / "node_modules" / "@nzila" / "platform-jurisdiction-compliance" / "dist" / "policies.json",
-            cwd / ".." / "node_modules" / "@nzila" / "platform-jurisdiction-compliance" / "dist" / "policies.json",
+            cwd
+            / "node_modules"
+            / "@nzila"
+            / "platform-jurisdiction-compliance"
+            / "dist"
+            / "policies.json",
+            cwd
+            / ".."
+            / "node_modules"
+            / "@nzila"
+            / "platform-jurisdiction-compliance"
+            / "dist"
+            / "policies.json",
         ]
 
     @classmethod
