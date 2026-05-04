@@ -20,6 +20,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+  import { AI_FEATURES } from '@/lib/services/feature-flags';
+  import { enforceAISafety } from '@nzila/policies';
 
 const matchPrecedentsSchema = z.object({
   action: z.enum(['match', 'analyze', 'memorandum']).default('match'),
@@ -62,6 +65,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 403 }
       );
     }
+
+      // OWASP AI: Feature flag + AI safety gate
+      const blocked = await guardAiFeature(AI_FEATURES.AI_MATCH_PRECEDENTS, { userId: context.userId, organizationId: context.organizationId });
+      if (blocked) return blocked;
+      enforceAISafety({ origin: 'match-precedents', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();

@@ -16,6 +16,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+  import { AI_FEATURES } from '@/lib/services/feature-flags';
+  import { enforceAISafety } from '@nzila/policies';
 
 const aiExtractClausesSchema = z.object({
   pdfUrl: z.string().url('Invalid URL'),
@@ -57,6 +60,11 @@ export const POST = withRoleAuth('member', async (request, context) => {
         { status: 403 }
       );
     }
+
+      // OWASP AI: Feature flag + AI safety gate
+      const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: context.userId, organizationId: context.organizationId });
+      if (blocked) return blocked;
+      enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();

@@ -8,6 +8,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+  import { AI_FEATURES } from '@/lib/services/feature-flags';
+  import { enforceAISafety } from '@nzila/policies';
 const QuerySchema = z.object({
   question: z.string().min(1).max(500),
   context: z.any().optional(),
@@ -58,11 +61,19 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     );
   }
 
+    // OWASP AI: Org presence check + feature flag + AI safety gate
+    if (!organizationId) {
+      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
+    }
+    const blocked = await guardAiFeature(AI_FEATURES.ML_QUERY, { userId, organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'ml-query', action: 'POST', organizationId, userId, userRole: 'member', dataClass: 'internal' });
+
   try {
     const body = await request.json();
     const { question, context: queryContext } = QuerySchema.parse(body);
 
-    const organizationScopeId = organizationId || userId || '';
+      const organizationScopeId = organizationId;
 
     // Call AI service for natural language query
     const aiServiceUrl = process.env.AI_SERVICE_URL;

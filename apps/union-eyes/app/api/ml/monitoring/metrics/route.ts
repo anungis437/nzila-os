@@ -7,6 +7,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+  import { AI_FEATURES } from '@/lib/services/feature-flags';
+  import { enforceAISafety } from '@nzila/policies';
 /**
  * GET /api/ml/monitoring/metrics
  * 
@@ -53,8 +56,16 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
     );
   }
 
+    // OWASP AI: Org presence check + feature flag + AI safety gate
+    if (!organizationId) {
+      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
+    }
+    const blocked = await guardAiFeature(AI_FEATURES.ML_MONITORING, { userId, organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'ml-monitoring-metrics', action: 'GET', organizationId, userId, userRole: 'member', dataClass: 'internal' });
+
   try {
-    const organizationScopeId = organizationId || userId;
+      const organizationScopeId = organizationId;
 
     // Query model performance metrics from analytics tables
     // Build on existing analytics_scheduled_reports and benchmark_data tables
