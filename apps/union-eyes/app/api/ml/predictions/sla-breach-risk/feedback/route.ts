@@ -1,4 +1,7 @@
 import { withApi, z, RATE_LIMITS, ApiError } from '@/lib/api/framework';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 import { db } from '@/db';
 import { and, desc, eq } from 'drizzle-orm';
 import { mlPredictions, modelMetadata } from '@/db/schema';
@@ -30,6 +33,14 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const blocked = await guardAiFeature(AI_FEATURES.GRIEVANCE_TRIAGE, {
+      organizationId: organizationId!,
+      userId: userId ?? '',
+    });
+    if (blocked) return blocked;
+
+    enforceAISafety({ origin: 'sla-breach-risk-feedback', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
     const [prediction] = await db
       .select()
@@ -185,8 +196,16 @@ export const GET = withApi(
       summary: 'Get SLA prediction feedback and retraining signal summary',
     },
   },
-  async ({ organizationId, query }) => {
+  async ({ organizationId, userId, query }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const blockedGet = await guardAiFeature(AI_FEATURES.GRIEVANCE_TRIAGE, {
+      organizationId: organizationId!,
+      userId: userId ?? '',
+    });
+    if (blockedGet) return blockedGet;
+
+    enforceAISafety({ origin: 'sla-breach-risk-feedback', action: 'GET', organizationId: organizationId!, userId: userId ?? '', userRole: 'member', dataClass: 'confidential' });
 
     const rows = await db
       .select()

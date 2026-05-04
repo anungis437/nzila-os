@@ -52,6 +52,7 @@
     "@nzila/nar": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/policies": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-cognition-core": "workspace:*",

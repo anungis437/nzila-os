@@ -21,6 +21,8 @@ export { labourRules } from './labour/rules'
 export { legalRules } from './legal/rules'
 export { commerceRules } from './commerce/rules'
 export { mediaRightsRules } from './media-rights/rules'
+export * from './ai-safety-policy'
+export * from './enforce-ai-safety'
 
 function mapEnvironment(value: LegacyPolicyContext['environment']): string {
   if (value === 'dev') return 'development'

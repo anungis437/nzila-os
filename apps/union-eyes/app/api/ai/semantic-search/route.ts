@@ -24,6 +24,9 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+  import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+  import { AI_FEATURES } from '@/lib/services/feature-flags';
+  import { enforceAISafety } from '@nzila/policies';
 
 const semanticSearchSchema = z.object({
   query: z.string().max(1000, 'Query too long').optional(),
@@ -72,6 +75,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 403 }
       );
     }
+
+      // OWASP AI: Feature flag + AI safety gate
+      const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: context.userId, organizationId: context.organizationId });
+      if (blocked) return blocked;
+      enforceAISafety({ origin: 'semantic-search', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
     try {
       const body = await request.json();

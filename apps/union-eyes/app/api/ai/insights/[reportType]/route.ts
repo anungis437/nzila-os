@@ -27,6 +27,7 @@ import {
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 const VALID_REPORT_TYPES: InsightReportType[] = [
   'trend_forecast',
@@ -65,6 +66,7 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
 
   // 4. Entitlement
   await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+  enforceAISafety({ origin: 'ai-insights', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
 
   // 5. Parse query params
   const parsed = querySchema.safeParse(

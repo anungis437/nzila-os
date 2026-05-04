@@ -19,6 +19,9 @@ import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
 import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +57,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       { status: 403 },
     );
   }
+
+    // OWASP AI: Feature flag + AI safety gate
+    const blocked = await guardAiFeature(AI_FEATURES.AI_SEARCH, { userId: context.userId, organizationId: context.organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'search', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
   try {
     const body = await request.json();
@@ -184,6 +192,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 });
 
 export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
+  // OWASP AI: Feature flag gate for knowledge base stats
+  const getBlocked = await guardAiFeature(AI_FEATURES.AI_SEARCH, { userId: _context.userId, organizationId: _context.organizationId });
+  if (getBlocked) return getBlocked;
+
   try {
     const rows = await withRLSContext(async () => db.execute(sql`
       SELECT

@@ -24,6 +24,7 @@ import { projectMemberBenefit } from '@/lib/ai/pension-intelligence';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 const projectionQuerySchema = z.object({
   targetRetirementAge: z.coerce.number().int().min(55).max(75),
@@ -45,6 +46,7 @@ export const GET = withRoleAuth('officer', async (request: NextRequest, context:
 
   // 3. Entitlement
   await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+  enforceAISafety({ origin: 'pension-projection', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'pension_financial' });
 
   // 4. Validate query params
   const parsed = projectionQuerySchema.safeParse(

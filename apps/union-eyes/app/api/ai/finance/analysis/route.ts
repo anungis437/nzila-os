@@ -16,6 +16,7 @@
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { enforceAISafety } from '@nzila/policies';
 import {
   generateFinancialInsight,
   type FinancialAnalysisType,
@@ -48,6 +49,7 @@ export const GET = withApi(
       organizationId,
     });
     if (blocked) return blocked;
+    enforceAISafety({ origin: 'finance-analysis', action: 'GET', organizationId, userId: userId ?? '', userRole: 'officer', dataClass: 'confidential' });
 
     const result = await generateFinancialInsight({
       analysisType: query.type as FinancialAnalysisType,

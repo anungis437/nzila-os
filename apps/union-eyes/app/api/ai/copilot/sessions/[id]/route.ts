@@ -14,6 +14,8 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { recordCopilotOutcome } from '@/lib/ai/steward-copilot';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 const outcomeSchema = z.object({
   outcome: z.enum(['accepted', 'edited', 'rejected']),
@@ -23,6 +25,10 @@ const outcomeSchema = z.object({
 });
 
 export const PATCH = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
+  // Rate limit
+  const rl = await checkRateLimit(`ai-copilot-session:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
+  if (!rl.allowed) return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded.');
+
   const blocked = await guardAiFeature(AI_FEATURES.STEWARD_COPILOT, {
     userId: context.userId,
     organizationId: context.organizationId,
@@ -30,6 +36,7 @@ export const PATCH = withRoleAuth('steward', async (request: NextRequest, contex
   if (blocked) return blocked;
 
   await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  enforceAISafety({ origin: 'copilot-session', action: 'PATCH', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'internal' });
 
   const id = (context.params as Record<string, string>)?.id;
   if (!id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing session id');

@@ -1,4 +1,7 @@
 import { withApi, z, RATE_LIMITS, ApiError } from '@/lib/api/framework';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 import { db } from '@/db';
 import { mlPredictions, modelMetadata } from '@/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
@@ -38,6 +41,14 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const blocked = await guardAiFeature(AI_FEATURES.GRIEVANCE_TRIAGE, {
+      organizationId: organizationId!,
+      userId: userId ?? '',
+    });
+    if (blocked) return blocked;
+
+    enforceAISafety({ origin: 'sla-breach-risk', action: 'POST', organizationId: organizationId!, userId: userId ?? '', userRole: 'steward', dataClass: 'confidential' });
 
     const selectedVersion = body.modelVersion ?? 'sla-risk-v1';
     const [existingModel] = await db

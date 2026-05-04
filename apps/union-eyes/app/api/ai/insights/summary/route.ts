@@ -14,6 +14,7 @@ import { getInsightReports } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
   // Rate limit — AI_COMPLETION is the most expensive tier (20/hr per user)
@@ -33,6 +34,8 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
   } catch (err) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
+
+  enforceAISafety({ origin: 'ai-insights-summary', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
 
   try {
     // Fetch latest report for each type

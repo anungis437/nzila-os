@@ -17,6 +17,9 @@ import { knowledgeBase } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { enforceAISafety } from '@nzila/policies';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +54,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       { status: 403 },
     );
   }
+
+    // OWASP AI: Feature flag + AI safety gate
+    const blocked = await guardAiFeature(AI_FEATURES.AI_SUMMARIZE, { userId: context.userId, organizationId: context.organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'summarize', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
 
   try {
     const body = await request.json();

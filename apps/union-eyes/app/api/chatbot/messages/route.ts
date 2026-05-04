@@ -7,6 +7,10 @@
 import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
 import { ChatbotService } from '@/lib/ai/chatbot-service';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,9 +25,22 @@ const chatbotService = new ChatbotService();
 export const POST = withApi(
   {
     body: bodySchema,
+    auth: { minRole: 'member' },
+    entitlement: 'ai_chatbot',
+    rateLimit: RATE_LIMITS.AI_COMPLETION,
     openapi: { tags: ['AI'], summary: 'Send chatbot message and get AI response' },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId }) => {
+    const blocked = await guardAiFeature(AI_FEATURES.AI_CHATBOT, { userId: userId ?? undefined, organizationId: organizationId ?? undefined });
+    if (blocked) return blocked;
+    enforceAISafety({
+      origin: 'chatbot',
+      action: 'POST',
+      organizationId,
+      userId,
+      userRole: 'member',
+      dataClass: 'internal',
+    });
     const assistantMessage = await chatbotService.sendMessage({
       sessionId: body.sessionId,
       userId: userId!,

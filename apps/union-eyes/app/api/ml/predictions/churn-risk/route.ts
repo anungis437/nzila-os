@@ -1,6 +1,7 @@
 ﻿import { z } from 'zod';
 import { getCurrentUser, withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 import { logger } from '@/lib/logger';
 /**
  * UC-07: Churn Risk Prediction API
@@ -58,6 +59,8 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
       }
     );
   }
+
+  enforceAISafety({ origin: 'churn-risk', action: 'GET', organizationId: organizationId ?? '', userId: userId ?? '', userRole: 'officer', dataClass: 'confidential' });
 
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -174,6 +177,17 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
     const user = await getCurrentUser();
     const userId = user?.id;
     const organizationId = user?.organizationId;
+
+    // Rate limit ML predictions
+    const postRateLimitResult = await checkRateLimit(`ml-predictions:${userId}`, RATE_LIMITS.ML_PREDICTIONS);
+    if (!postRateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded for ML operations. Please try again later.' },
+        { status: 429, headers: createRateLimitHeaders(postRateLimitResult) }
+      );
+    }
+
+    enforceAISafety({ origin: 'churn-risk', action: 'POST', organizationId: organizationId ?? '', userId: userId ?? '', userRole: 'officer', dataClass: 'confidential' });
 
     try {
       const body = await request.json();

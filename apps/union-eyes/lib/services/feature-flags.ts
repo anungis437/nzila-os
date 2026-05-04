@@ -101,6 +101,32 @@ export const AI_FEATURES = {
   PENSION_TRUSTEE_SUMMARY: 'ai_pension_trustee_summary',
   /** Financial analysis: collection anomalies, arrears risk, budget variance, NL summaries */
   FINANCIAL_ANALYSIS: 'ai_financial_analysis',
+  /** AI keyword/vector search across knowledge and document surfaces */
+  AI_SEARCH: 'ai_search',
+  /** AI summarization of documents, cases, and records */
+  AI_SUMMARIZE: 'ai_summarize',
+  /** Semantic vector search across org-scoped knowledge */
+  AI_SEMANTIC_SEARCH: 'ai_semantic_search',
+  /** Chatbot conversational assistant */
+  AI_CHATBOT: 'ai_chatbot',
+  /** AI document ingest and extraction pipeline */
+  AI_INGEST: 'ai_ingest',
+  /** Mamba long-context reasoning model surface */
+  AI_MAMBA: 'ai_mamba',
+  /** AI feedback collection (thumbs up/down, corrections) */
+  AI_FEEDBACK: 'ai_feedback',
+  /** AI-powered grievance precedent matching */
+  AI_MATCH_PRECEDENTS: 'ai_match_precedents',
+  /** AI clause extraction from CBA / contract documents */
+  AI_EXTRACT_CLAUSES: 'ai_extract_clauses',
+  /** ML model query surface (custom model inference) */
+  ML_QUERY: 'ml_query',
+  /** ML predictions surface (SLA-breach risk, etc.) */
+  ML_PREDICTIONS: 'ml_predictions',
+  /** ML monitoring surface (drift, metrics, alerts, usage) */
+  ML_MONITORING: 'ml_monitoring',
+  /** ML-powered recommendations surface */
+  ML_RECOMMENDATIONS: 'ml_recommendations',
 } as const;
 
 /**

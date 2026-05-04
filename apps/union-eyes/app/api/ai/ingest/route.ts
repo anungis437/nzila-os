@@ -10,7 +10,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { getCurrentUser } from '@/lib/api-auth-guard';
+import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
+import { AI_FEATURES } from '@/lib/services/feature-flags';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { enforceAISafety } from '@nzila/policies';
 import { dataIngestion } from '@/lib/ai/data-ingestion';
 import { entityExtraction, ExtractionResult } from '@/lib/ai/entity-extraction';
 import { ragPipeline } from '@/lib/ai/rag-pipeline';
@@ -28,17 +33,30 @@ const ingestSchema = z.object({
  * POST /api/ai/ingest
  * Upload and process document for AI ingestion
  */
-export async function POST(request: NextRequest) {
+export const POST = withRoleAuth('officer', async (request: NextRequest, context: BaseAuthContext) => {
+  // 1. Rate limit
+  const rl = await checkRateLimit(`ai-ingest:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+  }
+  // 2. Feature flag
+  const blocked = await guardAiFeature(AI_FEATURES.AI_INGEST, {
+    userId: context.userId,
+    organizationId: context.organizationId,
+  });
+  if (blocked) return blocked;
+  // 3. Entitlement
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+  // 4. AI safety policy
+  enforceAISafety({
+    origin: 'ingest',
+    action: 'POST',
+    organizationId: context.organizationId,
+    userId: context.userId,
+    userRole: String(context.userRole ?? 'officer'),
+    dataClass: 'internal',
+  });
   try {
-    // Authenticate
-    const auth = await getCurrentUser();
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // Parse multipart form data
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -90,8 +108,8 @@ export async function POST(request: NextRequest) {
     const filename = file.name || 'unknown';
 
     // AuthUser has typed `id` and `organizationId` properties
-    const userId = auth.id;
-    const orgId = auth.organizationId;
+    const userId = context.userId;
+    const orgId = context.organizationId;
 
     if (!orgId) {
       return NextResponse.json(
@@ -185,29 +203,25 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * GET /api/ai/ingest
  * Get ingestion status or list recent ingestions
  */
-export async function GET(request: NextRequest) {
-  try {
-    // Authenticate
-    const auth = await getCurrentUser();
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const { searchParams } = new URL(request.url);
-    const _action = searchParams.get('action');
-    const _documentId = searchParams.get('documentId');
-
-    // Return API info
-    return NextResponse.json({
+export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
+  // 1. Rate limit
+  const rl2 = await checkRateLimit(`ai-ingest-get:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
+  if (!rl2.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+  }
+  // 2. Feature flag
+  const blocked2 = await guardAiFeature(AI_FEATURES.AI_INGEST, {
+    userId: context.userId,
+    organizationId: context.organizationId,
+  });
+  if (blocked2) return blocked2;
+  return NextResponse.json({
       name: 'AI Data Ingestion API',
       version: '1.0.0',
       supportedFormats: ['pdf', 'docx', 'xlsx', 'csv', 'txt', 'json', 'html', 'eml'],
@@ -229,13 +243,4 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
-  } catch (error) {
-    logger.error('AI ingestion GET error', { error });
-
-    return NextResponse.json(
-      { error: 'Failed to get ingestion info' },
-      { status: 500 }
-    );
-  }
-}
+});

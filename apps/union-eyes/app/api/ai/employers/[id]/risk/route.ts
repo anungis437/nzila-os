@@ -19,6 +19,7 @@ import { calculateEmployerRisk } from '@/lib/ai/employer-risk';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { enforceAISafety } from '@nzila/policies';
 
 export const GET = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   // 1. Rate limit
@@ -37,7 +38,10 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
   // 3. Entitlement
   await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
 
-  // 4. Execute
+  // 4. AI Safety
+  enforceAISafety({ origin: 'employer-risk', action: 'GET', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'confidential' });
+
+  // 5. Execute
   const employerId = request.nextUrl.pathname.split('/').at(-2) ?? '';
   try {
     const result = await calculateEmployerRisk({
