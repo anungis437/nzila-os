@@ -61,6 +61,8 @@ type InventoryRouting = {
 type InventoryApp = {
   routing?: InventoryRouting
   stagingDnsStatus?: string
+  stagingDeployed?: boolean
+  productionDeployed?: boolean
 }
 
 type InventoryTopology = {
@@ -179,6 +181,9 @@ export function buildInventoryEndpointsForApproved(
     const approvedApps = approvedAppsByEnv[env] ?? []
     for (const appName of approvedApps) {
       const app = inventory.apps[appName]
+      // Skip apps that are not deployed in the target environment
+      if (env === 'staging' && app?.stagingDeployed === false) continue
+      if (env === 'production' && app?.productionDeployed === false) continue
       const canonicalRoute = normalizeRoute(app?.routing?.[env])
       const fallbackKey = env === 'staging' ? 'stagingFallback' : 'productionFallback'
       const fallbackRoute = normalizeRoute(app?.routing?.[fallbackKey])
