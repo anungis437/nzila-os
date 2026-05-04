@@ -23,8 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="w-full bg-amber-400 text-amber-900 px-6 py-3 text-sm font-semibold flex items-center gap-2 border-b border-amber-500 shrink-0">
             <span className="text-lg">⚠</span>
             <span>
-              SYNTHETIC DEMO ENVIRONMENT — All data is fabricated for demonstration purposes. No
-              real operational or patient data is present.
+              SYNTHETIC DEMO ENVIRONMENT — NO PHI. All data is fabricated for demonstration
+              purposes. No real operational or patient data is present.
             </span>
           </div>
           <main className="flex-1 p-6">{children}</main>

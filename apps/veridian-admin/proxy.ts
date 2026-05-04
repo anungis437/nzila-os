@@ -14,9 +14,42 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const PHI_MARKER_HEADERS = ['x-phi-payload', 'x-contains-phi'] as const
+const PUBLIC_PATHS = new Set(['/api/health', '/api/ready', '/api/version'])
+const VALID_ACCESS_CONTEXT = 'veridian-synthetic-access'
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.has(pathname)
+}
 
 export function proxy(request: NextRequest): NextResponse {
   try {
+    const pathname = request.nextUrl.pathname
+
+    if (!isPublicPath(pathname)) {
+      const accessContext = request.headers.get('x-veridian-access-context')
+      if (!accessContext) {
+        return NextResponse.json(
+          {
+            error: 'ACCESS_CONTEXT_REQUIRED',
+            code: 'PROTECTED_ROUTE_DENIED',
+            message: 'Protected Veridian-admin routes require valid synthetic access context.',
+          },
+          { status: 403 },
+        )
+      }
+
+      if (accessContext !== VALID_ACCESS_CONTEXT) {
+        return NextResponse.json(
+          {
+            error: 'ACCESS_CONTEXT_INVALID',
+            code: 'PROTECTED_ROUTE_DENIED',
+            message: 'Protected Veridian-admin routes require valid synthetic access context.',
+          },
+          { status: 403 },
+        )
+      }
+    }
+
     for (const h of PHI_MARKER_HEADERS) {
       const v = request.headers.get(h)
       if (v && v.toLowerCase() === 'true') {
