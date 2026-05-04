@@ -1,43 +1,20 @@
 {
-  "generatedAt": "2026-05-03T13:40:37.539Z",
+  "generatedAt": "2026-05-04T00:00:37.252Z",
   "phase": "validate",
   "deterministicOrder": [
     "implementation",
     "security-governance"
   ],
   "changedFiles": [
-    "pps/union-eyes/e2e/cape-features.spec.ts",
-    "pps/union-eyes/e2e/cba-intelligence.spec.ts",
-    "pps/union-eyes/e2e/dashboard.spec.ts",
-    "pps/union-eyes/e2e/pilot-journey.spec.ts",
-    "pps/union-eyes/e2e/smoke.spec.ts",
-    "pps/union-eyes/e2e/ue-workflow.spec.ts",
-    "pps/union-eyes/lib/__tests__/clc-governance.test.ts",
-    "pps/union-eyes/lib/audit-logger.ts",
-    "pps/union-eyes/lib/clc/governance.ts",
-    "pps/union-eyes/playwright.config.ts",
     "pps/union-eyes/scripts/seed-test-env.ts",
-    "pps/union-eyes/services/platform-economics/entitlement-guard.ts",
-    "pps/union-eyes/tests/api/_qa-route-inventory.ts",
-    "pps/union-eyes/tests/api/audit.spec.ts",
-    "pps/union-eyes/tests/api/cases.spec.ts",
-    "pps/union-eyes/tests/api/intelligence.spec.ts",
-    "pps/union-eyes/tests/api/rbac.spec.ts",
-    "pps/union-eyes/tests/e2e/ue-workflow.spec.ts",
-    "pps/union-eyes/tests/fixtures/test-orgs.ts",
-    "pps/union-eyes/tests/fixtures/test-permissions.ts",
-    "pps/union-eyes/tests/fixtures/test-users.ts",
     "rtifacts/ai-dev-agent/latest-report.json",
     "rtifacts/ai-dev-agent/latest-report.md",
     "rtifacts/ue-qa/latest-results.json",
     "rtifacts/ue-qa/qa-report.json",
+    "rtifacts/ue-qa/qa-report.md",
+    "rtifacts/ue-qa/readiness-summary.md",
     "ocs/ops/sre/executive-reliability-dashboard.md",
     "ocs/ops/sre/portfolio-reliability-audit.md",
-    "ocs/union-eyes/qa/external-tester-containment.md",
-    "ocs/union-eyes/qa/rbac-reality-map.md",
-    "ocs/union-eyes/qa/user-story-coverage-matrix.md",
-    "ackage.json",
-    "ackages/platform-auth/src/risk/assess.ts",
     "eports/claim-verification.json",
     "eports/claim-verification.md",
     "eports/sre-alert-routing-dry-run.json",
@@ -45,26 +22,7 @@
     "eports/sre-reliability-audit.json",
     "eports/sre-synthetic-dry-run.json",
     "eports/unsafe-claims.md",
-    "cripts/ai-agent-runner.ts",
-    "cripts/ue-qa-gate.ts",
-    "cripts/ue-qa-report.ts",
-    "apps/union-eyes/tests/api/concurrency.spec.ts",
-    "apps/union-eyes/tests/api/external-tester-containment.spec.ts",
-    "apps/union-eyes/tests/api/state-machine.spec.ts",
-    "apps/union-eyes/tests/e2e/.env.test.example",
-    "apps/union-eyes/tests/e2e/_helpers.ts",
-    "apps/union-eyes/tests/e2e/admin-assignment.spec.ts",
-    "apps/union-eyes/tests/e2e/auditor-readonly.spec.ts",
-    "apps/union-eyes/tests/e2e/case-escalation.spec.ts",
-    "apps/union-eyes/tests/e2e/case-resolution.spec.ts",
-    "apps/union-eyes/tests/e2e/cross-org-block.spec.ts",
-    "apps/union-eyes/tests/e2e/e2e-env.ts",
-    "apps/union-eyes/tests/e2e/external-ux-tester.spec.ts",
-    "apps/union-eyes/tests/e2e/member-intake.spec.ts",
-    "apps/union-eyes/tests/e2e/steward-review.spec.ts",
-    "artifacts/ue-qa/qa-report.md",
-    "artifacts/ue-qa/readiness-summary.md",
-    "docs/union-eyes/qa/qa-readiness-model.md"
+    "cripts/ue-qa-gate.ts"
   ],
   "summaryOfChanges": "Pipeline completed without blocking failures.",
   "stages": [
@@ -75,13 +33,13 @@
         {
           "command": "pnpm.cmd typecheck",
           "exitCode": 0,
-          "durationMs": 102933,
+          "durationMs": 7635,
           "passed": true
         },
         {
           "command": "pnpm.cmd lint",
           "exitCode": 0,
-          "durationMs": 161411,
+          "durationMs": 6486,
           "passed": true
         }
       ],
@@ -94,61 +52,61 @@
         {
           "command": "pnpm.cmd typecheck",
           "exitCode": 0,
-          "durationMs": 7639,
+          "durationMs": 5407,
           "passed": true
         },
         {
           "command": "pnpm.cmd lint",
           "exitCode": 0,
-          "durationMs": 7193,
+          "durationMs": 5247,
           "passed": true
         },
         {
           "command": "pnpm.cmd test:fast",
           "exitCode": 0,
-          "durationMs": 157811,
+          "durationMs": 101853,
           "passed": true
         },
         {
           "command": "pnpm.cmd governance:check",
           "exitCode": 0,
-          "durationMs": 2382,
+          "durationMs": 1736,
           "passed": true
         },
         {
           "command": "pnpm.cmd decision:coverage:strict",
           "exitCode": 0,
-          "durationMs": 9241,
+          "durationMs": 7499,
           "passed": true
         },
         {
           "command": "pnpm.cmd ue:qa:gate -- --target ux",
           "exitCode": 0,
-          "durationMs": 167604,
+          "durationMs": 127229,
           "passed": true
         },
         {
           "command": "pnpm.cmd intelligence:pipeline-health",
           "exitCode": 0,
-          "durationMs": 6890,
+          "durationMs": 5113,
           "passed": true
         },
         {
           "command": "pnpm.cmd nar:chain:verify",
           "exitCode": 0,
-          "durationMs": 37007,
+          "durationMs": 35269,
           "passed": true
         },
         {
           "command": "pnpm.cmd validate:claims",
           "exitCode": 0,
-          "durationMs": 2234,
+          "durationMs": 1470,
           "passed": true
         },
         {
           "command": "pnpm.cmd sre:alerts:dry-run",
           "exitCode": 0,
-          "durationMs": 1967,
+          "durationMs": 1419,
           "passed": true
         }
       ],

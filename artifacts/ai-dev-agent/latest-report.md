@@ -1,6 +1,6 @@
 # Nzila AI Agent Runner Report
 
-- Generated: 2026-05-03T13:40:37.539Z
+- Generated: 2026-05-04T00:00:37.252Z
 - Phase: validate
 - Decision: GO
 - Risk Level: low
@@ -22,38 +22,15 @@
   - pnpm.cmd sre:alerts:dry-run => PASS
 
 ## Changed Files
-- pps/union-eyes/e2e/cape-features.spec.ts
-- pps/union-eyes/e2e/cba-intelligence.spec.ts
-- pps/union-eyes/e2e/dashboard.spec.ts
-- pps/union-eyes/e2e/pilot-journey.spec.ts
-- pps/union-eyes/e2e/smoke.spec.ts
-- pps/union-eyes/e2e/ue-workflow.spec.ts
-- pps/union-eyes/lib/__tests__/clc-governance.test.ts
-- pps/union-eyes/lib/audit-logger.ts
-- pps/union-eyes/lib/clc/governance.ts
-- pps/union-eyes/playwright.config.ts
 - pps/union-eyes/scripts/seed-test-env.ts
-- pps/union-eyes/services/platform-economics/entitlement-guard.ts
-- pps/union-eyes/tests/api/_qa-route-inventory.ts
-- pps/union-eyes/tests/api/audit.spec.ts
-- pps/union-eyes/tests/api/cases.spec.ts
-- pps/union-eyes/tests/api/intelligence.spec.ts
-- pps/union-eyes/tests/api/rbac.spec.ts
-- pps/union-eyes/tests/e2e/ue-workflow.spec.ts
-- pps/union-eyes/tests/fixtures/test-orgs.ts
-- pps/union-eyes/tests/fixtures/test-permissions.ts
-- pps/union-eyes/tests/fixtures/test-users.ts
 - rtifacts/ai-dev-agent/latest-report.json
 - rtifacts/ai-dev-agent/latest-report.md
 - rtifacts/ue-qa/latest-results.json
 - rtifacts/ue-qa/qa-report.json
+- rtifacts/ue-qa/qa-report.md
+- rtifacts/ue-qa/readiness-summary.md
 - ocs/ops/sre/executive-reliability-dashboard.md
 - ocs/ops/sre/portfolio-reliability-audit.md
-- ocs/union-eyes/qa/external-tester-containment.md
-- ocs/union-eyes/qa/rbac-reality-map.md
-- ocs/union-eyes/qa/user-story-coverage-matrix.md
-- ackage.json
-- ackages/platform-auth/src/risk/assess.ts
 - eports/claim-verification.json
 - eports/claim-verification.md
 - eports/sre-alert-routing-dry-run.json
@@ -61,26 +38,7 @@
 - eports/sre-reliability-audit.json
 - eports/sre-synthetic-dry-run.json
 - eports/unsafe-claims.md
-- cripts/ai-agent-runner.ts
 - cripts/ue-qa-gate.ts
-- cripts/ue-qa-report.ts
-- apps/union-eyes/tests/api/concurrency.spec.ts
-- apps/union-eyes/tests/api/external-tester-containment.spec.ts
-- apps/union-eyes/tests/api/state-machine.spec.ts
-- apps/union-eyes/tests/e2e/.env.test.example
-- apps/union-eyes/tests/e2e/_helpers.ts
-- apps/union-eyes/tests/e2e/admin-assignment.spec.ts
-- apps/union-eyes/tests/e2e/auditor-readonly.spec.ts
-- apps/union-eyes/tests/e2e/case-escalation.spec.ts
-- apps/union-eyes/tests/e2e/case-resolution.spec.ts
-- apps/union-eyes/tests/e2e/cross-org-block.spec.ts
-- apps/union-eyes/tests/e2e/e2e-env.ts
-- apps/union-eyes/tests/e2e/external-ux-tester.spec.ts
-- apps/union-eyes/tests/e2e/member-intake.spec.ts
-- apps/union-eyes/tests/e2e/steward-review.spec.ts
-- artifacts/ue-qa/qa-report.md
-- artifacts/ue-qa/readiness-summary.md
-- docs/union-eyes/qa/qa-readiness-model.md
 
 ## Remaining Gaps
 - none

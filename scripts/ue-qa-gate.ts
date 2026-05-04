@@ -29,6 +29,14 @@ function shellQuote(value: string): string {
     : `'${value.replace(/'/g, `'\\''`)}'`
 }
 
+function parseApprover(): string | undefined {
+  const explicit = process.argv.find((arg) => arg.startsWith('--approver='))
+  if (explicit) return explicit.slice('--approver='.length)
+  const flagIndex = process.argv.indexOf('--approver')
+  if (flagIndex >= 0) return process.argv[flagIndex + 1]
+  return undefined
+}
+
 function parseTarget(): GateTarget {
   const explicit = process.argv.find((arg) => arg.startsWith('--target='))
   if (explicit) {
@@ -69,6 +77,7 @@ function runStep(name: string, command: string, args: string[], stepEnv: StepEnv
   const qaEnv = mode === 'ue-qa' || mode === 'ue-e2e'
     ? {
         QA_TEST_ENV: 'true',
+        UE_QA_GATE: 'true',
         NODE_ENV: 'test',
       }
     : {}
@@ -138,6 +147,7 @@ function ensureArtifacts(): string[] {
 
 function main(): void {
   const target = parseTarget()
+  const approver = parseApprover()
   const steps: GateStep[] = []
   const cmd = pnpmCmd()
 
@@ -173,6 +183,7 @@ function main(): void {
     `--results=${outPath}`,
     `--target=${target}`,
     '--enforce',
+    ...(approver ? [`--approver=${approver}`] : []),
   ], {}, 'ue-qa')
   steps.push(report)
 

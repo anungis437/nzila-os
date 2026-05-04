@@ -13,7 +13,9 @@ import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
 const NOW = new Date('2026-05-01T00:00:00.000Z')
 
 function assertSafeRuntime(): void {
-  const qaTestEnv = (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true'
+  const qaTestEnv =
+    (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true' ||
+    (process.env.UE_QA_GATE ?? '').toLowerCase() === 'true'
 
   if (!qaTestEnv) {
     throw new Error(
@@ -74,12 +76,14 @@ async function seed(): Promise<void> {
 
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
-    await tx.delete(authUsers).where(inArray(authUsers.userId, userIds))
     await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
-    await tx.delete(users).where(inArray(users.userId, userIds))
+
+    // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
+    await tx.execute(sql`delete from audit_security.security_events`)
+    await tx.execute(sql`delete from audit_security.audit_logs`)
 
     // Remove existing QA orgs and recreate deterministically.
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
@@ -98,19 +102,33 @@ async function seed(): Promise<void> {
       })),
     )
 
-    await tx.insert(users).values(
-      usersFixture.map((u) => ({
-        userId: u.userId,
-        email: u.email,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        displayName: `${u.firstName} ${u.lastName}`,
-        isActive: u.status === 'active',
-        isSystemAdmin: false,
-        createdAt: NOW,
-        updatedAt: NOW,
-      })),
-    )
+    await tx
+      .insert(users)
+      .values(
+        usersFixture.map((u) => ({
+          userId: u.userId,
+          email: u.email,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          displayName: `${u.firstName} ${u.lastName}`,
+          isActive: u.status === 'active',
+          isSystemAdmin: false,
+          createdAt: NOW,
+          updatedAt: NOW,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: users.userId,
+        set: {
+          email: sql`excluded.email`,
+          firstName: sql`excluded.first_name`,
+          lastName: sql`excluded.last_name`,
+          displayName: sql`excluded.display_name`,
+          isActive: sql`excluded.is_active`,
+          isSystemAdmin: false,
+          updatedAt: NOW,
+        },
+      })
 
     await tx
       .insert(authUsers)
