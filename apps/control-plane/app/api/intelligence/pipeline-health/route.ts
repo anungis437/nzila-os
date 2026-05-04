@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { desc, eq } from 'drizzle-orm'
 
-import { requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
+import { requireApiAuth, requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
 import { platformDb } from '@nzila/db/platform'
 import { decisionPipelineCheckpoints, decisionPipelineRuns } from '@nzila/db/schema'
 import { computeFreshnessLag, evaluateFreshnessSla } from '@nzila/decision-intelligence'
@@ -10,6 +10,10 @@ const PIPELINE_NAME = 'decision-aggregate-materialization'
 
 export async function GET(request: NextRequest) {
   try {
+    if (request.headers.has('x-api-key')) {
+      await requireApiAuth(request)
+    }
+
     await requireAuditReadAuth(request)
 
     const [checkpoint] = await platformDb

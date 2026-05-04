@@ -100,7 +100,7 @@ function parseArgs(): JobArgs {
   const validModes: Mode[] = ['incremental', 'full_rebuild', 'org_specific', 'dry_run', 'repair']
   if (!validModes.includes(rawMode as Mode)) {
     logger.error(`Invalid --mode value: ${rawMode}`, { valid: validModes })
-    process.exit(1)
+    throw new Error(`Invalid --mode value: ${rawMode}`)
   }
 
   const mode = rawMode as Mode
@@ -124,20 +124,20 @@ function validateArgs(args: JobArgs): void {
     logger.error('full_rebuild mode requires --confirm-full-rebuild flag', {
       errorCode: ErrorCode.FULL_REBUILD_CONFIRMATION_REQUIRED,
     })
-    process.exit(1)
+    throw new Error('full_rebuild mode requires --confirm-full-rebuild flag')
   }
   if (args.mode === 'org_specific' && !args.organizationId) {
     logger.error('org_specific mode requires --organizationId=<uuid>', {
       errorCode: ErrorCode.MISSING_ORG_ID,
     })
-    process.exit(1)
+    throw new Error('org_specific mode requires --organizationId=<uuid>')
   }
   // Phase 4.6: --skip-integrity-check is forbidden in production
   if (args.skipIntegrityCheck && process.env['NODE_ENV'] === 'production') {
     logger.error('--skip-integrity-check is forbidden in production', {
       errorCode: ErrorCode.INTEGRITY_CRITICAL,
     })
-    process.exit(1)
+    throw new Error('--skip-integrity-check is forbidden in production')
   }
 }
 
@@ -584,7 +584,7 @@ async function run(): Promise<void> {
       logger.error('DATABASE_URL is required in non-dry_run modes', {
         errorCode: ErrorCode.MISSING_DATABASE_URL,
       })
-      process.exit(1)
+      throw new Error('DATABASE_URL is required in non-dry_run modes')
     }
 
     if (args.mode === 'repair') {
@@ -643,7 +643,7 @@ async function run(): Promise<void> {
           runId: runId ?? undefined,
         })
         await sendPipelineAlert(alert)
-        process.exit(1)
+        throw new Error('NAR chain mismatch — run aborted')
       }
     }
 
@@ -850,10 +850,12 @@ async function run(): Promise<void> {
     })
 
     if (criticalIntegrityFailure) {
-      process.exit(1)
+      process.exitCode = 1
+      return
     }
     if (freshnessStatus === 'breached') {
-      process.exit(2) // non-zero but distinct from hard failure
+      process.exitCode = 2 // non-zero but distinct from hard failure
+      return
     }
   }
 
@@ -890,7 +892,7 @@ async function run(): Promise<void> {
       errorCode: ErrorCode.MAX_RETRIES_EXCEEDED,
       error: lastError instanceof Error ? lastError.message : String(lastError),
     })
-    process.exit(1)
+    throw new Error('Max retry attempts exceeded')
   }
 
   run().catch((error) => {
@@ -900,7 +902,7 @@ async function run(): Promise<void> {
           ? { message: error.message, stack: error.stack }
           : { value: String(error) },
     })
-    process.exit(1)
+    process.exitCode = 1
   })
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
+import { requireApiAuth, requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
 import { platformDb } from '@nzila/db/platform'
 import { auditRecords } from '@nzila/db/schema'
 import { verifyNarRecord } from '@nzila/nar'
@@ -77,6 +77,10 @@ function toNarRecord(row: typeof auditRecords.$inferSelect): NarRecord {
 
 export async function POST(request: NextRequest) {
   try {
+    if (request.headers.has('x-api-key')) {
+      await requireApiAuth(request)
+    }
+
     const auth = await requireAuditReadAuth(request)
 
     const body = await request.json().catch(() => null)

@@ -1,7 +1,7 @@
 # Union Eyes QA Readiness Report
 
-- Generated: 2026-05-03T23:59:53.847Z
-- Target: ux
+- Generated: 2026-05-04T01:59:16.203Z
+- Target: production
 - Readiness: GO_FOR_PRODUCTION
 - Decision: GO
 
@@ -23,7 +23,7 @@
 ## Human Review
 - requiredForPilot: true
 - requiredForProduction: true
-- approver: not-recorded
+- approver: aubert.nungisa
 - approvalDate: not-recorded
 - notes: not-recorded
 

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-03T23:59:53.847Z",
-  "target": "ux",
+  "generatedAt": "2026-05-04T01:59:16.203Z",
+  "target": "production",
   "readinessStatus": "GO_FOR_PRODUCTION",
   "decision": "GO",
   "userStoryCoveragePercent": 100,
@@ -17,7 +17,7 @@
   "humanReview": {
     "requiredForPilot": true,
     "requiredForProduction": true,
-    "approver": null,
+    "approver": "aubert.nungisa",
     "approvalDate": null,
     "notes": null
   },

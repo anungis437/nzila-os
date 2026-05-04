@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { and, asc, eq, gte, lte } from 'drizzle-orm'
-import { requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
+import { requireApiAuth, requireAuditReadAuth, handleAuthError } from '@/lib/api-auth'
 import { requireIntelligenceTier } from '@/lib/intelligence-access'
 import { platformDb } from '@nzila/db/platform'
 import { auditRecords, decisionAggregates } from '@nzila/db/schema'
@@ -21,6 +21,10 @@ function mapAuditRow(row: typeof auditRecords.$inferSelect): AggregateRecord {
 
 export async function GET(request: NextRequest) {
   try {
+    if (request.headers.has('x-api-key')) {
+      await requireApiAuth(request)
+    }
+
     const auth = await requireAuditReadAuth(request)
     const tier = requireIntelligenceTier(request, 'basic')
     const orgId = request.nextUrl.searchParams.get('orgId')

@@ -114,5 +114,5 @@ run().catch((error) => {
   logger.error('NAR chain verification job failed', {
     error: error instanceof Error ? { message: error.message, stack: error.stack } : { value: String(error) },
   })
-  process.exit(1)
+  process.exitCode = 1
 })
