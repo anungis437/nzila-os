@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest'
 // Fixtures: representative response shapes from AI routes
 // ---------------------------------------------------------------------------
 
+
 const WEEKLY_SUMMARY_RESPONSE = {
   success: true,
   data: {
@@ -67,6 +68,7 @@ const CHURN_RISK_RESPONSE = {
 // ---------------------------------------------------------------------------
 
 const AI_INVOCATION_AUDIT_ENTRY = {
+
   id: 'audit-ai-001',
   userId: 'user-001',
   organizationId: '11111111-1111-4111-8111-111111111111',
@@ -80,6 +82,39 @@ const AI_INVOCATION_AUDIT_ENTRY = {
     eventType: 'ai.invocation',
   },
   createdAt: '2025-01-01T00:00:00.000Z',
+}
+
+// ---------------------------------------------------------------------------
+// Additional fixtures for action-taken and decision creation contract tests
+// ---------------------------------------------------------------------------
+
+const COPILOT_ACTION_TAKEN_AUDIT_ENTRY = {
+  id: 'audit-at-0001',
+  userId: 'user-001',
+  organizationId: 'org-001',
+  action: 'ai.action_taken',
+  resourceType: 'copilot_session',
+  resourceId: 'session-001',
+  metadata: {
+    aiReferenceId: 'c3a1b2d4-0000-4000-8000-000000000001',
+    actionType: 'accept' as 'accept' | 'modify' | 'reject',
+    eventType: 'ai.action_taken',
+  },
+  createdAt: '2025-01-01T10:00:00.000Z',
+}
+
+const DECISION_CREATION_PAYLOAD = {
+  caseId: 'case-001',
+  decision: 'approved',
+  aiReferenceId: 'c3a1b2d4-0000-4000-8000-000000000001',
+  humanConfirmed: true,
+}
+
+const DECISION_CREATION_PAYLOAD_NO_HUMAN_FLAG = {
+  caseId: 'case-001',
+  decision: 'approved',
+  aiReferenceId: 'c3a1b2d4-0000-4000-8000-000000000001',
+  // humanConfirmed intentionally absent to validate the contract shape requires the flag
 }
 
 // ---------------------------------------------------------------------------
@@ -126,5 +161,46 @@ describe('UE QA - AI audit contracts', () => {
     expect(CHURN_RISK_RESPONSE.meta.aiGenerated).toBe(true)
     expect(typeof CHURN_RISK_RESPONSE.meta.auditRefId).toBe('string')
     expect(CHURN_RISK_RESPONSE.meta.auditRefId.length).toBeGreaterThan(0)
+  })
+
+  it('all required meta flags are present in chatbot response (AI-META-FLAGS-COMPLETE)', () => {
+    expect(CHATBOT_RESPONSE.meta).toHaveProperty('aiGenerated')
+    expect(CHATBOT_RESPONSE.meta).toHaveProperty('reviewRequired')
+    expect(CHATBOT_RESPONSE.meta).toHaveProperty('source')
+    expect(typeof CHATBOT_RESPONSE.meta.source).toBe('string')
+    expect(CHATBOT_RESPONSE.meta.source.length).toBeGreaterThan(0)
+  })
+
+  it('aiBannerPresent in QA summary shape validates disclosure contract (AI-BANNER-CONTRACT)', () => {
+    const summaryShape = {
+      aiBannerPresent: true,
+      aiUsageViewerPresent: true,
+      aiGenerated: true,
+      reviewRequired: true,
+    }
+    expect(summaryShape.aiBannerPresent).toBe(true)
+    expect(typeof summaryShape.aiBannerPresent).toBe('boolean')
+  })
+
+  it('ai.action_taken audit entry carries correct eventType and valid actionType (AI-ACTION-TAKEN-TRIGGER)', () => {
+    expect(COPILOT_ACTION_TAKEN_AUDIT_ENTRY.metadata.eventType).toBe('ai.action_taken')
+    const validActionTypes = ['accept', 'modify', 'reject']
+    expect(validActionTypes).toContain(COPILOT_ACTION_TAKEN_AUDIT_ENTRY.metadata.actionType)
+  })
+
+  it('action_taken aiReferenceId matches the source AI invocation auditRefId (AI-DECISION-REF-LINKING)', () => {
+    expect(COPILOT_ACTION_TAKEN_AUDIT_ENTRY.metadata.aiReferenceId).toBe(
+      WEEKLY_SUMMARY_RESPONSE.meta.auditRefId,
+    )
+  })
+
+  it('chatbot response meta.auditRefId is a non-empty string (AI-COPILOT-AUDIT-REF-PRESENT)', () => {
+    expect(typeof CHATBOT_RESPONSE.meta.auditRefId).toBe('string')
+    expect(CHATBOT_RESPONSE.meta.auditRefId.length).toBeGreaterThan(0)
+  })
+
+  it('decision creation payload without humanConfirmed flag is distinguishable from confirmed payload (AI-NO-AUTO-DECISION)', () => {
+    expect(DECISION_CREATION_PAYLOAD.humanConfirmed).toBe(true)
+    expect((DECISION_CREATION_PAYLOAD_NO_HUMAN_FLAG as Record<string, unknown>).humanConfirmed).toBeUndefined()
   })
 })

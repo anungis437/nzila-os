@@ -16,6 +16,7 @@ import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
+import { logAiActionTaken } from '@/lib/audit-logger';
 
 const outcomeSchema = z.object({
   outcome: z.enum(['accepted', 'edited', 'rejected']),
@@ -55,6 +56,18 @@ export const PATCH = withRoleAuth('steward', async (request: NextRequest, contex
     parsed.data.feedbackRating,
     parsed.data.feedbackNotes,
   );
+
+  // Emit AI_ACTION_TAKEN for full user→AI output traceability chain
+  await logAiActionTaken({
+    userId: context.userId!,
+    organizationId: context.organizationId!,
+    aiReferenceId: id,
+    actionType: parsed.data.outcome === 'accepted' ? 'accept'
+      : parsed.data.outcome === 'edited' ? 'modify'
+      : 'reject',
+    entityType: 'recommendation',
+    entityId: id,
+  });
 
   return standardSuccessResponse({ sessionId: id, ...parsed.data });
 });

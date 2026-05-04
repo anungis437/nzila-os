@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AiDisclaimer } from "./ai-disclaimer";
+import { AIBanner } from "@/components/ai";
 import {
   Bot,
   ChevronRight,
@@ -187,6 +188,7 @@ export function StewardCopilotDrawer({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {result?.available && result.data && (
           <>
+            <AIBanner variant="info" context="analysis" />
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">

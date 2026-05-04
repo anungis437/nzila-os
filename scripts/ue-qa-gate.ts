@@ -133,6 +133,84 @@ function runStep(name: string, command: string, args: string[], stepEnv: StepEnv
   }
 }
 
+function findRouteFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return []
+  const result: string[] = []
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      result.push(...findRouteFiles(fullPath))
+    } else if (entry.name === 'route.ts') {
+      result.push(fullPath)
+    }
+  }
+  return result
+}
+
+/**
+ * Static AI compliance checks — hard-fail the gate if any critical invariants
+ * are broken (missing audit calls, missing disclosure meta, missing components).
+ */
+function runStaticAiChecks(repoRoot: string): string[] {
+  const violations: string[] = []
+
+  // 1. copilot/query route must call auditAIInvocation and return aiGenerated: true
+  const copilotQueryPath = path.join(
+    repoRoot,
+    'apps', 'union-eyes', 'app', 'api', 'ai', 'copilot', 'query', 'route.ts',
+  )
+  if (fs.existsSync(copilotQueryPath)) {
+    const content = fs.readFileSync(copilotQueryPath, 'utf8')
+    if (!content.includes('auditAIInvocation')) {
+      violations.push('copilot/query/route.ts: missing auditAIInvocation call')
+    }
+    if (!content.includes('aiGenerated: true')) {
+      violations.push('copilot/query/route.ts: missing aiGenerated: true in meta')
+    }
+  } else {
+    violations.push('copilot/query/route.ts: file not found')
+  }
+
+  // 2. copilot/sessions PATCH route must call logAiActionTaken
+  const copilotSessionsPath = path.join(
+    repoRoot,
+    'apps', 'union-eyes', 'app', 'api', 'ai', 'copilot', 'sessions', '[id]', 'route.ts',
+  )
+  if (fs.existsSync(copilotSessionsPath)) {
+    const content = fs.readFileSync(copilotSessionsPath, 'utf8')
+    if (!content.includes('logAiActionTaken')) {
+      violations.push('copilot/sessions/[id]/route.ts: missing logAiActionTaken call')
+    }
+  } else {
+    violations.push('copilot/sessions/[id]/route.ts: file not found')
+  }
+
+  // 3. AIBanner component must exist
+  const aiBannerPath = path.join(
+    repoRoot,
+    'apps', 'union-eyes', 'components', 'ai', 'AIBanner.tsx',
+  )
+  if (!fs.existsSync(aiBannerPath)) {
+    violations.push('components/ai/AIBanner.tsx: AI disclosure banner component missing')
+  }
+
+  // 4. audit-logger must export AI_ACTION_TAKEN
+  const auditLoggerPath = path.join(
+    repoRoot,
+    'apps', 'union-eyes', 'lib', 'audit-logger.ts',
+  )
+  if (fs.existsSync(auditLoggerPath)) {
+    const content = fs.readFileSync(auditLoggerPath, 'utf8')
+    if (!content.includes('AI_ACTION_TAKEN')) {
+      violations.push('lib/audit-logger.ts: missing AI_ACTION_TAKEN enum entry')
+    }
+  } else {
+    violations.push('lib/audit-logger.ts: file not found')
+  }
+
+  return violations
+}
+
 function ensureArtifacts(): string[] {
   const resolvedOutDir = path.join(process.cwd(), 'artifacts', 'ue-qa')
   const required = [
@@ -150,6 +228,18 @@ function main(): void {
   const approver = parseApprover()
   const steps: GateStep[] = []
   const cmd = pnpmCmd()
+
+  // Static AI compliance checks — hard-fail before running any steps
+  const repoRoot = process.cwd()
+  const staticViolations = runStaticAiChecks(repoRoot)
+  if (staticViolations.length > 0) {
+    console.error('\n[ue:qa:gate] Static AI compliance check FAILED:')
+    for (const violation of staticViolations) {
+      console.error(`  - ${violation}`)
+    }
+    process.exit(1)
+  }
+  console.log('[ue:qa:gate] Static AI compliance checks passed.')
 
   steps.push(runStep('Seed deterministic UE test environment', cmd, ['ue:seed:test-env'], {}, 'ue-qa'))
   steps.push(runStep('Run UE API QA suite', cmd, ['ue:qa:api'], {}, 'ue-qa'))

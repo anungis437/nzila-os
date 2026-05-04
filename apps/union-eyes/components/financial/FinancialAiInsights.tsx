@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AIBanner } from '@/components/ai';
 
 // ── Types matching the API envelope ─────────────────────────────────────────
 
@@ -151,6 +152,7 @@ export default function FinancialAiInsights() {
 
   return (
     <div className="space-y-6">
+      <AIBanner variant="info" context="analysis" />
       {/* Header + Confidence */}
       <div className="flex items-start justify-between">
         <div>

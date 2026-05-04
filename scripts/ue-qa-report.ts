@@ -49,6 +49,7 @@ type Summary = {
   e2eCoveragePercent: number
   aiUxCoveragePercent: number
   aiAuditCoveragePercent: number
+  aiDecisionTraceCoveragePercent: number
   aiBannerPresent: boolean
   aiUsageViewerPresent: boolean
   externalTesterContainmentStatus: 'pass' | 'fail' | 'warning'
@@ -222,6 +223,7 @@ function writeMarkdownReport(summary: Summary, outPath: string): void {
     `- E2E coverage: ${summary.e2eCoveragePercent}%`,
     `- AI UX coverage: ${summary.aiUxCoveragePercent}%`,
     `- AI audit coverage: ${summary.aiAuditCoveragePercent}%`,
+    `- AI decision trace coverage: ${summary.aiDecisionTraceCoveragePercent}%`,
     `- AI banner present: ${summary.aiBannerPresent}`,
     `- AI usage viewer present: ${summary.aiUsageViewerPresent}`,
     '',
@@ -401,6 +403,14 @@ function main(): void {
   const aiAuditCoveragePercent =
     aiMutationStories.length > 0 ? safePercent(aiMutationTested, aiMutationStories.length) : 0
 
+  const aiDecisionTraceStories = aiStories.filter(
+    (story) =>
+      story.expectedDecisionRecord === 'required' || story.expectedDecisionRecord === 'delegated',
+  )
+  const aiDecisionTraceTested = aiDecisionTraceStories.filter((story) => story.tested === 'yes').length
+  const aiDecisionTraceCoveragePercent =
+    aiDecisionTraceStories.length > 0 ? safePercent(aiDecisionTraceTested, aiDecisionTraceStories.length) : 0
+
   if (!aiBannerPresent) {
     blockers.push('AI disclosure banner component is missing.')
   }
@@ -491,6 +501,7 @@ function main(): void {
     e2eCoveragePercent: e2eCoverage.percent,
     aiUxCoveragePercent,
     aiAuditCoveragePercent,
+    aiDecisionTraceCoveragePercent,
     aiBannerPresent,
     aiUsageViewerPresent,
     externalTesterContainmentStatus,

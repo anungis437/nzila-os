@@ -97,6 +97,7 @@ export enum AuditEventType {
 
     // AI / ML Invocations
     AI_INVOCATION = 'ai.invocation',
+  AI_ACTION_TAKEN = 'ai.action_taken',
 }
 
 /**
@@ -277,6 +278,38 @@ export async function auditDataMutation(params: {
     });
     return auditRefId;
   }
+
+/**
+ * Audit log for a user acting on an AI-generated output (accept / modify / reject).
+ * Links back to the original AI invocation via aiReferenceId.
+ */
+export async function logAiActionTaken(params: {
+  userId: string;
+  organizationId: string;
+  aiReferenceId: string;
+  actionType: 'accept' | 'modify' | 'reject';
+  entityType: 'grievance' | 'recommendation' | 'insight';
+  entityId: string;
+  timestamp?: string;
+}): Promise<void> {
+  await auditLog({
+    eventType: AuditEventType.AI_ACTION_TAKEN,
+    severity: AuditSeverity.LOW,
+    userId: params.userId,
+    organizationId: params.organizationId,
+    resource: params.entityType,
+    resourceId: params.entityId,
+    action: params.actionType,
+    details: { aiReferenceId: params.aiReferenceId, actionType: params.actionType },
+    outcome: 'success',
+    metadata: {
+      aiReferenceId: params.aiReferenceId,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      timestamp: params.timestamp ?? new Date().toISOString(),
+    },
+  });
+}
 
 /**
  * Audit log for PII access (special handling for sensitive data)
