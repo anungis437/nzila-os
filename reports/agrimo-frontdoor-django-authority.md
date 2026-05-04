@@ -11,15 +11,14 @@ Agrimo is a Next.js 15 front-door app (`apps/agrimo`) backed by a Django sidecar
 1. **Silent stale-policy fallback** — the Django `JurisdictionConfig` loader silently fell back to embedded `_HARDCODED_POLICIES` (KE/UG/NG only, no version) when the shared `@nzila/platform-jurisdiction-compliance` artifact was missing. In production/staging this masked compliance regressions. **Fixed**: the loader now `raise RuntimeError` in `production`/`staging` (env from `AGRIMO_ENV` / `NODE_ENV` / `DJANGO_ENV`) and only permits the hardcoded fallback in development.
 2. **Runtime invisibility in proof artifacts** — fixed previously by inventory-driven fallback endpoint generation for blocked canonical routes.
 
-P1 follow-up hardening now confirms canonical staging DNS resolves and updates proof behavior accordingly:
+P1 follow-up stabilization confirms canonical custom domain remains blocked and keeps fallback evidence advisory:
 
-- Canonical staging endpoint for Agrimo is now `https://staging-agrimo.nzilaventures.com`.
+- `staging-agrimo.nzilaventures.com` publishes a CNAME but has no reachable A/AAAA data in probe context.
+- Azure Container Apps shows no Agrimo custom domain binding (`customDomains: []`).
+- Canonical staging remains `routing.staging = "blocked"` with `stagingDnsStatus = "pending-manual-cloudflare"`.
 - Fallback ACA endpoint remains monitored as secondary advisory evidence.
-- Health proof generation now emits canonical staging endpoints first and fallback endpoints second when both are present.
-- Canonical staging checks are marked `policyCritical: true` when `stagingDnsStatus` is live (`resolved|active|wired|healthy|live`).
-- Fallback checks remain `policyCritical: false`.
 
-**Overall Front-Door Readiness**: PARTIAL — front-door auth and edge boundaries are sound; back-end authority is fail-loud; runtime monitoring now prioritizes canonical staging proof with fallback advisory backup. This is not a production or partner-demo readiness claim.
+**Overall Front-Door Readiness**: PARTIAL — front-door auth and edge boundaries are sound; back-end authority is fail-loud; canonical staging remains DNS/domain-blocked and fallback proof remains advisory. This is not a production or partner-demo readiness claim.
 
 ---
 
@@ -91,9 +90,9 @@ If none resolve and `AGRIMO_ENV`/`NODE_ENV`/`DJANGO_ENV` is `production` or `sta
   "prodPromotionEligible": false,
   "containerAppName": "nzila-os-agrimo",
   "stagingDeployed": true,
-  "stagingDnsStatus": "resolved",
+  "stagingDnsStatus": "pending-manual-cloudflare",
   "routing": {
-    "staging": "https://staging-agrimo.nzilaventures.com",
+    "staging": "blocked",
     "stagingFallback": "https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
     "production": "blocked",
     "productionState": "reserved-not-yet-promoted",
@@ -107,7 +106,7 @@ If none resolve and `AGRIMO_ENV`/`NODE_ENV`/`DJANGO_ENV` is `production` or `sta
 
 ### Generator Behavior
 
-`scripts/proof/check-health.ts` now emits both canonical and fallback routes when both exist:
+`scripts/proof/check-health.ts` emits canonical and fallback routes when both are inventory-valid. Agrimo currently remains fallback-only because canonical staging is blocked in inventory.
 
 ```ts
 const canonicalRoute = normalizeRoute(app?.routing?.[env])
@@ -118,18 +117,15 @@ if (fallbackRoute && fallbackRoute !== canonicalRoute) {
 }
 ```
 
-Canonical staging routes are marked policy-critical only when staging DNS status is explicitly live (`resolved`, `active`, `wired`, `healthy`, `live`). Fallback routes are always advisory.
+Canonical staging routes become policy-critical only when staging DNS status is explicitly live (`resolved`, `active`, `wired`, `healthy`, `live`). Fallback routes remain advisory.
 
 ### Resulting Endpoint Schema
 
 ```ts
-For Agrimo in staging, canonical and fallback endpoints are emitted:
+For Agrimo in staging (current blocked canonical posture), fallback endpoints are emitted:
 
 | Name | URL | Path | policyCritical |
 |---|---|---|---|
-| `staging:agrimo:root` | `https://staging-agrimo.nzilaventures.com` | `/` | `true` |
-| `staging:agrimo:health` | `https://staging-agrimo.nzilaventures.com` | `/api/health` | `true` |
-| `staging:agrimo:ready` | `https://staging-agrimo.nzilaventures.com` | `/api/ready` | `true` |
 | `staging:agrimo:fallback:root` | `https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | `/` | `false` |
 | `staging:agrimo:fallback:health` | `https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | `/api/health` | `false` |
 | `staging:agrimo:fallback:ready` | `https://nzila-os-agrimo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io` | `/api/ready` | `false` |
@@ -154,8 +150,9 @@ publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/ap
 
 1. `pnpm -F @nzila/agrimo typecheck` — front-door types clean.
 2. `npx tsx scripts/proof/check-health.ts` (with `HEALTH_LOCAL_SKIP=true` in offline mode) — generated snapshot includes both canonical and fallback Agrimo endpoints with canonical marked policy-critical.
-3. Live DNS probe (`Resolve-DnsName staging-agrimo.nzilaventures.com`) resolves to the Azure Container Apps domain.
-4. Smoke probe of Django backend with `JURISDICTION_POLICIES_PATH` unset and `AGRIMO_ENV=staging` — Django boot fails fast with `RuntimeError`.
+3. Live DNS probe indicates canonical CNAME exists but no reachable A/AAAA data for probe context; canonical staging remains blocked.
+4. Azure probe (`az containerapp hostname list`) returns no custom domains for Agrimo container app.
+5. Smoke probe of Django backend with `JURISDICTION_POLICIES_PATH` unset and `AGRIMO_ENV=staging` — Django boot fails fast with `RuntimeError`.
 
 ---
 
