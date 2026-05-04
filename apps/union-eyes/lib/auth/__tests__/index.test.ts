@@ -55,7 +55,7 @@ describe('lib/auth/index re-exports', { timeout: 60_000 }, () => {
 
   beforeAll(async () => {
     mod = await import('../index');
-  });
+  }, 60_000);
 
   it('exports Permission', async () => {
     expect(mod.Permission).toBeDefined();
