@@ -324,6 +324,7 @@ function selectStages(phase: RunnerPhase): StageDefinition[] {
       {
         ...securityGovernance,
         commands: [
+          `${cmd} prod:region:validate`,
           `${cmd} typecheck`,
           `${cmd} lint`,
           `${cmd} test:fast`,

@@ -3,8 +3,10 @@
 
 environment: production
 region: canadacentral
-resource_group: nzila-prod-rg
+resource_group: nzila-canada-prod-rg
 dr_region: canadaeast
+# NOTE: eastus is NOT an approved region for UE/CUPE workloads.
+# All production deployments must target canadacentral (PIPEDA / Québec Law 25).
 
 # PIPEDA / Québec Law 25 — all PII must remain in Canada
 # Primary: Canada Central (Toronto)
@@ -12,7 +14,7 @@ dr_region: canadaeast
 # Cross-border transfer: disabled
 
 container_apps:
-  environment: nzila-prod-env
+  environment: nzila-canada-prod-env
   revision_mode: Multiple
   min_replicas: 3
   max_replicas: 50              # scaled for 100K+ users (was 20)

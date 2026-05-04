@@ -257,6 +257,21 @@ These must be recorded before expanding the pilot or moving to full production.
 
 ---
 
+## 9. Production Data Residency / Hosting Region
+
+- **Target Region**: `canadacentral` (Azure Canada Central)
+- **Resource Group**: `nzila-canada-prod-rg`
+- **Container Apps Environment**: `nzila-canada-prod-env`
+- **Deployment Status**: Configuration committed — no live production deployment yet (config-only fix)
+- **Compliance**: PIPEDA / Québec Law 25 — all PII remains in Canada
+- **Forbidden Regions**: `eastus`, `eastus2`, `westus` — NOT approved for regulated CUPE workloads
+- **Validation Commands**:
+  - `pnpm prod:region:validate` — static config gate (reads `prod.env` + `production.yml`)
+  - `pnpm ue:prod:canadacentral:dry-run` — full production readiness dry-run (no deploy)
+- **Previous Value**: `DEPLOYMENT_REGION=eastus` (non-compliant) → corrected 2026-05-06
+
+---
+
 ## Appendix — Artifact Index
 
 | Artifact | Path | Status |
@@ -270,3 +285,6 @@ These must be recorded before expanding the pilot or moving to full production.
 | SRE Synthetic Checks | `reports/sre-synthetic-dry-run.json` | 6 targets PASS |
 | Baseline Commit | `42b1efe14` | pushed, tagged |
 | Git Tag | `ue-prod-readiness-2026-05-03` | pushed |
+| Region Validation Script | `scripts/validate-prod-region.ts` | CI gate — canadacentral |
+| Prod Dry-Run Script | `scripts/ue-prod-canadacentral-dry-run.ts` | readiness check |
+| Prod Transition Guide | `docs/union-eyes/deployment/cupe-pilot-to-prod-transition.md` | authored |
