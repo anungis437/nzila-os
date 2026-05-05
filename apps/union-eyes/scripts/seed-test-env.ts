@@ -235,8 +235,11 @@ async function seed(): Promise<void> {
         createdAt: NOW,
       })),
     )
+  })
 
-    try {
+  // Claims insert in its own transaction so a missing-table error doesn't abort the main transaction
+  try {
+    await db.transaction(async (tx) => {
       await tx.insert(claims).values(
         casesFixture.map((c) => ({
           claimId: c.claimId,
@@ -257,11 +260,11 @@ async function seed(): Promise<void> {
           updatedAt: NOW,
         })),
       )
-    } catch (error) {
-      if (!isMissingRelationError(error)) throw error
-      console.warn('[ue:seed:test-env] claims insert skipped (claims table not present in this schema)')
-    }
-  })
+    })
+  } catch (error) {
+    if (!isMissingRelationError(error)) throw error
+    console.warn('[ue:seed:test-env] claims insert skipped (claims table not present in this schema)')
+  }
 
   // Separate transaction for organization_members (may fail due to schema drift)
   try {
