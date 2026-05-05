@@ -7,6 +7,8 @@
  * Used by POST /api/export/audit?format=pdf
  */
 
+// pdfkit ships only CommonJS modules (no ESM exports), so require() is needed here.
+// The serverExternalPackages config in next.config.ts ensures this runs only on the server.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const PDFDocument = require('pdfkit') as typeof import('pdfkit')
 import type { ComplianceReport } from './report'

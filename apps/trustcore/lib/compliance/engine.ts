@@ -338,7 +338,7 @@ function evaluateIncidents(
         'incident',
         'critical',
         `${unreportedSerious.length} incident(s) with likely serious harm have not been reported to the CAI.`,
-        'Law 25 requires reporting incidents with likely serious harm to the Commission d\u2019acc\u00e8s \u00e0 l\u2019information within 72 hours. File the reports immediately.',
+        "Law 25 requires reporting incidents with likely serious harm to the Commission d'accès à l'information within 72 hours. File the reports immediately.",
         {
           blocking: true,
           actionUrl: '/incidents',

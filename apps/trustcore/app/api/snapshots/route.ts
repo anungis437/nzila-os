@@ -12,6 +12,19 @@ import {
   createComplianceSnapshot,
   listComplianceSnapshots,
 } from '@nzila/db/queries/trustcore'
+import type { RiskItem } from '@/types/core'
+
+// JSON-serialisable form of a RiskItem array for the jsonb column
+type SerializedRisks = Record<string, unknown>[]
+type SerializedSummary = Record<string, unknown>
+
+function serializeRisks(risks: RiskItem[]): SerializedRisks {
+  return risks.map((r) => ({ ...r })) as SerializedRisks
+}
+
+function serializeSummary(summary: Record<string, number>): SerializedSummary {
+  return { ...summary }
+}
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
@@ -32,8 +45,8 @@ export const POST = withRequiredRole(
       score: evaluation.score,
       confidence: evaluation.confidence,
       status: evaluation.status,
-      risks: evaluation.risks as unknown as Record<string, unknown>[],
-      summary: evaluation.summary as unknown as Record<string, unknown>,
+      risks: serializeRisks(evaluation.risks),
+      summary: serializeSummary(evaluation.summary),
       riskCount: evaluation.risks.length,
       blockingCount,
       triggeredBy,

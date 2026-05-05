@@ -35,14 +35,19 @@ export const POST = withRequiredRole(
 
     if (format === 'pdf') {
       const pdfBuffer = await generateAuditPdf(report)
-      return new NextResponse(pdfBuffer as unknown as BodyInit, {
+      // Ensure ArrayBuffer (not SharedArrayBuffer) for Blob compatibility in TS 6+.
+      const pdfArrayBuffer: ArrayBuffer = pdfBuffer.buffer.slice(
+        pdfBuffer.byteOffset,
+        pdfBuffer.byteOffset + pdfBuffer.byteLength,
+      ) as ArrayBuffer
+      return new Response(new Blob([pdfArrayBuffer], { type: 'application/pdf' }), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="trustcore-audit-${ctx.orgId}-${Date.now()}.pdf"`,
           'Cache-Control': 'no-store',
         },
-      })
+      }) as NextResponse
     }
 
     // JSON export — full structured document
