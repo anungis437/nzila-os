@@ -288,8 +288,8 @@ async function seed(): Promise<void> {
       )
     })
   } catch (error) {
-    if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] organization_members insert skipped due schema drift (missing column)')
+    if (!(isMissingColumnError(error) || isMissingRelationError(error))) throw error
+    console.warn('[ue:seed:test-env] organization_members insert skipped due schema drift (missing column or table)')
   }
 
   // Separate transaction for claim_updates (may fail due to schema drift)
