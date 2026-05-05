@@ -26,6 +26,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+-- Ensure 'synced' value exists (may have been created by migration 65 without it)
+DO $$ BEGIN
+  ALTER TYPE sync_status ADD VALUE IF NOT EXISTS 'synced';
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 DO $$ BEGIN
   CREATE TYPE event_type AS ENUM ('meeting','appointment','deadline','reminder','task','hearing','mediation','negotiation','training','other');
 EXCEPTION WHEN duplicate_object THEN NULL;
@@ -81,6 +87,16 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE membership AS ENUM ('free','pro');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_provider AS ENUM ('stripe','whop');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ============================================================
 -- 2. Create tables (ordered by FK dependencies)
 -- ============================================================
@@ -124,8 +140,8 @@ CREATE TABLE IF NOT EXISTS worksites (
   custom_fields JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  created_by TEXT REFERENCES profiles(user_id),
-  updated_by TEXT REFERENCES profiles(user_id),
+  created_by TEXT,
+  updated_by TEXT,
   archived_at TIMESTAMPTZ
 );
 
@@ -148,15 +164,15 @@ CREATE TABLE IF NOT EXISTS bargaining_units (
   next_bargaining_date DATE,
   member_count INTEGER DEFAULT 0,
   classifications JSONB,
-  chief_steward_id TEXT REFERENCES profiles(user_id),
-  bargaining_chair_id TEXT REFERENCES profiles(user_id),
+  chief_steward_id TEXT,
+  bargaining_chair_id TEXT,
   description TEXT,
   notes TEXT,
   custom_fields JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  created_by TEXT REFERENCES profiles(user_id),
-  updated_by TEXT REFERENCES profiles(user_id),
+  created_by TEXT,
+  updated_by TEXT,
   archived_at TIMESTAMPTZ
 );
 
@@ -237,7 +253,7 @@ CREATE TABLE IF NOT EXISTS calendar_events (
 -- 2.6 chat_sessions
 CREATE TABLE IF NOT EXISTS chat_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT NOT NULL REFERENCES profiles(user_id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL,
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   status chat_session_status NOT NULL DEFAULT 'active',
@@ -275,16 +291,16 @@ CREATE TABLE IF NOT EXISTS committees (
   requires_appointment BOOLEAN DEFAULT FALSE,
   requires_election BOOLEAN DEFAULT FALSE,
   term_length INTEGER,
-  chair_id TEXT REFERENCES profiles(user_id),
-  secretary_id TEXT REFERENCES profiles(user_id),
+  chair_id TEXT,
+  secretary_id TEXT,
   contact_email VARCHAR(255),
   description TEXT,
   notes TEXT,
   custom_fields JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  created_by TEXT REFERENCES profiles(user_id),
-  updated_by TEXT REFERENCES profiles(user_id),
+  created_by TEXT,
+  updated_by TEXT,
   archived_at TIMESTAMPTZ
 );
 

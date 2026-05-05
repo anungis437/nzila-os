@@ -9,25 +9,29 @@
 -- 1. reserved_matter_votes — add missing columns
 -- ============================================================================
 
-ALTER TABLE "reserved_matter_votes"
-  ADD COLUMN IF NOT EXISTS "proposed_date" timestamp,
-  ADD COLUMN IF NOT EXISTS "voting_deadline" timestamp,
-  ADD COLUMN IF NOT EXISTS "matter_details" jsonb DEFAULT '{}'::jsonb,
-  ADD COLUMN IF NOT EXISTS "class_a_votes_for" integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "class_a_votes_against" integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "class_a_abstain" integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "class_a_total_votes" integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "class_a_percent_for" integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "class_b_vote" text,
-  ADD COLUMN IF NOT EXISTS "class_b_vote_date" timestamp,
-  ADD COLUMN IF NOT EXISTS "class_b_vote_rationale" text,
-  ADD COLUMN IF NOT EXISTS "class_b_council_members_voting" jsonb,
-  ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS "final_decision" text,
-  ADD COLUMN IF NOT EXISTS "decision_date" timestamp,
-  ADD COLUMN IF NOT EXISTS "implemented" boolean DEFAULT false,
-  ADD COLUMN IF NOT EXISTS "implementation_date" timestamp,
-  ADD COLUMN IF NOT EXISTS "implementation_notes" text;
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'reserved_matter_votes') THEN
+    ALTER TABLE "reserved_matter_votes"
+      ADD COLUMN IF NOT EXISTS "proposed_date" timestamp,
+      ADD COLUMN IF NOT EXISTS "voting_deadline" timestamp,
+      ADD COLUMN IF NOT EXISTS "matter_details" jsonb DEFAULT '{}'::jsonb,
+      ADD COLUMN IF NOT EXISTS "class_a_votes_for" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "class_a_votes_against" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "class_a_abstain" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "class_a_total_votes" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "class_a_percent_for" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "class_b_vote" text,
+      ADD COLUMN IF NOT EXISTS "class_b_vote_date" timestamp,
+      ADD COLUMN IF NOT EXISTS "class_b_vote_rationale" text,
+      ADD COLUMN IF NOT EXISTS "class_b_council_members_voting" jsonb,
+      ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'pending',
+      ADD COLUMN IF NOT EXISTS "final_decision" text,
+      ADD COLUMN IF NOT EXISTS "decision_date" timestamp,
+      ADD COLUMN IF NOT EXISTS "implemented" boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS "implementation_date" timestamp,
+      ADD COLUMN IF NOT EXISTS "implementation_notes" text;
+  END IF;
+END $$;
 
 -- ============================================================================
 -- 2. Report enums

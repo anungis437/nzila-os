@@ -85,12 +85,14 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sync_status') THEN
     CREATE TYPE sync_status AS ENUM (
       'idle',
+      'synced',
       'pending',
       'running',
       'success',
       'failed',
       'partial',
-      'cancelled'
+      'cancelled',
+      'disconnected'
     );
   ELSE
     -- Extend existing enum with new values if needed
@@ -99,11 +101,19 @@ BEGIN
     EXCEPTION WHEN duplicate_object THEN NULL;
     END;
     BEGIN
+      ALTER TYPE sync_status ADD VALUE IF NOT EXISTS 'synced';
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
       ALTER TYPE sync_status ADD VALUE IF NOT EXISTS 'partial';
     EXCEPTION WHEN duplicate_object THEN NULL;
     END;
     BEGIN
       ALTER TYPE sync_status ADD VALUE IF NOT EXISTS 'cancelled';
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+    BEGIN
+      ALTER TYPE sync_status ADD VALUE IF NOT EXISTS 'disconnected';
     EXCEPTION WHEN duplicate_object THEN NULL;
     END;
   END IF;

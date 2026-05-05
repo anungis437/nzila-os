@@ -68,6 +68,34 @@ DO $$ BEGIN
   CREATE TYPE chargeback_status AS ENUM ('draft','issued','acknowledged','disputed','resolved');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Recreate cost_center_type enum (was dropped by migration 0019)
+DO $$ BEGIN
+  CREATE TYPE "cost_center_type" AS ENUM ('department','project','location','program','fund','grant','other');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Recreate cost_centers table (was dropped by migration 0019, needed for DAPL FK)
+CREATE TABLE IF NOT EXISTS "cost_centers" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid NOT NULL,
+  "code" varchar(50) NOT NULL,
+  "name" varchar(255) NOT NULL,
+  "description" text,
+  "type" "cost_center_type" NOT NULL,
+  "parent_cost_center_id" uuid,
+  "manager" varchar(255),
+  "status" varchar(50) DEFAULT 'active' NOT NULL,
+  "budget_amount" numeric(19, 2),
+  "budget_period" varchar(50),
+  "budget_start_date" timestamp,
+  "budget_end_date" timestamp,
+  "warning_threshold" integer DEFAULT 80,
+  "external_code" varchar(100),
+  "created_at" timestamp DEFAULT now() NOT NULL,
+  "updated_at" timestamp DEFAULT now() NOT NULL,
+  "created_by" varchar(255),
+  "updated_by" varchar(255)
+);
+
 -- ============================================================================
 -- LAYER 1: PLATFORM BILLING DOMAIN
 -- ============================================================================
