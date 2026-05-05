@@ -297,34 +297,38 @@ async function seed(): Promise<void> {
   }
 
   // Separate transaction for claim_updates (may fail due to schema drift)
-  try {
-    await db.transaction(async (tx) => {
-      await tx.insert(claimUpdates).values(
-        casesFixture.map((c, index) => ({
-          claimId: c.claimId,
-          updateType: 'seed_baseline',
-          message: `Deterministic QA baseline #${index + 1}`,
-          createdBy: c.memberId,
-          isInternal: false,
-          visibilityScope: 'member' as const,
-          metadata: {
-            seed: true,
-            narRequired: true,
-            decisionRequired: true,
-          },
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-    })
-  } catch (error) {
-    const isRelationError = isMissingRelationError(error)
-    const isColumnError = isMissingColumnError(error)
-    if (!(isColumnError || isRelationError)) {
-      console.error('[ue:seed:test-env] claim_updates insert check results - isColumn:', isColumnError, 'isRelation:', isRelationError, 'error:', error)
-      throw error
+  if (claimIds.length > 0) {
+    try {
+      await db.transaction(async (tx) => {
+        await tx.insert(claimUpdates).values(
+          casesFixture.map((c, index) => ({
+            claimId: c.claimId,
+            updateType: 'seed_baseline',
+            message: `Deterministic QA baseline #${index + 1}`,
+            createdBy: c.memberId,
+            isInternal: false,
+            visibilityScope: 'member' as const,
+            metadata: {
+              seed: true,
+              narRequired: true,
+              decisionRequired: true,
+            },
+            createdAt: NOW,
+            updatedAt: NOW,
+          })),
+        )
+      })
+    } catch (error) {
+      const isRelationError = isMissingRelationError(error)
+      const isColumnError = isMissingColumnError(error)
+      if (!(isColumnError || isRelationError)) {
+        console.error('[ue:seed:test-env] claim_updates insert check results - isColumn:', isColumnError, 'isRelation:', isRelationError, 'error:', error)
+        throw error
+      }
+      console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift or missing table')
     }
-    console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift or missing table')
+  } else {
+    console.warn('[ue:seed:test-env] claim_updates insert skipped (no claims to create updates for)')
   }
 
   // Required containment artifacts for external UX tester access.
