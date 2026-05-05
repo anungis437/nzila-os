@@ -64,7 +64,7 @@ function ReminderCard({
   reminder: TrustcoreReminder
   canAct: boolean
   nowMs: number
-  onAction: (id: string, action: 'complete' | 'dismiss') => void
+  onAction: (id: string, action: 'complete' | 'dismiss') => Promise<void>
 }) {
   const [loading, setLoading] = useState(false)
   const dueText = reminder.dueAt ? formatDueDate(reminder.dueAt, nowMs) : null
@@ -72,10 +72,13 @@ function ReminderCard({
   const colorClass = SEVERITY_COLORS[reminder.severity] ?? SEVERITY_COLORS.medium!
   const badgeClass = SEVERITY_BADGE[reminder.severity] ?? SEVERITY_BADGE.medium!
 
-  function handleAction(action: 'complete' | 'dismiss') {
+  async function handleAction(action: 'complete' | 'dismiss') {
     setLoading(true)
-    onAction(reminder.id, action)
-    setLoading(false)
+    try {
+      await onAction(reminder.id, action)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -157,7 +160,7 @@ function Section({
   reminders: TrustcoreReminder[]
   canAct: boolean
   nowMs: number
-  onAction: (id: string, action: 'complete' | 'dismiss') => void
+  onAction: (id: string, action: 'complete' | 'dismiss') => Promise<void>
 }) {
   if (reminders.length === 0) return null
   return (
@@ -182,7 +185,7 @@ function Section({
 export function ActionCenter({ reminders: initial, canAct, nowMs }: ActionCenterProps) {
   const [reminders, setReminders] = useState(initial)
 
-  function handleAction(id: string, action: 'complete' | 'dismiss') {
+  async function handleAction(id: string, action: 'complete' | 'dismiss'): Promise<void> {
     // Optimistic update
     setReminders((prev) =>
       prev.map((r) =>
@@ -190,14 +193,20 @@ export function ActionCenter({ reminders: initial, canAct, nowMs }: ActionCenter
       ),
     )
 
-    fetch(`/api/reminders/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
-    }).catch(() => {
-      // Revert on failure
+    try {
+      const res = await fetch(`/api/reminders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      if (!res.ok) {
+        // Revert on failure
+        setReminders(initial)
+      }
+    } catch {
+      // Revert on network error
       setReminders(initial)
-    })
+    }
   }
 
   const active = reminders.filter((r) => r.status === 'open' || r.status === 'overdue')

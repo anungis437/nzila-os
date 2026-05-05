@@ -329,13 +329,14 @@ export async function generateTrustcoreReminders(
   // ── F. Data Assets ─────────────────────────────────────────────────────
 
   const activeAssets = assets.filter((a) => a.status === 'active')
-  const piaAssetIds = new Set(pias.map((p) => p.id)) // rough: if any PIA exists, partial credit
+  const hasPias = pias.length > 0
 
   for (const asset of activeAssets) {
     const needsPia =
       asset.sensitivityLevel === 'high' || asset.sensitivityLevel === 'critical'
-    // Only flag if there are no PIAs at all (conservative heuristic)
-    if (needsPia && pias.length === 0 && !piaAssetIds.has(asset.id)) {
+    // Flag each high/critical asset when the org has no PIAs at all.
+    // This is intentionally conservative: once a PIA is created, reminders stop.
+    if (needsPia && !hasPias) {
       results.push(
         await upsertTrustcoreReminder({
           orgId,
