@@ -74,9 +74,8 @@ async function seed(): Promise<void> {
   const userIds = usersFixture.map((u) => u.userId)
   const claimIds = casesFixture.map((c) => c.claimId)
 
-  // Main transaction: wipe and reseed core tables
+  // Claims cleanup in its own transaction so a missing-table error doesn't abort the main transaction.
   await db.transaction(async (tx) => {
-    // Wipe deterministic test footprint only.
     try {
       await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
       await tx.delete(claims).where(inArray(claims.claimId, claimIds))
@@ -84,7 +83,10 @@ async function seed(): Promise<void> {
       if (!isMissingRelationError(error)) throw error
       console.warn('[ue:seed:test-env] claim cleanup skipped (claim tables not present in this schema)')
     }
+  })
 
+  // Main transaction: wipe and reseed core tables
+  await db.transaction(async (tx) => {
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
     await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
