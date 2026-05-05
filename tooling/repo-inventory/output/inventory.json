@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-01T00:00:00.000Z",
+  "generatedAt": "2026-05-05T00:00:00.000Z",
   "appCount": 24,
-  "packageCount": 189,
-  "workspacePackageCount": 219,
+  "packageCount": 194,
+  "workspacePackageCount": 224,
   "workflowCount": 47,
   "contractTestCount": 233,
-  "tsTestFileCount": 1290,
+  "tsTestFileCount": 1328,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -22,10 +22,12 @@
         "blob",
         "config",
         "db",
+        "decision-core",
         "governed-workflow",
         "integrations-core",
         "integrations-runtime",
         "ml-sdk",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-performance",
@@ -71,7 +73,7 @@
         "ui"
       ],
       "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
-      "codeFileCount": 102
+      "codeFileCount": 104
     },
     {
       "name": "cfo",
@@ -132,6 +134,7 @@
         "crm-hubspot",
         "db",
         "deal-engine",
+        "decision-intelligence",
         "executive-os",
         "governed-workflow",
         "itsm-core",
@@ -163,7 +166,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 355
+      "codeFileCount": 356
     },
     {
       "name": "control-plane",
@@ -178,11 +181,15 @@
         "config",
         "db",
         "deal-engine",
+        "decision-core",
+        "decision-intelligence",
         "governed-workflow",
         "metrics-commercial",
+        "nar",
         "observability",
         "operating-evidence",
         "os-core",
+        "pipeline-alerting",
         "platform-agent-workflows",
         "platform-ai-governance",
         "platform-ai-query",
@@ -208,11 +215,12 @@
         "platform-revenue",
         "platform-shell",
         "policies",
+        "policy-intelligence",
         "schema-core",
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 250
+      "codeFileCount": 266
     },
     {
       "name": "cora",
@@ -269,9 +277,11 @@
         "config",
         "crm-hubspot",
         "db",
+        "decision-core",
         "flow-engine",
         "governed-workflow",
         "ml-sdk",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-commerce-org",
@@ -417,8 +427,10 @@
       "dependsOnPlatformAuth": false,
       "nzilaDeps": [
         "db",
+        "decision-core",
         "fsm-core",
         "itsm-core",
+        "nar",
         "operating-evidence",
         "os-core",
         "platform-event-fabric",
@@ -472,10 +484,12 @@
       "nzilaDeps": [
         "config",
         "db",
+        "decision-core",
         "governed-workflow",
         "integrations-core",
         "integrations-runtime",
         "itsm-core",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-context-orchestrator",
@@ -560,20 +574,24 @@
         "crm-hubspot",
         "cupe-vocabulary",
         "db",
+        "decision-core",
         "evidence",
         "ml-sdk",
+        "nar",
         "os-core",
         "payments-stripe",
         "platform-auth",
         "platform-cognition-core",
+        "platform-ops",
         "platform-pilot-metrics",
         "platform-shell",
+        "policies",
         "ue-cognition",
         "ui",
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3191
+      "codeFileCount": 3220
     },
     {
       "name": "veridian-admin",
@@ -590,7 +608,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 18
+      "codeFileCount": 20
     },
     {
       "name": "veridian-care",
@@ -607,7 +625,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 21
+      "codeFileCount": 23
     },
     {
       "name": "veridian-site",
@@ -624,7 +642,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 21
+      "codeFileCount": 24
     },
     {
       "name": "web",
@@ -690,8 +708,10 @@
         "config",
         "crm-hubspot",
         "db",
+        "decision-core",
         "governed-workflow",
         "ml-sdk",
+        "nar",
         "os-core",
         "payments-stripe",
         "platform-auth",
@@ -711,7 +731,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 450
+      "codeFileCount": 454
     }
   ],
   "workflows": [
