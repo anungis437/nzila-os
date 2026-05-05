@@ -92,10 +92,6 @@ async function seed(): Promise<void> {
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
 
-    // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
-    await tx.execute(sql`delete from audit_security.security_events`)
-    await tx.execute(sql`delete from audit_security.audit_logs`)
-
     // Remove existing QA orgs and recreate deterministically.
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
 
