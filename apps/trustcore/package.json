@@ -1,0 +1,39 @@
+{
+  "name": "@nzila/trustcore",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3010",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
+    "@nzila/ui": "workspace:*",
+    "lucide-react": "^0.576.0",
+    "next": "16.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}
