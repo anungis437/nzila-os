@@ -2,306 +2,48 @@
   "version": "7",
   "dialect": "postgresql",
   "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1763406880019,
-      "tag": "0000_flippant_luke_cage",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763594511882,
-      "tag": "0001_phase5b_inter_union_features",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1764959563791,
-      "tag": "0002_true_selene",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1764959585710,
-      "tag": "0003_curious_agent_zero",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1770355877546,
-      "tag": "0004_phase2_complete",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1770371778360,
-      "tag": "0005_lazy_kate_bishop",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1770537031000,
-      "tag": "0006_flat_stepford_cuckoos",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1770621501496,
-      "tag": "0007_add_wage_benchmarks",
-      "breakpoints": true
-    },
-    {
-      "idx": 29,
-      "breakpoints": true,
-      "when": 1770621523496,
-      "version": "7",
-      "tag": "0071_update_messaging_rls_for_session_context"
-    },
-    {
-      "idx": 28,
-      "breakpoints": true,
-      "when": 1770621522496,
-      "version": "7",
-      "tag": "0070_add_organization_users_rls_policies"
-    },
-    {
-      "idx": 31,
-      "breakpoints": true,
-      "when": 1770621525496,
-      "version": "7",
-      "tag": "0073_update_documents_reports_calendar_rls"
-    },
-    {
-      "idx": 30,
-      "breakpoints": true,
-      "when": 1770621524496,
-      "version": "7",
-      "tag": "0072_update_in_app_notifications_rls"
-    },
-    {
-      "idx": 25,
-      "breakpoints": true,
-      "when": 1770621519496,
-      "version": "7",
-      "tag": "0067_add_congress_memberships"
-    },
-    {
-      "idx": 24,
-      "breakpoints": true,
-      "when": 1770621518496,
-      "version": "7",
-      "tag": "0066_drop_obsolete_search_vector_trigger"
-    },
-    {
-      "idx": 27,
-      "breakpoints": true,
-      "when": 1770621521496,
-      "version": "7",
-      "tag": "0069_rename_tenant_users_to_organization_users"
-    },
-    {
-      "idx": 26,
-      "breakpoints": true,
-      "when": 1770621520496,
-      "version": "7",
-      "tag": "0068_add_peer_detection_indexes"
-    },
-    {
-      "idx": 37,
-      "breakpoints": true,
-      "when": 1770621531496,
-      "version": "7",
-      "tag": "0079_ai_cost_tracking_phase1"
-    },
-    {
-      "idx": 36,
-      "breakpoints": true,
-      "when": 1770621530496,
-      "version": "7",
-      "tag": "0078_force_dues_transactions_rls"
-    },
-    {
-      "idx": 39,
-      "breakpoints": true,
-      "when": 1770621533496,
-      "version": "7",
-      "tag": "0081_add_missing_critical_indexes"
-    },
-    {
-      "idx": 38,
-      "breakpoints": true,
-      "when": 1770621532496,
-      "version": "7",
-      "tag": "0080_add_schema_drift_protection"
-    },
-    {
-      "idx": 33,
-      "breakpoints": true,
-      "when": 1770621527496,
-      "version": "7",
-      "tag": "0075_add_organizations_rls_policies"
-    },
-    {
-      "idx": 32,
-      "breakpoints": true,
-      "when": 1770621526496,
-      "version": "7",
-      "tag": "0074_add_hierarchical_rls_functions"
-    },
-    {
-      "idx": 35,
-      "breakpoints": true,
-      "when": 1770621529496,
-      "version": "7",
-      "tag": "0077_migrate_claim_deadlines_to_org_id"
-    },
-    {
-      "idx": 34,
-      "breakpoints": true,
-      "when": 1770621528496,
-      "version": "7",
-      "tag": "0076_add_claims_rls_policies"
-    },
-    {
-      "idx": 13,
-      "breakpoints": true,
-      "when": 1770621507496,
-      "version": "7",
-      "tag": "0055_align_user_ids_to_clerk"
-    },
-    {
-      "idx": 12,
-      "breakpoints": true,
-      "when": 1770621506496,
-      "version": "7",
-      "tag": "0054_add_calendar_rls_policies"
-    },
-    {
-      "idx": 15,
-      "breakpoints": true,
-      "when": 1770621509496,
-      "version": "7",
-      "tag": "0057_recreate_training_views"
-    },
-    {
-      "idx": 14,
-      "breakpoints": true,
-      "when": 1770621508496,
-      "version": "7",
-      "tag": "0056_add_missing_fk_constraints"
-    },
-    {
-      "idx": 9,
-      "breakpoints": true,
-      "when": 1770621503496,
-      "version": "7",
-      "tag": "0051_add_messaging_rls_policies"
-    },
-    {
-      "idx": 8,
-      "breakpoints": true,
-      "when": 1770621502496,
-      "version": "7",
-      "tag": "0008_lean_mother_askani"
-    },
-    {
-      "idx": 11,
-      "breakpoints": true,
-      "when": 1770621505496,
-      "version": "7",
-      "tag": "0053_add_reports_rls_policies"
-    },
-    {
-      "idx": 10,
-      "breakpoints": true,
-      "when": 1770621504496,
-      "version": "7",
-      "tag": "0052_add_notifications_documents_rls"
-    },
-    {
-      "idx": 21,
-      "breakpoints": true,
-      "when": 1770621515496,
-      "version": "7",
-      "tag": "0063_add_audit_log_archive_support"
-    },
-    {
-      "idx": 20,
-      "breakpoints": true,
-      "when": 1770621514496,
-      "version": "7",
-      "tag": "0062_add_immutable_transition_history"
-    },
-    {
-      "idx": 23,
-      "breakpoints": true,
-      "when": 1770621517496,
-      "version": "7",
-      "tag": "0065_add_governance_tables"
-    },
-    {
-      "idx": 22,
-      "breakpoints": true,
-      "when": 1770621516496,
-      "version": "7",
-      "tag": "0064_add_immutability_triggers"
-    },
-    {
-      "idx": 17,
-      "breakpoints": true,
-      "when": 1770621511496,
-      "version": "7",
-      "tag": "0059_convert_remaining_user_ids"
-    },
-    {
-      "idx": 16,
-      "breakpoints": true,
-      "when": 1770621510496,
-      "version": "7",
-      "tag": "0058_world_class_rls_policies"
-    },
-    {
-      "idx": 19,
-      "breakpoints": true,
-      "when": 1770621513496,
-      "version": "7",
-      "tag": "0061_add_defensibility_packs"
-    },
-    {
-      "idx": 18,
-      "breakpoints": true,
-      "when": 1770621512496,
-      "version": "7",
-      "tag": "0060_add_visibility_scopes"
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1771003000895,
-      "tag": "0019_lonely_stephen_strange",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1771006344559,
-      "tag": "0020_keen_roulette",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "7",
-      "when": 1771010093200,
-      "tag": "0021_steady_darwin",
-      "breakpoints": true
-    }
+    {"idx":0,"version":"7","when":1763406880019,"tag":"0000_flippant_luke_cage","breakpoints":true},
+    {"idx":1,"version":"7","when":1764959563791,"tag":"0002_true_selene","breakpoints":true},
+    {"idx":2,"version":"7","when":1763594511882,"tag":"0001_phase5b_inter_union_features","breakpoints":true},
+    {"idx":3,"version":"7","when":1764959585710,"tag":"0003_curious_agent_zero","breakpoints":true},
+    {"idx":4,"version":"7","when":1770355877546,"tag":"0004_phase2_complete","breakpoints":true},
+    {"idx":5,"version":"7","when":1770371778360,"tag":"0005_lazy_kate_bishop","breakpoints":true},
+    {"idx":6,"version":"7","when":1770537031000,"tag":"0006_flat_stepford_cuckoos","breakpoints":true},
+    {"idx":7,"version":"7","when":1770621501496,"tag":"0007_add_wage_benchmarks","breakpoints":true},
+    {"idx":8,"version":"7","when":1770621502496,"tag":"0008_lean_mother_askani","breakpoints":true},
+    {"idx":9,"version":"7","when":1771003000895,"tag":"0019_lonely_stephen_strange","breakpoints":true},
+    {"idx":10,"version":"7","when":1771006344559,"tag":"0020_keen_roulette","breakpoints":true},
+    {"idx":11,"version":"7","when":1771010093200,"tag":"0021_steady_darwin","breakpoints":true},
+    {"idx":12,"version":"7","when":1770621503496,"tag":"0051_add_messaging_rls_policies","breakpoints":true},
+    {"idx":13,"version":"7","when":1770621504496,"tag":"0052_add_notifications_documents_rls","breakpoints":true},
+    {"idx":14,"version":"7","when":1770621505496,"tag":"0053_add_reports_rls_policies","breakpoints":true},
+    {"idx":15,"version":"7","when":1770621506496,"tag":"0054_add_calendar_rls_policies","breakpoints":true},
+    {"idx":16,"version":"7","when":1770621507496,"tag":"0055_align_user_ids_to_clerk","breakpoints":true},
+    {"idx":17,"version":"7","when":1770621508496,"tag":"0056_add_missing_fk_constraints","breakpoints":true},
+    {"idx":18,"version":"7","when":1770621509496,"tag":"0057_recreate_training_views","breakpoints":true},
+    {"idx":19,"version":"7","when":1770621510496,"tag":"0058_world_class_rls_policies","breakpoints":true},
+    {"idx":20,"version":"7","when":1770621511496,"tag":"0059_convert_remaining_user_ids","breakpoints":true},
+    {"idx":21,"version":"7","when":1770621512496,"tag":"0060_add_visibility_scopes","breakpoints":true},
+    {"idx":22,"version":"7","when":1770621513496,"tag":"0061_add_defensibility_packs","breakpoints":true},
+    {"idx":23,"version":"7","when":1770621514496,"tag":"0062_add_immutable_transition_history","breakpoints":true},
+    {"idx":24,"version":"7","when":1770621515496,"tag":"0063_add_audit_log_archive_support","breakpoints":true},
+    {"idx":25,"version":"7","when":1770621516496,"tag":"0064_add_immutability_triggers","breakpoints":true},
+    {"idx":26,"version":"7","when":1770621517496,"tag":"0065_add_governance_tables","breakpoints":true},
+    {"idx":27,"version":"7","when":1770621518496,"tag":"0066_drop_obsolete_search_vector_trigger","breakpoints":true},
+    {"idx":28,"version":"7","when":1770621519496,"tag":"0067_add_congress_memberships","breakpoints":true},
+    {"idx":29,"version":"7","when":1770621520496,"tag":"0068_add_peer_detection_indexes","breakpoints":true},
+    {"idx":30,"version":"7","when":1770621521496,"tag":"0069_rename_tenant_users_to_organization_users","breakpoints":true},
+    {"idx":31,"version":"7","when":1770621522496,"tag":"0070_add_organization_users_rls_policies","breakpoints":true},
+    {"idx":32,"version":"7","when":1770621523496,"tag":"0071_update_messaging_rls_for_session_context","breakpoints":true},
+    {"idx":33,"version":"7","when":1770621524496,"tag":"0072_update_in_app_notifications_rls","breakpoints":true},
+    {"idx":34,"version":"7","when":1770621525496,"tag":"0073_update_documents_reports_calendar_rls","breakpoints":true},
+    {"idx":35,"version":"7","when":1770621526496,"tag":"0074_add_hierarchical_rls_functions","breakpoints":true},
+    {"idx":36,"version":"7","when":1770621527496,"tag":"0075_add_organizations_rls_policies","breakpoints":true},
+    {"idx":37,"version":"7","when":1770621528496,"tag":"0076_add_claims_rls_policies","breakpoints":true},
+    {"idx":38,"version":"7","when":1770621529496,"tag":"0077_migrate_claim_deadlines_to_org_id","breakpoints":true},
+    {"idx":39,"version":"7","when":1770621530496,"tag":"0078_force_dues_transactions_rls","breakpoints":true},
+    {"idx":40,"version":"7","when":1770621531496,"tag":"0079_ai_cost_tracking_phase1","breakpoints":true},
+    {"idx":41,"version":"7","when":1770621532496,"tag":"0080_add_schema_drift_protection","breakpoints":true},
+    {"idx":42,"version":"7","when":1770621533496,"tag":"0081_add_missing_critical_indexes","breakpoints":true}
   ]
 }
