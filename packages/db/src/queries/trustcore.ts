@@ -6,7 +6,7 @@
  *
  * @module @nzila/db/queries/trustcore
  */
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { db } from '../client'
 import {
   trustcorePrivacyPrograms,
@@ -435,22 +435,25 @@ export async function createTrustcorePolicy(
 
 /**
  * Return all policies for an org, ordered newest first.
- * Optionally filter by type.
+ * Optionally filter by type in the WHERE clause.
  */
 export async function listTrustcorePolicies(
   orgId: string,
   type?: 'privacy_policy' | 'data_governance',
 ): Promise<TrustcorePolicy[]> {
-  const rows = await db
+  const where = type
+    ? and(eq(trustcorePolicies.orgId, orgId), eq(trustcorePolicies.type, type))
+    : eq(trustcorePolicies.orgId, orgId)
+  return db
     .select()
     .from(trustcorePolicies)
-    .where(eq(trustcorePolicies.orgId, orgId))
+    .where(where)
     .orderBy(desc(trustcorePolicies.createdAt))
-  return type ? rows.filter((r) => r.type === type) : rows
 }
 
 /**
  * Return the latest version of a policy type for an org, or null.
+ * Filters by type in the WHERE clause for correctness and efficiency.
  */
 export async function getLatestPolicy(
   orgId: string,
@@ -459,8 +462,8 @@ export async function getLatestPolicy(
   const [row] = await db
     .select()
     .from(trustcorePolicies)
-    .where(eq(trustcorePolicies.orgId, orgId))
+    .where(and(eq(trustcorePolicies.orgId, orgId), eq(trustcorePolicies.type, type)))
     .orderBy(desc(trustcorePolicies.createdAt))
     .limit(1)
-  return row && row.type === type ? row : null
+  return row ?? null
 }

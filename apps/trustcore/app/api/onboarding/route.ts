@@ -225,7 +225,7 @@ export const POST = withRequiredRole(['org_admin'], async (req: NextRequest, ctx
         dataCategory: seed.dataCategory,
         sensitivityLevel: seed.sensitivityLevel,
         processingPurpose: seed.processingPurpose,
-        lawfulBasisOrConsentBasis: input.step5.collectsConsent ? 'consent' : 'legitimate_interest',
+        lawfulBasisOrConsentBasis: input.step5.collectsConsent ? 'Consent' : 'Legitimate interest',
         crossBorderTransfer: input.step3.storesOutsideCanada,
         destinationCountry: input.step3.storesOutsideCanada ? 'Multiple' : null,
         status: 'active',
