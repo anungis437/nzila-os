@@ -132,6 +132,25 @@
       "path": "apps/nzila-hq/server/db/audit.ts",
       "owner": "platform-core",
       "justification": "Server-side audit logger in incubating app \u2014 console.error used as fallback when DB insert fails. Will adopt os-core structured logger before PILOT promotion.",
-      "expiresOn": "2026-10-01"    }
+      "expiresOn": "2026-10-01"
+    },
+    {
+      "path": "apps/veridian-admin/proxy.ts",
+      "owner": "platform-team",
+      "justification": "Edge middleware cannot use @nzila/os-core/createLogger (Node.js APIs unavailable on Edge Runtime) — console.error is the only safe logging mechanism in dev-mode catch blocks.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/veridian-care/proxy.ts",
+      "owner": "platform-team",
+      "justification": "Edge middleware cannot use @nzila/os-core/createLogger (Node.js APIs unavailable on Edge Runtime) — console.error is the only safe logging mechanism in dev-mode catch blocks.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/veridian-site/proxy.ts",
+      "owner": "platform-team",
+      "justification": "Edge middleware cannot use @nzila/os-core/createLogger (Node.js APIs unavailable on Edge Runtime) — console.error is the only safe logging mechanism in dev-mode catch blocks.",
+      "expiresOn": "2026-09-01"
+    }
   ]
 }
