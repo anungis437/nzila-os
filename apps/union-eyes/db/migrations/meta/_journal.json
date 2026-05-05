@@ -6,594 +6,601 @@
       "idx": 0,
       "version": "7",
       "when": 1763406880019,
-      "tag": "0097_add_missing_training_fks",
+      "tag": "0000_flippant_luke_cage",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1764959563791,
-      "tag": "0098_msc_enterprise_billing",
+      "when": 1763406881019,
+      "tag": "0001_nzilaos_rls_org_isolation",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1763594511882,
+      "when": 1763406882019,
       "tag": "0001_phase5b_inter_union_features",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1764959585710,
-      "tag": "0003_curious_agent_zero",
+      "when": 1763406883019,
+      "tag": "0002_true_selene",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1770355877546,
-      "tag": "0004_phase2_complete",
+      "when": 1763406884019,
+      "tag": "0003_curious_agent_zero",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1770371778360,
-      "tag": "0005_lazy_kate_bishop",
+      "when": 1763406885019,
+      "tag": "0004_phase2_complete",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1770537031000,
-      "tag": "0006_flat_stepford_cuckoos",
+      "when": 1763406886019,
+      "tag": "0005_lazy_kate_bishop",
       "breakpoints": true
     },
     {
       "idx": 7,
       "version": "7",
-      "when": 1770621501496,
-      "tag": "0007_add_wage_benchmarks",
+      "when": 1763406887019,
+      "tag": "0006_flat_stepford_cuckoos",
       "breakpoints": true
     },
     {
       "idx": 8,
       "version": "7",
-      "when": 1770621502496,
-      "tag": "0008_lean_mother_askani",
+      "when": 1763406888019,
+      "tag": "0007_add_wage_benchmarks",
       "breakpoints": true
     },
     {
       "idx": 9,
       "version": "7",
-      "when": 1771003000895,
-      "tag": "0019_lonely_stephen_strange",
+      "when": 1763406889019,
+      "tag": "0008_lean_mother_askani",
       "breakpoints": true
     },
     {
       "idx": 10,
       "version": "7",
-      "when": 1771006344559,
-      "tag": "0020_keen_roulette",
+      "when": 1763406890019,
+      "tag": "0019_lonely_stephen_strange",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1771010093200,
-      "tag": "0021_steady_darwin",
+      "when": 1763406891019,
+      "tag": "0020_keen_roulette",
       "breakpoints": true
     },
     {
       "idx": 12,
       "version": "7",
-      "when": 1770621503496,
-      "tag": "0051_add_messaging_rls_policies",
+      "when": 1763406892019,
+      "tag": "0021_steady_darwin",
       "breakpoints": true
     },
     {
       "idx": 13,
       "version": "7",
-      "when": 1770621504496,
-      "tag": "0052_add_notifications_documents_rls",
+      "when": 1763406893019,
+      "tag": "0025_pilot_enrollments",
       "breakpoints": true
     },
     {
       "idx": 14,
       "version": "7",
-      "when": 1770621505496,
-      "tag": "0053_add_reports_rls_policies",
+      "when": 1763406894019,
+      "tag": "0051_add_messaging_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 15,
       "version": "7",
-      "when": 1770621506496,
-      "tag": "0054_add_calendar_rls_policies",
+      "when": 1763406895019,
+      "tag": "0052_add_notifications_documents_rls",
       "breakpoints": true
     },
     {
       "idx": 16,
       "version": "7",
-      "when": 1770621507496,
-      "tag": "0055_align_user_ids_to_clerk",
+      "when": 1763406896019,
+      "tag": "0053_add_reports_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 17,
       "version": "7",
-      "when": 1770621508496,
-      "tag": "0056_add_missing_fk_constraints",
+      "when": 1763406897019,
+      "tag": "0054_add_calendar_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 18,
       "version": "7",
-      "when": 1770621509496,
-      "tag": "0057_recreate_training_views",
+      "when": 1763406898019,
+      "tag": "0055_align_user_ids_to_clerk",
       "breakpoints": true
     },
     {
       "idx": 19,
       "version": "7",
-      "when": 1770621510496,
-      "tag": "0058_world_class_rls_policies",
+      "when": 1763406899019,
+      "tag": "0056_add_missing_fk_constraints",
       "breakpoints": true
     },
     {
       "idx": 20,
       "version": "7",
-      "when": 1770621511496,
-      "tag": "0059_convert_remaining_user_ids",
+      "when": 1763406900019,
+      "tag": "0057_recreate_training_views",
       "breakpoints": true
     },
     {
       "idx": 21,
       "version": "7",
-      "when": 1770621512496,
-      "tag": "0060_add_visibility_scopes",
+      "when": 1763406901019,
+      "tag": "0058_world_class_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 22,
       "version": "7",
-      "when": 1770621513496,
-      "tag": "0061_add_defensibility_packs",
+      "when": 1763406902019,
+      "tag": "0059_convert_remaining_user_ids",
       "breakpoints": true
     },
     {
       "idx": 23,
       "version": "7",
-      "when": 1770621514496,
-      "tag": "0062_add_immutable_transition_history",
+      "when": 1763406903019,
+      "tag": "0060_add_visibility_scopes",
       "breakpoints": true
     },
     {
       "idx": 24,
       "version": "7",
-      "when": 1770621515496,
-      "tag": "0063_add_audit_log_archive_support",
+      "when": 1763406904019,
+      "tag": "0061_add_defensibility_packs",
       "breakpoints": true
     },
     {
       "idx": 25,
       "version": "7",
-      "when": 1770621516496,
-      "tag": "0064_add_immutability_triggers",
+      "when": 1763406905019,
+      "tag": "0062_add_immutable_transition_history",
       "breakpoints": true
     },
     {
       "idx": 26,
       "version": "7",
-      "when": 1770621517496,
-      "tag": "0065_add_governance_tables",
+      "when": 1763406906019,
+      "tag": "0063_add_audit_log_archive_support",
       "breakpoints": true
     },
     {
       "idx": 27,
       "version": "7",
-      "when": 1770621518496,
-      "tag": "0066_drop_obsolete_search_vector_trigger",
+      "when": 1763406907019,
+      "tag": "0064_add_immutability_triggers",
       "breakpoints": true
     },
     {
       "idx": 28,
       "version": "7",
-      "when": 1770621519496,
-      "tag": "0067_add_congress_memberships",
+      "when": 1763406908019,
+      "tag": "0065_add_governance_tables",
       "breakpoints": true
     },
     {
       "idx": 29,
       "version": "7",
-      "when": 1770621520496,
-      "tag": "0068_add_peer_detection_indexes",
+      "when": 1763406909019,
+      "tag": "0066_drop_obsolete_search_vector_trigger",
       "breakpoints": true
     },
     {
       "idx": 30,
       "version": "7",
-      "when": 1770621521496,
-      "tag": "0069_rename_tenant_users_to_organization_users",
+      "when": 1763406910019,
+      "tag": "0067_add_congress_memberships",
       "breakpoints": true
     },
     {
       "idx": 31,
       "version": "7",
-      "when": 1770621522496,
-      "tag": "0070_add_organization_users_rls_policies",
+      "when": 1763406911019,
+      "tag": "0068_add_peer_detection_indexes",
       "breakpoints": true
     },
     {
       "idx": 32,
       "version": "7",
-      "when": 1770621523496,
-      "tag": "0071_update_messaging_rls_for_session_context",
+      "when": 1763406912019,
+      "tag": "0069_rename_tenant_users_to_organization_users",
       "breakpoints": true
     },
     {
       "idx": 33,
       "version": "7",
-      "when": 1770621524496,
-      "tag": "0072_update_in_app_notifications_rls",
+      "when": 1763406913019,
+      "tag": "0070_add_organization_users_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 34,
       "version": "7",
-      "when": 1770621525496,
-      "tag": "0073_update_documents_reports_calendar_rls",
+      "when": 1763406914019,
+      "tag": "0070_predeployment_hardening",
       "breakpoints": true
     },
     {
       "idx": 35,
       "version": "7",
-      "when": 1770621526496,
-      "tag": "0074_add_hierarchical_rls_functions",
+      "when": 1763406915019,
+      "tag": "0071_update_messaging_rls_for_session_context",
       "breakpoints": true
     },
     {
       "idx": 36,
       "version": "7",
-      "when": 1770621527496,
-      "tag": "0075_add_organizations_rls_policies",
+      "when": 1763406916019,
+      "tag": "0072_update_in_app_notifications_rls",
       "breakpoints": true
     },
     {
       "idx": 37,
       "version": "7",
-      "when": 1770621528496,
-      "tag": "0076_add_claims_rls_policies",
+      "when": 1763406917019,
+      "tag": "0073_update_documents_reports_calendar_rls",
       "breakpoints": true
     },
     {
       "idx": 38,
       "version": "7",
-      "when": 1770621529496,
-      "tag": "0077_migrate_claim_deadlines_to_org_id",
+      "when": 1763406918019,
+      "tag": "0074_add_hierarchical_rls_functions",
       "breakpoints": true
     },
     {
       "idx": 39,
       "version": "7",
-      "when": 1770621530496,
-      "tag": "0078_force_dues_transactions_rls",
+      "when": 1763406919019,
+      "tag": "0075_add_organizations_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 40,
       "version": "7",
-      "when": 1770621531496,
-      "tag": "0079_ai_cost_tracking_phase1",
+      "when": 1763406920019,
+      "tag": "0076_add_claims_rls_policies",
       "breakpoints": true
     },
     {
       "idx": 41,
       "version": "7",
-      "when": 1770621532496,
-      "tag": "0080_add_schema_drift_protection",
+      "when": 1763406921019,
+      "tag": "0077_migrate_claim_deadlines_to_org_id",
       "breakpoints": true
     },
     {
       "idx": 42,
       "version": "7",
-      "when": 1770621533496,
-      "tag": "0081_add_missing_critical_indexes",
+      "when": 1763406922019,
+      "tag": "0078_force_dues_transactions_rls",
       "breakpoints": true
     },
     {
       "idx": 43,
       "version": "7",
-      "when": 1770621534496,
-      "tag": "0001_nzilaos_rls_org_isolation",
+      "when": 1763406923019,
+      "tag": "0079_ai_cost_tracking_phase1",
       "breakpoints": true
     },
     {
       "idx": 44,
       "version": "7",
-      "when": 1770621535496,
-      "tag": "0025_pilot_enrollments",
+      "when": 1763406924019,
+      "tag": "0080_add_schema_drift_protection",
       "breakpoints": true
     },
     {
       "idx": 45,
       "version": "7",
-      "when": 1770621536496,
-      "tag": "0097_add_missing_training_fks",
+      "when": 1763406925019,
+      "tag": "0080_audit_remediation",
       "breakpoints": true
     },
     {
       "idx": 46,
       "version": "7",
-      "when": 1770621537496,
-      "tag": "0070_predeployment_hardening",
+      "when": 1763406926019,
+      "tag": "0081_add_missing_critical_indexes",
       "breakpoints": true
     },
     {
       "idx": 47,
       "version": "7",
-      "when": 1770621538496,
-      "tag": "0080_audit_remediation",
+      "when": 1763406927019,
+      "tag": "0082_add_pilot_tables",
       "breakpoints": true
     },
     {
       "idx": 48,
       "version": "7",
-      "when": 1770621539496,
-      "tag": "0082_add_pilot_tables",
+      "when": 1763406928019,
+      "tag": "0083_data_source_tables",
       "breakpoints": true
     },
     {
       "idx": 49,
       "version": "7",
-      "when": 1770621540496,
-      "tag": "0083_data_source_tables",
+      "when": 1763406929019,
+      "tag": "0084_claims_monetary_varchar_to_decimal",
       "breakpoints": true
     },
     {
       "idx": 50,
       "version": "7",
-      "when": 1770621541496,
-      "tag": "0084_claims_monetary_varchar_to_decimal",
+      "when": 1763406930019,
+      "tag": "0085_monetization_infrastructure_layer",
       "breakpoints": true
     },
     {
       "idx": 51,
       "version": "7",
-      "when": 1770621542496,
-      "tag": "0085_monetization_infrastructure_layer",
+      "when": 1763406931019,
+      "tag": "0086_monetization_phase2",
       "breakpoints": true
     },
     {
       "idx": 52,
       "version": "7",
-      "when": 1770621543496,
-      "tag": "0086_monetization_phase2",
+      "when": 1763406932019,
+      "tag": "0087_add_member_location_fields",
       "breakpoints": true
     },
     {
       "idx": 53,
       "version": "7",
-      "when": 1770621544496,
-      "tag": "0087_add_member_location_fields",
+      "when": 1763406933019,
+      "tag": "0088_add_fts_gin_index",
       "breakpoints": true
     },
     {
       "idx": 54,
       "version": "7",
-      "when": 1770621545496,
-      "tag": "0088_add_fts_gin_index",
+      "when": 1763406934019,
+      "tag": "0089_ingestion_hardening",
       "breakpoints": true
     },
     {
       "idx": 55,
       "version": "7",
-      "when": 1770621546496,
-      "tag": "0089_ingestion_hardening",
+      "when": 1763406935019,
+      "tag": "0090_zonga_listeners_user_id_unique",
       "breakpoints": true
     },
     {
       "idx": 56,
       "version": "7",
-      "when": 1770621547496,
-      "tag": "0090_zonga_listeners_user_id_unique",
+      "when": 1763406936019,
+      "tag": "0091_zonga_social_tables",
       "breakpoints": true
     },
     {
       "idx": 57,
       "version": "7",
-      "when": 1770621548496,
-      "tag": "0091_zonga_social_tables",
+      "when": 1763406937019,
+      "tag": "0092_msc_billing_seed",
       "breakpoints": true
     },
     {
       "idx": 58,
       "version": "7",
-      "when": 1770621549496,
-      "tag": "0098_msc_enterprise_billing",
+      "when": 1763406938019,
+      "tag": "0093_applications_registry",
       "breakpoints": true
     },
     {
       "idx": 59,
       "version": "7",
-      "when": 1770621550496,
-      "tag": "0093_applications_registry",
+      "when": 1763406939019,
+      "tag": "0094_ms_celebrations_seed",
       "breakpoints": true
     },
     {
       "idx": 60,
       "version": "7",
-      "when": 1770621551496,
-      "tag": "0094_ms_celebrations_seed",
+      "when": 1763406940019,
+      "tag": "0095_ms_celebrations_auth_users",
       "breakpoints": true
     },
     {
       "idx": 61,
       "version": "7",
-      "when": 1770621552496,
-      "tag": "0095_ms_celebrations_auth_users",
+      "when": 1763406941019,
+      "tag": "0096_add_missing_ue_required_tables",
       "breakpoints": true
     },
     {
       "idx": 62,
       "version": "7",
-      "when": 1770621553496,
-      "tag": "0096_add_missing_ue_required_tables",
+      "when": 1763406942019,
+      "tag": "0097_add_missing_training_fks",
       "breakpoints": true
     },
     {
       "idx": 63,
       "version": "7",
-      "when": 1770621554496,
-      "tag": "1770880372830_consolidate_chart_of_accounts_fixed",
+      "when": 1763406943019,
+      "tag": "0098_msc_enterprise_billing",
       "breakpoints": true
     },
     {
       "idx": 64,
       "version": "7",
-      "when": 1770621555496,
-      "tag": "20260212_add_hris_tables_fixed",
+      "when": 1763406944019,
+      "tag": "1770880372830_consolidate_chart_of_accounts_fixed",
       "breakpoints": true
     },
     {
       "idx": 65,
       "version": "7",
-      "when": 1770621556496,
-      "tag": "20260212_add_integration_framework_fixed",
+      "when": 1763406945019,
+      "tag": "20260212_add_hris_tables_fixed",
       "breakpoints": true
     },
     {
       "idx": 66,
       "version": "7",
-      "when": 1770621557496,
-      "tag": "20260213_add_accounting_tables_fixed",
+      "when": 1763406946019,
+      "tag": "20260212_add_integration_framework_fixed",
       "breakpoints": true
     },
     {
       "idx": 67,
       "version": "7",
-      "when": 1770621558496,
-      "tag": "20260213_add_integration_foreign_keys",
+      "when": 1763406947019,
+      "tag": "20260213_add_accounting_tables_fixed",
       "breakpoints": true
     },
     {
       "idx": 68,
       "version": "7",
-      "when": 1770621559496,
-      "tag": "20260324_add_missing_tables_and_columns",
+      "when": 1763406948019,
+      "tag": "20260213_add_integration_foreign_keys",
       "breakpoints": true
     },
     {
       "idx": 69,
       "version": "7",
-      "when": 1770621560496,
-      "tag": "20260324_add_remaining_missing_tables",
+      "when": 1763406949019,
+      "tag": "20260324_add_missing_tables_and_columns",
       "breakpoints": true
     },
     {
       "idx": 70,
       "version": "7",
-      "when": 1770621561496,
-      "tag": "20260325_dapl_platform_ledger",
+      "when": 1763406950019,
+      "tag": "20260324_add_remaining_missing_tables",
       "breakpoints": true
     },
     {
       "idx": 71,
       "version": "7",
-      "when": 1770621562496,
-      "tag": "20260327_staging_alignment_phase2",
+      "when": 1763406951019,
+      "tag": "20260325_dapl_platform_ledger",
       "breakpoints": true
     },
     {
       "idx": 72,
       "version": "7",
-      "when": 1770621563496,
-      "tag": "20260327_staging_alignment_phase3",
+      "when": 1763406952019,
+      "tag": "20260327_staging_alignment_phase2",
       "breakpoints": true
     },
     {
       "idx": 73,
       "version": "7",
-      "when": 1770621564496,
-      "tag": "20260327_staging_schema_alignment",
+      "when": 1763406953019,
+      "tag": "20260327_staging_alignment_phase3",
       "breakpoints": true
     },
     {
       "idx": 74,
       "version": "7",
-      "when": 1770621565496,
-      "tag": "20260328_jurisdiction_preferences",
+      "when": 1763406954019,
+      "tag": "20260327_staging_schema_alignment",
       "breakpoints": true
     },
     {
       "idx": 75,
       "version": "7",
-      "when": 1770621566496,
-      "tag": "20260401_cba_intelligence_public_sources",
+      "when": 1763406955019,
+      "tag": "20260328_jurisdiction_preferences",
       "breakpoints": true
     },
     {
       "idx": 76,
       "version": "7",
-      "when": 1770621567496,
-      "tag": "20260402_audit_immutability",
+      "when": 1763406956019,
+      "tag": "20260401_cba_intelligence_public_sources",
       "breakpoints": true
     },
     {
       "idx": 77,
       "version": "7",
-      "when": 1770621568496,
-      "tag": "20260402_pgvector_embeddings",
+      "when": 1763406957019,
+      "tag": "20260402_audit_immutability",
       "breakpoints": true
     },
     {
       "idx": 78,
       "version": "7",
-      "when": 1770621569496,
-      "tag": "20260404_pilot_observability",
+      "when": 1763406958019,
+      "tag": "20260402_pgvector_embeddings",
       "breakpoints": true
     },
     {
       "idx": 79,
       "version": "7",
-      "when": 1770621570496,
-      "tag": "20260710_clerk_to_entra_user_ids",
+      "when": 1763406959019,
+      "tag": "20260404_pilot_observability",
       "breakpoints": true
     },
     {
       "idx": 80,
       "version": "7",
-      "when": 1770621571496,
-      "tag": "20260711_auth_password_reset_tokens",
+      "when": 1763406960019,
+      "tag": "20260710_clerk_to_entra_user_ids",
       "breakpoints": true
     },
     {
       "idx": 81,
       "version": "7",
-      "when": 1770621572496,
-      "tag": "20260712_org_users_unique_constraint",
+      "when": 1763406961019,
+      "tag": "20260711_auth_password_reset_tokens",
       "breakpoints": true
     },
     {
       "idx": 82,
       "version": "7",
-      "when": 1770621573496,
-      "tag": "20260713_dedup_and_quality_warnings",
+      "when": 1763406962019,
+      "tag": "20260712_org_users_unique_constraint",
       "breakpoints": true
     },
     {
       "idx": 83,
       "version": "7",
-      "when": 1770621574496,
-      "tag": "20260714_correspondence_pipeline",
+      "when": 1763406963019,
+      "tag": "20260713_dedup_and_quality_warnings",
       "breakpoints": true
     },
     {
       "idx": 84,
       "version": "7",
-      "when": 1770621575496,
+      "when": 1763406964019,
+      "tag": "20260714_correspondence_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1763406965019,
       "tag": "20260715_integration_fabric",
       "breakpoints": true
     }

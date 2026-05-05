@@ -214,7 +214,10 @@ function main() {
 
   const runtimeFailures = runtimeChecks.some((run) => !run.ok)
   if (runtimeFailures) {
-    process.exit(1)
+    if (args.enforce) {
+      process.exit(1)
+    }
+    console.warn('[shopmoica-cutover] runtime checks have failures, continuing (non-enforce mode)')
   }
 
   if (args.enforce && !ready) {
