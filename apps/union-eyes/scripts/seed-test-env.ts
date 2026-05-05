@@ -39,14 +39,16 @@ function assertSafeRuntime(): void {
 
 function isMissingColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  return cause?.code === '42703'
+  const err = error as any
+  // Check error.cause.code (Drizzle wrapping) or error.code (direct postgres-js error)
+  return err.cause?.code === '42703' || err.code === '42703'
 }
 
 function isMissingRelationError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  return cause?.code === '42P01'
+  const err = error as any
+  // Check error.cause.code (Drizzle wrapping) or error.code (direct postgres-js error)
+  return err.cause?.code === '42P01' || err.code === '42P01'
 }
 
 function assertDeterministicInputs(): void {
