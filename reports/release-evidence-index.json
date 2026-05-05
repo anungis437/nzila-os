@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-05-05T00:00:00.000Z",
+  "entries": [
+    {
+      "id": "ue-human-approval",
+      "type": "human-approval",
+      "product": "Union Eyes",
+      "path": "artifacts/ue-qa/human-approval.json",
+      "requiredFor": "production-release"
+    }
+  ]
+}

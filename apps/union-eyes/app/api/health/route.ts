@@ -1,6 +1,7 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { getBuildMetadata, healthStatusFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
+import { buildHealthResponse } from '@nzila/platform-ops/health/strictHealth'
 
 const APP = 'union-eyes'
 
@@ -39,7 +40,24 @@ async function checkQueue(): Promise<'ok' | 'degraded' | 'unreachable'> {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const forceFailRequested = request ? new URL(request.url).searchParams.get('forceFail') === '1' : false
+  const allowForceFail = process.env.NODE_ENV !== 'production'
+
+  if (forceFailRequested && allowForceFail) {
+    const forced = buildHealthResponse([{ name: 'forced-degradation', ok: false }])
+    return NextResponse.json(
+      {
+        status: 'degraded',
+        ...getBuildMetadata(APP),
+        checks: forced.body.checks,
+        ok: forced.body.ok,
+        timestamp: forced.body.timestamp,
+      },
+      { status: forced.status },
+    )
+  }
+
   const [dbResult, queueResult] = await Promise.allSettled([checkDb(), checkQueue()])
   const requireQueue = parseBoolEnv(process.env.HEALTH_REQUIRE_QUEUE, false)
 
@@ -56,13 +74,26 @@ export async function GET() {
 
   const status = healthStatusFromChecks(checks)
 
+  const strict = buildHealthResponse([
+    { name: 'process', ok: true },
+    { name: 'database', ok: checksInput.database },
+    {
+      name: 'queue',
+      ok: checksInput.queue ?? true,
+      critical: requireQueue,
+      message: queueResult.status === 'fulfilled' ? queueResult.value : 'unreachable',
+    },
+  ])
+
   return NextResponse.json(
     {
-      status,
+      status: strict.status === 200 ? status : 'degraded',
       ...getBuildMetadata(APP),
       checks,
+      ok: strict.body.ok,
+      timestamp: strict.body.timestamp,
     },
-    { status: status === 'ok' ? 200 : 503 },
+    { status: strict.status },
   )
 }
 

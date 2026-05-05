@@ -13,12 +13,21 @@
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { resolve, relative } from 'node:path'
 
 const ROOT = resolve(__dirname, '../..')
 
-function read(rel: string): string {
+function resolveUnderRoot(rel: string): string {
   const abs = resolve(ROOT, rel)
+  const relToRoot = relative(ROOT, abs)
+  if (relToRoot.startsWith('..')) {
+    throw new Error(`Unsafe path outside root: ${rel}`)
+  }
+  return abs
+}
+
+function read(rel: string): string {
+  const abs = resolveUnderRoot(rel)
   return existsSync(abs) ? readFileSync(abs, 'utf-8') : ''
 }
 
@@ -82,7 +91,15 @@ describe('Health & Readiness Routes — REM-05 contract', () => {
       // ── Degraded response ─────────────────────────────────────────────────
       it('health route returns 503 on degraded', () => {
         const content = read(healthRoutePath(app))
-        expect(content).toContain('503')
+        const hasConditionalStatus =
+          /status\s*===\s*['\"]ok['\"]\s*\?\s*200\s*:\s*503/.test(content) ||
+          /status\s*:\s*[a-zA-Z0-9_$.]+\s*\?\s*200\s*:\s*503/.test(content) ||
+          /reply\.status\([^)]*\?\s*200\s*:\s*503\)/.test(content) ||
+          /buildHealthResponse\(/.test(content)
+        expect(
+          hasConditionalStatus,
+          `apps/${app} health route must conditionally return 503 based on dependency checks`,
+        ).toBe(true)
       })
 
       // ── Response shape ────────────────────────────────────────────────────

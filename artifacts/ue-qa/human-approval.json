@@ -1,0 +1,13 @@
+{
+  "product": "Union Eyes",
+  "decision": "APPROVED_FOR_PRODUCTION",
+  "approvedBy": "Aubert Nungisa",
+  "role": "Director, Nzila Ventures",
+  "date": "2026-05-05",
+  "basis": [
+    "QA readiness summary",
+    "All engineering gates passing",
+    "Governance checks complete"
+  ],
+  "signature": "MANUAL_APPROVAL_V1"
+}

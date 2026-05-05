@@ -1,11 +1,9 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,19 +24,6 @@ if (!databaseUrl) {
 }
 
 const migrationsFolder = path.join(appRoot, 'db', 'migrations');
-const journalPath = path.join(migrationsFolder, 'meta', '_journal.json');
-
-function readJournalEntries() {
-  const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'));
-  return journal.entries.map((entry) => {
-    const migrationPath = path.join(migrationsFolder, `${entry.tag}.sql`);
-    const sql = fs.readFileSync(migrationPath, 'utf8');
-    return {
-      when: entry.when,
-      hash: crypto.createHash('sha256').update(sql).digest('hex'),
-    };
-  });
-}
 
 async function ensureBaseline() {
   const client = new pg.Client({ connectionString: databaseUrl });
@@ -71,12 +56,14 @@ async function ensureBaseline() {
       return;
     }
 
-    const entries = readJournalEntries();
+    const drizzleMigrator = await import('drizzle-orm/migrator');
+    const entries = drizzleMigrator.readMigrationFiles({ migrationsFolder });
+
     await client.query('BEGIN');
     for (const entry of entries) {
       await client.query(
         'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
-        [entry.hash, entry.when],
+        [entry.hash, entry.folderMillis],
       );
     }
     await client.query('COMMIT');
@@ -88,7 +75,15 @@ async function ensureBaseline() {
       // no-op
     }
     console.error('Failed to prepare Drizzle migration baseline.');
-    console.error(error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      console.error(error.message);
+      const cause = (error).cause;
+      if (cause) {
+        console.error('Cause:', cause);
+      }
+    } else {
+      console.error(String(error));
+    }
     process.exit(1);
   } finally {
     await client.end();
@@ -105,7 +100,15 @@ async function runMigrations() {
     console.log('Drizzle migrations are up to date.');
   } catch (error) {
     console.error('Failed to run Drizzle migrations.');
-    console.error(error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      console.error(error.message);
+      const cause = (error).cause;
+      if (cause) {
+        console.error('Cause:', cause);
+      }
+    } else {
+      console.error(String(error));
+    }
     process.exit(1);
   } finally {
     await client.end();

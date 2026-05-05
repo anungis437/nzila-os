@@ -3,6 +3,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { computeRuntimeScore } from '@nzila/platform-ops/runtime/computeRuntimeScore'
 import {
   RuntimeProofGateSchema,
   evaluateRuntimeGate,
@@ -43,8 +44,12 @@ function pass(msg: string): never {
 
 export function runGate(env: GateEnv): void {
   const latestPath = path.join(ROOT, 'reports/runtime/runtime-latest.json')
+  const healthPath = path.join(ROOT, 'reports/runtime/health-latest.json')
   if (!fs.existsSync(latestPath)) {
     fail(`runtime-latest.json not found at ${latestPath} — run proof:runtime first`)
+  }
+  if (!fs.existsSync(healthPath)) {
+    fail(`health-latest.json not found at ${healthPath} — run proof:health first`)
   }
 
   let raw: unknown
@@ -63,6 +68,29 @@ export function runGate(env: GateEnv): void {
   }
 
   const proof = parsed.data as RuntimeProofForGate
+
+  let healthRaw: unknown
+  try {
+    healthRaw = JSON.parse(fs.readFileSync(healthPath, 'utf8'))
+  } catch {
+    fail(`Failed to parse ${healthPath}`)
+  }
+
+  const expectedRuntime = computeRuntimeScore(healthRaw)
+  if (proof.score !== expectedRuntime.score) {
+    fail(
+      `Runtime score mismatch: runtime-latest score=${proof.score}, expected=${expectedRuntime.score} from health-latest`,
+    )
+  }
+
+  const healthOverallStatus =
+    typeof (healthRaw as { overallStatus?: unknown }).overallStatus === 'string'
+      ? String((healthRaw as { overallStatus?: unknown }).overallStatus)
+      : 'unknown'
+  if (proof.score === 100 && healthOverallStatus !== 'pass') {
+    fail(`Runtime score invalid: score=100 but health overallStatus=${healthOverallStatus}`)
+  }
+
   const decision = evaluateRuntimeGate(proof, env)
 
   console.log(`Runtime Proof Gate [${env.toUpperCase()}]`)

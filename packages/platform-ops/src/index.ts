@@ -9,6 +9,19 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 
+// Re-export strict health response helper
+export {
+  buildHealthResponse,
+  type DependencyCheck,
+  type StrictHealthResponse,
+} from './health/strictHealth'
+
+// Re-export runtime score derivation helper
+export {
+  computeRuntimeScore,
+  type RuntimeScore,
+} from './runtime/computeRuntimeScore'
+
 // Re-export health digest & alerting modules
 export {
   computeDeltas,

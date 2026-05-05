@@ -147,6 +147,7 @@
     "ue:qa:gate:ux": "pnpm ue:qa:gate -- --target ux",
     "ue:qa:gate:pilot": "pnpm ue:qa:gate -- --target pilot",
     "ue:qa:gate:production": "pnpm ue:qa:gate -- --target production",
+    "ue:final-gate": "tsx scripts/ue-final-gate.ts",
     "prod:region:validate": "tsx scripts/validate-prod-region.ts",
     "ue:prod:canadacentral:dry-run": "tsx scripts/ue-prod-canadacentral-dry-run.ts",
     "release:prod": "pnpm release:audit && pnpm release:secrets:audit && tsx scripts/release/resolve-deploy-apps.ts --env production --apps all",

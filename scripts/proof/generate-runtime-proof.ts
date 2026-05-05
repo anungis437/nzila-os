@@ -11,11 +11,13 @@ import {
   classifySecurityProof,
   classifySealVerification,
   isBootstrapCiRun,
+  scoreToGrade,
   summarizeRestoreProof,
   type ArtifactSet,
   type RuntimeMetric,
   type ScoringDimension,
 } from './runtime-proof-core'
+import { computeRuntimeScore } from '@nzila/platform-ops/runtime/computeRuntimeScore'
 
 const ROOT = (() => {
   if (typeof __dirname !== 'undefined') {
@@ -416,14 +418,31 @@ export function generateRuntimeProof(periodInput?: string): RuntimeProofV2 {
     forcedUnknowns: forcedFindings.unknowns,
   })
 
+  const runtimeTruth = computeRuntimeScore(artifacts.healthReport)
+  const healthOverallStatus =
+    typeof artifacts.healthReport?.['overallStatus'] === 'string'
+      ? artifacts.healthReport['overallStatus']
+      : 'unknown'
+
+  if (runtimeTruth.score === 100 && healthOverallStatus !== 'pass') {
+    throw new Error(
+      `Runtime score invalid: score=100 but health overallStatus=${healthOverallStatus}`,
+    )
+  }
+
   const restoreProof = summarizeRestoreProof(artifacts.restoreDrill)
   const securityProof = classifySecurityProof(artifacts.securityProof)
   const sealVerification = classifySealVerification(artifacts.snapshot)
 
   const overallHealth: RuntimeProofV2['overallHealth'] =
-    scoreDetails.blockingFindings.length > 0 ? 'critical'
+    runtimeTruth.status === 'unhealthy' ? 'critical'
+    : runtimeTruth.status === 'degraded' ? 'degraded'
+    : scoreDetails.blockingFindings.length > 0 ? 'critical'
     : scoreDetails.advisoryFindings.length > 0 || scoreDetails.unknowns.length > 0 ? 'degraded'
     : 'healthy'
+
+  const derivedScore = runtimeTruth.score
+  const derivedGrade = scoreToGrade(derivedScore, scoreDetails.bootstrapSources.length > 0)
 
   const proof: RuntimeProofV2 = {
     schemaVersion: 2,
@@ -447,9 +466,9 @@ export function generateRuntimeProof(periodInput?: string): RuntimeProofV2 {
       sourceEntry('snapshot', path.relative(ROOT, snapshotPath), artifacts.snapshot ? 1 : 0),
     ],
     overallHealth,
-    score: scoreDetails.score,
+    score: derivedScore,
     maxScore: scoreDetails.maxScore,
-    grade: scoreDetails.grade,
+    grade: derivedGrade,
     scoringBreakdown: scoreDetails.breakdown,
     blockingFindings: scoreDetails.blockingFindings,
     advisoryFindings: scoreDetails.advisoryFindings,

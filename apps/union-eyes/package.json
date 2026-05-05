@@ -56,6 +56,7 @@
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-cognition-core": "workspace:*",
+    "@nzila/platform-ops": "workspace:*",
     "@nzila/platform-pilot-metrics": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
     "@nzila/ue-cognition": "workspace:*",
