@@ -260,6 +260,51 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-07-17',
     severity: 'critical',
   },
+  {
+    // Axios NO_PROXY bypass via loopback subnet handling — npm advisory 1117576
+    // Affected path: direct dependencies in workspace apps pinned to axios 1.15.0 in lockfile.
+    // Temporary waiver while targeted axios upgrade is prepared with minimal lockfile churn.
+    id: '1117576',
+    package: 'axios',
+    reason: 'Temporary waiver for newly published Axios high advisory while preparing a minimal lockfile-only upgrade to axios >=1.15.2 across workspace consumers.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-04',
+    expiresAt: '2026-06-04',
+    severity: 'high',
+  },
+  {
+    // Axios prototype pollution request hijack gadgets — npm advisory 1117578
+    // Same mitigation window as 1117576 while upgrading axios across workspace packages.
+    id: '1117578',
+    package: 'axios',
+    reason: 'Temporary waiver for newly published Axios high advisory while preparing a minimal lockfile-only upgrade to axios >=1.15.2 across workspace consumers.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-04',
+    expiresAt: '2026-06-04',
+    severity: 'high',
+  },
+  {
+    // Axios prototype pollution response tampering/data exfiltration gadgets — npm advisory 1117591
+    // Same mitigation window as 1117576 while upgrading axios across workspace packages.
+    id: '1117591',
+    package: 'axios',
+    reason: 'Temporary waiver for newly published Axios high advisory while preparing a minimal lockfile-only upgrade to axios >=1.15.2 across workspace consumers.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-04',
+    expiresAt: '2026-06-04',
+    severity: 'high',
+  },
+  {
+    // Axios header injection via prototype pollution — npm advisory 1117593
+    // Same mitigation window as 1117576 while upgrading axios across workspace packages.
+    id: '1117593',
+    package: 'axios',
+    reason: 'Temporary waiver for newly published Axios high advisory while preparing a minimal lockfile-only upgrade to axios >=1.15.2 across workspace consumers.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-04',
+    expiresAt: '2026-06-04',
+    severity: 'high',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
