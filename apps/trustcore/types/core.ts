@@ -30,6 +30,12 @@ export type AuditAction =
   | 'exported'
   | 'submitted'
   | 'escalated'
+  // TrustCore domain-specific actions
+  | 'data_asset_created'
+  | 'pia_created'
+  | 'incident_logged'
+  | 'dsr_created'
+  | 'vendor_added'
 
 export interface AuditEvent {
   id: string

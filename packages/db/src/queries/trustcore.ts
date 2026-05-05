@@ -30,6 +30,11 @@ export type TrustcoreConsentRecord = typeof trustcoreConsentRecords.$inferSelect
 export type TrustcoreVendor = typeof trustcoreVendors.$inferSelect
 export type TrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferSelect
 
+export type NewTrustcoreDataAsset = typeof trustcoreDataAssets.$inferInsert
+export type NewTrustcorePia = typeof trustcorePias.$inferInsert
+export type NewTrustcoreIncident = typeof trustcoreIncidents.$inferInsert
+export type NewTrustcoreDsrRequest = typeof trustcoreDsrRequests.$inferInsert
+export type NewTrustcoreVendor = typeof trustcoreVendors.$inferInsert
 export type NewTrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
@@ -224,6 +229,71 @@ export async function createTrustcoreEvidenceEvent(
     .returning()
   if (!row) {
     throw new Error('createTrustcoreEvidenceEvent: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcoreDataAsset(
+  input: NewTrustcoreDataAsset,
+): Promise<TrustcoreDataAsset> {
+  const [row] = await db
+    .insert(trustcoreDataAssets)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcoreDataAsset: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcorePia(
+  input: NewTrustcorePia,
+): Promise<TrustcorePia> {
+  const [row] = await db
+    .insert(trustcorePias)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcorePia: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcoreIncident(
+  input: NewTrustcoreIncident,
+): Promise<TrustcoreIncident> {
+  const [row] = await db
+    .insert(trustcoreIncidents)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcoreIncident: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcoreDsrRequest(
+  input: NewTrustcoreDsrRequest,
+): Promise<TrustcoreDsrRequest> {
+  const [row] = await db
+    .insert(trustcoreDsrRequests)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcoreDsrRequest: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcoreVendor(
+  input: NewTrustcoreVendor,
+): Promise<TrustcoreVendor> {
+  const [row] = await db
+    .insert(trustcoreVendors)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcoreVendor: insert returned no row')
   }
   return row
 }
