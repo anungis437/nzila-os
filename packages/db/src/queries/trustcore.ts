@@ -18,6 +18,7 @@ import {
   trustcoreVendors,
   trustcoreEvidenceEvents,
   trustcoreComplianceSnapshots,
+  trustcorePolicies,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -30,6 +31,7 @@ export type TrustcoreConsentRecord = typeof trustcoreConsentRecords.$inferSelect
 export type TrustcoreVendor = typeof trustcoreVendors.$inferSelect
 export type TrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferSelect
 export type TrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots.$inferSelect
+export type TrustcorePolicy = typeof trustcorePolicies.$inferSelect
 
 export type NewTrustcoreDataAsset = typeof trustcoreDataAssets.$inferInsert
 export type NewTrustcorePia = typeof trustcorePias.$inferInsert
@@ -38,6 +40,7 @@ export type NewTrustcoreDsrRequest = typeof trustcoreDsrRequests.$inferInsert
 export type NewTrustcoreVendor = typeof trustcoreVendors.$inferInsert
 export type NewTrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferInsert
 export type NewTrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots.$inferInsert
+export type NewTrustcorePolicy = typeof trustcorePolicies.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
@@ -325,6 +328,47 @@ export async function createTrustcoreVendor(
   return row
 }
 
+export async function createTrustcorePrivacyProgram(
+  input: typeof trustcorePrivacyPrograms.$inferInsert,
+): Promise<TrustcorePrivacyProgram> {
+  const [row] = await db
+    .insert(trustcorePrivacyPrograms)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcorePrivacyProgram: insert returned no row')
+  }
+  return row
+}
+
+export async function createTrustcoreConsentRecord(
+  input: typeof trustcoreConsentRecords.$inferInsert,
+): Promise<TrustcoreConsentRecord> {
+  const [row] = await db
+    .insert(trustcoreConsentRecords)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcoreConsentRecord: insert returned no row')
+  }
+  return row
+}
+
+/**
+ * Return the most recent active privacy program for an org, or null.
+ */
+export async function getActivePrivacyProgram(
+  orgId: string,
+): Promise<TrustcorePrivacyProgram | null> {
+  const [row] = await db
+    .select()
+    .from(trustcorePrivacyPrograms)
+    .where(eq(trustcorePrivacyPrograms.orgId, orgId))
+    .orderBy(desc(trustcorePrivacyPrograms.createdAt))
+    .limit(1)
+  return row ?? null
+}
+
 // ── Compliance snapshot helpers ────────────────────────────────────────────
 
 /**
@@ -372,4 +416,51 @@ export async function listComplianceSnapshots(
     .where(eq(trustcoreComplianceSnapshots.orgId, orgId))
     .orderBy(desc(trustcoreComplianceSnapshots.createdAt))
     .limit(limit)
+}
+
+// ── Policy helpers ─────────────────────────────────────────────────────────
+
+export async function createTrustcorePolicy(
+  input: NewTrustcorePolicy,
+): Promise<TrustcorePolicy> {
+  const [row] = await db
+    .insert(trustcorePolicies)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createTrustcorePolicy: insert returned no row')
+  }
+  return row
+}
+
+/**
+ * Return all policies for an org, ordered newest first.
+ * Optionally filter by type.
+ */
+export async function listTrustcorePolicies(
+  orgId: string,
+  type?: 'privacy_policy' | 'data_governance',
+): Promise<TrustcorePolicy[]> {
+  const rows = await db
+    .select()
+    .from(trustcorePolicies)
+    .where(eq(trustcorePolicies.orgId, orgId))
+    .orderBy(desc(trustcorePolicies.createdAt))
+  return type ? rows.filter((r) => r.type === type) : rows
+}
+
+/**
+ * Return the latest version of a policy type for an org, or null.
+ */
+export async function getLatestPolicy(
+  orgId: string,
+  type: 'privacy_policy' | 'data_governance',
+): Promise<TrustcorePolicy | null> {
+  const [row] = await db
+    .select()
+    .from(trustcorePolicies)
+    .where(eq(trustcorePolicies.orgId, orgId))
+    .orderBy(desc(trustcorePolicies.createdAt))
+    .limit(1)
+  return row && row.type === type ? row : null
 }

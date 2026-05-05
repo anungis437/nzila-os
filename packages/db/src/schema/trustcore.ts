@@ -156,6 +156,8 @@ export const trustcorePrivacyPrograms = pgTable(
     publicContactEmail: text('public_contact_email'),
     status: tcProgramStatusEnum('status').notNull().default('draft'),
     lastReviewedAt: timestamp('last_reviewed_at', { withTimezone: true }),
+    /** Set when the onboarding wizard completes. Null = not yet onboarded. */
+    onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -392,5 +394,36 @@ export const trustcoreComplianceSnapshots = pgTable(
   (t) => [
     index('tc_snapshots_org_idx').on(t.orgId),
     index('tc_snapshots_org_created_idx').on(t.orgId, t.createdAt),
+  ],
+)
+
+// ── J) trustcorePolicies ──────────────────────────────────────────────────
+
+export const tcPolicyTypeEnum = pgEnum('tc_policy_type', [
+  'privacy_policy',
+  'data_governance',
+])
+
+/**
+ * Generated compliance policies (privacy policy, data governance).
+ * Content is stored as markdown for portability.
+ * New versions are appended; old ones are not deleted (immutable history).
+ */
+export const trustcorePolicies = pgTable(
+  'trustcore_policies',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    type: tcPolicyTypeEnum('type').notNull(),
+    content: text('content').notNull(),
+    version: integer('version').notNull().default(1),
+    generatedBy: text('generated_by').notNull().default('system'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_policies_org_idx').on(t.orgId),
+    index('tc_policies_org_type_idx').on(t.orgId, t.type),
   ],
 )
