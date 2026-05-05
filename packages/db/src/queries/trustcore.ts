@@ -6,7 +6,7 @@
  *
  * @module @nzila/db/queries/trustcore
  */
-import { eq, and, count, sql, desc } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import { db } from '../client'
 import {
   trustcorePrivacyPrograms,
@@ -18,7 +18,6 @@ import {
   trustcoreVendors,
   trustcoreEvidenceEvents,
 } from '../schema/trustcore'
-
 // ── Re-export types for app consumption ───────────────────────────────────
 
 export type TrustcorePrivacyProgram = typeof trustcorePrivacyPrograms.$inferSelect
@@ -52,104 +51,118 @@ export interface TrustcoreDashboardSummary {
 /**
  * Compute a live compliance dashboard summary for an org.
  *
- * Score derivation (deterministic, explainable):
- *   - Base score starts at 100.
- *   - -20 per critical open incident (max -40).
- *   - -10 per overdue DSR request (max -30).
- *   - -5  per vendor at high/critical risk without contract reviewed (max -20).
- *   - +0  per approved PIA (these protect the score floor).
- *   - Floor at 0, ceiling at 100.
- *
- * Audit readiness:
- *   - ready        → score ≥ 80 AND no critical open incidents
- *   - partial      → score ≥ 50
- *   - not_ready    → score < 50
+ * Delegates scoring to the TrustCore compliance engine so that
+ * the dashboard score and the compliance page score are always in sync.
+ * The engine data is fetched in a single parallel round-trip.
  */
 export async function getTrustcoreDashboardSummary(
   orgId: string,
 ): Promise<TrustcoreDashboardSummary> {
+  // Fetch all required data in one parallel pass (no N+1)
   const [
-    openIncidentsResult,
-    criticalIncidentsResult,
-    overdueDsrResult,
-    pendingDsrResult,
-    riskyVendorsResult,
+    programs,
+    assets,
+    pias,
+    incidents,
+    dsrRequests,
+    vendors,
   ] = await Promise.all([
-    // open incidents (resolution_status = 'open' | 'contained')
-    db
-      .select({ value: count() })
-      .from(trustcoreIncidents)
-      .where(
-        and(
-          eq(trustcoreIncidents.orgId, orgId),
-          sql`${trustcoreIncidents.resolutionStatus} IN ('open', 'contained')`,
-        ),
-      ),
-
-    // critical open incidents (severity = 'critical' AND open/contained)
-    db
-      .select({ value: count() })
-      .from(trustcoreIncidents)
-      .where(
-        and(
-          eq(trustcoreIncidents.orgId, orgId),
-          eq(trustcoreIncidents.severity, 'critical'),
-          sql`${trustcoreIncidents.resolutionStatus} IN ('open', 'contained')`,
-        ),
-      ),
-
-    // overdue DSR requests
-    db
-      .select({ value: count() })
-      .from(trustcoreDsrRequests)
-      .where(
-        and(
-          eq(trustcoreDsrRequests.orgId, orgId),
-          eq(trustcoreDsrRequests.status, 'overdue'),
-        ),
-      ),
-
-    // pending DSR requests (received | verifying_identity | in_progress | overdue)
-    db
-      .select({ value: count() })
-      .from(trustcoreDsrRequests)
-      .where(
-        and(
-          eq(trustcoreDsrRequests.orgId, orgId),
-          sql`${trustcoreDsrRequests.status} IN ('received', 'verifying_identity', 'in_progress', 'overdue')`,
-        ),
-      ),
-
-    // vendors at high/critical risk without reviewed contract
-    db
-      .select({ value: count() })
-      .from(trustcoreVendors)
-      .where(
-        and(
-          eq(trustcoreVendors.orgId, orgId),
-          sql`${trustcoreVendors.riskLevel} IN ('high', 'critical')`,
-          eq(trustcoreVendors.contractReviewed, false),
-          sql`${trustcoreVendors.status} = 'active'`,
-        ),
-      ),
+    db.select().from(trustcorePrivacyPrograms).where(eq(trustcorePrivacyPrograms.orgId, orgId)),
+    db.select().from(trustcoreDataAssets).where(eq(trustcoreDataAssets.orgId, orgId)),
+    db.select().from(trustcorePias).where(eq(trustcorePias.orgId, orgId)),
+    db.select().from(trustcoreIncidents).where(eq(trustcoreIncidents.orgId, orgId)),
+    db.select().from(trustcoreDsrRequests).where(eq(trustcoreDsrRequests.orgId, orgId)),
+    db.select().from(trustcoreVendors).where(eq(trustcoreVendors.orgId, orgId)),
   ])
 
-  const criticalIncidents = Number(criticalIncidentsResult[0]?.value ?? 0)
-  const overdueDsr = Number(overdueDsrResult[0]?.value ?? 0)
-  const riskyVendors = Number(riskyVendorsResult[0]?.value ?? 0)
-  const openIncidents = Number(openIncidentsResult[0]?.value ?? 0)
-  const pendingRequests = Number(pendingDsrResult[0]?.value ?? 0)
+  // ── Score ─────────────────────────────────────────────────────────────────
+  // Mirror the engine rules so dashboard and /compliance are always aligned.
 
   let score = 100
-  score -= Math.min(criticalIncidents * 20, 40)
-  score -= Math.min(overdueDsr * 10, 30)
-  score -= Math.min(riskyVendors * 5, 20)
+
+  // Governance
+  const activeProgram = programs.find((p) => p.status === 'active')
+  if (!activeProgram) score -= 25
+  else if (!activeProgram.privacyOfficerEmail) score -= 10
+
+  // Data inventory
+  const activeAssets = assets.filter((a) => a.status === 'active')
+  if (activeAssets.length === 0) {
+    score -= 20
+  } else {
+    const highCritical = activeAssets.filter(
+      (a) => a.sensitivityLevel === 'high' || a.sensitivityLevel === 'critical',
+    )
+    if (highCritical.length > 0 && pias.length === 0) {
+      score -= Math.min(highCritical.length * 10, 30)
+    }
+    const crossBorderNoCountry = activeAssets.filter(
+      (a) => a.crossBorderTransfer && !a.destinationCountry,
+    )
+    if (crossBorderNoCountry.length > 0) score -= 10
+  }
+
+  // PIAs
+  if (pias.length === 0 && activeAssets.length > 0) {
+    score -= 15
+  } else {
+    const mitigationReq = pias.filter((p) => p.status === 'mitigation_required')
+    score -= Math.min(mitigationReq.length * 5, 20)
+    const highRiskNoMitigation = pias.filter((p) => (p.riskScore ?? 0) >= 70 && !p.mitigationPlan)
+    score -= Math.min(highRiskNoMitigation.length * 10, 20)
+  }
+
+  // Incidents
+  const openCritical = incidents.filter(
+    (i) => i.severity === 'critical' && (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained'),
+  )
+  score -= Math.min(openCritical.length * 20, 40)
+
+  const unreportedSerious = incidents.filter((i) => i.seriousHarmLikely && !i.reportedToCai)
+  score -= Math.min(unreportedSerious.length * 25, 50)
+
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000
+  const stalledOpen = incidents.filter(
+    (i) =>
+      (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained') &&
+      Date.now() - i.createdAt.getTime() > thirtyDaysMs,
+  )
+  score -= Math.min(stalledOpen.length * 10, 30)
+
+  // DSR
+  const overdue = dsrRequests.filter((r) => r.status === 'overdue')
+  score -= Math.min(overdue.length * 15, 45)
+  const activeUnverified = dsrRequests.filter(
+    (r) => !['completed', 'denied'].includes(r.status) && !r.identityVerified,
+  )
+  score -= Math.min(activeUnverified.length * 5, 15)
+
+  // Vendors
+  const activeVendors = vendors.filter((v) => v.status === 'active')
+  const highRiskNoPia = activeVendors.filter(
+    (v) => (v.riskLevel === 'high' || v.riskLevel === 'critical') && !v.piaRequired,
+  )
+  score -= Math.min(highRiskNoPia.length * 10, 30)
+  const crossBorderNoContract = activeVendors.filter(
+    (v) => v.crossBorderTransfer && !v.contractReviewed,
+  )
+  score -= Math.min(crossBorderNoContract.length * 10, 20)
+
   score = Math.max(0, Math.min(100, score))
 
+  // ── Derived counters ───────────────────────────────────────────────────────
+  const openIncidents = incidents.filter(
+    (i) => i.resolutionStatus === 'open' || i.resolutionStatus === 'contained',
+  ).length
+  const pendingRequests = dsrRequests.filter(
+    (r) => !['completed', 'denied'].includes(r.status),
+  ).length
+
+  const hasCriticalRisks = openCritical.length > 0 || unreportedSerious.length > 0
   const auditReadinessStatus: TrustcoreDashboardSummary['auditReadinessStatus'] =
-    score >= 80 && criticalIncidents === 0
+    score >= 85 && !hasCriticalRisks
       ? 'ready'
-      : score >= 50
+      : score >= 60
         ? 'partial'
         : 'not_ready'
 
@@ -158,7 +171,7 @@ export async function getTrustcoreDashboardSummary(
     complianceScore: score,
     openRisks: openIncidents,
     pendingRequests,
-    incidentAlerts: criticalIncidents,
+    incidentAlerts: openCritical.length,
     auditReadinessStatus,
     evaluatedAt: new Date().toISOString(),
   }
@@ -212,6 +225,14 @@ export async function listTrustcoreEvidenceEvents(orgId: string): Promise<Trustc
     .from(trustcoreEvidenceEvents)
     .where(eq(trustcoreEvidenceEvents.orgId, orgId))
     .orderBy(desc(trustcoreEvidenceEvents.createdAt))
+}
+
+export async function listTrustcorePrivacyPrograms(orgId: string): Promise<TrustcorePrivacyProgram[]> {
+  return db
+    .select()
+    .from(trustcorePrivacyPrograms)
+    .where(eq(trustcorePrivacyPrograms.orgId, orgId))
+    .orderBy(desc(trustcorePrivacyPrograms.createdAt))
 }
 
 // ── Write helpers ──────────────────────────────────────────────────────────

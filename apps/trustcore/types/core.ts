@@ -52,6 +52,35 @@ export interface AuditEvent {
 
 export type ComplianceStatus = 'compliant' | 'at-risk' | 'non-compliant'
 
+export type RiskCategory = 'governance' | 'data' | 'pia' | 'incident' | 'dsr' | 'vendor'
+
+export type RiskSeverity = 'low' | 'medium' | 'high' | 'critical'
+
+export interface RiskItem {
+  /** Stable identifier for deduplication (deterministic, based on rule). */
+  id: string
+  category: RiskCategory
+  severity: RiskSeverity
+  message: string
+  recommendation: string
+}
+
+export interface ComplianceEvaluation {
+  orgId: string
+  score: number
+  status: ComplianceStatus
+  risks: RiskItem[]
+  summary: {
+    totalAssets: number
+    missingPias: number
+    overdueRequests: number
+    openIncidents: number
+    highRiskVendors: number
+  }
+  evaluatedAt: string
+}
+
+/** @deprecated Use ComplianceEvaluation — kept for backward compat */
 export interface ComplianceResult {
   orgId: string
   score: number
