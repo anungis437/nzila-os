@@ -40,15 +40,19 @@ function assertSafeRuntime(): void {
 function isMissingColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
-  // Check error.cause.code (Drizzle wrapping) or error.code (direct postgres-js error)
-  return err.cause?.code === '42703' || err.code === '42703'
+  // Check multiple possible error structures and message patterns
+  const code = err.code || err.cause?.code || err.originalError?.code
+  const message = String(err.message || err.cause?.message || '')
+  return code === '42703' || (message.includes('column') && message.includes('does not exist'))
 }
 
 function isMissingRelationError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
-  // Check error.cause.code (Drizzle wrapping) or error.code (direct postgres-js error)
-  return err.cause?.code === '42P01' || err.code === '42P01'
+  // Check multiple possible error structures and message patterns
+  const code = err.code || err.cause?.code || err.originalError?.code
+  const message = String(err.message || err.cause?.message || '')
+  return code === '42P01' || (message.includes('relation') && message.includes('does not exist'))
 }
 
 function assertDeterministicInputs(): void {
