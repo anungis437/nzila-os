@@ -64,7 +64,7 @@ async function validateDatabase(): Promise<ValidationResult> {
 
     const existingTables = await db.execute(tableCheckQuery);
     const existingTableNames = new Set(
-      (existingTables as Array<{ table_name: string }>).map((t) =>
+      (existingTables as unknown as Array<{ table_name: string }>).map((t) =>
         t.table_name.toLowerCase()
       )
     );
@@ -90,7 +90,7 @@ async function validateDatabase(): Promise<ValidationResult> {
 
     const existingEnums = await db.execute(enumCheckQuery);
     const existingEnumNames = new Set(
-      (existingEnums as Array<{ typname: string }>).map((e) => e.typname)
+      (existingEnums as unknown as Array<{ typname: string }>).map((e) => e.typname)
     );
 
     for (const enumName of REQUIRED_ENUMS) {
@@ -115,7 +115,7 @@ async function validateDatabase(): Promise<ValidationResult> {
 
       const columns = await db.execute(columnCheckQuery);
       const columnNames = new Set(
-        (columns as Array<{ column_name: string }>).map((c) =>
+        (columns as unknown as Array<{ column_name: string }>).map((c) =>
           c.column_name.toLowerCase()
         )
       );
