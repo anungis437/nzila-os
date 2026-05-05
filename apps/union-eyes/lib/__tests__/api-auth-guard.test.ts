@@ -517,13 +517,13 @@ describe('ApiAuthGuard', () => {
     });
 
     it('checks roles when specified', async () => {
-      mocks.mockOrgMembersFindFirst.mockResolvedValue({ role: 'admin' });
+      mocks.mockSelect.mockReturnValueOnce(chain([{ role: 'admin' }]));
       const ctx = await requireApiAuth({ roles: ['admin'] });
       expect(ctx.role).toBe('admin');
     });
 
     it('throws when role not matched', async () => {
-      mocks.mockOrgMembersFindFirst.mockResolvedValue({ role: 'member' });
+      mocks.mockSelect.mockReturnValueOnce(chain([{ role: 'member' }]));
       await expect(requireApiAuth({ roles: ['admin'] })).rejects.toThrow('Forbidden');
     });
   });
