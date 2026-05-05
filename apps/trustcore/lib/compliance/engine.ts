@@ -134,11 +134,9 @@ function evaluateDataInventory(
   }
 
   // High/critical assets without any PIA
-  const piaOrgIds = new Set(pias.map((p) => p.orgId))
-  // For per-asset PIA coverage we check if there is at least one PIA for the org
-  // (the schema does not link PIAs to assets directly; use the org-level heuristic)
+  // The schema does not link PIAs to individual assets; we use the org-level heuristic:
+  // if there are no PIAs at all for the org, flag all high/critical assets as uncovered.
   const hasPias = pias.length > 0
-  void piaOrgIds // suppress unused-var if needed
 
   const highCriticalAssets = activeAssets.filter(
     (a) => a.sensitivityLevel === 'high' || a.sensitivityLevel === 'critical',
@@ -324,7 +322,8 @@ function evaluateDsrRequests(
   // Active requests (not completed/denied) without identity verification
   const activeUnverified = dsrRequests.filter(
     (r) =>
-      !['completed', 'denied'].includes(r.status) &&
+      r.status !== 'completed' &&
+      r.status !== 'denied' &&
       !r.identityVerified,
   )
   if (activeUnverified.length > 0) {

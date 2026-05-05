@@ -133,7 +133,10 @@ export async function getTrustcoreDashboardSummary(
   const overdue = dsrRequests.filter((r) => r.status === 'overdue')
   score -= Math.min(overdue.length * 15, 45)
   const activeUnverified = dsrRequests.filter(
-    (r) => !['completed', 'denied'].includes(r.status) && !r.identityVerified,
+    (r) =>
+      r.status !== 'completed' &&
+      r.status !== 'denied' &&
+      !r.identityVerified,
   )
   score -= Math.min(activeUnverified.length * 5, 15)
 
@@ -155,7 +158,7 @@ export async function getTrustcoreDashboardSummary(
     (i) => i.resolutionStatus === 'open' || i.resolutionStatus === 'contained',
   ).length
   const pendingRequests = dsrRequests.filter(
-    (r) => !['completed', 'denied'].includes(r.status),
+    (r) => r.status !== 'completed' && r.status !== 'denied',
   ).length
 
   const hasCriticalRisks = openCritical.length > 0 || unreportedSerious.length > 0
