@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
-import { evaluateCompliance } from '@/lib/compliance/engine'
+import { getTrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
   async (_request: NextRequest, ctx) => {
-    const result = evaluateCompliance(ctx.orgId, {
-      verifiedControlIds: [],
-      applicableControlIds: [],
-      openRisks: [],
-    })
-
-    return NextResponse.json({ success: true, data: result })
+    const summary = await getTrustcoreDashboardSummary(ctx.orgId)
+    return NextResponse.json({ success: true, data: summary })
   },
 )

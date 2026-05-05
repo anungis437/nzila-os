@@ -14,6 +14,7 @@
     "./audit": "./src/audit.ts",
     "./platform": "./src/platform.ts",
     "./org-registry": "./src/org-registry.ts",
+    "./queries/trustcore": "./src/queries/trustcore.ts",
     "./eslint-no-shadow-db": "./eslint-no-shadow-db.mjs"
   },
   "scripts": {

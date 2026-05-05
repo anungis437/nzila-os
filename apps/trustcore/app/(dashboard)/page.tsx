@@ -1,12 +1,11 @@
 /**
  * TrustCore — Dashboard Home
  *
- * Displays a structured compliance posture overview.
- * All metric fields reflect the real data model — no static lorem content.
+ * Displays a live compliance posture overview backed by DB queries.
  */
 
 import { getAuthContext } from '@/lib/auth/getAuthContext'
-import { evaluateCompliance } from '@/lib/compliance/engine'
+import { getTrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
@@ -14,7 +13,7 @@ import {
   BellAlertIcon,
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline'
-import type { ComplianceStatus } from '@/types/core'
+import type { TrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,15 +44,17 @@ function MetricCard({
   )
 }
 
-function StatusBadge({ status }: { status: ComplianceStatus }) {
-  const styles: Record<ComplianceStatus, string> = {
-    compliant: 'bg-green-100 text-green-700',
-    'at-risk': 'bg-yellow-100 text-yellow-700',
-    'non-compliant': 'bg-red-100 text-red-700',
+type AuditStatus = TrustcoreDashboardSummary['auditReadinessStatus']
+
+function StatusBadge({ status }: { status: AuditStatus }) {
+  const styles: Record<AuditStatus, string> = {
+    ready: 'bg-green-100 text-green-700',
+    partial: 'bg-yellow-100 text-yellow-700',
+    not_ready: 'bg-red-100 text-red-700',
   }
   return (
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${styles[status]}`}>
-      {status}
+      {status.replace('_', ' ')}
     </span>
   )
 }
@@ -62,21 +63,7 @@ function StatusBadge({ status }: { status: ComplianceStatus }) {
 
 export default async function DashboardPage() {
   const ctx = await getAuthContext()
-
-  // Stub inputs — will be replaced with real DB queries in the next prompt.
-  const compliance = evaluateCompliance(ctx.orgId, {
-    verifiedControlIds: [],
-    applicableControlIds: [],
-    openRisks: [],
-  })
-
-  const metrics = {
-    complianceScore: compliance.score,
-    openRisks: compliance.risks.length,
-    pendingRequests: 0,
-    incidentAlerts: 0,
-    auditReadinessStatus: compliance.status,
-  }
+  const summary = await getTrustcoreDashboardSummary(ctx.orgId)
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -91,29 +78,29 @@ export default async function DashboardPage() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
         <MetricCard
           title="Compliance Score"
-          value={`${metrics.complianceScore}/100`}
-          sub="Based on verified controls"
+          value={`${summary.complianceScore}/100`}
+          sub="Live — deducted by open risks and overdue requests"
           icon={ShieldCheckIcon}
           accent="text-teal-600"
         />
         <MetricCard
           title="Open Risks"
-          value={metrics.openRisks}
-          sub="Unresolved risk items"
+          value={summary.openRisks}
+          sub="Incidents open or contained"
           icon={ExclamationTriangleIcon}
           accent="text-yellow-500"
         />
         <MetricCard
           title="Pending Requests"
-          value={metrics.pendingRequests}
-          sub="Access / correction / deletion"
+          value={summary.pendingRequests}
+          sub="Access / correction / deletion / portability"
           icon={InboxArrowDownIcon}
           accent="text-blue-500"
         />
         <MetricCard
-          title="Incident Alerts"
-          value={metrics.incidentAlerts}
-          sub="Active incidents requiring action"
+          title="Critical Incidents"
+          value={summary.incidentAlerts}
+          sub="Critical-severity open incidents"
           icon={BellAlertIcon}
           accent="text-red-500"
         />
@@ -123,9 +110,9 @@ export default async function DashboardPage() {
             <p className="text-sm font-medium text-gray-500">Audit Readiness</p>
           </div>
           <div className="flex items-center gap-3">
-            <StatusBadge status={metrics.auditReadinessStatus} />
+            <StatusBadge status={summary.auditReadinessStatus} />
             <p className="text-xs text-gray-400">
-              Evaluated {new Date(compliance.evaluatedAt).toLocaleString()}
+              Evaluated {new Date(summary.evaluatedAt).toLocaleString()}
             </p>
           </div>
         </div>

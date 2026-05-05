@@ -3,7 +3,11 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@nzila/ui": ["../../packages/ui/src"]
+      "@nzila/ui": ["../../packages/ui/src"],
+      "@nzila/db": ["../../packages/db/src/index.ts"],
+      "@nzila/db/schema": ["../../packages/db/src/schema/index.ts"],
+      "@nzila/db/client": ["../../packages/db/src/client.ts"],
+      "@nzila/db/queries/trustcore": ["../../packages/db/src/queries/trustcore.ts"]
     }
   },
   "include": [

@@ -314,6 +314,16 @@ export const ORG_SCOPED_TABLES = [
   // ── executive.ts (Founder Focus Engine) ──────────────────
   'executiveRecommendations',
   'executivePrioritySnapshots',
+
+  // ── trustcore.ts (TrustCore — Law 25 compliance) ─────────
+  'trustcorePrivacyPrograms',
+  'trustcoreDataAssets',
+  'trustcorePias',
+  'trustcoreIncidents',
+  'trustcoreDsrRequests',
+  'trustcoreConsentRecords',
+  'trustcoreVendors',
+  'trustcoreEvidenceEvents',
 ] as const
 
 /**
