@@ -848,12 +848,23 @@ export async function requireRole(role: string): Promise<UnifiedUserContext> {
  * Get user role from database
  */
 async function getUserRoleFromDatabase(userId: string): Promise<string> {
-  const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq }) => eq(om.userId, userId),
-  });
+  try {
+    // Select only the role column to avoid brittle "select *" behavior when
+    // the runtime DB shape drifts from expansive schema definitions.
+    const [membership] = await db
+      .select({ role: organizationMembers.role })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.userId, userId))
+      .limit(1)
 
-  if (membership?.role) {
-    return membership.role
+    if (membership?.role) {
+      return membership.role
+    }
+  } catch (error) {
+    logger.warn('[Auth] getUserRoleFromDatabase: org membership lookup failed, falling back to auth mapping', {
+      userId,
+      error: String(error),
+    })
   }
 
   const [authMembership] = await db
