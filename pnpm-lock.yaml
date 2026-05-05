@@ -2103,6 +2103,9 @@ importers:
       '@nzila/platform-cognition-core':
         specifier: workspace:*
         version: link:../../packages/platform-cognition-core
+      '@nzila/platform-ops':
+        specifier: workspace:*
+        version: link:../../packages/platform-ops
       '@nzila/platform-pilot-metrics':
         specifier: workspace:*
         version: link:../../packages/platform-pilot-metrics
