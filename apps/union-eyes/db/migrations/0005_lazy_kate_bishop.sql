@@ -68,50 +68,87 @@ CREATE TABLE IF NOT EXISTS "exchange_rates" (
 --> statement-breakpoint
 -- Removed user_management schema references - using organization terminology in public schema
 --> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "emergency_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "activation_initiated_at" timestamp NOT NULL;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "activation_approved_at" timestamp;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "key_holder_ids" jsonb;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "secret_shares" jsonb;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audited_at" timestamp;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audited_by" uuid;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audit_report" text;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" ADD CONSTRAINT "break_glass_activations_emergency_id_emergency_declarations_id_fk" FOREIGN KEY ("emergency_id") REFERENCES "public"."emergency_declarations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "break_glass_system_id";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activation_type";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "emergency_level";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activated_at";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "resolved_at";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "recovery_duration";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_user_id";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_timestamp";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_ip_address";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_user_id";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_timestamp";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_ip_address";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "authorization_complete";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "authorization_completed_at";--> statement-breakpoint
-ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activated_by";--> statement-breakpoint
-ALTER TABLE "voter_eligibility" DROP CONSTRAINT IF EXISTS "valid_verification_status";--> statement-breakpoint
-ALTER TABLE "voter_eligibility" ADD CONSTRAINT "valid_verification_status" CHECK ("voter_eligibility"."verification_status" IN ('pending', 'verified', 'rejected')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "votes" DROP CONSTRAINT IF EXISTS "valid_voter_type";--> statement-breakpoint
-ALTER TABLE "votes" ADD CONSTRAINT "valid_voter_type" CHECK ("votes"."voter_type" IN ('member', 'delegate', 'officer', 'guest')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_notifications" DROP CONSTRAINT IF EXISTS "valid_notification_type";--> statement-breakpoint
-ALTER TABLE "voting_notifications" ADD CONSTRAINT "valid_notification_type" CHECK ("voting_notifications"."type" IN ('session_started', 'session_ending', 'results_available', 'quorum_reached', 'vote_reminder')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_notifications" DROP CONSTRAINT IF EXISTS "valid_priority";--> statement-breakpoint
-ALTER TABLE "voting_notifications" ADD CONSTRAINT "valid_priority" CHECK ("voting_notifications"."priority" IN ('low', 'medium', 'high', 'urgent')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_type";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_type" CHECK ("voting_sessions"."type" IN ('convention', 'ratification', 'special_vote')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_status";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_status" CHECK ("voting_sessions"."status" IN ('draft', 'active', 'paused', 'closed', 'cancelled')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_meeting_type";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_meeting_type" CHECK ("voting_sessions"."meeting_type" IN ('convention', 'ratification', 'emergency', 'special')) NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_time_range";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_time_range" CHECK ("voting_sessions"."end_time" IS NULL OR "voting_sessions"."start_time" IS NULL OR "voting_sessions"."end_time" > "voting_sessions"."start_time") NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_scheduled_end";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_scheduled_end" CHECK ("voting_sessions"."scheduled_end_time" IS NULL OR "voting_sessions"."scheduled_end_time" > "voting_sessions"."created_at") NOT VALID;--> statement-breakpoint
-ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_quorum";--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_quorum" CHECK ("voting_sessions"."quorum_threshold" >= 0 AND "voting_sessions"."quorum_threshold" <= 100) NOT VALID;--> statement-breakpoint
+DO $$ BEGIN
+ IF EXISTS (
+  SELECT 1
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+   AND table_name = 'break_glass_activations'
+ ) THEN
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "emergency_id" uuid NOT NULL;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "activation_initiated_at" timestamp NOT NULL;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "activation_approved_at" timestamp;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "key_holder_ids" jsonb;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "secret_shares" jsonb;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audited_at" timestamp;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audited_by" uuid;
+  ALTER TABLE "break_glass_activations" ADD COLUMN IF NOT EXISTS "audit_report" text;
+
+  IF EXISTS (
+   SELECT 1
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+    AND table_name = 'emergency_declarations'
+  ) THEN
+   ALTER TABLE "break_glass_activations" ADD CONSTRAINT "break_glass_activations_emergency_id_emergency_declarations_id_fk" FOREIGN KEY ("emergency_id") REFERENCES "public"."emergency_declarations"("id") ON DELETE no action ON UPDATE no action;
+  END IF;
+
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "break_glass_system_id";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activation_type";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "emergency_level";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activated_at";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "resolved_at";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "recovery_duration";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_user_id";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_timestamp";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_4_ip_address";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_user_id";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_timestamp";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "signature_5_ip_address";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "authorization_complete";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "authorization_completed_at";
+  ALTER TABLE "break_glass_activations" DROP COLUMN IF EXISTS "activated_by";
+ END IF;
+EXCEPTION
+ WHEN duplicate_object OR undefined_table THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'voter_eligibility') THEN
+    ALTER TABLE "voter_eligibility" DROP CONSTRAINT IF EXISTS "valid_verification_status";
+    ALTER TABLE "voter_eligibility" ADD CONSTRAINT "valid_verification_status" CHECK ("voter_eligibility"."verification_status" IN ('pending', 'verified', 'rejected')) NOT VALID;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'votes') THEN
+    ALTER TABLE "votes" DROP CONSTRAINT IF EXISTS "valid_voter_type";
+    ALTER TABLE "votes" ADD CONSTRAINT "valid_voter_type" CHECK ("votes"."voter_type" IN ('member', 'delegate', 'officer', 'guest')) NOT VALID;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'voting_notifications') THEN
+    ALTER TABLE "voting_notifications" DROP CONSTRAINT IF EXISTS "valid_notification_type";
+    ALTER TABLE "voting_notifications" ADD CONSTRAINT "valid_notification_type" CHECK ("voting_notifications"."type" IN ('session_started', 'session_ending', 'results_available', 'quorum_reached', 'vote_reminder')) NOT VALID;
+    ALTER TABLE "voting_notifications" DROP CONSTRAINT IF EXISTS "valid_priority";
+    ALTER TABLE "voting_notifications" ADD CONSTRAINT "valid_priority" CHECK ("voting_notifications"."priority" IN ('low', 'medium', 'high', 'urgent')) NOT VALID;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'voting_sessions') THEN
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_type";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_type" CHECK ("voting_sessions"."type" IN ('convention', 'ratification', 'special_vote')) NOT VALID;
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_status";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_status" CHECK ("voting_sessions"."status" IN ('draft', 'active', 'paused', 'closed', 'cancelled')) NOT VALID;
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_meeting_type";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_meeting_type" CHECK ("voting_sessions"."meeting_type" IN ('convention', 'ratification', 'emergency', 'special')) NOT VALID;
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_time_range";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_time_range" CHECK ("voting_sessions"."end_time" IS NULL OR "voting_sessions"."start_time" IS NULL OR "voting_sessions"."end_time" > "voting_sessions"."start_time") NOT VALID;
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_scheduled_end";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_scheduled_end" CHECK ("voting_sessions"."scheduled_end_time" IS NULL OR "voting_sessions"."scheduled_end_time" > "voting_sessions"."created_at") NOT VALID;
+    ALTER TABLE "voting_sessions" DROP CONSTRAINT IF EXISTS "valid_quorum";
+    ALTER TABLE "voting_sessions" ADD CONSTRAINT "valid_quorum" CHECK ("voting_sessions"."quorum_threshold" >= 0 AND "voting_sessions"."quorum_threshold" <= 100) NOT VALID;
+  END IF;
+EXCEPTION
+ WHEN duplicate_object OR undefined_table THEN null;
+END $$;
+--> statement-breakpoint
 -- Removed user_management, tenant_management, and audit_security schema references - using organization terminology in public schema
 --> statement-breakpoint
 -- Conditional constraint operations for tables that may not exist yet

@@ -903,7 +903,14 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "shared_clause_library" ADD CONSTRAINT "shared_clause_library_source_cba_id_collective_agreements_id_fk" FOREIGN KEY ("source_cba_id") REFERENCES "public"."collective_agreements"("id") ON DELETE no action ON UPDATE no action;
+ IF EXISTS (
+	 SELECT 1
+	 FROM information_schema.tables
+	 WHERE table_schema = 'public'
+		  AND table_name = 'collective_agreements'
+ ) THEN
+	 ALTER TABLE "shared_clause_library" ADD CONSTRAINT "shared_clause_library_source_cba_id_collective_agreements_id_fk" FOREIGN KEY ("source_cba_id") REFERENCES "public"."collective_agreements"("id") ON DELETE no action ON UPDATE no action;
+ END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -921,7 +928,14 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "arbitration_precedents" ADD CONSTRAINT "arbitration_precedents_source_decision_id_arbitration_decisions_id_fk" FOREIGN KEY ("source_decision_id") REFERENCES "public"."arbitration_decisions"("id") ON DELETE no action ON UPDATE no action;
+ IF EXISTS (
+	 SELECT 1
+	 FROM information_schema.tables
+	 WHERE table_schema = 'public'
+		  AND table_name = 'arbitration_decisions'
+ ) THEN
+	 ALTER TABLE "arbitration_precedents" ADD CONSTRAINT "arbitration_precedents_source_decision_id_arbitration_decisions_id_fk" FOREIGN KEY ("source_decision_id") REFERENCES "public"."arbitration_decisions"("id") ON DELETE no action ON UPDATE no action;
+ END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

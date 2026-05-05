@@ -43,6 +43,12 @@ function isMissingColumnError(error: unknown): boolean {
   return cause?.code === '42703'
 }
 
+function isMissingRelationError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const cause = (error as { cause?: { code?: string } }).cause
+  return cause?.code === '42P01'
+}
+
 function assertDeterministicInputs(): void {
   const orgIds = Object.values(UE_TEST_ORGS).map((o) => o.id)
   const userIds = Object.values(UE_TEST_USERS).map((u) => u.userId)
@@ -71,8 +77,13 @@ async function seed(): Promise<void> {
   // Main transaction: wipe and reseed core tables
   await db.transaction(async (tx) => {
     // Wipe deterministic test footprint only.
-    await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
-    await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+    try {
+      await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
+      await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error
+      console.warn('[ue:seed:test-env] claim cleanup skipped (claim tables not present in this schema)')
+    }
 
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
@@ -227,26 +238,31 @@ async function seed(): Promise<void> {
       })),
     )
 
-    await tx.insert(claims).values(
-      casesFixture.map((c) => ({
-        claimId: c.claimId,
-        claimNumber: c.claimNumber,
-        organizationId: c.organizationId,
-        memberId: c.memberId,
-        claimType: c.claimType,
-        status: c.status,
-        priority: c.priority,
-        description: c.description,
-        incidentDate: 'incidentDate' in c ? c.incidentDate : NOW,
-        location: 'location' in c ? c.location : 'Unknown Location',
-        desiredOutcome: 'desiredOutcome' in c ? c.desiredOutcome : null,
-        filedDate: NOW,
-        assignedTo: 'assignedTo' in c ? c.assignedTo : null,
-        assignedAt: 'assignedTo' in c ? NOW : null,
-        createdAt: NOW,
-        updatedAt: NOW,
-      })),
-    )
+    try {
+      await tx.insert(claims).values(
+        casesFixture.map((c) => ({
+          claimId: c.claimId,
+          claimNumber: c.claimNumber,
+          organizationId: c.organizationId,
+          memberId: c.memberId,
+          claimType: c.claimType,
+          status: c.status,
+          priority: c.priority,
+          description: c.description,
+          incidentDate: 'incidentDate' in c ? c.incidentDate : NOW,
+          location: 'location' in c ? c.location : 'Unknown Location',
+          desiredOutcome: 'desiredOutcome' in c ? c.desiredOutcome : null,
+          filedDate: NOW,
+          assignedTo: 'assignedTo' in c ? c.assignedTo : null,
+          assignedAt: 'assignedTo' in c ? NOW : null,
+          createdAt: NOW,
+          updatedAt: NOW,
+        })),
+      )
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error
+      console.warn('[ue:seed:test-env] claims insert skipped (claims table not present in this schema)')
+    }
   })
 
   // Separate transaction for organization_members (may fail due to schema drift)
@@ -295,8 +311,8 @@ async function seed(): Promise<void> {
       )
     })
   } catch (error) {
-    if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift (missing column)')
+    if (!(isMissingColumnError(error) || isMissingRelationError(error))) throw error
+    console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift or missing table')
   }
 
   // Required containment artifacts for external UX tester access.

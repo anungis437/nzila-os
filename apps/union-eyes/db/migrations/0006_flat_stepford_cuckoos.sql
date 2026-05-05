@@ -1857,32 +1857,191 @@ EXCEPTION
   WHEN undefined_column THEN NULL;
   WHEN undefined_table THEN NULL;
 END $$;--> statement-breakpoint
-ALTER TABLE "collective_agreements" ADD COLUMN IF NOT EXISTS "sector" varchar(200);--> statement-breakpoint
-ALTER TABLE "collective_agreements" ADD COLUMN IF NOT EXISTS "ai_processed" boolean DEFAULT false;--> statement-breakpoint
-ALTER TABLE "cba_clauses" ADD COLUMN IF NOT EXISTS "organization_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "precedent_summary" text;--> statement-breakpoint
-ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "reasoning" text;--> statement-breakpoint
-ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "key_facts" text;--> statement-breakpoint
-ALTER TABLE "voting_audit_log" ADD CONSTRAINT "voting_audit_log_session_id_voting_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."voting_sessions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "automation_rules" ADD CONSTRAINT "automation_rules_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+ IF EXISTS (
+  SELECT 1
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+   AND table_name = 'collective_agreements'
+ ) THEN
+  ALTER TABLE "collective_agreements" ADD COLUMN IF NOT EXISTS "sector" varchar(200);
+  ALTER TABLE "collective_agreements" ADD COLUMN IF NOT EXISTS "ai_processed" boolean DEFAULT false;
+ END IF;
+EXCEPTION
+ WHEN duplicate_object OR undefined_table THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+ IF EXISTS (
+  SELECT 1
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+   AND table_name = 'cba_clauses'
+ ) THEN
+  ALTER TABLE "cba_clauses" ADD COLUMN IF NOT EXISTS "organization_id" uuid NOT NULL;
+ END IF;
+EXCEPTION
+ WHEN duplicate_object OR undefined_table THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+ IF EXISTS (
+  SELECT 1
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+   AND table_name = 'arbitration_decisions'
+ ) THEN
+  ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "precedent_summary" text;
+  ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "reasoning" text;
+  ALTER TABLE "arbitration_decisions" ADD COLUMN IF NOT EXISTS "key_facts" text;
+ END IF;
+EXCEPTION
+ WHEN duplicate_object OR undefined_table THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "voting_audit_log" ADD CONSTRAINT "voting_audit_log_session_id_voting_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."voting_sessions"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "automation_rules" ADD CONSTRAINT "automation_rules_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
 -- Commented out FK to non-existent table recognition_award_types
 -- ALTER TABLE "automation_rules" ADD CONSTRAINT "automation_rules_award_type_id_recognition_award_types_id_fk" FOREIGN KEY ("award_type_id") REFERENCES "public"."recognition_award_types"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "cookie_consents" ADD CONSTRAINT "cookie_consents_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "data_anonymization_log" ADD CONSTRAINT "data_anonymization_log_request_id_gdpr_data_requests_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."gdpr_data_requests"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "gdpr_data_requests" ADD CONSTRAINT "gdpr_data_requests_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_consents" ADD CONSTRAINT "user_consents_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "document_signers" ADD CONSTRAINT "document_signers_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "document_signers" ADD CONSTRAINT "document_signers_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_audit_trail" ADD CONSTRAINT "signature_audit_trail_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_audit_trail" ADD CONSTRAINT "signature_audit_trail_signer_id_document_signers_id_fk" FOREIGN KEY ("signer_id") REFERENCES "public"."document_signers"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_documents" ADD CONSTRAINT "signature_documents_sent_by_profiles_user_id_fk" FOREIGN KEY ("sent_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_documents" ADD CONSTRAINT "signature_documents_template_id_signature_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."signature_templates"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_templates" ADD CONSTRAINT "signature_templates_created_by_profiles_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "signature_webhooks_log" ADD CONSTRAINT "signature_webhooks_log_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "ai_safety_filters" ADD CONSTRAINT "ai_safety_filters_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "ai_safety_filters" ADD CONSTRAINT "ai_safety_filters_message_id_chat_messages_id_fk" FOREIGN KEY ("message_id") REFERENCES "public"."chat_messages"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "cookie_consents" ADD CONSTRAINT "cookie_consents_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "data_anonymization_log" ADD CONSTRAINT "data_anonymization_log_request_id_gdpr_data_requests_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."gdpr_data_requests"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "gdpr_data_requests" ADD CONSTRAINT "gdpr_data_requests_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "user_consents" ADD CONSTRAINT "user_consents_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "document_signers" ADD CONSTRAINT "document_signers_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "document_signers" ADD CONSTRAINT "document_signers_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_audit_trail" ADD CONSTRAINT "signature_audit_trail_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_audit_trail" ADD CONSTRAINT "signature_audit_trail_signer_id_document_signers_id_fk" FOREIGN KEY ("signer_id") REFERENCES "public"."document_signers"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_documents" ADD CONSTRAINT "signature_documents_sent_by_profiles_user_id_fk" FOREIGN KEY ("sent_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_documents" ADD CONSTRAINT "signature_documents_template_id_signature_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."signature_templates"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_templates" ADD CONSTRAINT "signature_templates_created_by_profiles_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "signature_webhooks_log" ADD CONSTRAINT "signature_webhooks_log_document_id_signature_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."signature_documents"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "ai_safety_filters" ADD CONSTRAINT "ai_safety_filters_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "ai_safety_filters" ADD CONSTRAINT "ai_safety_filters_message_id_chat_messages_id_fk" FOREIGN KEY ("message_id") REFERENCES "public"."chat_messages"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_session_id_chat_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."chat_sessions"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "chat_sessions" ADD CONSTRAINT "chat_sessions_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
 DO $$ BEGIN
 	IF EXISTS (
 		SELECT 1
@@ -1893,15 +2052,78 @@ DO $$ BEGIN
 		ALTER TABLE "knowledge_base" ADD CONSTRAINT "knowledge_base_created_by_profiles_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
 	END IF;
 END $$;--> statement-breakpoint
-ALTER TABLE "accessibility_audits" ADD CONSTRAINT "accessibility_audits_scheduled_by_profiles_user_id_fk" FOREIGN KEY ("scheduled_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_audit_id_accessibility_audits_id_fk" FOREIGN KEY ("audit_id") REFERENCES "public"."accessibility_audits"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_assigned_to_profiles_user_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_resolved_by_profiles_user_id_fk" FOREIGN KEY ("resolved_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "accessibility_test_suites" ADD CONSTRAINT "accessibility_test_suites_created_by_profiles_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "accessibility_user_testing" ADD CONSTRAINT "accessibility_user_testing_conducted_by_profiles_user_id_fk" FOREIGN KEY ("conducted_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "address_change_history" ADD CONSTRAINT "address_change_history_address_id_international_addresses_id_fk" FOREIGN KEY ("address_id") REFERENCES "public"."international_addresses"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "address_change_history" ADD CONSTRAINT "address_change_history_changed_by_profiles_user_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "international_addresses" ADD CONSTRAINT "international_addresses_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_audits" ADD CONSTRAINT "accessibility_audits_scheduled_by_profiles_user_id_fk" FOREIGN KEY ("scheduled_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_audit_id_accessibility_audits_id_fk" FOREIGN KEY ("audit_id") REFERENCES "public"."accessibility_audits"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_assigned_to_profiles_user_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_issues" ADD CONSTRAINT "accessibility_issues_resolved_by_profiles_user_id_fk" FOREIGN KEY ("resolved_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_test_suites" ADD CONSTRAINT "accessibility_test_suites_created_by_profiles_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "accessibility_user_testing" ADD CONSTRAINT "accessibility_user_testing_conducted_by_profiles_user_id_fk" FOREIGN KEY ("conducted_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "address_change_history" ADD CONSTRAINT "address_change_history_address_id_international_addresses_id_fk" FOREIGN KEY ("address_id") REFERENCES "public"."international_addresses"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "address_change_history" ADD CONSTRAINT "address_change_history_changed_by_profiles_user_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."profiles"("user_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "international_addresses" ADD CONSTRAINT "international_addresses_user_id_profiles_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("user_id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
 CREATE INDEX "automation_rules_org_idx" ON "automation_rules" USING btree ("org_id");--> statement-breakpoint
 CREATE INDEX "automation_rules_trigger_idx" ON "automation_rules" USING btree ("trigger_type");--> statement-breakpoint
 CREATE INDEX "automation_rules_active_idx" ON "automation_rules" USING btree ("is_active");--> statement-breakpoint
@@ -2026,12 +2248,20 @@ CREATE INDEX "international_addresses_country_code_idx" ON "international_addres
 CREATE INDEX "international_addresses_status_idx" ON "international_addresses" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "international_addresses_is_primary_idx" ON "international_addresses" USING btree ("is_primary");--> statement-breakpoint
 CREATE INDEX "international_addresses_postal_code_idx" ON "international_addresses" USING btree ("postal_code");--> statement-breakpoint
-ALTER TABLE "voter_eligibility" ADD CONSTRAINT "voter_eligibility_member_id_organization_members_id_fk" FOREIGN KEY ("member_id") REFERENCES "public"."organization_members"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "voting_sessions" ADD CONSTRAINT "voting_sessions_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
-
-
-
-
-
-
+DO $$ BEGIN
+  ALTER TABLE "voter_eligibility" ADD CONSTRAINT "voter_eligibility_member_id_organization_members_id_fk" FOREIGN KEY ("member_id") REFERENCES "public"."organization_members"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "voting_sessions" ADD CONSTRAINT "voting_sessions_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN undefined_table THEN NULL;
+  WHEN undefined_column THEN NULL;
+  WHEN undefined_object THEN NULL;
+END $$;--> statement-breakpoint
 
