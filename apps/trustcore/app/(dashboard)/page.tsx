@@ -54,7 +54,7 @@ function StatusBadge({ status }: { status: AuditStatus }) {
   }
   return (
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${styles[status]}`}>
-      {status.replace('_', ' ')}
+      {status.replace(/_/g, ' ')}
     </span>
   )
 }

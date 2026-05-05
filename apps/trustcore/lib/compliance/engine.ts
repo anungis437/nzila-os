@@ -28,7 +28,7 @@ export interface ComplianceInput {
  */
 function computeScore(verified: number, total: number): number {
   if (total === 0) return 0
-  return Math.round((verified / total) * 100)
+  return Math.min(100, Math.round((verified / total) * 100))
 }
 
 function deriveStatus(score: number, openRisks: string[]): ComplianceStatus {

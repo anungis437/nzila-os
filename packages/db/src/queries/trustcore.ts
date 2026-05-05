@@ -222,5 +222,8 @@ export async function createTrustcoreEvidenceEvent(
     .insert(trustcoreEvidenceEvents)
     .values(input)
     .returning()
+  if (!row) {
+    throw new Error('createTrustcoreEvidenceEvent: insert returned no row')
+  }
   return row
 }
