@@ -5,7 +5,8 @@
  */
 
 import { getAuthContext } from '@/lib/auth/getAuthContext'
-import { getTrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
+import { getTrustcoreDashboardSummary, listTrustcoreReminders } from '@nzila/db/queries/trustcore'
+import { generateTrustcoreReminders } from '@/lib/reminders/engine'
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
@@ -15,8 +16,10 @@ import {
   ArrowDownTrayIcon,
   DocumentTextIcon,
   GlobeAltIcon,
+  BoltIcon,
 } from '@heroicons/react/24/outline'
 import type { TrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
+import { ActionCenter } from '@/components/reminders/ActionCenter'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,7 +100,21 @@ function ExportButton({
 
 export default async function DashboardPage() {
   const ctx = await getAuthContext()
-  const summary = await getTrustcoreDashboardSummary(ctx.orgId)
+
+  // Run reminder engine to auto-refresh reminders on every dashboard load
+  // (idempotent — won't create duplicates)
+  await generateTrustcoreReminders(ctx.orgId).catch(() => {
+    // Non-fatal: if reminder generation fails, dashboard still loads
+  })
+
+  const [summary, reminders] = await Promise.all([
+    getTrustcoreDashboardSummary(ctx.orgId),
+    listTrustcoreReminders(ctx.orgId),
+  ])
+
+  const canAct = ctx.role === 'org_admin' || ctx.role === 'staff' || ctx.role === 'platform_admin'
+  // eslint-disable-next-line react-hooks/purity -- server component, not a hook
+  const nowMs = Date.now()
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -153,7 +170,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Export / Share actions */}
-      <div className="mb-2">
+      <div className="mb-8">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
           Export &amp; Share
         </h2>
@@ -178,6 +195,22 @@ export default async function DashboardPage() {
             external
           />
         </div>
+      </div>
+
+      {/* Action Center */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+            <BoltIcon className="h-4 w-4 text-teal-600" />
+            Action Center
+          </h2>
+          {reminders.filter((r) => r.status === 'open' || r.status === 'overdue').length > 0 && (
+            <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-semibold">
+              {reminders.filter((r) => r.status === 'open' || r.status === 'overdue').length} active
+            </span>
+          )}
+        </div>
+        <ActionCenter reminders={reminders} canAct={canAct} nowMs={nowMs} />
       </div>
     </div>
   )

@@ -19,6 +19,7 @@ import {
   trustcoreEvidenceEvents,
   trustcoreComplianceSnapshots,
   trustcorePolicies,
+  trustcoreReminders,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -41,6 +42,8 @@ export type NewTrustcoreVendor = typeof trustcoreVendors.$inferInsert
 export type NewTrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferInsert
 export type NewTrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots.$inferInsert
 export type NewTrustcorePolicy = typeof trustcorePolicies.$inferInsert
+export type TrustcoreReminder = typeof trustcoreReminders.$inferSelect
+export type NewTrustcoreReminder = typeof trustcoreReminders.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
@@ -464,6 +467,111 @@ export async function getLatestPolicy(
     .from(trustcorePolicies)
     .where(and(eq(trustcorePolicies.orgId, orgId), eq(trustcorePolicies.type, type)))
     .orderBy(desc(trustcorePolicies.createdAt))
+    .limit(1)
+  return row ?? null
+}
+
+// ── Reminder helpers ───────────────────────────────────────────────────────
+
+/**
+ * Return all non-dismissed reminders for an org, sorted by severity then dueAt.
+ * Severity order: critical > high > medium > low (via CASE in application layer).
+ */
+export async function listTrustcoreReminders(
+  orgId: string,
+  status?: 'open' | 'completed' | 'dismissed' | 'overdue',
+): Promise<TrustcoreReminder[]> {
+  const where = status
+    ? and(eq(trustcoreReminders.orgId, orgId), eq(trustcoreReminders.status, status))
+    : eq(trustcoreReminders.orgId, orgId)
+  const rows = await db
+    .select()
+    .from(trustcoreReminders)
+    .where(where)
+    .orderBy(desc(trustcoreReminders.createdAt))
+
+  // Sort: critical first, then high, medium, low; ties broken by dueAt ascending
+  const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 } as const
+  return rows.sort((a, b) => {
+    const sa = SEVERITY_ORDER[a.severity] ?? 99
+    const sb = SEVERITY_ORDER[b.severity] ?? 99
+    if (sa !== sb) return sa - sb
+    const da = a.dueAt?.getTime() ?? Infinity
+    const db_ = b.dueAt?.getTime() ?? Infinity
+    return da - db_
+  })
+}
+
+/**
+ * Upsert a reminder by (orgId, sourceType, sourceId, title).
+ * If a matching open/overdue reminder already exists, it is left unchanged.
+ * If none exists, a new one is inserted.
+ * Returns the existing or newly created reminder.
+ */
+export async function upsertTrustcoreReminder(
+  input: NewTrustcoreReminder,
+): Promise<TrustcoreReminder> {
+  // Look for existing open/overdue reminder with same key
+  const existing = await db
+    .select()
+    .from(trustcoreReminders)
+    .where(
+      and(
+        eq(trustcoreReminders.orgId, input.orgId),
+        eq(trustcoreReminders.sourceType, input.sourceType),
+        eq(trustcoreReminders.title, input.title),
+      ),
+    )
+    .limit(1)
+
+  const activeExisting = existing.find(
+    (r) => r.status === 'open' || r.status === 'overdue',
+  )
+  if (activeExisting) return activeExisting
+
+  const [row] = await db
+    .insert(trustcoreReminders)
+    .values(input)
+    .returning()
+  if (!row) throw new Error('upsertTrustcoreReminder: insert returned no row')
+  return row
+}
+
+/**
+ * Update a reminder's status (complete or dismiss).
+ * Returns the updated row.
+ */
+export async function updateTrustcoreReminderStatus(
+  id: string,
+  orgId: string,
+  status: 'completed' | 'dismissed',
+): Promise<TrustcoreReminder> {
+  const now = new Date()
+  const patch =
+    status === 'completed'
+      ? { status: 'completed' as const, completedAt: now, updatedAt: now }
+      : { status: 'dismissed' as const, dismissedAt: now, updatedAt: now }
+
+  const [row] = await db
+    .update(trustcoreReminders)
+    .set(patch)
+    .where(and(eq(trustcoreReminders.id, id), eq(trustcoreReminders.orgId, orgId)))
+    .returning()
+  if (!row) throw new Error('updateTrustcoreReminderStatus: reminder not found')
+  return row
+}
+
+/**
+ * Return a single reminder by id + orgId, or null.
+ */
+export async function getTrustcoreReminder(
+  id: string,
+  orgId: string,
+): Promise<TrustcoreReminder | null> {
+  const [row] = await db
+    .select()
+    .from(trustcoreReminders)
+    .where(and(eq(trustcoreReminders.id, id), eq(trustcoreReminders.orgId, orgId)))
     .limit(1)
   return row ?? null
 }

@@ -13,6 +13,8 @@
  *   trustcoreConsentRecords    — Consent and withdrawal tracking
  *   trustcoreVendors           — Vendor / subprocessor register
  *   trustcoreEvidenceEvents    — Append-oriented compliance evidence log
+ *   trustcorePolicies          — Generated privacy + governance policies
+ *   trustcoreReminders         — Operational reminders and due-date alerts
  */
 import {
   pgTable,
@@ -425,5 +427,65 @@ export const trustcorePolicies = pgTable(
   (t) => [
     index('tc_policies_org_idx').on(t.orgId),
     index('tc_policies_org_type_idx').on(t.orgId, t.type),
+  ],
+)
+
+// ── K) trustcoreReminders ─────────────────────────────────────────────────
+
+export const tcReminderSourceTypeEnum = pgEnum('tc_reminder_source_type', [
+  'privacy_program',
+  'pia',
+  'incident',
+  'dsr_request',
+  'vendor',
+  'policy',
+  'data_asset',
+])
+
+export const tcReminderSeverityEnum = pgEnum('tc_reminder_severity', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+])
+
+export const tcReminderStatusEnum = pgEnum('tc_reminder_status', [
+  'open',
+  'completed',
+  'dismissed',
+  'overdue',
+])
+
+/**
+ * Operational reminders for Law 25 obligations.
+ * Generated deterministically from live org data by the reminder engine.
+ * Deduplication is enforced by (orgId, sourceType, sourceId, title) uniqueness
+ * at the application layer — the engine upserts by that composite key.
+ */
+export const trustcoreReminders = pgTable(
+  'trustcore_reminders',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    sourceType: tcReminderSourceTypeEnum('source_type').notNull(),
+    sourceId: uuid('source_id'),
+    title: text('title').notNull(),
+    description: text('description'),
+    severity: tcReminderSeverityEnum('severity').notNull(),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    status: tcReminderStatusEnum('status').notNull().default('open'),
+    actionUrl: text('action_url'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    dismissedAt: timestamp('dismissed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_reminders_org_idx').on(t.orgId),
+    index('tc_reminders_org_status_idx').on(t.orgId, t.status),
+    index('tc_reminders_org_due_idx').on(t.orgId, t.dueAt),
+    index('tc_reminders_org_severity_idx').on(t.orgId, t.severity),
   ],
 )
