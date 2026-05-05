@@ -63,11 +63,36 @@ export interface RiskItem {
   severity: RiskSeverity
   message: string
   recommendation: string
+  /**
+   * When true this risk blocks audit readiness regardless of score.
+   * Examples: unreported serious-harm incident, overdue DSR request.
+   */
+  blocking: boolean
+  /** Deep-link to the TrustCore module where the user should act. */
+  actionUrl?: string
+  /** Rough effort estimate to resolve this risk. */
+  effort?: 'low' | 'medium' | 'high'
+  /**
+   * ISO 8601 deadline imposed by Law 25 (e.g., CAI 72-hour reporting window).
+   * Undefined when no statutory deadline applies.
+   */
+  slaDeadline?: string
+  /**
+   * IDs of evidence events or entity records that support this risk finding.
+   * Allows auditors to trace from risk → raw log.
+   */
+  evidenceRefs?: string[]
 }
 
 export interface ComplianceEvaluation {
   orgId: string
   score: number
+  /**
+   * Confidence in the score (0–100).
+   * Low when few modules have been populated (e.g., no assets, no PIAs).
+   * A low-confidence high score does not indicate real compliance.
+   */
+  confidence: number
   status: ComplianceStatus
   risks: RiskItem[]
   summary: {

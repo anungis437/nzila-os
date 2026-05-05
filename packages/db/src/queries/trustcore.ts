@@ -17,6 +17,7 @@ import {
   trustcoreConsentRecords,
   trustcoreVendors,
   trustcoreEvidenceEvents,
+  trustcoreComplianceSnapshots,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -28,6 +29,7 @@ export type TrustcoreDsrRequest = typeof trustcoreDsrRequests.$inferSelect
 export type TrustcoreConsentRecord = typeof trustcoreConsentRecords.$inferSelect
 export type TrustcoreVendor = typeof trustcoreVendors.$inferSelect
 export type TrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferSelect
+export type TrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots.$inferSelect
 
 export type NewTrustcoreDataAsset = typeof trustcoreDataAssets.$inferInsert
 export type NewTrustcorePia = typeof trustcorePias.$inferInsert
@@ -35,6 +37,7 @@ export type NewTrustcoreIncident = typeof trustcoreIncidents.$inferInsert
 export type NewTrustcoreDsrRequest = typeof trustcoreDsrRequests.$inferInsert
 export type NewTrustcoreVendor = typeof trustcoreVendors.$inferInsert
 export type NewTrustcoreEvidenceEvent = typeof trustcoreEvidenceEvents.$inferInsert
+export type NewTrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
@@ -320,4 +323,53 @@ export async function createTrustcoreVendor(
     throw new Error('createTrustcoreVendor: insert returned no row')
   }
   return row
+}
+
+// ── Compliance snapshot helpers ────────────────────────────────────────────
+
+/**
+ * Persist an immutable compliance evaluation snapshot.
+ * Returns the created row.
+ */
+export async function createComplianceSnapshot(
+  input: NewTrustcoreComplianceSnapshot,
+): Promise<TrustcoreComplianceSnapshot> {
+  const [row] = await db
+    .insert(trustcoreComplianceSnapshots)
+    .values(input)
+    .returning()
+  if (!row) {
+    throw new Error('createComplianceSnapshot: insert returned no row')
+  }
+  return row
+}
+
+/**
+ * Return the most recent snapshot for an org, or null when none exists.
+ */
+export async function getLatestComplianceSnapshot(
+  orgId: string,
+): Promise<TrustcoreComplianceSnapshot | null> {
+  const [row] = await db
+    .select()
+    .from(trustcoreComplianceSnapshots)
+    .where(eq(trustcoreComplianceSnapshots.orgId, orgId))
+    .orderBy(desc(trustcoreComplianceSnapshots.createdAt))
+    .limit(1)
+  return row ?? null
+}
+
+/**
+ * Return the last N snapshots for an org, ordered newest first.
+ */
+export async function listComplianceSnapshots(
+  orgId: string,
+  limit = 10,
+): Promise<TrustcoreComplianceSnapshot[]> {
+  return db
+    .select()
+    .from(trustcoreComplianceSnapshots)
+    .where(eq(trustcoreComplianceSnapshots.orgId, orgId))
+    .orderBy(desc(trustcoreComplianceSnapshots.createdAt))
+    .limit(limit)
 }

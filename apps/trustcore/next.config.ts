@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
     '@nzila/platform-shell',
     '@nzila/ui',
   ],
+  serverExternalPackages: ['pdfkit'],
   output: process.platform === 'win32' ? undefined : 'standalone',
   headers: async () => [
     {

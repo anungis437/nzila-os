@@ -12,6 +12,9 @@ import {
   InboxArrowDownIcon,
   BellAlertIcon,
   ClipboardDocumentCheckIcon,
+  ArrowDownTrayIcon,
+  DocumentTextIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline'
 import type { TrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
 
@@ -56,6 +59,37 @@ function StatusBadge({ status }: { status: AuditStatus }) {
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${styles[status]}`}>
       {status.replace(/_/g, ' ')}
     </span>
+  )
+}
+
+// ── Export action button ────────────────────────────────────────────────────
+
+function ExportButton({
+  href,
+  icon: Icon,
+  label,
+  sub,
+  external,
+}: {
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  sub: string
+  external?: boolean
+}) {
+  return (
+    <a
+      href={href}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener noreferrer' : undefined}
+      className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 transition group"
+    >
+      <Icon className="h-5 w-5 text-teal-600 mt-0.5 shrink-0 group-hover:text-teal-700" />
+      <div>
+        <p className="text-sm font-semibold text-gray-900">{label}</p>
+        <p className="text-xs text-gray-400">{sub}</p>
+      </div>
+    </a>
   )
 }
 
@@ -115,6 +149,34 @@ export default async function DashboardPage() {
               Evaluated {new Date(summary.evaluatedAt).toLocaleString()}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Export / Share actions */}
+      <div className="mb-2">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+          Export &amp; Share
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <ExportButton
+            href="/api/export/audit"
+            icon={ArrowDownTrayIcon}
+            label="Download Audit Report (JSON)"
+            sub="Full structured audit export for this org"
+          />
+          <ExportButton
+            href="/api/export/evidence"
+            icon={DocumentTextIcon}
+            label="Download Evidence Bundle"
+            sub="All evidence events, grouped by type"
+          />
+          <ExportButton
+            href={`/trust-center/${ctx.orgId}`}
+            icon={GlobeAltIcon}
+            label="View Trust Center"
+            sub="Shareable compliance summary page"
+            external
+          />
         </div>
       </div>
     </div>

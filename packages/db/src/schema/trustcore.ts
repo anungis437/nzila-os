@@ -364,3 +364,33 @@ export const trustcoreEvidenceEvents = pgTable(
     index('tc_evidence_events_org_entity_idx').on(t.orgId, t.entityType, t.entityId),
   ],
 )
+
+// ── I) trustcoreComplianceSnapshots ───────────────────────────────────────
+
+/**
+ * Point-in-time snapshots of compliance evaluations.
+ * Used as audit trail, procurement artifacts, and trend analysis.
+ * Immutable once created.
+ */
+export const trustcoreComplianceSnapshots = pgTable(
+  'trustcore_compliance_snapshots',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    score: integer('score').notNull(),
+    confidence: integer('confidence').notNull(),
+    status: text('status').notNull(), // 'compliant' | 'at-risk' | 'non-compliant'
+    risks: jsonb('risks').notNull(),    // RiskItem[]
+    summary: jsonb('summary').notNull(), // evaluation summary object
+    riskCount: integer('risk_count').notNull(),
+    blockingCount: integer('blocking_count').notNull(),
+    triggeredBy: text('triggered_by'), // 'manual' | 'cron' | 'export'
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_snapshots_org_idx').on(t.orgId),
+    index('tc_snapshots_org_created_idx').on(t.orgId, t.createdAt),
+  ],
+)

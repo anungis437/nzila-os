@@ -1,0 +1,90 @@
+/**
+ * TrustCore — Audit Export API
+ *
+ * POST /api/export/audit
+ *
+ * Generates a full audit report for the authenticated org.
+ * Supports JSON and PDF formats.
+ *
+ * Access: org_admin only (RBAC enforced)
+ *
+ * Body: { format: 'json' | 'pdf' }
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { withRequiredRole } from '@/lib/rbac/requireRole'
+import { generateComplianceReport } from '@/lib/compliance/report'
+import { listTrustcoreEvidenceEvents } from '@nzila/db/queries/trustcore'
+import { generateAuditPdf } from '@/lib/compliance/pdf'
+
+export const POST = withRequiredRole(
+  ['org_admin', 'platform_admin'],
+  async (request: NextRequest, ctx) => {
+    let format: 'json' | 'pdf' = 'json'
+    try {
+      const body = await request.json() as { format?: unknown }
+      if (body.format === 'pdf') format = 'pdf'
+    } catch {
+      // default to json
+    }
+
+    const [report, evidenceEvents] = await Promise.all([
+      generateComplianceReport(ctx.orgId),
+      listTrustcoreEvidenceEvents(ctx.orgId),
+    ])
+
+    if (format === 'pdf') {
+      const pdfBuffer = await generateAuditPdf(report)
+      return new NextResponse(pdfBuffer as unknown as BodyInit, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="trustcore-audit-${ctx.orgId}-${Date.now()}.pdf"`,
+          'Cache-Control': 'no-store',
+        },
+      })
+    }
+
+    // JSON export — full structured document
+    const exportDoc = {
+      exportedAt: new Date().toISOString(),
+      format: 'json',
+      framework: 'law-25',
+      organization: {
+        orgId: ctx.orgId,
+        privacyOfficerName: report.privacyOfficerName,
+        privacyOfficerEmail: report.privacyOfficerEmail,
+        privacyOfficerRole: report.privacyOfficerRole,
+        programStatus: report.programStatus,
+        lastReviewedAt: report.lastReviewedAt,
+      },
+      compliance: {
+        score: report.score,
+        confidence: report.confidence,
+        status: report.status,
+        evaluatedAt: report.evaluatedAt,
+        auditReadyStatement: report.auditReadyStatement,
+      },
+      summary: report.summary,
+      risks: report.evaluation.risks,
+      dataInventory: report.inputs.assets,
+      pias: report.inputs.pias,
+      incidents: report.inputs.incidents,
+      dsrRequests: report.inputs.dsrRequests,
+      vendors: report.inputs.vendors,
+      evidence: evidenceEvents,
+      evidenceStatement:
+        'This report is generated from a system with immutable audit logging. All actions are recorded with timestamps and attribution.',
+    }
+
+    return NextResponse.json(
+      { success: true, data: exportDoc },
+      {
+        headers: {
+          'Content-Disposition': `attachment; filename="trustcore-audit-${ctx.orgId}-${Date.now()}.json"`,
+          'Cache-Control': 'no-store',
+        },
+      },
+    )
+  },
+)
