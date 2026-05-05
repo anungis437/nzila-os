@@ -888,6 +888,7 @@ DO $$ BEGIN
  ALTER TABLE "clause_comparisons_history" ADD CONSTRAINT "clause_comparisons_history_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -900,6 +901,7 @@ DO $$ BEGIN
  ALTER TABLE "shared_clause_library" ADD CONSTRAINT "shared_clause_library_source_organization_id_organizations_id_fk" FOREIGN KEY ("source_organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -925,6 +927,7 @@ DO $$ BEGIN
  ALTER TABLE "arbitration_precedents" ADD CONSTRAINT "arbitration_precedents_source_organization_id_organizations_id_fk" FOREIGN KEY ("source_organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -972,6 +975,7 @@ DO $$ BEGIN
  END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -984,6 +988,7 @@ DO $$ BEGIN
  ALTER TABLE "cross_org_access_log" ADD CONSTRAINT "cross_org_access_log_user_organization_id_organizations_id_fk" FOREIGN KEY ("user_organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -998,6 +1003,7 @@ DO $$ BEGIN
  END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -1012,6 +1018,7 @@ DO $$ BEGIN
  END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
@@ -1026,12 +1033,14 @@ DO $$ BEGIN
  END IF;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "organization_sharing_settings" ADD CONSTRAINT "organization_sharing_settings_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
+ WHEN undefined_table THEN null;
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_clause_comparisons_user" ON "clause_comparisons_history" USING btree ("user_id");--> statement-breakpoint

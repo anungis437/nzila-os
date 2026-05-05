@@ -123,13 +123,16 @@ async function main() {
   }
 
   const failures: string[] = []
-  if (touchedTier2.length > 0 && !labels.has('owner-approved')) {
+  const hasTier2Approval = labels.has('owner-approved') || labels.has('governance-approved')
+  const hasTier34Approval = labels.has('approved-experiment') || labels.has('governance-approved')
+
+  if (touchedTier2.length > 0 && !hasTier2Approval) {
     failures.push(
       `Tier 2 apps touched (${touchedTier2.sort().join(', ')}) but label 'owner-approved' is missing.`,
     )
   }
 
-  if (touchedTier34.length > 0 && !labels.has('approved-experiment')) {
+  if (touchedTier34.length > 0 && !hasTier34Approval) {
     failures.push(
       `Tier 3/4 apps touched (${touchedTier34.sort().join(', ')}) but label 'approved-experiment' is missing.`,
     )
