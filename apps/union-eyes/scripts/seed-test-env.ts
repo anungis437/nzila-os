@@ -41,8 +41,8 @@ function isMissingColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
   // Check multiple possible error structures and message patterns
-  const code = err.code || err.cause?.code || err.originalError?.code
-  const message = String(err.message || err.cause?.message || '')
+  const code = err.code || err.cause?.code || err.originalError?.code || (err.errors && err.errors[0]?.code)
+  const message = String((err.message || err.cause?.message || err.originalError?.message || '') as any)
   return code === '42703' || (message.includes('column') && message.includes('does not exist'))
 }
 
@@ -50,8 +50,8 @@ function isMissingRelationError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
   // Check multiple possible error structures and message patterns
-  const code = err.code || err.cause?.code || err.originalError?.code
-  const message = String(err.message || err.cause?.message || '')
+  const code = err.code || err.cause?.code || err.originalError?.code || (err.errors && err.errors[0]?.code)
+  const message = String((err.message || err.cause?.message || err.originalError?.message || '') as any)
   return code === '42P01' || (message.includes('relation') && message.includes('does not exist'))
 }
 
@@ -318,7 +318,12 @@ async function seed(): Promise<void> {
       )
     })
   } catch (error) {
-    if (!(isMissingColumnError(error) || isMissingRelationError(error))) throw error
+    const isRelationError = isMissingRelationError(error)
+    const isColumnError = isMissingColumnError(error)
+    if (!(isColumnError || isRelationError)) {
+      console.error('[ue:seed:test-env] claim_updates insert check results - isColumn:', isColumnError, 'isRelation:', isRelationError, 'error:', error)
+      throw error
+    }
     console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift or missing table')
   }
 
