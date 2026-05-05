@@ -38,6 +38,7 @@ overrides:
   '@grpc/proto-loader>protobufjs': 7.5.5
   '@opentelemetry/otlp-transformer>protobufjs': 8.0.1
   proto3-json-serializer>protobufjs: 8.0.1
+  axios: '>=1.15.2'
 
 importers:
 
@@ -158,8 +159,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       axios:
-        specifier: ^1.15.0
-        version: 1.15.0
+        specifier: '>=1.15.2'
+        version: 1.16.0
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -2284,8 +2285,8 @@ importers:
         specifier: ^1.35.8
         version: 1.37.0
       axios:
-        specifier: ^1.9.0
-        version: 1.15.0
+        specifier: '>=1.15.2'
+        version: 1.16.0
       bullmq:
         specifier: ^5.66.0
         version: 5.73.0
@@ -14045,8 +14046,8 @@ packages:
     resolution: {integrity: sha512-byD6KPdvo72y/wj2T/4zGEvvlis+PsZsn/yPS3pEO+sFpcrqRpX/TJCxvVaEsNeMrfQbCr7w163YqoD9IYwHXw==}
     engines: {node: '>=4'}
 
-  axios@1.15.0:
-    resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}
+  axios@1.16.0:
+    resolution: {integrity: sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -19391,7 +19392,7 @@ snapshots:
       '@apimatic/http-query': 0.3.9
       '@apimatic/json-bigint': 1.2.0
       '@apimatic/proxy': 0.1.4
-      axios: 1.15.0
+      axios: 1.16.0
       detect-browser: 5.3.0
       detect-node: 2.1.0
       form-data: 4.0.5
@@ -25074,7 +25075,7 @@ snapshots:
   '@sendgrid/client@8.1.6':
     dependencies:
       '@sendgrid/helpers': 8.0.0
-      axios: 1.15.0
+      axios: 1.16.0
     transitivePeerDependencies:
       - debug
 
@@ -26285,7 +26286,7 @@ snapshots:
       '@swagger-api/apidom-core': 1.7.0
       '@swagger-api/apidom-error': 1.7.0
       '@types/ramda': 0.30.2
-      axios: 1.15.0
+      axios: 1.16.0
       minimatch: 10.2.5
       ramda: 0.30.1
       ramda-adjunct: 5.1.0(ramda@0.30.1)
@@ -27810,7 +27811,7 @@ snapshots:
 
   axe-core@4.11.2: {}
 
-  axios@1.15.0:
+  axios@1.16.0:
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.5
@@ -30737,7 +30738,7 @@ snapshots:
 
   mailgun.js@12.7.1:
     dependencies:
-      axios: 1.15.0
+      axios: 1.16.0
       base-64: 1.0.0
       url-join: 4.0.1
     transitivePeerDependencies:
@@ -33442,7 +33443,7 @@ snapshots:
 
   twilio@5.13.1:
     dependencies:
-      axios: 1.15.0
+      axios: 1.16.0
       dayjs: 1.11.19
       https-proxy-agent: 5.0.1
       jsonwebtoken: 9.0.3
