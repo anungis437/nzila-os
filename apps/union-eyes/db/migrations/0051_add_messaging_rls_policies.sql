@@ -8,7 +8,9 @@
 -- ============================================================================
 
 -- Enable RLS on messages table
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN undefined_table THEN null; END $$;
 
 -- Policy 1: Users can SELECT messages in threads they participate in
 DO $$ BEGIN
@@ -22,7 +24,7 @@ DO $$ BEGIN
       WHERE user_id = current_setting('app.current_user_id', true) -- Clerk user ID from auth context
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 2: Users can INSERT messages only to threads they're part of (as sender)
 DO $$ BEGIN
@@ -37,7 +39,7 @@ DO $$ BEGIN
     )
     AND sender_id = current_setting('app.current_user_id', true) -- Can only send as themselves
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 3: Users can UPDATE their own recent messages (15 min edit window)
 DO $$ BEGIN
@@ -56,7 +58,7 @@ DO $$ BEGIN
       WHERE user_id = current_setting('app.current_user_id', true)
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 4: Users can DELETE their own recent messages (1 hour delete window)
 DO $$ BEGIN
@@ -67,19 +69,27 @@ DO $$ BEGIN
     sender_id = current_setting('app.current_user_id', true)
     AND created_at > (NOW() - INTERVAL '1 hour')
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Index for performance - queries on thread_id
-CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON messages(thread_id) WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
-CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON messages(thread_id) WHERE deleted_at IS NULL;
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
 
 -- ============================================================================
 -- 2. MESSAGE_THREADS TABLE - RLS POLICIES
 -- ============================================================================
 
 -- Enable RLS on message_threads table
-ALTER TABLE message_threads ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  ALTER TABLE message_threads ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN undefined_table THEN null; END $$;
 
 -- Policy 1: Users can SELECT threads they participate in
 DO $$ BEGIN
@@ -93,7 +103,7 @@ DO $$ BEGIN
       WHERE user_id = current_setting('app.current_user_id', true)
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 2: Organization members can CREATE threads within their org
 DO $$ BEGIN
@@ -108,7 +118,7 @@ DO $$ BEGIN
         AND status = 'active'
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 3: Thread participants can UPDATE thread metadata (title, etc)
 DO $$ BEGIN
@@ -122,7 +132,7 @@ DO $$ BEGIN
       WHERE user_id = current_setting('app.current_user_id', true)
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 4: Only thread creator or org admins can DELETE threads
 DO $$ BEGIN
@@ -138,18 +148,24 @@ DO $$ BEGIN
         AND role IN ('admin', 'officer')
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Index for performance
-CREATE INDEX IF NOT EXISTS idx_message_threads_organization_id ON message_threads(organization_id);
-CREATE INDEX IF NOT EXISTS idx_message_threads_created_by ON message_threads(created_by);
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_threads_organization_id ON message_threads(organization_id);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_threads_created_by ON message_threads(created_by);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
 
 -- ============================================================================
 -- 3. MESSAGE_PARTICIPANTS TABLE - RLS POLICIES
 -- ============================================================================
 
 -- Enable RLS on message_participants table
-ALTER TABLE message_participants ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  ALTER TABLE message_participants ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN undefined_table THEN null; END $$;
 
 -- Policy 1: Users can SELECT their own participant records or if they admin the org
 DO $$ BEGIN
@@ -168,7 +184,7 @@ DO $$ BEGIN
       )
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 2: Only org admins can insert participants
 DO $$ BEGIN
@@ -186,7 +202,7 @@ DO $$ BEGIN
       )
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 3: Users can remove themselves from threads
 DO $$ BEGIN
@@ -194,18 +210,24 @@ DO $$ BEGIN
   FOR DELETE
   TO public
   USING (user_id = current_setting('app.current_user_id', true));
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Index for performance
-CREATE INDEX IF NOT EXISTS idx_message_participants_user_id ON message_participants(user_id);
-CREATE INDEX IF NOT EXISTS idx_message_participants_thread_id ON message_participants(thread_id);
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_participants_user_id ON message_participants(user_id);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_participants_thread_id ON message_participants(thread_id);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
 
 -- ============================================================================
 -- 4. MESSAGE_READ_RECEIPTS TABLE - RLS POLICIES
 -- ============================================================================
 
 -- Enable RLS on message_read_receipts table
-ALTER TABLE message_read_receipts ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  ALTER TABLE message_read_receipts ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN undefined_table THEN null; END $$;
 
 -- Policy 1: Users can only see their own read receipts (privacy)
 DO $$ BEGIN
@@ -220,7 +242,7 @@ DO $$ BEGIN
       WHERE m.sender_id = current_setting('app.current_user_id', true)
     )
   );
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 2: Users can only insert their own read receipts
 DO $$ BEGIN
@@ -228,14 +250,16 @@ DO $$ BEGIN
   FOR INSERT
   TO public
   WITH CHECK (reader_id = current_setting('app.current_user_id', true));
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- ============================================================================
 -- 5. MESSAGE_NOTIFICATIONS TABLE - RLS POLICIES
 -- ============================================================================
 
 -- Enable RLS on message_notifications table
-ALTER TABLE message_notifications ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  ALTER TABLE message_notifications ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN undefined_table THEN null; END $$;
 
 -- Policy 1: Users can only see their own notifications
 DO $$ BEGIN
@@ -243,7 +267,7 @@ DO $$ BEGIN
   FOR SELECT
   TO public
   USING (recipient_id = current_setting('app.current_user_id', true));
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 2: Users can only insert notifications for themselves
 DO $$ BEGIN
@@ -251,7 +275,7 @@ DO $$ BEGIN
   FOR INSERT
   TO public
   WITH CHECK (recipient_id = current_setting('app.current_user_id', true));
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Policy 3: Users can update their own notifications (mark as read, etc)
 DO $$ BEGIN
@@ -259,11 +283,15 @@ DO $$ BEGIN
   FOR UPDATE
   TO public
   USING (recipient_id = current_setting('app.current_user_id', true));
-EXCEPTION WHEN duplicate_object THEN null; END $$;
+EXCEPTION WHEN duplicate_object OR undefined_table OR undefined_column THEN null; END $$;
 
 -- Index for performance
-CREATE INDEX IF NOT EXISTS idx_message_notifications_recipient_id ON message_notifications(recipient_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_message_notifications_is_read ON message_notifications(is_read) WHERE is_read = false;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_notifications_recipient_id ON message_notifications(recipient_id, created_at DESC);
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_message_notifications_is_read ON message_notifications(is_read) WHERE is_read = false;
+EXCEPTION WHEN undefined_table OR undefined_column THEN null; END $$;
 
 -- ============================================================================
 -- VERIFICATION

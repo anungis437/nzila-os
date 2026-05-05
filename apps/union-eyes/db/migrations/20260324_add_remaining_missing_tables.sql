@@ -511,18 +511,8 @@ CREATE TABLE IF NOT EXISTS ml_predictions (
 );
 
 -- 2.17 oauth_providers (in user_management schema)
-CREATE TABLE IF NOT EXISTS user_management.oauth_providers (
-  provider_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id VARCHAR(255) NOT NULL REFERENCES user_management.users(user_id) ON DELETE CASCADE,
-  provider_name VARCHAR(50) NOT NULL,
-  provider_user_id VARCHAR(255) NOT NULL,
-  provider_data JSONB DEFAULT '{}'::jsonb,
-  access_token TEXT,
-  refresh_token TEXT,
-  token_expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- (user_management schema does not exist at this migration point — skipped)
+-- CREATE TABLE IF NOT EXISTS user_management.oauth_providers ( ... );
 
 -- 2.18 pending_profiles
 CREATE TABLE IF NOT EXISTS pending_profiles (

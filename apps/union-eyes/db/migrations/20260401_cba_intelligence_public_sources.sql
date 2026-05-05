@@ -481,12 +481,13 @@ CREATE INDEX idx_cba_intel_freshness_checked ON cba_intel_freshness_log (checked
 
 -- --------------------------------------------------------------------------
 -- 13. Fix CBA number unique constraint to be tenant-scoped
+-- (collective_agreements does not exist at this migration point — skipped)
 -- --------------------------------------------------------------------------
 
-ALTER TABLE collective_agreements
-  DROP CONSTRAINT IF EXISTS collective_agreements_cba_number_unique;
+-- ALTER TABLE collective_agreements
+--   DROP CONSTRAINT IF EXISTS collective_agreements_cba_number_unique;
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_cba_number_per_org
-  ON collective_agreements (cba_number, organization_id);
+-- CREATE UNIQUE INDEX IF NOT EXISTS uq_cba_number_per_org
+--   ON collective_agreements (cba_number, organization_id);
 
 COMMIT;

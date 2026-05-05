@@ -112,8 +112,8 @@ SELECT
   o.organization_type,
   om.id            AS member_id,
   om.user_id,
-  om.name          AS member_name,
-  om.email         AS member_email,
+  o.name           AS member_name,
+  o.email            AS member_email,
   om.role          AS member_role,
   om.status        AS member_status
 FROM organization_members om
