@@ -11,7 +11,7 @@
  */
 
 import { sql } from "drizzle-orm";
-import { getClient } from "../client";
+import { db } from "@/db/db";
 
 // Required tables for Union Eyes operations
 const REQUIRED_TABLES = [
@@ -45,7 +45,6 @@ interface ValidationResult {
 }
 
 async function validateDatabase(): Promise<ValidationResult> {
-  const db = getClient();
   const result: ValidationResult = {
     valid: true,
     missingTables: [],

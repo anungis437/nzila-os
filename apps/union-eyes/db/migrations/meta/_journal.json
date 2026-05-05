@@ -454,154 +454,189 @@
       "idx": 64,
       "version": "7",
       "when": 1763406944019,
-      "tag": "1770880372830_consolidate_chart_of_accounts_fixed",
+      "tag": "0099_restore_claim_updates_table",
       "breakpoints": true
     },
     {
       "idx": 65,
       "version": "7",
       "when": 1763406945019,
-      "tag": "20260212_add_hris_tables_fixed",
+      "tag": "0100_add_clerk_organization_id",
       "breakpoints": true
     },
     {
       "idx": 66,
       "version": "7",
       "when": 1763406946019,
-      "tag": "20260212_add_integration_framework_fixed",
+      "tag": "0101_add_clc_financial_columns",
       "breakpoints": true
     },
     {
       "idx": 67,
       "version": "7",
       "when": 1763406947019,
-      "tag": "20260213_add_accounting_tables_fixed",
+      "tag": "1770880372830_consolidate_chart_of_accounts_fixed",
       "breakpoints": true
     },
     {
       "idx": 68,
       "version": "7",
       "when": 1763406948019,
-      "tag": "20260213_add_integration_foreign_keys",
+      "tag": "20260212_add_hris_tables_fixed",
       "breakpoints": true
     },
     {
       "idx": 69,
       "version": "7",
       "when": 1763406949019,
-      "tag": "20260324_add_missing_tables_and_columns",
+      "tag": "20260212_add_integration_framework_fixed",
       "breakpoints": true
     },
     {
       "idx": 70,
       "version": "7",
       "when": 1763406950019,
-      "tag": "20260324_add_remaining_missing_tables",
+      "tag": "20260213_add_accounting_tables_fixed",
       "breakpoints": true
     },
     {
       "idx": 71,
       "version": "7",
       "when": 1763406951019,
-      "tag": "20260325_dapl_platform_ledger",
+      "tag": "20260213_add_integration_foreign_keys",
       "breakpoints": true
     },
     {
       "idx": 72,
       "version": "7",
       "when": 1763406952019,
-      "tag": "20260327_staging_alignment_phase2",
+      "tag": "20260324_add_missing_tables_and_columns",
       "breakpoints": true
     },
     {
       "idx": 73,
       "version": "7",
       "when": 1763406953019,
-      "tag": "20260327_staging_alignment_phase3",
+      "tag": "20260324_add_remaining_missing_tables",
       "breakpoints": true
     },
     {
       "idx": 74,
       "version": "7",
       "when": 1763406954019,
-      "tag": "20260327_staging_schema_alignment",
+      "tag": "20260325_dapl_platform_ledger",
       "breakpoints": true
     },
     {
       "idx": 75,
       "version": "7",
       "when": 1763406955019,
-      "tag": "20260328_jurisdiction_preferences",
+      "tag": "20260327_staging_alignment_phase2",
       "breakpoints": true
     },
     {
       "idx": 76,
       "version": "7",
       "when": 1763406956019,
-      "tag": "20260401_cba_intelligence_public_sources",
+      "tag": "20260327_staging_alignment_phase3",
       "breakpoints": true
     },
     {
       "idx": 77,
       "version": "7",
       "when": 1763406957019,
-      "tag": "20260402_audit_immutability",
+      "tag": "20260327_staging_schema_alignment",
       "breakpoints": true
     },
     {
       "idx": 78,
       "version": "7",
       "when": 1763406958019,
-      "tag": "20260402_pgvector_embeddings",
+      "tag": "20260328_jurisdiction_preferences",
       "breakpoints": true
     },
     {
       "idx": 79,
       "version": "7",
       "when": 1763406959019,
-      "tag": "20260404_pilot_observability",
+      "tag": "20260401_cba_intelligence_public_sources",
       "breakpoints": true
     },
     {
       "idx": 80,
       "version": "7",
       "when": 1763406960019,
-      "tag": "20260710_clerk_to_entra_user_ids",
+      "tag": "20260402_audit_immutability",
       "breakpoints": true
     },
     {
       "idx": 81,
       "version": "7",
       "when": 1763406961019,
-      "tag": "20260711_auth_password_reset_tokens",
+      "tag": "20260402_pgvector_embeddings",
       "breakpoints": true
     },
     {
       "idx": 82,
       "version": "7",
       "when": 1763406962019,
-      "tag": "20260712_org_users_unique_constraint",
+      "tag": "20260404_pilot_observability",
       "breakpoints": true
     },
     {
       "idx": 83,
       "version": "7",
       "when": 1763406963019,
-      "tag": "20260713_dedup_and_quality_warnings",
+      "tag": "20260710_clerk_to_entra_user_ids",
       "breakpoints": true
     },
     {
       "idx": 84,
       "version": "7",
       "when": 1763406964019,
-      "tag": "20260714_correspondence_pipeline",
+      "tag": "20260711_auth_password_reset_tokens",
       "breakpoints": true
     },
     {
       "idx": 85,
       "version": "7",
       "when": 1763406965019,
+      "tag": "20260712_org_users_unique_constraint",
+      "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1763406966019,
+      "tag": "20260713_dedup_and_quality_warnings",
+      "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1763406967019,
+      "tag": "20260714_correspondence_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1763406968019,
       "tag": "20260715_integration_fabric",
+      "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1763406969019,
+      "tag": "0102_create_user_management_core_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1763406970019,
+      "tag": "0103_align_claims_identifier_columns",
       "breakpoints": true
     }
   ]
