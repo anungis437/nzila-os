@@ -40,19 +40,23 @@ function assertSafeRuntime(): void {
 function isMissingColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
-  // Check multiple possible error structures and message patterns
-  const code = err.code || err.cause?.code || err.originalError?.code || (err.errors && err.errors[0]?.code)
-  const message = String((err.message || err.cause?.message || err.originalError?.message || '') as any)
-  return code === '42703' || (message.includes('column') && message.includes('does not exist'))
+  const message = String(err.message || '').toLowerCase()
+  // Check if it's a column missing error - either by code or message
+  if (err.code === '42703') return true
+  if (err.cause?.code === '42703') return true
+  if (message.includes('column') && message.includes('does not exist')) return true
+  return false
 }
 
 function isMissingRelationError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const err = error as any
-  // Check multiple possible error structures and message patterns
-  const code = err.code || err.cause?.code || err.originalError?.code || (err.errors && err.errors[0]?.code)
-  const message = String((err.message || err.cause?.message || err.originalError?.message || '') as any)
-  return code === '42P01' || (message.includes('relation') && message.includes('does not exist'))
+  const message = String(err.message || '').toLowerCase()
+  // Check if it's a relation missing error - either by code or message
+  if (err.code === '42p01') return true
+  if (err.cause?.code === '42p01') return true
+  if (message.includes('relation') && message.includes('does not exist')) return true
+  return false
 }
 
 function assertDeterministicInputs(): void {
@@ -319,10 +323,10 @@ async function seed(): Promise<void> {
         )
       })
     } catch (error) {
+      console.log('[ue:seed:test-env] claimUpdates error details:', { type: error?.constructor?.name, code: (error as any)?.code, message: (error as any)?.message })
       const isRelationError = isMissingRelationError(error)
       const isColumnError = isMissingColumnError(error)
       if (!(isColumnError || isRelationError)) {
-        console.error('[ue:seed:test-env] claim_updates insert check results - isColumn:', isColumnError, 'isRelation:', isRelationError, 'error:', error)
         throw error
       }
       console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift or missing table')
