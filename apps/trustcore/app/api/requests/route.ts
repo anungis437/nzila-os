@@ -7,6 +7,7 @@ import {
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createDsrRequestSchema } from '@/lib/validation/dsrRequest'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 
 // Law 25: DSR responses due within 30 days
 const DSR_DUE_DAYS = 30
@@ -51,6 +52,14 @@ export const POST = withRequiredRole(
           requestType: dsr.requestType,
           dueAt: dsr.dueAt.toISOString(),
         },
+      })
+      buildPlatformEvent({
+        type: 'trustcore.dsr.created',
+        payload: { id: dsr.id, requesterEmail: dsr.requesterEmail, requestType: dsr.requestType, dueAt: dsr.dueAt.toISOString() },
+        tenantId: ctx.orgId,
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        source: '@nzila/trustcore',
       })
       return NextResponse.json({ success: true, data: dsr }, { status: 201 })
     })

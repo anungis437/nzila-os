@@ -7,6 +7,7 @@ import {
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createVendorSchema } from '@/lib/validation/vendor'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
@@ -42,6 +43,14 @@ export const POST = withRequiredRole(
           riskLevel: vendor.riskLevel,
           crossBorderTransfer: vendor.crossBorderTransfer,
         },
+      })
+      buildPlatformEvent({
+        type: 'trustcore.vendor.added',
+        payload: { id: vendor.id, name: vendor.name, country: vendor.country, riskLevel: vendor.riskLevel, crossBorderTransfer: vendor.crossBorderTransfer },
+        tenantId: ctx.orgId,
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        source: '@nzila/trustcore',
       })
       return NextResponse.json({ success: true, data: vendor }, { status: 201 })
     })

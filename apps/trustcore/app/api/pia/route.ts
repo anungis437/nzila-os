@@ -7,6 +7,7 @@ import {
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createPiaSchema } from '@/lib/validation/pia'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
@@ -37,6 +38,14 @@ export const POST = withRequiredRole(
         entityId: pia.id,
         action: 'pia_created',
         metadata: { title: pia.title, triggerType: pia.triggerType, riskScore: pia.riskScore },
+      })
+      buildPlatformEvent({
+        type: 'trustcore.pia.created',
+        payload: { id: pia.id, title: pia.title, triggerType: pia.triggerType, riskScore: pia.riskScore },
+        tenantId: ctx.orgId,
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        source: '@nzila/trustcore',
       })
       return NextResponse.json({ success: true, data: pia }, { status: 201 })
     })

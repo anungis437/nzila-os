@@ -7,6 +7,7 @@ import {
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createDataAssetSchema } from '@/lib/validation/dataAsset'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
@@ -37,6 +38,14 @@ export const POST = withRequiredRole(
         entityId: asset.id,
         action: 'data_asset_created',
         metadata: { name: asset.name, dataCategory: asset.dataCategory, sensitivityLevel: asset.sensitivityLevel },
+      })
+      buildPlatformEvent({
+        type: 'trustcore.data_asset.created',
+        payload: { id: asset.id, name: asset.name, dataCategory: asset.dataCategory, sensitivityLevel: asset.sensitivityLevel },
+        tenantId: ctx.orgId,
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        source: '@nzila/trustcore',
       })
       return NextResponse.json({ success: true, data: asset }, { status: 201 })
     })

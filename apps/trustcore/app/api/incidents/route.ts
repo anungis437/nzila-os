@@ -7,6 +7,7 @@ import {
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createIncidentSchema } from '@/lib/validation/incident'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
@@ -46,6 +47,14 @@ export const POST = withRequiredRole(
           severity: incident.severity,
           seriousHarmLikely: incident.seriousHarmLikely,
         },
+      })
+      buildPlatformEvent({
+        type: 'trustcore.incident.logged',
+        payload: { id: incident.id, title: incident.title, incidentType: incident.incidentType, severity: incident.severity, seriousHarmLikely: incident.seriousHarmLikely },
+        tenantId: ctx.orgId,
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        source: '@nzila/trustcore',
       })
       return NextResponse.json({ success: true, data: incident }, { status: 201 })
     })
