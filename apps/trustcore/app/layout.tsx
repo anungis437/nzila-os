@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { AuthProvider } from '@nzila/platform-auth/entra/client'
 import { NzilaAppShell } from '@nzila/platform-shell'
 import { Poppins } from 'next/font/google'
@@ -15,10 +16,18 @@ export const metadata: Metadata = {
   description: 'Privacy compliance and governance platform — Nzila OS',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+function resolveLang(rawLocale: string | undefined): 'en' | 'fr' {
+  if (rawLocale === 'fr' || rawLocale === 'fr-CA') return 'fr'
+  return 'en'
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const lang = resolveLang(cookieStore.get('NEXT_LOCALE')?.value)
+
   return (
     <AuthProvider>
-      <html lang="en" data-product="trustcore">
+      <html lang={lang} data-product="trustcore">
         <body className={poppins.className}>
           <NzilaAppShell moduleId="trustcore">
             {children}
