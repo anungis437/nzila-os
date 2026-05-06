@@ -7,4 +7,4 @@ export {
   checkEntitlementInputSchema,
   createBillingService,
   createInMemoryBillingService,
-} from './service.js';
+} from './service';
