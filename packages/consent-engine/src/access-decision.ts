@@ -1,5 +1,5 @@
-import { ConsentRole, ConsentScope } from './types.js'
-import type { AccessDecisionInput, AccessDecision } from './types.js'
+import { ConsentRole, ConsentScope } from './types'
+import type { AccessDecisionInput, AccessDecision } from './types'
 
 export const ROLE_SCOPE_MAP: Record<ConsentRole, ConsentScope[]> = {
   [ConsentRole.CLINICIAN]: [

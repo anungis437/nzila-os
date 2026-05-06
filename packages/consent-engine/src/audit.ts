@@ -1,4 +1,4 @@
-import type { AuditEvent } from './types.js'
+import type { AuditEvent } from './types'
 
 export function createAuditEvent(params: Omit<AuditEvent, 'timestamp'>): AuditEvent {
   return {

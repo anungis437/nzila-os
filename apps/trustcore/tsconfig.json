@@ -20,6 +20,7 @@
       "@nzila/platform-semantic-search": ["../../packages/platform-semantic-search/src/index.ts"],
       "@nzila/platform-rum": ["../../packages/platform-rum/src/index.ts"],
       "@nzila/webhooks": ["../../packages/webhooks/src/index.ts"],
+      "@nzila/consent-engine": ["../../packages/consent-engine/src/index.ts"],
       "@nzila/platform-feature-flags": ["../../packages/platform-feature-flags/src/index.ts"],
       "@nzila/pilot-mode": ["../../packages/pilot-mode/src/index.ts"],
       "@nzila/platform-contracts": ["../../packages/platform-contracts/src/index.ts"],
