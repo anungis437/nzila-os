@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   let event: import('stripe').Stripe.Event
   try {
     const { default: Stripe } = await import('stripe')
-    const stripe = new Stripe(stripeKey, { apiVersion: '2025-04-30.basil' })
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err) {
     console.error('[TrustCore billing webhook] signature verification failed', err)
@@ -90,25 +90,28 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.paid': {
         const invoice = event.data.object as import('stripe').Stripe.Invoice
-        const subId =
-          typeof invoice.subscription === 'string' ? invoice.subscription : null
+        // In Stripe v22 (dahlia), subscription ID lives on invoice.parent
+        const parentSub = invoice.parent?.subscription_details?.subscription
+        const subId = typeof parentSub === 'string' ? parentSub : null
         if (!subId) break
 
-        // Fetch subscription to get metadata (orgId)
+        // Fetch subscription to get metadata (orgId) and period dates
         const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2025-04-30.basil' })
+        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
         const sub = await stripe.subscriptions.retrieve(subId)
         const orgId = sub.metadata?.orgId
         if (!orgId) break
 
+        // current_period is on SubscriptionItem in v22
+        const item = sub.items.data[0]
         await upsertTrustcoreSubscription({
           orgId,
           plan: (sub.metadata?.plan ?? 'pro') as 'pro' | 'premium',
           status: 'active',
           stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : null,
           stripeSubscriptionId: sub.id,
-          currentPeriodStart: new Date(sub.current_period_start * 1000),
-          currentPeriodEnd: new Date(sub.current_period_end * 1000),
+          currentPeriodStart: item ? new Date(item.current_period_start * 1000) : undefined,
+          currentPeriodEnd: item ? new Date(item.current_period_end * 1000) : undefined,
         })
         break
       }
@@ -120,14 +123,15 @@ export async function POST(req: NextRequest) {
           console.warn('[TrustCore webhook] subscription.updated missing orgId metadata')
           break
         }
+        const item = sub.items.data[0]
         await upsertTrustcoreSubscription({
           orgId,
           plan: (sub.metadata?.plan ?? 'pro') as 'pro' | 'premium',
           status: sub.status as 'active' | 'trialing' | 'past_due' | 'canceled',
           stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : null,
           stripeSubscriptionId: sub.id,
-          currentPeriodStart: new Date(sub.current_period_start * 1000),
-          currentPeriodEnd: new Date(sub.current_period_end * 1000),
+          currentPeriodStart: item ? new Date(item.current_period_start * 1000) : undefined,
+          currentPeriodEnd: item ? new Date(item.current_period_end * 1000) : undefined,
         })
         break
       }
