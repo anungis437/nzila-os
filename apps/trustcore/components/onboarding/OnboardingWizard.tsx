@@ -18,6 +18,7 @@ import {
   step4Schema,
   step5Schema,
 } from '@/lib/validation/onboarding'
+import { trackEvent } from '@/lib/analytics/track'
 import type {
   Step1Input,
   Step2Input,
@@ -620,6 +621,7 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
 
   // Hydrate from localStorage on mount
   useEffect(() => {
+    trackEvent('onboarding_started', { orgId })
     try {
       const saved = localStorage.getItem(storageKey)
       if (saved) {
@@ -629,7 +631,7 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
     } catch {
       // ignore
     }
-  }, [storageKey])
+  }, [storageKey, orgId])
 
   // Auto-save to localStorage on every state change
   const persistState = useCallback(
@@ -709,6 +711,7 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
 
       // Clear saved state on success, show upgrade modal before redirecting
       localStorage.removeItem(storageKey)
+      trackEvent('onboarding_completed', { orgId })
       setShowUpgradeModal(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'An unexpected error occurred')

@@ -12,6 +12,7 @@
  * as a lightweight proof of compliance posture.
  */
 
+import type { Metadata } from 'next'
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
@@ -21,13 +22,37 @@ import {
   UserIcon,
   BuildingOffice2Icon,
   LockClosedIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline'
 import { evaluateCompliance } from '@/lib/compliance/engine'
 import { listTrustcorePrivacyPrograms, getLatestComplianceSnapshot } from '@nzila/db/queries/trustcore'
 import { requireFeature, FeatureGateError } from '@/lib/billing/requireFeature'
+import { TrustCenterShareButton } from '@/components/trust-center/TrustCenterShareButton'
 import type { ComplianceEvaluation } from '@/types/core'
 
 export const dynamic = 'force-dynamic'
+
+// ── Metadata ───────────────────────────────────────────────────────────────
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgId: string }>
+}): Promise<Metadata> {
+  const { orgId } = await params
+  const programs = await listTrustcorePrivacyPrograms(orgId).catch(() => [])
+  const activeProgram = programs.find((p) => p.status === 'active') ?? null
+  const orgName = activeProgram?.orgName ?? orgId
+
+  return {
+    title: `Trust Center — ${orgName}`,
+    description: 'Law 25 compliance status and privacy practices — powered by TrustCore.',
+    openGraph: {
+      title: `Trust Center — ${orgName}`,
+      description: 'Law 25 (Quebec) compliance status and privacy practices.',
+    },
+  }
+}
 
 // ── Safe status derivation ─────────────────────────────────────────────────
 
@@ -106,24 +131,46 @@ export default async function TrustCenterPage({
   const controls = derivePublicControls(evaluation)
   const StatusIcon = STATUS_ICON[evaluation.status]
   const lastEvaluated = latestSnapshot?.createdAt ?? new Date(evaluation.evaluatedAt)
+  const trustCenterUrl = `/trust-center/${orgId}`
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 print:bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-5">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <ShieldCheckIcon className="h-8 w-8 text-teal-600 shrink-0" />
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Trust Center</h1>
-            <p className="text-sm text-gray-500">Law 25 (Quebec) Compliance Status — powered by TrustCore</p>
+      <header className="bg-white border-b border-gray-200 px-6 py-5 print:border-gray-300">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <ShieldCheckIcon className="h-8 w-8 text-teal-600 shrink-0" />
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-bold text-gray-900">Trust Center</h1>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 border border-teal-200 text-teal-700">
+                  <GlobeAltIcon className="h-3.5 w-3.5" />
+                  Public Trust Page
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">Law 25 (Quebec) Compliance Status — powered by TrustCore</p>
+            </div>
+          </div>
+
+          {/* Share actions */}
+          <div className="flex items-center gap-2 print:hidden">
+            <TrustCenterShareButton url={trustCenterUrl} />
+            <a
+              href={trustCenterUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex text-xs text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 px-3 py-1.5 rounded-lg transition"
+            >
+              Open in new tab ↗
+            </a>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8 print:py-6">
 
         {/* Org identity + scope */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 print:border-gray-300">
           <div className="flex items-center gap-3 mb-4">
             <BuildingOffice2Icon className="h-5 w-5 text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Organisation</h2>
@@ -145,7 +192,7 @@ export default async function TrustCenterPage({
         </div>
 
         {/* Compliance Status */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 print:border-gray-300">
           <div className="flex items-center gap-3 mb-5">
             <StatusIcon className="h-5 w-5 text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Law 25 Compliance Status</h2>
@@ -176,7 +223,7 @@ export default async function TrustCenterPage({
         </div>
 
         {/* Key Controls */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 print:border-gray-300">
           <div className="flex items-center gap-3 mb-5">
             <InformationCircleIcon className="h-5 w-5 text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Security &amp; Privacy Controls</h2>
@@ -197,7 +244,7 @@ export default async function TrustCenterPage({
         </div>
 
         {/* Privacy Practices */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 print:border-gray-300">
           <div className="flex items-center gap-3 mb-5">
             <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Privacy Practices</h2>
@@ -228,7 +275,7 @@ export default async function TrustCenterPage({
         </div>
 
         {/* Audit Statement */}
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-5">
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-5 print:border-teal-300">
           <div className="flex items-start gap-3">
             <ShieldCheckIcon className="h-5 w-5 text-teal-600 mt-0.5 shrink-0" />
             <div>
@@ -244,7 +291,7 @@ export default async function TrustCenterPage({
 
         {/* Privacy Officer contact */}
         {activeProgram?.privacyOfficerEmail && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 print:border-gray-300">
             <div className="flex items-center gap-3 mb-4">
               <UserIcon className="h-5 w-5 text-gray-400" />
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Privacy Officer Contact</h2>
@@ -269,7 +316,7 @@ export default async function TrustCenterPage({
         )}
 
         {/* Footer */}
-        <div className="text-center pt-2">
+        <div className="text-center pt-2 print:pt-4">
           <p className="text-xs text-gray-400">
             This Trust Center page is auto-generated by TrustCore and reflects the compliance posture as of the
             last evaluation. It is provided for transparency purposes and does not constitute a legal compliance

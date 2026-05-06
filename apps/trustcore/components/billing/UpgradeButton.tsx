@@ -9,6 +9,7 @@
 
 import { useState } from 'react'
 import { SparklesIcon } from '@heroicons/react/24/outline'
+import { trackEvent } from '@/lib/analytics/track'
 
 interface UpgradeButtonProps {
   targetPlan: 'pro' | 'premium'
@@ -27,6 +28,7 @@ export function UpgradeButton({
   async function handleUpgrade() {
     setLoading(true)
     setError(null)
+    trackEvent('upgrade_clicked', { plan: targetPlan })
     try {
       const res = await fetch('/api/billing/create-checkout-session', {
         method: 'POST',

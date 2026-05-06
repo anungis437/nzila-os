@@ -28,7 +28,9 @@ import {
   ExclamationTriangleIcon,
   BoltIcon,
   ChatBubbleLeftEllipsisIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline'
+import { TrackedCtaLink } from '@/components/shared/TrackedCtaLink'
 
 // ── How It Works ─────────────────────────────────────────────────────────
 
@@ -222,13 +224,15 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link
+                <TrackedCtaLink
                   href="/onboarding"
+                  event="landing_cta_click"
+                  payload={{ location: 'hero' }}
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-teal-600 hover:bg-teal-700 text-white text-base font-semibold rounded-xl transition shadow-sm shadow-teal-200"
                 >
                   <ShieldCheckIcon className="h-5 w-5" />
                   Start Free
-                </Link>
+                </TrackedCtaLink>
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-base font-semibold rounded-xl transition"
@@ -237,9 +241,19 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <p className="mt-4 text-xs text-gray-400">
-                Free to start. No credit card required.
-              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-xs text-gray-400">Free to start. No credit card required.</p>
+                <span className="text-gray-200">·</span>
+                <TrackedCtaLink
+                  href="/trust-center/sample"
+                  event="landing_sample_trust_center_click"
+                  payload={{ location: 'hero' }}
+                  className="inline-flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-medium transition"
+                >
+                  <EyeIcon className="h-3.5 w-3.5" />
+                  View sample Trust Center →
+                </TrackedCtaLink>
+              </div>
             </div>
 
             {/* Mock dashboard */}
@@ -275,13 +289,15 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 text-center">
-            <Link
+            <TrackedCtaLink
               href="/onboarding"
+              event="landing_cta_click"
+              payload={{ location: 'how_it_works' }}
               className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition text-sm"
             >
               <BoltIcon className="h-4 w-4" />
               Start your setup now
-            </Link>
+            </TrackedCtaLink>
           </div>
         </div>
       </section>
@@ -313,6 +329,17 @@ export default function LandingPage() {
                   <Icon className="h-6 w-6 text-teal-600 mb-3" />
                   <h3 className="font-semibold text-gray-900 text-sm mb-1">{f.title}</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">{f.description}</p>
+                  {f.title === 'Trust Center — shareable' && (
+                    <TrackedCtaLink
+                      href="/trust-center/sample"
+                      event="landing_sample_trust_center_click"
+                      payload={{ location: 'what_you_get' }}
+                      className="inline-flex items-center gap-1 mt-3 text-xs text-teal-600 hover:text-teal-700 font-medium transition"
+                    >
+                      <EyeIcon className="h-3.5 w-3.5" />
+                      View sample →
+                    </TrackedCtaLink>
+                  )}
                 </div>
               )
             })}
@@ -328,6 +355,7 @@ export default function LandingPage() {
             <p className="text-gray-500 text-base">
               Start free. Upgrade when you need audit reports and your Trust Center.
             </p>
+            <p className="text-xs text-gray-400 mt-2">No contracts. Cancel anytime. Upgrade or downgrade whenever you need.</p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-6 mb-10">
@@ -336,12 +364,14 @@ export default function LandingPage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Free</p>
               <p className="text-3xl font-black text-gray-900 mb-1">$0</p>
               <p className="text-xs text-gray-400 mb-5">Forever</p>
-              <Link
+              <TrackedCtaLink
                 href="/onboarding"
+                event="landing_cta_click"
+                payload={{ location: 'pricing_free' }}
                 className="block text-center w-full py-2.5 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition text-sm mb-5"
               >
                 Start Free
-              </Link>
+              </TrackedCtaLink>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center gap-2"><CheckCircleIcon className="h-4 w-4 text-teal-500 shrink-0" />Compliance dashboard</li>
                 <li className="flex items-center gap-2"><CheckCircleIcon className="h-4 w-4 text-teal-500 shrink-0" />Risk detection</li>
@@ -361,13 +391,15 @@ export default function LandingPage() {
               </div>
               <p className="text-xs font-semibold uppercase tracking-wide text-teal-200 mb-2">Pro</p>
               <p className="text-3xl font-black mb-1">$49</p>
-              <p className="text-xs text-teal-200 mb-5">per month</p>
-              <Link
+              <p className="text-xs text-teal-200 mb-5">per month · Cancel anytime</p>
+              <TrackedCtaLink
                 href="/onboarding"
+                event="landing_cta_click"
+                payload={{ location: 'pricing_pro' }}
                 className="block text-center w-full py-2.5 bg-white text-teal-700 font-semibold rounded-xl hover:bg-teal-50 transition text-sm mb-5"
               >
-                Start with Pro
-              </Link>
+                Start Free, Upgrade Anytime
+              </TrackedCtaLink>
               <ul className="space-y-2 text-sm text-teal-100">
                 <li className="flex items-center gap-2"><CheckCircleIcon className="h-4 w-4 text-teal-300 shrink-0" />Everything in Free</li>
                 <li className="flex items-center gap-2"><CheckCircleIcon className="h-4 w-4 text-teal-300 shrink-0" />Unlimited reminders</li>
@@ -473,13 +505,15 @@ export default function LandingPage() {
             Answer 6 questions. Get your compliance score, risks, and policies — automatically.
             Free to start, no credit card required.
           </p>
-          <Link
+          <TrackedCtaLink
             href="/onboarding"
+            event="landing_cta_click"
+            payload={{ location: 'cta_footer' }}
             className="inline-flex items-center gap-2 px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold rounded-2xl transition shadow-lg shadow-teal-900/30"
           >
             <ShieldCheckIcon className="h-6 w-6" />
             Get compliant in 15 minutes
-          </Link>
+          </TrackedCtaLink>
           <p className="mt-4 text-xs text-gray-500">
             Free plan available. No credit card. Works for any Quebec SMB.
           </p>
