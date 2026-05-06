@@ -8,6 +8,8 @@ import {
 import type { SearchMode } from '@nzila/platform-semantic-search'
 import {
   listTrustcoreDataAssets,
+  listTrustcoreIncidents,
+  listTrustcorePias,
   listTrustcoreVendors,
 } from '@nzila/db/queries/trustcore'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
@@ -45,9 +47,11 @@ export const POST = withRequiredRole(
       return NextResponse.json({ success: false, error: 'query is required' }, { status: 400 })
     }
 
-    const [assets, vendors] = await Promise.all([
+    const [assets, vendors, pias, incidents] = await Promise.all([
       listTrustcoreDataAssets(ctx.orgId),
       listTrustcoreVendors(ctx.orgId),
+      listTrustcorePias(ctx.orgId),
+      listTrustcoreIncidents(ctx.orgId),
     ])
 
     const index = createInMemorySearchIndex()
@@ -96,6 +100,58 @@ export const POST = withRequiredRole(
           crossBorderTransfer: vendor.crossBorderTransfer,
         },
         tags: compactTags([vendor.riskLevel, vendor.country, 'vendor']),
+      })
+    }
+
+    for (const pia of pias) {
+      await indexEntity(index, {
+        tenantId: ctx.orgId,
+        entityType: 'pia',
+        entityId: pia.id,
+        title: pia.title,
+        content: [
+          pia.description,
+          pia.triggerType,
+          pia.mitigationPlan,
+          pia.reviewerName,
+          pia.status,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        metadata: {
+          module: 'pia',
+          status: pia.status,
+          riskScore: pia.riskScore,
+          triggerType: pia.triggerType,
+        },
+        tags: compactTags([pia.triggerType, pia.status, 'pia']),
+      })
+    }
+
+    for (const incident of incidents) {
+      await indexEntity(index, {
+        tenantId: ctx.orgId,
+        entityType: 'incident',
+        entityId: incident.id,
+        title: incident.title,
+        content: [
+          incident.description,
+          incident.incidentType,
+          incident.harmAssessment,
+          incident.containmentActions,
+          incident.severity,
+          incident.resolutionStatus,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        metadata: {
+          module: 'incidents',
+          severity: incident.severity,
+          resolutionStatus: incident.resolutionStatus,
+          seriousHarmLikely: incident.seriousHarmLikely,
+          incidentType: incident.incidentType,
+        },
+        tags: compactTags([incident.incidentType, incident.severity, incident.resolutionStatus, 'incident']),
       })
     }
 
