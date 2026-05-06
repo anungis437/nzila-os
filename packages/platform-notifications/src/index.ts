@@ -3,4 +3,4 @@ export {
   type SendNotificationInput,
   sendNotificationInputSchema,
   createInMemoryNotificationService,
-} from './service.js';
+} from './service';

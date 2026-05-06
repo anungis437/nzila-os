@@ -12,31 +12,31 @@ export {
   rootHashSnapshotSchema,
   verificationResultSchema,
   GENESIS_HASH,
-} from './schema.js'
+} from './schema'
 
 export {
   AuditEngine,
   computeAuditHash,
-} from './engine.js'
+} from './engine'
 
 export {
   type AuditStore,
   InMemoryAuditStore,
-} from './store.js'
+} from './store'
 
 export {
   verifyChain,
   verifyOrgChain,
-} from './verify.js'
+} from './verify'
 
 export {
   type SnapshotStore,
   InMemorySnapshotStore,
   createRootHashSnapshot,
-} from './snapshot.js'
+} from './snapshot'
 
 export {
   exportAuditLog,
   type AuditExportOptions,
   type AuditExportResult,
-} from './export.js'
+} from './export'
