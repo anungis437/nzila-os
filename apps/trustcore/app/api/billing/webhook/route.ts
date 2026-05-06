@@ -20,9 +20,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
+import { InMemoryIdempotencyStore } from '@nzila/webhooks'
 
-// In-process idempotency cache (sufficient for single-instance deployments)
-const processedEventIds = new Set<string>()
+const processedEventIds = new InMemoryIdempotencyStore()
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -56,15 +56,10 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Idempotency guard ────────────────────────────────────────────────────
-  if (processedEventIds.has(event.id)) {
+  if (await processedEventIds.has(event.id)) {
     return NextResponse.json({ received: true, duplicate: true })
   }
-  processedEventIds.add(event.id)
-  // Keep the set bounded to prevent unbounded growth in long-running instances
-  if (processedEventIds.size > 10_000) {
-    const first = processedEventIds.values().next().value
-    if (first) processedEventIds.delete(first)
-  }
+  await processedEventIds.add(event.id)
 
   // ── Event handling ───────────────────────────────────────────────────────
   try {

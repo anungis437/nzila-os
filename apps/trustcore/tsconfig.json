@@ -17,6 +17,9 @@
       "@nzila/platform-billing": ["../../packages/platform-billing/src/index.ts"],
       "@nzila/platform-notifications": ["../../packages/platform-notifications/src/index.ts"],
       "@nzila/comms-email": ["../../packages/comms-email/src/index.ts"],
+      "@nzila/platform-semantic-search": ["../../packages/platform-semantic-search/src/index.ts"],
+      "@nzila/platform-rum": ["../../packages/platform-rum/src/index.ts"],
+      "@nzila/webhooks": ["../../packages/webhooks/src/index.ts"],
       "@nzila/platform-contracts": ["../../packages/platform-contracts/src/index.ts"],
       "@nzila/platform-contracts/*": ["../../packages/platform-contracts/src/*"]
     }
