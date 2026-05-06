@@ -9,6 +9,9 @@
  */
 
 import type { OnboardingInput } from '../validation/onboarding'
+import { withNzilaSpan } from '@nzila/otel-core'
+import { evaluatePolicy, isBlocked, requiresApproval } from '@nzila/platform-policy-engine'
+import { CircuitBreaker, executeWithFallback, withTimeout } from '@nzila/ai-core'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -16,6 +19,104 @@ export interface GeneratedPolicy {
   type: 'privacy_policy' | 'data_governance'
   content: string
   version: number
+}
+
+const generatorCircuitBreaker = new CircuitBreaker({
+  failureThreshold: 3,
+  successThreshold: 1,
+  timeout: 10_000,
+})
+
+function policyGuardNotice(orgId: string, input: OnboardingInput): string {
+  const output = evaluatePolicy(
+    {
+      id: 'trustcore.policy.generator.guard',
+      name: 'TrustCore Policy Generator Guard',
+      version: '1.0.0',
+      type: 'approval',
+      description: 'Require consent review when personal data is collected',
+      enabled: true,
+      scope: {
+        resources: ['trustcore/policy-generator'],
+      },
+      rules: [
+        {
+          id: 'require-consent-review',
+          description: 'Personal data collection without explicit consent requires review',
+          conditions: [
+            { field: 'context.collectsPersonalData', operator: 'eq', value: true },
+            { field: 'context.collectsConsent', operator: 'eq', value: false },
+          ],
+          effect: 'require_approval',
+          severity: 'critical',
+          requireApprovers: 1,
+          approverRoles: ['org_admin', 'privacy_officer'],
+        },
+      ],
+      metadata: { app: 'trustcore' },
+    },
+    {
+      policyId: 'trustcore.policy.generator.guard',
+      actor: {
+        userId: 'system:policy-generator',
+        roles: ['org_admin'],
+      },
+      action: 'generate_policy',
+      resource: 'trustcore/policy-generator',
+      context: {
+        collectsPersonalData: input.step3.collectsPersonalData,
+        collectsConsent: input.step5.collectsConsent,
+      },
+      orgId,
+      environment: process.env.NODE_ENV ?? 'development',
+    },
+  )
+
+  if (isBlocked([output])) {
+    return 'Policy generation was blocked by platform policy controls.'
+  }
+
+  if (requiresApproval([output])) {
+    return 'Policy generated with platform warning: consent workflow requires legal/privacy approval before publication.'
+  }
+
+  return ''
+}
+
+async function generateWithResilience(
+  orgId: string,
+  type: GeneratedPolicy['type'],
+  generator: () => GeneratedPolicy,
+): Promise<GeneratedPolicy> {
+  try {
+    const { result } = await executeWithFallback({
+      circuitBreaker: generatorCircuitBreaker,
+      strategy: {
+        providers: ['trustcore-policy-generator'],
+        retryableErrors: ['provider_error'],
+      },
+      execute: async () => {
+        try {
+          const generated = await withTimeout(Promise.resolve(generator()), 1_500, type)
+          return { result: generated, providerUsed: 'trustcore-policy-generator' }
+        } catch (error) {
+          const wrapped = new Error(
+            error instanceof Error ? error.message : 'Policy generation failed',
+          ) as Error & { code: string }
+          wrapped.code = 'provider_error'
+          throw wrapped
+        }
+      },
+    })
+
+    return result
+  } catch {
+    return {
+      type,
+      content: `# ${type === 'privacy_policy' ? 'Privacy Policy' : 'Data Governance Policy'}\n\nPolicy generation fallback was used. Please retry generation and review manually.`,
+      version: 1,
+    }
+  }
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -81,15 +182,19 @@ function vendorSection(input: OnboardingInput): string {
 
 // ── Privacy Policy ─────────────────────────────────────────────────────────
 
-export function generatePrivacyPolicy(input: OnboardingInput): GeneratedPolicy {
-  const { orgName, province, website, industry } = input.step1
-  const { officerName, officerEmail, officerTitle } = input.step2
-  const { dataTypes, storesOutsideCanada, collectsPersonalData } = input.step3
-  const { collectsConsent, handlesDsrRequests } = input.step5
-  const siteRef = website ? `Visit our website at ${website}.` : ''
-  const date = formatDate()
+export async function generatePrivacyPolicy(input: OnboardingInput): Promise<GeneratedPolicy> {
+  const orgId = input.step1.orgName || 'trustcore-org'
+  const notice = policyGuardNotice(orgId, input)
 
-  const content = `# Privacy Policy — ${orgName}
+  const build = (): GeneratedPolicy => {
+    const { orgName, province, website, industry } = input.step1
+    const { officerName, officerEmail, officerTitle } = input.step2
+    const { dataTypes, storesOutsideCanada, collectsPersonalData } = input.step3
+    const { collectsConsent, handlesDsrRequests } = input.step5
+    const siteRef = website ? `Visit our website at ${website}.` : ''
+    const date = formatDate()
+
+    const content = `# Privacy Policy — ${orgName}
 
 **Effective Date:** ${date}
 **Last Updated:** ${date}
@@ -179,19 +284,32 @@ We may update this Privacy Policy from time to time. We will notify you of signi
 *This Privacy Policy was generated by TrustCore, a Law 25 compliance platform. It should be reviewed by qualified legal counsel before publication.*
 `
 
-  return { type: 'privacy_policy', content, version: 1 }
+    return {
+      type: 'privacy_policy',
+      content: notice ? `${content}\n\n> ${notice}` : content,
+      version: 1,
+    }
+  }
+
+  return withNzilaSpan('trustcore.policy.generate.privacy', orgId, async () => {
+    return generateWithResilience(orgId, 'privacy_policy', build)
+  })
 }
 
 // ── Data Governance Policy ─────────────────────────────────────────────────
 
-export function generateDataGovernancePolicy(input: OnboardingInput): GeneratedPolicy {
-  const { orgName, industry } = input.step1
-  const { officerName, officerEmail, officerTitle } = input.step2
-  const { dataTypes, storesOutsideCanada } = input.step3
-  const { hasIncidentProcedures } = input.step5
-  const date = formatDate()
+export async function generateDataGovernancePolicy(input: OnboardingInput): Promise<GeneratedPolicy> {
+  const orgId = input.step1.orgName || 'trustcore-org'
+  const notice = policyGuardNotice(orgId, input)
 
-  const content = `# Data Governance Policy — ${orgName}
+  const build = (): GeneratedPolicy => {
+    const { orgName, industry } = input.step1
+    const { officerName, officerEmail, officerTitle } = input.step2
+    const { dataTypes, storesOutsideCanada } = input.step3
+    const { hasIncidentProcedures } = input.step5
+    const date = formatDate()
+
+    const content = `# Data Governance Policy — ${orgName}
 
 **Effective Date:** ${date}
 **Version:** 1.0
@@ -311,5 +429,14 @@ This policy is reviewed annually or following:
 *This Data Governance Policy was generated by TrustCore. It should be reviewed and customized by qualified legal counsel before formal adoption.*
 `
 
-  return { type: 'data_governance', content, version: 1 }
+    return {
+      type: 'data_governance',
+      content: notice ? `${content}\n\n> ${notice}` : content,
+      version: 1,
+    }
+  }
+
+  return withNzilaSpan('trustcore.policy.generate.governance', orgId, async () => {
+    return generateWithResilience(orgId, 'data_governance', build)
+  })
 }

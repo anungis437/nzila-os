@@ -59,7 +59,7 @@ export const POST = withRequiredRole(
       try {
         // Dynamic import keeps Stripe out of the bundle when the key is absent
         const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+        const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
 
         const session = await stripe.checkout.sessions.create({
           mode: 'subscription',

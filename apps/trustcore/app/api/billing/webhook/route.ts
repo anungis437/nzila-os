@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   let event: import('stripe').Stripe.Event
   try {
     const { default: Stripe } = await import('stripe')
-    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err) {
     console.error('[TrustCore billing webhook] signature verification failed', err)
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
         // Fetch subscription to get metadata (orgId) and period dates
         const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+        const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
         const sub = await stripe.subscriptions.retrieve(subId)
         const orgId = sub.metadata?.orgId
         if (!orgId) break

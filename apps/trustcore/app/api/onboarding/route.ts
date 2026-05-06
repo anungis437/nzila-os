@@ -316,8 +316,10 @@ export const POST = withRequiredRole(['org_admin'], async (req: NextRequest, ctx
   }
 
   // 8. Generate and store policies
-  const privacyPolicy = generatePrivacyPolicy(input)
-  const governancePolicy = generateDataGovernancePolicy(input)
+  const [privacyPolicy, governancePolicy] = await Promise.all([
+    generatePrivacyPolicy(input),
+    generateDataGovernancePolicy(input),
+  ])
 
   const [storedPrivacy, storedGovernance] = await Promise.all([
     createTrustcorePolicy({
