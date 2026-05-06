@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
-    "next": "^16.2.3",
+    "next": "^16.2.5",
     "typescript": "^6",
     "vitest": "^4.1.2"
   }
