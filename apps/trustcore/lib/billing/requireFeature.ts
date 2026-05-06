@@ -17,11 +17,13 @@
  */
 
 import { getResolvedSubscription } from './getSubscription'
+import { getTrustcoreBillingService } from '@/lib/platform/billing'
 import {
   gateAuditExport,
   gateEvidenceExport,
   gateTrustCenter,
   gateReminderCreate,
+  TRUSTCORE_FEATURE_KEYS,
   type GateResult,
 } from './featureAccess'
 
@@ -69,6 +71,20 @@ export async function requireFeature(
   feature: GatedFeature,
   extraArg?: number,
 ): Promise<void> {
+  const billingService = getTrustcoreBillingService()
+  const entitlement = await billingService.checkEntitlement(orgId, TRUSTCORE_FEATURE_KEYS[feature])
+  if (!entitlement.active) {
+    throw new FeatureGateError({
+      allowed: false,
+      error: feature === 'reminders' ? 'limit_reached' : 'upgrade_required',
+      feature,
+      message:
+        feature === 'reminders'
+          ? 'Upgrade to Pro for unlimited reminders.'
+          : `Feature '${feature}' requires a plan upgrade.`,
+    })
+  }
+
   const subscription = await getResolvedSubscription(orgId)
 
   let result: GateResult

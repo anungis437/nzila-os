@@ -13,19 +13,26 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { hasPlatformRole, requirePlatformRoleGuard } from '@nzila/platform-auth'
+import type { PlatformRole } from '@nzila/platform-contracts'
 import { getAuthContext } from '@/lib/auth/getAuthContext'
 import type { AuthContext, Role } from '@/types/core'
 
-// ── Role hierarchy (higher index = higher privilege) ───────────────────────
-
-const ROLE_HIERARCHY: Role[] = ['auditor', 'staff', 'org_admin', 'platform_admin']
-
-function getRoleLevel(role: Role): number {
-  return ROLE_HIERARCHY.indexOf(role)
+function toPlatformRole(role: Role): PlatformRole {
+  switch (role) {
+    case 'platform_admin':
+      return 'platform_admin'
+    case 'org_admin':
+      return 'org_admin'
+    case 'staff':
+      return 'org_member'
+    case 'auditor':
+      return 'org_viewer'
+  }
 }
 
 export function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return getRoleLevel(userRole) >= getRoleLevel(minRole)
+  return hasPlatformRole(toPlatformRole(userRole), toPlatformRole(minRole))
 }
 
 // ── Server-component guard ─────────────────────────────────────────────────
@@ -41,7 +48,12 @@ export function hasMinRole(userRole: Role, minRole: Role): boolean {
 export async function requireRole(allowed: Role[]): Promise<AuthContext> {
   const ctx = await getAuthContext()
 
-  if (!allowed.includes(ctx.role)) {
+  const roleCheck = requirePlatformRoleGuard(
+    toPlatformRole(ctx.role),
+    ...allowed.map(toPlatformRole),
+  )
+
+  if (!roleCheck.ok) {
     throw new Error(
       `Forbidden: role "${ctx.role}" is not in [${allowed.join(', ')}]`,
     )
@@ -93,7 +105,12 @@ export function withRequiredRole(
       )
     }
 
-    if (!allowed.includes(ctx.role)) {
+    const roleCheck = requirePlatformRoleGuard(
+      toPlatformRole(ctx.role),
+      ...allowed.map(toPlatformRole),
+    )
+
+    if (!roleCheck.ok) {
       return NextResponse.json(
         {
           success: false,

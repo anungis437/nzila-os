@@ -21,6 +21,13 @@
 
 import type { ResolvedSubscription, Plan } from './getSubscription'
 
+export const TRUSTCORE_FEATURE_KEYS = {
+  audit_export: 'audit_export',
+  evidence_export: 'evidence_export',
+  trust_center: 'trust_center',
+  reminders: 'reminders',
+} as const
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 export const FREE_REMINDER_LIMIT = 10

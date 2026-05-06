@@ -17,6 +17,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  getTrustcoreNotificationService,
+  sendTrustcoreEmail,
+} from '@/lib/platform/notifications'
 import { z } from 'zod'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 
@@ -28,7 +32,7 @@ const NotifySchema = z.object({
 
 export const POST = withRequiredRole(
   ['platform_admin'],
-  async (req: NextRequest) => {
+  async (req: NextRequest, ctx) => {
     let body: unknown
     try {
       body = await req.json()
@@ -42,12 +46,53 @@ export const POST = withRequiredRole(
     }
 
     const { event, email, metadata } = parsed.data
+    const notificationService = getTrustcoreNotificationService()
 
-    // ── Email provider hook (log-only stub) ───────────────────────────────
-    // When a provider is connected, replace this with:
-    //   await sendEmail({ to: email, template: event, data: metadata })
-    console.info('[TrustCore notify]', { event, email, metadata, sentAt: new Date().toISOString() })
+    const content =
+      event === 'lead_captured'
+        ? {
+            title: 'New TrustCore lead captured',
+            body: 'A new TrustCore lead was captured and is ready for follow-up.',
+          }
+        : {
+            title: 'TrustCore onboarding completed without upgrade',
+            body: 'A customer completed onboarding but did not upgrade their plan.',
+          }
 
-    return NextResponse.json({ success: true, note: 'Email provider not yet configured — logged only.' })
+    await notificationService.send({
+      orgId: ctx.orgId,
+      recipientId: email,
+      title: content.title,
+      body: content.body,
+      channels: ['email'],
+      priority: 'normal',
+      metadata: {
+        event,
+        email,
+        ...(metadata ?? {}),
+      },
+    })
+
+    const emailResult = await sendTrustcoreEmail({
+      to: email,
+      subject: content.title,
+      body: `${content.body}\n\n${JSON.stringify(metadata ?? {}, null, 2)}`,
+    })
+
+    if (!emailResult.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: emailResult.error ?? 'Email delivery failed',
+        },
+        { status: emailResult.provider ? 502 : 503 },
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      provider: emailResult.provider,
+      providerMessageId: emailResult.providerMessageId ?? null,
+    })
   },
 )

@@ -8,6 +8,8 @@
  */
 
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
+import { GENESIS_HASH, computeAuditHash } from '@nzila/audit'
+import { computeMerkleRoot, generateSeal } from '@nzila/evidence'
 import type { AuditAction, AuditEvent } from '@/types/core'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -51,8 +53,37 @@ export async function logEvent(input: LogEventInput): Promise<AuditEvent> {
     occurredAt: row.createdAt.toISOString(),
   }
 
+  const hashPayload = {
+    id: event.id,
+    timestamp: event.occurredAt,
+    actorId: event.actorId,
+    orgId: event.orgId,
+    action: event.action,
+    resource: event.entityType,
+    resourceId: event.entityId,
+    payload: event.metadata ?? {},
+  }
+  const hash = computeAuditHash(GENESIS_HASH, hashPayload)
+  const merkleRoot = computeMerkleRoot([hash])
+  const seal = generateSeal({
+    artifacts: [{ sha256: hash }],
+    eventId: event.id,
+    orgId: event.orgId,
+    merkleRoot,
+  })
+
   // Structured log — captured by platform aggregator.
-  console.log(JSON.stringify({ level: 'audit', ...event }))
+  console.log(
+    JSON.stringify({
+      level: 'audit',
+      ...event,
+      integrity: {
+        hash,
+        merkleRoot,
+        seal,
+      },
+    }),
+  )
 
   return event
 }

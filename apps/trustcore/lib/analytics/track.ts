@@ -23,6 +23,17 @@ export type AnalyticsEvent =
 
 export type EventPayload = Record<string, string | number | boolean | null | undefined>
 
+function postAnalytics(entry: Record<string, unknown>): void {
+  fetch('/api/analytics', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+    keepalive: true,
+  }).catch(() => {
+    // silently ignore — tracking must never block or error the UI
+  })
+}
+
 /**
  * Fire an analytics event.
  *
@@ -41,18 +52,9 @@ export function trackEvent(event: AnalyticsEvent, payload?: EventPayload): void 
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.log('[TrustCore Analytics]', entry)
-      return
     }
 
-    // In production — fire-and-forget POST (no await, no error surfacing)
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
-      keepalive: true,
-    }).catch(() => {
-      // silently ignore — tracking must never block or error the UI
-    })
+    postAnalytics(entry)
   } catch {
     // silently ignore
   }

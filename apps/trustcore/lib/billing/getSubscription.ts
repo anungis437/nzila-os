@@ -8,7 +8,7 @@
  * feature gating in TrustCore.
  */
 
-import { getTrustcoreSubscription } from '@nzila/db/queries/trustcore'
+import { getTrustcoreBillingService } from '@/lib/platform/billing'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -45,18 +45,23 @@ const FREE_FALLBACK: ResolvedSubscription = {
 export async function getResolvedSubscription(
   orgId: string,
 ): Promise<ResolvedSubscription> {
-  const record = await getTrustcoreSubscription(orgId)
+  const record = await getTrustcoreBillingService().getSubscription(orgId)
 
   if (!record) return FREE_FALLBACK
 
   const isActive = record.status === 'active' || record.status === 'trialing'
 
   return {
-    plan: record.plan as Plan,
+    plan:
+      record.plan === 'professional'
+        ? 'pro'
+        : record.plan === 'enterprise' || record.plan === 'custom'
+          ? 'premium'
+          : 'free',
     status: record.status as SubscriptionStatus,
     isActive,
-    stripeCustomerId: record.stripeCustomerId ?? null,
-    stripeSubscriptionId: record.stripeSubscriptionId ?? null,
-    currentPeriodEnd: record.currentPeriodEnd ?? null,
+    stripeCustomerId: null,
+    stripeSubscriptionId: record.externalId ?? null,
+    currentPeriodEnd: record.currentPeriodEnd ? new Date(record.currentPeriodEnd) : null,
   }
 }
