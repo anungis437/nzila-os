@@ -13,20 +13,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { listTrustcoreEvidenceEvents } from '@nzila/db/queries/trustcore'
-import { getResolvedSubscription } from '@/lib/billing/getSubscription'
-import { gateEvidenceExport } from '@/lib/billing/featureAccess'
+import { requireFeature, FeatureGateError } from '@/lib/billing/requireFeature'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'platform_admin'],
   async (_request: NextRequest, ctx) => {
     // ── Billing gate ──────────────────────────────────────────────────────
-    const subscription = await getResolvedSubscription(ctx.orgId)
-    const gate = gateEvidenceExport(subscription)
-    if (!gate.allowed) {
-      return NextResponse.json(
-        { success: false, error: gate.error, feature: gate.feature, message: gate.message },
-        { status: 403 },
-      )
+    try {
+      await requireFeature(ctx.orgId, 'evidence_export')
+    } catch (err) {
+      if (err instanceof FeatureGateError) {
+        return NextResponse.json(err.toResponse(), { status: 403 })
+      }
+      throw err
     }
 
     const events = await listTrustcoreEvidenceEvents(ctx.orgId)

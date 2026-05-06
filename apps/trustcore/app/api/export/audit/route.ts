@@ -17,20 +17,19 @@ import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { generateComplianceReport } from '@/lib/compliance/report'
 import { listTrustcoreEvidenceEvents } from '@nzila/db/queries/trustcore'
 import { generateAuditPdf } from '@/lib/compliance/pdf'
-import { getResolvedSubscription } from '@/lib/billing/getSubscription'
-import { gateAuditExport } from '@/lib/billing/featureAccess'
+import { requireFeature, FeatureGateError } from '@/lib/billing/requireFeature'
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
   async (request: NextRequest, ctx) => {
     // ── Billing gate ──────────────────────────────────────────────────────
-    const subscription = await getResolvedSubscription(ctx.orgId)
-    const gate = gateAuditExport(subscription)
-    if (!gate.allowed) {
-      return NextResponse.json(
-        { success: false, error: gate.error, feature: gate.feature, message: gate.message },
-        { status: 403 },
-      )
+    try {
+      await requireFeature(ctx.orgId, 'audit_export')
+    } catch (err) {
+      if (err instanceof FeatureGateError) {
+        return NextResponse.json(err.toResponse(), { status: 403 })
+      }
+      throw err
     }
 
     let format: 'json' | 'pdf' = 'json'

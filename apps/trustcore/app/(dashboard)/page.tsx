@@ -5,7 +5,7 @@
  */
 
 import { getAuthContext } from '@/lib/auth/getAuthContext'
-import { getTrustcoreDashboardSummary, listTrustcoreReminders } from '@nzila/db/queries/trustcore'
+import { getTrustcoreDashboardSummary, listTrustcoreReminders, listComplianceSnapshots } from '@nzila/db/queries/trustcore'
 import { generateTrustcoreReminders } from '@/lib/reminders/engine'
 import { getResolvedSubscription } from '@/lib/billing/getSubscription'
 import { canExportAudit, canExportEvidence, canAccessTrustCenter } from '@/lib/billing/featureAccess'
@@ -20,8 +20,11 @@ import {
   GlobeAltIcon,
   BoltIcon,
   LockClosedIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  MinusIcon,
 } from '@heroicons/react/24/outline'
-import type { TrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
+import type { TrustcoreDashboardSummary, TrustcoreComplianceSnapshot } from '@nzila/db/queries/trustcore'
 import { ActionCenter } from '@/components/reminders/ActionCenter'
 import { FreePlanBanner } from '@/components/billing/FreePlanBanner'
 
@@ -114,6 +117,78 @@ function ExportButton({
   )
 }
 
+// ── Compliance History widget ──────────────────────────────────────────────
+
+const STATUS_DOT: Record<string, string> = {
+  'compliant': 'bg-green-500',
+  'partially-compliant': 'bg-yellow-400',
+  'non-compliant': 'bg-red-500',
+  'unknown': 'bg-gray-300',
+}
+
+function ComplianceHistory({ snapshots }: { snapshots: TrustcoreComplianceSnapshot[] }) {
+  if (snapshots.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-8">
+        <div className="flex items-center gap-2 mb-3">
+          <ClipboardDocumentCheckIcon className="h-4 w-4 text-indigo-500" />
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Compliance History</h2>
+        </div>
+        <p className="text-xs text-gray-400">No snapshots yet. Run a compliance check to start tracking.</p>
+      </div>
+    )
+  }
+
+  const latest = snapshots[0]!
+  const previous = snapshots[1]
+  const trend = !previous
+    ? 'stable'
+    : latest.score > previous.score
+    ? 'up'
+    : latest.score < previous.score
+    ? 'down'
+    : 'stable'
+
+  const TrendIcon =
+    trend === 'up' ? ArrowTrendingUpIcon : trend === 'down' ? ArrowTrendingDownIcon : MinusIcon
+  const trendColor =
+    trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-500' : 'text-gray-400'
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ClipboardDocumentCheckIcon className="h-4 w-4 text-indigo-500" />
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Compliance History</h2>
+        </div>
+        <div className={`flex items-center gap-1 text-xs font-medium ${trendColor}`}>
+          <TrendIcon className="h-4 w-4" />
+          {trend === 'up' ? 'Improving' : trend === 'down' ? 'Declining' : 'Stable'}
+        </div>
+      </div>
+      <div className="space-y-2">
+        {snapshots.slice(0, 3).map((s, i) => (
+          <div key={s.id} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+            <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${STATUS_DOT[s.status] ?? STATUS_DOT.unknown}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 truncate">
+                {s.createdAt?.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) ?? '—'}
+                <span className="ml-2 text-gray-400">{s.triggeredBy}</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className={`text-sm font-bold ${i === 0 ? 'text-gray-900' : 'text-gray-500'}`}>
+                {s.score}
+              </span>
+              <span className="text-xs text-gray-400">/ 100</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
@@ -125,10 +200,11 @@ export default async function DashboardPage() {
     // Non-fatal: if reminder generation fails, dashboard still loads
   })
 
-  const [summary, reminders, subscription] = await Promise.all([
+  const [summary, reminders, subscription, recentSnapshots] = await Promise.all([
     getTrustcoreDashboardSummary(ctx.orgId),
     listTrustcoreReminders(ctx.orgId),
     getResolvedSubscription(ctx.orgId),
+    listComplianceSnapshots(ctx.orgId, 3),
   ])
 
   const canAct = ctx.role === 'org_admin' || ctx.role === 'staff' || ctx.role === 'platform_admin'
@@ -220,6 +296,9 @@ export default async function DashboardPage() {
           />
         </div>
       </div>
+
+      {/* Compliance History */}
+      <ComplianceHistory snapshots={recentSnapshots} />
 
       {/* Action Center */}
       <div>

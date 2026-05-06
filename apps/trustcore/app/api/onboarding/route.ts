@@ -32,6 +32,7 @@ import {
   createComplianceSnapshot,
   createTrustcoreEvidenceEvent,
 } from '@nzila/db/queries/trustcore'
+import { generateTrustcoreReminders } from '@/lib/reminders/engine'
 import type { OnboardingInput, KnownVendor } from '@/lib/validation/onboarding'
 
 // ── Vendor seed catalogue ──────────────────────────────────────────────────
@@ -235,6 +236,31 @@ export const POST = withRequiredRole(['org_admin'], async (req: NextRequest, ctx
     }
   }
 
+  // Always ensure ≥2 data assets for a meaningful compliance posture.
+  // If no personal data types were selected, seed the two most common defaults.
+  if (assetIds.length < 2) {
+    const defaults: (keyof typeof DATA_TYPE_ASSET_MAP)[] = ['contact', 'employee']
+    for (const dtype of defaults) {
+      if (assetIds.length >= 2) break
+      const seed = DATA_TYPE_ASSET_MAP[dtype]
+      if (!seed) continue
+      const asset = await createTrustcoreDataAsset({
+        orgId,
+        name: seed.name,
+        description: seed.description,
+        dataCategory: seed.dataCategory,
+        sensitivityLevel: seed.sensitivityLevel,
+        processingPurpose: seed.processingPurpose,
+        lawfulBasisOrConsentBasis: 'Legitimate interest',
+        crossBorderTransfer: false,
+        destinationCountry: null,
+        status: 'active',
+      })
+      assetIds.push(asset.id)
+      createdIds.push(asset.id)
+    }
+  }
+
   // 6. Seed vendors
   const vendorIds: string[] = []
   if (input.step4.usesThirdPartyTools) {
@@ -373,6 +399,10 @@ export const POST = withRequiredRole(['org_admin'], async (req: NextRequest, ctx
       initialScore: evaluation.score,
     },
   })
+
+  // 11. Run reminder engine to generate initial Law 25 obligation reminders.
+  //     Non-fatal: if reminder generation fails, onboarding is still complete.
+  await generateTrustcoreReminders(orgId).catch(() => {})
 
   return NextResponse.json({
     success: true,

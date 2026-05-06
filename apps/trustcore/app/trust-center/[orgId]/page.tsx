@@ -23,9 +23,8 @@ import {
   LockClosedIcon,
 } from '@heroicons/react/24/outline'
 import { evaluateCompliance } from '@/lib/compliance/engine'
-import { listTrustcorePrivacyPrograms } from '@nzila/db/queries/trustcore'
-import { getResolvedSubscription } from '@/lib/billing/getSubscription'
-import { gateTrustCenter } from '@/lib/billing/featureAccess'
+import { listTrustcorePrivacyPrograms, getLatestComplianceSnapshot } from '@nzila/db/queries/trustcore'
+import { requireFeature, FeatureGateError } from '@/lib/billing/requireFeature'
 import type { ComplianceEvaluation } from '@/types/core'
 
 export const dynamic = 'force-dynamic'
@@ -72,9 +71,17 @@ export default async function TrustCenterPage({
   const { orgId } = await params
 
   // ── Billing gate (server-side) ────────────────────────────────────────────
-  const subscription = await getResolvedSubscription(orgId)
-  const gate = gateTrustCenter(subscription)
-  if (!gate.allowed) {
+  let gateBlocked = false
+  try {
+    await requireFeature(orgId, 'trust_center')
+  } catch (err) {
+    if (err instanceof FeatureGateError) {
+      gateBlocked = true
+    } else {
+      throw err
+    }
+  }
+  if (gateBlocked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="max-w-md text-center">
@@ -88,32 +95,34 @@ export default async function TrustCenterPage({
     )
   }
 
-  // Fetch evaluation and privacy program in parallel
-  const [evaluation, programs] = await Promise.all([
+  // Fetch evaluation, privacy program, and latest snapshot in parallel
+  const [evaluation, programs, latestSnapshot] = await Promise.all([
     evaluateCompliance(orgId),
     listTrustcorePrivacyPrograms(orgId),
+    getLatestComplianceSnapshot(orgId),
   ])
 
   const activeProgram = programs.find((p) => p.status === 'active') ?? null
   const controls = derivePublicControls(evaluation)
   const StatusIcon = STATUS_ICON[evaluation.status]
+  const lastEvaluated = latestSnapshot?.createdAt ?? new Date(evaluation.evaluatedAt)
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-3">
-          <ShieldCheckIcon className="h-7 w-7 text-teal-600" />
+      <header className="bg-white border-b border-gray-200 px-6 py-5">
+        <div className="max-w-4xl mx-auto flex items-center gap-4">
+          <ShieldCheckIcon className="h-8 w-8 text-teal-600 shrink-0" />
           <div>
-            <h1 className="text-lg font-bold text-gray-900">TrustCore — Trust Center</h1>
-            <p className="text-xs text-gray-500">Law 25 (Quebec) Compliance Transparency</p>
+            <h1 className="text-xl font-bold text-gray-900">Trust Center</h1>
+            <p className="text-sm text-gray-500">Law 25 (Quebec) Compliance Status — powered by TrustCore</p>
           </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
 
-        {/* Org identity */}
+        {/* Org identity + scope */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-4">
             <BuildingOffice2Icon className="h-5 w-5 text-gray-400" />
@@ -122,8 +131,16 @@ export default async function TrustCenterPage({
           <p className="text-sm text-gray-700">
             Organisation ID: <span className="font-mono text-gray-900">{orgId}</span>
           </p>
-          <p className="text-xs text-gray-400 mt-2">
-            Last evaluated: {new Date(evaluation.evaluatedAt).toLocaleString()}
+          <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+            This organisation&apos;s privacy compliance is assessed against the requirements of
+            Quebec&apos;s <strong>Law 25</strong> (<em>An Act to modernize legislative provisions as
+            regards the protection of personal information</em>). This page is published
+            voluntarily for transparency with customers, partners, and procurement teams.
+          </p>
+          <p className="text-xs text-gray-400 mt-3">
+            Last evaluated: <span className="font-medium text-gray-500">
+              {lastEvaluated.toLocaleString('en-CA', { dateStyle: 'long', timeStyle: 'short' })}
+            </span>
           </p>
         </div>
 
@@ -131,11 +148,11 @@ export default async function TrustCenterPage({
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
             <StatusIcon className="h-5 w-5 text-gray-400" />
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Compliance Status</h2>
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Law 25 Compliance Status</h2>
           </div>
 
           <div className="flex items-center gap-5">
-            {/* Score */}
+            {/* Score ring */}
             <div className="flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 border-gray-100 bg-gray-50 shrink-0">
               <span className="text-3xl font-black text-gray-900">{evaluation.score}</span>
               <span className="text-xs text-gray-400">/ 100</span>
@@ -146,10 +163,13 @@ export default async function TrustCenterPage({
                 {evaluation.status.replace('-', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
               </span>
               <p className="text-xs text-gray-500 mt-2">
-                Score confidence: {evaluation.confidence}%
+                Assessment confidence: {evaluation.confidence}%
                 {evaluation.confidence < 60 && (
-                  <span className="ml-2 text-yellow-600 font-medium">(Low — not all modules populated)</span>
+                  <span className="ml-2 text-yellow-600 font-medium">(Partial — not all modules populated)</span>
                 )}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Score reflects active risk deductions across governance, data, PIAs, incidents, DSR, and vendors.
               </p>
             </div>
           </div>
@@ -176,7 +196,7 @@ export default async function TrustCenterPage({
           </div>
         </div>
 
-        {/* Practices */}
+        {/* Privacy Practices */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-5">
             <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
@@ -185,20 +205,40 @@ export default async function TrustCenterPage({
 
           <div className="space-y-3 text-sm text-gray-700">
             <p>
-              <span className="font-medium">Framework:</span> Quebec Law 25 (An Act to modernize legislative provisions as regards the protection of personal information)
+              <span className="font-medium">Regulatory Framework:</span>{' '}
+              Quebec Law 25 (An Act to modernize legislative provisions as regards the protection of personal information)
             </p>
             <p>
-              <span className="font-medium">Incident Response:</span> This organisation maintains an incident response procedure and logs all privacy incidents.
+              <span className="font-medium">Incident Response:</span>{' '}
+              This organisation maintains a formal incident response procedure. All privacy incidents are logged, triaged, and reported to the Commission d&apos;accès à l&apos;information (CAI) where required by law.
             </p>
             <p>
-              <span className="font-medium">Data Subject Rights:</span> Requests for access, correction, deletion, and portability are processed within the 30-day statutory window.
+              <span className="font-medium">Data Subject Rights:</span>{' '}
+              Requests for access, rectification, deletion, and portability are accepted and processed within the 30-day statutory window under Law 25.
             </p>
             <p>
-              <span className="font-medium">Vendor Management:</span> Third-party processors are assessed for risk and contractually bound to data protection obligations.
+              <span className="font-medium">Vendor Management:</span>{' '}
+              All third-party processors are assessed for risk and contractually bound to data protection obligations before access to personal information is granted.
             </p>
             <p>
-              <span className="font-medium">Audit Logging:</span> All compliance actions are recorded with immutable timestamps and actor attribution.
+              <span className="font-medium">Data Retention:</span>{' '}
+              Personal information is retained only as long as necessary for the stated purpose and then securely destroyed or anonymized.
             </p>
+          </div>
+        </div>
+
+        {/* Audit Statement */}
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-5">
+          <div className="flex items-start gap-3">
+            <ShieldCheckIcon className="h-5 w-5 text-teal-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-teal-800 mb-1">Immutable Audit Log</p>
+              <p className="text-sm text-teal-700 leading-relaxed">
+                This organisation maintains an immutable audit log of all compliance-related actions.
+                Every change is recorded with a timestamp, actor attribution, and action summary.
+                Evidence is available upon request to verified auditors or regulatory bodies.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -209,25 +249,31 @@ export default async function TrustCenterPage({
               <UserIcon className="h-5 w-5 text-gray-400" />
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Privacy Officer Contact</h2>
             </div>
-            <p className="text-sm text-gray-700">
-              For privacy inquiries, please contact our designated Privacy Officer:
+            <p className="text-sm text-gray-600 mb-3">
+              For privacy inquiries, data subject rights requests, or questions about this organisation&apos;s
+              compliance program, please contact the designated Privacy Officer:
             </p>
-            <p className="mt-2">
-              <a
-                href={`mailto:${activeProgram.privacyOfficerEmail}`}
-                className="text-teal-600 hover:text-teal-700 font-medium text-sm underline"
-              >
-                {activeProgram.privacyOfficerEmail}
-              </a>
-            </p>
+            {activeProgram.privacyOfficerName && (
+              <p className="text-sm font-medium text-gray-900">{activeProgram.privacyOfficerName}</p>
+            )}
+            {activeProgram.privacyOfficerRole && (
+              <p className="text-xs text-gray-500 mb-1">{activeProgram.privacyOfficerRole}</p>
+            )}
+            <a
+              href={`mailto:${activeProgram.privacyOfficerEmail}`}
+              className="text-teal-600 hover:text-teal-700 font-medium text-sm underline"
+            >
+              {activeProgram.privacyOfficerEmail}
+            </a>
           </div>
         )}
 
         {/* Footer */}
-        <div className="text-center">
+        <div className="text-center pt-2">
           <p className="text-xs text-gray-400">
-            This Trust Center page is auto-generated by TrustCore. Data reflects the compliance posture as of the last evaluation.
-            It is provided for transparency purposes and does not constitute a legal compliance certification.
+            This Trust Center page is auto-generated by TrustCore and reflects the compliance posture as of the
+            last evaluation. It is provided for transparency purposes and does not constitute a legal compliance
+            certification. Last assessed: {lastEvaluated.toLocaleDateString('en-CA')}.
           </p>
         </div>
       </main>
