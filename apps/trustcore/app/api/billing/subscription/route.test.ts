@@ -52,7 +52,7 @@ describe('GET /api/billing/subscription', () => {
     vi.clearAllMocks()
     vi.resetModules()
     mocks.withRequiredRole.mockImplementation(
-      (_roles: unknown, handler: Function) =>
+      (_roles: unknown, handler: (...args: unknown[]) => unknown) =>
         (request: NextRequest) =>
           handler(request, fakeCtx),
     )

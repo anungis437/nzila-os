@@ -53,7 +53,7 @@ function makeRequest(body: unknown): NextRequest {
 // ── Helpers ───────────────────────────────────────────────────────────────
 function setupWithRequiredRole() {
   mocks.withRequiredRole.mockImplementation(
-    (_roles: unknown, handler: Function) =>
+    (_roles: unknown, handler: (...args: unknown[]) => unknown) =>
       (request: NextRequest) =>
         handler(request, fakeCtx),
   )
@@ -66,7 +66,7 @@ describe('POST /api/ai/policies', () => {
     setupWithRequiredRole()
     mocks.decideAccess.mockReturnValue({ allowed: true, reason: 'ok', requiresBreakGlass: false })
     mocks.createAuditEvent.mockReturnValue({ eventId: 'audit_1' })
-    mocks.withNzilaSpan.mockImplementation((_name: string, _orgId: string, fn: Function) => fn())
+    mocks.withNzilaSpan.mockImplementation((_name: string, _orgId: string, fn: () => unknown) => fn())
     mocks.generatePrivacyPolicy.mockResolvedValue({ title: 'Privacy Policy' })
     mocks.generateDataGovernancePolicy.mockResolvedValue({ title: 'Data Governance Policy' })
   })
@@ -139,7 +139,6 @@ describe('POST /api/ai/policies', () => {
     const { POST } = await import('./route')
     const req = makeRequest({ input: validInput }) // no mode
     const res = await POST(req)
-    const body = await res.json()
     expect(res.status).toBe(200)
     expect(mocks.generatePrivacyPolicy).toHaveBeenCalledOnce()
     expect(mocks.generateDataGovernancePolicy).toHaveBeenCalledOnce()

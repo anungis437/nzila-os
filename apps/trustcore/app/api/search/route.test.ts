@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { NextRequest } from 'next/server'
 
 const mocks = vi.hoisted(() => ({
   withRequiredRole: vi.fn(),
@@ -32,8 +33,8 @@ vi.mock('@nzila/platform-semantic-search', () => ({
 const fakeCtx = { userId: 'user_1', orgId: 'org_1', role: 'org_admin' as const }
 const fakeIndex = {}
 
-function makeRequest(body: unknown): Request {
-  return new Request('http://localhost/api/search', {
+function makeRequest(body: unknown): NextRequest {
+  return new NextRequest('http://localhost/api/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -44,8 +45,8 @@ describe('POST /api/search', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.withRequiredRole.mockImplementation(
-      (_roles: unknown, handler: Function) =>
-        (request: Request) =>
+      (_roles: unknown, handler: (...args: unknown[]) => unknown) =>
+        (request: NextRequest) =>
           handler(request, fakeCtx),
     )
     mocks.listTrustcoreDataAssets.mockResolvedValue([])
@@ -59,7 +60,7 @@ describe('POST /api/search', () => {
 
   it('returns 400 when query is missing', async () => {
     const { POST } = await import('./route')
-    const res = await POST(makeRequest({ query: '' }) as any)
+    const res = await POST(makeRequest({ query: '' }))
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.success).toBe(false)
@@ -68,13 +69,13 @@ describe('POST /api/search', () => {
 
   it('returns 400 when body has no query field', async () => {
     const { POST } = await import('./route')
-    const res = await POST(makeRequest({}) as any)
+    const res = await POST(makeRequest({}))
     expect(res.status).toBe(400)
   })
 
   it('calls all 4 list functions with orgId', async () => {
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'health data' }) as any)
+    await POST(makeRequest({ query: 'health data' }))
     expect(mocks.listTrustcoreDataAssets).toHaveBeenCalledWith('org_1')
     expect(mocks.listTrustcoreVendors).toHaveBeenCalledWith('org_1')
     expect(mocks.listTrustcorePias).toHaveBeenCalledWith('org_1')
@@ -83,7 +84,7 @@ describe('POST /api/search', () => {
 
   it('calls searchEntities with query, orgId, and defaults', async () => {
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'health data' }) as any)
+    await POST(makeRequest({ query: 'health data' }))
     expect(mocks.searchEntities).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({
@@ -97,7 +98,7 @@ describe('POST /api/search', () => {
 
   it('respects explicit mode and limit', async () => {
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'vendor risk', mode: 'semantic', limit: 5 }) as any)
+    await POST(makeRequest({ query: 'vendor risk', mode: 'semantic', limit: 5 }))
     expect(mocks.searchEntities).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({ mode: 'semantic', limit: 5 }),
@@ -106,7 +107,7 @@ describe('POST /api/search', () => {
 
   it('clamps limit to [1, 20]', async () => {
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'test', limit: 999 }) as any)
+    await POST(makeRequest({ query: 'test', limit: 999 }))
     expect(mocks.searchEntities).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({ limit: 20 }),
@@ -117,7 +118,7 @@ describe('POST /api/search', () => {
     const results = [{ entityId: 'a1', score: 0.9 }]
     mocks.searchEntities.mockResolvedValue(results)
     const { POST } = await import('./route')
-    const res = await POST(makeRequest({ query: 'patient' }) as any)
+    const res = await POST(makeRequest({ query: 'patient' }))
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
@@ -138,7 +139,7 @@ describe('POST /api/search', () => {
       },
     ])
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'PHI' }) as any)
+    await POST(makeRequest({ query: 'PHI' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({
@@ -162,7 +163,7 @@ describe('POST /api/search', () => {
       },
     ])
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'AWS' }) as any)
+    await POST(makeRequest({ query: 'AWS' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({ entityType: 'vendor', entityId: 'v1' }),
@@ -183,7 +184,7 @@ describe('POST /api/search', () => {
       },
     ])
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'assessment' }) as any)
+    await POST(makeRequest({ query: 'assessment' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({ entityType: 'pia', entityId: 'pia1' }),
@@ -205,7 +206,7 @@ describe('POST /api/search', () => {
       },
     ])
     const { POST } = await import('./route')
-    await POST(makeRequest({ query: 'breach' }) as any)
+    await POST(makeRequest({ query: 'breach' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
       expect.objectContaining({ entityType: 'incident', entityId: 'inc1' }),
