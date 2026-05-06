@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   meetsRoleRequirement,
   type PlatformRole,
-} from './role.js'
+} from './role'
 
 describe('meetsRoleRequirement', () => {
   it('app_owner meets any role', () => {

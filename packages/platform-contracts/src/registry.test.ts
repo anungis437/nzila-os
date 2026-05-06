@@ -7,7 +7,7 @@ import {
   getAppsWithCapability,
   getProductionApps,
   validateBuiltInRegistry,
-} from './registry.js'
+} from './registry'
 
 describe('APP_REGISTRY', () => {
   it('contains all 23 apps', () => {

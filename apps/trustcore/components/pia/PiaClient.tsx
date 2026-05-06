@@ -12,6 +12,7 @@ import { DocumentMagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outli
 import { FormModal } from '@/components/shared/FormModal'
 import { FormBuilder, Field, inputCls, selectCls } from '@/components/shared/form-builder'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { RecordExplorer } from '@/components/shared/RecordExplorer'
 import type { TrustcorePia } from '@nzila/db/queries/trustcore'
 import type { Role } from '@/types/core'
 
@@ -144,33 +145,81 @@ export function PiaClient({ records, role }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Title', 'Trigger', 'Risk Score', 'Status', 'Reviewer', 'Created'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.title}</td>
-                  <td className="px-4 py-3 text-gray-500">{TRIGGER_LABELS[r.triggerType] ?? r.triggerType}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.riskScore ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
-                      {r.status.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{r.reviewerName ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{r.createdAt.toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordExplorer
+          records={records}
+          rowKey={(r) => r.id}
+          searchPlaceholder="Search PIAs by title, trigger, reviewer, or status..."
+          searchText={(r) => `${r.title} ${r.triggerType} ${r.status} ${r.reviewerName ?? ''}`}
+          filters={[
+            {
+              id: 'trigger',
+              label: 'Trigger',
+              options: Object.entries(TRIGGER_LABELS).map(([value, label]) => ({ value, label })),
+              matches: (r, v) => r.triggerType === v,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              options: Object.keys(STATUS_STYLES).map((value) => ({ value, label: value.replace(/_/g, ' ') })),
+              matches: (r, v) => r.status === v,
+            },
+          ]}
+          columns={[
+            {
+              id: 'title',
+              label: 'Title',
+              sortValue: (r) => r.title,
+              render: (r) => <span className="font-medium text-gray-900">{r.title}</span>,
+            },
+            {
+              id: 'trigger',
+              label: 'Trigger',
+              sortValue: (r) => r.triggerType,
+              render: (r) => <span className="text-gray-500">{TRIGGER_LABELS[r.triggerType] ?? r.triggerType}</span>,
+            },
+            {
+              id: 'risk',
+              label: 'Risk Score',
+              sortValue: (r) => r.riskScore ?? -1,
+              render: (r) => <span className="text-gray-500">{r.riskScore ?? '—'}</span>,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              sortValue: (r) => r.status,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
+                  {r.status.replace(/_/g, ' ')}
+                </span>
+              ),
+            },
+            {
+              id: 'reviewer',
+              label: 'Reviewer',
+              sortValue: (r) => r.reviewerName ?? '',
+              render: (r) => <span className="text-gray-500">{r.reviewerName ?? '—'}</span>,
+            },
+            {
+              id: 'created',
+              label: 'Created',
+              sortValue: (r) => r.createdAt,
+              render: (r) => <span className="text-gray-400 text-xs">{r.createdAt.toLocaleDateString()}</span>,
+            },
+          ]}
+          drillDownTitle={(r) => `PIA: ${r.title}`}
+          renderDrillDown={(r) => (
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Trigger</p><p>{TRIGGER_LABELS[r.triggerType] ?? r.triggerType}</p></div>
+              <div><p className="text-xs text-gray-500">Status</p><p>{r.status.replace(/_/g, ' ')}</p></div>
+              <div><p className="text-xs text-gray-500">Risk score</p><p>{r.riskScore ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Reviewer</p><p>{r.reviewerName ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Approved at</p><p>{r.approvedAt ? r.approvedAt.toLocaleString() : '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Created</p><p>{r.createdAt.toLocaleString()}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Description</p><p>{r.description ?? '—'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Mitigation plan</p><p>{r.mitigationPlan ?? '—'}</p></div>
+            </div>
+          )}
+        />
       )}
 
       <FormModal open={open} onClose={() => { setOpen(false); setSubmitError(null) }} title="Create PIA">
@@ -179,7 +228,7 @@ export function PiaClient({ records, role }: Props) {
             <input type="text" className={inputCls} value={values.title} onChange={(e) => set('title', e.target.value)} placeholder="e.g. New CRM System PIA" />
           </Field>
           <Field label="Trigger Type" error={errors.triggerType} required>
-            <select className={selectCls} value={values.triggerType} onChange={(e) => set('triggerType', e.target.value)}>
+            <select aria-label="Trigger type" className={selectCls} value={values.triggerType} onChange={(e) => set('triggerType', e.target.value)}>
               {Object.entries(TRIGGER_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </Field>

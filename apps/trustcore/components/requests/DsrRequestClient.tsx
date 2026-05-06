@@ -12,6 +12,7 @@ import { InboxArrowDownIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { FormModal } from '@/components/shared/FormModal'
 import { FormBuilder, Field, inputCls, selectCls } from '@/components/shared/form-builder'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { RecordExplorer } from '@/components/shared/RecordExplorer'
 import type { TrustcoreDsrRequest } from '@nzila/db/queries/trustcore'
 import type { Role } from '@/types/core'
 
@@ -139,33 +140,82 @@ export function DsrRequestClient({ records, role }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Requester', 'Email', 'Type', 'Due', 'Identity Verified', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.requesterName}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.requesterEmail}</td>
-                  <td className="px-4 py-3 text-gray-500">{REQUEST_TYPE_LABELS[r.requestType] ?? r.requestType}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.dueAt.toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.identityVerified ? <span className="text-green-600">✓ Verified</span> : <span className="text-gray-400">Pending</span>}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
-                      {r.status.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordExplorer
+          records={records}
+          rowKey={(r) => r.id}
+          searchPlaceholder="Search requester, email, or request type..."
+          searchText={(r) => `${r.requesterName} ${r.requesterEmail} ${r.requestType} ${r.status}`}
+          filters={[
+            {
+              id: 'type',
+              label: 'Type',
+              options: Object.entries(REQUEST_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+              matches: (r, v) => r.requestType === v,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              options: Object.keys(STATUS_STYLES).map((value) => ({ value, label: value.replace(/_/g, ' ') })),
+              matches: (r, v) => r.status === v,
+            },
+          ]}
+          columns={[
+            {
+              id: 'requester',
+              label: 'Requester',
+              sortValue: (r) => r.requesterName,
+              render: (r) => <span className="font-medium text-gray-900">{r.requesterName}</span>,
+            },
+            {
+              id: 'email',
+              label: 'Email',
+              sortValue: (r) => r.requesterEmail,
+              render: (r) => <span className="text-gray-500">{r.requesterEmail}</span>,
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              sortValue: (r) => r.requestType,
+              render: (r) => <span className="text-gray-500">{REQUEST_TYPE_LABELS[r.requestType] ?? r.requestType}</span>,
+            },
+            {
+              id: 'due',
+              label: 'Due',
+              sortValue: (r) => r.dueAt,
+              render: (r) => <span className="text-gray-500">{r.dueAt.toLocaleDateString()}</span>,
+            },
+            {
+              id: 'identity',
+              label: 'Identity Verified',
+              sortValue: (r) => r.identityVerified,
+              render: (r) =>
+                r.identityVerified ? <span className="text-green-600">Verified</span> : <span className="text-gray-400">Pending</span>,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              sortValue: (r) => r.status,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
+                  {r.status.replace(/_/g, ' ')}
+                </span>
+              ),
+            },
+          ]}
+          drillDownTitle={(r) => `DSR Request: ${r.requesterName}`}
+          renderDrillDown={(r) => (
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Requester</p><p>{r.requesterName}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p>{r.requesterEmail}</p></div>
+              <div><p className="text-xs text-gray-500">Type</p><p>{REQUEST_TYPE_LABELS[r.requestType] ?? r.requestType}</p></div>
+              <div><p className="text-xs text-gray-500">Status</p><p>{r.status.replace(/_/g, ' ')}</p></div>
+              <div><p className="text-xs text-gray-500">Received</p><p>{r.receivedAt.toLocaleString()}</p></div>
+              <div><p className="text-xs text-gray-500">Due</p><p>{r.dueAt.toLocaleString()}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Response Summary</p><p>{r.responseSummary ?? '—'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Denial Reason</p><p>{r.denialReason ?? '—'}</p></div>
+            </div>
+          )}
+        />
       )}
 
       <FormModal open={open} onClose={() => { setOpen(false); setSubmitError(null) }} title="New DSR Request">
@@ -177,7 +227,7 @@ export function DsrRequestClient({ records, role }: Props) {
             <input type="email" className={inputCls} value={values.requesterEmail} onChange={(e) => set('requesterEmail', e.target.value)} placeholder="email@example.com" />
           </Field>
           <Field label="Request Type" required>
-            <select className={selectCls} value={values.requestType} onChange={(e) => set('requestType', e.target.value)}>
+            <select aria-label="Request type" className={selectCls} value={values.requestType} onChange={(e) => set('requestType', e.target.value)}>
               {Object.entries(REQUEST_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </Field>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ok, fail } from './mutation.js'
+import { ok, fail } from './mutation'
 
 describe('ok()', () => {
   it('creates a success result', () => {

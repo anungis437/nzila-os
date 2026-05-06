@@ -15,9 +15,17 @@ interface FormModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
+  /** 'sm' = max-w-lg (default), 'lg' = max-w-3xl, 'xl' = max-w-5xl */
+  size?: 'sm' | 'lg' | 'xl'
 }
 
-export function FormModal({ open, onClose, title, children }: FormModalProps) {
+const sizeClass: Record<'sm' | 'lg' | 'xl', string> = {
+  sm: 'max-w-lg',
+  lg: 'max-w-3xl',
+  xl: 'max-w-5xl',
+}
+
+export function FormModal({ open, onClose, title, children, size = 'sm' }: FormModalProps) {
   // Dismiss on Escape key
   useEffect(() => {
     if (!open) return
@@ -45,7 +53,7 @@ export function FormModal({ open, onClose, title, children }: FormModalProps) {
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl max-h-[80vh] overflow-y-auto">
+      <div className={`relative w-full ${sizeClass[size]} bg-white rounded-xl shadow-xl max-h-[85vh] overflow-y-auto`}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 id="modal-title" className="text-base font-semibold text-gray-900">

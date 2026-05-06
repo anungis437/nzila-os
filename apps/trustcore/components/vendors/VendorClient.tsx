@@ -12,6 +12,7 @@ import { BuildingStorefrontIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { FormModal } from '@/components/shared/FormModal'
 import { FormBuilder, Field, inputCls, selectCls } from '@/components/shared/form-builder'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { RecordExplorer } from '@/components/shared/RecordExplorer'
 import type { TrustcoreVendor } from '@nzila/db/queries/trustcore'
 import type { Role } from '@/types/core'
 
@@ -142,37 +143,94 @@ export function VendorClient({ records, role }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Name', 'Country', 'Risk Level', 'Cross-border', 'Contract', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.country ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${RISK_STYLES[r.riskLevel] ?? ''}`}>
-                      {r.riskLevel}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{r.crossBorderTransfer ? 'Yes' : 'No'}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.contractReviewed ? <span className="text-green-600">✓ Reviewed</span> : <span className="text-gray-400">Pending</span>}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
-                      {r.status.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordExplorer
+          records={records}
+          rowKey={(r) => r.id}
+          searchPlaceholder="Search vendors by name, country, or service..."
+          searchText={(r) => `${r.name} ${r.country ?? ''} ${r.serviceDescription ?? ''} ${r.status}`}
+          filters={[
+            {
+              id: 'risk',
+              label: 'Risk',
+              options: [
+                { value: 'low', label: 'Low' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'high', label: 'High' },
+                { value: 'critical', label: 'Critical' },
+              ],
+              matches: (r, v) => r.riskLevel === v,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              options: [
+                { value: 'active', label: 'Active' },
+                { value: 'pending_review', label: 'Pending review' },
+                { value: 'suspended', label: 'Suspended' },
+                { value: 'archived', label: 'Archived' },
+              ],
+              matches: (r, v) => r.status === v,
+            },
+          ]}
+          columns={[
+            {
+              id: 'name',
+              label: 'Name',
+              sortValue: (r) => r.name,
+              render: (r) => <span className="font-medium text-gray-900">{r.name}</span>,
+            },
+            {
+              id: 'country',
+              label: 'Country',
+              sortValue: (r) => r.country ?? '',
+              render: (r) => <span className="text-gray-500">{r.country ?? '—'}</span>,
+            },
+            {
+              id: 'risk',
+              label: 'Risk Level',
+              sortValue: (r) => r.riskLevel,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${RISK_STYLES[r.riskLevel] ?? ''}`}>
+                  {r.riskLevel}
+                </span>
+              ),
+            },
+            {
+              id: 'crossBorder',
+              label: 'Cross-border',
+              sortValue: (r) => r.crossBorderTransfer,
+              render: (r) => <span className="text-gray-500">{r.crossBorderTransfer ? 'Yes' : 'No'}</span>,
+            },
+            {
+              id: 'contract',
+              label: 'Contract',
+              sortValue: (r) => r.contractReviewed,
+              render: (r) =>
+                r.contractReviewed ? <span className="text-green-600">Reviewed</span> : <span className="text-gray-400">Pending</span>,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              sortValue: (r) => r.status,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.status] ?? ''}`}>
+                  {r.status.replace(/_/g, ' ')}
+                </span>
+              ),
+            },
+          ]}
+          drillDownTitle={(r) => `Vendor: ${r.name}`}
+          renderDrillDown={(r) => (
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Service</p><p>{r.serviceDescription ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Country</p><p>{r.country ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Data shared</p><p>{r.dataSharedDescription ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">PIA required</p><p>{r.piaRequired ? 'Yes' : 'No'}</p></div>
+              <div><p className="text-xs text-gray-500">Created</p><p>{r.createdAt.toLocaleString()}</p></div>
+              <div><p className="text-xs text-gray-500">Updated</p><p>{r.updatedAt.toLocaleString()}</p></div>
+            </div>
+          )}
+        />
       )}
 
       <FormModal open={open} onClose={() => { setOpen(false); setSubmitError(null) }} title="Add Vendor">
@@ -188,7 +246,7 @@ export function VendorClient({ records, role }: Props) {
               <input type="text" className={inputCls} value={values.country} onChange={(e) => set('country', e.target.value)} placeholder="e.g. United States" />
             </Field>
             <Field label="Risk Level" required>
-              <select className={selectCls} value={values.riskLevel} onChange={(e) => set('riskLevel', e.target.value)}>
+              <select aria-label="Risk level" className={selectCls} value={values.riskLevel} onChange={(e) => set('riskLevel', e.target.value)}>
                 {['low', 'medium', 'high', 'critical'].map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </Field>

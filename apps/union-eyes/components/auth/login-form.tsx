@@ -181,36 +181,46 @@ export function LoginForm() {
           role="tablist"
           aria-label="Sign-in method"
         >
-          {methods.password && (
+          {methods.password && mode === 'password' && (
             <button
               type="button"
               role="tab"
-              aria-selected={mode === 'password'}
-              onClick={() => {
-                setMode('password');
-                setError(null);
-                setInfo(null);
-              }}
-              className={`rounded-lg px-3 py-2 font-medium transition-colors ${
-                mode === 'password' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
+              aria-selected="true"
+              onClick={() => { setMode('password'); setError(null); setInfo(null); }}
+              className="rounded-lg px-3 py-2 font-medium transition-colors bg-white text-gray-900 shadow-sm"
             >
               Password
             </button>
           )}
-          {methods.magicLink && (
+          {methods.password && mode !== 'password' && (
             <button
               type="button"
               role="tab"
-              aria-selected={mode === 'magic-link'}
-              onClick={() => {
-                setMode('magic-link');
-                setError(null);
-                setInfo(null);
-              }}
-              className={`rounded-lg px-3 py-2 font-medium transition-colors ${
-                mode === 'magic-link' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
+              aria-selected="false"
+              onClick={() => { setMode('password'); setError(null); setInfo(null); }}
+              className="rounded-lg px-3 py-2 font-medium transition-colors text-gray-600 hover:text-gray-900"
+            >
+              Password
+            </button>
+          )}
+          {methods.magicLink && mode === 'magic-link' && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected="true"
+              onClick={() => { setMode('magic-link'); setError(null); setInfo(null); }}
+              className="rounded-lg px-3 py-2 font-medium transition-colors bg-white text-gray-900 shadow-sm"
+            >
+              Email me a link
+            </button>
+          )}
+          {methods.magicLink && mode !== 'magic-link' && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected="false"
+              onClick={() => { setMode('magic-link'); setError(null); setInfo(null); }}
+              className="rounded-lg px-3 py-2 font-medium transition-colors text-gray-600 hover:text-gray-900"
             >
               Email me a link
             </button>

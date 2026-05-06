@@ -1,5 +1,7 @@
 'use client'
 
+import { useId, isValidElement, cloneElement } from 'react'
+
 /**
  * TrustCore — Form Builder
  *
@@ -24,13 +26,20 @@ interface FieldProps {
 }
 
 export function Field({ label, error, required, children }: FieldProps) {
+  const id = useId()
+  // Inject the generated id into the single child control so the <label htmlFor>
+  // association is valid — fixes axe/forms aria-required-attr and select-name rules.
+  const labelledChild = isValidElement(children)
+    ? cloneElement(children as React.ReactElement<{ id?: string }>, { id })
+    : children
+
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
-      {children}
+      {labelledChild}
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   )

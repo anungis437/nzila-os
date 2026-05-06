@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   moduleRegistrationSchema,
   moduleManifestSchema,
-} from './module-registry.js'
+} from './module-registry'
 
 describe('moduleRegistrationSchema', () => {
   it('validates a well-formed registration', () => {

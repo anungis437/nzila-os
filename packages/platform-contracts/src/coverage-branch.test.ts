@@ -1,36 +1,36 @@
 import { describe, it, expect } from 'vitest'
-import { meetsRoleRequirement } from './role.js'
+import { meetsRoleRequirement } from './role'
 import {
   paginationInputSchema,
   buildPaginationMeta,
   paginatedListSchema,
   cursorListSchema,
-} from './pagination.js'
-import { checkFeatureGate, featureGateManifestSchema } from './entitlement.js'
-import { platformEventSchema } from './platform-event.js'
-import { notificationSchema } from './notification.js'
-import { fileMetadataSchema } from './file-metadata.js'
+} from './pagination'
+import { checkFeatureGate, featureGateManifestSchema } from './entitlement'
+import { platformEventSchema } from './platform-event'
+import { notificationSchema } from './notification'
+import { fileMetadataSchema } from './file-metadata'
 import {
   isValidHealthResponse,
   isValidMetricsSummary,
   isValidGovernanceTelemetry,
   isValidEvidenceExport,
-} from './schemas.js'
-import { validateAppManifest, validateAppRegistry } from './app-registry.js'
+} from './schemas'
+import { validateAppManifest, validateAppRegistry } from './app-registry'
 import {
   userIdentitySchema,
   sessionIdentitySchema,
   userDisplayProfileSchema,
-} from './identity.js'
+} from './identity'
 import {
   orgScopeSchema,
   orgScopedRequestContextSchema,
   toOrgScopeId,
-} from './org-scope.js'
+} from './org-scope'
 import {
   platformAuditEventSchema,
   platformAuditInputSchema,
-} from './audit-event.js'
+} from './audit-event'
 
 describe('role hierarchy fallback branch', () => {
   it('returns false when user role is unknown at runtime', () => {

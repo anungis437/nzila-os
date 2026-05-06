@@ -9,23 +9,35 @@
  */
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { UserButton } from '@nzila/platform-auth/entra/client'
 import { TrustCoreSidebar } from '@/components/shared/TrustCoreSidebar'
+import { TrustCoreLocaleToggle } from '@/components/shared/TrustCoreLocaleToggle'
+import { TrustCoreAccountMenu } from '@/components/shared/TrustCoreAccountMenu'
 import { getAuthContextOrNull } from '@/lib/auth/getAuthContext'
 
 export const dynamic = 'force-dynamic'
 
+function resolveLocale(rawLocale: string | undefined): 'en-CA' | 'fr-CA' {
+  if (rawLocale === 'en' || rawLocale === 'en-CA') return 'en-CA'
+  if (rawLocale === 'fr' || rawLocale === 'fr-CA') return 'fr-CA'
+  return 'fr-CA'
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
+
+  const cookieStore = await cookies()
+  const locale = resolveLocale(cookieStore.get('NEXT_LOCALE')?.value)
+  const lang = locale === 'fr-CA' ? 'fr' : 'en'
 
   const ctx = await getAuthContextOrNull()
   if (!ctx) redirect('/sign-in')
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <TrustCoreSidebar />
+      <TrustCoreSidebar lang={lang} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
@@ -43,7 +55,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
 
           <div className="flex items-center gap-3">
-            <UserButton />
+            <TrustCoreLocaleToggle locale={locale} />
+            <TrustCoreAccountMenu userId={ctx.userId} lang={lang} />
           </div>
         </header>
 

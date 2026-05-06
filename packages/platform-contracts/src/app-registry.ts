@@ -14,7 +14,7 @@
  * aggregate health, enforce policies, and manage app lifecycle.
  */
 import { z } from 'zod'
-import { moduleRegistrationSchema } from './module-registry.js'
+import { moduleRegistrationSchema } from './module-registry'
 
 // ── Governance Requirements ─────────────────────────────────────────────────
 

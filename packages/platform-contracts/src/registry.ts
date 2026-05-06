@@ -8,8 +8,8 @@
  * Usage:
  *   import { APP_REGISTRY, getAppManifest } from '@nzila/platform-contracts/registry'
  */
-import type { AppManifestInput } from './app-registry.js'
-import { validateAppRegistry } from './app-registry.js'
+import type { AppManifestInput } from './app-registry'
+import { validateAppRegistry } from './app-registry'
 
 /**
  * Registry entries omit fields that have Zod defaults (requiredRoles,

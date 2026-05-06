@@ -171,6 +171,7 @@
     "change:validate": "tsx scripts/validate-change-window.ts",
     "change:seed-demo": "tsx scripts/change-seed-demo.ts",
     "decision:seed-demo": "tsx scripts/decision-seed-demo.ts",
+    "trustcore:seed:heavy": "tsx scripts/trustcore-seed-heavy.ts",
     "decision:coverage": "tsx scripts/check-decision-coverage.ts",
     "decision:coverage:strict": "tsx scripts/check-decision-coverage.ts --strict",
     "intelligence:test": "pnpm --filter @nzila/decision-intelligence test && pnpm --filter @nzila/policy-intelligence test",

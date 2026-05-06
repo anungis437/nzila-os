@@ -26,7 +26,7 @@ export {
   type DeploymentMetadata,
   type AppManifest,
   type AppRegistryEntry,
-} from './app-registry.js'
+} from './app-registry'
 
 // ── App Registry Data ──
 export {
@@ -37,13 +37,13 @@ export {
   getAppsWithCapability,
   getProductionApps,
   validateBuiltInRegistry,
-} from './registry.js'
+} from './registry'
 
 // ── Health ──
-export type { HealthStatus, ComponentHealth, HealthResponse, HealthContract } from './health.js'
+export type { HealthStatus, ComponentHealth, HealthResponse, HealthContract } from './health'
 
 // ── Metrics ──
-export type { MetricType, MetricEntry, MetricsSummary, MetricsContract } from './metrics.js'
+export type { MetricType, MetricEntry, MetricsSummary, MetricsContract } from './metrics'
 
 // ── Governance ──
 export type {
@@ -51,10 +51,10 @@ export type {
   GovernanceCheckEntry,
   GovernanceTelemetry,
   GovernanceContract,
-} from './governance.js'
+} from './governance'
 
 // ── Evidence ──
-export type { EvidenceFormat, EvidenceArtifact, EvidenceExport, EvidenceContract } from './evidence.js'
+export type { EvidenceFormat, EvidenceArtifact, EvidenceExport, EvidenceContract } from './evidence'
 
 // ── Environment ──
 export type {
@@ -62,10 +62,10 @@ export type {
   EnvironmentVariable,
   EnvironmentDeclaration,
   EnvironmentContract,
-} from './environment.js'
+} from './environment'
 
 // ── Change Awareness ──
-export type { ChangeType, ChangeRecord, ChangeContract } from './change.js'
+export type { ChangeType, ChangeRecord, ChangeContract } from './change'
 
 // ── Validators ──
 export {
@@ -73,7 +73,7 @@ export {
   isValidMetricsSummary,
   isValidGovernanceTelemetry,
   isValidEvidenceExport,
-} from './schemas.js'
+} from './schemas'
 
 // ── Identity ──
 export {
@@ -83,7 +83,7 @@ export {
   type UserIdentity,
   type SessionIdentity,
   type UserDisplayProfile,
-} from './identity.js'
+} from './identity'
 
 // ── Org Scope ──
 export {
@@ -101,7 +101,7 @@ export {
   type OrgScopeRoleAssignment,
   type OrgScopedActorContext,
   type OrgScopedRequestContext,
-} from './org-scope.js'
+} from './org-scope'
 
 // ── Role / Permission ──
 export {
@@ -114,7 +114,7 @@ export {
   type RoleDefinition,
   type PermissionCheck,
   type PermissionResult,
-} from './role.js'
+} from './role'
 
 // ── Module / App Registry ──
 export {
@@ -124,7 +124,7 @@ export {
   type ModuleRegistration,
   type ModuleManifest,
   type ModuleTier,
-} from './module-registry.js'
+} from './module-registry'
 
 // ── Error Envelope ──
 export {
@@ -136,7 +136,7 @@ export {
   type PlatformError,
   type PlatformErrorCode,
   type FieldError,
-} from './error.js'
+} from './error'
 
 // ── Pagination ──
 export {
@@ -151,7 +151,7 @@ export {
   type PaginatedList,
   type CursorList,
   type PaginationInput,
-} from './pagination.js'
+} from './pagination'
 
 // ── Mutation / Action Result ──
 export {
@@ -164,7 +164,7 @@ export {
   type ActionFailure,
   type ActionResponse,
   type PartialSuccess,
-} from './mutation.js'
+} from './mutation'
 
 // ── Platform Event ──
 export {
@@ -177,7 +177,7 @@ export {
   entitlementChangedPayloadSchema,
   type PlatformEvent,
   type PlatformEventType,
-} from './platform-event.js'
+} from './platform-event'
 
 // ── Notification ──
 export {
@@ -189,7 +189,7 @@ export {
   type UnreadCount,
   type NotificationChannel,
   type NotificationPriority,
-} from './notification.js'
+} from './notification'
 
 // ── Entitlement / Subscription ──
 export {
@@ -210,13 +210,13 @@ export {
   type PlanTier,
   type PartnerTier,
   type SubscriptionStatus,
-} from './entitlement.js'
+} from './entitlement'
 
 // ── File Metadata ──
 export {
   fileMetadataSchema,
   type FileMetadata,
-} from './file-metadata.js'
+} from './file-metadata'
 
 // ── Audit Event (Platform) ──
 export {
@@ -224,7 +224,7 @@ export {
   platformAuditInputSchema,
   type PlatformAuditEvent,
   type PlatformAuditInput,
-} from './audit-event.js'
+} from './audit-event'
 
 // ── Control System — Canonical Types ──
 export {
@@ -269,7 +269,7 @@ export {
   type ControlActionResult,
   type BreakGlassAction,
   type ControlSystemHealth,
-} from './control-system.js'
+} from './control-system'
 
 // ── Runtime Evidence ──
 export {
@@ -297,4 +297,4 @@ export {
   type SecurityProofSummary,
   type EvidenceSealVerification,
   type RuntimeProofScore,
-} from './runtime-evidence.js'
+} from './runtime-evidence'

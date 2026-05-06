@@ -4,7 +4,7 @@ import {
   getHttpStatus,
   platformErrorSchema,
   type PlatformErrorCode,
-} from './error.js'
+} from './error'
 
 describe('createPlatformError', () => {
   it('creates error with correct category', () => {

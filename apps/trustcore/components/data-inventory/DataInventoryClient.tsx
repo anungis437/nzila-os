@@ -14,6 +14,7 @@ import { CircleStackIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { FormModal } from '@/components/shared/FormModal'
 import { FormBuilder, Field, inputCls, selectCls } from '@/components/shared/form-builder'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { RecordExplorer } from '@/components/shared/RecordExplorer'
 import type { TrustcoreDataAsset } from '@nzila/db/queries/trustcore'
 import type { Role } from '@/types/core'
 
@@ -159,35 +160,93 @@ export function DataInventoryClient({ records, role }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Name', 'Category', 'Sensitivity', 'Storage', 'Cross-border', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{CATEGORY_LABELS[r.dataCategory] ?? r.dataCategory}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${SEVERITY_STYLES[r.sensitivityLevel] ?? ''}`}>
-                      {r.sensitivityLevel}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 truncate max-w-[160px]">{r.storageLocation ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.crossBorderTransfer ? 'Yes' : 'No'}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordExplorer
+          records={records}
+          rowKey={(r) => r.id}
+          searchPlaceholder="Search assets by name, purpose, storage, or owner..."
+          searchText={(r) => `${r.name} ${r.processingPurpose ?? ''} ${r.storageLocation ?? ''} ${r.systemOwner ?? ''}`}
+          filters={[
+            {
+              id: 'category',
+              label: 'Category',
+              options: Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
+              matches: (r, v) => r.dataCategory === v,
+            },
+            {
+              id: 'sensitivity',
+              label: 'Sensitivity',
+              options: ['low', 'medium', 'high', 'critical'].map((value) => ({ value, label: value })),
+              matches: (r, v) => r.sensitivityLevel === v,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              options: [
+                { value: 'active', label: 'Active' },
+                { value: 'archived', label: 'Archived' },
+                { value: 'needs_review', label: 'Needs review' },
+              ],
+              matches: (r, v) => r.status === v,
+            },
+          ]}
+          columns={[
+            {
+              id: 'name',
+              label: 'Name',
+              sortValue: (r) => r.name,
+              render: (r) => <span className="font-medium text-gray-900">{r.name}</span>,
+            },
+            {
+              id: 'category',
+              label: 'Category',
+              sortValue: (r) => r.dataCategory,
+              render: (r) => <span className="text-gray-500">{CATEGORY_LABELS[r.dataCategory] ?? r.dataCategory}</span>,
+            },
+            {
+              id: 'sensitivity',
+              label: 'Sensitivity',
+              sortValue: (r) => r.sensitivityLevel,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${SEVERITY_STYLES[r.sensitivityLevel] ?? ''}`}>
+                  {r.sensitivityLevel}
+                </span>
+              ),
+            },
+            {
+              id: 'storage',
+              label: 'Storage',
+              sortValue: (r) => r.storageLocation ?? '',
+              render: (r) => <span className="text-gray-500 truncate max-w-40 block">{r.storageLocation ?? '—'}</span>,
+            },
+            {
+              id: 'crossBorder',
+              label: 'Cross-border',
+              sortValue: (r) => r.crossBorderTransfer,
+              render: (r) => <span className="text-gray-500">{r.crossBorderTransfer ? 'Yes' : 'No'}</span>,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              sortValue: (r) => r.status,
+              render: (r) => <span className="text-gray-500">{r.status.replace(/_/g, ' ')}</span>,
+            },
+          ]}
+          drillDownTitle={(r) => `Data Asset: ${r.name}`}
+          renderDrillDown={(r) => (
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Category</p><p>{CATEGORY_LABELS[r.dataCategory] ?? r.dataCategory}</p></div>
+              <div><p className="text-xs text-gray-500">Sensitivity</p><p>{r.sensitivityLevel}</p></div>
+              <div><p className="text-xs text-gray-500">Status</p><p>{r.status.replace(/_/g, ' ')}</p></div>
+              <div><p className="text-xs text-gray-500">System owner</p><p>{r.systemOwner ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Storage location</p><p>{r.storageLocation ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Retention period</p><p>{r.retentionPeriod ?? '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Cross-border transfer</p><p>{r.crossBorderTransfer ? `Yes (${r.destinationCountry ?? 'unspecified'})` : 'No'}</p></div>
+              <div><p className="text-xs text-gray-500">Created</p><p>{r.createdAt.toLocaleString()}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Processing purpose</p><p>{r.processingPurpose ?? '—'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Description</p><p>{r.description ?? '—'}</p></div>
+            </div>
+          )}
+        />
       )}
 
       {/* Create modal */}
@@ -213,12 +272,12 @@ export function DataInventoryClient({ records, role }: Props) {
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Data Category" error={errors.dataCategory} required>
-              <select className={selectCls} value={values.dataCategory} onChange={(e) => set('dataCategory', e.target.value)}>
+              <select aria-label="Data Category" className={selectCls} value={values.dataCategory} onChange={(e) => set('dataCategory', e.target.value)}>
                 {Object.entries(CATEGORY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </Field>
             <Field label="Sensitivity Level" error={errors.sensitivityLevel} required>
-              <select className={selectCls} value={values.sensitivityLevel} onChange={(e) => set('sensitivityLevel', e.target.value)}>
+              <select aria-label="Sensitivity Level" className={selectCls} value={values.sensitivityLevel} onChange={(e) => set('sensitivityLevel', e.target.value)}>
                 {['low', 'medium', 'high', 'critical'].map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </Field>

@@ -3,10 +3,10 @@
  * No external dependencies. Used by apps to validate contract conformance.
  */
 
-import type { HealthResponse, HealthStatus } from './health.js'
-import type { MetricsSummary, MetricType } from './metrics.js'
-import type { GovernanceTelemetry, GovernanceCheckResult } from './governance.js'
-import type { EvidenceExport } from './evidence.js'
+import type { HealthResponse, HealthStatus } from './health'
+import type { MetricsSummary, MetricType } from './metrics'
+import type { GovernanceTelemetry, GovernanceCheckResult } from './governance'
+import type { EvidenceExport } from './evidence'
 
 const VALID_HEALTH_STATUSES: HealthStatus[] = ['healthy', 'degraded', 'unhealthy']
 const VALID_METRIC_TYPES: MetricType[] = ['counter', 'gauge', 'histogram']

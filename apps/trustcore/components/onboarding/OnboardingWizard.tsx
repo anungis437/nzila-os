@@ -110,8 +110,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
               </div>
               {n < total && (
                 <div
-                  className={`h-0.5 flex-1 mx-1 transition-all ${done ? 'bg-teal-400' : 'bg-gray-200'}`}
-                  style={{ minWidth: '2rem' }}
+                  className={`h-0.5 flex-1 mx-1 min-w-8 transition-all ${done ? 'bg-teal-400' : 'bg-gray-200'}`}
                 />
               )}
             </div>
@@ -187,19 +186,27 @@ function BoolToggle({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <button
-        type="button"
-        onClick={() => onChange(!value)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          value ? 'bg-teal-600' : 'bg-gray-300'
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
-            value ? 'translate-x-6' : 'translate-x-1'
-          }`}
-        />
-      </button>
+      {value ? (
+        <button
+          type="button"
+          aria-label={label}
+          aria-pressed="true"
+          onClick={() => onChange(false)}
+          className="relative inline-flex h-6 w-11 items-center rounded-full bg-teal-600 transition-colors"
+        >
+          <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow translate-x-6" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          aria-label={label}
+          aria-pressed="false"
+          onClick={() => onChange(true)}
+          className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 transition-colors"
+        >
+          <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow translate-x-1" />
+        </button>
+      )}
       <span className="text-sm text-gray-700">{label}</span>
     </div>
   )
@@ -227,6 +234,7 @@ function Step1({ data, onChange }: { data: Partial<Step1Input>; onChange: (d: Pa
       </Field>
       <Field label="Industry" required error={errors.industry}>
         <select
+          aria-label="Industry"
           value={data.industry ?? ''}
           onChange={(e) => onChange({ ...data, industry: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
@@ -237,6 +245,7 @@ function Step1({ data, onChange }: { data: Partial<Step1Input>; onChange: (d: Pa
       </Field>
       <Field label="Province / Jurisdiction" required error={errors.province}>
         <select
+          aria-label="Province / Jurisdiction"
           value={data.province ?? 'Quebec'}
           onChange={(e) => onChange({ ...data, province: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
@@ -396,7 +405,7 @@ function Step4({ data, onChange }: { data: Partial<Step4Input>; onChange: (d: Pa
                     }`}
                   >
                     <div
-                      className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center ${
+                      className={`shrink-0 w-5 h-5 rounded border flex items-center justify-center ${
                         checked ? 'bg-teal-500 border-teal-500' : 'border-gray-400'
                       }`}
                     >

@@ -22,7 +22,7 @@ import type {
   PolicyEvalResponse,
   DecisionEvent,
   ControlActionResult,
-} from './control-system.js'
+} from './control-system'
 
 export interface ControlPlaneClientConfig {
   baseUrl: string

@@ -12,6 +12,7 @@ import { ExclamationTriangleIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { FormModal } from '@/components/shared/FormModal'
 import { FormBuilder, Field, inputCls, selectCls } from '@/components/shared/form-builder'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { RecordExplorer } from '@/components/shared/RecordExplorer'
 import type { TrustcoreIncident } from '@nzila/db/queries/trustcore'
 import type { Role } from '@/types/core'
 
@@ -148,37 +149,87 @@ export function IncidentClient({ records, role }: Props) {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Title', 'Type', 'Severity', 'Detected', 'Serious Harm', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.title}</td>
-                  <td className="px-4 py-3 text-gray-500">{INCIDENT_TYPE_LABELS[r.incidentType] ?? r.incidentType}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${SEVERITY_STYLES[r.severity] ?? ''}`}>
-                      {r.severity}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{r.dateDetected.toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.seriousHarmLikely ? <span className="text-red-600 font-medium">Yes</span> : 'No'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.resolutionStatus] ?? ''}`}>
-                      {r.resolutionStatus}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RecordExplorer
+          records={records}
+          rowKey={(r) => r.id}
+          searchPlaceholder="Search incidents by title, type, severity, or status..."
+          searchText={(r) => `${r.title} ${r.incidentType} ${r.severity} ${r.resolutionStatus}`}
+          filters={[
+            {
+              id: 'severity',
+              label: 'Severity',
+              options: ['low', 'medium', 'high', 'critical'].map((value) => ({ value, label: value })),
+              matches: (r, v) => r.severity === v,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              options: Object.keys(STATUS_STYLES).map((value) => ({ value, label: value })),
+              matches: (r, v) => r.resolutionStatus === v,
+            },
+          ]}
+          columns={[
+            {
+              id: 'title',
+              label: 'Title',
+              sortValue: (r) => r.title,
+              render: (r) => <span className="font-medium text-gray-900">{r.title}</span>,
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              sortValue: (r) => r.incidentType,
+              render: (r) => <span className="text-gray-500">{INCIDENT_TYPE_LABELS[r.incidentType] ?? r.incidentType}</span>,
+            },
+            {
+              id: 'severity',
+              label: 'Severity',
+              sortValue: (r) => r.severity,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${SEVERITY_STYLES[r.severity] ?? ''}`}>
+                  {r.severity}
+                </span>
+              ),
+            },
+            {
+              id: 'detected',
+              label: 'Detected',
+              sortValue: (r) => r.dateDetected,
+              render: (r) => <span className="text-gray-500">{r.dateDetected.toLocaleDateString()}</span>,
+            },
+            {
+              id: 'harm',
+              label: 'Serious Harm',
+              sortValue: (r) => r.seriousHarmLikely,
+              render: (r) => <span className="text-gray-500">{r.seriousHarmLikely ? 'Yes' : 'No'}</span>,
+            },
+            {
+              id: 'status',
+              label: 'Status',
+              sortValue: (r) => r.resolutionStatus,
+              render: (r) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[r.resolutionStatus] ?? ''}`}>
+                  {r.resolutionStatus}
+                </span>
+              ),
+            },
+          ]}
+          drillDownTitle={(r) => `Incident: ${r.title}`}
+          renderDrillDown={(r) => (
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Type</p><p>{INCIDENT_TYPE_LABELS[r.incidentType] ?? r.incidentType}</p></div>
+              <div><p className="text-xs text-gray-500">Severity</p><p>{r.severity}</p></div>
+              <div><p className="text-xs text-gray-500">Resolution status</p><p>{r.resolutionStatus}</p></div>
+              <div><p className="text-xs text-gray-500">Detected</p><p>{r.dateDetected.toLocaleString()}</p></div>
+              <div><p className="text-xs text-gray-500">Occurred</p><p>{r.dateOccurred ? r.dateOccurred.toLocaleString() : '—'}</p></div>
+              <div><p className="text-xs text-gray-500">CAI reported</p><p>{r.reportedToCai ? 'Yes' : 'No'}</p></div>
+              <div><p className="text-xs text-gray-500">Individuals notified</p><p>{r.affectedIndividualsNotified ? 'Yes' : 'No'}</p></div>
+              <div><p className="text-xs text-gray-500">Serious harm likely</p><p>{r.seriousHarmLikely ? 'Yes' : 'No'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Description</p><p>{r.description ?? '—'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-500">Containment actions</p><p>{r.containmentActions ?? '—'}</p></div>
+            </div>
+          )}
+        />
       )}
 
       <FormModal open={open} onClose={() => { setOpen(false); setSubmitError(null) }} title="Log Incident">
@@ -191,18 +242,18 @@ export function IncidentClient({ records, role }: Props) {
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Incident Type" required>
-              <select className={selectCls} value={values.incidentType} onChange={(e) => set('incidentType', e.target.value)}>
+              <select aria-label="Incident Type" className={selectCls} value={values.incidentType} onChange={(e) => set('incidentType', e.target.value)}>
                 {Object.entries(INCIDENT_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </Field>
             <Field label="Severity" required>
-              <select className={selectCls} value={values.severity} onChange={(e) => set('severity', e.target.value)}>
+              <select aria-label="Severity" className={selectCls} value={values.severity} onChange={(e) => set('severity', e.target.value)}>
                 {['low', 'medium', 'high', 'critical'].map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </Field>
           </div>
           <Field label="Date Detected" error={errors.dateDetected} required>
-            <input type="date" className={inputCls} value={values.dateDetected} onChange={(e) => set('dateDetected', e.target.value)} />
+            <input type="date" aria-label="Date Detected" className={inputCls} value={values.dateDetected} onChange={(e) => set('dateDetected', e.target.value)} />
           </Field>
           <Field label="Harm Assessment">
             <textarea className={inputCls} rows={2} value={values.harmAssessment} onChange={(e) => set('harmAssessment', e.target.value)} placeholder="Describe the potential harm to affected individuals…" />
