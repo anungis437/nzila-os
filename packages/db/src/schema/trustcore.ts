@@ -531,3 +531,32 @@ export const trustcoreSubscriptions = pgTable(
     index('tc_subscriptions_status_idx').on(t.status),
   ],
 )
+
+// ── M) trustcoreLeads ──────────────────────────────────────────────────────
+
+export const tcLeadSourceEnum = pgEnum('tc_lead_source', [
+  'landing',
+  'sample_trust_center',
+  'onboarding',
+])
+
+/**
+ * Pre-onboarding email lead capture.
+ * Soft gate — never blocks flow. Email is unique (upsert on conflict).
+ * convertedAt + orgId are set when onboarding completes.
+ */
+export const trustcoreLeads = pgTable(
+  'trustcore_leads',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: text('email').notNull(),
+    source: tcLeadSourceEnum('source').notNull().default('landing'),
+    capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+    convertedAt: timestamp('converted_at', { withTimezone: true }),
+    orgId: uuid('org_id').references(() => orgs.id, { onDelete: 'set null' }),
+  },
+  (t) => [
+    index('tc_leads_email_idx').on(t.email),
+    index('tc_leads_captured_at_idx').on(t.capturedAt),
+  ],
+)

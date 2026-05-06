@@ -1,11 +1,11 @@
 /**
- * TrustCore — Billing: Create Checkout Session (Stripe-ready stub)
+ * TrustCore — Billing: Create Checkout Session
  *
  * POST /api/billing/create-checkout-session
  *
- * Returns a mocked session URL. When Stripe is connected, replace the
- * mock body with a real `stripe.checkout.sessions.create(...)` call
- * using the priceId and stripeCustomerId from the subscription record.
+ * Creates a Stripe Checkout Session for upgrading to Pro.
+ * When STRIPE_SECRET_KEY is set, returns the real Stripe Checkout URL.
+ * Falls back to a mock URL in dev environments without Stripe configured.
  *
  * Body: { plan: 'pro' | 'premium' }
  * Response: { sessionUrl: string }
@@ -17,10 +17,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
-
-// Stripe price IDs — set via environment variables when Stripe is connected.
-// const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID
-// const STRIPE_PREMIUM_PRICE_ID = process.env.STRIPE_PREMIUM_PRICE_ID
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
@@ -51,22 +47,43 @@ export const POST = withRequiredRole(
       metadata: { targetPlan: plan },
     })
 
-    // ── Stripe integration placeholder ────────────────────────────────────
-    // When STRIPE_SECRET_KEY is set, replace this block:
-    //
-    // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' })
-    // const session = await stripe.checkout.sessions.create({
-    //   mode: 'subscription',
-    //   customer: subscription.stripeCustomerId ?? undefined,
-    //   line_items: [{ price: plan === 'pro' ? STRIPE_PRO_PRICE_ID : STRIPE_PREMIUM_PRICE_ID, quantity: 1 }],
-    //   success_url: `${process.env.APP_URL}/billing?upgraded=1`,
-    //   cancel_url: `${process.env.APP_URL}/billing`,
-    //   metadata: { orgId: ctx.orgId, plan },
-    // })
-    // return NextResponse.json({ success: true, sessionUrl: session.url })
+    // ── Stripe integration ────────────────────────────────────────────────
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+    const priceId =
+      plan === 'pro'
+        ? process.env.STRIPE_PRICE_PRO_ID
+        : process.env.STRIPE_PRICE_PREMIUM_ID
+    const appUrl = process.env.APP_URL ?? 'http://localhost:3010'
 
-    // Mock response for pre-Stripe environments
+    if (stripeKey && priceId) {
+      try {
+        // Dynamic import keeps Stripe out of the bundle when the key is absent
+        const { default: Stripe } = await import('stripe')
+        const stripe = new Stripe(stripeKey, { apiVersion: '2025-04-30.basil' })
+
+        const session = await stripe.checkout.sessions.create({
+          mode: 'subscription',
+          line_items: [{ price: priceId, quantity: 1 }],
+          success_url: `${appUrl}/billing?success=1`,
+          cancel_url: `${appUrl}/billing?canceled=1`,
+          metadata: { orgId: ctx.orgId, plan },
+          // Allow the customer to provide their email at checkout
+          customer_email: undefined,
+        })
+
+        return NextResponse.json({ success: true, sessionUrl: session.url })
+      } catch (err) {
+        console.error('[TrustCore billing] Stripe checkout error', err)
+        return NextResponse.json(
+          { success: false, error: 'Failed to create checkout session' },
+          { status: 500 },
+        )
+      }
+    }
+
+    // Mock response when Stripe is not configured
     const mockSessionUrl = `/billing?mock_checkout=1&plan=${plan}&org=${ctx.orgId}`
     return NextResponse.json({ success: true, sessionUrl: mockSessionUrl })
   },
 )
+

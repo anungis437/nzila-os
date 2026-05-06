@@ -25,6 +25,7 @@
     "pdfkit": "^0.18.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "stripe": "^22.1.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

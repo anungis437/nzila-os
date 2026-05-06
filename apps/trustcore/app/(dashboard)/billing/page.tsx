@@ -17,6 +17,8 @@ import {
   CreditCardIcon,
 } from '@heroicons/react/24/outline'
 import { UpgradeButton } from '@/components/billing/UpgradeButton'
+import { BillingStatusBanner } from '@/components/billing/BillingStatusBanner'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,6 +116,11 @@ export default async function BillingPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Post-checkout status banner */}
+      <Suspense fallback={null}>
+        <BillingStatusBanner />
+      </Suspense>
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

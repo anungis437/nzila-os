@@ -712,6 +712,22 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
       // Clear saved state on success, show upgrade modal before redirecting
       localStorage.removeItem(storageKey)
       trackEvent('onboarding_completed', { orgId })
+
+      // Convert lead: if email was captured pre-onboarding, mark it as converted
+      const capturedEmail = (() => {
+        try { return localStorage.getItem('tc_lead_email') } catch { return null }
+      })()
+      if (capturedEmail) {
+        fetch('/api/leads/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: capturedEmail }),
+        }).catch(() => {
+          // silent — lead conversion is non-critical
+        })
+        try { localStorage.removeItem('tc_lead_email') } catch { /* ignore */ }
+      }
+
       setShowUpgradeModal(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'An unexpected error occurred')

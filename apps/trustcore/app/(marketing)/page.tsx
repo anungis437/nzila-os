@@ -225,7 +225,7 @@ export default function LandingPage() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <TrackedCtaLink
-                  href="/onboarding"
+                  href="/start"
                   event="landing_cta_click"
                   payload={{ location: 'hero' }}
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-teal-600 hover:bg-teal-700 text-white text-base font-semibold rounded-xl transition shadow-sm shadow-teal-200"
@@ -290,7 +290,7 @@ export default function LandingPage() {
 
           <div className="mt-10 text-center">
             <TrackedCtaLink
-              href="/onboarding"
+              href="/start"
               event="landing_cta_click"
               payload={{ location: 'how_it_works' }}
               className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition text-sm"
@@ -365,7 +365,7 @@ export default function LandingPage() {
               <p className="text-3xl font-black text-gray-900 mb-1">$0</p>
               <p className="text-xs text-gray-400 mb-5">Forever</p>
               <TrackedCtaLink
-                href="/onboarding"
+                href="/start"
                 event="landing_cta_click"
                 payload={{ location: 'pricing_free' }}
                 className="block text-center w-full py-2.5 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition text-sm mb-5"
@@ -393,7 +393,7 @@ export default function LandingPage() {
               <p className="text-3xl font-black mb-1">$49</p>
               <p className="text-xs text-teal-200 mb-5">per month · Cancel anytime</p>
               <TrackedCtaLink
-                href="/onboarding"
+                href="/start"
                 event="landing_cta_click"
                 payload={{ location: 'pricing_pro' }}
                 className="block text-center w-full py-2.5 bg-white text-teal-700 font-semibold rounded-xl hover:bg-teal-50 transition text-sm mb-5"
@@ -506,7 +506,7 @@ export default function LandingPage() {
             Free to start, no credit card required.
           </p>
           <TrackedCtaLink
-            href="/onboarding"
+            href="/start"
             event="landing_cta_click"
             payload={{ location: 'cta_footer' }}
             className="inline-flex items-center gap-2 px-8 py-4 bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold rounded-2xl transition shadow-lg shadow-teal-900/30"

@@ -17,7 +17,9 @@ export type AnalyticsEvent =
   | 'onboarding_completed'
   | 'upgrade_clicked'
   | 'upgrade_modal_opened'
+  | 'upgrade_completed'
   | 'export_attempt_blocked'
+  | 'lead_captured'
 
 export type EventPayload = Record<string, string | number | boolean | null | undefined>
 

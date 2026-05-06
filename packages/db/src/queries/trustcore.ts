@@ -21,6 +21,7 @@ import {
   trustcorePolicies,
   trustcoreReminders,
   trustcoreSubscriptions,
+  trustcoreLeads,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -47,6 +48,8 @@ export type TrustcoreReminder = typeof trustcoreReminders.$inferSelect
 export type NewTrustcoreReminder = typeof trustcoreReminders.$inferInsert
 export type TrustcoreSubscription = typeof trustcoreSubscriptions.$inferSelect
 export type NewTrustcoreSubscription = typeof trustcoreSubscriptions.$inferInsert
+export type TrustcoreLead = typeof trustcoreLeads.$inferSelect
+export type NewTrustcoreLead = typeof trustcoreLeads.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
@@ -640,4 +643,51 @@ export async function countActiveTrustcoreReminders(orgId: string): Promise<numb
     .from(trustcoreReminders)
     .where(eq(trustcoreReminders.orgId, orgId))
   return rows.filter((r) => r.status === 'open' || r.status === 'overdue').length
+}
+
+// ── Lead helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Upsert a lead by email.
+ * If a lead with the same email already exists, source is NOT overwritten
+ * (first-touch attribution). Returns the existing or newly created lead.
+ */
+export async function upsertTrustcoreLead(input: {
+  email: string
+  source: 'landing' | 'sample_trust_center' | 'onboarding'
+}): Promise<TrustcoreLead> {
+  const existing = await db
+    .select()
+    .from(trustcoreLeads)
+    .where(eq(trustcoreLeads.email, input.email))
+    .limit(1)
+  if (existing[0]) return existing[0]
+
+  const [row] = await db.insert(trustcoreLeads).values(input).returning()
+  if (!row) throw new Error('upsertTrustcoreLead: insert returned no row')
+  return row
+}
+
+/**
+ * Mark a lead as converted after onboarding completion.
+ * Sets convertedAt and orgId on the matching email record.
+ */
+export async function convertTrustcoreLead(
+  email: string,
+  orgId: string,
+): Promise<TrustcoreLead | null> {
+  const [row] = await db
+    .update(trustcoreLeads)
+    .set({ convertedAt: new Date(), orgId })
+    .where(and(eq(trustcoreLeads.email, email)))
+    .returning()
+  return row ?? null
+}
+
+/**
+ * Return all leads ordered by capturedAt desc.
+ * Platform admin only — never expose on public routes.
+ */
+export async function listTrustcoreLeads(): Promise<TrustcoreLead[]> {
+  return db.select().from(trustcoreLeads).orderBy(desc(trustcoreLeads.capturedAt))
 }
