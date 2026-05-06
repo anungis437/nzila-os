@@ -12,6 +12,8 @@ import type { OnboardingInput } from '../validation/onboarding'
 import { withNzilaSpan } from '@nzila/otel-core'
 import { evaluatePolicy, isBlocked, requiresApproval } from '@nzila/platform-policy-engine'
 import { CircuitBreaker, executeWithFallback, withTimeout } from '@nzila/ai-core'
+import { isFeatureEnabled } from '@nzila/platform-feature-flags'
+import { evaluatePilotFlag } from '@nzila/pilot-mode'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -26,6 +28,46 @@ const generatorCircuitBreaker = new CircuitBreaker({
   successThreshold: 1,
   timeout: 10_000,
 })
+
+function parsePilotOrgList(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+}
+
+function resolvePilotPercentage(raw: string | undefined): number | undefined {
+  if (!raw) return undefined
+  const parsed = Number.parseInt(raw, 10)
+  if (!Number.isFinite(parsed)) return undefined
+  return Math.max(0, Math.min(100, parsed))
+}
+
+function canUsePlatformPolicyGenerator(orgId: string): boolean {
+  if (!isFeatureEnabled('ai_experimental')) {
+    return false
+  }
+
+  const orgIds = parsePilotOrgList(process.env.TRUSTCORE_POLICY_PILOT_ORGS)
+  const percentage = resolvePilotPercentage(process.env.TRUSTCORE_POLICY_PILOT_PERCENTAGE)
+
+  const evaluation = evaluatePilotFlag(
+    {
+      name: 'trustcore_policy_platform_generation',
+      description: 'Pilot gate for platform-governed policy generation',
+      enabled: true,
+      strategy: 'gradual',
+      orgIds: orgIds.length > 0 ? orgIds : undefined,
+      percentage,
+    },
+    {
+      orgId,
+      userId: 'system:policy-generator',
+    },
+  )
+
+  return evaluation.enabled
+}
 
 function policyGuardNotice(orgId: string, input: OnboardingInput): string {
   const output = evaluatePolicy(
@@ -88,6 +130,10 @@ async function generateWithResilience(
   type: GeneratedPolicy['type'],
   generator: () => GeneratedPolicy,
 ): Promise<GeneratedPolicy> {
+  if (!canUsePlatformPolicyGenerator(orgId)) {
+    return generator()
+  }
+
   try {
     const { result } = await executeWithFallback({
       circuitBreaker: generatorCircuitBreaker,
