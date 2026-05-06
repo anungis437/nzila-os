@@ -37,7 +37,7 @@
     "@azure/msal-node": "^3.8.4",
     "@azure/storage-blob": "^12.26.0",
     "@google-cloud/vision": "^5.3.4",
-    "@headlessui/react": "^2.2.9",
+    "@headlessui/react": "^2.2.10",
     "@hello-pangea/dnd": "^18.0.1",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.2",
