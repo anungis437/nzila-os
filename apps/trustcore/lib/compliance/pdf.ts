@@ -11,6 +11,7 @@
 // The serverExternalPackages config in next.config.ts ensures this runs only on the server.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const PDFDocument = require('pdfkit') as typeof import('pdfkit')
+import { withNzilaSpan } from '@nzila/otel-core'
 import type { ComplianceReport } from './report'
 
 // ── Color palette ───────────────────────────────────────────────────────────
@@ -72,12 +73,13 @@ function divider(doc: InstanceType<typeof PDFDocument>) {
 // ── PDF assembler ────────────────────────────────────────────────────────────
 
 export async function generateAuditPdf(report: ComplianceReport): Promise<Buffer> {
-  return new Promise<Buffer>((resolve, reject) => {
-    const doc = new PDFDocument({ margin: PAGE_MARGIN, size: 'A4' })
-    const chunks: Buffer[] = []
-    doc.on('data', (chunk: Buffer) => chunks.push(chunk))
-    doc.on('end', () => resolve(Buffer.concat(chunks)))
-    doc.on('error', reject)
+  return withNzilaSpan('trustcore.compliance.pdf.generate', report.orgId, async () => {
+    return new Promise<Buffer>((resolve, reject) => {
+      const doc = new PDFDocument({ margin: PAGE_MARGIN, size: 'A4' })
+      const chunks: Buffer[] = []
+      doc.on('data', (chunk: Buffer) => chunks.push(chunk))
+      doc.on('end', () => resolve(Buffer.concat(chunks)))
+      doc.on('error', reject)
 
     // ── Cover ───────────────────────────────────────────────────────────────
     doc
@@ -211,6 +213,7 @@ export async function generateAuditPdf(report: ComplianceReport): Promise<Buffer
       'This report was generated automatically by TrustCore. It is based on data entered by the organisation and reflects the compliance posture at the time of generation. It does not constitute legal advice.',
     )
 
-    doc.end()
+      doc.end()
+    })
   })
 }

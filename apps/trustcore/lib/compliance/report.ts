@@ -14,6 +14,7 @@ import {
   fetchComplianceInputs,
   evaluateComplianceFromInputs,
 } from './engine'
+import { withNzilaSpan } from '@nzila/otel-core'
 import { listTrustcorePrivacyPrograms } from '@nzila/db/queries/trustcore'
 import type { ComplianceEvaluation, RiskItem, RiskCategory } from '@/types/core'
 import type { ComplianceInputs } from './engine'
@@ -209,55 +210,57 @@ function buildNarrativeSections(
  * Performs a single batch load then derives all report fields — no N+1.
  */
 export async function generateComplianceReport(orgId: string): Promise<ComplianceReport> {
-  const [inputs, programs] = await Promise.all([
-    fetchComplianceInputs(orgId),
-    listTrustcorePrivacyPrograms(orgId),
-  ])
+  return withNzilaSpan('trustcore.compliance.report.generate', orgId, async () => {
+    const [inputs, programs] = await Promise.all([
+      fetchComplianceInputs(orgId),
+      listTrustcorePrivacyPrograms(orgId),
+    ])
 
-  const evaluation = evaluateComplianceFromInputs(orgId, inputs)
+    const evaluation = evaluateComplianceFromInputs(orgId, inputs)
 
-  const activeProgram = programs.find((p) => p.status === 'active') ?? null
+    const activeProgram = programs.find((p) => p.status === 'active') ?? null
 
-  const risksByCategory = ALL_CATEGORIES.reduce<Record<RiskCategory, RiskItem[]>>(
-    (acc, cat) => {
-      acc[cat] = evaluation.risks.filter((r) => r.category === cat)
-      return acc
-    },
-    { governance: [], data: [], pia: [], incident: [], dsr: [], vendor: [] },
-  )
+    const risksByCategory = ALL_CATEGORIES.reduce<Record<RiskCategory, RiskItem[]>>(
+      (acc, cat) => {
+        acc[cat] = evaluation.risks.filter((r) => r.category === cat)
+        return acc
+      },
+      { governance: [], data: [], pia: [], incident: [], dsr: [], vendor: [] },
+    )
 
-  const blockingRisks = evaluation.risks.filter((r) => r.blocking)
+    const blockingRisks = evaluation.risks.filter((r) => r.blocking)
 
-  const sections = buildNarrativeSections(evaluation, inputs)
-  const auditReadyStatement = buildAuditReadyStatement(
-    evaluation.score,
-    evaluation.confidence,
-    blockingRisks.length,
-  )
+    const sections = buildNarrativeSections(evaluation, inputs)
+    const auditReadyStatement = buildAuditReadyStatement(
+      evaluation.score,
+      evaluation.confidence,
+      blockingRisks.length,
+    )
 
-  return {
-    generatedAt: new Date().toISOString(),
-    framework: 'law-25',
-    orgId,
-    score: evaluation.score,
-    confidence: evaluation.confidence,
-    status: evaluation.status,
-    auditReadyStatement,
-    risksByCategory,
-    blockingRisks,
-    totalRisks: evaluation.risks.length,
-    blockingCount: blockingRisks.length,
-    summary: evaluation.summary,
-    sections,
-    evaluation,
-    inputs,
-    privacyOfficerName: activeProgram?.privacyOfficerName ?? null,
-    privacyOfficerEmail: activeProgram?.privacyOfficerEmail ?? null,
-    privacyOfficerRole: activeProgram?.privacyOfficerRole ?? null,
-    programStatus: activeProgram?.status ?? null,
-    lastReviewedAt: activeProgram?.lastReviewedAt?.toISOString() ?? null,
-    evaluatedAt: evaluation.evaluatedAt,
-  }
+    return {
+      generatedAt: new Date().toISOString(),
+      framework: 'law-25',
+      orgId,
+      score: evaluation.score,
+      confidence: evaluation.confidence,
+      status: evaluation.status,
+      auditReadyStatement,
+      risksByCategory,
+      blockingRisks,
+      totalRisks: evaluation.risks.length,
+      blockingCount: blockingRisks.length,
+      summary: evaluation.summary,
+      sections,
+      evaluation,
+      inputs,
+      privacyOfficerName: activeProgram?.privacyOfficerName ?? null,
+      privacyOfficerEmail: activeProgram?.privacyOfficerEmail ?? null,
+      privacyOfficerRole: activeProgram?.privacyOfficerRole ?? null,
+      programStatus: activeProgram?.status ?? null,
+      lastReviewedAt: activeProgram?.lastReviewedAt?.toISOString() ?? null,
+      evaluatedAt: evaluation.evaluatedAt,
+    }
+  })
 }
 
 // Re-export for convenience

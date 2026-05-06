@@ -39,6 +39,7 @@ import type {
   TrustcoreDsrRequest,
   TrustcoreVendor,
 } from '@nzila/db/queries/trustcore'
+import { withNzilaSpan } from '@nzila/otel-core'
 import type { ComplianceEvaluation, RiskItem, ComplianceStatus } from '@/types/core'
 
 // ── Inputs snapshot ────────────────────────────────────────────────────────
@@ -57,15 +58,17 @@ export interface ComplianceInputs {
  * Prevents N+1 and keeps evaluation latency predictable.
  */
 export async function fetchComplianceInputs(orgId: string): Promise<ComplianceInputs> {
-  const [programs, assets, pias, incidents, dsrRequests, vendors] = await Promise.all([
-    listTrustcorePrivacyPrograms(orgId),
-    listTrustcoreDataAssets(orgId),
-    listTrustcorePias(orgId),
-    listTrustcoreIncidents(orgId),
-    listTrustcoreDsrRequests(orgId),
-    listTrustcoreVendors(orgId),
-  ])
-  return { programs, assets, pias, incidents, dsrRequests, vendors }
+  return withNzilaSpan('trustcore.compliance.fetch_inputs', orgId, async () => {
+    const [programs, assets, pias, incidents, dsrRequests, vendors] = await Promise.all([
+      listTrustcorePrivacyPrograms(orgId),
+      listTrustcoreDataAssets(orgId),
+      listTrustcorePias(orgId),
+      listTrustcoreIncidents(orgId),
+      listTrustcoreDsrRequests(orgId),
+      listTrustcoreVendors(orgId),
+    ])
+    return { programs, assets, pias, incidents, dsrRequests, vendors }
+  })
 }
 
 // ── Category caps ──────────────────────────────────────────────────────────
@@ -599,8 +602,10 @@ export function evaluateComplianceFromInputs(
  * Use this in API routes and server components.
  */
 export async function evaluateCompliance(orgId: string): Promise<ComplianceEvaluation> {
-  const inputs = await fetchComplianceInputs(orgId)
-  return evaluateComplianceFromInputs(orgId, inputs)
+  return withNzilaSpan('trustcore.compliance.evaluate', orgId, async () => {
+    const inputs = await fetchComplianceInputs(orgId)
+    return evaluateComplianceFromInputs(orgId, inputs)
+  })
 }
 
 // ── Legacy shim ────────────────────────────────────────────────────────────

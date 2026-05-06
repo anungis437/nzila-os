@@ -30,6 +30,7 @@ import {
   countActiveTrustcoreReminders,
 } from '@nzila/db/queries/trustcore'
 import type { TrustcoreReminder, NewTrustcoreReminder } from '@nzila/db/queries/trustcore'
+import { withNzilaSpan } from '@nzila/otel-core'
 import { getResolvedSubscription } from '@/lib/billing/getSubscription'
 import { gateReminderCreate } from '@/lib/billing/featureAccess'
 
@@ -59,32 +60,33 @@ function ageInDays(date: Date): number {
 export async function generateTrustcoreReminders(
   orgId: string,
 ): Promise<TrustcoreReminder[]> {
-  // Resolve subscription for billing gate
-  const subscription = await getResolvedSubscription(orgId)
+  return withNzilaSpan('trustcore.reminders.generate', orgId, async () => {
+    // Resolve subscription for billing gate
+    const subscription = await getResolvedSubscription(orgId)
 
   // Batch-load all compliance data in parallel
-  const [programs, assets, pias, incidents, dsrRequests, vendors, policies] = await Promise.all([
-    listTrustcorePrivacyPrograms(orgId),
-    listTrustcoreDataAssets(orgId),
-    listTrustcorePias(orgId),
-    listTrustcoreIncidents(orgId),
-    listTrustcoreDsrRequests(orgId),
-    listTrustcoreVendors(orgId),
-    listTrustcorePolicies(orgId),
-  ])
+    const [programs, assets, pias, incidents, dsrRequests, vendors, policies] = await Promise.all([
+      listTrustcorePrivacyPrograms(orgId),
+      listTrustcoreDataAssets(orgId),
+      listTrustcorePias(orgId),
+      listTrustcoreIncidents(orgId),
+      listTrustcoreDsrRequests(orgId),
+      listTrustcoreVendors(orgId),
+      listTrustcorePolicies(orgId),
+    ])
 
-  const results: TrustcoreReminder[] = []
+    const results: TrustcoreReminder[] = []
 
   // Helper: upsert a reminder only if the billing gate allows it.
   // Returns the reminder on success, null when the limit is reached.
-  async function maybeUpsert(
-    input: NewTrustcoreReminder,
-  ): Promise<TrustcoreReminder | null> {
-    const activeCount = await countActiveTrustcoreReminders(orgId)
-    const gate = gateReminderCreate(subscription, activeCount)
-    if (!gate.allowed) return null
-    return upsertTrustcoreReminder(input)
-  }
+    async function maybeUpsert(
+      input: NewTrustcoreReminder,
+    ): Promise<TrustcoreReminder | null> {
+      const activeCount = await countActiveTrustcoreReminders(orgId)
+      const gate = gateReminderCreate(subscription, activeCount)
+      if (!gate.allowed) return null
+      return upsertTrustcoreReminder(input)
+    }
 
   // ── A. Privacy Program ─────────────────────────────────────────────────
 
@@ -359,5 +361,6 @@ export async function generateTrustcoreReminders(
     }
   }
 
-  return results
+    return results
+  })
 }
