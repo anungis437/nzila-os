@@ -1,5 +1,5 @@
 {
-  "extends": "@nzila/config/tsconfig/nextjs",
+  "extends": "../../packages/config/tsconfig.nextjs.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
