@@ -12,6 +12,7 @@ import {
   BuildingStorefrontIcon,
   DocumentTextIcon,
   ArchiveBoxIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline'
 
 interface NavItem {
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Vendors', href: '/vendors', icon: BuildingStorefrontIcon },
   { name: 'Policies', href: '/policies', icon: DocumentTextIcon },
   { name: 'Evidence Vault', href: '/evidence', icon: ArchiveBoxIcon },
+  { name: 'Billing & Plan', href: '/billing', icon: CreditCardIcon },
 ]
 
 export function TrustCoreSidebar() {

@@ -7,6 +7,8 @@
 import { getAuthContext } from '@/lib/auth/getAuthContext'
 import { getTrustcoreDashboardSummary, listTrustcoreReminders } from '@nzila/db/queries/trustcore'
 import { generateTrustcoreReminders } from '@/lib/reminders/engine'
+import { getResolvedSubscription } from '@/lib/billing/getSubscription'
+import { canExportAudit, canExportEvidence, canAccessTrustCenter } from '@/lib/billing/featureAccess'
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
@@ -17,9 +19,11 @@ import {
   DocumentTextIcon,
   GlobeAltIcon,
   BoltIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline'
 import type { TrustcoreDashboardSummary } from '@nzila/db/queries/trustcore'
 import { ActionCenter } from '@/components/reminders/ActionCenter'
+import { FreePlanBanner } from '@/components/billing/FreePlanBanner'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,13 +77,27 @@ function ExportButton({
   label,
   sub,
   external,
+  locked,
 }: {
   href: string
   icon: React.ComponentType<{ className?: string }>
   label: string
   sub: string
   external?: boolean
+  locked?: boolean
 }) {
+  if (locked) {
+    return (
+      <div className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 opacity-60 cursor-not-allowed" title="Upgrade to Pro to unlock">
+        <LockClosedIcon className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-gray-500">{label}</p>
+          <p className="text-xs text-gray-400">{sub}</p>
+          <p className="text-xs text-amber-600 font-medium mt-0.5">Upgrade to Pro to unlock</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <a
       href={href}
@@ -107,12 +125,14 @@ export default async function DashboardPage() {
     // Non-fatal: if reminder generation fails, dashboard still loads
   })
 
-  const [summary, reminders] = await Promise.all([
+  const [summary, reminders, subscription] = await Promise.all([
     getTrustcoreDashboardSummary(ctx.orgId),
     listTrustcoreReminders(ctx.orgId),
+    getResolvedSubscription(ctx.orgId),
   ])
 
   const canAct = ctx.role === 'org_admin' || ctx.role === 'staff' || ctx.role === 'platform_admin'
+  const isFree = subscription.plan === 'free'
   // eslint-disable-next-line react-hooks/purity -- server component, not a hook
   const nowMs = Date.now()
 
@@ -124,6 +144,7 @@ export default async function DashboardPage() {
           Org: <span className="font-mono">{ctx.orgId}</span> · Law 25 framework
         </p>
       </div>
+      {isFree && <FreePlanBanner />}
 
       {/* Metric cards */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
@@ -180,12 +201,14 @@ export default async function DashboardPage() {
             icon={ArrowDownTrayIcon}
             label="Download Audit Report (JSON)"
             sub="Full structured audit export for this org"
+            locked={!canExportAudit(subscription)}
           />
           <ExportButton
             href="/api/export/evidence"
             icon={DocumentTextIcon}
             label="Download Evidence Bundle"
             sub="All evidence events, grouped by type"
+            locked={!canExportEvidence(subscription)}
           />
           <ExportButton
             href={`/trust-center/${ctx.orgId}`}
@@ -193,6 +216,7 @@ export default async function DashboardPage() {
             label="View Trust Center"
             sub="Shareable compliance summary page"
             external
+            locked={!canAccessTrustCenter(subscription)}
           />
         </div>
       </div>

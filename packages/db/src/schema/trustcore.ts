@@ -489,3 +489,45 @@ export const trustcoreReminders = pgTable(
     index('tc_reminders_org_severity_idx').on(t.orgId, t.severity),
   ],
 )
+
+// ── L) trustcoreSubscriptions ─────────────────────────────────────────────
+
+export const tcSubscriptionPlanEnum = pgEnum('tc_subscription_plan', [
+  'free',
+  'pro',
+  'premium',
+])
+
+export const tcSubscriptionStatusEnum = pgEnum('tc_subscription_status', [
+  'active',
+  'trialing',
+  'past_due',
+  'canceled',
+])
+
+/**
+ * Org-level billing subscription record.
+ * Defaults to FREE when no record exists (resolver handles the fallback).
+ * Stripe fields are nullable to support pre-Stripe and Stripe-ready modes.
+ */
+export const trustcoreSubscriptions = pgTable(
+  'trustcore_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    plan: tcSubscriptionPlanEnum('plan').notNull().default('free'),
+    status: tcSubscriptionStatusEnum('status').notNull().default('active'),
+    currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
+    currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+    stripeCustomerId: text('stripe_customer_id'),
+    stripeSubscriptionId: text('stripe_subscription_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_subscriptions_org_idx').on(t.orgId),
+    index('tc_subscriptions_status_idx').on(t.status),
+  ],
+)

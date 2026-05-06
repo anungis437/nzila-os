@@ -7,15 +7,28 @@
  * grouped by entityType and ordered chronologically.
  *
  * Access: org_admin, auditor
+ * Plan:   PRO / PREMIUM required
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { listTrustcoreEvidenceEvents } from '@nzila/db/queries/trustcore'
+import { getResolvedSubscription } from '@/lib/billing/getSubscription'
+import { gateEvidenceExport } from '@/lib/billing/featureAccess'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'platform_admin'],
   async (_request: NextRequest, ctx) => {
+    // ── Billing gate ──────────────────────────────────────────────────────
+    const subscription = await getResolvedSubscription(ctx.orgId)
+    const gate = gateEvidenceExport(subscription)
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { success: false, error: gate.error, feature: gate.feature, message: gate.message },
+        { status: 403 },
+      )
+    }
+
     const events = await listTrustcoreEvidenceEvents(ctx.orgId)
 
     // Group by entityType, ordered chronologically within each group

@@ -7,6 +7,7 @@
  * Supports JSON and PDF formats.
  *
  * Access: org_admin only (RBAC enforced)
+ * Plan:   PRO / PREMIUM required
  *
  * Body: { format: 'json' | 'pdf' }
  */
@@ -16,10 +17,22 @@ import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { generateComplianceReport } from '@/lib/compliance/report'
 import { listTrustcoreEvidenceEvents } from '@nzila/db/queries/trustcore'
 import { generateAuditPdf } from '@/lib/compliance/pdf'
+import { getResolvedSubscription } from '@/lib/billing/getSubscription'
+import { gateAuditExport } from '@/lib/billing/featureAccess'
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
   async (request: NextRequest, ctx) => {
+    // ── Billing gate ──────────────────────────────────────────────────────
+    const subscription = await getResolvedSubscription(ctx.orgId)
+    const gate = gateAuditExport(subscription)
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { success: false, error: gate.error, feature: gate.feature, message: gate.message },
+        { status: 403 },
+      )
+    }
+
     let format: 'json' | 'pdf' = 'json'
     try {
       const body = await request.json() as { format?: unknown }

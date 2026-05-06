@@ -27,8 +27,11 @@ import {
   listTrustcoreVendors,
   listTrustcorePolicies,
   upsertTrustcoreReminder,
+  countActiveTrustcoreReminders,
 } from '@nzila/db/queries/trustcore'
-import type { TrustcoreReminder } from '@nzila/db/queries/trustcore'
+import type { TrustcoreReminder, NewTrustcoreReminder } from '@nzila/db/queries/trustcore'
+import { getResolvedSubscription } from '@/lib/billing/getSubscription'
+import { gateReminderCreate } from '@/lib/billing/featureAccess'
 
 // ── Time helpers ───────────────────────────────────────────────────────────
 
@@ -48,11 +51,17 @@ function ageInDays(date: Date): number {
  * Inspect all org data and create/upsert reminders for outstanding
  * Law 25 obligations.
  *
+ * FREE orgs: capped at FREE_REMINDER_LIMIT active reminders.
+ * PRO/PREMIUM orgs: unlimited.
+ *
  * @returns All reminders created or found (may include pre-existing ones).
  */
 export async function generateTrustcoreReminders(
   orgId: string,
 ): Promise<TrustcoreReminder[]> {
+  // Resolve subscription for billing gate
+  const subscription = await getResolvedSubscription(orgId)
+
   // Batch-load all compliance data in parallel
   const [programs, assets, pias, incidents, dsrRequests, vendors, policies] = await Promise.all([
     listTrustcorePrivacyPrograms(orgId),
@@ -66,13 +75,23 @@ export async function generateTrustcoreReminders(
 
   const results: TrustcoreReminder[] = []
 
+  // Helper: upsert a reminder only if the billing gate allows it.
+  // Returns the reminder on success, null when the limit is reached.
+  async function maybeUpsert(
+    input: NewTrustcoreReminder,
+  ): Promise<TrustcoreReminder | null> {
+    const activeCount = await countActiveTrustcoreReminders(orgId)
+    const gate = gateReminderCreate(subscription, activeCount)
+    if (!gate.allowed) return null
+    return upsertTrustcoreReminder(input)
+  }
+
   // ── A. Privacy Program ─────────────────────────────────────────────────
 
   const activeProgram = programs.find((p) => p.status === 'active')
 
   if (!activeProgram) {
-    results.push(
-      await upsertTrustcoreReminder({
+    const _r = await maybeUpsert({
         orgId,
         sourceType: 'privacy_program',
         sourceId: null,
@@ -83,15 +102,14 @@ export async function generateTrustcoreReminders(
         dueAt: daysFromNow(7),
         status: 'open',
         actionUrl: '/onboarding',
-      }),
-    )
+      })
+    if (_r) results.push(_r)
   } else {
     // Annual review
     if (activeProgram.lastReviewedAt) {
       const age = ageInDays(activeProgram.lastReviewedAt)
       if (age >= 365) {
-        results.push(
-          await upsertTrustcoreReminder({
+        const _r = await maybeUpsert({
             orgId,
             sourceType: 'privacy_program',
             sourceId: activeProgram.id,
@@ -101,15 +119,14 @@ export async function generateTrustcoreReminders(
             dueAt: new Date(activeProgram.lastReviewedAt.getTime() + 365 * MS_DAY),
             status: 'open',
             actionUrl: '/compliance',
-          }),
-        )
+          })
+        if (_r) results.push(_r)
       }
     }
 
     // Missing privacy officer email
     if (!activeProgram.privacyOfficerEmail) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'privacy_program',
           sourceId: activeProgram.id,
@@ -120,8 +137,8 @@ export async function generateTrustcoreReminders(
           dueAt: daysFromNow(14),
           status: 'open',
           actionUrl: '/compliance',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 
@@ -138,8 +155,7 @@ export async function generateTrustcoreReminders(
 
     if (dueMs < now) {
       // Overdue
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'dsr_request',
           sourceId: dsr.id,
@@ -149,11 +165,10 @@ export async function generateTrustcoreReminders(
           dueAt: dsr.dueAt,
           status: 'overdue',
           actionUrl: '/requests',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     } else if (daysUntilDue <= 3) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'dsr_request',
           sourceId: dsr.id,
@@ -163,11 +178,10 @@ export async function generateTrustcoreReminders(
           dueAt: dsr.dueAt,
           status: 'open',
           actionUrl: '/requests',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     } else if (daysUntilDue <= 7) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'dsr_request',
           sourceId: dsr.id,
@@ -177,8 +191,8 @@ export async function generateTrustcoreReminders(
           dueAt: dsr.dueAt,
           status: 'open',
           actionUrl: '/requests',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 
@@ -190,8 +204,7 @@ export async function generateTrustcoreReminders(
 
     // CAI reporting
     if (incident.seriousHarmLikely && !incident.reportedToCai) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'incident',
           sourceId: incident.id,
@@ -202,14 +215,13 @@ export async function generateTrustcoreReminders(
           dueAt: new Date(incident.dateDetected.getTime() + 72 * 60 * 60 * 1000),
           status: 'open',
           actionUrl: '/incidents',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
 
     // Stalled open > 30 days
     if (isOpen && ageInDays(incident.createdAt) > 30) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'incident',
           sourceId: incident.id,
@@ -220,8 +232,8 @@ export async function generateTrustcoreReminders(
           dueAt: daysFromNow(7),
           status: 'open',
           actionUrl: '/incidents',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 
@@ -233,8 +245,7 @@ export async function generateTrustcoreReminders(
     const isHighRisk = vendor.riskLevel === 'high' || vendor.riskLevel === 'critical'
 
     if (isHighRisk && !vendor.contractReviewed) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'vendor',
           sourceId: vendor.id,
@@ -244,13 +255,12 @@ export async function generateTrustcoreReminders(
           dueAt: daysFromNow(30),
           status: 'open',
           actionUrl: '/vendors',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
 
     if (vendor.crossBorderTransfer && !vendor.contractReviewed) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'vendor',
           sourceId: vendor.id,
@@ -260,8 +270,8 @@ export async function generateTrustcoreReminders(
           dueAt: daysFromNow(30),
           status: 'open',
           actionUrl: '/vendors',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 
@@ -275,8 +285,7 @@ export async function generateTrustcoreReminders(
     const age = ageInDays(policy.createdAt)
     if (age >= 365) {
       const label = policy.type === 'privacy_policy' ? 'Privacy Policy' : 'Data Governance Policy'
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'policy',
           sourceId: policy.id,
@@ -286,15 +295,14 @@ export async function generateTrustcoreReminders(
           dueAt: new Date(policy.createdAt.getTime() + 365 * MS_DAY),
           status: 'open',
           actionUrl: '/policies',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 
   // Policies missing entirely
   if (!policyTypesSeen.has('privacy_policy')) {
-    results.push(
-      await upsertTrustcoreReminder({
+    const _r = await maybeUpsert({
         orgId,
         sourceType: 'policy',
         sourceId: null,
@@ -305,13 +313,12 @@ export async function generateTrustcoreReminders(
         dueAt: daysFromNow(14),
         status: 'open',
         actionUrl: '/onboarding',
-      }),
-    )
+      })
+    if (_r) results.push(_r)
   }
 
   if (!policyTypesSeen.has('data_governance')) {
-    results.push(
-      await upsertTrustcoreReminder({
+    const _r = await maybeUpsert({
         orgId,
         sourceType: 'policy',
         sourceId: null,
@@ -322,8 +329,8 @@ export async function generateTrustcoreReminders(
         dueAt: daysFromNow(30),
         status: 'open',
         actionUrl: '/onboarding',
-      }),
-    )
+      })
+    if (_r) results.push(_r)
   }
 
   // ── F. Data Assets ─────────────────────────────────────────────────────
@@ -337,8 +344,7 @@ export async function generateTrustcoreReminders(
     // Flag each high/critical asset when the org has no PIAs at all.
     // This is intentionally conservative: once a PIA is created, reminders stop.
     if (needsPia && !hasPias) {
-      results.push(
-        await upsertTrustcoreReminder({
+      const _r = await maybeUpsert({
           orgId,
           sourceType: 'data_asset',
           sourceId: asset.id,
@@ -348,8 +354,8 @@ export async function generateTrustcoreReminders(
           dueAt: daysFromNow(30),
           status: 'open',
           actionUrl: '/pia',
-        }),
-      )
+        })
+      if (_r) results.push(_r)
     }
   }
 

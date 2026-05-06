@@ -20,9 +20,12 @@ import {
   InformationCircleIcon,
   UserIcon,
   BuildingOffice2Icon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline'
 import { evaluateCompliance } from '@/lib/compliance/engine'
 import { listTrustcorePrivacyPrograms } from '@nzila/db/queries/trustcore'
+import { getResolvedSubscription } from '@/lib/billing/getSubscription'
+import { gateTrustCenter } from '@/lib/billing/featureAccess'
 import type { ComplianceEvaluation } from '@/types/core'
 
 export const dynamic = 'force-dynamic'
@@ -67,6 +70,23 @@ export default async function TrustCenterPage({
   params: Promise<{ orgId: string }>
 }) {
   const { orgId } = await params
+
+  // ── Billing gate (server-side) ────────────────────────────────────────────
+  const subscription = await getResolvedSubscription(orgId)
+  const gate = gateTrustCenter(subscription)
+  if (!gate.allowed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-md text-center">
+          <LockClosedIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Trust Center Unavailable</h1>
+          <p className="text-sm text-gray-500">
+            This organization&apos;s Trust Center is not publicly available on their current plan.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   // Fetch evaluation and privacy program in parallel
   const [evaluation, programs] = await Promise.all([

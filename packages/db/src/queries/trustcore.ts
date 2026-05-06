@@ -20,6 +20,7 @@ import {
   trustcoreComplianceSnapshots,
   trustcorePolicies,
   trustcoreReminders,
+  trustcoreSubscriptions,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -44,6 +45,8 @@ export type NewTrustcoreComplianceSnapshot = typeof trustcoreComplianceSnapshots
 export type NewTrustcorePolicy = typeof trustcorePolicies.$inferInsert
 export type TrustcoreReminder = typeof trustcoreReminders.$inferSelect
 export type NewTrustcoreReminder = typeof trustcoreReminders.$inferInsert
+export type TrustcoreSubscription = typeof trustcoreSubscriptions.$inferSelect
+export type NewTrustcoreSubscription = typeof trustcoreSubscriptions.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
@@ -574,4 +577,67 @@ export async function getTrustcoreReminder(
     .where(and(eq(trustcoreReminders.id, id), eq(trustcoreReminders.orgId, orgId)))
     .limit(1)
   return row ?? null
+}
+
+// ── Subscription helpers ────────────────────────────────────────────────────
+
+/**
+ * Return the subscription record for an org, or null if none exists.
+ * Callers should fall back to FREE when null is returned.
+ */
+export async function getTrustcoreSubscription(
+  orgId: string,
+): Promise<TrustcoreSubscription | null> {
+  const [row] = await db
+    .select()
+    .from(trustcoreSubscriptions)
+    .where(eq(trustcoreSubscriptions.orgId, orgId))
+    .limit(1)
+  return row ?? null
+}
+
+/**
+ * Upsert a subscription record for an org.
+ * Inserts if none exists; updates plan/status/period/stripe fields if one does.
+ */
+export async function upsertTrustcoreSubscription(
+  input: NewTrustcoreSubscription,
+): Promise<TrustcoreSubscription> {
+  const existing = await getTrustcoreSubscription(input.orgId)
+  if (!existing) {
+    const [row] = await db
+      .insert(trustcoreSubscriptions)
+      .values(input)
+      .returning()
+    if (!row) throw new Error('upsertTrustcoreSubscription: insert returned no row')
+    return row
+  }
+
+  const [row] = await db
+    .update(trustcoreSubscriptions)
+    .set({
+      plan: input.plan ?? existing.plan,
+      status: input.status ?? existing.status,
+      currentPeriodStart: input.currentPeriodStart ?? existing.currentPeriodStart,
+      currentPeriodEnd: input.currentPeriodEnd ?? existing.currentPeriodEnd,
+      stripeCustomerId: input.stripeCustomerId ?? existing.stripeCustomerId,
+      stripeSubscriptionId: input.stripeSubscriptionId ?? existing.stripeSubscriptionId,
+      updatedAt: new Date(),
+    })
+    .where(eq(trustcoreSubscriptions.orgId, input.orgId))
+    .returning()
+  if (!row) throw new Error('upsertTrustcoreSubscription: update returned no row')
+  return row
+}
+
+/**
+ * Count active (open/overdue) reminders for an org.
+ * Used by billing gate to enforce FREE tier limit.
+ */
+export async function countActiveTrustcoreReminders(orgId: string): Promise<number> {
+  const rows = await db
+    .select()
+    .from(trustcoreReminders)
+    .where(eq(trustcoreReminders.orgId, orgId))
+  return rows.filter((r) => r.status === 'open' || r.status === 'overdue').length
 }
