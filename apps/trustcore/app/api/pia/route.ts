@@ -6,13 +6,15 @@ import {
 } from '@nzila/db/queries/trustcore'
 import { logEvent } from '@/lib/evidence/logEvent'
 import { createPiaSchema } from '@/lib/validation/pia'
+import { withNzilaSpan } from '@nzila/otel-core'
 
 export const GET = withRequiredRole(
   ['org_admin', 'auditor', 'staff', 'platform_admin'],
-  async (_request: NextRequest, ctx) => {
-    const data = await listTrustcorePias(ctx.orgId)
-    return NextResponse.json({ success: true, data, meta: { orgId: ctx.orgId, total: data.length } })
-  },
+  async (_request: NextRequest, ctx) =>
+    withNzilaSpan('trustcore.pia.list', ctx.orgId, async () => {
+      const data = await listTrustcorePias(ctx.orgId)
+      return NextResponse.json({ success: true, data, meta: { orgId: ctx.orgId, total: data.length } })
+    }),
 )
 
 export const POST = withRequiredRole(
@@ -26,16 +28,18 @@ export const POST = withRequiredRole(
         { status: 400 },
       )
     }
-    const pia = await createTrustcorePia({ orgId: ctx.orgId, ...parsed.data })
-    await logEvent({
-      orgId: ctx.orgId,
-      actorId: ctx.userId,
-      entityType: 'pia',
-      entityId: pia.id,
-      action: 'pia_created',
-      metadata: { title: pia.title, triggerType: pia.triggerType, riskScore: pia.riskScore },
+    return withNzilaSpan('trustcore.pia.create', ctx.orgId, async () => {
+      const pia = await createTrustcorePia({ orgId: ctx.orgId, ...parsed.data })
+      await logEvent({
+        orgId: ctx.orgId,
+        actorId: ctx.userId,
+        entityType: 'pia',
+        entityId: pia.id,
+        action: 'pia_created',
+        metadata: { title: pia.title, triggerType: pia.triggerType, riskScore: pia.riskScore },
+      })
+      return NextResponse.json({ success: true, data: pia }, { status: 201 })
     })
-    return NextResponse.json({ success: true, data: pia }, { status: 201 })
   },
 )
 
