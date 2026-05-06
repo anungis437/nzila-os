@@ -42,7 +42,7 @@ export async function generateMetadata({
   const { orgId } = await params
   const programs = await listTrustcorePrivacyPrograms(orgId).catch(() => [])
   const activeProgram = programs.find((p) => p.status === 'active') ?? null
-  const orgName = activeProgram?.orgName ?? orgId
+  const orgName = activeProgram?.framework ? `${orgId} (${activeProgram.framework.toUpperCase()})` : orgId
 
   return {
     title: `Trust Center — ${orgName}`,
