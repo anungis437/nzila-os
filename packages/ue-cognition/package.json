@@ -29,7 +29,7 @@
     "@nzila/platform-decision-engine": "workspace:*"
   },
   "devDependencies": {
-    "vitest": "^4.1.2",
+    "vitest": "^4.1.5",
     "typescript": "^6",
     "tsx": "^4.20.0"
   }
