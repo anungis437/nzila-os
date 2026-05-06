@@ -36,7 +36,7 @@
     "@nzila/platform-reasoning-engine": "workspace:*",
     "@nzila/platform-semantic-search": "workspace:*",
     "drizzle-orm": "^0.39.0",
-    "postgres": "^3.4.5",
+    "postgres": "^3.4.9",
     "zod": "^3.24.0"
   },
   "devDependencies": {
