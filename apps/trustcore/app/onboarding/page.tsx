@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   // Prevent re-running if already completed
   const program = await getActivePrivacyProgram(ctx.orgId)
   if (program?.onboardingCompletedAt) {
-    redirect('/')
+    redirect('/dashboard')
   }
 
   return <OnboardingWizard orgId={ctx.orgId} />

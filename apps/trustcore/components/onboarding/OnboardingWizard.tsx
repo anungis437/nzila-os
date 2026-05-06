@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldCheckIcon, CheckCircleIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { ShieldCheckIcon, CheckCircleIcon, ArrowLeftIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import {
   step1Schema,
   step2Schema,
@@ -616,6 +616,7 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
   const [state, setState] = useState<WizardState>(DEFAULT_STATE)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -700,15 +701,15 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
         if (res.status === 409) {
           // Already onboarded — redirect to dashboard
           localStorage.removeItem(storageKey)
-          router.push('/')
+          router.push('/dashboard')
           return
         }
         throw new Error((body as { error?: string }).error ?? `Server error ${res.status}`)
       }
 
-      // Clear saved state on success
+      // Clear saved state on success, show upgrade modal before redirecting
       localStorage.removeItem(storageKey)
-      router.push('/')
+      setShowUpgradeModal(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'An unexpected error occurred')
       setIsSubmitting(false)
@@ -718,7 +719,53 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
   const canProceed = isStepValid(state, state.step)
 
   return (
-    <div className="w-full max-w-xl">
+    <>
+      {/* Post-onboarding upgrade modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircleIcon className="h-14 w-14 text-teal-500" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">You&apos;re set up.</h2>
+            <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+              Your compliance program is live. Unlock your audit report and shareable Trust Center to go from &ldquo;set up&rdquo; to &ldquo;buyer-ready&rdquo;.
+            </p>
+
+            <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-6 text-left">
+              <p className="text-sm font-semibold text-teal-800 mb-2 flex items-center gap-2">
+                <SparklesIcon className="h-4 w-4 shrink-0" />
+                Upgrade to Pro unlocks:
+              </p>
+              <ul className="text-sm text-teal-700 space-y-1">
+                <li>✓ Audit export (JSON + PDF)</li>
+                <li>✓ Evidence bundle export</li>
+                <li>✓ Shareable public Trust Center</li>
+                <li>✓ Unlimited compliance reminders</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <a
+                href="/billing"
+                className="w-full py-3 px-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition text-sm flex items-center justify-center gap-2"
+              >
+                <SparklesIcon className="h-4 w-4" />
+                Upgrade to Pro
+              </a>
+              <button
+                type="button"
+                onClick={() => router.push('/dashboard')}
+                className="w-full py-2.5 px-6 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition text-sm"
+              >
+                Continue with Free — see what to fix next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="w-full max-w-xl">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex justify-center mb-3">
@@ -816,5 +863,6 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
         Your progress is saved automatically. You can close this page and resume anytime.
       </p>
     </div>
+    </>
   )
 }

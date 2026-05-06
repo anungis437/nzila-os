@@ -500,8 +500,8 @@ export async function listTrustcoreReminders(
     const sb = SEVERITY_ORDER[b.severity] ?? 99
     if (sa !== sb) return sa - sb
     const da = a.dueAt?.getTime() ?? Infinity
-    const db = b.dueAt?.getTime() ?? Infinity
-    return da - db
+    const dueB = b.dueAt?.getTime() ?? Infinity
+    return da - dueB
   })
 }
 

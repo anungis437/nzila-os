@@ -22,7 +22,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Compliance Status', href: '/compliance', icon: ShieldCheckIcon },
   { name: 'Data Inventory', href: '/data-inventory', icon: CircleStackIcon },
   { name: 'PIAs', href: '/pia', icon: DocumentMagnifyingGlassIcon },
@@ -40,7 +40,7 @@ export function TrustCoreSidebar() {
   return (
     <aside className="hidden md:flex w-64 border-r border-gray-200 bg-white flex-col h-screen sticky top-0">
       <div className="p-5 border-b border-gray-100">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <ShieldCheckIcon className="h-6 w-6 text-teal-600" />
           <span className="text-lg font-bold text-gray-900">TrustCore</span>
         </Link>
