@@ -67,3 +67,4 @@ export {
 export {
   reasoningChains,
 } from '@nzila/platform-reasoning-engine/schema'
+export * from './trustcore'
