@@ -60,7 +60,7 @@ export default async function HowItWorksPage() {
             ))}
           </div>
 
-          <div className="mt-12 rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white">
+          <div className="mt-12 rounded-4xl border border-slate-200 bg-slate-950 p-8 text-white">
             <div className="flex items-start gap-4">
               <div className="rounded-2xl border border-teal-400/20 bg-teal-400/10 p-3">
                 <BoltIcon className="h-6 w-6 text-teal-300" />

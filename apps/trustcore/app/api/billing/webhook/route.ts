@@ -31,13 +31,12 @@ export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-  // ── No Stripe configured — log and ack ───────────────────────────────────
+  // ── No Stripe configured — fail closed ───────────────────────────────────
   if (!stripeKey || !webhookSecret) {
-    console.info('[TrustCore billing webhook] received (Stripe not yet configured)', {
-      bodyLength: body.length,
-      sig,
-    })
-    return NextResponse.json({ received: true, note: 'Stripe not yet configured' })
+    return NextResponse.json(
+      { error: 'Billing webhook is unavailable because Stripe is not configured' },
+      { status: 503 },
+    )
   }
 
   // ── Signature verification ───────────────────────────────────────────────

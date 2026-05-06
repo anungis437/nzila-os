@@ -16,6 +16,7 @@ export function LanguageSwitcher({ currentLocale = 'fr-CA' }: LanguageSwitcherPr
 
   function switchLocale(code: string) {
     if (code === currentLocale) return
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `NEXT_LOCALE=${code};path=/;max-age=31536000;SameSite=Lax`
     router.refresh()
   }

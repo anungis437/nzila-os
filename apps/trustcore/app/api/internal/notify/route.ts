@@ -1,11 +1,10 @@
 /**
- * TrustCore — Internal Notification Hook (dev stub)
+ * TrustCore — Internal Notification Hook
  *
  * POST /api/internal/notify
  *
- * Lightweight email notification hook. In production this would
- * call an SMTP provider or transactional email service. For now
- * it logs the event and returns 200 — ready to be wired up.
+ * Sends internal notifications through the platform notification
+ * service and transactional email providers.
  *
  * Access: platform_admin or internal service (no public access)
  *

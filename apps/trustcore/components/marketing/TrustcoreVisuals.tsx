@@ -91,7 +91,7 @@ export function DossierStackVisual({
   items: string[]
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-xl shadow-slate-300/30">
+    <div className="relative overflow-hidden rounded-4xl border border-slate-200 bg-slate-950 p-6 text-white shadow-xl shadow-slate-300/30">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.22),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
       <div className="relative">
         <p className="text-xs font-semibold uppercase tracking-[0.26em] text-teal-300">{eyebrow}</p>
