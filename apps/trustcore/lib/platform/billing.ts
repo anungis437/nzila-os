@@ -45,6 +45,8 @@ function mapPlatformPlanToTrustcore(plan: PlanTier): TrustcorePlan {
     case 'starter':
       return 'free'
   }
+
+  return 'free'
 }
 
 function mapStatus(status: string | null | undefined): SubscriptionStatus {

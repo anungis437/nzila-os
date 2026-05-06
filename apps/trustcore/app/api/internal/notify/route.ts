@@ -74,6 +74,7 @@ export const POST = withRequiredRole(
     })
 
     const emailResult = await sendTrustcoreEmail({
+      orgId: ctx.orgId,
       to: email,
       subject: content.title,
       body: `${content.body}\n\n${JSON.stringify(metadata ?? {}, null, 2)}`,

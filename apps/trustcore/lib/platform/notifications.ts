@@ -9,6 +9,7 @@ import {
 } from '@nzila/comms-email'
 
 type EmailPayload = {
+  orgId: string
   to: string
   subject: string
   body: string
@@ -96,9 +97,12 @@ export async function sendTrustcoreEmail(payload: EmailPayload): Promise<{
 
   const result = await provider.adapter.send(
     {
+      orgId: payload.orgId,
+      channel: 'email',
       to: payload.to,
       subject: payload.subject,
       body: payload.body,
+      correlationId: crypto.randomUUID(),
     },
     provider.credentials,
   )

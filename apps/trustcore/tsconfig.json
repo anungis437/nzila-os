@@ -7,7 +7,16 @@
       "@nzila/db": ["../../packages/db/src/index.ts"],
       "@nzila/db/schema": ["../../packages/db/src/schema/index.ts"],
       "@nzila/db/client": ["../../packages/db/src/client.ts"],
-      "@nzila/db/queries/trustcore": ["../../packages/db/src/queries/trustcore.ts"]
+      "@nzila/db/queries/trustcore": ["../../packages/db/src/queries/trustcore.ts"],
+      "@nzila/otel-core": ["../../packages/otel-core/src/index.ts"],
+      "@nzila/platform-event-fabric": ["../../packages/platform-event-fabric/src/index.ts"],
+      "@nzila/audit": ["../../packages/audit/src/index.ts"],
+      "@nzila/evidence": ["../../packages/evidence/index.d.ts"],
+      "@nzila/platform-billing": ["../../packages/platform-billing/src/index.ts"],
+      "@nzila/platform-notifications": ["../../packages/platform-notifications/src/index.ts"],
+      "@nzila/comms-email": ["../../packages/comms-email/src/index.ts"],
+      "@nzila/platform-contracts": ["../../packages/platform-contracts/src/index.ts"],
+      "@nzila/platform-contracts/*": ["../../packages/platform-contracts/src/*"]
     }
   },
   "include": [
