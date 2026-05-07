@@ -14,12 +14,12 @@ import { OntologyEntityTypes, RelationshipTypes } from '@nzila/platform-ontology
 const TENANT = 'platform-admin'
 
 const SEED_NODES: EntityNode[] = [
-  { entityType: OntologyEntityTypes.ORGANIZATION, entityId: 'org-001', tenantId: TENANT, canonicalName: 'Nzila Corp', status: 'active', metadata: {} },
-  { entityType: OntologyEntityTypes.USER, entityId: 'usr-001', tenantId: TENANT, canonicalName: 'John Doe', status: 'active', metadata: { role: 'admin' } },
-  { entityType: OntologyEntityTypes.CASE, entityId: 'case-001', tenantId: TENANT, canonicalName: 'Onboarding Case #1', status: 'open', metadata: {} },
-  { entityType: OntologyEntityTypes.DOCUMENT, entityId: 'doc-001', tenantId: TENANT, canonicalName: 'KYC Document', status: 'verified', metadata: {} },
-  { entityType: OntologyEntityTypes.WORKFLOW, entityId: 'wf-001', tenantId: TENANT, canonicalName: 'Org Onboarding Flow', status: 'active', metadata: {} },
-  { entityType: OntologyEntityTypes.APPROVAL, entityId: 'appr-001', tenantId: TENANT, canonicalName: 'KYC Approval', status: 'pending', metadata: {} },
+  { entityType: OntologyEntityTypes.ORGANIZATION, resourceId: 'org-001', tenantId: TENANT, canonicalName: 'Nzila Corp', status: 'active', metadata: {} },
+  { entityType: OntologyEntityTypes.USER, resourceId: 'usr-001', tenantId: TENANT, canonicalName: 'John Doe', status: 'active', metadata: { role: 'admin' } },
+  { entityType: OntologyEntityTypes.CASE, resourceId: 'case-001', tenantId: TENANT, canonicalName: 'Onboarding Case #1', status: 'open', metadata: {} },
+  { entityType: OntologyEntityTypes.DOCUMENT, resourceId: 'doc-001', tenantId: TENANT, canonicalName: 'KYC Document', status: 'verified', metadata: {} },
+  { entityType: OntologyEntityTypes.WORKFLOW, resourceId: 'wf-001', tenantId: TENANT, canonicalName: 'Org Onboarding Flow', status: 'active', metadata: {} },
+  { entityType: OntologyEntityTypes.APPROVAL, resourceId: 'appr-001', tenantId: TENANT, canonicalName: 'KYC Approval', status: 'pending', metadata: {} },
 ]
 
 const SEED_EDGES = [
@@ -58,12 +58,12 @@ export default function EntityGraphExplorer() {
 
     if (mode === 'subgraph') {
       const subgraph = await buildEntitySubgraph(
-        store, TENANT, node.entityType, node.entityId, depth,
+        store, TENANT, node.entityType, node.resourceId, depth,
       )
       setResult(subgraph ? JSON.stringify(subgraph, null, 2) : 'No subgraph found')
     } else {
       const neighbors = await getEntityNeighbors(
-        store, TENANT, node.entityType, node.entityId,
+        store, TENANT, node.entityType, node.resourceId,
       )
       setResult(JSON.stringify(neighbors, null, 2))
     }
