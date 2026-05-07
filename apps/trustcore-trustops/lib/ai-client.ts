@@ -1,0 +1,57 @@
+/**
+ * AI client — TrustCore TrustOps app.
+ *
+ * Provides a singleton AI client for trust operations intelligence:
+ * mandate risk scoring, escalation pattern detection, and audit trail analysis.
+ *
+ * All AI calls are routed through the governed @nzila/ai-sdk layer
+ * (profiles, budgets, redaction, auditing).
+ */
+import {
+  buildAiEngineVersion,
+  createAiClient,
+  type AiClient,
+  type AiExecutionTelemetry,
+  type DataClass,
+  type EmbedResult,
+  type ExtractResult,
+  type GenerateResult,
+} from '@nzila/ai-sdk'
+
+const APP_KEY = 'trustcore-trustops'
+
+let _client: AiClient | null = null
+
+function resolveAiBaseUrl(): string {
+  const configured = process.env.AI_CORE_URL?.trim()
+  if (configured) return configured
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    return 'http://localhost:4100'
+  }
+  throw new Error('Missing required environment variable outside dev/test: AI_CORE_URL')
+}
+
+function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResult): AiExecutionTelemetry {
+  const provider = 'provider' in result ? result.provider : 'ai'
+  const modelUsed = 'model' in result ? result.model : 'unknown'
+  const tokensIn = 'tokensIn' in result ? result.tokensIn : 'tokensUsed' in result ? result.tokensUsed : null
+  const tokensOut = 'tokensOut' in result ? result.tokensOut : null
+  const tokenCostUsd = 'costUsd' in result ? result.costUsd : null
+  const latencyMs = 'latencyMs' in result ? result.latencyMs : null
+  return { provider, modelUsed, tokensIn, tokensOut, tokenCostUsd, latencyMs }
+}
+
+export function getAiClient(): AiClient {
+  if (!_client) {
+    _client = createAiClient({
+      appKey: APP_KEY,
+      baseUrl: resolveAiBaseUrl(),
+      getToken: () => process.env.AI_API_KEY ?? '',
+      engineVersion: buildAiEngineVersion(APP_KEY),
+    })
+  }
+  return _client
+}
+
+export { toExecutionTelemetry }
+export type { AiClient, AiExecutionTelemetry, DataClass, EmbedResult, ExtractResult, GenerateResult }
