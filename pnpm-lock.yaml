@@ -7180,15 +7180,6 @@ importers:
 
   packages/trustcore-core:
     dependencies:
-      '@nzila/db':
-        specifier: workspace:*
-        version: link:../db
-      '@nzila/os-core':
-        specifier: workspace:*
-        version: link:../os-core
-      '@nzila/otel-core':
-        specifier: workspace:*
-        version: link:../otel-core
       drizzle-orm:
         specifier: '>=0.45.2'
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(@upstash/redis@1.37.0)(better-sqlite3@12.9.0)(gel@2.2.0)(pg@8.20.0)(postgres@3.4.8)

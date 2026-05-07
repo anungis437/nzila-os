@@ -123,7 +123,6 @@ export async function POST(req: NextRequest, { params }: Params) {
             generated_at: nowISO(),
           })
         } catch (err) {
-          // eslint-disable-next-line no-console
           console.warn('[trustops] saveDecisionRecord failed', err)
         }
 

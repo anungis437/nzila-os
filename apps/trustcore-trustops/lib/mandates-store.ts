@@ -82,7 +82,7 @@ const FIXTURE_CLAIMS: ProofOfClaimRecord[] = [
   { id: 'p-6', mandateId: 'm-002', creditorId: 'c-6', classification: 'unsecured', status: 'submitted', amountCents: 6_400_000 },
 ]
 
-const useFallback = (): boolean => process.env.NODE_ENV !== 'production'
+const shouldUseFallback = (): boolean => process.env.NODE_ENV !== 'production'
 
 export async function listMandates(orgId: string = DEMO_ORG_ID): Promise<ReadonlyArray<MandateRecord>> {
   const rows = await db
@@ -95,7 +95,7 @@ export async function listMandates(orgId: string = DEMO_ORG_ID): Promise<Readonl
     .from(trustopsMandates)
     .where(eq(trustopsMandates.orgId, orgId))
 
-  if (rows.length === 0 && useFallback()) return FIXTURE_MANDATES
+  if (rows.length === 0 && shouldUseFallback()) return FIXTURE_MANDATES
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -120,7 +120,7 @@ export async function getMandate(
     .limit(1)
 
   if (rows.length === 0) {
-    if (useFallback()) return FIXTURE_MANDATES.find((m) => m.id === id)
+    if (shouldUseFallback()) return FIXTURE_MANDATES.find((m) => m.id === id)
     return undefined
   }
   const r = rows[0]!
@@ -149,7 +149,7 @@ export async function getCreditors(
       and(eq(trustopsCreditors.mandateId, mandateId), eq(trustopsCreditors.orgId, orgId)),
     )
 
-  if (rows.length === 0 && useFallback()) {
+  if (rows.length === 0 && shouldUseFallback()) {
     return FIXTURE_CREDITORS.filter((c) => c.mandateId === mandateId)
   }
   return rows.map((r) => ({
@@ -184,7 +184,7 @@ export async function getClaims(
       ),
     )
 
-  if (rows.length === 0 && useFallback()) {
+  if (rows.length === 0 && shouldUseFallback()) {
     return FIXTURE_CLAIMS.filter((p) => p.mandateId === mandateId)
   }
   return rows.map((r) => ({
@@ -230,7 +230,7 @@ export async function transitionStage(
         actorUserId,
       })
     })
-  } else if (useFallback()) {
+  } else if (shouldUseFallback()) {
     const fixture = FIXTURE_MANDATES.find((m) => m.id === mandateId)
     if (fixture) fixture.stage = toStage
   }
