@@ -15,14 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
-      - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
-        with:
-          node-version: 20
-          cache: pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
 
-      - name: Enable corepack (pnpm)
-        run: corepack enable
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
