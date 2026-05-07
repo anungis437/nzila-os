@@ -40,7 +40,8 @@ const combinedSQL = sqlFiles.map(f => {
 }).join('\n');
 
 function isTableCreated(tableName) {
-  return new RegExp(`CREATE TABLE[\\s\\S]*?"${tableName}"`).test(combinedSQL);
+  // Must match CREATE TABLE (IF NOT EXISTS)? "tableName" — not just any occurrence after any CREATE TABLE
+  return new RegExp(`CREATE TABLE(?:\\s+IF\\s+NOT\\s+EXISTS)?\\s+"${tableName}"`, 'i').test(combinedSQL);
 }
 
 function isEnumCreated(enumName) {

@@ -2,8 +2,8 @@
 -- FIXUP MIGRATION: Create all tables present in snapshot but missing
 -- from the actual SQL migration files.
 --
--- Tables created: 166
--- Enums created: 5
+-- Tables created: 169
+-- Enums created: 12
 -- ============================================================================
 
 -- ============================================================================
@@ -23,7 +23,49 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+  CREATE TYPE "public"."cba_jurisdiction" AS ENUM('federal', 'ontario', 'bc', 'alberta', 'quebec', 'manitoba', 'saskatchewan', 'nova_scotia', 'new_brunswick', 'pei', 'newfoundland', 'northwest_territories', 'yukon', 'nunavut');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."cba_language" AS ENUM('en', 'fr', 'bilingual');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."cba_status" AS ENUM('active', 'expired', 'under_negotiation', 'ratified_pending', 'archived');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
   CREATE TYPE "public"."clause_type" AS ENUM('wages_compensation', 'benefits_insurance', 'working_conditions', 'grievance_arbitration', 'seniority_promotion', 'health_safety', 'union_rights', 'management_rights', 'duration_renewal', 'vacation_leave', 'hours_scheduling', 'disciplinary_procedures', 'training_development', 'pension_retirement', 'overtime', 'job_security', 'technological_change', 'workplace_rights', 'other');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."tribunal_type" AS ENUM('fpslreb', 'provincial_labour_board', 'private_arbitrator', 'court_federal', 'court_provincial', 'other');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."decision_type" AS ENUM('grievance', 'unfair_practice', 'certification', 'judicial_review', 'interpretation', 'scope_bargaining', 'other');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."outcome" AS ENUM('grievance_upheld', 'grievance_denied', 'partial_success', 'dismissed', 'withdrawn', 'settled');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."precedent_value" AS ENUM('high', 'medium', 'low');
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
@@ -45,6 +87,26 @@ END $$;
 -- SECTION 2: Tables
 -- ============================================================================
 
+CREATE TABLE IF NOT EXISTS "profiles" (
+  "user_id" text NOT NULL PRIMARY KEY,
+  "email" text,
+  "membership" membership DEFAULT 'free' NOT NULL,
+  "payment_provider" payment_provider DEFAULT 'whop',
+  "stripe_customer_id" text,
+  "stripe_subscription_id" text,
+  "whop_user_id" text,
+  "whop_membership_id" text,
+  "plan_duration" text,
+  "billing_cycle_start" timestamp,
+  "billing_cycle_end" timestamp,
+  "next_credit_renewal" timestamp,
+  "usage_credits" integer DEFAULT 0,
+  "used_credits" integer DEFAULT 0,
+  "status" text DEFAULT 'active',
+  "created_at" timestamp DEFAULT now() NOT NULL,
+  "updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pending_profiles" (
   "id" text NOT NULL PRIMARY KEY,
   "email" text NOT NULL,
@@ -90,6 +152,44 @@ CREATE TABLE IF NOT EXISTS "cba_version_history" (
   "new_data" jsonb,
   "created_at" timestamp with time zone DEFAULT now() NOT NULL,
   "created_by" uuid NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "collective_agreements" (
+  "id" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+  "organization_id" uuid NOT NULL,
+  "cba_number" varchar(100) NOT NULL,
+  "title" varchar(500) NOT NULL,
+  "jurisdiction" cba_jurisdiction NOT NULL,
+  "language" cba_language DEFAULT 'en' NOT NULL,
+  "employer_name" varchar(300) NOT NULL,
+  "employer_id" varchar(100),
+  "union_name" varchar(300) NOT NULL,
+  "union_local" varchar(100),
+  "union_id" varchar(100),
+  "effective_date" timestamp with time zone NOT NULL,
+  "expiry_date" timestamp with time zone NOT NULL,
+  "signed_date" timestamp with time zone,
+  "ratification_date" timestamp with time zone,
+  "industry_sector" varchar(200) NOT NULL,
+  "employee_coverage" integer,
+  "bargaining_unit_description" text,
+  "document_url" text,
+  "document_hash" varchar(64),
+  "raw_text" text,
+  "structured_data" jsonb,
+  "embedding" text,
+  "summary_generated" text,
+  "key_terms" jsonb,
+  "status" cba_status DEFAULT 'active' NOT NULL,
+  "is_public" boolean DEFAULT false,
+  "view_count" integer DEFAULT 0,
+  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+  "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+  "created_by" uuid,
+  "last_modified_by" uuid,
+  "version" integer DEFAULT 1 NOT NULL,
+  "superseded_by" uuid,
+  "precedes_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "benefit_comparisons" (
@@ -441,6 +541,44 @@ CREATE TABLE IF NOT EXISTS "security_events" (
   "resolved_by" uuid,
   "resolution_notes" text,
   "created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "arbitration_decisions" (
+  "id" uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+  "case_number" varchar(100) NOT NULL,
+  "case_title" varchar(500) NOT NULL,
+  "tribunal" tribunal_type NOT NULL,
+  "decision_type" decision_type NOT NULL,
+  "decision_date" timestamp with time zone NOT NULL,
+  "filing_date" timestamp with time zone,
+  "hearing_date" timestamp with time zone,
+  "arbitrator" varchar(200) NOT NULL,
+  "panel_members" jsonb,
+  "grievor" varchar(300),
+  "union" varchar(300) NOT NULL,
+  "employer" varchar(300) NOT NULL,
+  "outcome" outcome NOT NULL,
+  "remedy" jsonb,
+  "key_findings" jsonb,
+  "issue_types" jsonb,
+  "precedent_value" precedent_value NOT NULL,
+  "legal_citations" jsonb,
+  "related_decisions" jsonb,
+  "cba_references" jsonb,
+  "full_text" text NOT NULL,
+  "summary" text,
+  "headnote" text,
+  "sector" varchar(100),
+  "jurisdiction" varchar(50),
+  "language" varchar(10) DEFAULT 'en' NOT NULL,
+  "citation_count" integer DEFAULT 0,
+  "view_count" integer DEFAULT 0,
+  "embedding" text,
+  "is_public" boolean DEFAULT true,
+  "access_restrictions" text,
+  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+  "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+  "imported_from" varchar(200)
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "arbitrator_profiles" (
