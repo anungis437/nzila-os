@@ -4,8 +4,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,14 +93,88 @@ async function ensureBaseline() {
   }
 }
 
+/**
+ * Transform DO $$ blocks so FK additions are fault-tolerant.
+ *
+ * Migration 0001 adds FK constraints referencing the `organizations` table,
+ * which is only created in migration 0002. On a fresh database this causes
+ * an `undefined_table` error that Drizzle's default `EXCEPTION WHEN
+ * duplicate_object` handler does not catch, aborting the entire migration
+ * sequence. We widen the catch to `WHEN OTHERS` at execution time while
+ * preserving the original SQL content for hash comparison so that existing
+ * databases whose `__drizzle_migrations` table already records the original
+ * hash are not affected.
+ *
+ * A separate fixup migration (20260507_fixup_phase5b_org_fks.sql) re-adds
+ * these constraints after `organizations` is created by migration 0002.
+ */
+function faultTolerantSql(sql) {
+  // Replace EXCEPTION WHEN duplicate_object in ADD CONSTRAINT DO blocks only
+  return sql.replace(
+    /(DO \$\$ BEGIN[\s\S]*?ADD CONSTRAINT[\s\S]*?EXCEPTION\s*\n\s*)WHEN duplicate_object THEN null;(\s*\nEND \$\$;)/g,
+    '$1WHEN OTHERS THEN null;$2',
+  )
+}
+
 async function runMigrations() {
+  // Use a custom statement-level runner so we can apply faultTolerantSql()
+  // at execution time while hashing the *original* SQL for migration tracking.
   const client = new pg.Client({ connectionString: databaseUrl });
 
   try {
     await client.connect();
-    const db = drizzle(client);
-    await migrate(db, { migrationsFolder });
-    console.log('Drizzle migrations are up to date.');
+
+    await client.query('CREATE SCHEMA IF NOT EXISTS drizzle');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
+        id SERIAL PRIMARY KEY,
+        hash text NOT NULL,
+        created_at bigint
+      )
+    `);
+
+    const { rows: appliedRows } = await client.query(
+      'SELECT hash FROM drizzle.__drizzle_migrations',
+    );
+    const appliedHashes = new Set(appliedRows.map((r) => r.hash));
+
+    const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'));
+    const entries = [...journal.entries].sort((a, b) => a.idx - b.idx);
+
+    let applied = 0;
+    for (const entry of entries) {
+      const migrationPath = path.join(migrationsFolder, `${entry.tag}.sql`);
+      const originalSql = fs.readFileSync(migrationPath, 'utf8');
+      const hash = crypto.createHash('sha256').update(originalSql).digest('hex');
+
+      if (appliedHashes.has(hash)) continue;
+
+      const execSql = faultTolerantSql(originalSql);
+      const statements = execSql.split('--> statement-breakpoint');
+
+      await client.query('BEGIN');
+      try {
+        for (const stmt of statements) {
+          const trimmed = stmt.trim();
+          if (trimmed) await client.query(trimmed);
+        }
+        await client.query(
+          'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
+          [hash, entry.when],
+        );
+        await client.query('COMMIT');
+        applied++;
+      } catch (stmtError) {
+        await client.query('ROLLBACK');
+        throw stmtError;
+      }
+    }
+
+    console.log(
+      applied > 0
+        ? `Applied ${applied} migration(s). Drizzle migrations are up to date.`
+        : 'Drizzle migrations are up to date.',
+    );
   } catch (error) {
     console.error('Failed to run Drizzle migrations.');
     console.error(error instanceof Error ? error.message : String(error));
