@@ -66,6 +66,13 @@
       "breakpoints": true
     },
     {
+      "idx": 7.5,
+      "version": "7",
+      "when": 1770621520000,
+      "tag": "20260507_fixup_pre_0008_missing_tables",
+      "breakpoints": true
+    },
+    {
       "idx": 29,
       "breakpoints": true,
       "when": 1770621523496,
