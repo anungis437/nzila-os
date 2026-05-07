@@ -109,6 +109,9 @@ async function ensureBaseline() {
  * these constraints after `organizations` is created by migration 0002.
  */
 function faultTolerantSql(sql) {
+  // Fix malformed "DO DROP TYPE" statements — artifact of repeated migration block generation
+  // in 0008_lean_mother_askani.sql where sections start with "DO DROP TYPE" instead of "DROP TYPE"
+  sql = sql.replace(/\bDO DROP TYPE\b/g, 'DROP TYPE');
   // Replace EXCEPTION WHEN duplicate_object in ADD CONSTRAINT DO blocks only
   return sql.replace(
     /(DO \$\$ BEGIN[\s\S]*?ADD CONSTRAINT[\s\S]*?EXCEPTION\s*\n\s*)WHEN duplicate_object THEN null;(\s*\nEND \$\$;)/g,
