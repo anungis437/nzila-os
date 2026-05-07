@@ -32,7 +32,18 @@ async function resolveOrgId(): Promise<string | null> {
 function resolveRole(sessionClaims: Record<string, unknown> | null | undefined): Role {
   const meta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined
   const raw = meta?.trustcoreRole ?? meta?.nzilaRole
-  const allowed: Role[] = ['platform_admin', 'org_admin', 'staff', 'auditor']
+  const allowed: Role[] = [
+    'platform_admin',
+    'org_admin',
+    'compliance_officer',
+    'security_officer',
+    'privacy_officer',
+    'legal_reviewer',
+    'staff',
+    'external_auditor',
+    'auditor',
+    'read_only',
+  ]
   if (typeof raw === 'string' && (allowed as string[]).includes(raw)) {
     return raw as Role
   }

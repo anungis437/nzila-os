@@ -40,9 +40,9 @@ export async function generateMetadata({
   params: Promise<{ orgId: string }>
 }): Promise<Metadata> {
   const { orgId } = await params
-  const programs = await listTrustcorePrivacyPrograms(orgId).catch(() => [])
-  const activeProgram = programs.find((p) => p.status === 'active') ?? null
-  const orgName = activeProgram?.orgName ?? orgId
+  // Note: org display name is not yet stored on the privacy program row;
+  // fall back to the orgId until a name field is added to the schema.
+  const orgName = orgId
 
   return {
     title: `Trust Center — ${orgName}`,

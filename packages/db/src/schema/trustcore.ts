@@ -560,3 +560,124 @@ export const trustcoreLeads = pgTable(
     index('tc_leads_captured_at_idx').on(t.capturedAt),
   ],
 )
+
+// ── N) trustcoreRisks (Risk Register v1) ──────────────────────────────────
+
+export const tcRiskRegisterCategoryEnum = pgEnum('tc_risk_register_category', [
+  'privacy',
+  'cybersecurity',
+  'governance',
+  'operational_continuity',
+  'ai_governance',
+  'vendor_dependency',
+  'access_governance',
+  'legal_exposure',
+  'data_residency',
+  'incident_recurrence',
+])
+
+export const tcRiskRegisterSeverityEnum = pgEnum('tc_risk_register_severity', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+])
+
+export const tcRiskRegisterStatusEnum = pgEnum('tc_risk_register_status', [
+  'open',
+  'mitigating',
+  'accepted',
+  'transferred',
+  'closed',
+])
+
+export const tcRiskMitigationStatusEnum = pgEnum('tc_risk_mitigation_status', [
+  'planned',
+  'in_progress',
+  'completed',
+  'cancelled',
+])
+
+/**
+ * Trust Operations Risk Register entry. Org-scoped, deterministic,
+ * extends compliance-engine signals with structured risk tracking.
+ */
+export const trustcoreRisks = pgTable(
+  'trustcore_risks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    title: text('title').notNull(),
+    description: text('description'),
+    category: tcRiskRegisterCategoryEnum('category').notNull(),
+    severity: tcRiskRegisterSeverityEnum('severity').notNull(),
+    status: tcRiskRegisterStatusEnum('status').notNull().default('open'),
+    owner: text('owner'),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    evidenceRefs: jsonb('evidence_refs').$type<string[]>().notNull().default([]),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risks_org_idx').on(t.orgId),
+    index('tc_risks_org_status_idx').on(t.orgId, t.status),
+    index('tc_risks_org_severity_idx').on(t.orgId, t.severity),
+    index('tc_risks_org_category_idx').on(t.orgId, t.category),
+  ],
+)
+
+/**
+ * Reviews (acceptance/decision events) attached to a risk.
+ */
+export const trustcoreRiskReviews = pgTable(
+  'trustcore_risk_reviews',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    riskId: uuid('risk_id')
+      .notNull()
+      .references(() => trustcoreRisks.id, { onDelete: 'cascade' }),
+    reviewerName: text('reviewer_name').notNull(),
+    decision: text('decision').notNull(),
+    notes: text('notes'),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risk_reviews_org_idx').on(t.orgId),
+    index('tc_risk_reviews_risk_idx').on(t.riskId),
+  ],
+)
+
+/**
+ * Mitigation actions attached to a risk.
+ */
+export const trustcoreRiskMitigations = pgTable(
+  'trustcore_risk_mitigations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    riskId: uuid('risk_id')
+      .notNull()
+      .references(() => trustcoreRisks.id, { onDelete: 'cascade' }),
+    action: text('action').notNull(),
+    owner: text('owner'),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    status: tcRiskMitigationStatusEnum('status').notNull().default('planned'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risk_mitigations_org_idx').on(t.orgId),
+    index('tc_risk_mitigations_risk_idx').on(t.riskId),
+    index('tc_risk_mitigations_org_status_idx').on(t.orgId, t.status),
+  ],
+)

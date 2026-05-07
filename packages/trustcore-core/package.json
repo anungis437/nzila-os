@@ -1,0 +1,32 @@
+{
+  "name": "@nzila/trustcore-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./scoring": "./src/scoring/index.ts",
+    "./risks": "./src/risks/index.ts",
+    "./tasks": "./src/tasks/index.ts",
+    "./trust-engine": "./src/trust-engine/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/db": "workspace:*",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/otel-core": "workspace:*",
+    "drizzle-orm": "^0.39.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

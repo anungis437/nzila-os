@@ -22,6 +22,9 @@ import {
   trustcoreReminders,
   trustcoreSubscriptions,
   trustcoreLeads,
+  trustcoreRisks,
+  trustcoreRiskReviews,
+  trustcoreRiskMitigations,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -690,4 +693,111 @@ export async function convertTrustcoreLead(
  */
 export async function listTrustcoreLeads(): Promise<TrustcoreLead[]> {
   return db.select().from(trustcoreLeads).orderBy(desc(trustcoreLeads.capturedAt))
+}
+
+// ── Risk Register ─────────────────────────────────────────────────────────
+
+export type TrustcoreRisk = typeof trustcoreRisks.$inferSelect
+export type TrustcoreRiskReview = typeof trustcoreRiskReviews.$inferSelect
+export type TrustcoreRiskMitigation = typeof trustcoreRiskMitigations.$inferSelect
+
+export type NewTrustcoreRisk = typeof trustcoreRisks.$inferInsert
+export type NewTrustcoreRiskReview = typeof trustcoreRiskReviews.$inferInsert
+export type NewTrustcoreRiskMitigation = typeof trustcoreRiskMitigations.$inferInsert
+
+/**
+ * List all risks for an org, newest first.
+ */
+export async function listTrustcoreRisks(orgId: string): Promise<TrustcoreRisk[]> {
+  return db
+    .select()
+    .from(trustcoreRisks)
+    .where(eq(trustcoreRisks.orgId, orgId))
+    .orderBy(desc(trustcoreRisks.createdAt))
+}
+
+/**
+ * Get a single risk by id, scoped to org.
+ */
+export async function getTrustcoreRisk(
+  orgId: string,
+  riskId: string,
+): Promise<TrustcoreRisk | null> {
+  const [row] = await db
+    .select()
+    .from(trustcoreRisks)
+    .where(and(eq(trustcoreRisks.orgId, orgId), eq(trustcoreRisks.id, riskId)))
+    .limit(1)
+  return row ?? null
+}
+
+/**
+ * Create a new risk. orgId is mandatory.
+ */
+export async function createTrustcoreRisk(input: NewTrustcoreRisk): Promise<TrustcoreRisk> {
+  const [row] = await db.insert(trustcoreRisks).values(input).returning()
+  if (!row) throw new Error('createTrustcoreRisk: insert returned no row')
+  return row
+}
+
+/**
+ * Update a risk. Caller must pass orgId for safety.
+ */
+export async function updateTrustcoreRisk(
+  orgId: string,
+  riskId: string,
+  patch: Partial<NewTrustcoreRisk>,
+): Promise<TrustcoreRisk | null> {
+  const [row] = await db
+    .update(trustcoreRisks)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(and(eq(trustcoreRisks.orgId, orgId), eq(trustcoreRisks.id, riskId)))
+    .returning()
+  return row ?? null
+}
+
+/**
+ * Append a mitigation entry to a risk.
+ */
+export async function addTrustcoreRiskMitigation(
+  input: NewTrustcoreRiskMitigation,
+): Promise<TrustcoreRiskMitigation> {
+  const [row] = await db.insert(trustcoreRiskMitigations).values(input).returning()
+  if (!row) throw new Error('addTrustcoreRiskMitigation: insert returned no row')
+  return row
+}
+
+/**
+ * Append a review entry to a risk.
+ */
+export async function addTrustcoreRiskReview(
+  input: NewTrustcoreRiskReview,
+): Promise<TrustcoreRiskReview> {
+  const [row] = await db.insert(trustcoreRiskReviews).values(input).returning()
+  if (!row) throw new Error('addTrustcoreRiskReview: insert returned no row')
+  return row
+}
+
+/**
+ * List mitigations for a single risk, newest first.
+ */
+export async function listTrustcoreRiskMitigations(
+  riskId: string,
+): Promise<TrustcoreRiskMitigation[]> {
+  return db
+    .select()
+    .from(trustcoreRiskMitigations)
+    .where(eq(trustcoreRiskMitigations.riskId, riskId))
+    .orderBy(desc(trustcoreRiskMitigations.createdAt))
+}
+
+/**
+ * List reviews for a single risk, newest first.
+ */
+export async function listTrustcoreRiskReviews(riskId: string): Promise<TrustcoreRiskReview[]> {
+  return db
+    .select()
+    .from(trustcoreRiskReviews)
+    .where(eq(trustcoreRiskReviews.riskId, riskId))
+    .orderBy(desc(trustcoreRiskReviews.reviewedAt))
 }

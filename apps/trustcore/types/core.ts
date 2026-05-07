@@ -7,7 +7,17 @@
 
 // ── Roles ─────────────────────────────────────────────────────────────────
 
-export type Role = 'platform_admin' | 'org_admin' | 'staff' | 'auditor'
+export type Role =
+  | 'platform_admin'
+  | 'org_admin'
+  | 'compliance_officer'
+  | 'security_officer'
+  | 'privacy_officer'
+  | 'legal_reviewer'
+  | 'staff'
+  | 'external_auditor'
+  | 'auditor'
+  | 'read_only'
 
 // ── Org-scoped entity base ────────────────────────────────────────────────
 

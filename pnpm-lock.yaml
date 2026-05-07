@@ -7074,6 +7074,34 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
 
+  packages/trustcore-core:
+    dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
+      '@nzila/otel-core':
+        specifier: workspace:*
+        version: link:../otel-core
+      drizzle-orm:
+        specifier: '>=0.45.2'
+        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(@upstash/redis@1.37.0)(better-sqlite3@12.9.0)(gel@2.2.0)(pg@8.20.0)(postgres@3.4.8)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^25
+        version: 25.5.2
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
   packages/ue-assistant:
     dependencies:
       '@nzila/os-core':
