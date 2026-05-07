@@ -1,0 +1,39 @@
+{
+  "name": "@nzila/trustcore-trustops-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3018",
+    "build": "next build",
+    "start": "next start --port 3018",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
+    "@nzila/trustcore-contracts": "workspace:*",
+    "@nzila/trustcore-trustops": "workspace:*",
+    "@nzila/trustops-intelligence": "workspace:*",
+    "@nzila/ui": "workspace:*",
+    "next": "16.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

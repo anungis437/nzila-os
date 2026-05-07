@@ -178,6 +178,23 @@ export const DEFAULT_MODULES: ModuleRegistration[] = [
     devPort: 3009,
     owner: 'mobility-team',
   },
+  {
+    id: 'trustcore-trustops',
+    name: 'TrustCore — TrustOps',
+    description: 'Insolvency, restructuring, and trust operations',
+    basePath: '/trustcore-trustops',
+    iconToken: 'scale',
+    tier: 'PILOT',
+    enabledByDefault: false,
+    requiredRoles: [],
+    requiredEntitlements: [],
+    showInNav: true,
+    navOrder: 110,
+    requiresOrgScope: true,
+    packageName: '@nzila/trustcore-trustops-app',
+    devPort: 3018,
+    owner: 'trustcore-team',
+  },
 
   // ── Platform surfaces ────────────────────────────────────────────────────
   {

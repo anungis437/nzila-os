@@ -1,0 +1,30 @@
+{
+  "name": "@nzila/trustcore-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./trust-severity": "./src/trust-severity/index.ts",
+    "./mandates": "./src/mandates/index.ts",
+    "./creditors": "./src/creditors/index.ts",
+    "./claims": "./src/claims/index.ts",
+    "./fsm": "./src/fsm/index.ts",
+    "./attestations": "./src/attestations/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}
