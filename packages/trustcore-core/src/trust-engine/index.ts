@@ -6,10 +6,13 @@
  * TrustOpsView that bundles deterministic score, scheduled remediation
  * tasks, and a stable summary suitable for dashboards.
  *
- * Importantly, the in-app engine remains the SOURCE OF TRUTH for the
- * compliance score. This module only re-derives the score from a structured
- * set of deductions when callers want to score WITHOUT the in-app engine
- * (e.g., from raw risk-register rows).
+ * Importantly, the SOURCE OF TRUTH for Law 25 compliance scoring lives in
+ * `@nzila/trustcore-core/compliance` (see `evaluateLaw25Compliance`). The
+ * in-app `apps/trustcore/lib/compliance/engine.ts` is a thin wrapper that
+ * fetches inputs and delegates to that evaluator. This trust-engine module
+ * only re-derives a score from a structured set of deductions when callers
+ * want to score WITHOUT running the full Law 25 evaluator (e.g., from raw
+ * risk-register rows).
  */
 
 import {

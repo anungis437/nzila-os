@@ -7,6 +7,11 @@
  * @module @nzila/db/queries/trustcore
  */
 import { eq, desc, and } from 'drizzle-orm'
+import {
+  evaluateLaw25Compliance,
+  dashboardSummaryFromEvaluation,
+  type DashboardSummary,
+} from '@nzila/trustcore-core/compliance'
 import { db } from '../client'
 import {
   trustcorePrivacyPrograms,
@@ -56,146 +61,44 @@ export type NewTrustcoreLead = typeof trustcoreLeads.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
-export interface TrustcoreDashboardSummary {
-  orgId: string
-  complianceScore: number
-  openRisks: number
-  pendingRequests: number
-  incidentAlerts: number
-  auditReadinessStatus: 'ready' | 'partial' | 'not_ready'
-  evaluatedAt: string
-}
+/**
+ * Live compliance dashboard summary for an org.
+ *
+ * The actual scoring rules live in `@nzila/trustcore-core/compliance` so the
+ * dashboard score and the `/compliance` page score are guaranteed to be in
+ * sync. This type is a re-export of the canonical `DashboardSummary` shape.
+ */
+export type TrustcoreDashboardSummary = DashboardSummary
 
 /**
  * Compute a live compliance dashboard summary for an org.
  *
- * Delegates scoring to the TrustCore compliance engine so that
- * the dashboard score and the compliance page score are always in sync.
- * The engine data is fetched in a single parallel round-trip.
+ * Fetches the six TrustCore inputs (programs, assets, PIAs, incidents, DSR
+ * requests, vendors) in a single parallel round-trip, then delegates scoring
+ * and audit-readiness derivation to `@nzila/trustcore-core/compliance`.
  */
 export async function getTrustcoreDashboardSummary(
   orgId: string,
 ): Promise<TrustcoreDashboardSummary> {
-  // Fetch all required data in one parallel pass (no N+1)
-  const [
+  const [programs, assets, pias, incidents, dsrRequests, vendors] = await Promise.all([
+    listTrustcorePrivacyPrograms(orgId),
+    listTrustcoreDataAssets(orgId),
+    listTrustcorePias(orgId),
+    listTrustcoreIncidents(orgId),
+    listTrustcoreDsrRequests(orgId),
+    listTrustcoreVendors(orgId),
+  ])
+
+  const evaluation = evaluateLaw25Compliance(orgId, {
     programs,
     assets,
     pias,
     incidents,
     dsrRequests,
     vendors,
-  ] = await Promise.all([
-    db.select().from(trustcorePrivacyPrograms).where(eq(trustcorePrivacyPrograms.orgId, orgId)),
-    db.select().from(trustcoreDataAssets).where(eq(trustcoreDataAssets.orgId, orgId)),
-    db.select().from(trustcorePias).where(eq(trustcorePias.orgId, orgId)),
-    db.select().from(trustcoreIncidents).where(eq(trustcoreIncidents.orgId, orgId)),
-    db.select().from(trustcoreDsrRequests).where(eq(trustcoreDsrRequests.orgId, orgId)),
-    db.select().from(trustcoreVendors).where(eq(trustcoreVendors.orgId, orgId)),
-  ])
+  })
 
-  // ── Score ─────────────────────────────────────────────────────────────────
-  // Mirror the engine rules so dashboard and /compliance are always aligned.
-
-  let score = 100
-
-  // Governance
-  const activeProgram = programs.find((p) => p.status === 'active')
-  if (!activeProgram) score -= 25
-  else if (!activeProgram.privacyOfficerEmail) score -= 10
-
-  // Data inventory
-  const activeAssets = assets.filter((a) => a.status === 'active')
-  if (activeAssets.length === 0) {
-    score -= 20
-  } else {
-    const highCritical = activeAssets.filter(
-      (a) => a.sensitivityLevel === 'high' || a.sensitivityLevel === 'critical',
-    )
-    if (highCritical.length > 0 && pias.length === 0) {
-      score -= Math.min(highCritical.length * 10, 30)
-    }
-    const crossBorderNoCountry = activeAssets.filter(
-      (a) => a.crossBorderTransfer && !a.destinationCountry,
-    )
-    if (crossBorderNoCountry.length > 0) score -= 10
-  }
-
-  // PIAs
-  if (pias.length === 0 && activeAssets.length > 0) {
-    score -= 15
-  } else {
-    const mitigationReq = pias.filter((p) => p.status === 'mitigation_required')
-    score -= Math.min(mitigationReq.length * 5, 20)
-    const highRiskNoMitigation = pias.filter((p) => (p.riskScore ?? 0) >= 70 && !p.mitigationPlan)
-    score -= Math.min(highRiskNoMitigation.length * 10, 20)
-  }
-
-  // Incidents
-  const openCritical = incidents.filter(
-    (i) => i.severity === 'critical' && (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained'),
-  )
-  score -= Math.min(openCritical.length * 20, 40)
-
-  const unreportedSerious = incidents.filter((i) => i.seriousHarmLikely && !i.reportedToCai)
-  score -= Math.min(unreportedSerious.length * 25, 50)
-
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000
-  const stalledOpen = incidents.filter(
-    (i) =>
-      (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained') &&
-      Date.now() - i.createdAt.getTime() > thirtyDaysMs,
-  )
-  score -= Math.min(stalledOpen.length * 10, 30)
-
-  // DSR
-  const overdue = dsrRequests.filter((r) => r.status === 'overdue')
-  score -= Math.min(overdue.length * 15, 45)
-  const activeUnverified = dsrRequests.filter(
-    (r) =>
-      r.status !== 'completed' &&
-      r.status !== 'denied' &&
-      !r.identityVerified,
-  )
-  score -= Math.min(activeUnverified.length * 5, 15)
-
-  // Vendors
-  const activeVendors = vendors.filter((v) => v.status === 'active')
-  const highRiskNoPia = activeVendors.filter(
-    (v) => (v.riskLevel === 'high' || v.riskLevel === 'critical') && !v.piaRequired,
-  )
-  score -= Math.min(highRiskNoPia.length * 10, 30)
-  const crossBorderNoContract = activeVendors.filter(
-    (v) => v.crossBorderTransfer && !v.contractReviewed,
-  )
-  score -= Math.min(crossBorderNoContract.length * 10, 20)
-
-  score = Math.max(0, Math.min(100, score))
-
-  // ── Derived counters ───────────────────────────────────────────────────────
-  const openIncidents = incidents.filter(
-    (i) => i.resolutionStatus === 'open' || i.resolutionStatus === 'contained',
-  ).length
-  const pendingRequests = dsrRequests.filter(
-    (r) => r.status !== 'completed' && r.status !== 'denied',
-  ).length
-
-  const hasCriticalRisks = openCritical.length > 0 || unreportedSerious.length > 0
-  const auditReadinessStatus: TrustcoreDashboardSummary['auditReadinessStatus'] =
-    score >= 85 && !hasCriticalRisks
-      ? 'ready'
-      : score >= 60
-        ? 'partial'
-        : 'not_ready'
-
-  return {
-    orgId,
-    complianceScore: score,
-    openRisks: openIncidents,
-    pendingRequests,
-    incidentAlerts: openCritical.length,
-    auditReadinessStatus,
-    evaluatedAt: new Date().toISOString(),
-  }
+  return dashboardSummaryFromEvaluation(evaluation, { incidents, dsrRequests })
 }
 
 // ── List helpers ───────────────────────────────────────────────────────────

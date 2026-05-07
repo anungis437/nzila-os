@@ -18,6 +18,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
+    "@nzila/trustcore-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@types/pdfkit": "^0.17.6",
     "lucide-react": "^0.576.0",
