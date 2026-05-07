@@ -657,5 +657,5 @@ CREATE TYPE "public"."alert_severity" AS ENUM('info', 'warning', 'urgent', 'crit
 --> statement-breakpoint
 ALTER TABLE "deadline_alerts" ALTER COLUMN "alert_severity" SET DATA TYPE "public"."alert_severity" USING "alert_severity"::text::"public"."alert_severity";
 --> statement-breakpoint
-DROP TYPE "_alert_severity_old";
+DROP TYPE IF EXISTS "_alert_severity_old";
 --> statement-breakpoint

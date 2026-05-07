@@ -109,9 +109,20 @@ async function ensureBaseline() {
  * these constraints after `organizations` is created by migration 0002.
  */
 function faultTolerantSql(sql) {
-  // Fix malformed "DO DROP TYPE" statements — artifact of repeated migration block generation
-  // in 0008_lean_mother_askani.sql where sections start with "DO DROP TYPE" instead of "DROP TYPE"
-  sql = sql.replace(/\bDO DROP TYPE\b/g, 'DROP TYPE');
+  // Fix malformed "DO DROP TYPE" statements — these mark repeated migration blocks in
+  // 0008_lean_mother_askani.sql. Letting them run as real DROP TYPE would CASCADE-drop
+  // columns from tables created earlier in the same migration.
+  // Replace with a no-op SELECT so the repeated block's DROP is completely skipped.
+  sql = sql.replace(
+    /\bDO DROP TYPE IF EXISTS "public"\."[^"]+" CASCADE;/g,
+    'SELECT 1 /* skipped: repeated migration block DROP TYPE */',
+  );
+  // Wrap bare CREATE TYPE ... AS ENUM statements in fault-tolerant DO blocks so that
+  // repeated blocks silently skip re-creating types that were already created.
+  sql = sql.replace(
+    /(CREATE TYPE "public"\."[^"]+" AS ENUM\([^;]+\);)/g,
+    'DO $$$$ BEGIN\n$1\nEXCEPTION\n  WHEN duplicate_object THEN null;\nEND $$$$;',
+  );
   // Replace EXCEPTION WHEN duplicate_object in ADD CONSTRAINT DO blocks only
   return sql.replace(
     /(DO \$\$ BEGIN[\s\S]*?ADD CONSTRAINT[\s\S]*?EXCEPTION\s*\n\s*)WHEN duplicate_object THEN null;(\s*\nEND \$\$;)/g,
