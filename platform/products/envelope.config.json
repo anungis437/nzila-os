@@ -201,6 +201,22 @@
       "trustProfile": "internal-control-plane",
       "launchStage": "internal-only",
       "publicVisible": false
+    },
+    "trustcore": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
+    "trustcore-trustops": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
     }
   }
 }

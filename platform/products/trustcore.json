@@ -1,8 +1,8 @@
 {
-  "slug": "veridian-admin",
-  "name": "Veridian Admin",
-  "tier": 4,
-  "tierLabel": "lab",
+  "slug": "trustcore",
+  "name": "TrustCore",
+  "tier": 3,
+  "tierLabel": "component",
   "status": "incubating",
   "owner": "Nzila Ventures",
   "pricingTier": "n/a",
@@ -13,7 +13,7 @@
   "publicVisible": false,
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
-  "strategicRole": "Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots. Internal-demo only; no live PHI.",
+  "strategicRole": "TrustCore marketing/portal Next.js 16 surface — public face of Trust Ops platform.",
   "generatedAt": "2026-05-07T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",

@@ -3,7 +3,7 @@
   "name": "Zonga",
   "tier": 4,
   "tierLabel": "lab",
-  "status": "incubating",
+  "status": "pilot",
   "owner": "Nzila Ventures",
   "pricingTier": "consumer",
   "telemetryRequired": true,
@@ -13,8 +13,8 @@
   "publicVisible": true,
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
-  "strategicRole": "Future growth option in the creator economy pending stronger market evidence.",
-  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "strategicRole": "Future growth option in the creator economy pending stronger market evidence. Controlled-launch ready in staging; production promotion gated by requiresExplicitProdOverride downstream.",
+  "generatedAt": "2026-05-07T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"
