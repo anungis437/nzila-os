@@ -12,6 +12,7 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/platform-shell": "workspace:*",

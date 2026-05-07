@@ -23,6 +23,7 @@ import {
   timestamp,
   boolean,
   integer,
+  bigint,
   jsonb,
   pgEnum,
   index,
@@ -688,3 +689,161 @@ export const trustcoreRiskMitigations = pgTable(
     index('tc_risk_mitigations_org_status_idx').on(t.orgId, t.status),
   ],
 )
+
+// ── TrustOps v1 ────────────────────────────────────────────────────────────
+
+export const trustopsMandateStageEnum = pgEnum('trustops_mandate_stage', [
+  'mandate_intake',
+  'engagement_signed',
+  'asset_inventory',
+  'creditor_list_published',
+  'proofs_of_claim_collection',
+  'claims_classification',
+  'restructuring_plan_drafted',
+  'stakeholder_review',
+  'court_filing',
+  'distribution',
+  'discharge',
+  'archived',
+])
+
+export const trustopsCreditorClassificationEnum = pgEnum(
+  'trustops_creditor_classification',
+  ['secured', 'unsecured', 'priority', 'subordinated', 'equity'],
+)
+
+export const trustopsProofOfClaimStatusEnum = pgEnum('trustops_proof_of_claim_status', [
+  'submitted',
+  'under_review',
+  'classified',
+  'admitted',
+  'partially_admitted',
+  'rejected',
+  'withdrawn',
+])
+
+export const trustopsTransitionTriggerEnum = pgEnum('trustops_transition_trigger', [
+  'manual',
+  'automatic',
+  'deadline',
+  'approval',
+  'rejection',
+])
+
+/**
+ * TrustOps mandates — top-level engagement record for a debtor file.
+ */
+export const trustopsMandates = pgTable(
+  'trustops_mandates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    stage: trustopsMandateStageEnum('stage').notNull().default('mandate_intake'),
+    name: text('name').notNull(),
+    debtorName: text('debtor_name'),
+    openedAt: timestamp('opened_at', { withTimezone: true }).notNull().defaultNow(),
+    closedAt: timestamp('closed_at', { withTimezone: true }),
+    metadata: jsonb('metadata').notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_mandates_org_idx').on(t.orgId),
+    index('trustops_mandates_org_stage_idx').on(t.orgId, t.stage),
+  ],
+)
+
+/**
+ * TrustOps creditors — parties with a financial interest in a mandate.
+ */
+export const trustopsCreditors = pgTable(
+  'trustops_creditors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    classification: trustopsCreditorClassificationEnum('classification').notNull(),
+    contact: jsonb('contact').notNull().default({}),
+    claimAmountCents: bigint('claim_amount_cents', { mode: 'bigint' }),
+    approvedAmountCents: bigint('approved_amount_cents', { mode: 'bigint' }),
+    currency: text('currency').notNull().default('CAD'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_creditors_org_idx').on(t.orgId),
+    index('trustops_creditors_mandate_idx').on(t.mandateId),
+    index('trustops_creditors_org_class_idx').on(t.orgId, t.classification),
+  ],
+)
+
+/**
+ * TrustOps proofs of claim — submitted claims linked to a creditor and mandate.
+ */
+export const trustopsProofsOfClaim = pgTable(
+  'trustops_proofs_of_claim',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    creditorId: uuid('creditor_id')
+      .notNull()
+      .references(() => trustopsCreditors.id, { onDelete: 'cascade' }),
+    status: trustopsProofOfClaimStatusEnum('status').notNull().default('submitted'),
+    amountClaimedCents: bigint('amount_claimed_cents', { mode: 'bigint' }),
+    amountAdmittedCents: bigint('amount_admitted_cents', { mode: 'bigint' }),
+    currency: text('currency').notNull().default('CAD'),
+    evidenceEventId: uuid('evidence_event_id'),
+    classificationDecisionId: uuid('classification_decision_id'),
+    notes: text('notes'),
+    submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_pocs_org_idx').on(t.orgId),
+    index('trustops_pocs_mandate_idx').on(t.mandateId),
+    index('trustops_pocs_creditor_idx').on(t.creditorId),
+    index('trustops_pocs_org_status_idx').on(t.orgId, t.status),
+  ],
+)
+
+/**
+ * TrustOps mandate stage history — append-only FSM transition log.
+ */
+export const trustopsMandateStageHistory = pgTable(
+  'trustops_mandate_stage_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    fromStage: trustopsMandateStageEnum('from_stage'),
+    toStage: trustopsMandateStageEnum('to_stage').notNull(),
+    trigger: trustopsTransitionTriggerEnum('trigger').notNull(),
+    reason: text('reason'),
+    actorUserId: text('actor_user_id').notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_stage_history_org_idx').on(t.orgId),
+    index('trustops_stage_history_mandate_time_idx').on(t.mandateId, t.occurredAt),
+  ],
+)
+
+

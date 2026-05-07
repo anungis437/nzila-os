@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request, { params }: Params) {
   const { mandateId } = await params
-  const mandate = getMandate(mandateId)
+  const mandate = await getMandate(mandateId)
   if (!mandate) {
     return NextResponse.json({ ok: false, reason: 'not_found' }, { status: 404 })
   }
@@ -25,6 +25,6 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ ok: false, reason: result.reason }, { status: 400 })
   }
 
-  transitionStage(mandateId, toStage)
+  await transitionStage(mandateId, toStage)
   redirect(`/mandates/${mandateId}`)
 }

@@ -4,8 +4,8 @@ import { listMandates } from '../../lib/mandates-store'
 
 export const dynamic = 'force-dynamic'
 
-export default function MandatesPage() {
-  const mandates = listMandates()
+export default async function MandatesPage() {
+  const mandates = await listMandates()
   return (
     <main style={{ padding: '2rem', maxWidth: 960, margin: '0 auto' }}>
       <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Mandates</h1>

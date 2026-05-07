@@ -2095,6 +2095,9 @@ importers:
 
   apps/trustcore-trustops:
     dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core

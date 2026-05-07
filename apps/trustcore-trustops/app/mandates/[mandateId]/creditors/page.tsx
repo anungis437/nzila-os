@@ -19,10 +19,10 @@ function formatCents(cents: number): string {
 
 export default async function CreditorsPage({ params }: Params) {
   const { mandateId } = await params
-  const mandate = getMandate(mandateId)
+  const mandate = await getMandate(mandateId)
   if (!mandate) notFound()
 
-  const creditors = [...getCreditors(mandateId)].sort((a, b) =>
+  const creditors = [...(await getCreditors(mandateId))].sort((a, b) =>
     compareCreditorPriority(a.classification, b.classification),
   )
 

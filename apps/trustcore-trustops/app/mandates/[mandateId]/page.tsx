@@ -15,7 +15,7 @@ interface Params {
 
 export default async function MandateDetailPage({ params }: Params) {
   const { mandateId } = await params
-  const mandate = getMandate(mandateId)
+  const mandate = await getMandate(mandateId)
   if (!mandate) notFound()
 
   const progress = computeMandateProgress(mandate.stage)

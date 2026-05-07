@@ -19,10 +19,10 @@ function formatCents(cents: number): string {
 
 export default async function ClaimsPage({ params }: Params) {
   const { mandateId } = await params
-  const mandate = getMandate(mandateId)
+  const mandate = await getMandate(mandateId)
   if (!mandate) notFound()
 
-  const claims = getClaims(mandateId)
+  const claims = await getClaims(mandateId)
   const open = claims.filter((c) => isOpenProofOfClaim(c.status))
   const admitted = claims.filter((c) => isAdmittedProofOfClaim(c.status))
 
