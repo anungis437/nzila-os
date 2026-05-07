@@ -643,3 +643,19 @@ CREATE TABLE IF NOT EXISTS "pack_verification_log" (
   "verification_trigger" varchar(50)
 );
 --> statement-breakpoint
+
+-- ============================================================================
+-- SECTION 3: Enum Value Extension (required before migration 0008)
+-- ============================================================================
+-- Migration 0001 created alert_severity with ('info','warning','urgent','critical').
+-- Migration 0008 creates tables with DEFAULT 'medium' on alert_severity columns.
+-- ALTER TYPE ADD VALUE cannot run inside a transaction, so we rename + recreate the
+-- enum with the full value set using a transaction-safe pattern.
+ALTER TYPE "public"."alert_severity" RENAME TO "_alert_severity_old";
+--> statement-breakpoint
+CREATE TYPE "public"."alert_severity" AS ENUM('info', 'warning', 'urgent', 'critical', 'high', 'medium', 'low');
+--> statement-breakpoint
+ALTER TABLE "deadline_alerts" ALTER COLUMN "alert_severity" SET DATA TYPE "public"."alert_severity" USING "alert_severity"::text::"public"."alert_severity";
+--> statement-breakpoint
+DROP TYPE "_alert_severity_old";
+--> statement-breakpoint
