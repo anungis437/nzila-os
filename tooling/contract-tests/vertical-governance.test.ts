@@ -141,6 +141,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'crudRoutes(',               // crudRoutes() factory — wraps withApi() internally
     'withMinRole(',              // Role-based auth guard with minimum role check
     'withOrgScope(',              // Org-scoped composite guard (auth + context + org validation)
+    'withRequiredRole(',           // Role-based access guard
   ]
 
   // Routes that are explicitly public
@@ -172,6 +173,8 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
     '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)
+    '/api/rum',                            // Public RUM telemetry sink (anonymous page events)
+    '/api/leads',                          // Public lead capture endpoint
   ]
 
   for (const appDir of appDirs) {

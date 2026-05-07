@@ -76,6 +76,7 @@ const APP_STRIPE_PATH_ALLOWLIST = [
   /\/payment-processor\//,           // union-eyes payment processor (governed, audited)
   /\/api\/dues\/create-payment-intent\//, // union-eyes dues payment intent route
   /\/observability\/telemetry\.ts$/, // telemetry instrumentation (references payment patterns)
+  /\/billing\/webhook\//,            // trustcore billing webhook (Stripe event verification)
 ]
 
 /**

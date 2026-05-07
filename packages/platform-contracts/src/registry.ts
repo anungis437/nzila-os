@@ -882,6 +882,18 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     policyBindings: [],
     supportedOrgScopes: ['*'],
   },
+  {
+    app: 'trustcore',
+    displayName: 'TrustCore',
+    description: 'Trust & compliance engine',
+    version: '1.0.0',
+    tier: 'incubating',
+    domain: 'trust',
+    owners: ['platform-core'],
+    apiPrefix: '/api',
+    authStrategy: 'platform-auth',
+    supportedOrgScopes: ['*'],
+  },
 ]
 
 /** Parsed registry with Zod defaults filled in. */

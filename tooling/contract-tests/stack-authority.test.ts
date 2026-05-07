@@ -64,6 +64,7 @@ const TS_AUTHORITATIVE_APPS = [
   'orchestrator-api',
   'nzila-hq',
   'maestria',
+  'trustcore',
 ]
 
 /** Temporary scaffold test apps — excluded from classification checks */

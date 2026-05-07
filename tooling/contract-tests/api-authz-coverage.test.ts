@@ -77,6 +77,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/monday-reset/,         // Public weekly checklist (static content)
       /\/api\/billing\/checkout/,    // Public SaaS checkout (Stripe-hosted)
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
+      /\/api\/rum/,                  // Public RUM telemetry sink (anonymous page events)
+      /\/api\/leads/,                // Public lead capture endpoint
     ]
 
     const AUTH_PATTERNS = [
@@ -97,6 +99,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /CRON_SECRET/,             // Cron job secret verification
       /withOrgScope\(/,           // Org-scoped composite guard (auth + context + org)
       /NZILA_HQ_SNAPSHOT_TOKEN/,  // HQ cron/internal routes protected by shared bearer token
+      /stripe\.webhooks\.constructEvent/,  // Stripe webhook signature verification
+      /withRequiredRole\(/,        // Role-based access guard
     ]
 
     const violations: string[] = []

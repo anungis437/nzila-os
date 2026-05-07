@@ -1,0 +1,17 @@
+{
+  "app": "trustcore",
+  "version": "1.0.0",
+  "riskLevel": "high",
+  "policyProfile": "standard",
+  "controls": {
+    "enforcement": true,
+    "governance": true,
+    "audit": true,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": true,
+    "events": false
+  },
+  "exceptions": []
+}

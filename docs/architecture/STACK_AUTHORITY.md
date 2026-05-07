@@ -39,6 +39,7 @@ audit trails, and lets contract tests enforce structural invariants.
 | **web** | **None** | No DB | — | Static/marketing |
 | **orchestrator-api** | **TS/Drizzle** | Lazy `getDb()` (Fastify) | — | API-key authed, not a business app |
 | **nzila-hq** | **TS/Drizzle** | `server/db/client.ts` (Drizzle) | — | INCUBATING executive cockpit — scoped DB, PILOT promotion gate |
+| **trustcore** | **TS/Drizzle** | No DB | — | INCUBATING trust & compliance engine |
 | **union-eyes** | **Django** | Django ORM (12 apps) | TS/Drizzle (read proxy) | See §2 |
 | **abr** | **Django** | Django ORM (10 apps) | TS wired but not active | See §2 |
 
