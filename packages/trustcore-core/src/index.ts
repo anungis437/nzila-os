@@ -14,6 +14,7 @@
 
 export * from './scoring/index'
 export * from './risks/index'
+export * from './rbac/index'
 export * from './tasks/index'
 export * from './trust-engine/index'
 export * from './compliance/index'

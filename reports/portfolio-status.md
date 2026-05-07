@@ -65,8 +65,8 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Control Plane | 5.0 | HOLD | PILOT | internal-only |
 | Nzila HQ | 5.0 | HOLD | EXPERIMENTAL | internal-only |
 | Orchestrator API | 4.8 | HOLD | EXPERIMENTAL | internal-only |
-| TrustCore | 5.0 | HOLD | UNREGISTERED | internal-only |
-| TrustCore Trust-Ops Console | 5.0 | HOLD | UNREGISTERED | internal-only |
+| TrustCore | 5.0 | HOLD | INCUBATING | internal-only |
+| TrustCore Trust-Ops Console | 5.0 | HOLD | INCUBATING | internal-only |
 | Web | 5.0 | HOLD | PRODUCTION | pilot-safe |
 | Agrimo | 3.6 | HOLD | INCUBATING | internal-only |
 | Cora | 3.6 | HOLD | INCUBATING | internal-only |

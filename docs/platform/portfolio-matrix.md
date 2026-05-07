@@ -46,8 +46,8 @@
 | Control Plane | PILOT | internal-only | internal | HOLD |
 | Nzila HQ | EXPERIMENTAL | internal-only | internal | HOLD |
 | Orchestrator API | EXPERIMENTAL | internal-only | internal | HOLD |
-| TrustCore | UNREGISTERED | internal-only | external | HOLD |
-| TrustCore Trust-Ops Console | UNREGISTERED | internal-only | internal | HOLD |
+| TrustCore | INCUBATING | internal-only | external | HOLD |
+| TrustCore Trust-Ops Console | INCUBATING | internal-only | internal | HOLD |
 | Web | PRODUCTION | pilot-safe | external | HOLD |
 | Agrimo | INCUBATING | internal-only | internal | HOLD |
 | Cora | INCUBATING | internal-only | internal | HOLD |

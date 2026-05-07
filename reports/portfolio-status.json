@@ -807,8 +807,8 @@
         "readiness": 3,
         "margin_potential": 2
       },
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "INCUBATING",
+      "dev_port": 3010
     },
     {
       "id": "trustcore-trustops",
@@ -869,8 +869,8 @@
         "readiness": 3,
         "margin_potential": 2
       },
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "INCUBATING",
+      "dev_port": 3018
     },
     {
       "id": "web",

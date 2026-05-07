@@ -572,16 +572,16 @@ export const trustcoreLeads = pgTable(
 // ── N) trustcoreRisks (Risk Register v1) ──────────────────────────────────
 
 export const tcRiskRegisterCategoryEnum = pgEnum('tc_risk_register_category', [
-  'privacy',
-  'cybersecurity',
   'governance',
-  'operational_continuity',
-  'ai_governance',
-  'vendor_dependency',
-  'access_governance',
-  'legal_exposure',
-  'data_residency',
-  'incident_recurrence',
+  'data',
+  'pia',
+  'incidents',
+  'dsr',
+  'vendors',
+  'security',
+  'operational',
+  'legal',
+  'financial',
 ])
 
 export const tcRiskRegisterSeverityEnum = pgEnum('tc_risk_register_severity', [
@@ -603,7 +603,7 @@ export const tcRiskMitigationStatusEnum = pgEnum('tc_risk_mitigation_status', [
   'planned',
   'in_progress',
   'completed',
-  'cancelled',
+  'blocked',
 ])
 
 /**

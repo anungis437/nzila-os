@@ -328,6 +328,16 @@ export const ORG_SCOPED_TABLES = [
   'trustcorePolicies',
   'trustcoreReminders',
   'trustcoreSubscriptions',
+  'trustcoreLeads',
+  'trustcoreRisks',
+  'trustcoreRiskReviews',
+  'trustcoreRiskMitigations',
+
+  // ── trustcore.ts (TrustOps v1 — restructuring mandates) ─────────
+  'trustopsMandates',
+  'trustopsCreditors',
+  'trustopsProofsOfClaim',
+  'trustopsMandateStageHistory',
 ] as const
 
 /**

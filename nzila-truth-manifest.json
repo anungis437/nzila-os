@@ -233,7 +233,7 @@
       "priority": "medium"
     },
     "trustcore": {
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
       "readiness_tier": "internal-only",
       "exposure": "public",
@@ -244,7 +244,7 @@
       "priority": "high"
     },
     "trustcore-trustops": {
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
       "readiness_tier": "internal-only",
       "exposure": "internal",

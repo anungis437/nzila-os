@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./scoring": "./src/scoring/index.ts",
     "./risks": "./src/risks/index.ts",
+    "./rbac": "./src/rbac/index.ts",
     "./tasks": "./src/tasks/index.ts",
     "./trust-engine": "./src/trust-engine/index.ts",
     "./compliance": "./src/compliance/index.ts"
