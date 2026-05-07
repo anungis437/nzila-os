@@ -38,7 +38,16 @@ function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResu
   const tokensOut = 'tokensOut' in result ? result.tokensOut : null
   const tokenCostUsd = 'costUsd' in result ? result.costUsd : null
   const latencyMs = 'latencyMs' in result ? result.latencyMs : null
-  return { provider, modelUsed, tokensIn, tokensOut, tokenCostUsd, latencyMs }
+  return {
+    requestId: result.requestId,
+    traceId: result.requestId,
+    provider,
+    modelUsed,
+    tokensIn,
+    tokensOut,
+    tokenCostUsd,
+    latencyMs,
+  }
 }
 
 export function getAiClient(): AiClient {
