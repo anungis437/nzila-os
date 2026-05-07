@@ -34,7 +34,6 @@ export interface TransitionAttemptResult {
   /** Reason code when ok=false. */
   reason?:
     | 'invalid_input'
-    | 'unknown_from_stage'
     | 'terminal_from_stage'
     | 'edge_not_allowed'
     | 'identity_transition'
@@ -53,8 +52,10 @@ export function evaluateTransition(input: unknown): TransitionAttemptResult {
   if ((TRUSTOPS_TERMINAL_STAGES as readonly string[]).includes(fromStage)) {
     return { ok: false, reason: 'terminal_from_stage' }
   }
-  const allowed = ADJACENCY.get(fromStage)
-  if (!allowed) return { ok: false, reason: 'unknown_from_stage' }
+  // ADJACENCY is preloaded for every TRUSTOPS_MANDATE_STAGES value, and
+  // zod has already validated fromStage as a member of that enum, so
+  // ADJACENCY.get(fromStage) is guaranteed to return a Set here.
+  const allowed = ADJACENCY.get(fromStage)!
   if (!allowed.has(toStage)) return { ok: false, reason: 'edge_not_allowed' }
   return { ok: true }
 }

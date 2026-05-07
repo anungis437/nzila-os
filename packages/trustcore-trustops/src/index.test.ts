@@ -91,6 +91,10 @@ describe('trustcore-trustops fsm', () => {
     expect(isTerminalStage('archived')).toBe(true)
     expect(isTerminalStage('mandate_intake')).toBe(false)
   })
+
+  it('returns an empty array of next stages for an unknown stage', () => {
+    expect(nextStages('not_a_real_stage' as never)).toEqual([])
+  })
 })
 
 describe('trustcore-trustops creditors', () => {
