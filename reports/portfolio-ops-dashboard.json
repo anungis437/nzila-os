@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-04",
+  "generated_at": "2026-05-07",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 24,
+    "total_products": 26,
     "total_engines": 4,
     "sell_now_count": 3,
     "internal_only_count": 6,
@@ -107,7 +107,7 @@
       },
       {
         "tier": 3,
-        "count": 5
+        "count": 7
       },
       {
         "tier": 4,
@@ -129,7 +129,7 @@
       },
       {
         "status": "incubating",
-        "count": 10
+        "count": 12
       },
       {
         "status": "internal",
@@ -263,6 +263,30 @@
       "readiness_tier": "internal-only",
       "registry_tier": "EXPERIMENTAL",
       "dev_port": 4000
+    },
+    {
+      "id": "trustcore",
+      "name": "TrustCore",
+      "tier": 3,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 5,
+      "readiness_tier": "internal-only",
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
+    },
+    {
+      "id": "trustcore-trustops",
+      "name": "TrustCore Trust-Ops Console",
+      "tier": 3,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 5,
+      "readiness_tier": "internal-only",
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
     },
     {
       "id": "web",
