@@ -151,6 +151,13 @@ export const trustcorePrivacyPrograms = pgTable(
     orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
+    /**
+     * Public display name for the organisation as shown on the Trust Center.
+     * Denormalised from `orgs.name` (or the org's chosen brand) so the
+     * public page can render without dereferencing the orgs table.
+     * Nullable — the page falls back to `orgId` when unset.
+     */
+    orgName: text('org_name'),
     framework: text('framework').notNull().default('law25'),
     privacyOfficerName: text('privacy_officer_name'),
     privacyOfficerEmail: text('privacy_officer_email'),
