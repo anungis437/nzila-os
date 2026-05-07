@@ -17,7 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
-import { createStripeClient } from '@/lib/stripe'
+import { getStripeClient } from '@nzila/payments-stripe'
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
@@ -58,7 +58,7 @@ export const POST = withRequiredRole(
 
     if (stripeKey && priceId) {
       try {
-        const stripe = await createStripeClient(stripeKey)
+        const stripe = getStripeClient()
 
         const session = await stripe.checkout.sessions.create({
           mode: 'subscription',

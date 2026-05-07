@@ -20,7 +20,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
-import { createStripeClient } from '@/lib/stripe'
+import { getStripeClient } from '@nzila/payments-stripe'
 
 // In-process idempotency cache (sufficient for single-instance deployments)
 const processedEventIds = new Set<string>()
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   let event: import('stripe').Stripe.Event
   try {
-    const stripe = await createStripeClient(stripeKey)
+    const stripe = getStripeClient()
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         if (!subId) break
 
         // Fetch subscription to get metadata (orgId) and period dates
-        const stripe = await createStripeClient(stripeKey)
+        const stripe = getStripeClient()
         const sub = await stripe.subscriptions.retrieve(subId)
         const orgId = sub.metadata?.orgId
         if (!orgId) break

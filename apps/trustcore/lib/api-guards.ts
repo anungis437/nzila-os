@@ -7,17 +7,10 @@
  * Re-exports withRequiredRole from lib/rbac/requireRole for convenience.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import {
-  createScopedDb,
-  withAudit,
-  type AuditedScopedDb,
-} from '@nzila/db'
 import { auth } from '@nzila/platform-auth/entra/server'
-import { createRequestContext, runWithContext } from '@nzila/os-core'
 
 // ── Re-exports ───────────────────────────────────────────────────────────────
-export { withAudit, createScopedDb, withRequiredRole } from '@/lib/rbac/requireRole'
-export type { AuditedScopedDb }
+export { withRequiredRole } from '@/lib/rbac/requireRole'
 
 export interface TrustCoreAuthContext {
   userId: string
@@ -40,9 +33,6 @@ export async function authenticateRequest(
   if (!orgId) {
     return { ok: false, response: NextResponse.json({ error: 'Org context required' }, { status: 403 }) }
   }
-
-  const { runWithContext: _run, createRequestContext: _ctx } = { runWithContext, createRequestContext }
-  void _run; void _ctx // future: wire request context tracing
 
   return { ok: true, ctx: { userId: session.userId, orgId } }
 }
