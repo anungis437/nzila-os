@@ -70,10 +70,8 @@ export function proxy(request: NextRequest): NextResponse {
     response.headers.set('x-demo-banner', 'internal-demo')
     response.headers.set('x-phi-mode', 'disabled')
     return response
-  } catch (err) {
+  } catch {
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.error('[veridian-admin/proxy] middleware failure', err)
       return NextResponse.next()
     }
     return NextResponse.json(

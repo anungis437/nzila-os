@@ -76,6 +76,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/analytics(?:\/|$)/,    // Public marketing analytics events (anonymous)
       /\/api\/monday-reset/,         // Public weekly checklist (static content)
       /\/api\/billing\/checkout/,    // Public SaaS checkout (Stripe-hosted)
+      /\/api\/billing\/webhook/,     // Stripe webhook (signature-verified, no user auth)
+      /\/api\/leads(?:\/|$)/,         // Public lead capture (pre-onboarding, no auth required)
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 
@@ -97,6 +99,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /CRON_SECRET/,             // Cron job secret verification
       /withOrgScope\(/,           // Org-scoped composite guard (auth + context + org)
       /NZILA_HQ_SNAPSHOT_TOKEN/,  // HQ cron/internal routes protected by shared bearer token
+      /withRequiredRole\(/,       // TrustCore role-based auth guard
     ]
 
     const violations: string[] = []

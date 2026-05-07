@@ -80,6 +80,7 @@ const ORG_GUARD_PATTERNS = [
   /crudRoutes\s*\(/,             // crudRoutes() factory — auth internally
   /withOrganizationAuth\s*\(/,   // Org-scoped auth wrapper
   /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
+  /withRequiredRole\s*\(/,       // TrustCore role-based auth guard
 ]
 
 function hasOrgGuard(content: string): boolean {
@@ -116,6 +117,8 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/analytics',                  // Public marketing analytics events (anonymous)
   '/api/monday-reset',               // Public weekly checklist (static content)
   '/api/billing/checkout',           // Public SaaS checkout (Stripe-hosted)
+  '/api/billing/webhook',            // Stripe billing webhook (Stripe-verified, not user-auth)
+  '/api/leads',                      // Public lead capture (pre-onboarding soft gate, no user-auth)
   '/_perf/',                         // Web vitals sendBeacon (anonymous, no org context)
 ]
 

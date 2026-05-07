@@ -39,8 +39,6 @@ export function trackEvent(event: AnalyticsEvent, payload?: EventPayload): void 
 
     // Always log in non-production for visibility during development
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.log('[TrustCore Analytics]', entry)
       return
     }
 

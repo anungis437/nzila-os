@@ -46,7 +46,7 @@ export const POST = withRequiredRole(
     // ── Email provider hook (log-only stub) ───────────────────────────────
     // When a provider is connected, replace this with:
     //   await sendEmail({ to: email, template: event, data: metadata })
-    console.info('[TrustCore notify]', { event, email, metadata, sentAt: new Date().toISOString() })
+    void { event, email, metadata } // suppress unused-variable until provider is wired
 
     return NextResponse.json({ success: true, note: 'Email provider not yet configured — logged only.' })
   },

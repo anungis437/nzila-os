@@ -141,6 +141,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'crudRoutes(',               // crudRoutes() factory — wraps withApi() internally
     'withMinRole(',              // Role-based auth guard with minimum role check
     'withOrgScope(',              // Org-scoped composite guard (auth + context + org validation)
+    'withRequiredRole(',          // TrustCore role-based auth guard
   ]
 
   // Routes that are explicitly public
@@ -169,6 +170,8 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/analytics',                      // Public marketing analytics events (anonymous)
     '/api/monday-reset',                   // Public weekly checklist (static content)
     '/api/billing/checkout',               // Public SaaS checkout (Stripe-hosted)
+    '/api/billing/webhook',                // Stripe webhook (signature-verified by Stripe)
+    '/api/leads',                          // Public lead capture (pre-onboarding soft gate, no auth required)
     '/api/auth_core/',                     // Django auth core health/status endpoints
     '/api/rights/terms',                   // Public rights/terms routes (terms, agreement)
     '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)

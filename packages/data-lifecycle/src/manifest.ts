@@ -490,6 +490,40 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     residency: { type: 'managed', regions: ['southafricanorth', 'westeurope'], orgSelectable: true, description: 'Managed hosting with org-selectable region' },
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 2 },
   },
+
+  // ── TrustCore (Privacy & Compliance + TrustOps) ─────────────────────────
+  {
+    appId: 'trustcore',
+    appName: 'TrustCore — Privacy, Compliance & Trust Operations',
+    version: '1.0.0',
+    lastUpdated: '2026-05-15',
+    dataCategories: [
+      { name: 'TrustCore Privacy Programs', description: 'Privacy programs, data assets, PIAs, incidents, DSR requests, consent records, and compliance snapshots', containsPii: true, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'TrustCore Vendor Risk', description: 'Third-party vendor assessments and risk records', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'TrustCore Evidence Events', description: 'Immutable audit evidence events for compliance actions', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'TrustCore Risk Management', description: 'Risk register, risk reviews, and risk mitigations', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'TrustCore Billing', description: 'Stripe subscriptions and lead capture records', containsPii: true, containsFinancial: true, storageEngine: 'PostgreSQL' },
+      { name: 'TrustOps Mandate Management', description: 'Insolvency mandates, creditor records, proofs of claim, and stage history (trustops_mandates, trustops_creditors, trustops_proofs_of_claim, trustops_mandate_stage_history)', containsPii: true, containsFinancial: true, storageEngine: 'PostgreSQL' },
+    ],
+    retentionSchedules: [
+      { category: 'TrustCore Privacy Programs', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Privacy regulatory compliance (POPIA, GDPR equivalents)' },
+      { category: 'TrustCore Vendor Risk', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Third-party due diligence records' },
+      { category: 'TrustCore Evidence Events', retentionClass: 'PERMANENT', retentionPeriod: 'Permanent', legalBasis: 'Immutable compliance audit trail — cannot be deleted' },
+      { category: 'TrustCore Risk Management', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Risk management and governance records' },
+      { category: 'TrustCore Billing', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Financial and billing record keeping' },
+      { category: 'TrustOps Mandate Management', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Insolvency and restructuring regulatory records' },
+    ],
+    deletionPolicies: [
+      { category: 'TrustCore Privacy Programs', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin', 'org_admin'], reversible: true },
+      { category: 'TrustCore Vendor Risk', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin', 'org_admin'], reversible: true },
+      { category: 'TrustCore Evidence Events', method: 'retention_expiry', verification: 'deletion_certificate', authorizedRoles: [], reversible: false },
+      { category: 'TrustCore Risk Management', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin', 'org_admin'], reversible: true },
+      { category: 'TrustCore Billing', method: 'retention_expiry', verification: 'deletion_certificate', authorizedRoles: [], reversible: false },
+      { category: 'TrustOps Mandate Management', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin'], reversible: true },
+    ],
+    residency: { type: 'managed', regions: ['southafricanorth', 'westeurope'], orgSelectable: true, description: 'Managed hosting with org-selectable region' },
+    backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 1 },
+  },
 ]
 
 // ── Manifest Generation ─────────────────────────────────────────────────────

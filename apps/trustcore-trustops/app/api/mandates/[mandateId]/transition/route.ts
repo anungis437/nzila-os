@@ -122,8 +122,8 @@ export async function POST(req: NextRequest, { params }: Params) {
             },
             generated_at: nowISO(),
           })
-        } catch (err) {
-          console.warn('[trustops] saveDecisionRecord failed', err)
+        } catch {
+          // saveDecisionRecord failure is non-fatal — continue
         }
 
         return NextResponse.redirect(

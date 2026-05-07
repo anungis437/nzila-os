@@ -21,10 +21,9 @@ export function proxy(request: NextRequest): NextResponse {
     response.headers.set('x-request-id', requestId)
     response.headers.set('x-demo-banner', 'synthetic-demo')
     return response
-  } catch (err) {
+  } catch {
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('[veridian-site/proxy] middleware failure', err)
       return NextResponse.next()
     }
     return NextResponse.json(

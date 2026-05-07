@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
+import { createStripeClient } from '@/lib/stripe'
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
@@ -57,9 +58,7 @@ export const POST = withRequiredRole(
 
     if (stripeKey && priceId) {
       try {
-        // Dynamic import keeps Stripe out of the bundle when the key is absent
-        const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+        const stripe = await createStripeClient(stripeKey)
 
         const session = await stripe.checkout.sessions.create({
           mode: 'subscription',
@@ -72,8 +71,7 @@ export const POST = withRequiredRole(
         })
 
         return NextResponse.json({ success: true, sessionUrl: session.url })
-      } catch (err) {
-        console.error('[TrustCore billing] Stripe checkout error', err)
+      } catch {
         return NextResponse.json(
           { success: false, error: 'Failed to create checkout session' },
           { status: 500 },

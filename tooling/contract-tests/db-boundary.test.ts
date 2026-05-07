@@ -82,6 +82,8 @@ const EXEMPT_PATHS = [
   'apps/control-plane/db/',
   // Nzila HQ — db setup files exempt (lazy singleton client + schema definitions)
   'apps/nzila-hq/server/',
+  // TrustCore TrustOps — repository pattern: lib/ contains typed store layer (mandates-store)
+  'apps/trustcore-trustops/lib/',
 ]
 
 function isExempt(filePath: string): boolean {

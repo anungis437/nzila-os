@@ -132,6 +132,8 @@ describe('SCHEMA_LIFECYCLE_DRIFT_001 — Schema-to-Manifest Drift Detection', ()
       trade: ['Trade', 'trade'],
       mobility: ['Mobility', 'mobility'],
       agri: ['Agri', 'agri', 'Producer', 'Harvest', 'Traceability'],
+      trustcore: ['TrustCore', 'trustcore', 'Privacy', 'Compliance'],
+      trustops: ['TrustOps', 'trustops', 'Mandate', 'mandate'],
     }
 
     const schemaFiles = [...new Set(tables.map((t) => t.schemaFile))]
@@ -183,6 +185,7 @@ describe('SCHEMA_LIFECYCLE_DRIFT_001 — Schema-to-Manifest Drift Detection', ()
       'deal', 'commission', 'certification', 'asset', 'api_credential',
       'automation', 'tax', 'indirect_tax', 'nacp', 'zonga', 'platform',
       'trade', 'gtm', 'mobility', 'agri',
+      'trustcore', 'trustops',  // TrustCore privacy/compliance + TrustOps mandate management
     ]
 
     const uncoveredTables: string[] = []
