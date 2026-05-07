@@ -79,10 +79,10 @@ export function EvidenceList({ records }: Props) {
           render: (r) => <span className="text-gray-500">{r.entityType}</span>,
         },
         {
-          id: 'entityId',
+          id: 'resourceId',
           label: 'Entity ID',
-          sortValue: (r) => r.entityId,
-          render: (r) => <span className="text-gray-400 font-mono text-xs">{r.entityId.slice(0, 8)}…</span>,
+          sortValue: (r) => r.resourceId,
+          render: (r) => <span className="text-gray-400 font-mono text-xs">{r.resourceId.slice(0, 8)}…</span>,
         },
         {
           id: 'actor',
@@ -108,7 +108,7 @@ export function EvidenceList({ records }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <div><p className="text-xs text-gray-500">Action</p><p>{r.action}</p></div>
           <div><p className="text-xs text-gray-500">Entity type</p><p>{r.entityType}</p></div>
-          <div><p className="text-xs text-gray-500">Entity ID</p><p className="font-mono text-xs break-all">{r.entityId}</p></div>
+          <div><p className="text-xs text-gray-500">Entity ID</p><p className="font-mono text-xs break-all">{r.resourceId}</p></div>
           <div><p className="text-xs text-gray-500">Actor</p><p className="font-mono text-xs break-all">{r.actorId}</p></div>
           <div><p className="text-xs text-gray-500">Timestamp</p><p>{r.createdAt.toLocaleString()}</p></div>
           <div><p className="text-xs text-gray-500">Event hash</p><p className="font-mono text-xs break-all">{r.eventHash ?? '—'}</p></div>

@@ -45,7 +45,7 @@ export const POST = withRequiredRole(
         orgId: ctx.orgId,
         actorId: ctx.userId,
         entityType: 'dsr_request',
-        entityId: dsr.id,
+        resourceId: dsr.id,
         action: 'dsr_created',
         metadata: {
           requesterEmail: dsr.requesterEmail,

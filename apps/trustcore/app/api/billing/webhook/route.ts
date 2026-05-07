@@ -20,9 +20,17 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
+import { createLogger } from '@nzila/os-core'
 
 // In-process idempotency cache (sufficient for single-instance deployments)
 const processedEventIds = new Set<string>()
+const logger = createLogger('trustcore:api:billing:webhook')
+
+async function verifyWebhookSignature(body: string, signature: string, stripeKey: string, webhookSecret: string) {
+  const { default: Stripe } = await import('stripe')
+  const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+  return stripe.webhooks.constructEvent(body, signature, webhookSecret)
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -33,9 +41,9 @@ export async function POST(req: NextRequest) {
 
   // ── No Stripe configured — log and ack ───────────────────────────────────
   if (!stripeKey || !webhookSecret) {
-    console.info('[TrustCore billing webhook] received (Stripe not yet configured)', {
+    logger.info('[trustcore billing webhook] received while Stripe is not configured', {
       bodyLength: body.length,
-      sig,
+      hasSignature: Boolean(sig),
     })
     return NextResponse.json({ received: true, note: 'Stripe not yet configured' })
   }
@@ -47,11 +55,11 @@ export async function POST(req: NextRequest) {
 
   let event: import('stripe').Stripe.Event
   try {
-    const { default: Stripe } = await import('stripe')
-    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+    event = await verifyWebhookSignature(body, sig, stripeKey, webhookSecret)
   } catch (err) {
-    console.error('[TrustCore billing webhook] signature verification failed', err)
+    logger.error('[trustcore billing webhook] signature verification failed', {
+      error: err instanceof Error ? err.message : String(err),
+    })
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
@@ -74,7 +82,7 @@ export async function POST(req: NextRequest) {
         const orgId = session.metadata?.orgId
         const plan = (session.metadata?.plan ?? 'pro') as 'pro' | 'premium'
         if (!orgId) {
-          console.warn('[TrustCore webhook] checkout.session.completed missing orgId metadata')
+          logger.warn('[trustcore webhook] checkout.session.completed missing orgId metadata')
           break
         }
         await upsertTrustcoreSubscription({
@@ -120,7 +128,7 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as import('stripe').Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
-          console.warn('[TrustCore webhook] subscription.updated missing orgId metadata')
+          logger.warn('[trustcore webhook] subscription.updated missing orgId metadata')
           break
         }
         const item = sub.items.data[0]
@@ -140,7 +148,7 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as import('stripe').Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
-          console.warn('[TrustCore webhook] subscription.deleted missing orgId metadata')
+          logger.warn('[trustcore webhook] subscription.deleted missing orgId metadata')
           break
         }
         // Downgrade to free — do NOT delete the record
@@ -159,7 +167,10 @@ export async function POST(req: NextRequest) {
         break
     }
   } catch (err) {
-    console.error('[TrustCore billing webhook] event processing error', { eventType: event.type, err })
+    logger.error('[trustcore billing webhook] event processing error', {
+      eventType: event.type,
+      error: err instanceof Error ? err.message : String(err),
+    })
     // Return 500 so Stripe retries the event
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
   }

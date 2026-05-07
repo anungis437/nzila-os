@@ -354,7 +354,7 @@ export const trustcoreEvidenceEvents = pgTable(
       .references(() => orgs.id),
     actorId: text('actor_id').notNull(),
     entityType: text('entity_type').notNull(),
-    entityId: text('entity_id').notNull(),
+    resourceId: text('entity_id').notNull(),
     action: text('action').notNull(),
     summary: text('summary'),
     metadata: jsonb('metadata'),
@@ -365,7 +365,7 @@ export const trustcoreEvidenceEvents = pgTable(
   (t) => [
     index('tc_evidence_events_org_idx').on(t.orgId),
     index('tc_evidence_events_org_created_idx').on(t.orgId, t.createdAt),
-    index('tc_evidence_events_org_entity_idx').on(t.orgId, t.entityType, t.entityId),
+    index('tc_evidence_events_org_entity_idx').on(t.orgId, t.entityType, t.resourceId),
   ],
 )
 

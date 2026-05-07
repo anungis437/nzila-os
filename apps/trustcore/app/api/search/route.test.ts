@@ -115,7 +115,7 @@ describe('POST /api/search', () => {
   })
 
   it('returns search results in data field', async () => {
-    const results = [{ entityId: 'a1', score: 0.9 }]
+    const results = [{ resourceId: 'a1', score: 0.9 }]
     mocks.searchEntities.mockResolvedValue(results)
     const { POST } = await import('./route')
     const res = await POST(makeRequest({ query: 'patient' }))
@@ -144,7 +144,7 @@ describe('POST /api/search', () => {
       fakeIndex,
       expect.objectContaining({
         entityType: 'data_asset',
-        entityId: 'da1',
+        resourceId: 'da1',
         title: 'PHI Records',
       }),
     )
@@ -166,7 +166,7 @@ describe('POST /api/search', () => {
     await POST(makeRequest({ query: 'AWS' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
-      expect.objectContaining({ entityType: 'vendor', entityId: 'v1' }),
+      expect.objectContaining({ entityType: 'vendor', resourceId: 'v1' }),
     )
   })
 
@@ -187,7 +187,7 @@ describe('POST /api/search', () => {
     await POST(makeRequest({ query: 'assessment' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
-      expect.objectContaining({ entityType: 'pia', entityId: 'pia1' }),
+      expect.objectContaining({ entityType: 'pia', resourceId: 'pia1' }),
     )
   })
 
@@ -209,7 +209,7 @@ describe('POST /api/search', () => {
     await POST(makeRequest({ query: 'breach' }))
     expect(mocks.indexEntity).toHaveBeenCalledWith(
       fakeIndex,
-      expect.objectContaining({ entityType: 'incident', entityId: 'inc1' }),
+      expect.objectContaining({ entityType: 'incident', resourceId: 'inc1' }),
     )
   })
 })

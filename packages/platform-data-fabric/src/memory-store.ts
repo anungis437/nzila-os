@@ -35,9 +35,9 @@ export function createInMemoryDataFabricStore(): DataFabricStore {
         syncJobs[idx] = { ...syncJobs[idx], ...update }
       }
     },
-    async getLineage(entityType, entityId) {
+    async getLineage(entityType, resourceId) {
       const matching = canonicals.filter(
-        (c) => c.entityType === entityType && c.entityId === entityId,
+        (c) => c.entityType === entityType && c.resourceId === resourceId,
       )
       return lineage.filter((l) =>
         matching.some((c) => c.id === l.canonicalRecordId),

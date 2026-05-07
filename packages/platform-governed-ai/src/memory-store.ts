@@ -20,9 +20,9 @@ export function createInMemoryAIRunStore(): AIRunStore {
     async getRun(id) {
       return runs.get(id)
     },
-    async getRunsByEntity(entityType, entityId) {
+    async getRunsByEntity(entityType, resourceId) {
       return Array.from(runs.values()).filter(
-        (r) => r.entityType === entityType && r.entityId === entityId,
+        (r) => r.entityType === entityType && r.resourceId === resourceId,
       )
     },
     async getRunsByTenant(tenantId, limit = 50) {

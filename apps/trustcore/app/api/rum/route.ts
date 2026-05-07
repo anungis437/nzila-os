@@ -1,5 +1,8 @@
+import { NextRequest } from 'next/server'
 import { handleRUMBeacon } from '@nzila/platform-rum'
+import { withRequiredRole } from '@/lib/rbac/requireRole'
 
-export async function POST(request: Request): Promise<Response> {
-  return handleRUMBeacon(request)
-}
+export const POST = withRequiredRole(
+  ['staff', 'org_admin', 'platform_admin'],
+  async (request: NextRequest) => handleRUMBeacon(request),
+)

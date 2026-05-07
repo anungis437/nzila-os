@@ -35,7 +35,7 @@ export const POST = withRequiredRole(
         orgId: ctx.orgId,
         actorId: ctx.userId,
         entityType: 'vendor',
-        entityId: vendor.id,
+        resourceId: vendor.id,
         action: 'vendor_added',
         metadata: {
           name: vendor.name,

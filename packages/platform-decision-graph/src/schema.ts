@@ -24,7 +24,7 @@ export const decisionNodes = pgTable(
     actorType: varchar('actor_type', { length: 32 }).notNull(),
     actorId: text('actor_id').notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     summary: text('summary').notNull(),
     outcome: jsonb('outcome').notNull().default({}),
     confidence: real('confidence'),
@@ -40,7 +40,7 @@ export const decisionNodes = pgTable(
   },
   (t) => [
     index('decision_nodes_tenant_idx').on(t.tenantId),
-    index('decision_nodes_entity_idx').on(t.entityType, t.entityId),
+    index('decision_nodes_entity_idx').on(t.entityType, t.resourceId),
     index('decision_nodes_type_idx').on(t.decisionType),
     index('decision_nodes_status_idx').on(t.status),
   ],

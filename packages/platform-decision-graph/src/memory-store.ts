@@ -28,9 +28,9 @@ export function createInMemoryDecisionStore(): DecisionGraphStore {
     async getEdgesTo(decisionId) {
       return edges.filter((e) => e.toDecisionId === decisionId)
     },
-    async getNodesByEntity(entityType, entityId) {
+    async getNodesByEntity(entityType, resourceId) {
       return Array.from(nodes.values()).filter(
-        (n) => n.entityType === entityType && n.entityId === entityId,
+        (n) => n.entityType === entityType && n.resourceId === resourceId,
       )
     },
     async updateNodeStatus(id, status) {

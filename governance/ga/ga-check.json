@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-30T12:53:53.238Z",
-  "commitSha": "1e4b5e08",
+  "timestamp": "2026-05-07T13:16:09.906Z",
+  "commitSha": "a5a5fabf2",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,14 +14,14 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 2938
+      "durationMs": 1257
     },
     {
       "id": "ORG-REGISTRY",
       "name": "Org boundary: Org-scoped registry exists and consistent",
       "status": "PASS",
       "details": "Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "HASH-CHAIN",
@@ -35,7 +35,7 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUTH-MIDDLEWARE",
@@ -43,7 +43,7 @@
       "status": "PASS",
       "details": "All 4 apps have auth edge guards (proxy.ts/middleware.ts)",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUDITED-WRITES",
@@ -72,7 +72,7 @@
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 9
+      "durationMs": 1
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 8
+      "durationMs": 6
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -127,14 +127,14 @@
       "status": "PASS",
       "details": "All 4 apps enforce 3 boundary rules",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
       "details": "233 contract test files (require ≥20)",
-      "durationMs": 4
+      "durationMs": 5
     },
     {
       "id": "CODEOWNERS",
@@ -149,22 +149,22 @@
       "name": "Red-team: Nightly red-team workflow exists",
       "status": "PASS",
       "details": "Red-team nightly workflow with schedule trigger present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "RED-TEAM-EVIDENCE",
       "name": "Red-team: Outputs included as evidence artifacts",
       "status": "PASS",
       "details": "Red-team outputs uploaded as artifacts, test files present",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "STUDIO-PLATFORM-SCORE",
       "name": "Studio maturity: Every app scores ≥ 7/10 on platform integration",
       "status": "PASS",
-      "details": "All 24 apps score ≥ 7/10 on platform integration",
+      "details": "All 25 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 14
+      "durationMs": 12
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -172,7 +172,7 @@
       "status": "PASS",
       "details": "All apps with AI claims have runtime ai-sdk wiring",
       "violations": [],
-      "durationMs": 20
+      "durationMs": 8
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -180,14 +180,14 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 3392
+      "durationMs": 1887
     }
   ],
   "environment": {
     "nodeVersion": "v24.13.1",
     "platform": "win32",
     "ci": false,
-    "cwd": "C:\\APPS\\nzila-automation"
+    "cwd": "C:/APPS/nzila-automation"
   },
-  "totalDurationMs": 6511
+  "totalDurationMs": 3257
 }

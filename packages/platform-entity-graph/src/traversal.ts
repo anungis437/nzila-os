@@ -23,9 +23,9 @@ export async function getEntityNode(
   store: EntityGraphStore,
   tenantId: string,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<EntityNode | undefined> {
-  return store.getNode(tenantId, entityType, entityId)
+  return store.getNode(tenantId, entityType, resourceId)
 }
 
 /**
@@ -35,14 +35,14 @@ export async function getEntityNeighbors(
   store: EntityGraphStore,
   tenantId: string,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<readonly NeighborResult[]> {
-  const edges = await store.getEdges(tenantId, entityType, entityId)
+  const edges = await store.getEdges(tenantId, entityType, resourceId)
   const results: NeighborResult[] = []
 
   for (const edge of edges) {
     const isSource =
-      edge.sourceEntityType === entityType && edge.sourceEntityId === entityId
+      edge.sourceEntityType === entityType && edge.sourceEntityId === resourceId
     const neighborType = isSource ? edge.targetEntityType : edge.sourceEntityType
     const neighborId = isSource ? edge.targetEntityId : edge.sourceEntityId
 
@@ -76,7 +76,7 @@ export async function buildEntitySubgraph(
   const visitedNodes = new Map<string, EntityNode>()
   const collectedEdges = new Map<string, EntityEdge>()
 
-  const nodeKey = (n: EntityNode) => `${n.entityType}:${n.entityId}`
+  const nodeKey = (n: EntityNode) => `${n.entityType}:${n.resourceId}`
   visitedNodes.set(nodeKey(seedNode), seedNode)
 
   let frontier: EntityNode[] = [seedNode]
@@ -88,7 +88,7 @@ export async function buildEntitySubgraph(
       const edges = await store.getEdges(
         tenantId,
         current.entityType,
-        current.entityId,
+        current.resourceId,
       )
 
       for (const edge of edges) {
@@ -97,7 +97,7 @@ export async function buildEntitySubgraph(
 
         const isSource =
           edge.sourceEntityType === current.entityType &&
-          edge.sourceEntityId === current.entityId
+          edge.sourceEntityId === current.resourceId
         const neighborType = isSource
           ? edge.targetEntityType
           : edge.sourceEntityType
@@ -164,13 +164,13 @@ export async function resolveRelationshipPath(
     const edges = await store.getEdges(
       tenantId,
       current.node.entityType,
-      current.node.entityId,
+      current.node.resourceId,
     )
 
     for (const edge of edges) {
       const isSource =
         edge.sourceEntityType === current.node.entityType &&
-        edge.sourceEntityId === current.node.entityId
+        edge.sourceEntityId === current.node.resourceId
       const neighborType = isSource
         ? edge.targetEntityType
         : edge.sourceEntityType

@@ -35,7 +35,7 @@ export const POST = withRequiredRole(
         orgId: ctx.orgId,
         actorId: ctx.userId,
         entityType: 'data_asset',
-        entityId: asset.id,
+        resourceId: asset.id,
         action: 'data_asset_created',
         metadata: { name: asset.name, dataCategory: asset.dataCategory, sensitivityLevel: asset.sensitivityLevel },
       })

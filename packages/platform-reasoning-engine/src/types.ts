@@ -79,7 +79,7 @@ export interface ReasoningChain {
   readonly reasoningType: ReasoningType
   readonly status: ReasoningStatus
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly question: string
   readonly steps: readonly ReasoningStep[]
   readonly conclusion: ReasoningConclusion | null
@@ -122,7 +122,7 @@ export interface ReasoningStore {
   getChain(id: string): Promise<ReasoningChain | undefined>
   getChainsByEntity(
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
   ): Promise<readonly ReasoningChain[]>
   getChainsByOrg(
     orgId: string,
@@ -138,7 +138,7 @@ export const ReasoningRequestSchema = z.object({
     Object.values(ReasoningTypes) as [string, ...string[]],
   ),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   question: z.string().min(1),
   requestedBy: z.string().min(1),
 })

@@ -328,6 +328,7 @@ export const ORG_SCOPED_TABLES = [
   'trustcorePolicies',
   'trustcoreReminders',
   'trustcoreSubscriptions',
+  'trustcoreLeads',
 ] as const
 
 /**

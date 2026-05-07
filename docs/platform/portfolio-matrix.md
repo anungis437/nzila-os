@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-05-04
+> Generated: 2026-05-07
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -15,6 +15,7 @@
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Nzila HQ | 3 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
+| TrustCore | 3 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
@@ -44,6 +45,7 @@
 | Control Plane | PILOT | internal-only | internal | HOLD |
 | Nzila HQ | EXPERIMENTAL | internal-only | internal | HOLD |
 | Orchestrator API | EXPERIMENTAL | internal-only | internal | HOLD |
+| TrustCore | INCUBATING | internal-only | internal | HOLD |
 | Web | PRODUCTION | pilot-safe | external | HOLD |
 | Agrimo | INCUBATING | internal-only | internal | HOLD |
 | Cora | INCUBATING | internal-only | internal | HOLD |

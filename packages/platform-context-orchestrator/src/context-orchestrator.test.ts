@@ -36,7 +36,7 @@ describe('platform-context-orchestrator', () => {
           tenantId: TENANT,
           purpose: ContextPurposes.WORKFLOW,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           caller: CALLER,
         },
       )
@@ -81,7 +81,7 @@ describe('platform-context-orchestrator', () => {
         tenantId: TENANT,
         purpose: ContextPurposes.DECISION,
         entityType: OntologyEntityTypes.CASE,
-        entityId: ENTITY_ID,
+        resourceId: ENTITY_ID,
         caller: CALLER,
       })
 
@@ -102,7 +102,7 @@ describe('platform-context-orchestrator', () => {
         tenantId: TENANT,
         purpose: ContextPurposes.AUDIT,
         entityType: OntologyEntityTypes.CASE,
-        entityId: ENTITY_ID,
+        resourceId: ENTITY_ID,
         caller: CALLER,
       })
 
@@ -122,7 +122,7 @@ describe('platform-context-orchestrator', () => {
           tenantId: TENANT,
           purpose: ContextPurposes.WORKFLOW,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           caller: CALLER,
         })
 
@@ -130,7 +130,7 @@ describe('platform-context-orchestrator', () => {
           tenantId: TENANT,
           purpose: ContextPurposes.WORKFLOW,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           caller: CALLER,
         })
 

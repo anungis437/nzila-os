@@ -45,7 +45,7 @@ function generateId(): string {
 export interface MapSourceRecordOptions {
   sourceRecord: SourceRecord
   targetEntityType: OntologyEntityType
-  entityId: string
+  resourceId: string
   mappingVersion: number
   transformFn: (raw: Record<string, unknown>) => Record<string, unknown>
 }
@@ -56,7 +56,7 @@ export interface MapSourceRecordOptions {
 export function mapSourceRecordToCanonical(
   options: MapSourceRecordOptions,
 ): CanonicalRecord {
-  const { sourceRecord, targetEntityType, entityId, mappingVersion, transformFn } = options
+  const { sourceRecord, targetEntityType, resourceId, mappingVersion, transformFn } = options
   const now = new Date().toISOString()
   const payload = transformFn(sourceRecord.rawPayload)
 
@@ -64,7 +64,7 @@ export function mapSourceRecordToCanonical(
     id: generateId(),
     tenantId: sourceRecord.tenantId,
     entityType: targetEntityType,
-    entityId,
+    resourceId,
     sourceSystem: sourceRecord.sourceSystem,
     sourceRecordId: sourceRecord.sourceRecordId,
     mappingVersion,
@@ -82,7 +82,7 @@ export async function reconcileCanonicalEntity(
   store: DataFabricStore,
   record: CanonicalRecord,
 ): Promise<{ persisted: boolean; conflicts: readonly ConflictRecord[] }> {
-  const existing = await store.getLineage(record.entityType, record.entityId)
+  const existing = await store.getLineage(record.entityType, record.resourceId)
   const conflicts: ConflictRecord[] = []
 
   // Check for source conflicts
@@ -95,7 +95,7 @@ export async function reconcileCanonicalEntity(
         id: generateId(),
         tenantId: record.tenantId,
         entityType: record.entityType,
-        entityId: record.entityId,
+        resourceId: record.resourceId,
         sourceSystemA: lineage.sourceSystem,
         sourceSystemB: record.sourceSystem,
         conflictingField: 'source_identity',
@@ -128,9 +128,9 @@ export async function reconcileCanonicalEntity(
 export async function getLineageForEntity(
   store: DataFabricStore,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<readonly LineageRecord[]> {
-  return store.getLineage(entityType, entityId)
+  return store.getLineage(entityType, resourceId)
 }
 
 /**

@@ -114,6 +114,7 @@ describe('Org-scope enforcement patterns', () => {
           content.includes('withOrganizationAuth(') ||
           content.includes('getCurrentUser(') ||
           content.includes('withMinRole(') ||
+          content.includes('withRequiredRole(') ||
           content.includes('requireUser(') ||
           content.includes('authenticateUser(') ||
           content.includes('verifyWebhookSignature(') ||

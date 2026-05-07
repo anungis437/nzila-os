@@ -879,7 +879,7 @@ export const zongaUserActivity = pgTable('zonga_user_activity', {
   userType: varchar('user_type', { length: 50 }).notNull(),
   activityType: varchar('activity_type', { length: 100 }).notNull(),
   entityType: varchar('entity_type', { length: 50 }),
-  entityId: uuid('entity_id'),
+  resourceId: uuid('entity_id'),
   metadata: jsonb('metadata').notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
@@ -891,7 +891,7 @@ export const zongaSharedContent = pgTable('zonga_shared_content', {
     .references(() => orgs.id),
   sharerId: uuid('sharer_id').notNull(),
   shareType: zongaShareTypeEnum('share_type').notNull(),
-  entityId: uuid('entity_id').notNull(),
+  resourceId: uuid('entity_id').notNull(),
   deepLink: text('deep_link').notNull(),
   platform: varchar('platform', { length: 50 }),
   clickCount: integer('click_count').notNull().default(0),

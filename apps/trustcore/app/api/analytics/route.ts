@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildPlatformEvent } from '@nzila/platform-event-fabric'
 import { withNzilaSpan } from '@nzila/otel-core'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('trustcore:api:analytics')
 
 function getString(value: unknown, fallback: string): string {
   return typeof value === 'string' && value.length > 0 ? value : fallback
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       correlationId: request.headers.get('x-request-id') ?? undefined,
     })
 
-    console.log('[TrustCore Analytics]', event)
+    logger.info('[trustcore analytics] event received', { type: event.type, orgId })
 
     return NextResponse.json({ ok: true })
   })

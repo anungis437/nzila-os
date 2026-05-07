@@ -34,7 +34,7 @@ export async function indexEntity(
     id: generateId(),
     tenantId: input.tenantId,
     entityType: input.entityType as OntologyEntityType,
-    entityId: input.entityId,
+    resourceId: input.resourceId,
     title: input.title,
     content: input.content,
     metadata: input.metadata,

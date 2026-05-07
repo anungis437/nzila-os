@@ -25,7 +25,7 @@ export const aiRunRecords = pgTable(
     modelId: varchar('model_id', { length: 128 }).notNull(),
     modelVersion: varchar('model_version', { length: 64 }).notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     input: jsonb('input').notNull(),
     output: jsonb('output'),
     confidence: real('confidence'),
@@ -45,7 +45,7 @@ export const aiRunRecords = pgTable(
   },
   (t) => [
     index('ai_runs_tenant_idx').on(t.tenantId),
-    index('ai_runs_entity_idx').on(t.entityType, t.entityId),
+    index('ai_runs_entity_idx').on(t.entityType, t.resourceId),
     index('ai_runs_model_idx').on(t.modelId),
     index('ai_runs_status_idx').on(t.status),
     index('ai_runs_operation_idx').on(t.operationType),

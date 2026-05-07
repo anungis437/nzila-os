@@ -13,9 +13,9 @@ export function createInMemoryReasoningStore(): ReasoningStore {
     async getChain(id) {
       return chains.get(id)
     },
-    async getChainsByEntity(entityType, entityId) {
+    async getChainsByEntity(entityType, resourceId) {
       return Array.from(chains.values()).filter(
-        (c) => c.entityType === entityType && c.entityId === entityId,
+        (c) => c.entityType === entityType && c.resourceId === resourceId,
       )
     },
     async getChainsByOrg(orgId, limit = 50) {

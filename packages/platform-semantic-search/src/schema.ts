@@ -20,7 +20,7 @@ export const searchDocuments = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     title: text('title').notNull(),
     content: text('content').notNull(),
     metadata: jsonb('metadata').notNull().default({}),
@@ -36,7 +36,7 @@ export const searchDocuments = pgTable(
   },
   (t) => [
     index('search_docs_tenant_idx').on(t.tenantId),
-    index('search_docs_entity_idx').on(t.entityType, t.entityId),
+    index('search_docs_entity_idx').on(t.entityType, t.resourceId),
     index('search_docs_entity_type_idx').on(t.entityType),
   ],
 )

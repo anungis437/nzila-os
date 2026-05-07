@@ -41,7 +41,7 @@ export async function createDecisionNode(
     actorType: input.actorType as DecisionNode['actorType'],
     actorId: input.actorId,
     entityType: input.entityType as OntologyEntityType,
-    entityId: input.entityId,
+    resourceId: input.resourceId,
     summary: input.summary,
     outcome: input.outcome,
     confidence: input.confidence,
@@ -167,7 +167,7 @@ export async function getDecisionTrail(
 export async function getDecisionsForEntity(
   store: DecisionGraphStore,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<readonly DecisionNode[]> {
-  return store.getNodesByEntity(entityType, entityId)
+  return store.getNodesByEntity(entityType, resourceId)
 }

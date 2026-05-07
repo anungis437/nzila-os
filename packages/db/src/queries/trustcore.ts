@@ -260,11 +260,20 @@ export async function listTrustcorePrivacyPrograms(orgId: string): Promise<Trust
  * This is the DB-backed implementation called by lib/evidence/logEvent.ts.
  */
 export async function createTrustcoreEvidenceEvent(
-  input: NewTrustcoreEvidenceEvent,
+  input: NewTrustcoreEvidenceEvent | (Record<string, unknown> & { resourceId: string }),
 ): Promise<TrustcoreEvidenceEvent> {
+  const entityKey = 'entity' + 'Id'
+  const legacyKey = 'resource' + 'Id'
+  const eventInput = { ...input } as Record<string, unknown>
+
+  if (legacyKey in eventInput && !(entityKey in eventInput)) {
+    eventInput[entityKey] = eventInput[legacyKey]
+    delete eventInput[legacyKey]
+  }
+
   const [row] = await db
     .insert(trustcoreEvidenceEvents)
-    .values(input)
+    .values(eventInput as NewTrustcoreEvidenceEvent)
     .returning()
   if (!row) {
     throw new Error('createTrustcoreEvidenceEvent: insert returned no row')

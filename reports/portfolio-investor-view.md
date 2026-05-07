@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-05-04
+Generated: 2026-05-07
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
@@ -37,6 +37,7 @@ Authority: governance/portfolio/product-catalog.json
 | Control Plane | internal | Operational governance engine supporting all products and control loops. | internal-proof | HOLD |
 | Nzila HQ | incubating | Executive intelligence cockpit — portfolio scoring, domain health, venture snapshot, and capital allocation. | internal-proof | HOLD |
 | Orchestrator API | internal | Shared orchestration backbone that remains important operationally but is not a standalone commercial SKU. | internal-proof | HOLD |
+| TrustCore | incubating | Trust & compliance engine — policy enforcement, audit trails, and governance controls for platform apps. | internal-proof | HOLD |
 | Maestria | incubating | Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs. | internal-proof | HOLD |
 | WeekOne | frozen | Onboarding and first-week activation surface for new tenants across the portfolio. Parked / successor-track; excluded from active commercial scorecards. | internal-proof | HOLD |
 

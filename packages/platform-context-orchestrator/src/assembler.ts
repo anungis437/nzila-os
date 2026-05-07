@@ -34,7 +34,7 @@ export async function buildContextEnvelope(
     tenantId,
     purpose,
     entityType,
-    entityId,
+    resourceId,
     caller,
     graphDepth = 1,
     eventLimit = 20,
@@ -46,11 +46,11 @@ export async function buildContextEnvelope(
   // Parallel fetch from all context sources
   const [entity, graphResult, events, knowledge, decisions, tenantPolicies] =
     await Promise.all([
-      sources.entity.getEntity(tenantId, entityTypeStr, entityId),
-      sources.graph.getNeighbors(entityTypeStr, entityId, graphDepth),
-      sources.events.getRecentEvents(tenantId, entityTypeStr, entityId, eventLimit),
+      sources.entity.getEntity(tenantId, entityTypeStr, resourceId),
+      sources.graph.getNeighbors(entityTypeStr, resourceId, graphDepth),
+      sources.events.getRecentEvents(tenantId, entityTypeStr, resourceId, eventLimit),
       sources.knowledge.getApplicable(tenantId, entityTypeStr, knowledgeTags),
-      sources.decisions.getDecisions(entityTypeStr, entityId),
+      sources.decisions.getDecisions(entityTypeStr, resourceId),
       sources.tenant.getTenantPolicies(tenantId),
     ])
 
@@ -59,7 +59,7 @@ export async function buildContextEnvelope(
     tenantId,
     purpose: purpose as ContextEnvelope['purpose'],
     primaryEntityType: entityTypeStr,
-    primaryEntityId: entityId,
+    primaryEntityId: resourceId,
     assembledAt: new Date().toISOString(),
     entity,
     relatedEntities: graphResult.nodes,
@@ -81,14 +81,14 @@ export async function getWorkflowContext(
   sources: ContextSources,
   tenantId: string,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
   caller: ContextRequest['caller'],
 ): Promise<ContextEnvelope> {
   return buildContextEnvelope(sources, {
     tenantId,
     purpose: 'workflow',
     entityType,
-    entityId,
+    resourceId,
     caller,
     graphDepth: 1,
     eventLimit: 10,
@@ -102,14 +102,14 @@ export async function getDecisionContext(
   sources: ContextSources,
   tenantId: string,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
   caller: ContextRequest['caller'],
 ): Promise<ContextEnvelope> {
   return buildContextEnvelope(sources, {
     tenantId,
     purpose: 'decision',
     entityType,
-    entityId,
+    resourceId,
     caller,
     graphDepth: 2,
     eventLimit: 50,
@@ -123,7 +123,7 @@ export async function getAIContext(
   sources: ContextSources,
   tenantId: string,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
   caller: ContextRequest['caller'],
   knowledgeTags?: readonly string[],
 ): Promise<ContextEnvelope> {
@@ -131,7 +131,7 @@ export async function getAIContext(
     tenantId,
     purpose: 'ai_inference',
     entityType,
-    entityId,
+    resourceId,
     caller,
     graphDepth: 3,
     eventLimit: 100,

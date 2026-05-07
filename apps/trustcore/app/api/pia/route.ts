@@ -35,7 +35,7 @@ export const POST = withRequiredRole(
         orgId: ctx.orgId,
         actorId: ctx.userId,
         entityType: 'pia',
-        entityId: pia.id,
+        resourceId: pia.id,
         action: 'pia_created',
         metadata: { title: pia.title, triggerType: pia.triggerType, riskScore: pia.riskScore },
       })

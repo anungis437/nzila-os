@@ -45,7 +45,7 @@ export async function runCrossVerticalDemo() {
   const yieldRun = await executeGovernedAIRun(aiStore, policyEval, {
     tenantId: ORG,
     entityType: OntologyEntityTypes.PRODUCT,
-    entityId: 'crop-maize-2024',
+    resourceId: 'crop-maize-2024',
     operationType: AIOperationTypes.RISK_SCORING,
     modelId: 'agri-yield-predictor-v1',
     prompt: 'Predict maize yield for Katanga region given current weather patterns',
@@ -68,7 +68,7 @@ export async function runCrossVerticalDemo() {
   const agriDecision = await createDecisionNode(decisionStore, {
     tenantId: ORG,
     entityType: OntologyEntityTypes.PRODUCT,
-    entityId: 'crop-maize-2024',
+    resourceId: 'crop-maize-2024',
     decisionType: DecisionTypes.RISK_ASSESSMENT,
     actorType: ActorTypes.AI_MODEL,
     actorId: 'agri-yield-predictor-v1',
@@ -82,7 +82,7 @@ export async function runCrossVerticalDemo() {
       type: PlatformEventTypes.ENTITY_UPDATED,
       tenantId: ORG,
       entityType: OntologyEntityTypes.PRODUCT,
-      entityId: 'crop-maize-2024',
+      resourceId: 'crop-maize-2024',
       payload: { alert: 'yield_below_threshold', yieldRatio: 0.525 },
       actorId: 'agri-yield-predictor-v1',
     }),
@@ -106,7 +106,7 @@ export async function runCrossVerticalDemo() {
   const commerceRun = await executeGovernedAIRun(aiStore, policyEval, {
     tenantId: ORG,
     entityType: OntologyEntityTypes.TRANSACTION,
-    entityId: 'txn-batch-2024-03',
+    resourceId: 'txn-batch-2024-03',
     operationType: AIOperationTypes.ANOMALY_DETECTION,
     modelId: 'commerce-anomaly-v2',
     prompt: 'Analyze maize transaction batch for pricing anomalies',
@@ -136,7 +136,7 @@ export async function runCrossVerticalDemo() {
   const chain = await executeReasoningChain(reasoningStore, {
     orgId: ORG,
     entityType: OntologyEntityTypes.ORGANIZATION,
-    entityId: 'org-nzila-demo',
+    resourceId: 'org-nzila-demo',
     reasoningType: ReasoningTypes.CROSS_VERTICAL,
     question: 'How do agricultural yield forecasts impact commodity trading risk?',
     strategy: {
@@ -145,7 +145,7 @@ export async function runCrossVerticalDemo() {
           {
             stepNumber: 1,
             description: 'Analyze agricultural yield signals',
-            input: { vertical: 'agriculture', entityId: 'crop-maize-2024' },
+            input: { vertical: 'agriculture', resourceId: 'crop-maize-2024' },
             output: { yieldRatio: 0.525, belowThreshold: true },
             citations: [
               { sourceType: 'decision' as const, sourceId: agriDecision.id, excerpt: 'Yield 52.5% of average' },
@@ -157,7 +157,7 @@ export async function runCrossVerticalDemo() {
           {
             stepNumber: 2,
             description: 'Correlate with commodity price movements',
-            input: { vertical: 'commerce', entityId: 'txn-batch-2024-03' },
+            input: { vertical: 'commerce', resourceId: 'txn-batch-2024-03' },
             output: { priceSurge: 0.35, anomalyDetected: true },
             citations: [
               { sourceType: 'data' as const, sourceId: 'market-data-kinshasa', excerpt: 'Price +35%' },

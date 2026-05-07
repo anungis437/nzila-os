@@ -1,6 +1,6 @@
 # Portfolio Status
 
-Generated: 2026-05-04
+Generated: 2026-05-07
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix
@@ -16,6 +16,7 @@ Authority: governance/portfolio/product-catalog.json
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Nzila HQ | 3 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Orchestrator API | 3 | internal | internal-only | internal-cost-center | internal-proof | medium |
+| TrustCore | 3 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Web | 3 | pilot | maintain | pre-revenue | internal-proof | medium |
 | Agrimo | 4 | incubating | hold | pre-revenue | none | low |
 | Cora | 4 | incubating | hold | pre-revenue | none | low |
@@ -36,7 +37,7 @@ Authority: governance/portfolio/product-catalog.json
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
-- Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria, weekone
+- Internal only: console, control-plane, nzila-hq, orchestrator-api, trustcore, maestria, weekone
 - Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
 
 ## Engine Topology
@@ -63,6 +64,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Control Plane | 5.0 | HOLD | PILOT | internal-only |
 | Nzila HQ | 5.0 | HOLD | EXPERIMENTAL | internal-only |
 | Orchestrator API | 4.8 | HOLD | EXPERIMENTAL | internal-only |
+| TrustCore | 4.8 | HOLD | INCUBATING | internal-only |
 | Web | 5.0 | HOLD | PRODUCTION | pilot-safe |
 | Agrimo | 3.6 | HOLD | INCUBATING | internal-only |
 | Cora | 3.6 | HOLD | INCUBATING | internal-only |

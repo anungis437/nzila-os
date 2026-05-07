@@ -65,7 +65,7 @@ export interface CanonicalRecord {
   readonly id: string
   readonly tenantId: string
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly sourceSystem: string
   readonly sourceRecordId: string
   readonly mappingVersion: number
@@ -120,7 +120,7 @@ export interface ConflictRecord {
   readonly id: string
   readonly tenantId: string
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly sourceSystemA: string
   readonly sourceSystemB: string
   readonly conflictingField: string
@@ -148,7 +148,7 @@ export interface DataFabricStore {
   persistConflict(conflict: ConflictRecord): Promise<void>
   persistSyncJob(job: SyncJob): Promise<void>
   updateSyncJob(id: string, update: Partial<SyncJob>): Promise<void>
-  getLineage(entityType: OntologyEntityType, entityId: string): Promise<readonly LineageRecord[]>
+  getLineage(entityType: OntologyEntityType, resourceId: string): Promise<readonly LineageRecord[]>
   getConflicts(tenantId: string, entityType?: OntologyEntityType): Promise<readonly ConflictRecord[]>
 }
 
@@ -168,7 +168,7 @@ export const CanonicalRecordSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   sourceSystem: z.string().min(1),
   sourceRecordId: z.string().min(1),
   mappingVersion: z.number().int().positive(),

@@ -490,6 +490,37 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     residency: { type: 'managed', regions: ['southafricanorth', 'westeurope'], orgSelectable: true, description: 'Managed hosting with org-selectable region' },
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 2 },
   },
+
+  // ── TrustCore ──────────────────────────────────────────────────────
+  {
+    appId: 'trustcore',
+    appName: 'TrustCore',
+    version: '1.0.0',
+    lastUpdated: '2026-05-07',
+    dataCategories: [
+      { name: 'Privacy Program Records', description: 'Privacy governance setup, officers, and accountability records', containsPii: true, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Personal Data Inventory', description: 'Data assets, vendors, consent records, and transfer metadata', containsPii: true, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Risk & Incident Management', description: 'PIAs, incidents, DSR requests, reminders, and compliance snapshots', containsPii: true, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Evidence & Audit Trail', description: 'Immutable evidence events and generated policy artifacts', containsPii: false, containsFinancial: false, storageEngine: 'PostgreSQL' },
+      { name: 'Subscriptions & Leads', description: 'Subscription state and onboarding lead capture records', containsPii: true, containsFinancial: true, storageEngine: 'PostgreSQL' },
+    ],
+    retentionSchedules: [
+      { category: 'Privacy Program Records', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Privacy governance accountability and Law 25 auditability' },
+      { category: 'Personal Data Inventory', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Data mapping and vendor due diligence audit trail' },
+      { category: 'Risk & Incident Management', retentionClass: '7_YEARS', retentionPeriod: '7 years', legalBasis: 'Incident and request lifecycle compliance evidence' },
+      { category: 'Evidence & Audit Trail', retentionClass: 'PERMANENT', retentionPeriod: 'Permanent', legalBasis: 'Immutable compliance and defensibility evidence' },
+      { category: 'Subscriptions & Leads', retentionClass: '3_YEARS', retentionPeriod: '3 years', legalBasis: 'Commercial operations and customer lifecycle management' },
+    ],
+    deletionPolicies: [
+      { category: 'Privacy Program Records', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin', 'org_admin'], reversible: true },
+      { category: 'Personal Data Inventory', method: 'crypto_shred', verification: 'deletion_certificate', authorizedRoles: ['platform_admin', 'org_admin'], reversible: false },
+      { category: 'Risk & Incident Management', method: 'soft_delete', verification: 'audit_log', authorizedRoles: ['platform_admin', 'org_admin'], reversible: true },
+      { category: 'Evidence & Audit Trail', method: 'retention_expiry', verification: 'deletion_certificate', authorizedRoles: [], reversible: false },
+      { category: 'Subscriptions & Leads', method: 'hard_delete', verification: 'audit_log', authorizedRoles: ['platform_admin'], reversible: false },
+    ],
+    residency: { type: 'managed', regions: ['canadacentral', 'eastus2'], orgSelectable: true, description: 'Managed hosting with compliance-oriented residency controls' },
+    backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 1 },
+  },
 ]
 
 // ── Manifest Generation ─────────────────────────────────────────────────────

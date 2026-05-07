@@ -69,7 +69,7 @@ export async function executeReasoningChain(
       reasoningType: request.reasoningType as ReasoningChain['reasoningType'],
       status: ReasoningStatuses.COMPLETED,
       entityType: request.entityType as OntologyEntityType,
-      entityId: request.entityId,
+      resourceId: request.resourceId,
       question: request.question,
       steps: result.steps,
       conclusion: result.conclusion,
@@ -90,7 +90,7 @@ export async function executeReasoningChain(
       reasoningType: request.reasoningType as ReasoningChain['reasoningType'],
       status: ReasoningStatuses.FAILED,
       entityType: request.entityType as OntologyEntityType,
-      entityId: request.entityId,
+      resourceId: request.resourceId,
       question: request.question,
       steps: [],
       conclusion: null,
@@ -134,7 +134,7 @@ export async function getReasoningChain(
 export async function getReasoningHistory(
   store: ReasoningStore,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<readonly ReasoningChain[]> {
-  return store.getChainsByEntity(entityType, entityId)
+  return store.getChainsByEntity(entityType, resourceId)
 }

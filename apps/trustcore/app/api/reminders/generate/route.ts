@@ -21,7 +21,7 @@ export const POST = withRequiredRole(
       orgId: ctx.orgId,
       actorId: ctx.userId,
       entityType: 'reminder',
-      entityId: ctx.orgId,
+      resourceId: ctx.orgId,
       action: 'created',
       summary: `${reminders.length} reminder(s) generated or found`,
       metadata: { count: reminders.length, triggeredBy: 'manual' },

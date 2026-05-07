@@ -61,7 +61,7 @@ export interface DecisionNode {
   readonly actorType: ActorType
   readonly actorId: string
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly summary: string
   readonly outcome: Record<string, unknown>
   readonly confidence?: number
@@ -115,7 +115,7 @@ export interface DecisionGraphStore {
   getEdgesTo(decisionId: string): Promise<readonly DecisionEdge[]>
   getNodesByEntity(
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
   ): Promise<readonly DecisionNode[]>
   updateNodeStatus(id: string, status: DecisionStatus): Promise<void>
 }
@@ -130,7 +130,7 @@ export const CreateDecisionNodeSchema = z.object({
   actorType: z.enum(Object.values(ActorTypes) as [string, ...string[]]),
   actorId: z.string().min(1),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   summary: z.string().min(1),
   outcome: z.record(z.unknown()),
   confidence: z.number().min(0).max(1).optional(),

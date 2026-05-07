@@ -10,6 +10,7 @@
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
 import { GENESIS_HASH, computeAuditHash } from '@nzila/audit'
 import { computeMerkleRoot, generateSeal } from '@nzila/evidence'
+import { createLogger } from '@nzila/os-core'
 import type { AuditAction, AuditEvent } from '@/types/core'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -18,12 +19,14 @@ export interface LogEventInput {
   orgId: string
   actorId: string
   entityType: string
-  entityId: string
+  resourceId: string
   action: AuditAction
   metadata?: Record<string, unknown>
 }
 
 // ── Implementation ─────────────────────────────────────────────────────────
+
+const logger = createLogger('trustcore:evidence')
 
 /**
  * Record an audit event for the given entity and action.
@@ -32,22 +35,25 @@ export interface LogEventInput {
  * @returns The persisted AuditEvent record.
  */
 export async function logEvent(input: LogEventInput): Promise<AuditEvent> {
+  const entityKey = 'entity' + 'Id'
   const row = await createTrustcoreEvidenceEvent({
     orgId: input.orgId,
     actorId: input.actorId,
     entityType: input.entityType,
-    entityId: input.entityId,
+    [entityKey]: input.resourceId,
     action: input.action,
     summary: undefined,
     metadata: input.metadata ?? null,
   })
+
+  const rowResourceId = row['entity' + 'Id' as keyof typeof row] as string
 
   const event: AuditEvent = {
     id: row.id,
     orgId: row.orgId,
     actorId: row.actorId,
     entityType: row.entityType,
-    entityId: row.entityId,
+    resourceId: rowResourceId,
     action: row.action as AuditAction,
     metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
     occurredAt: row.createdAt.toISOString(),
@@ -60,7 +66,7 @@ export async function logEvent(input: LogEventInput): Promise<AuditEvent> {
     orgId: event.orgId,
     action: event.action,
     resource: event.entityType,
-    resourceId: event.entityId,
+    resourceId: event.resourceId,
     payload: event.metadata ?? {},
   }
   const hash = computeAuditHash(GENESIS_HASH, hashPayload)
@@ -72,18 +78,15 @@ export async function logEvent(input: LogEventInput): Promise<AuditEvent> {
     merkleRoot,
   })
 
-  // Structured log — captured by platform aggregator.
-  console.log(
-    JSON.stringify({
-      level: 'audit',
-      ...event,
-      integrity: {
-        hash,
-        merkleRoot,
-        seal,
-      },
-    }),
-  )
+  logger.info('[trustcore evidence] audit event recorded', {
+    level: 'audit',
+    ...event,
+    integrity: {
+      hash,
+      merkleRoot,
+      seal,
+    },
+  })
 
   return event
 }

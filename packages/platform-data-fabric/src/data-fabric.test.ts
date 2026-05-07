@@ -80,7 +80,7 @@ describe('platform-data-fabric', () => {
       const canonical = mapSourceRecordToCanonical({
         sourceRecord: source,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000099',
+        resourceId: '00000000-0000-0000-0000-000000000099',
         mappingVersion: 1,
         transformFn: (raw) => ({
           displayName: `${raw.firstName} ${raw.lastName}`,
@@ -118,7 +118,7 @@ describe('platform-data-fabric', () => {
       const first = mapSourceRecordToCanonical({
         sourceRecord: source,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000188',
+        resourceId: '00000000-0000-0000-0000-000000000188',
         mappingVersion: 1,
         transformFn: (raw) => ({ email: raw.email }),
       })
@@ -126,7 +126,7 @@ describe('platform-data-fabric', () => {
       const second = mapSourceRecordToCanonical({
         sourceRecord: source,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000189',
+        resourceId: '00000000-0000-0000-0000-000000000189',
         mappingVersion: 1,
         transformFn: (raw) => ({ email: raw.email }),
       })
@@ -156,7 +156,7 @@ describe('platform-data-fabric', () => {
       const canonical = mapSourceRecordToCanonical({
         sourceRecord: source,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000099',
+        resourceId: '00000000-0000-0000-0000-000000000099',
         mappingVersion: 1,
         transformFn: (raw) => ({ name: raw.firstName }),
       })
@@ -183,7 +183,7 @@ describe('platform-data-fabric', () => {
       const canonical1 = mapSourceRecordToCanonical({
         sourceRecord: source1,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000099',
+        resourceId: '00000000-0000-0000-0000-000000000099',
         mappingVersion: 1,
         transformFn: (raw) => ({ name: raw.firstName }),
       })
@@ -197,7 +197,7 @@ describe('platform-data-fabric', () => {
       const canonical2 = mapSourceRecordToCanonical({
         sourceRecord: source2,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000099',
+        resourceId: '00000000-0000-0000-0000-000000000099',
         mappingVersion: 1,
         transformFn: (raw) => ({ name: raw.firstName }),
       })
@@ -216,7 +216,7 @@ describe('platform-data-fabric', () => {
       const canonical1 = mapSourceRecordToCanonical({
         sourceRecord: source1,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000199',
+        resourceId: '00000000-0000-0000-0000-000000000199',
         mappingVersion: 1,
         transformFn: (raw) => ({ name: raw.firstName }),
       })
@@ -230,7 +230,7 @@ describe('platform-data-fabric', () => {
       const canonical2 = mapSourceRecordToCanonical({
         sourceRecord: source2,
         targetEntityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000199',
+        resourceId: '00000000-0000-0000-0000-000000000199',
         mappingVersion: 1,
         transformFn: (raw) => ({ name: raw.firstName }),
       })
@@ -275,7 +275,7 @@ describe('platform-data-fabric', () => {
         id: 'conflict-1',
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000222',
+        resourceId: '00000000-0000-0000-0000-000000000222',
         sourceSystemA: 'hubspot',
         sourceSystemB: 'salesforce',
         conflictingField: 'email',
@@ -288,7 +288,7 @@ describe('platform-data-fabric', () => {
         id: 'conflict-2',
         tenantId: TENANT,
         entityType: OntologyEntityTypes.PRODUCT,
-        entityId: '00000000-0000-0000-0000-000000000223',
+        resourceId: '00000000-0000-0000-0000-000000000223',
         sourceSystemA: 'stripe',
         sourceSystemB: 'quickbooks',
         conflictingField: 'price',

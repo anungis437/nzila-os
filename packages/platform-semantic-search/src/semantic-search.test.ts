@@ -26,7 +26,7 @@ describe('platform-semantic-search', () => {
       const doc = await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000010',
+        resourceId: '00000000-0000-0000-0000-000000000010',
         title: 'Ada Lovelace',
         content: 'First computer programmer, daughter of Lord Byron',
         metadata: { source: 'hubspot' },
@@ -48,7 +48,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000010',
+        resourceId: '00000000-0000-0000-0000-000000000010',
         title: 'Ada Lovelace',
         content: 'First computer programmer, analytical engine expert',
         metadata: {},
@@ -57,7 +57,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000011',
+        resourceId: '00000000-0000-0000-0000-000000000011',
         title: 'Grace Hopper',
         content: 'Computer scientist, COBOL inventor, Navy admiral',
         metadata: {},
@@ -66,7 +66,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.DOCUMENT,
-        entityId: '00000000-0000-0000-0000-000000000012',
+        resourceId: '00000000-0000-0000-0000-000000000012',
         title: 'Annual Report 2024',
         content: 'Financial summary and outlook',
         metadata: {},
@@ -148,7 +148,7 @@ describe('platform-semantic-search', () => {
         {
           tenantId: TENANT,
           entityType: OntologyEntityTypes.CLIENT,
-          entityId: '00000000-0000-0000-0000-000000000010',
+          resourceId: '00000000-0000-0000-0000-000000000010',
           title: 'Test Doc',
           content: 'Test content',
           metadata: {},
@@ -171,7 +171,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000013',
+        resourceId: '00000000-0000-0000-0000-000000000013',
         title: 'Plain text only',
         content: 'No embedding stored',
         metadata: {},
@@ -190,7 +190,7 @@ describe('platform-semantic-search', () => {
         {
           tenantId: TENANT,
           entityType: OntologyEntityTypes.CLIENT,
-          entityId: '00000000-0000-0000-0000-000000000014',
+          resourceId: '00000000-0000-0000-0000-000000000014',
           title: 'Short vector',
           content: 'Mismatched dimensions',
           metadata: {},
@@ -214,7 +214,7 @@ describe('platform-semantic-search', () => {
         {
           tenantId: TENANT,
           entityType: OntologyEntityTypes.CLIENT,
-          entityId: '00000000-0000-0000-0000-000000000015',
+          resourceId: '00000000-0000-0000-0000-000000000015',
           title: 'Hybrid match',
           content: 'computer language pioneer',
           metadata: {},
@@ -243,7 +243,7 @@ describe('platform-semantic-search', () => {
       const doc = await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000010',
+        resourceId: '00000000-0000-0000-0000-000000000010',
         title: 'To Remove',
         content: 'Will be removed',
         metadata: {},
@@ -261,7 +261,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: TENANT,
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000016',
+        resourceId: '00000000-0000-0000-0000-000000000016',
         title: 'Tenant one',
         content: 'Alpha tenant doc',
         metadata: {},
@@ -270,7 +270,7 @@ describe('platform-semantic-search', () => {
       await indexEntity(idx, {
         tenantId: '00000000-0000-0000-0000-000000000099',
         entityType: OntologyEntityTypes.CLIENT,
-        entityId: '00000000-0000-0000-0000-000000000017',
+        resourceId: '00000000-0000-0000-0000-000000000017',
         title: 'Tenant two',
         content: 'Beta tenant doc',
         metadata: {},
@@ -294,7 +294,7 @@ describe('platform-semantic-search', () => {
         const doc = await indexEntity(isolatedIndex, {
           tenantId: TENANT,
           entityType: OntologyEntityTypes.CLIENT,
-          entityId: '00000000-0000-0000-0000-000000000018',
+          resourceId: '00000000-0000-0000-0000-000000000018',
           title: 'Fallback ID',
           content: 'Generated without crypto',
           metadata: {},

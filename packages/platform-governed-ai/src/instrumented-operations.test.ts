@@ -27,7 +27,7 @@ function createTestRequest(overrides: Partial<AIRunRequest> = {}): AIRunRequest 
     operationType: 'classify',
     modelId: 'gpt-4',
     entityType: 'policy',
-    entityId: 'policy-123',
+    resourceId: 'policy-123',
     input: { text: 'test input' },
     requestedBy: 'test-user',
     ...overrides,

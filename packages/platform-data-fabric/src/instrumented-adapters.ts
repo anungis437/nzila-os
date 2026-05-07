@@ -52,7 +52,7 @@ export function instrumentedMapSourceRecord(
     sourceSystem: options.sourceRecord.sourceSystem,
     sourceRecordId: options.sourceRecord.sourceRecordId,
     entityType: options.targetEntityType,
-    entityId: options.entityId,
+    resourceId: options.resourceId,
     mappingVersion: options.mappingVersion,
   })
 
@@ -82,13 +82,13 @@ export async function instrumentedReconcile(
   const durationMs = Math.round(performance.now() - startMs)
 
   // Emit reconciliation telemetry
-  tel.reconciliationPerformed(record.entityId, result.conflicts.length === 0)
+  tel.reconciliationPerformed(record.resourceId, result.conflicts.length === 0)
 
   // Emit conflict telemetry
   for (const conflict of result.conflicts) {
-    tel.conflictDetected(conflict.entityId, conflict.conflictingField)
+    tel.conflictDetected(conflict.resourceId, conflict.conflictingField)
     logger.warn('data_fabric_conflict_detected', {
-      entityId: conflict.entityId,
+      resourceId: conflict.resourceId,
       entityType: conflict.entityType,
       sourceA: conflict.sourceSystemA,
       sourceB: conflict.sourceSystemB,
@@ -97,11 +97,11 @@ export async function instrumentedReconcile(
   }
 
   // Lineage update
-  tel.lineageUpdated(record.entityId)
+  tel.lineageUpdated(record.resourceId)
 
   // Audit event
   gov.auditEmitted('data_fabric_reconciliation', {
-    entityId: record.entityId,
+    resourceId: record.resourceId,
     entityType: record.entityType,
     sourceSystem: record.sourceSystem,
     conflictCount: result.conflicts.length,
@@ -109,7 +109,7 @@ export async function instrumentedReconcile(
   })
 
   logger.info('data_fabric_reconciliation_completed', {
-    entityId: record.entityId,
+    resourceId: record.resourceId,
     entityType: record.entityType,
     sourceSystem: record.sourceSystem,
     persisted: result.persisted,

@@ -9,7 +9,7 @@ import type { OntologyEntityType, RelationshipType } from '@nzila/platform-ontol
 
 export interface EntityNode {
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly tenantId: string
   readonly canonicalName: string
   readonly status: string
@@ -57,8 +57,8 @@ export interface NeighborResult {
 // ── Graph Store Interface ───────────────────────────────────────────────────
 
 export interface EntityGraphStore {
-  getNode(tenantId: string, entityType: OntologyEntityType, entityId: string): Promise<EntityNode | undefined>
-  getEdges(tenantId: string, entityType: OntologyEntityType, entityId: string): Promise<readonly EntityEdge[]>
+  getNode(tenantId: string, entityType: OntologyEntityType, resourceId: string): Promise<EntityNode | undefined>
+  getEdges(tenantId: string, entityType: OntologyEntityType, resourceId: string): Promise<readonly EntityEdge[]>
   addNode(node: EntityNode): Promise<void>
   addEdge(edge: EntityEdge): Promise<void>
   removeEdge(edgeId: string): Promise<void>

@@ -39,7 +39,7 @@ export const POST = withRequiredRole(
         orgId: ctx.orgId,
         actorId: ctx.userId,
         entityType: 'incident',
-        entityId: incident.id,
+        resourceId: incident.id,
         action: 'incident_logged',
         metadata: {
           title: incident.title,

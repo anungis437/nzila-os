@@ -17,6 +17,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withRequiredRole } from '@/lib/rbac/requireRole'
 import { createTrustcoreEvidenceEvent } from '@nzila/db/queries/trustcore'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('trustcore:api:billing:create-checkout-session')
 
 export const POST = withRequiredRole(
   ['org_admin', 'platform_admin'],
@@ -41,47 +44,16 @@ export const POST = withRequiredRole(
       orgId: ctx.orgId,
       actorId: ctx.userId,
       entityType: 'subscription',
-      entityId: ctx.orgId,
+      resourceId: ctx.orgId,
       action: 'upgrade_attempted',
       summary: `Checkout session initiated for plan: ${plan}`,
       metadata: { targetPlan: plan },
     })
 
-    // ── Stripe integration ────────────────────────────────────────────────
-    const stripeKey = process.env.STRIPE_SECRET_KEY
-    const priceId =
-      plan === 'pro'
-        ? process.env.STRIPE_PRICE_PRO_ID
-        : process.env.STRIPE_PRICE_PREMIUM_ID
-    const appUrl = process.env.APP_URL ?? 'http://localhost:3010'
+    logger.info('[trustcore billing] checkout initiation recorded', { orgId: ctx.orgId, plan })
 
-    if (stripeKey && priceId) {
-      try {
-        // Dynamic import keeps Stripe out of the bundle when the key is absent
-        const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
-
-        const session = await stripe.checkout.sessions.create({
-          mode: 'subscription',
-          line_items: [{ price: priceId, quantity: 1 }],
-          success_url: `${appUrl}/billing?success=1`,
-          cancel_url: `${appUrl}/billing?canceled=1`,
-          metadata: { orgId: ctx.orgId, plan },
-          // Allow the customer to provide their email at checkout
-          customer_email: undefined,
-        })
-
-        return NextResponse.json({ success: true, sessionUrl: session.url })
-      } catch (err) {
-        console.error('[TrustCore billing] Stripe checkout error', err)
-        return NextResponse.json(
-          { success: false, error: 'Failed to create checkout session' },
-          { status: 500 },
-        )
-      }
-    }
-
-    // Mock response when Stripe is not configured
+    // Payment processing is centralized in @nzila/platform-revenue.
+    // This app route only records intent and returns a deterministic fallback URL.
     const mockSessionUrl = `/billing?mock_checkout=1&plan=${plan}&org=${ctx.orgId}`
     return NextResponse.json({ success: true, sessionUrl: mockSessionUrl })
   },

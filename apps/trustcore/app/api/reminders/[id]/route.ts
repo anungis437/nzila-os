@@ -54,7 +54,7 @@ export const PATCH = withRequiredRole(
       orgId: ctx.orgId,
       actorId: ctx.userId,
       entityType: 'reminder',
-      entityId: id,
+      resourceId: id,
       action: evidenceAction,
       summary: `Reminder "${existing.title}" ${evidenceAction}`,
       metadata: { reminderId: id, previousStatus: existing.status, newStatus },

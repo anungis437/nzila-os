@@ -20,7 +20,7 @@ export const canonicalRecords = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     sourceSystem: varchar('source_system', { length: 128 }).notNull(),
     sourceRecordId: varchar('source_record_id', { length: 256 }).notNull(),
     mappingVersion: integer('mapping_version').notNull().default(1),
@@ -31,7 +31,7 @@ export const canonicalRecords = pgTable(
   },
   (table) => [
     index('canonical_records_tenant_idx').on(table.tenantId),
-    index('canonical_records_entity_idx').on(table.entityType, table.entityId),
+    index('canonical_records_entity_idx').on(table.entityType, table.resourceId),
     index('canonical_records_source_idx').on(table.sourceSystem, table.sourceRecordId),
   ],
 )
@@ -84,7 +84,7 @@ export const syncConflicts = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     tenantId: uuid('tenant_id').notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     sourceSystemA: varchar('source_system_a', { length: 128 }).notNull(),
     sourceSystemB: varchar('source_system_b', { length: 128 }).notNull(),
     conflictingField: varchar('conflicting_field', { length: 256 }).notNull(),
@@ -97,6 +97,6 @@ export const syncConflicts = pgTable(
   },
   (table) => [
     index('sync_conflicts_tenant_idx').on(table.tenantId),
-    index('sync_conflicts_entity_idx').on(table.entityType, table.entityId),
+    index('sync_conflicts_entity_idx').on(table.entityType, table.resourceId),
   ],
 )

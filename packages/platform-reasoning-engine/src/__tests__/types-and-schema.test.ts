@@ -54,7 +54,7 @@ describe('ReasoningRequestSchema', () => {
     orgId: '11111111-1111-1111-1111-111111111111',
     reasoningType: 'risk_based',
     entityType: 'case',
-    entityId: '22222222-2222-2222-2222-222222222222',
+    resourceId: '22222222-2222-2222-2222-222222222222',
     question: 'What is the risk?',
     requestedBy: 'user-1',
   };
@@ -79,9 +79,9 @@ describe('ReasoningRequestSchema', () => {
     ).toThrow();
   });
 
-  it('rejects invalid entityId (not UUID)', () => {
+  it('rejects invalid resourceId (not UUID)', () => {
     expect(() =>
-      ReasoningRequestSchema.parse({ ...validRequest, entityId: 'bad' }),
+      ReasoningRequestSchema.parse({ ...validRequest, resourceId: 'bad' }),
     ).toThrow();
   });
 

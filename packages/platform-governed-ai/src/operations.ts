@@ -77,7 +77,7 @@ export async function executeGovernedAIRun(
       modelId: request.modelId,
       modelVersion: provider.modelVersion,
       entityType: request.entityType as OntologyEntityType,
-      entityId: request.entityId,
+      resourceId: request.resourceId,
       input: request.input,
       output: null,
       confidence: null,
@@ -106,7 +106,7 @@ export async function executeGovernedAIRun(
       modelId: request.modelId,
       modelVersion: provider.modelVersion,
       entityType: request.entityType as OntologyEntityType,
-      entityId: request.entityId,
+      resourceId: request.resourceId,
       input: request.input,
       output: result.output,
       confidence: result.confidence,
@@ -131,7 +131,7 @@ export async function executeGovernedAIRun(
       modelId: request.modelId,
       modelVersion: provider.modelVersion,
       entityType: request.entityType as OntologyEntityType,
-      entityId: request.entityId,
+      resourceId: request.resourceId,
       input: request.input,
       output: null,
       confidence: null,
@@ -154,9 +154,9 @@ export async function executeGovernedAIRun(
 export async function getAIRunHistory(
   store: AIRunStore,
   entityType: OntologyEntityType,
-  entityId: string,
+  resourceId: string,
 ): Promise<readonly AIRunRecord[]> {
-  return store.getRunsByEntity(entityType, entityId)
+  return store.getRunsByEntity(entityType, resourceId)
 }
 
 // ── Get AI Run by ID ────────────────────────────────────────────────────────

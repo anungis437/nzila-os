@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-04",
+  "generated_at": "2026-05-07",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 24,
+    "total_products": 25,
     "total_engines": 4,
     "sell_now_count": 3,
-    "internal_only_count": 6,
+    "internal_only_count": 7,
     "frozen_count": 3
   },
   "engines": [
@@ -107,7 +107,7 @@
       },
       {
         "tier": 3,
-        "count": 5
+        "count": 6
       },
       {
         "tier": 4,
@@ -129,7 +129,7 @@
       },
       {
         "status": "incubating",
-        "count": 10
+        "count": 11
       },
       {
         "status": "internal",
@@ -263,6 +263,18 @@
       "readiness_tier": "internal-only",
       "registry_tier": "EXPERIMENTAL",
       "dev_port": 4000
+    },
+    {
+      "id": "trustcore",
+      "name": "TrustCore",
+      "tier": 3,
+      "status": "incubating",
+      "gtm_posture": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 4.8,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3017
     },
     {
       "id": "web",

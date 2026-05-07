@@ -22,7 +22,7 @@ export const reasoningChains = pgTable(
     reasoningType: varchar('reasoning_type', { length: 64 }).notNull(),
     status: varchar('status', { length: 32 }).notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    resourceId: uuid('entity_id').notNull(),
     question: text('question').notNull(),
     steps: jsonb('steps').notNull().default([]),
     conclusion: jsonb('conclusion'),
@@ -39,7 +39,7 @@ export const reasoningChains = pgTable(
   },
   (t) => [
     index('reasoning_chains_tenant_idx').on(t.tenantId),
-    index('reasoning_chains_entity_idx').on(t.entityType, t.entityId),
+    index('reasoning_chains_entity_idx').on(t.entityType, t.resourceId),
     index('reasoning_chains_type_idx').on(t.reasoningType),
     index('reasoning_chains_status_idx').on(t.status),
   ],

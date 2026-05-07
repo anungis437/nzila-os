@@ -125,7 +125,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Risk?',
           requestedBy: 'user-1',
         },
@@ -135,7 +135,7 @@ describe('operations', () => {
       expect(chain.steps).toHaveLength(2);
       expect(chain.conclusion).not.toBeNull();
       expect(chain.orgId).toBe(ORG);
-      expect(chain.entityId).toBe(ENTITY_ID);
+      expect(chain.resourceId).toBe(ENTITY_ID);
       expect(chain.question).toBe('Risk?');
       expect(chain.requestedBy).toBe('user-1');
       expect(chain.createdAt).toBeDefined();
@@ -162,7 +162,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.DEDUCTIVE,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -191,7 +191,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.INDUCTIVE,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -224,7 +224,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -260,7 +260,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.CAUSAL,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -285,7 +285,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -312,7 +312,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.DEDUCTIVE,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -342,7 +342,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.DEDUCTIVE,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -364,7 +364,7 @@ describe('operations', () => {
         orgId: ORG,
         reasoningType: ReasoningTypes.RISK_BASED,
         entityType: OntologyEntityTypes.CASE,
-        entityId: ENTITY_ID,
+        resourceId: ENTITY_ID,
         question: 'Q',
         requestedBy: 'u',
       };
@@ -414,7 +414,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -444,7 +444,7 @@ describe('operations', () => {
           orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
-          entityId: ENTITY_ID,
+          resourceId: ENTITY_ID,
           question: 'Q',
           requestedBy: 'u',
         },
@@ -475,7 +475,7 @@ describe('operations', () => {
         orgId: ORG,
         reasoningType: ReasoningTypes.RISK_BASED,
         entityType: OntologyEntityTypes.CASE,
-        entityId: ENTITY_ID,
+        resourceId: ENTITY_ID,
         requestedBy: 'u',
       };
 

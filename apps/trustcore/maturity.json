@@ -6,9 +6,9 @@
   "data_integrity": "partial",
   "contracts_complete": false,
   "observability": "partial",
-  "portfolio_tier": "TIER 4",
-  "gtm_posture": "hold",
+  "portfolio_tier": "TIER 3",
+  "gtm_posture": "internal-only",
   "proof_level": "internal-proof",
-  "revenue_status": "pre-revenue",
+  "revenue_status": "internal-cost-center",
   "last_validated": "2026-05-07"
 }

@@ -73,14 +73,14 @@ export interface ContextEntitySource {
   getEntity(
     tenantId: string,
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
   ): Promise<OntologyEntity | null>
 }
 
 export interface ContextGraphSource {
   getNeighbors(
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
     depth?: number,
   ): Promise<{ nodes: readonly EntityNode[]; edges: readonly EntityEdge[] }>
 }
@@ -89,7 +89,7 @@ export interface ContextEventSource {
   getRecentEvents(
     tenantId: string,
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
     limit?: number,
   ): Promise<readonly PlatformEvent[]>
 }
@@ -105,7 +105,7 @@ export interface ContextKnowledgeSource {
 export interface ContextDecisionSource {
   getDecisions(
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
   ): Promise<readonly DecisionNode[]>
 }
 
@@ -130,7 +130,7 @@ export interface ContextRequest {
   tenantId: string
   purpose: ContextPurpose
   entityType: OntologyEntityType
-  entityId: string
+  resourceId: string
   caller: ContextCaller
   graphDepth?: number
   eventLimit?: number
@@ -145,7 +145,7 @@ export const ContextRequestSchema = z.object({
     Object.values(ContextPurposes) as [string, ...string[]],
   ),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   caller: z.object({
     userId: z.string().optional(),
     role: z.string().optional(),

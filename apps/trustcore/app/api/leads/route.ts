@@ -14,33 +14,42 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { upsertTrustcoreLead } from '@nzila/db/queries/trustcore'
+import { withRequiredRole } from '@/lib/rbac/requireRole'
+import { createLogger } from '@nzila/os-core'
 
 const LeadSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
   source: z.enum(['landing', 'sample_trust_center', 'onboarding']).default('landing'),
 })
 
-export async function POST(req: NextRequest) {
-  let body: unknown
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 })
-  }
+const logger = createLogger('trustcore:api:leads')
 
-  const parsed = LeadSchema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json(
-      { success: false, error: parsed.error.issues[0]?.message ?? 'Validation error' },
-      { status: 422 },
-    )
-  }
+export const POST = withRequiredRole(
+  ['staff', 'org_admin', 'platform_admin'],
+  async (req: NextRequest) => {
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 })
+    }
 
-  try {
-    await upsertTrustcoreLead(parsed.data)
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('[api/leads] upsert failed', err)
-    return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
-  }
-}
+    const parsed = LeadSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message ?? 'Validation error' },
+        { status: 422 },
+      )
+    }
+
+    try {
+      await upsertTrustcoreLead(parsed.data)
+      return NextResponse.json({ success: true })
+    } catch (err) {
+      logger.error('[trustcore leads] upsert failed', {
+        error: err instanceof Error ? err.message : String(err),
+      })
+      return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
+    }
+  },
+)

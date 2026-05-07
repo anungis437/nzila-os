@@ -60,7 +60,7 @@ export const POST = withRequiredRole(
       await indexEntity(index, {
         tenantId: ctx.orgId,
         entityType: 'data_asset',
-        entityId: asset.id,
+        resourceId: asset.id,
         title: asset.name,
         content: [
           asset.description,
@@ -84,7 +84,7 @@ export const POST = withRequiredRole(
       await indexEntity(index, {
         tenantId: ctx.orgId,
         entityType: 'vendor',
-        entityId: vendor.id,
+        resourceId: vendor.id,
         title: vendor.name,
         content: [
           vendor.serviceDescription,
@@ -107,7 +107,7 @@ export const POST = withRequiredRole(
       await indexEntity(index, {
         tenantId: ctx.orgId,
         entityType: 'pia',
-        entityId: pia.id,
+        resourceId: pia.id,
         title: pia.title,
         content: [
           pia.description,
@@ -132,7 +132,7 @@ export const POST = withRequiredRole(
       await indexEntity(index, {
         tenantId: ctx.orgId,
         entityType: 'incident',
-        entityId: incident.id,
+        resourceId: incident.id,
         title: incident.title,
         content: [
           incident.description,

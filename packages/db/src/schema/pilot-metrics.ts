@@ -47,7 +47,7 @@ export const pilotMetricEvents = pgTable(
     metricName: varchar('metric_name', { length: 128 }).notNull(),
     valueNumeric: numeric('value_numeric', { precision: 18, scale: 6 }),
     valueJson: jsonb('value_json'),
-    entityId: text('entity_id'),
+    resourceId: text('entity_id'),
     entityType: varchar('entity_type', { length: 64 }),
     traceId: text('trace_id'),
     occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),

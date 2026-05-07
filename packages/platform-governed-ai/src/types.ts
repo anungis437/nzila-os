@@ -66,7 +66,7 @@ export interface AIRunRecord {
   readonly modelId: string
   readonly modelVersion: string
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly input: Record<string, unknown>
   readonly output: Record<string, unknown> | null
   readonly confidence: number | null
@@ -113,7 +113,7 @@ export interface AIRunStore {
   getRun(id: string): Promise<AIRunRecord | undefined>
   getRunsByEntity(
     entityType: OntologyEntityType,
-    entityId: string,
+    resourceId: string,
   ): Promise<readonly AIRunRecord[]>
   getRunsByTenant(
     tenantId: string,
@@ -141,7 +141,7 @@ export const AIRunRequestSchema = z.object({
   ),
   modelId: z.string().min(1),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   input: z.record(z.unknown()),
   requestedBy: z.string().min(1),
 })

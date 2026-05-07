@@ -32,13 +32,13 @@ describe('instrumentedMapSourceRecord', () => {
     const canonical = instrumentedMapSourceRecord({
       sourceRecord: source,
       targetEntityType: 'Policy',
-      entityId: 'entity-1',
+      resourceId: 'entity-1',
       mappingVersion: 1,
       transformFn: (raw) => ({ normalized_amount: raw.amount }),
     })
 
     expect(canonical.entityType).toBe('Policy')
-    expect(canonical.entityId).toBe('entity-1')
+    expect(canonical.resourceId).toBe('entity-1')
     expect(canonical.sourceSystem).toBe('quickbooks')
     expect(canonical.payload).toEqual({ normalized_amount: 1000 })
     expect(canonical.mappingVersion).toBe(1)
@@ -50,7 +50,7 @@ describe('instrumentedMapSourceRecord', () => {
     const canonical = instrumentedMapSourceRecord({
       sourceRecord: source,
       targetEntityType: 'Policy',
-      entityId: 'entity-2',
+      resourceId: 'entity-2',
       mappingVersion: 2,
       transformFn: (raw) => raw,
     })
@@ -71,7 +71,7 @@ describe('instrumentedReconcile', () => {
     const canonical = instrumentedMapSourceRecord({
       sourceRecord: source,
       targetEntityType: 'Policy',
-      entityId: 'entity-1',
+      resourceId: 'entity-1',
       mappingVersion: 1,
       transformFn: (raw) => raw,
     })
@@ -90,7 +90,7 @@ describe('instrumentedReconcile', () => {
     const canonical1 = instrumentedMapSourceRecord({
       sourceRecord: source1,
       targetEntityType: 'Policy',
-      entityId: 'entity-1',
+      resourceId: 'entity-1',
       mappingVersion: 1,
       transformFn: (raw) => raw,
     })
@@ -101,7 +101,7 @@ describe('instrumentedReconcile', () => {
     const canonical2 = instrumentedMapSourceRecord({
       sourceRecord: source2,
       targetEntityType: 'Policy',
-      entityId: 'entity-1',
+      resourceId: 'entity-1',
       mappingVersion: 1,
       transformFn: (raw) => raw,
     })
@@ -120,7 +120,7 @@ describe('instrumentedReconcile', () => {
     const canonical = instrumentedMapSourceRecord({
       sourceRecord: source,
       targetEntityType: 'Policy',
-      entityId: 'new-entity',
+      resourceId: 'new-entity',
       mappingVersion: 1,
       transformFn: (raw) => raw,
     })

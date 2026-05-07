@@ -18,7 +18,7 @@ const TENANT = '550e8400-e29b-41d4-a716-446655440000'
 function node(type: string, id: string, name: string): EntityNode {
   return {
     entityType: type as OntologyEntityType,
-    entityId: id,
+    resourceId: id,
     tenantId: TENANT,
     canonicalName: name,
     status: 'active',
@@ -104,7 +104,7 @@ describe('platform-entity-graph', () => {
       store, TENANT, OntologyEntityTypes.FAMILY, familyId,
     )
     // Only Client neighbor should appear (the missing product is skipped)
-    const ids = neighbors.map((n) => n.node.entityId)
+    const ids = neighbors.map((n) => n.node.resourceId)
     expect(ids).not.toContain(missingId)
     await store.removeEdge('e-missing-nbr')
   })
@@ -166,7 +166,7 @@ describe('platform-entity-graph', () => {
     )
     expect(subgraph).toBeDefined()
     // Dangling node should not appear
-    const ids = subgraph!.nodes.map((n) => n.entityId)
+    const ids = subgraph!.nodes.map((n) => n.resourceId)
     expect(ids).not.toContain(extraId)
     await store.removeEdge('e-dangling')
   })
@@ -182,7 +182,7 @@ describe('platform-entity-graph', () => {
       store, TENANT, OntologyEntityTypes.CLIENT, clientId, 2,
     )
     expect(subgraph).toBeDefined()
-    const ids = subgraph!.nodes.map((n) => n.entityId)
+    const ids = subgraph!.nodes.map((n) => n.resourceId)
     expect(ids).toContain(employerId)
     await store.removeEdge('e-emp')
   })
@@ -197,7 +197,7 @@ describe('platform-entity-graph', () => {
     )
     expect(subgraph).toBeDefined()
     // Client should appear exactly once despite the cycle
-    const clientNodes = subgraph!.nodes.filter((n) => n.entityId === clientId)
+    const clientNodes = subgraph!.nodes.filter((n) => n.resourceId === clientId)
     expect(clientNodes.length).toBe(1)
     await store.removeEdge('e-cycle')
   })

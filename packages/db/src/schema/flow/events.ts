@@ -14,7 +14,7 @@ export const flowDomainEvents = pgTable('flow_domain_events', {
     .notNull()
     .references(() => orgs.id),
   entityType: text('entity_type').notNull(),
-  entityId: uuid('entity_id').notNull(),
+  resourceId: uuid('entity_id').notNull(),
   eventType: flowEventTypeEnum('event_type').notNull(),
   actorId: text('actor_id'),
   payloadJson: jsonb('payload_json'),
@@ -22,7 +22,7 @@ export const flowDomainEvents = pgTable('flow_domain_events', {
 },
   (table) => [
     index('flow_domain_events_org_id_idx').on(table.orgId),
-    index('flow_domain_events_entity_idx').on(table.entityType, table.entityId),
+    index('flow_domain_events_entity_idx').on(table.entityType, table.resourceId),
     index('flow_domain_events_event_type_idx').on(table.eventType),
     index('flow_domain_events_created_at_idx').on(table.createdAt),
   ],

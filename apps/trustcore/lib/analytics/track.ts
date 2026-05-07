@@ -48,11 +48,6 @@ export function trackEvent(event: AnalyticsEvent, payload?: EventPayload): void 
       ...(payload ?? {}),
     }
 
-    // Always log in non-production for visibility during development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[TrustCore Analytics]', entry)
-    }
-
     postAnalytics(entry)
   } catch {
     // silently ignore

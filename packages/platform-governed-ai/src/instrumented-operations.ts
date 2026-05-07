@@ -43,7 +43,7 @@ export async function executeInstrumentedAIRun(
     runId,
     operationType: options.request.operationType,
     entityType: options.request.entityType,
-    entityId: options.request.entityId,
+    resourceId: options.request.resourceId,
     tenantId: options.request.tenantId,
     modelId: options.request.modelId,
   })

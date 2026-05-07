@@ -681,6 +681,7 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/veridian-care': 3,  // INCUBATING — health care portal, platform wiring planned pre-PILOT
     'apps/veridian-site': 3,  // INCUBATING — health public site, platform wiring planned pre-PILOT
     'apps/maestria': 4,  // INCUBATING — platform wiring staged pre-PILOT
+    'apps/trustcore': 3, // INCUBATING — internal trust/compliance engine, platform wiring staged pre-PILOT
   }
 
   for (const appDir of appDirs) {

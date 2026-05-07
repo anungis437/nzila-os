@@ -25,7 +25,7 @@ function makeInput(overrides: Partial<CreateDecisionNodeInput> = {}): CreateDeci
     actorType: ActorTypes.USER,
     actorId: 'user-1',
     entityType: OntologyEntityTypes.CASE,
-    entityId: ENTITY_ID,
+    resourceId: ENTITY_ID,
     summary: 'Approved case for processing',
     outcome: { approved: true },
     policyRefs: ['policy-kyc-001'],
@@ -158,7 +158,7 @@ describe('platform-decision-graph', () => {
       await createDecisionNode(
         store,
         makeInput({
-          entityId: '00000000-0000-0000-0000-000000000088',
+          resourceId: '00000000-0000-0000-0000-000000000088',
           summary: 'Different entity',
         }),
       )

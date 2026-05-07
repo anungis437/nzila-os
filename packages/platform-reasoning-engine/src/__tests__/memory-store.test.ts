@@ -14,7 +14,7 @@ function makeChain(overrides: Partial<ReasoningChain> = {}): ReasoningChain {
     reasoningType: ReasoningTypes.RISK_BASED,
     status: ReasoningStatuses.COMPLETED,
     entityType: 'case' as ReasoningChain['entityType'],
-    entityId: 'entity-1',
+    resourceId: 'entity-1',
     question: 'test question',
     steps: [],
     conclusion: null,
@@ -62,9 +62,9 @@ describe('createInMemoryReasoningStore', () => {
 
   describe('getChainsByEntity', () => {
     it('returns chains matching entity type and id', async () => {
-      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, entityId: 'e1' }));
-      await store.persistChain(makeChain({ id: 'b', entityType: 'case' as any, entityId: 'e1' }));
-      await store.persistChain(makeChain({ id: 'c', entityType: 'case' as any, entityId: 'e2' }));
+      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, resourceId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'b', entityType: 'case' as any, resourceId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'c', entityType: 'case' as any, resourceId: 'e2' }));
 
       const results = await store.getChainsByEntity('case' as any, 'e1');
       expect(results).toHaveLength(2);
@@ -72,7 +72,7 @@ describe('createInMemoryReasoningStore', () => {
     });
 
     it('returns empty array when no chains match', async () => {
-      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, entityId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, resourceId: 'e1' }));
 
       const results = await store.getChainsByEntity('person' as any, 'e1');
       expect(results).toHaveLength(0);

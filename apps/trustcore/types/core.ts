@@ -42,7 +42,7 @@ export interface AuditEvent {
   orgId: string
   actorId: string
   entityType: string
-  entityId: string
+  resourceId: string
   action: AuditAction
   metadata?: Record<string, unknown>
   occurredAt: string

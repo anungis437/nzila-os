@@ -9,7 +9,7 @@ import { z } from 'zod'
 const createEventSchema = z.object({
   actorId: z.string().min(1),
   entityType: z.string().min(1),
-  entityId: z.string().min(1),
+  resourceId: z.string().min(1),
   action: z.string().min(1),
   summary: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),

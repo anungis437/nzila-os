@@ -62,7 +62,7 @@ export const canonicalEventSchema = z.object({
   /** ISO-8601 timestamp of when the event occurred. */
   timestamp: z.string().datetime(),
   /** Target entity ID (the entity this event pertains to). */
-  entityId: z.string().uuid().optional(),
+  resourceId: z.string().uuid().optional(),
   /** Target entity type. */
   entityType: z.string().optional(),
   /** Correlation ID for distributed tracing. */
@@ -153,7 +153,7 @@ export const canonicalWorkflowStateSchema = z.object({
   /** Previous state (null for initial). */
   previousState: z.string().nullable(),
   /** The entity this workflow governs. */
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   /** Entity type. */
   entityType: z.string().min(1),
   /** Org scope. */
@@ -237,7 +237,7 @@ export const canonicalFinancialRecordSchema = z.object({
   /** Source module. */
   sourceModule: z.string().min(1),
   /** Related entity ID (order, invoice, subscription, etc.). */
-  entityId: z.string().uuid().optional(),
+  resourceId: z.string().uuid().optional(),
   /** Related entity type. */
   entityType: z.string().optional(),
   /** Counterparty ID (customer, creator, vendor). */

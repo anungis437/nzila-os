@@ -168,7 +168,7 @@ describe('NzilaCanonicalWorkflowState', () => {
     workflowKey: 'claim-lifecycle',
     currentState: 'investigating',
     previousState: 'filed',
-    entityId: UUID,
+    resourceId: UUID,
     entityType: 'claim',
     orgId: 'org_123',
     sourceModule: 'union-eyes',

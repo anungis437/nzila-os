@@ -23,7 +23,7 @@ export interface SearchDocument {
   readonly id: string
   readonly tenantId: string
   readonly entityType: OntologyEntityType
-  readonly entityId: string
+  readonly resourceId: string
   readonly title: string
   readonly content: string
   readonly metadata: Record<string, unknown>
@@ -104,7 +104,7 @@ export const SearchQuerySchema = z.object({
 export const IndexDocumentSchema = z.object({
   tenantId: z.string().uuid(),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
+  resourceId: z.string().uuid(),
   title: z.string().min(1),
   content: z.string().min(1),
   metadata: z.record(z.unknown()).default({}),
