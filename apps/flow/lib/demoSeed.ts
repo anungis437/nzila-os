@@ -847,21 +847,21 @@ export async function seedDemo() {
   for (const evt of [
     {
       orgId: org.id,
-      entityType: 'order', entityId: 'demo-order-003', // entity_id column
+      entityType: 'order', resourceId: 'demo-order-003', // entity_id column
       eventType: 'order_created' as const,
       actorId: 'demo-sales',
       payloadJson: { ref: 'SO-2026-003' },
     },
     {
       orgId: org.id,
-      entityType: 'order', entityId: 'demo-order-003', // entity_id column
+      entityType: 'order', resourceId: 'demo-order-003', // entity_id column
       eventType: 'production_started' as const,
       actorId: 'demo-production',
       payloadJson: { jobId: 'demo-job-001' },
     },
     {
       orgId: org.id,
-      entityType: 'order', entityId: 'demo-order-005', // entity_id column
+      entityType: 'order', resourceId: 'demo-order-005', // entity_id column
       eventType: 'shipment_created' as const,
       actorId: 'demo-production',
       payloadJson: { shipmentId: 'demo-shipment-001', carrier: 'Purolator' },

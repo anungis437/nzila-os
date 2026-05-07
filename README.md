@@ -50,7 +50,7 @@ pnpm build              # Build everything
 ## Repo Structure
 
 ```
-apps/              24 applications
+apps/              25 applications
 packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
