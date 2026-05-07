@@ -153,10 +153,14 @@ async function runMigrations() {
       const statements = execSql.split('--> statement-breakpoint');
 
       await client.query('BEGIN');
+      let stmtIndex = 0;
       try {
         for (const stmt of statements) {
           const trimmed = stmt.trim();
-          if (trimmed) await client.query(trimmed);
+          if (trimmed) {
+            stmtIndex++;
+            await client.query(trimmed);
+          }
         }
         await client.query(
           'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
@@ -166,6 +170,7 @@ async function runMigrations() {
         applied++;
       } catch (stmtError) {
         await client.query('ROLLBACK');
+        console.error(`Migration failed: ${entry.tag} (statement #${stmtIndex})`);
         throw stmtError;
       }
     }
