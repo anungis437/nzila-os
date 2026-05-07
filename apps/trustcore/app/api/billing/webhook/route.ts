@@ -20,9 +20,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
-import { InMemoryIdempotencyStore } from '@nzila/webhooks'
 
-const processedEventIds = new InMemoryIdempotencyStore()
+// In-process idempotency cache (sufficient for single-instance deployments)
+const processedEventIds = new Set<string>()
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -31,12 +31,13 @@ export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-  // ── No Stripe configured — fail closed ───────────────────────────────────
+  // ── No Stripe configured — log and ack ───────────────────────────────────
   if (!stripeKey || !webhookSecret) {
-    return NextResponse.json(
-      { error: 'Billing webhook is unavailable because Stripe is not configured' },
-      { status: 503 },
-    )
+    console.info('[TrustCore billing webhook] received (Stripe not yet configured)', {
+      bodyLength: body.length,
+      sig,
+    })
+    return NextResponse.json({ received: true, note: 'Stripe not yet configured' })
   }
 
   // ── Signature verification ───────────────────────────────────────────────
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
   let event: import('stripe').Stripe.Event
   try {
     const { default: Stripe } = await import('stripe')
-    const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err) {
     console.error('[TrustCore billing webhook] signature verification failed', err)
@@ -55,10 +56,15 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Idempotency guard ────────────────────────────────────────────────────
-  if (await processedEventIds.has(event.id)) {
+  if (processedEventIds.has(event.id)) {
     return NextResponse.json({ received: true, duplicate: true })
   }
-  await processedEventIds.add(event.id)
+  processedEventIds.add(event.id)
+  // Keep the set bounded to prevent unbounded growth in long-running instances
+  if (processedEventIds.size > 10_000) {
+    const first = processedEventIds.values().next().value
+    if (first) processedEventIds.delete(first)
+  }
 
   // ── Event handling ───────────────────────────────────────────────────────
   try {
@@ -91,7 +97,7 @@ export async function POST(req: NextRequest) {
 
         // Fetch subscription to get metadata (orgId) and period dates
         const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-02-25.clover' })
+        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
         const sub = await stripe.subscriptions.retrieve(subId)
         const orgId = sub.metadata?.orgId
         if (!orgId) break
