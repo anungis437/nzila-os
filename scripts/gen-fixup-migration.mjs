@@ -78,12 +78,13 @@ function colDefault(def) {
   if (typeof def === 'number') return String(def);
   if (typeof def === 'string') {
     if (
-      /^[a-zA-Z_][a-zA-Z0-9_."]*\(/.test(def) ||
+      /^[a-zA-Z_][a-zA-Z0-9_."]*\(/.test(def) || // function call: gen_random_uuid(), now()
+      def.startsWith('ARRAY[') || // array constructor: ARRAY['push']
       def === 'now()' || def === 'current_timestamp' ||
       def === 'true' || def === 'false' ||
       /^\d+$/.test(def) ||
-      def.startsWith("'") ||
-      def.includes('::')
+      def.startsWith("'") || // already single-quoted string literal or 'val'::type
+      def.includes('::') // type cast
     ) {
       return def;
     }

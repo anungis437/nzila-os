@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS "voting_notifications" (
   "message" text NOT NULL,
   "recipient_id" uuid NOT NULL,
   "priority" varchar(20) DEFAULT 'medium',
-  "delivery_method" text[] DEFAULT 'ARRAY[''push'']',
+  "delivery_method" text[] DEFAULT ARRAY['push'],
   "is_read" boolean DEFAULT false,
   "sent_at" timestamp with time zone DEFAULT now(),
   "read_at" timestamp with time zone,
