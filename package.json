@@ -329,5 +329,7 @@
       "axios": ">=1.15.2"
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@nzila/db": "workspace:*"
+  }
 }

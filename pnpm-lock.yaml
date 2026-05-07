@@ -43,6 +43,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:packages/db
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.0
