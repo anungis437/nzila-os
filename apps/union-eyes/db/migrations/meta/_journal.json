@@ -38,6 +38,13 @@
       "breakpoints": true
     },
     {
+      "idx": 4.5,
+      "version": "7",
+      "when": 1770363000000,
+      "tag": "20260507_fixup_create_break_glass_activations",
+      "breakpoints": true
+    },
+    {
       "idx": 5,
       "version": "7",
       "when": 1770371778360,
