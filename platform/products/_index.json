@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-04T00:00:00.000Z",
-  "count": 24,
+  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "count": 25,
   "products": [
     {
       "slug": "abr",
@@ -102,6 +102,12 @@
       "slug": "trade",
       "tier": 4,
       "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "trustcore",
+      "tier": 3,
+      "tierLabel": "component",
       "publicVisible": false
     },
     {

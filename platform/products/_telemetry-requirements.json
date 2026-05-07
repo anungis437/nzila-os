@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-04T00:00:00.000Z",
+  "generatedAt": "2026-05-07T00:00:00.000Z",
   "requiredApps": [
     "abr",
     "cfo",
@@ -11,6 +11,7 @@
     "nzila-hq",
     "orchestrator-api",
     "trade",
+    "trustcore",
     "union-eyes",
     "web",
     "zonga"
