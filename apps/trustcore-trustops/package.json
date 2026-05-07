@@ -13,8 +13,12 @@
   },
   "dependencies": {
     "@nzila/db": "workspace:*",
+    "@nzila/org": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/otel-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-decision-engine": "workspace:*",
+    "@nzila/platform-events": "workspace:*",
     "@nzila/platform-shell": "workspace:*",
     "@nzila/trustcore-contracts": "workspace:*",
     "@nzila/trustcore-trustops": "workspace:*",

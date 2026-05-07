@@ -1,11 +1,13 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { auth } from '@nzila/platform-auth/entra/server'
 import {
   TRUSTOPS_TERMINAL_STAGES,
   nextStages,
 } from '@nzila/trustcore-trustops/fsm'
 import { computeMandateProgress } from '@nzila/trustcore-trustops/progress'
 import { getMandate } from '../../../lib/mandates-store'
+import { getOrganizationIdForUser } from '../../../lib/organization-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +16,12 @@ interface Params {
 }
 
 export default async function MandateDetailPage({ params }: Params) {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+  const orgId = await getOrganizationIdForUser(userId)
+  if (!orgId) redirect('/select-organization')
   const { mandateId } = await params
-  const mandate = await getMandate(mandateId)
+  const mandate = await getMandate(mandateId, orgId)
   if (!mandate) notFound()
 
   const progress = computeMandateProgress(mandate.stage)

@@ -1,11 +1,18 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { computeMandateProgress } from '@nzila/trustcore-trustops/progress'
 import { listMandates } from '../../lib/mandates-store'
+import { getOrganizationIdForUser } from '../../lib/organization-utils'
 
 export const dynamic = 'force-dynamic'
 
 export default async function MandatesPage() {
-  const mandates = await listMandates()
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+  const orgId = await getOrganizationIdForUser(userId)
+  if (!orgId) redirect('/select-organization')
+  const mandates = await listMandates(orgId)
   return (
     <main style={{ padding: '2rem', maxWidth: 960, margin: '0 auto' }}>
       <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Mandates</h1>

@@ -2098,12 +2098,24 @@ importers:
       '@nzila/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nzila/org':
+        specifier: workspace:*
+        version: link:../../packages/org
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core
+      '@nzila/otel-core':
+        specifier: workspace:*
+        version: link:../../packages/otel-core
       '@nzila/platform-auth':
         specifier: workspace:*
         version: link:../../packages/platform-auth
+      '@nzila/platform-decision-engine':
+        specifier: workspace:*
+        version: link:../../packages/platform-decision-engine
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../../packages/platform-events
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell

@@ -1,11 +1,13 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { auth } from '@nzila/platform-auth/entra/server'
 import {
   isAdmittedProofOfClaim,
   isOpenProofOfClaim,
 } from '@nzila/trustcore-trustops/claims'
 import { classifyClaimBatch } from '@nzila/trustops-intelligence/claim-batch-classifier'
 import { getClaims, getMandate } from '../../../../lib/mandates-store'
+import { getOrganizationIdForUser } from '../../../../lib/organization-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,11 +20,15 @@ function formatCents(cents: number): string {
 }
 
 export default async function ClaimsPage({ params }: Params) {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+  const orgId = await getOrganizationIdForUser(userId)
+  if (!orgId) redirect('/select-organization')
   const { mandateId } = await params
-  const mandate = await getMandate(mandateId)
+  const mandate = await getMandate(mandateId, orgId)
   if (!mandate) notFound()
 
-  const claims = await getClaims(mandateId)
+  const claims = await getClaims(mandateId, orgId)
   const open = claims.filter((c) => isOpenProofOfClaim(c.status))
   const admitted = claims.filter((c) => isAdmittedProofOfClaim(c.status))
 

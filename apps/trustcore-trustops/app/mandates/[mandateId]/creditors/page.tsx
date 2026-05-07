@@ -1,11 +1,13 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { auth } from '@nzila/platform-auth/entra/server'
 import {
   CREDITOR_PRIORITY_ORDER,
   compareCreditorPriority,
 } from '@nzila/trustcore-trustops/creditors'
 import type { CreditorClassification } from '@nzila/trustcore-contracts'
 import { getCreditors, getMandate } from '../../../../lib/mandates-store'
+import { getOrganizationIdForUser } from '../../../../lib/organization-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,11 +20,15 @@ function formatCents(cents: number): string {
 }
 
 export default async function CreditorsPage({ params }: Params) {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+  const orgId = await getOrganizationIdForUser(userId)
+  if (!orgId) redirect('/select-organization')
   const { mandateId } = await params
-  const mandate = await getMandate(mandateId)
+  const mandate = await getMandate(mandateId, orgId)
   if (!mandate) notFound()
 
-  const creditors = [...(await getCreditors(mandateId))].sort((a, b) =>
+  const creditors = [...(await getCreditors(mandateId, orgId))].sort((a, b) =>
     compareCreditorPriority(a.classification, b.classification),
   )
 
