@@ -5,9 +5,9 @@
  * Use these in place of ad-hoc reasoning state in domain engines.
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
-import type { CognitionSession, ReasoningChain } from '../contracts/index.js';
-import type { EvidenceItem } from '../explainability/index.js';
+import type { CognitionDomain } from '../ontology/index';
+import type { CognitionSession, ReasoningChain } from '../contracts/index';
+import type { EvidenceItem } from '../explainability/index';
 
 let monotonicCounter = 0;
 function generateId(prefix: string): string {

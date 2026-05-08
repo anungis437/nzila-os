@@ -83,6 +83,9 @@ const ENTITY_ID_EXCEPTIONS = [
   /entityId:\s*\w+(?:\.\w+)+/, // evidence event subject from chained property (vendor.id, ctx.orgId)
   /entityId:\s*\w+[,;)\s]/,  // evidence event subject from single variable (orgId, id, etc.)
   /\.entityId\b/,            // reading evidence subject from a data row/object (r.entityId, row.entityId)
+  // QueryFinding domain results: entityId names a finding/result subject (path id, summary id, node id)
+  /entityId:\s*`/,           // template-literal value (e.g. entityId: `path_${...}`)
+  /entityId:\s*'[^']+'/,     // string-literal value (e.g. entityId: 'redundancy_summary')
 ]
 
 function isExceptionLine(line: string): boolean {

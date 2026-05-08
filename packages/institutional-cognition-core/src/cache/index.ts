@@ -9,8 +9,8 @@
  * Cache entries are NEVER shared across organizations.
  */
 
-import type { InstitutionalExplainabilityEnvelope } from '../explainability/index.js';
-import { emitCognitionTelemetry } from '../observability/index.js';
+import type { InstitutionalExplainabilityEnvelope } from '../explainability/index';
+import { emitCognitionTelemetry } from '../observability/index';
 
 export interface EnvelopeCacheStore {
   get(key: string): Promise<InstitutionalExplainabilityEnvelope<unknown> | undefined>;

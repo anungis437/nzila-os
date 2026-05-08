@@ -13,12 +13,12 @@
  * inputs and the canonical ontology. Pure function from inputs to result.
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
-import type { InstitutionalExplainabilityEnvelope } from '../explainability/index.js';
-import { assertLaborSafe, type CognitionGovernanceContext } from '../governance/index.js';
-import { feedersOf } from '../ontology-governance/index.js';
-import { emitCognitionTelemetry } from '../observability/index.js';
-import type { CognitionEngineFn, OrchestrationResult, OrchestrationStep } from './index.js';
+import type { CognitionDomain } from '../ontology/index';
+import type { InstitutionalExplainabilityEnvelope } from '../explainability/index';
+import { assertLaborSafe, type CognitionGovernanceContext } from '../governance/index';
+import { feedersOf } from '../ontology-governance/index';
+import { emitCognitionTelemetry } from '../observability/index';
+import type { CognitionEngineFn, OrchestrationResult, OrchestrationStep } from './index';
 
 export type CognitionPriority = 'critical' | 'high' | 'normal' | 'low';
 

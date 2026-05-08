@@ -19,12 +19,12 @@
 import {
   COGNITION_DOMAINS,
   type CognitionDomain,
-} from '../ontology/index.js';
+} from '../ontology/index';
 import {
   GOVERNANCE_VOCABULARY,
   CONTINUITY_LEXICON,
   INSTITUTIONAL_ONTOLOGY_VERSION,
-} from './index.js';
+} from './index';
 
 /* -------------------------------------------------------------------------- */
 /* Taxonomy node                                                               */

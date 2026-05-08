@@ -60,6 +60,7 @@ const AUTH_CALL_PATTERNS = [
   /withMinRole\s*\(/,            // UE role-based auth guard
   /requireUser\s*\(/,            // UE/UX auth guard (validates user identity)
   /getAuth\s*\(/,               // Clerk getAuth (low-level auth extraction)
+  /cognitionRoute\s*\(/,         // Cognition route factory — wraps withApi() with required auth
 ]
 
 /** Public routes that are intentionally exempt from auth requirements. */
@@ -164,6 +165,7 @@ describe('PR9: Org isolation — DB queries scoped to org', () => {
           content.includes('withApiAuth(') ||
           content.includes('withMinRole(') ||
           content.includes('requireUser(') ||
+          content.includes('cognitionRoute(') ||
           /\bauth\s*\(\)/.test(content)
 
         expect(

@@ -7,7 +7,7 @@
  * their own observability stack (Sentry, App Insights, OpenTelemetry, etc.).
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
+import type { CognitionDomain } from '../ontology/index';
 
 /* -------------------------------------------------------------------------- */
 /* Event shapes                                                                */

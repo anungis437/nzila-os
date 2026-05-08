@@ -5,8 +5,8 @@
  * the kernel without re-implementing boilerplate.
  */
 
-import type { CognitionDomain, ConfidenceBand } from '../ontology/index.js';
-import { confidenceBandFromScore } from '../ontology/index.js';
+import type { CognitionDomain, ConfidenceBand } from '../ontology/index';
+import { confidenceBandFromScore } from '../ontology/index';
 import {
   buildExplainabilityEnvelope,
   type InstitutionalExplainabilityEnvelope,
@@ -14,9 +14,9 @@ import {
   type ReasoningStep,
   type ContinuityAssumption,
   type GovernanceImplication,
-} from '../explainability/index.js';
-import { assertLaborSafe } from '../governance/index.js';
-import { COGNITION_CONTRACT_VERSION } from '../contracts/index.js';
+} from '../explainability/index';
+import { assertLaborSafe } from '../governance/index';
+import { COGNITION_CONTRACT_VERSION } from '../contracts/index';
 
 export interface CognitionEngineDefinition<TPayload> {
   engineId: string;

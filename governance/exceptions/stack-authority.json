@@ -139,6 +139,12 @@
       "owner": "@nzila/union-eyes",
       "justification": "Compliance audit logs v2 — audit_security.audit_logs table (TS-only, no Django model). withApi auth enforced (minRole: officer for reads, admin for writes).",
       "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/exit-interviews/**/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Exit-interview lifecycle event inserts (exit_interview_events) — TS-only event table, no Django model. cognitionRoute/withApi auth (officer) enforced; organizationId scoped via withApi context. Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
     }
   ]
 }

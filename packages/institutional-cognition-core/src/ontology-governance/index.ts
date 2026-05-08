@@ -14,7 +14,7 @@ import {
   INSTITUTIONAL_CONCEPTS,
   type CognitionDomain,
   type InstitutionalConcept,
-} from '../ontology/index.js';
+} from '../ontology/index';
 
 /* -------------------------------------------------------------------------- */
 /* Semantic Version                                                            */

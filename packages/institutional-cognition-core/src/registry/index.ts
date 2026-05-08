@@ -5,7 +5,7 @@
  * The orchestrator uses this to discover engines without hard-coupling.
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
+import type { CognitionDomain } from '../ontology/index';
 
 export interface CognitionEngineDescriptor {
   /** Stable engine id, e.g. "systems-dynamics". */

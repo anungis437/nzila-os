@@ -18,7 +18,7 @@
  *   - Aggregated, anonymized signals about systemic dynamics
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
+import type { CognitionDomain } from '../ontology/index';
 
 export class CognitionGovernanceViolation extends Error {
   readonly code: string;

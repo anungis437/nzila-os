@@ -12,11 +12,11 @@ import type {
   MaturityLevel,
   SeverityLevel,
   TrajectoryLabel,
-} from '../ontology/index.js';
+} from '../ontology/index';
 import type {
   EvidenceItem,
   InstitutionalExplainabilityEnvelope,
-} from '../explainability/index.js';
+} from '../explainability/index';
 
 /** Current canonical contract version emitted by engines. */
 export const COGNITION_CONTRACT_VERSION = '1.0.0';

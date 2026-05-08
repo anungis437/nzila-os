@@ -6,9 +6,9 @@
  * orchestrator only coordinates their invocation and aggregates envelopes.
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
-import type { InstitutionalExplainabilityEnvelope } from '../explainability/index.js';
-import { assertLaborSafe, type CognitionGovernanceContext } from '../governance/index.js';
+import type { CognitionDomain } from '../ontology/index';
+import type { InstitutionalExplainabilityEnvelope } from '../explainability/index';
+import { assertLaborSafe, type CognitionGovernanceContext } from '../governance/index';
 
 export type CognitionEngineFn<TPayload> = (
   organizationId: string,

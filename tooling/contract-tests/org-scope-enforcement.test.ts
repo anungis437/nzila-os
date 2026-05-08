@@ -119,7 +119,8 @@ describe('Org-scope enforcement patterns', () => {
           content.includes('verifyWebhookSignature(') ||
           content.includes('auth()') ||
           content.includes('getAuth(') ||
-          content.includes('requirePlatformRole(')
+          content.includes('requirePlatformRole(') ||
+          content.includes('cognitionRoute(')
         if (!hasOrgGuard) {
           const rel = route.replace(APPS_DIR, '').replace(/\\/g, '/')
           violations.push(`${app.id}: ${rel} — no org-scope guard`)

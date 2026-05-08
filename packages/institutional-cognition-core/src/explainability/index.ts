@@ -7,7 +7,7 @@
  * and human oversight.
  */
 
-import type { CognitionDomain, ConfidenceBand, SeverityLevel } from '../ontology/index.js';
+import type { CognitionDomain, ConfidenceBand, SeverityLevel } from '../ontology/index';
 
 /**
  * Discrete piece of evidence backing a cognition output.

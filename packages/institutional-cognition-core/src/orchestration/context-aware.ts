@@ -16,14 +16,14 @@
  * for review.
  */
 
-import type { CognitionDomain } from '../ontology/index.js';
-import { emitCognitionTelemetry } from '../observability/index.js';
+import type { CognitionDomain } from '../ontology/index';
+import { emitCognitionTelemetry } from '../observability/index';
 import {
   orchestrateCognitionIntelligent,
   type IntelligentOrchestrationResult,
   type IntelligentOrchestrationStep,
   type CognitionPriority,
-} from './intelligent.js';
+} from './intelligent';
 
 /* -------------------------------------------------------------------------- */
 /* Declared institutional contexts                                             */

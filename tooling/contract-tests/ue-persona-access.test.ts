@@ -314,7 +314,21 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Debug (dev-only, gated by NODE_ENV) ────────────────────────────────
   { path: 'debug/page.tsx',                              minRole: 'admin',                description: 'Debug info (dev-only)' },
-]
+  // ── Knowledge transfer & institutional cognition (Finalization v1) ──────
+  { path: 'continuity-intelligence/page.tsx',            minRole: 'officer',              description: 'Continuity intelligence dashboard' },
+  { path: 'continuity-planning/page.tsx',                minRole: 'officer',              description: 'Continuity planning workspace' },
+  { path: 'continuity-simulation/page.tsx',              minRole: 'officer',              description: 'Continuity simulation workspace' },
+  { path: 'executive-operating-intelligence/page.tsx',   minRole: 'vice_president',       description: 'Executive operating intelligence dashboard' },
+  { path: 'governance-center/page.tsx',                  minRole: 'officer',              description: 'Governance center' },
+  { path: 'governance-culture/page.tsx',                 minRole: 'officer',              description: 'Governance culture dashboard' },
+  { path: 'governance-recommendations/page.tsx',         minRole: 'officer',              description: 'Governance recommendations workspace' },
+  { path: 'institutional-intelligence/page.tsx',         minRole: 'officer',              description: 'Institutional intelligence dashboard' },
+  { path: 'institutional-memory/page.tsx',               minRole: 'officer',              description: 'Institutional memory workspace' },
+  { path: 'institutional-operating-intelligence/page.tsx', minRole: 'vice_president',     description: 'Institutional operating intelligence workspace' },
+  { path: 'knowledge-transfer/page.tsx',                 minRole: 'officer',              description: 'Knowledge transfer index' },
+  { path: 'knowledge-transfer/new/page.tsx',             minRole: 'officer',              description: 'Knowledge transfer create' },
+  { path: 'knowledge-transfer/[id]/page.tsx',            minRole: 'officer',              description: 'Knowledge transfer detail' },
+  { path: 'longitudinal-cognition/page.tsx',             minRole: 'vice_president',       description: 'Longitudinal cognition workspace' },]
 
 // ── API routes backing dashboard pages ──────────────────────────────────────
 

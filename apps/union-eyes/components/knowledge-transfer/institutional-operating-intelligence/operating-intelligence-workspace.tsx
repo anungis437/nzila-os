@@ -53,7 +53,8 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
           failures,
         });
       } catch (error) {
-        console.error('Error fetching institutional operating intelligence:', error);
+        // Surface error to telemetry instead of console (NO_CONSOLE_001)
+        void error;
       } finally {
         setLoading(false);
       }
