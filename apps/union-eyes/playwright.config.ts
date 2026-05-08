@@ -17,7 +17,7 @@ export default defineConfig({
   timeout: 60_000,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  testIgnore: ['tests/e2e/ue-workflow.spec.ts'],
+  testIgnore: ['tests/e2e/ue-workflow.spec.ts', '**/.next/**', '**/node_modules/**'],
   reporter: process.env.CI
     ? [['html', { open: 'never' }], ['github']]
     : [['html', { open: 'on-failure' }]],
