@@ -18,8 +18,6 @@ import {
   type GenerateResult,
 } from '@nzila/ai-sdk'
 
-const APP_KEY = 'trustcore'
-
 let _client: AiClient | null = null
 
 function resolveAiBaseUrl(): string {
@@ -43,6 +41,7 @@ function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResu
     traceId: result.requestId,
     provider,
     modelUsed,
+    engineVersion: buildAiEngineVersion(provider, modelUsed),
     tokensIn,
     tokensOut,
     tokenCostUsd,
@@ -53,10 +52,8 @@ function toExecutionTelemetry(result: GenerateResult | EmbedResult | ExtractResu
 export function getAiClient(): AiClient {
   if (!_client) {
     _client = createAiClient({
-      appKey: APP_KEY,
       baseUrl: resolveAiBaseUrl(),
       getToken: () => process.env.AI_API_KEY ?? '',
-      engineVersion: buildAiEngineVersion(APP_KEY),
     })
   }
   return _client

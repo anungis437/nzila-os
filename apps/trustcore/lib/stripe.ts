@@ -14,5 +14,5 @@
  */
 export async function createStripeClient(apiKey: string) {
   const { default: Stripe } = await import('stripe')
-  return new Stripe(apiKey, { apiVersion: '2026-04-22.dahlia' })
+  return new Stripe(apiKey, { apiVersion: '2026-02-25.clover' })
 }

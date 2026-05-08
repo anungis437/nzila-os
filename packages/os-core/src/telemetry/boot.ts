@@ -30,6 +30,8 @@ type AppName =
   | 'control-plane'
   | 'nzila-hq'
   | 'maestria'
+  | 'trustcore'
+  | 'trustcore-trustops'
 
 export interface AppBootOptions {
   /** Skip env validation (e.g. for marketing-only apps) */

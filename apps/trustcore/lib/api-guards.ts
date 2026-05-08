@@ -29,7 +29,7 @@ export async function authenticateRequest(
     return { ok: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  const orgId = req.headers.get('x-org-id') ?? session.activeOrgId
+  const orgId = req.headers.get('x-org-id') ?? session.orgId
   if (!orgId) {
     return { ok: false, response: NextResponse.json({ error: 'Org context required' }, { status: 403 }) }
   }

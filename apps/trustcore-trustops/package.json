@@ -12,7 +12,9 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@nzila/ai-sdk": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/ml-sdk": "workspace:*",
     "@nzila/org": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/otel-core": "workspace:*",

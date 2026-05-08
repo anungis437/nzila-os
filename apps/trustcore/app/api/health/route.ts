@@ -25,11 +25,12 @@ async function checkDb(): Promise<boolean> {
 export async function GET() {
   const [dbOk] = await Promise.all([checkDb()])
 
-  const checks = normalizeHealthChecks([
-    { name: 'db', healthy: dbOk },
-  ])
+  const checks = normalizeHealthChecks({
+    db: dbOk,
+  })
 
-  const { status, httpStatus } = healthStatusFromChecks(checks)
+  const status = healthStatusFromChecks(checks)
+  const httpStatus = status === 'ok' ? 200 : 503
   const build = getBuildMetadata(APP)
 
   return NextResponse.json({ app: APP, status, checks, build }, { status: httpStatus })

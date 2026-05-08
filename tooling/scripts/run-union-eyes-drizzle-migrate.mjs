@@ -117,11 +117,14 @@ function faultTolerantSql(sql) {
     /\bDO DROP TYPE IF EXISTS "public"\."[^"]+" CASCADE;/g,
     'SELECT 1 /* skipped: repeated migration block DROP TYPE */',
   );
-  // Wrap bare CREATE TYPE ... AS ENUM statements in fault-tolerant DO blocks so that
-  // repeated blocks silently skip re-creating types that were already created.
+  // Fix malformed one-line blocks found in 0008 where a DO body lost delimiters:
+  //   $ BEGIN ALTER TABLE ... EXCEPTION ... END DROP TYPE IF EXISTS ...;
+  // Rewrite to valid SQL preserving intent.
+  // NOTE: use a function replacement to avoid $$ → $ corruption in replacement strings.
   sql = sql.replace(
-    /(CREATE TYPE "public"\."[^"]+" AS ENUM\([^;]+\);)/g,
-    'DO $$$$ BEGIN\n$1\nEXCEPTION\n  WHEN duplicate_object THEN null;\nEND $$$$;',
+    /\$ BEGIN ALTER TABLE ([\s\S]*?) END DROP TYPE IF EXISTS "public"\."([^"]+)" CASCADE;/g,
+    (_, tableBody, typeName) =>
+      `DO $$ BEGIN ALTER TABLE ${tableBody} END $$; DROP TYPE IF EXISTS "public"."${typeName}" CASCADE;`,
   );
   // Replace EXCEPTION WHEN duplicate_object in ADD CONSTRAINT DO blocks only
   return sql.replace(
@@ -173,7 +176,11 @@ async function runMigrations() {
           const trimmed = stmt.trim();
           if (trimmed) {
             stmtIndex++;
-            await client.query(trimmed);
+            if (/^CREATE\s+TYPE\s+/i.test(trimmed)) {
+              await client.query(`DO $$ BEGIN ${trimmed} EXCEPTION WHEN duplicate_object THEN null; END $$;`);
+            } else {
+              await client.query(trimmed);
+            }
           }
         }
         await client.query(
