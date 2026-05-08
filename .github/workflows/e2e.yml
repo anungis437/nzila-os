@@ -86,7 +86,7 @@ jobs:
 
       - name: Start app
         run: |
-          node apps/${{ matrix.app }}/.next/standalone/apps/${{ matrix.app }}/server.js &
+          node apps/${{ matrix.app }}/.next/standalone/apps/${{ matrix.app }}/server.js >/tmp/app-server.log 2>&1 &
           # Wait for the server to be ready
           timeout 60 bash -c 'until curl -sf http://localhost:${{ matrix.port }}/ > /dev/null 2>&1 || curl -sf http://localhost:${{ matrix.port }}/api/health > /dev/null 2>&1; do sleep 2; done'
         env:
@@ -123,4 +123,18 @@ jobs:
         with:
           name: playwright-report-${{ matrix.app }}
           path: apps/${{ matrix.app }}/playwright-report/
+          retention-days: 14
+
+      - name: Dump app server log on failure
+        if: failure()
+        run: |
+          echo '===== app server log ====='
+          tail -n 500 /tmp/app-server.log || true
+
+      - name: Upload app server log
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: app-server-log-${{ matrix.app }}
+          path: /tmp/app-server.log
           retention-days: 14

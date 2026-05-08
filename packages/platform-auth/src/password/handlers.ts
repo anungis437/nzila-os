@@ -128,7 +128,8 @@ export async function handleLogin(request: NextRequest) {
     }
 
     return NextResponse.json({ user: result.user })
-  } catch {
+  } catch (error) {
+    console.error('[platform-auth] handleLogin failed:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

@@ -351,6 +351,13 @@
       "when": 1778298000000,
       "tag": "20260508_fixup_post_0019_align_modern_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1778384400000,
+      "tag": "20260509_fixup_auth_mfa_magic_invites",
+      "breakpoints": true
     }
   ]
 }
