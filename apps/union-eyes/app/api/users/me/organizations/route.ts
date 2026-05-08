@@ -147,8 +147,7 @@ export async function GET(_req: NextRequest) {
         const allOrgs = await db.select().from(organizations);
         orgs = allOrgs.filter(o =>
           orgIds.includes(o.id) ||
-          orgIds.includes(o.slug ?? '') ||
-          orgIds.includes(o.clerkOrganizationId ?? ''),
+          orgIds.includes(o.slug ?? ''),
         );
       }
 
@@ -157,14 +156,6 @@ export async function GET(_req: NextRequest) {
         membershipCount: memberships.length,
         orgCount: orgs.length,
       });
-    }
-
-    // Build a lookup from Clerk org IDs to org UUIDs for normalization
-    const clerkIdToUuid = new Map<string, string>();
-    for (const o of orgs) {
-      if (o.clerkOrganizationId) {
-        clerkIdToUuid.set(o.clerkOrganizationId, o.id);
-      }
     }
 
     return NextResponse.json({
@@ -182,7 +173,7 @@ export async function GET(_req: NextRequest) {
       })),
       memberships: memberships.map(m => ({
         id: m.id,
-        organizationId: clerkIdToUuid.get(m.organizationId) ?? m.organizationId,
+        organizationId: m.organizationId,
         userId: m.userId,
         role: m.role,
         isPrimary: m.isPrimary ?? false,

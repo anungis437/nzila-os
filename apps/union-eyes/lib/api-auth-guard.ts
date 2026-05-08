@@ -450,23 +450,11 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     const metadataOrgId =
       (publicMetadata.organizationId as string) || (privateMetadata.organizationId as string) || null;
 
-    // Resolve organizationId: auth orgId (org_xxx format) must be mapped to
-    // the database UUID via organizations.clerk_organization_id. DB columns are
-    // uuid type and will throw "invalid input syntax for type uuid" if given a
-    // non-UUID string directly.
+    // Resolve organizationId from metadata / legacy fields. Authentication
+    // orgId is treated as the canonical app org UUID.
     let resolvedOrganizationId = metadataOrgId || legacyTenantId || null;
     if (orgId) {
-      try {
-        const [org] = await db
-          .select({ id: organizations.id })
-          .from(organizations)
-          .where(eq(organizations.clerkOrganizationId, orgId))
-          .limit(1);
-        resolvedOrganizationId = org?.id ?? resolvedOrganizationId;
-      } catch {
-        // Fallback to metadata if the lookup fails
-        logger.warn('Failed to resolve auth orgId to DB UUID', { orgId });
-      }
+      resolvedOrganizationId = orgId;
     }
 
     // Validate resolvedOrganizationId actually exists in the organizations

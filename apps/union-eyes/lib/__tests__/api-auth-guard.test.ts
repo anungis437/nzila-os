@@ -75,7 +75,7 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('@/db/schema', () => ({
   organizationMembers: { id: 'id', userId: 'userId', organizationId: 'organizationId', role: 'role', status: 'status' },
-  organizations: { id: 'id', clerkOrganizationId: 'clerkOrganizationId' },
+  organizations: { id: 'id' },
 }));
 
 vi.mock('@/db/schema/domains/member', () => ({

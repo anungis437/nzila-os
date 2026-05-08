@@ -11,7 +11,7 @@
 import { auth, currentUser } from '@/lib/api-auth-guard';
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 import { db } from "@/db/db";
-import { organizationMembers, organizations } from "@/db/schema-organizations";
+import { organizationMembers } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
 import { createLogger } from '@nzila/os-core'
@@ -110,23 +110,7 @@ export async function getUserRole(
 
     // 1. Try organization_members (org-scoped membership)
     if (organizationId) {
-      // Clerk auth() returns Clerk org IDs (org_xxx), but organization_members
-      // stores UUID references. Resolve Clerk ID → UUID when needed.
-      let resolvedOrgId = organizationId;
-      if (organizationId.startsWith('org_')) {
-        try {
-          const org = await db
-            .select({ id: organizations.id })
-            .from(organizations)
-            .where(eq(organizations.clerkOrganizationId, organizationId))
-            .limit(1);
-          if (org[0]?.id) {
-            resolvedOrgId = org[0].id;
-          }
-        } catch (lookupErr) {
-          logger.warn('[getUserRole] Clerk org ID lookup failed', { detail: lookupErr instanceof Error ? lookupErr.message : lookupErr });
-        }
-      }
+      const resolvedOrgId = organizationId;
 
       const orgMember = await db
         .select({ role: organizationMembers.role })

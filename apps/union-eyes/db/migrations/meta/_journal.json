@@ -344,6 +344,13 @@
       "when": 1778213031280,
       "tag": "0043_fantastic_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1778298000000,
+      "tag": "20260508_fixup_post_0019_align_modern_schema",
+      "breakpoints": true
     }
   ]
 }

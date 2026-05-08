@@ -29,7 +29,7 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('@/db/schema-organizations', () => ({
   organizationMembers: { userId: 'userId', organizationId: 'organizationId', role: 'role', status: 'status' },
-  organizations: { id: 'id', clerkOrganizationId: 'clerkOrganizationId' },
+  organizations: { id: 'id' },
 }));
 
 vi.mock('drizzle-orm', () => ({

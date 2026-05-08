@@ -658,4 +658,177 @@ CREATE TYPE "public"."alert_severity" AS ENUM('info', 'warning', 'urgent', 'crit
 ALTER TABLE "deadline_alerts" ALTER COLUMN "alert_severity" SET DATA TYPE "public"."alert_severity" USING "alert_severity"::text::"public"."alert_severity";
 --> statement-breakpoint
 DROP TYPE IF EXISTS "_alert_severity_old";
+--> statement-breakpoint-- ── Auth & audit schemas (auto-bootstrap for fresh DBs / E2E) ──────────────
+-- These schemas/tables live in a separate Drizzle migration set
+-- (db/migrations-audit) that the union-eyes app does not run. The seed and
+-- runtime code in @nzila/db/schema/auth.ts depends on them, so we ensure
+-- they exist here. CREATE … IF NOT EXISTS keeps this safe for prod.
+CREATE SCHEMA IF NOT EXISTS "user_management";
+--> statement-breakpoint
+CREATE SCHEMA IF NOT EXISTS "audit_security";
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."users" (
+  "user_id" varchar(255) PRIMARY KEY NOT NULL,
+  "email" varchar(255) NOT NULL,
+  "email_verified" boolean DEFAULT false,
+  "email_verified_at" timestamp with time zone,
+  "password_hash" text,
+  "first_name" varchar(100),
+  "last_name" varchar(100),
+  "display_name" varchar(200),
+  "avatar_url" text,
+  "phone" varchar(20),
+  "phone_verified" boolean DEFAULT false,
+  "phone_verified_at" timestamp with time zone,
+  "timezone" varchar(50) DEFAULT 'UTC',
+  "locale" varchar(10) DEFAULT 'en-US',
+  "is_active" boolean DEFAULT true,
+  "is_system_admin" boolean DEFAULT false,
+  "last_login_at" timestamp with time zone,
+  "last_login_ip" varchar(45),
+  "password_changed_at" timestamp with time zone,
+  "failed_login_attempts" integer DEFAULT 0,
+  "account_locked_until" timestamp with time zone,
+  "two_factor_enabled" boolean DEFAULT false,
+  "two_factor_secret" text,
+  "two_factor_backup_codes" text[],
+  "encrypted_sin" text,
+  "encrypted_ssn" text,
+  "encrypted_bank_account" text,
+  "account_source" varchar(20) NOT NULL DEFAULT 'local',
+  "lifecycle_state" varchar(20) NOT NULL DEFAULT 'active',
+  "lifecycle_reason" text,
+  "lifecycle_changed_at" timestamp with time zone,
+  "lifecycle_changed_by" varchar(255),
+  "created_at" timestamp with time zone DEFAULT now(),
+  "updated_at" timestamp with time zone DEFAULT now(),
+  CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."organization_users" (
+  "organization_user_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid NOT NULL,
+  "user_id" varchar(255) NOT NULL,
+  "role" varchar(50) DEFAULT 'member' NOT NULL,
+  "permissions" jsonb DEFAULT '[]'::jsonb,
+  "is_active" boolean DEFAULT true,
+  "is_primary" boolean DEFAULT false,
+  "invited_by" varchar(255),
+  "invited_at" timestamp with time zone,
+  "joined_at" timestamp with time zone,
+  "last_access_at" timestamp with time zone,
+  "created_at" timestamp with time zone DEFAULT now(),
+  "updated_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "organization_users_user_id_organization_id_idx" ON "user_management"."organization_users" ("user_id", "organization_id");
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."user_sessions" (
+  "session_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "user_id" varchar(255) NOT NULL,
+  "organization_id" uuid,
+  "session_token" text NOT NULL,
+  "refresh_token" text,
+  "device_info" jsonb DEFAULT '{}'::jsonb,
+  "ip_address" varchar(45),
+  "user_agent" text,
+  "expires_at" timestamp with time zone NOT NULL,
+  "is_active" boolean DEFAULT true,
+  "created_at" timestamp with time zone DEFAULT now(),
+  "last_used_at" timestamp with time zone DEFAULT now(),
+  CONSTRAINT "user_sessions_session_token_unique" UNIQUE("session_token"),
+  CONSTRAINT "user_sessions_refresh_token_unique" UNIQUE("refresh_token")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."oauth_providers" (
+  "provider_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "user_id" varchar(255) NOT NULL,
+  "provider_name" varchar(50) NOT NULL,
+  "provider_user_id" varchar(255) NOT NULL,
+  "provider_data" jsonb DEFAULT '{}'::jsonb,
+  "access_token" text,
+  "refresh_token" text,
+  "token_expires_at" timestamp with time zone,
+  "created_at" timestamp with time zone DEFAULT now(),
+  "updated_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "audit_security"."audit_logs" (
+  "audit_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid,
+  "user_id" varchar(255),
+  "action" varchar(100) NOT NULL,
+  "resource_type" varchar(50) NOT NULL,
+  "resource_id" uuid,
+  "old_values" jsonb,
+  "new_values" jsonb,
+  "ip_address" varchar(45),
+  "user_agent" text,
+  "session_id" uuid,
+  "correlation_id" uuid,
+  "severity" varchar(20) DEFAULT 'info',
+  "outcome" varchar(20) DEFAULT 'success',
+  "error_message" text,
+  "metadata" jsonb DEFAULT '{}'::jsonb,
+  "archived" boolean DEFAULT false NOT NULL,
+  "archived_at" timestamp with time zone,
+  "archived_path" text,
+  "created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "audit_security"."failed_login_attempts" (
+  "attempt_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "email" varchar(255) NOT NULL,
+  "ip_address" varchar(45) NOT NULL,
+  "user_agent" text,
+  "failure_reason" varchar(100) NOT NULL,
+  "attempted_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "audit_security"."rate_limit_events" (
+  "event_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "identifier" varchar(255) NOT NULL,
+  "identifier_type" varchar(20) NOT NULL,
+  "endpoint" varchar(255) NOT NULL,
+  "request_count" integer NOT NULL,
+  "limit_exceeded" boolean DEFAULT false,
+  "window_start" timestamp with time zone NOT NULL,
+  "window_end" timestamp with time zone NOT NULL,
+  "created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "audit_security"."security_events" (
+  "event_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid,
+  "user_id" varchar(255),
+  "event_type" varchar(50) NOT NULL,
+  "event_category" varchar(30) NOT NULL,
+  "severity" varchar(20) NOT NULL,
+  "description" text NOT NULL,
+  "source_ip" varchar(45),
+  "user_agent" text,
+  "additional_data" jsonb DEFAULT '{}'::jsonb,
+  "risk_score" integer DEFAULT 0,
+  "is_resolved" boolean DEFAULT false,
+  "resolved_at" timestamp with time zone,
+  "resolved_by" varchar(255),
+  "resolution_notes" text,
+  "created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."org_auth_policies" (
+  "organization_id" uuid PRIMARY KEY,
+  "allow_local_auth" boolean NOT NULL DEFAULT true,
+  "allow_magic_link" boolean NOT NULL DEFAULT true,
+  "allow_sso" boolean NOT NULL DEFAULT true,
+  "require_sso" boolean NOT NULL DEFAULT false,
+  "require_invite" boolean NOT NULL DEFAULT false,
+  "password_reset_allowed" boolean NOT NULL DEFAULT true,
+  "allowed_email_domains" jsonb DEFAULT '[]'::jsonb,
+  "mfa_required_for_roles" jsonb DEFAULT '[]'::jsonb,
+  "sso_provider_id" uuid,
+  "updated_by" varchar(255),
+  "updated_at" timestamp with time zone DEFAULT now(),
+  "created_at" timestamp with time zone DEFAULT now()
+);
 --> statement-breakpoint
