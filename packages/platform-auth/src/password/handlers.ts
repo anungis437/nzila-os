@@ -130,8 +130,22 @@ export async function handleLogin(request: NextRequest) {
     return NextResponse.json({ user: result.user })
   } catch (error) {
     console.error('[platform-auth] handleLogin failed:', error)
+    const exposeDetails =
+      process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
+    const err = error as Error & { cause?: unknown }
+    const cause = err?.cause as { message?: string; code?: string } | undefined
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        ...(exposeDetails
+          ? {
+              detail: err?.message ?? String(error),
+              cause: cause?.message ?? (cause ? String(cause) : undefined),
+              causeCode: cause?.code,
+              stack: err?.stack,
+            }
+          : {}),
+      },
       { status: 500 },
     )
   }
