@@ -113,6 +113,11 @@ export const UE_PROFILES = {
   PENSION_TRUSTEE_SUMMARY: 'ue-pension-trustee-summary',
   // Financial intelligence profile
   FINANCIAL_ANALYSIS: 'ue-financial-analysis',
+  // Knowledge Transfer Intelligence Layer
+  KNOWLEDGE_SUMMARY: 'ue-knowledge-summary',
+  EXPERTISE_EXTRACTION: 'ue-expertise-extraction',
+  CONTINUITY_RISK: 'ue-continuity-risk',
+  TOPIC_EXTRACTION: 'ue-topic-extraction',
 } as const
 
 export async function runAICompletionDetailed(input: Parameters<AiClient['generate']>[0]): Promise<{ content: string; execution: AiExecutionTelemetry }> {

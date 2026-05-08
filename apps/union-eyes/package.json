@@ -49,6 +49,7 @@
     "@nzila/cupe-vocabulary": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/decision-core": "workspace:*",
+    "@nzila/institutional-cognition-core": "workspace:*",
     "@nzila/nar": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/os-core": "workspace:*",

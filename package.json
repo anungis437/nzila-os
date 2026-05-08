@@ -71,6 +71,7 @@
     "uec:test": "vitest run --project ue-cognition",
     "uec:report": "pnpm --filter @nzila/ue-cognition report",
     "governance:check": "tsx scripts/governance-check.ts",
+    "governance:cognition": "tsx tooling/governance/cognition-governance-ci.ts",
     "ai:analyze": "tsx scripts/ai-agent-runner.ts --phase=analyze",
     "ai:implement": "tsx scripts/ai-agent-runner.ts --phase=implement",
     "ai:qa": "tsx scripts/ai-agent-runner.ts --phase=qa",

@@ -1,3 +1,4 @@
+// cognition-governance-ci: file-allow-vocabulary — Marketing/anti-surveillance copy: this file declares what the platform DOES NOT DO. Forbidden terms appear deliberately in negated context.
 /**
  * Human-Centered Callout Component
  * 

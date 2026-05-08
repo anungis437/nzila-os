@@ -444,16 +444,16 @@ export function predictOrganizerRetentionRisk(input: OrganizerRetentionPredictio
   // Confidence
   const confidence = input.casesHandled > 10 ? 85 : 65; // Higher confidence with more data
 
-  // Interpretation
+  // Interpretation — wellbeing framing, supportive intent (see file header: "Predict to support, not surveil")
   let interpretation = '';
   if (totalRisk >= 70) {
-    interpretation = 'High retention risk. Immediate intervention recommended.';
+    interpretation = 'High burnout signal. Offer immediate support and workload relief.';
   } else if (totalRisk >= 50) {
-    interpretation = 'Moderate risk. Monitor closely and offer support.';
+    interpretation = 'Elevated burnout signal. Check in and offer support.';
   } else if (totalRisk >= 30) {
-    interpretation = 'Low risk. Organizer is engaged and supported.';
+    interpretation = 'Low burnout signal. Organizer is engaged and supported.';
   } else {
-    interpretation = 'Very low risk. Organizer is thriving.';
+    interpretation = 'Very low burnout signal. Organizer is thriving.';
   }
 
   // Recommendations

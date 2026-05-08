@@ -316,7 +316,7 @@ describe('predictive-scoring', () => {
 
     it('very low risk interpretation for healthy organizer', () => {
       const result = predictOrganizerRetentionRisk(makeOrganizerInput());
-      expect(result.interpretation).toMatch(/very low risk|low risk/i);
+      expect(result.interpretation).toMatch(/very low burnout|low burnout|thriving/i);
     });
 
     it('high risk interpretation for stressed organizer', () => {
@@ -329,7 +329,7 @@ describe('predictive-scoring', () => {
           memberSatisfactionScore: 20,
         }),
       );
-      expect(result.interpretation).toMatch(/high.*risk/i);
+      expect(result.interpretation).toMatch(/high.*burnout/i);
     });
 
     it('recommends redistribution for overloaded', () => {

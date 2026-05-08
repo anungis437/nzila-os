@@ -5,6 +5,7 @@ import noShadowAi from '../../packages/ai-sdk/eslint-no-shadow-ai.mjs'
 import noShadowMl from '../../packages/ml-sdk/eslint-no-shadow-ml.mjs'
 import noShadowDb from '../../packages/db/eslint-no-shadow-db.mjs'
 import noDirectProvider from '../../packages/config/eslint-no-direct-provider.mjs'
+import cognitionArchitecture from '../../packages/institutional-cognition-core/eslint-cognition-architecture.mjs'
 
 const domainImportRestrictions = {
   'case-intelligence': ['clc', 'observability', 'pki', 'platform-economics'],
@@ -33,6 +34,7 @@ const eslintConfig = defineConfig([
   noShadowMl,
   noShadowDb,
   noDirectProvider,
+  cognitionArchitecture,
   globalIgnores([
     '.next/**',
     'out/**',
