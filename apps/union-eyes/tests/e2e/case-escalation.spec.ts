@@ -18,7 +18,7 @@ test.describe('UE E2E - case escalation', () => {
       },
     })
 
-    expect([200, 400, 409, 422]).toContain(escalate.status())
+    expect([200, 400, 409, 422], `escalate body: ${await escalate.text()}`).toContain(escalate.status())
 
     await loginAsTestUser(request, UE_E2E_USERS.member)
 

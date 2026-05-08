@@ -211,9 +211,23 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error('Workflow transition failed', { error: String(err) })
     const message = err instanceof Error ? err.message : 'Internal error'
+    const exposeDetails = process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
+    const e = err as Error & { cause?: unknown }
+    const cause = e?.cause as { message?: string; code?: string } | undefined
 
     return NextResponse.json(
-      { success: false, error: message.startsWith('Unauthorized') || message.startsWith('Forbidden') ? message : 'Internal error' },
+      {
+        success: false,
+        error: message.startsWith('Unauthorized') || message.startsWith('Forbidden') ? message : 'Internal error',
+        ...(exposeDetails && !(message.startsWith('Unauthorized') || message.startsWith('Forbidden'))
+          ? {
+              detail: e?.message ?? String(err),
+              cause: cause?.message ?? (cause ? String(cause) : undefined),
+              causeCode: cause?.code,
+              stack: e?.stack,
+            }
+          : {}),
+      },
       { status: statusForAuthError(message) },
     )
   }
