@@ -358,6 +358,13 @@
       "when": 1778384400000,
       "tag": "20260509_fixup_auth_mfa_magic_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1778470800000,
+      "tag": "20260711_auth_password_reset_tokens",
+      "breakpoints": true
     }
   ]
 }
