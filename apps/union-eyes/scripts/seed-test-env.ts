@@ -53,6 +53,24 @@ function isMissingRelationError(error: unknown): boolean {
   return cause?.code === '42P01'
 }
 
+// Per docs/nzila-runtime-integrity/full-seeded-persona-legitimacy-hardening.md and
+// docs/nzila-runtime-integrity/full-dashboard-runtime-failure-integrity.md, silent
+// collapse must become observable evidence — log the underlying PG error code,
+// message, and (if available) the offending column so the next CI run reveals the
+// actual schema-drift cause rather than masking it behind a generic warning.
+function describePgError(error: unknown): string {
+  if (!error || typeof error !== 'object') return String(error)
+  const cause = (error as { cause?: { code?: string; message?: string; column?: string; detail?: string; table?: string } }).cause
+  if (!cause) return (error as { message?: string }).message ?? String(error)
+  const parts: string[] = []
+  if (cause.code) parts.push(`code=${cause.code}`)
+  if (cause.table) parts.push(`table=${cause.table}`)
+  if (cause.column) parts.push(`column=${cause.column}`)
+  if (cause.message) parts.push(`message=${cause.message}`)
+  if (cause.detail) parts.push(`detail=${cause.detail}`)
+  return parts.join(' ')
+}
+
 function assertDeterministicInputs(): void {
   const orgIds = Object.values(UE_TEST_ORGS).map((o) => o.id)
   const userIds = Object.values(UE_TEST_USERS).map((u) => u.userId)
@@ -327,7 +345,9 @@ async function seed(): Promise<void> {
     })
   } catch (error) {
     if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] organization_members insert skipped due schema drift (missing column)')
+    console.warn(
+      `[ue:seed:test-env] organization_members insert skipped due schema drift: ${describePgError(error)}`,
+    )
   }
 
   // Separate transaction for claim_updates (may fail due to schema drift)
@@ -353,7 +373,9 @@ async function seed(): Promise<void> {
     })
   } catch (error) {
     if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift (missing column)')
+    console.warn(
+      `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
+    )
   }
 
   // Required containment artifacts for external UX tester access.
