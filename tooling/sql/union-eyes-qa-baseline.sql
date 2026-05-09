@@ -67,21 +67,41 @@ CREATE TABLE IF NOT EXISTS public.organizations (
 );
 
 CREATE TABLE IF NOT EXISTS user_management.users (
-  user_id varchar(255) PRIMARY KEY,
-  email varchar(255) UNIQUE,
+  user_id varchar(255) PRIMARY KEY NOT NULL,
+  email varchar(255) NOT NULL,
   email_verified boolean DEFAULT false,
   email_verified_at timestamptz,
   password_hash text,
   first_name varchar(100),
   last_name varchar(100),
   display_name varchar(200),
+  avatar_url text,
+  phone varchar(20),
+  phone_verified boolean DEFAULT false,
+  phone_verified_at timestamptz,
+  timezone varchar(50) DEFAULT 'UTC',
+  locale varchar(10) DEFAULT 'en-US',
   is_active boolean DEFAULT true,
   is_system_admin boolean DEFAULT false,
+  last_login_at timestamptz,
+  last_login_ip varchar(45),
+  password_changed_at timestamptz,
+  failed_login_attempts integer DEFAULT 0,
+  account_locked_until timestamptz,
+  two_factor_enabled boolean DEFAULT false,
+  two_factor_secret text,
+  two_factor_backup_codes text[],
+  encrypted_sin text,
+  encrypted_ssn text,
+  encrypted_bank_account text,
   account_source varchar(20) NOT NULL DEFAULT 'local',
   lifecycle_state varchar(20) NOT NULL DEFAULT 'active',
-  password_changed_at timestamptz,
+  lifecycle_reason text,
+  lifecycle_changed_at timestamptz,
+  lifecycle_changed_by varchar(255),
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT users_email_unique UNIQUE(email)
 );
 
 CREATE TABLE IF NOT EXISTS user_management.organization_users (
@@ -92,7 +112,10 @@ CREATE TABLE IF NOT EXISTS user_management.organization_users (
   permissions jsonb DEFAULT '[]'::jsonb,
   is_active boolean DEFAULT true,
   is_primary boolean DEFAULT false,
+  invited_by varchar(255),
+  invited_at timestamptz,
   joined_at timestamptz,
+  last_access_at timestamptz,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -106,6 +129,7 @@ CREATE TABLE IF NOT EXISTS user_management.user_sessions (
   organization_id uuid,
   session_token text NOT NULL UNIQUE,
   refresh_token text,
+  device_info jsonb DEFAULT '{}'::jsonb,
   ip_address varchar(45),
   user_agent text,
   expires_at timestamptz NOT NULL,
@@ -125,6 +149,7 @@ CREATE TABLE IF NOT EXISTS user_management.org_auth_policies (
   password_reset_allowed boolean NOT NULL DEFAULT true,
   allowed_email_domains jsonb DEFAULT '[]'::jsonb,
   mfa_required_for_roles jsonb DEFAULT '[]'::jsonb,
+  sso_provider_id uuid,
   updated_by varchar(255),
   updated_at timestamptz DEFAULT now(),
   created_at timestamptz DEFAULT now()
@@ -220,10 +245,11 @@ CREATE TABLE IF NOT EXISTS public.organization_members (
 
 CREATE TABLE IF NOT EXISTS public.claims (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  claim_id uuid NOT NULL UNIQUE,
-  claim_number varchar(50),
-  organization_id uuid,
+  claim_id uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  claim_number varchar(50) UNIQUE,
+  organization_id uuid NOT NULL,
   member_id varchar(255),
+  is_anonymous boolean DEFAULT true,
   claim_type text,
   status text NOT NULL DEFAULT 'submitted',
   priority text NOT NULL DEFAULT 'medium',
@@ -231,11 +257,32 @@ CREATE TABLE IF NOT EXISTS public.claims (
   location text,
   description text,
   desired_outcome text,
-  filed_date timestamptz,
+  witnesses_present boolean DEFAULT false,
+  witness_details text,
+  previously_reported boolean DEFAULT false,
+  previous_report_details text,
   assigned_to varchar(255),
   assigned_at timestamptz,
+  ai_score integer,
+  ai_analysis jsonb,
+  merit_confidence integer,
+  precedent_match integer,
+  complexity_score integer,
+  progress integer DEFAULT 0,
+  claim_amount decimal(14,2) NOT NULL DEFAULT 0,
+  settlement_amount decimal(14,2) NOT NULL DEFAULT 0,
+  legal_costs decimal(14,2) NOT NULL DEFAULT 0,
+  court_costs decimal(14,2) NOT NULL DEFAULT 0,
+  resolution_outcome varchar(100),
+  filed_date timestamptz,
+  resolved_at timestamptz,
+  attachments jsonb DEFAULT '[]'::jsonb,
+  voice_transcriptions jsonb DEFAULT '[]'::jsonb,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  idempotency_hash varchar(64) UNIQUE,
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  closed_at timestamptz
 );
 
 CREATE TABLE IF NOT EXISTS public.claim_updates (
