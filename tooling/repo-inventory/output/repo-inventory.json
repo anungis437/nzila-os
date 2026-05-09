@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "generatedAt": "2026-05-09T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 198,
-  "workspacePackageCount": 230,
-  "workflowCount": 47,
-  "contractTestCount": 234,
-  "tsTestFileCount": 1338,
+  "packageCount": 213,
+  "workspacePackageCount": 245,
+  "workflowCount": 48,
+  "contractTestCount": 248,
+  "tsTestFileCount": 1380,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -123,6 +123,7 @@
       "nzilaDeps": [
         "ai-core",
         "ai-sdk",
+        "attestation-visibility",
         "blob",
         "chatops-slack",
         "chatops-teams",
@@ -131,14 +132,18 @@
         "comms-push",
         "comms-sms",
         "config",
+        "continuity-review",
         "crm-hubspot",
         "db",
         "deal-engine",
         "decision-intelligence",
         "executive-os",
+        "governance-operations",
+        "governance-review",
         "governed-workflow",
         "itsm-core",
         "ml-sdk",
+        "operational-convergence",
         "os-core",
         "payments-stripe",
         "platform-assurance",
@@ -162,11 +167,12 @@
         "platform-shell",
         "qbo",
         "schema-core",
+        "stabilization-signals",
         "tax",
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 356
+      "codeFileCount": 364
     },
     {
       "name": "control-plane",
@@ -178,16 +184,21 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "attestation-visibility",
         "config",
+        "continuity-review",
         "db",
         "deal-engine",
         "decision-core",
         "decision-intelligence",
+        "governance-operations",
+        "governance-review",
         "governed-workflow",
         "metrics-commercial",
         "nar",
         "observability",
         "operating-evidence",
+        "operational-convergence",
         "os-core",
         "pipeline-alerting",
         "platform-agent-workflows",
@@ -217,10 +228,11 @@
         "policies",
         "policy-intelligence",
         "schema-core",
+        "stabilization-signals",
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 266
+      "codeFileCount": 300
     },
     {
       "name": "cora",
@@ -567,16 +579,19 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "ai-sdk",
         "config",
         "db",
+        "ml-sdk",
         "os-core",
+        "payments-stripe",
         "platform-auth",
         "platform-shell",
         "trustcore-core",
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 87
+      "codeFileCount": 96
     },
     {
       "name": "trustcore-trustops",
@@ -588,8 +603,10 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "ai-sdk",
         "config",
         "db",
+        "ml-sdk",
         "org",
         "os-core",
         "otel-core",
@@ -603,7 +620,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 14
+      "codeFileCount": 20
     },
     {
       "name": "union-eyes",
@@ -616,16 +633,24 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "ai-sdk",
+        "attestation-visibility",
         "blob",
         "clc-executive-intelligence",
         "config",
+        "continuity-review",
         "crm-hubspot",
         "cupe-vocabulary",
         "db",
         "decision-core",
         "evidence",
+        "governance-middleware",
+        "governance-operations",
+        "governance-otel",
+        "governance-review",
+        "institutional-cognition-core",
         "ml-sdk",
         "nar",
+        "operational-convergence",
         "os-core",
         "payments-stripe",
         "platform-auth",
@@ -633,12 +658,13 @@
         "platform-pilot-metrics",
         "platform-shell",
         "policies",
+        "stabilization-signals",
         "ue-cognition",
         "ui",
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3220
+      "codeFileCount": 3511
     },
     {
       "name": "veridian-admin",
@@ -824,6 +850,7 @@
     "release-train.yml",
     "reliability-guard.yml",
     "repo-inventory-check.yml",
+    "runtime-governance-attestation.yml",
     "sbom.yml",
     "secret-scan.yml",
     "security-design-review.yml",
