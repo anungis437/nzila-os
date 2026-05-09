@@ -7,6 +7,8 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { StatusPage } from '@/components/monitoring/StatusPage';
+import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { heroImagery } from '@/lib/marketing-hero-imagery';
 import type { StatusLabels } from '@/components/monitoring/StatusPage';
 
 export async function generateMetadata({
@@ -50,6 +52,13 @@ export default async function LocaleStatusPage({
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hero Section with Imagery */}
+      <MarketingHeroSection
+        imageUrl={heroImagery.status}
+        heading={t('pageTitle')}
+        description={t('pageDescription')}
+      />
+
       <StatusPage labels={labels} />
     </div>
   );

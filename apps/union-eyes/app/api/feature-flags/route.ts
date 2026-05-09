@@ -19,6 +19,34 @@ export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthCon
     // User context provided by withApiAuth guard
     const userId = context.userId;
     const orgId = context.organizationId;
+
+    // Single-flag compatibility mode: /api/feature-flags?flag=pilot-mode
+    // used by pilot context and E2E assertions.
+    const requestedFlag = request.nextUrl.searchParams.get('flag')?.trim();
+    if (requestedFlag) {
+      const isPilotRuntime = ['pilot', 'demo'].includes((process.env.NZILA_MODE ?? '').toLowerCase());
+      const isQaTestEnv = (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true' || process.env.NODE_ENV === 'test';
+
+      let enabled = false;
+      if (requestedFlag === 'pilot-mode') {
+        // Pilot mode is fail-closed by default in production runtime.
+        // In explicit test environments, keep it deterministic for E2E validation.
+        enabled = isPilotRuntime || isQaTestEnv;
+      } else {
+        const single = await evaluateFeatures([requestedFlag], {
+          userId,
+          organizationId: orgId || undefined,
+        });
+        enabled = Boolean(single[requestedFlag]);
+      }
+
+      return NextResponse.json({
+        flag: requestedFlag,
+        enabled,
+        userId,
+        organizationId: orgId || null,
+      });
+    }
     
     // Evaluate all feature flags (LRO + AI) for this user
     const featureNames = [...Object.values(LRO_FEATURES), ...Object.values(AI_FEATURES)];

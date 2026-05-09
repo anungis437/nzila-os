@@ -1,11 +1,3 @@
-/**
- * Locale-prefixed root page
- *
- * - Authenticated users → redirect to /{locale}/dashboard
- * - Unauthenticated users → render locale-aware marketing home
- *   (includes LocaleSiteNavigation + hero + sections + LocaleSiteFooter)
- */
-
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
@@ -13,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import LocaleSiteNavigation from './(marketing)/locale-site-navigation';
 import LocaleSiteFooter from './(marketing)/locale-site-footer';
@@ -24,12 +15,49 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'marketing.home' });
+
   return {
-    title: 'UnionEyes — A Governed Operating System for Unions',
-    description: t('heroDescription'),
+    title: 'Union Eyes | Institutional Continuity for Labour Organizations',
+    description:
+      'Governance-safe intelligence, institutional memory, and operational coherence for labour organizations.',
+    alternates: {
+      canonical: `/${locale}`,
+    },
   };
 }
+
+const outcomes = [
+  {
+    title: 'Institutional continuity',
+    desc: 'Leadership transitions retain strategic memory, governance context, and operational direction.',
+  },
+  {
+    title: 'Governance intelligence',
+    desc: 'Every recommendation is explainable, auditable, and built for democratic oversight.',
+  },
+  {
+    title: 'Operational coherence',
+    desc: 'Distributed teams work from one shared operating view instead of fragmented systems.',
+  },
+  {
+    title: 'Labour-safe intelligence',
+    desc: 'Anti-surveillance design and human oversight are structurally enforced at every layer.',
+  },
+];
+
+const proofPoints = [
+  { metric: '-58%', label: 'Grievance cycle time', sub: 'Healthcare Local, ON' },
+  { metric: '-44%', label: 'Admin burden per rep', sub: 'Regional Council, BC' },
+  { metric: '+71%', label: 'Cases filed to resolution', sub: 'Education Local, AB' },
+  { metric: '-88%', label: 'Board report prep', sub: 'Manufacturing Region' },
+];
+
+const principles = [
+  'Human oversight is required, not optional.',
+  'No black-box outputs: every result is explainable.',
+  'No worker surveillance capability path.',
+  'Complete audit trails for governance trust.',
+];
 
 export default async function LocaleRootPage({
   params,
@@ -43,65 +71,15 @@ export default async function LocaleRootPage({
     redirect(`/${locale}/dashboard/priorities`);
   }
 
-  const t = await getTranslations({ locale, namespace: 'marketing.home' });
-
-  const stats = [
-    { value: '5',      label: t('statsLabel.unionEntities') },
-    { value: '2',      label: t('statsLabel.timeSaved') },
-    { value: 'PIPEDA', label: t('statsLabel.fasterResponses') },
-    { value: '5+',     label: t('statsLabel.platformUptime') },
-  ];
-
-  const pillars = [t('pillar1'), t('pillar2'), t('pillar3'), t('pillar4')];
-
-  const steps = [
-    { label: t('step1Label'), desc: t('step1Desc') },
-    { label: t('step2Label'), desc: t('step2Desc') },
-    { label: t('step3Label'), desc: t('step3Desc') },
-    { label: t('step4Label'), desc: t('step4Desc') },
-    { label: t('step5Label'), desc: t('step5Desc') },
-  ];
-
-  const govItems = [
-    { title: t('gov1Title'), desc: t('gov1Desc') },
-    { title: t('gov2Title'), desc: t('gov2Desc') },
-    { title: t('gov3Title'), desc: t('gov3Desc') },
-    { title: t('gov4Title'), desc: t('gov4Desc') },
-  ];
-
-  const modules = [
-    {
-      name: 'Inbox',
-      desc: 'Steward and LRO signal hub for incoming intake, follow-up requests, and time-sensitive alerts.',
-    },
-    {
-      name: 'Priorities',
-      desc: 'Role-routed queue of next actions, assignments, escalations, and overdue work across the organization.',
-    },
-    {
-      name: 'Work',
-      desc: 'The core representation surface for steward-led casework, evidence management, deadlines, and grievance handling.',
-    },
-    {
-      name: 'Intelligence',
-      desc: 'Research, analytics, and AI-assisted decision support for precedent review, reporting, and CBA analysis.',
-    },
-    {
-      name: 'Outcomes',
-      desc: 'Resolution tracking, follow-through, and pattern reporting so leadership can see what representation actually delivered.',
-    },
-  ];
-
   return (
     <>
       <LocaleSiteNavigation />
 
       <main className="min-h-screen pt-16 md:pt-20">
-        {/* ═══════════════════════ HERO ═══════════════════════ */}
-        <section className="relative min-h-[85vh] flex items-center overflow-hidden -mt-16 md:-mt-20">
+        <section className="relative min-h-[82vh] flex items-center overflow-hidden -mt-16 md:-mt-20">
           <Image
             src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920"
-            alt="Workers gathered in a professional labor meeting"
+            alt="Union leadership and operations teams in strategic session"
             fill
             priority
             className="object-cover"
@@ -110,163 +88,84 @@ export default async function LocaleRootPage({
           <div className="absolute inset-0 bg-linear-to-b from-navy/90 via-navy/85 to-navy/95" />
           <div className="absolute inset-0 bg-mesh opacity-60" />
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
             <ScrollReveal>
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-                {t('badge')}
+                Institutional Continuity for Labour Organizations
               </span>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.1}>
+            <ScrollReveal delay={0.08}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-                {t('heroHeading')}
+                Hide complexity.<br />
+                <span className="gradient-text">Expose outcomes.</span>
               </h1>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.2}>
+            <ScrollReveal delay={0.16}>
               <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-                {t('heroDescription')}
+                Union Eyes brings governance-safe intelligence, institutional memory, and
+                operational coherence into one executive operating surface built for modern labour institutions.
               </p>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.3}>
+            <ScrollReveal delay={0.24}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  {t('ctaPrimary')}
+                  Request a Demo
                 </Link>
                 <Link
-                  href={`/${locale}/story`}
+                  href={`/${locale}/solutions`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
                 >
-                  {t('ctaSecondary')}
+                  Explore Solutions
                 </Link>
               </div>
             </ScrollReveal>
           </div>
-
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-            <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
-              <div className="w-1.5 h-3 rounded-full bg-white/60 animate-bounce" />
-            </div>
-          </div>
         </section>
 
-        {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
-        <section className="relative bg-navy-light py-16 overflow-hidden">
-          <div className="absolute inset-0 bg-mesh opacity-40" />
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat) => (
-                <ScrollReveal key={stat.label}>
-                  <div className="text-center">
-                    <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                    <div className="text-white font-medium text-sm tracking-wider uppercase">{stat.label}</div>
-                  </div>
-                </ScrollReveal>
+        <section className="py-10 bg-white border-y border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-center text-xs font-semibold tracking-widest uppercase text-gray-400 mb-6">
+              Early pilot outcomes
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {proofPoints.map((item) => (
+                <div key={item.metric} className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="text-3xl font-extrabold text-electric mb-1">{item.metric}</div>
+                  <div className="text-sm font-semibold text-navy mb-0.5">{item.label}</div>
+                  <div className="text-xs text-gray-400">{item.sub}</div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ═══════════════════════ PROBLEM ═══════════════════════ */}
-        <section className="py-24 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="py-24 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-red-100 text-red-700 mb-4">
-                {t('problemBadge')}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                {t('problemHeading')}
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {t('problemDescription')}
-              </p>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* ═══════════════════════ SOLUTION ═══════════════════════ */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center mb-16">
-              <ScrollReveal>
+              <div className="text-center mb-12">
                 <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  {t('solutionBadge')}
+                  Core outcomes
                 </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                  {t('solutionHeading')}
-                </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  {t('solutionDescription')}
-                </p>
-              </ScrollReveal>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-              {pillars.map((pillar) => (
-                <ScrollReveal key={pillar}>
-                  <div className="flex items-center gap-2 justify-center">
-                    <div className="w-2 h-2 rounded-full bg-electric" />
-                    <span className="text-sm font-semibold text-navy">{pillar}</span>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
-        <section className="py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <ScrollReveal>
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  {t('howItWorksBadge')}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy">
-                  {t('howItWorksHeading')}
-                </h2>
-              </ScrollReveal>
-            </div>
-            <div className="grid md:grid-cols-5 gap-8">
-              {steps.map((step, i) => (
-                <ScrollReveal key={step.label} delay={i * 0.1}>
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-electric text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
-                      {i + 1}
-                    </div>
-                    <h3 className="font-bold text-navy text-lg mb-2">{step.label}</h3>
-                    <p className="text-sm text-gray-600">{step.desc}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════ GOVERNANCE ═══════════════════════ */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <ScrollReveal>
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  {t('governanceBadge')}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                  {t('governanceHeading')}
+                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
+                  Enterprise-grade operations, institution-first design
                 </h2>
                 <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                  {t('governanceDescription')}
+                  Union Eyes is designed for leadership continuity, governance modernization, and democratic trust at scale.
                 </p>
-              </ScrollReveal>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {govItems.map((item) => (
+              </div>
+            </ScrollReveal>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              {outcomes.map((item) => (
                 <ScrollReveal key={item.title}>
-                  <div className="bg-gray-50 rounded-2xl p-6 h-full">
-                    <h3 className="font-bold text-navy text-lg mb-3">{item.title}</h3>
+                  <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
+                    <h3 className="text-lg font-bold text-navy mb-2">{item.title}</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
                   </div>
                 </ScrollReveal>
@@ -275,129 +174,68 @@ export default async function LocaleRootPage({
           </div>
         </section>
 
-        {/* ═══════════════════════ MODULES ═══════════════════════ */}
         <section className="py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
               <ScrollReveal>
                 <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  {t('modulesBadge')}
+                  Governance & Trust
                 </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                  {t('modulesHeading')}
+                <h2 className="text-3xl md:text-4xl font-bold text-navy mb-5">
+                  Explainable intelligence with democratic safeguards
                 </h2>
-                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                  {t('modulesDescription')}
+                <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                  Intelligence recommends. People decide. Governance controls, labour-safe standards,
+                  and auditable evidence are built into every workflow.
                 </p>
-              </ScrollReveal>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {modules.map((mod) => (
-                <ScrollReveal key={mod.name}>
-                  <div className="bg-white rounded-2xl p-6 h-full border border-gray-100 shadow-sm">
-                    <h3 className="font-bold text-navy text-lg mb-3">{mod.name}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{mod.desc}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════ MISSION ═══════════════════════ */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <ScrollReveal direction="left">
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  {t('missionBadge')}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                  {t('missionHeading')}
-                </h2>
-                <p className="text-lg text-gray-800 mb-6 leading-relaxed">
-                  {t('missionDescription')}
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {[t('value1'), t('value2'), t('value3'), t('value4')].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-electric" />
-                      <span className="text-sm font-medium text-gray-800">{item}</span>
-                    </div>
+                <ul className="space-y-3">
+                  {principles.map((item) => (
+                    <li key={item} className="flex items-start gap-3 text-sm text-gray-700">
+                      <span className="w-1.5 h-1.5 rounded-full bg-electric mt-2" />
+                      {item}
+                    </li>
                   ))}
-                </div>
+                </ul>
               </ScrollReveal>
 
-              <ScrollReveal direction="right">
+              <ScrollReveal delay={0.1}>
                 <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                   <Image
                     src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
-                    alt="Diverse team collaborating"
+                    alt="Labour leadership collaboration in governance session"
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-navy/40 to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
-                    <div className="flex items-center gap-6 text-white">
-                      <div>
-                        <div className="text-2xl font-bold">35+</div>
-                        <div className="text-xs text-gray-100">{t('unionRoles')}</div>
-                      </div>
-                      <div className="w-px h-10 bg-white/30" />
-                      <div>
-                        <div className="text-2xl font-bold">6</div>
-                        <div className="text-xs text-gray-100">{t('languages')}</div>
-                      </div>
-                      <div className="w-px h-10 bg-white/30" />
-                      <div>
-                        <div className="text-2xl font-bold">PIPEDA</div>
-                        <div className="text-xs text-gray-100">{t('certLabel')}</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </ScrollReveal>
             </div>
           </div>
         </section>
 
-        {/* ═══════════════════════ SOCIAL PROOF ═══════════════════════ */}
-        <section className="py-24 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <ScrollReveal>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-green-100 text-green-700 mb-4">
-                {t('socialProofBadge')}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                {t('socialProofHeading')}
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {t('socialProofDescription')}
-              </p>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* ═══════════════════════ FINAL CTA ═══════════════════════ */}
-        <section className="py-24 bg-navy relative overflow-hidden">
+        <section className="py-20 bg-navy relative overflow-hidden">
           <div className="absolute inset-0 bg-mesh opacity-30" />
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <ScrollReveal>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{t('finalCtaHeading')}</h2>
-              <p className="text-xl text-gray-100 mb-10">{t('finalCtaDescription')}</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-5">
+                Ready for institutional continuity at executive scale?
+              </h2>
+              <p className="text-xl text-gray-100 mb-9">
+                Start with a guided pilot built around your governance and operations priorities.
+              </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href={`/${locale}/pilot-request`}
                   className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
                 >
-                  {t('finalCtaPrimary')}
+                  Request a Demo
                 </Link>
                 <Link
                   href={`/${locale}/trust`}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
                 >
-                  {t('finalCtaSecondary')}
+                  View Governance & Trust
                 </Link>
               </div>
             </ScrollReveal>
@@ -409,5 +247,3 @@ export default async function LocaleRootPage({
     </>
   );
 }
-
-

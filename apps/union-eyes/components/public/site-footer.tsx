@@ -21,28 +21,35 @@ const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.co
 /* ────────────────── Link Data ────────────────── */
 
 const footerLinks = {
-  System: [
-    { name: 'Inbox',                 href: '/features/inbox' },
-    { name: 'Priorities',            href: '/features/priorities' },
-    { name: 'Work',                  href: '/features/grievance-tracking' },
-    { name: 'Intelligence',          href: '/features/ai-workbench' },
-    { name: 'Outcomes',              href: '/features/analytics' },
-    { name: 'Pricing',              href: '/pricing' },
-    { name: 'System Status',        href: '/en-CA/trust#system-status' },
+  Platform: [
+    { name: 'Institutional Continuity',   href: '/en-CA/institutional-continuity' },
+    { name: 'Governance Intelligence',     href: '/en-CA/platform/governance-intelligence' },
+    { name: 'Organizational Memory',       href: '/en-CA/platform/organizational-memory' },
+    { name: 'Executive Intelligence',      href: '/en-CA/executive-intelligence' },
+    { name: 'Operational Coherence',       href: '/en-CA/platform/operational-coherence' },
+    { name: 'Explainable Intelligence',    href: '/en-CA/platform/explainable-intelligence' },
   ],
-  'Use Cases': [
-    { name: 'Representatives',  href: '/en-CA/for-representatives' },
-    { name: 'Leadership',       href: '/en-CA/for-leadership' },
-    { name: 'Federations',      href: '/en-CA/for-federations' },
-    { name: 'CLC',              href: '/en-CA/for-clc' },
-    { name: 'Members',          href: '/en-CA/for-members' },
+  Solutions: [
+    { name: 'Executive Leadership',  href: '/en-CA/solutions/executive-leadership' },
+    { name: 'Governance Leadership', href: '/en-CA/solutions/governance-leadership' },
+    { name: 'Operations Leadership', href: '/en-CA/solutions/operations-leadership' },
+    { name: 'Technology Leadership', href: '/en-CA/solutions/technology-leadership' },
+    { name: 'Policy & Labour',       href: '/en-CA/solutions/labour-leadership' },
+    { name: 'Procurement',           href: '/en-CA/solutions/procurement' },
   ],
-  Resources: [
-    { name: 'Case Studies',   href: '/case-studies' },
-    { name: 'Trust',          href: '/en-CA/trust' },
+  'Governance & Trust': [
+    { name: 'Trust Center',               href: '/en-CA/trust' },
+    { name: 'Governance Structure',       href: '/en-CA/governance' },
+    { name: 'Labour-Safe AI',             href: '/en-CA/trust#labour-safe' },
+    { name: 'Explainability Standards',   href: '/en-CA/trust#explainability' },
+  ],
+  Company: [
     { name: 'Our Story',      href: '/story' },
-    { name: 'Request a Demo', href: '/pilot-request' },
+    { name: 'Insights',       href: '/en-CA/insights' },
+    { name: 'Case Studies',   href: '/case-studies' },
+    { name: 'Pricing',        href: '/pricing' },
     { name: 'Contact Us',     href: '/contact' },
+    { name: 'System Status',  href: '/en-CA/trust#system-status' },
   ],
   Legal: [
     { name: 'Privacy Policy',    href: '/legal/privacy' },
@@ -95,7 +102,7 @@ export default function SiteFooter() {
 
       {/* ─── Main Footer ─── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-12 lg:gap-8">
           {/* Brand Column (spans 2) */}
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-3 group">
@@ -104,7 +111,7 @@ export default function SiteFooter() {
                 alt="UnionEyes"
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
+                className="w-10 h-10 rounded-lg object-contain"
               />
               <span className="text-2xl font-bold text-white">UnionEyes</span>
             </Link>

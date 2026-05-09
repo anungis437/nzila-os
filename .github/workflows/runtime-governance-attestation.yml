@@ -1,0 +1,97 @@
+name: runtime-governance-attestation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'infrastructure/**'
+      - 'tooling/runtime-governance/**'
+      - '.github/workflows/runtime-governance-attestation.yml'
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'infrastructure/**'
+      - 'tooling/runtime-governance/**'
+      - '.github/workflows/runtime-governance-attestation.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  runtime-governance-attestation:
+    name: Runtime governance attestation
+    runs-on: ubuntu-latest
+    env:
+      NZILA_RELEASE_ID: ${{ github.sha }}
+      NZILA_COMMIT_SHA: ${{ github.sha }}
+      NZILA_MANIFEST_HASH: sha256-pending
+      NZILA_BUILT_AT: ${{ github.event.head_commit.timestamp || github.event.pull_request.updated_at }}
+      NZILA_ENVIRONMENT_CLASS: ci
+      NZILA_PRODUCT: platform
+      NZILA_ATTESTATION_ISSUER: github-actions
+      NZILA_ATTESTATION_VERDICT: verified
+      NZILA_ATTESTATION_EVIDENCE: github://${{ github.repository }}/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate doctrine enforcement contracts
+        run: pnpm --filter @nzila/doctrine-enforcement test
+
+      - name: Validate governance telemetry contracts
+        run: pnpm --filter @nzila/governance-telemetry test
+
+      - name: Validate runtime attestation schema
+        run: pnpm --filter @nzila/runtime-attestation test
+
+      - name: Validate governance OTel adapter
+        run: pnpm --filter @nzila/governance-otel test
+
+      - name: Validate governance middleware
+        run: pnpm --filter @nzila/governance-middleware test
+
+      - name: Validate environment legitimacy inputs
+        run: node tooling/runtime-governance/check-env.mjs
+
+      - name: Validate pilot boundaries
+        run: node tooling/runtime-governance/check-pilot-boundaries.mjs
+
+      - name: Generate deployment attestation
+        run: node tooling/runtime-governance/generate-attestation.mjs --class=deployment
+
+      - name: Generate doctrine compliance attestation
+        run: node tooling/runtime-governance/generate-attestation.mjs --class=doctrine-compliance
+
+      - name: Write attestation evidence
+        run: |
+          node tooling/runtime-governance/write-evidence.mjs \
+            --from-attestation=proof-artifacts/attestations/${NZILA_RELEASE_ID}/deployment.json
+          node tooling/runtime-governance/write-evidence.mjs \
+            --from-attestation=proof-artifacts/attestations/${NZILA_RELEASE_ID}/doctrine-compliance.json
+
+      - name: Upload governance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-governance-${{ github.sha }}
+          path: |
+            proof-artifacts/attestations/**
+            proof-artifacts/evidence/**
+          if-no-files-found: error
+          retention-days: 90

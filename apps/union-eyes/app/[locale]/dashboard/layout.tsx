@@ -13,6 +13,7 @@ import { OrganizationSelector } from "@/components/organization/organization-sel
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
+import RoleExperienceGuard from "@/components/dashboard/role-experience-guard";
 import { PilotModeProvider } from "@/contexts/pilot-mode-context";
 import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
@@ -247,6 +248,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           {/* Page content */}
           <div className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
             <FeatureFlagProvider>
+              <RoleExperienceGuard userRole={userRole} />
               {children}
             </FeatureFlagProvider>
           </div>

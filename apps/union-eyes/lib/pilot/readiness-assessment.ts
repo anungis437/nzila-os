@@ -6,6 +6,10 @@
  */
 
 import { PilotApplicationInput } from '@/types/marketing';
+import {
+  buildContinuityReadinessProfile,
+  buildExecutiveReadinessOutputs,
+} from '@/lib/operational-legitimacy';
 
 export interface ReadinessAssessmentResult {
   score: number; // 0-100
@@ -15,10 +19,23 @@ export interface ReadinessAssessmentResult {
   recommendations: string[];
   estimatedSetupTime: string; // e.g., "2-3 weeks"
   supportLevel: 'minimal' | 'standard' | 'intensive';
+  continuityProfile: string;
+  continuityOverview: {
+    continuityPosture: string;
+    governanceCoherence: string;
+    operationalStability: string;
+    institutionalMemoryHealth: string;
+  };
+  continuityRiskNarratives: string[];
+  governanceAlignmentSummary: string;
+  fragmentationObservations: string[];
+  institutionalResilienceDirection: string;
+  rolloutRecommendation: string;
 }
 
 /**
- * Calculate readiness score based on application responses
+ * Calculate directional readiness profile based on application responses.
+ * The score represents institutional deployment readiness, not worker performance.
  */
 export function calculateReadinessScore(
   application: PilotApplicationInput
@@ -74,6 +91,8 @@ export function calculateReadinessScore(
   const level = determineReadinessLevel(score);
   const estimatedSetupTime = estimateSetupTime(score, application);
   const supportLevel = determineSupportLevel(score, concerns.length);
+  const continuityProfile = buildContinuityReadinessProfile(application);
+  const executiveOutputs = buildExecutiveReadinessOutputs(continuityProfile, application);
 
   return {
     score,
@@ -83,6 +102,13 @@ export function calculateReadinessScore(
     recommendations,
     estimatedSetupTime,
     supportLevel,
+    continuityProfile: executiveOutputs.continuityProfile,
+    continuityOverview: executiveOutputs.continuityOverview,
+    continuityRiskNarratives: executiveOutputs.continuityRiskNarratives,
+    governanceAlignmentSummary: executiveOutputs.governanceAlignmentSummary,
+    fragmentationObservations: executiveOutputs.fragmentationObservations,
+    institutionalResilienceDirection: executiveOutputs.institutionalResilienceDirection,
+    rolloutRecommendation: executiveOutputs.rolloutRecommendation,
   };
 }
 
@@ -97,27 +123,27 @@ function evaluateSize(memberCount: number): {
   if (memberCount >= 500 && memberCount <= 5000) {
     return {
       points: 20,
-      strength: 'Ideal pilot size: Large enough for meaningful data, small enough for manageable rollout',
+      strength: 'Pilot scope supports meaningful evidence while remaining operationally manageable',
     };
   }
 
   if (memberCount >= 200 && memberCount < 500) {
     return {
       points: 15,
-      strength: 'Good pilot size: Manageable scope with representative use cases',
+      strength: 'Pilot scope is manageable and representative for early continuity validation',
     };
   }
 
   if (memberCount > 5000) {
     return {
       points: 12,
-      concern: 'Large membership may require phased rollout and additional support',
+      concern: 'Large membership suggests phased rollout sequencing and stronger governance checkpoints',
     };
   }
 
   return {
     points: 10,
-    concern: 'Small membership may limit feedback diversity. Consider partnering with another local.',
+    concern: 'Small membership. Consider shared learning pathways with partner institutions.',
   };
 }
 
@@ -141,27 +167,27 @@ function evaluateCurrentSystem(
   if (hasCriticalPainPoints && hasNoSystem) {
     return {
       points: 25,
-      strength: 'Clear pain points with current process. High motivation for improvement.',
+      strength: 'Clear pain points motivate continuity investment and governance prioritization',
     };
   }
 
   if (hasCriticalPainPoints) {
     return {
       points: 20,
-      strength: 'Documented challenges provide clear improvement targets',
+      strength: 'Documented challenges provide clear modernization and governance targets',
     };
   }
 
   if (currentSystem && !/UnionEyes|digital/i.test(currentSystem)) {
     return {
       points: 15,
-      concern: 'Existing system in place. May require change management and data migration.',
+      concern: 'Data migration and change management required from existing system.',
     };
   }
 
   return {
     points: 10,
-    concern: 'Unclear on current challenges. May need discovery phase to identify pain points.',
+    concern: 'Current challenges are not yet fully articulated. Discovery may be needed before pilot alignment.',
   };
 }
 
@@ -180,20 +206,20 @@ function evaluateLeadership(responses: Record<string, unknown>): {
   if (hasExecutiveSponsor && hasStaffCommitment && hasBudget) {
     return {
       points: 20,
-      strength: 'Strong leadership commitment with executive sponsor and approved resources',
+      strength: 'Leadership sponsorship and resources support governable deployment pacing',
     };
   }
 
   if (hasExecutiveSponsor || hasStaffCommitment) {
     return {
       points: 15,
-      strength: 'Leadership support present. May need to secure additional buy-in.',
+      strength: 'Leadership support is present with room to strengthen cross-team governance alignment.',
     };
   }
 
   return {
     points: 8,
-    concern: 'Limited leadership commitment. Pilot success requires executive support and resources.',
+    concern: 'Leadership sponsorship appears limited. Pilot stability improves with explicit governance sponsorship.',
   };
 }
 
@@ -212,21 +238,21 @@ function evaluateTechnicalCapacity(responses: Record<string, unknown>): {
   if (hasITSupport && hasDataAccess && staffComfort === 'high') {
     return {
       points: 15,
-      strength: 'Strong technical capacity with IT support and comfortable staff',
+      strength: 'Technical support and data access indicate strong conditions for implementation reliability',
     };
   }
 
   if (hasDataAccess && staffComfort !== 'low') {
     return {
       points: 12,
-      strength: 'Adequate technical capacity. May need training but foundation is solid.',
+      strength: 'Technical foundation is adequate for pilot with targeted onboarding support.',
     };
   }
 
   if (staffComfort === 'low') {
     return {
       points: 7,
-      concern: 'Staff unfamiliar with digital tools. Will require extensive training and support.',
+      concern: 'Staff unfamiliar with digital tools. Plan intensive training and enablement.',
     };
   }
 
@@ -252,20 +278,20 @@ function evaluateComplexity(
   if (isSimple) {
     return {
       points: 10,
-      strength: 'Single jurisdiction and focused sector. Clean, manageable pilot scope.',
+      strength: 'Focused jurisdiction and sector profile supports controlled rollout governance.',
     };
   }
 
   if (isModerate) {
     return {
       points: 8,
-      strength: 'Moderate complexity. Provides good test of multi-jurisdictional features.',
+      strength: 'Moderate complexity provides meaningful governance coordination signals during pilot.',
     };
   }
 
   return {
     points: 5,
-    concern: 'High complexity across jurisdictions/sectors. May need phased rollout.',
+    concern: 'Multi-jurisdiction complexity is high. Begin with constrained deployment boundaries.',
   };
 }
 
@@ -285,26 +311,26 @@ function evaluateGoals(goals: string[]): {
     if (hasMeasurable) {
       return {
         points: 10,
-        strength: 'Clear, measurable goals. Easy to track pilot success.',
+        strength: 'Clear and measurable goals support pilot success interpretation.',
       };
     }
 
     return {
       points: 8,
-      strength: 'Goals identified. May need to refine success metrics.',
+      strength: 'Goals are present; refine governance and continuity success measures for stronger clarity.',
     };
   }
 
   if (goals.length < 3) {
     return {
       points: 5,
-      concern: 'Limited goals defined. Recommend establishing clear success criteria.',
+      concern: 'Limited goals defined. Define pilot success indicators before deployment activation.',
     };
   }
 
   return {
     points: 7,
-    concern: 'Many goals listed. May need to prioritize for focused pilot.',
+    concern: 'Too many goals. Prioritize near-term outcomes to keep pilot scope governable.',
   };
 }
 
@@ -360,32 +386,32 @@ function generateRecommendations(
   const recommendations: string[] = [];
 
   if (score >= 80) {
-    recommendations.push('Organization is ready to proceed with pilot immediately');
-    recommendations.push('Schedule kickoff meeting within 1 week');
+    recommendations.push('Readiness profile supports pilot launch with standard governance checkpoints');
+    recommendations.push('Schedule institutional kickoff and continuity review within 1 week');
   } else if (score >= 65) {
-    recommendations.push('Address identified concerns before pilot launch');
-    recommendations.push('Complete pre-pilot preparation phase (2-3 weeks)');
+    recommendations.push('Address highlighted readiness gaps before full pilot activation');
+    recommendations.push('Complete continuity and governance preparation phase (2-3 weeks)');
   } else {
-    recommendations.push('Conduct discovery phase before committing to pilot');
-    recommendations.push('Build internal alignment and secure executive sponsorship');
+    recommendations.push('Run a bounded discovery phase before pilot commitment');
+    recommendations.push('Build executive governance sponsorship and cross-team continuity alignment');
   }
 
   if (concerns.some((c) => /leadership|commitment|buy-in/i.test(c))) {
-    recommendations.push('Schedule alignment meeting with union executives');
-    recommendations.push('Present business case with projected ROI');
+    recommendations.push('Schedule governance alignment meeting with executive sponsors');
+    recommendations.push('Document deployment confidence case with continuity and oversight criteria');
   }
 
   if (concerns.some((c) => /technical|training|unfamiliar/i.test(c))) {
-    recommendations.push('Plan comprehensive training program for staff');
-    recommendations.push('Identify internal tech champions for peer support');
+    recommendations.push('Plan phased onboarding enablement for pilot teams');
+    recommendations.push('Identify internal implementation champions for continuity support');
   }
 
   if (application.memberCount > 3000) {
-    recommendations.push('Consider phased rollout by department or region');
+    recommendations.push('Use phased rollout by department or region with stabilization checkpoints');
   }
 
   if (application.jurisdictions.length > 2) {
-    recommendations.push('Start with single jurisdiction, expand based on results');
+    recommendations.push('Begin with a single jurisdiction and expand through governance-reviewed milestones');
   }
 
   return recommendations;

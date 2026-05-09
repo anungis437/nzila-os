@@ -61,30 +61,38 @@ export default function LocaleSiteFooter() {
   const copy = FOOTER_COPY[locale] ?? FOOTER_COPY['en-CA'];
 
   const footerLinks = {
-    System: [
-      { name: 'Inbox',                 href: `/${locale}/features/inbox` },
-      { name: 'Priorities',            href: `/${locale}/features/priorities` },
-      { name: 'Work',                  href: `/${locale}/features/grievance-tracking` },
-      { name: 'Intelligence',          href: `/${locale}/features/ai-workbench` },
-      { name: 'Outcomes',              href: `/${locale}/features/analytics` },
-      { name: t('pricing'),            href: `/${locale}/pricing` },
-      { name: t('systemStatus'),       href: `/${locale}/trust#system-status` },
+    [t('platform') as string]: [
+      { name: 'Continuity Command Center', href: `/${locale}/institutional-continuity` },
+      { name: 'Governance Intelligence Hub', href: `/${locale}/platform/governance-intelligence` },
+      { name: 'Institutional Memory Vault', href: `/${locale}/platform/organizational-memory` },
+      { name: 'Executive Briefing Engine', href: `/${locale}/executive-intelligence` },
+      { name: 'Operations Coherence Layer', href: `/${locale}/platform/operational-coherence` },
+      { name: 'Explainability and Audit Layer', href: `/${locale}/platform/explainable-intelligence` },
     ],
-    'Use Cases': [
-      { name: 'Representatives',  href: `/${locale}/for-representatives` },
-      { name: 'Leadership',       href: `/${locale}/for-leadership` },
-      { name: 'Federations',      href: `/${locale}/for-federations` },
-      { name: 'CLC',              href: `/${locale}/for-clc` },
-      { name: 'Members',          href: `/${locale}/for-members` },
+    [t('solutions') as string]: [
+      { name: t('executiveLeadership'),   href: `/${locale}/solutions/executive-leadership` },
+      { name: t('governanceLeadership'),  href: `/${locale}/solutions/governance-leadership` },
+      { name: t('operationsLeadership'),  href: `/${locale}/solutions/operations-leadership` },
+      { name: t('technologyLeadership'),  href: `/${locale}/solutions/technology-leadership` },
+      { name: t('policyAndLabour'),       href: `/${locale}/solutions/labour-leadership` },
+      { name: t('procurement'),           href: `/${locale}/solutions/procurement` },
     ],
-    [t('resources')]: [
-      { name: t('caseStudies'),  href: `/${locale}/case-studies` },
-      { name: t('trust'),        href: `/${locale}/trust` },
+    [t('governanceAndTrust') as string]: [
+      { name: t('trustCenter'),               href: `/${locale}/trust` },
+      { name: t('governanceStructure'),       href: `/${locale}/governance` },
+      { name: t('labourSafeAi'),              href: `/${locale}/trust#labour-safe` },
+      { name: t('explainabilityStandards'),   href: `/${locale}/trust#explainability` },
+    ],
+    [t('company') as string]: [
       { name: t('story'),        href: `/${locale}/story` },
-      { name: t('pilotProgram'), href: `/${locale}/pilot-request` },
+      { name: t('insights'),     href: `/${locale}/insights` },
+      { name: t('institutionalProof'), href: `/${locale}/proof` },
+      { name: t('caseStudies'),  href: `/${locale}/case-studies` },
+      { name: t('pricing'),      href: `/${locale}/pricing` },
       { name: t('contact'),      href: `/${locale}/contact` },
+      { name: t('systemStatus'), href: `/${locale}/trust#system-status` },
     ],
-    [t('legal')]: [
+    [t('legal') as string]: [
       { name: t('privacy'),       href: `/${locale}/legal/privacy` },
       { name: t('terms'),         href: `/${locale}/legal/terms` },
       { name: t('security'),      href: `/${locale}/legal/security` },
@@ -124,7 +132,7 @@ export default function LocaleSiteFooter() {
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-12 lg:gap-8">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-6">
             <Link href={`/${locale}`} className="flex items-center gap-3 group">
@@ -133,7 +141,7 @@ export default function LocaleSiteFooter() {
                 alt="UnionEyes"
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
+                className="w-10 h-10 rounded-lg object-contain"
               />
               <span className="text-2xl font-bold text-white">UnionEyes</span>
             </Link>

@@ -231,10 +231,28 @@ export async function handleMe() {
   try {
     const user = await getAuthUser()
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      return NextResponse.json(
+        { user: null },
+        {
+          status: 200,
+          headers: { 'Cache-Control': 'no-store' },
+        },
+      )
     }
-    return NextResponse.json({ user })
+    return NextResponse.json(
+      { user },
+      {
+        status: 200,
+        headers: { 'Cache-Control': 'no-store' },
+      },
+    )
   } catch {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    return NextResponse.json(
+      { user: null },
+      {
+        status: 200,
+        headers: { 'Cache-Control': 'no-store' },
+      },
+    )
   }
 }

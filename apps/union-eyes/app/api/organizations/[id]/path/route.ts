@@ -14,6 +14,13 @@ export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ id: string }> };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string): boolean {
+  return UUID_RE.test(value);
+}
+
 type OrgRow = typeof organizations.$inferSelect;
 function formatOrg(o: OrgRow) {
   return {
@@ -38,13 +45,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
+  const lookupByUuid = isUuid(id);
 
-  // Lookup org by UUID (id param is always the UUID from OrganizationContext)
+  // Accept either UUID or slug to support mixed legacy test data.
   const rows = await db
     .select()
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(eq(organizations.id, id as any))
+    .where(lookupByUuid ? eq(organizations.id, id as any) : eq(organizations.slug, id as any))
     .limit(1);
 
   const org = rows[0];
@@ -54,23 +62,45 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const path: ReturnType<typeof formatOrg>[] = [];
 
-  // hierarchyPath stores ordered ancestor UUIDs (root first, org last).
-  // Fetch all ancestors in one query then sort by level.
-  const ancestorIds = (org.hierarchyPath ?? []).filter(
-    (anc) => anc !== org.id,
+  const hierarchyTokens = (org.hierarchyPath ?? []).filter(
+    (token) => token && token !== org.id && token !== org.slug,
   );
 
-  if (ancestorIds.length > 0) {
-    const ancestors = await db
-      .select()
-      .from(organizations)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(inArray(organizations.id, ancestorIds as any));
+  if (hierarchyTokens.length > 0) {
+    const uuidTokens = hierarchyTokens.filter(isUuid);
+    const slugTokens = hierarchyTokens.filter((token) => !isUuid(token));
 
-    ancestors.sort(
-      (a, b) => (a.hierarchyLevel ?? 0) - (b.hierarchyLevel ?? 0),
-    );
-    path.push(...ancestors.map(formatOrg));
+    const [uuidAncestors, slugAncestors] = await Promise.all([
+      uuidTokens.length > 0
+        ? db
+            .select()
+            .from(organizations)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .where(inArray(organizations.id, uuidTokens as any))
+        : Promise.resolve([]),
+      slugTokens.length > 0
+        ? db
+            .select()
+            .from(organizations)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .where(inArray(organizations.slug, slugTokens as any))
+        : Promise.resolve([]),
+    ]);
+
+    const ancestorByToken = new Map<string, OrgRow>();
+    for (const ancestor of [...uuidAncestors, ...slugAncestors]) {
+      ancestorByToken.set(ancestor.id, ancestor);
+      if (ancestor.slug) {
+        ancestorByToken.set(ancestor.slug, ancestor);
+      }
+    }
+
+    for (const token of hierarchyTokens) {
+      const ancestor = ancestorByToken.get(token);
+      if (!ancestor) continue;
+      if (path.some((entry) => entry.id === ancestor.id)) continue;
+      path.push(formatOrg(ancestor));
+    }
   }
 
   path.push(formatOrg(org));

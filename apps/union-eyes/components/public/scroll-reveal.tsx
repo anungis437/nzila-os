@@ -13,6 +13,10 @@ interface ScrollRevealProps {
   delay?: number;
   direction?: 'up' | 'down' | 'left' | 'right' | 'none';
   duration?: number;
+  distance?: number;
+  amount?: number;
+  once?: boolean;
+  tempo?: 'default' | 'conference';
 }
 
 export default function ScrollReveal({
@@ -20,13 +24,36 @@ export default function ScrollReveal({
   className = '',
   delay = 0,
   direction = 'up',
-  duration = 0.6,
+  duration = 0.85,
+  distance = 24,
+  amount = 0.2,
+  once = true,
+  tempo = 'default',
 }: ScrollRevealProps) {
+  const pace =
+    tempo === 'conference'
+      ? {
+          durationMultiplier: 1.2,
+          delayMultiplier: 1.2,
+          distanceMultiplier: 0.85,
+          easing: [0.2, 0.92, 0.28, 1] as const,
+        }
+      : {
+          durationMultiplier: 1,
+          delayMultiplier: 1,
+          distanceMultiplier: 1,
+          easing: [0.16, 1, 0.3, 1] as const,
+        };
+
+  const resolvedDistance = Math.max(0, Math.round(distance * pace.distanceMultiplier));
+  const resolvedDuration = duration * pace.durationMultiplier;
+  const resolvedDelay = delay * pace.delayMultiplier;
+
   const offsets = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { y: 0, x: -40 },
-    right: { y: 0, x: 40 },
+    up: { y: resolvedDistance, x: 0 },
+    down: { y: -resolvedDistance, x: 0 },
+    left: { y: 0, x: -resolvedDistance },
+    right: { y: 0, x: resolvedDistance },
     none: { y: 0, x: 0 },
   };
 
@@ -37,11 +64,11 @@ export default function ScrollReveal({
       className={className}
       initial={{ opacity: 0, y: offset.y, x: offset.x }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
+      viewport={{ once, margin: '-64px', amount }}
       transition={{
-        duration,
-        delay,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: resolvedDuration,
+        delay: resolvedDelay,
+        ease: pace.easing,
       }}
     >
       {children}

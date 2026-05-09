@@ -64,12 +64,12 @@ foreach ($e in $envs) {
 
   # Persist the admin password to the per-env Key Vault so the app and CI can fetch it.
   az keyvault secret set `
-    --vault-name "nzila-$($e.Name)-kv" `
+    --vault-name "nzila-canada-$($e.Name)-kv" `
     --name DB-PASSWORD `
     --value $pwdPlain `
     --output none
 
-  Write-Host "✓ $($e.Name) provisioned. KV=nzila-$($e.Name)-kv  DB=nzila_os_$($e.Name)" -ForegroundColor Green
+  Write-Host "✓ $($e.Name) provisioned. KV=nzila-canada-$($e.Name)-kv  DB=nzila_os_$($e.Name)" -ForegroundColor Green
 }
 
 Write-Host "`nNext steps:" -ForegroundColor Yellow

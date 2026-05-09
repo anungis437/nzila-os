@@ -7139,6 +7139,17 @@
   "marketing": {
     "nav": {
       "home": "Home",
+      "solutions": "Soluzioni",
+      "insights": "Approfondimenti",
+      "proof": "Prove",
+      "solutionsItems": {
+        "executive": { "name": "Leadership esecutiva sindacale", "desc": "Continuità strategica" },
+        "governance": { "name": "Leadership di governance", "desc": "Modernizzazione della governance" },
+        "operations": { "name": "Leadership operativa", "desc": "Coordinamento tra team" },
+        "technology": { "name": "Leadership tecnologica", "desc": "IA sicura per l'impresa" },
+        "labour": { "name": "Leadership politica e lavoro", "desc": "Supervisione umana" },
+        "procurement": { "name": "Stakeholder degli acquisti", "desc": "Prontezza al deployment" }
+      },
       "story": "La nostra storia",
       "modules": "Moduli",
       "pricing": "Prezzi",
@@ -7361,6 +7372,15 @@
         "heading": "Richiesta pilota ricevuta!",
         "body": "Grazie per il tuo interesse in UnionEyes. Il nostro team di implementazione esaminerà la tua richiesta e ti contatterà entro 2–3 giorni lavorativi per discutere l'ambito."
       },
+      "phase6": {
+        "leadershipTitle": "Scenari di continuita nelle transizioni di leadership",
+        "frictionTitle": "Flussi di simulazione delle frizioni di governance",
+        "onboardingTitle": "Intelligenza di continuita per onboarding",
+        "federationTitle": "Scenari di continuita su scala federativa",
+        "decisionTitle": "Sistemi di percorso decisionale executive",
+        "stabilizationMoveLabel": "Mossa di stabilizzazione:",
+        "manageThroughLabel": "Gestire tramite:"
+      },
       "sectors": {
         "Healthcare": "Sanità",
         "Education": "Istruzione",
@@ -7410,10 +7430,30 @@
     "footer": {
       "description": "Un sistema operativo governato per i sindacati canadesi.",
       "platform": "Moduli",
+      "solutions": "Soluzioni",
+      "governanceAndTrust": "Governance e fiducia",
       "product": "Prodotto",
       "resources": "Risorse",
       "company": "Azienda",
       "legal": "Legale",
+      "institutionalContinuity": "Continuità istituzionale",
+      "governanceIntelligence": "Intelligenza di governance",
+      "organizationalMemory": "Memoria organizzativa",
+      "executiveIntelligence": "Intelligenza esecutiva",
+      "operationalCoherence": "Coerenza operativa",
+      "explainableIntelligence": "Intelligenza spiegabile",
+      "executiveLeadership": "Leadership esecutiva",
+      "governanceLeadership": "Leadership di governance",
+      "operationsLeadership": "Leadership operativa",
+      "technologyLeadership": "Leadership tecnologica",
+      "policyAndLabour": "Politica e lavoro",
+      "procurement": "Approvvigionamento",
+      "trustCenter": "Centro fiducia",
+      "governanceStructure": "Struttura di governance",
+      "labourSafeAi": "IA sicura per il lavoro",
+      "explainabilityStandards": "Standard di spiegabilità",
+      "insights": "Approfondimenti",
+      "institutionalProof": "Prove istituzionali",
       "governance": "Governance e supervisione",
       "grievanceTracking": "Gestione casi e reclami",
       "memberPortal": "Portale membri",
@@ -7699,7 +7739,19 @@
       "entitlementTitle": "Controllo delle Funzionalità Basato sui Diritti",
       "entitlementDesc": "I moduli e le funzionalità sono attivati tramite il contratto di distribuzione. Nulla è attivo per impostazione predefinita. Gli amministratori dell'organizzazione controllano ciò che è disponibile e a chi.",
       "defensibilityTitle": "Difendibile per Progettazione",
-      "defensibilityDesc": "Sigillatura delle prove, catena di custodia dei reclami e registri a prova di manomissione. Quando le tue decisioni vengono contestate, la piattaforma fornisce le prove."
+      "defensibilityDesc": "Sigillatura delle prove, catena di custodia dei reclami e registri a prova di manomissione. Quando le tue decisioni vengono contestate, la piattaforma fornisce le prove.",
+      "phase6": {
+        "tabScenario": "Intelligenza scenari",
+        "leadershipTitle": "Scenari di continuita nelle transizioni di leadership",
+        "leadershipDesc": "Questi scenari riflettono transizioni istituzionali reali e mostrano risposte calme che preservano la coerenza di governance.",
+        "frictionTitle": "Flussi di simulazione delle frizioni di governance",
+        "disruptionTitle": "Modellazione delle interruzioni operative",
+        "stabilizationTitle": "Simulazione di stabilizzazione organizzativa",
+        "committeeTitle": "Simulazioni di coordinamento dei comitati",
+        "stabilizationMoveLabel": "Mossa di stabilizzazione:",
+        "manageThroughLabel": "Gestire tramite:",
+        "stabilizeWithLabel": "Stabilizzare con:"
+      }
     },
     "statusBody": {
       "systemStatus": "Stato del Sistema",

@@ -45,6 +45,9 @@ export async function loginAsTestUser(request: APIRequestContext, email: string)
   await request.post('/api/auth/logout').catch(() => undefined)
 
   let response = await request.post('/api/auth/login', {
+    headers: {
+      'user-agent': 'playwright-e2e-auth',
+    },
     data: {
       email,
       password: UE_TEST_USER_PASSWORD,
@@ -57,6 +60,9 @@ export async function loginAsTestUser(request: APIRequestContext, email: string)
 
   await request.get('/sign-in').catch(() => undefined)
   response = await request.post('/api/auth/login', {
+    headers: {
+      'user-agent': 'playwright-e2e-auth',
+    },
     data: {
       email,
       password: UE_TEST_USER_PASSWORD,

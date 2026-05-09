@@ -13,7 +13,7 @@
 //   * Container App                nzila-os-union-eyes-<env>
 //   * PostgreSQL flexible server   nzila-os-union-eyes-<env>-db
 //   * PostgreSQL database          nzila_os_<env>
-//   * Key Vault                    nzila-<env>-kv
+//   * Key Vault                    nzila-canada-<env>-kv
 //   * Log Analytics workspace      nzila-canada-<env>-law
 //
 // Production receives PremiumV3 sizing and 30-day backup retention. All
@@ -33,7 +33,7 @@ param postgresAdminPassword string
 param location string = 'canadacentral'
 
 @description('Container image to deploy (full ACR path with tag)')
-param containerImage string = 'nzilacanadaacr.azurecr.io/nzila-os-union-eyes:latest'
+param containerImage string = 'nzilacanadaacr.azurecr.io/nzila-os-union-eyes:production'
 
 @description('ACR resource (managed identity must have AcrPull on this registry)')
 param acrLoginServer string = 'nzilacanadaacr.azurecr.io'
@@ -42,7 +42,7 @@ var isProd = environment == 'prod'
 var dbName = 'nzila_os_${environment}'
 var appName = 'nzila-os-union-eyes-${environment}'
 var pgServerName = 'nzila-os-union-eyes-${environment}-db'
-var kvName = 'nzila-${environment}-kv'
+var kvName = 'nzila-canada-${environment}-kv'
 var lawName = 'nzila-canada-${environment}-law'
 var caEnvName = 'nzila-canada-${environment}-env'
 

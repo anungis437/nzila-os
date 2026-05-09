@@ -7202,14 +7202,24 @@
   "marketing": {
     "nav": {
       "home": "Home",
+      "solutions": "Solutions",
+      "insights": "Insights",
+      "solutionsItems": {
+        "executive": { "name": "Union Executive Leadership", "desc": "Strategic continuity" },
+        "governance": { "name": "Governance Leadership", "desc": "Governance modernization" },
+        "operations": { "name": "Operations Leadership", "desc": "Cross-team coordination" },
+        "technology": { "name": "Technology Leadership", "desc": "Enterprise-safe AI" },
+        "labour": { "name": "Policy & Labour Leadership", "desc": "Human oversight" },
+        "procurement": { "name": "Procurement Stakeholders", "desc": "Deployment readiness" }
+      },
       "story": "Our Story",
       "modules": "Modules",
-      "pricing": "Pricing",
+      "pricing": "Programs",
       "trust": "Trust & Compliance",
       "caseStudies": "Case Studies",
       "status": "Status",
       "contact": "Contact",
-      "requestPilot": "Start a Pilot",
+      "requestPilot": "Executive Briefing",
       "signIn": "Sign In"
     },
     "home": {
@@ -7318,15 +7328,15 @@
       "ctaContact": "Start a conversation"
     },
     "pricing": {
-      "heroHeading": "Contract-Based Deployment",
-      "heroDescription": "UnionEyes is deployed through governed contracts — not self-serve subscriptions. Pricing is scoped to your organization, your modules, and your rollout plan.",
+      "heroHeading": "Institutional Modernization Programs",
+      "heroDescription": "UnionEyes is packaged as a consultative modernization program aligned to governance complexity, organizational scope, and continuity outcomes.",
       "monthly": "Monthly",
       "yearly": "Yearly",
       "perMonth": "/ month",
       "perYear": "/ year",
-      "getStarted": "Start a Pilot",
-      "pageTitle": "Pricing & Deployment | UnionEyes",
-      "pageDescription": "Contract-based deployment pricing for Canadian unions. Parent-level billing with local allocation."
+      "getStarted": "Request Executive Briefing",
+      "pageTitle": "Institutional Modernization Programs | UnionEyes",
+      "pageDescription": "Program-based commercial packaging for governance modernization, continuity resilience, and operational trust infrastructure."
     },
     "contact": {
       "heroHeading": "Get in touch",
@@ -7349,23 +7359,23 @@
       "pageDescription": "How Canadian unions deploy UnionEyes through governed contracts and controlled pilots."
     },
     "pilotRequest": {
-      "heroHeading": "Start a Controlled Pilot",
-      "heroDescription": "Every UnionEyes deployment begins with a scoped pilot — structured around your organization's governance, modules, and readiness.",
-      "pageTitle": "Controlled Pilot Deployment | UnionEyes",
-      "pageDescription": "Begin a governed pilot deployment of UnionEyes scoped to your organization.",
-      "trustCallout": "Every pilot deployment is contract-scoped, module-controlled, and subject to your organization's governance requirements.",
+      "heroHeading": "Request an Institutional Modernization Briefing",
+      "heroDescription": "Every UnionEyes engagement begins with a structured modernization pilot pathway aligned to governance maturity, continuity priorities, and implementation scope.",
+      "pageTitle": "Institutional Continuity Modernization Pilot | UnionEyes",
+      "pageDescription": "Begin a structured institutional modernization pilot aligned to governance and operational maturity.",
+      "trustCallout": "Every pilot pathway is governance-scoped, implementation-structured, and designed for executive and procurement confidence.",
       "stepLabels": {
         "organization": "Organization",
         "context": "Context",
-        "modulesGoals": "Modules & Goals",
+        "modulesGoals": "Priorities",
         "readiness": "Readiness",
         "assessment": "Assessment"
       },
       "buttons": {
         "continue": "Continue",
         "back": "Back",
-        "assessReadiness": "Assess deployment readiness",
-        "submit": "Submit pilot request",
+        "assessReadiness": "Assess institutional readiness",
+        "submit": "Submit executive briefing request",
         "submitting": "Submitting…"
       },
       "alerts": {
@@ -7386,43 +7396,43 @@
         "memberCountHint": "Approximate total membership"
       },
       "step2": {
-        "heading": "Your operational context",
+        "heading": "Your institutional operating context",
         "jurisdictionsLabel": "Jurisdictions *",
         "sectorsLabel": "Sectors *",
-        "currentSystemLabel": "Current System (Optional)",
-        "currentSystemPlaceholder": "e.g., Excel spreadsheets, paper files, legacy software",
-        "challengesLabel": "Current governance challenges (select all that apply)"
+        "currentSystemLabel": "Current Operating Environment (Optional)",
+        "currentSystemPlaceholder": "e.g., spreadsheets, paper workflows, legacy systems",
+        "challengesLabel": "Current continuity and governance challenges (select all that apply)"
       },
       "step3": {
-        "heading": "Modules & goals",
-        "modulesLabel": "Modules of Interest *",
-        "goalsLabel": "Governance objectives (select all that apply) *",
-        "additionalNotesLabel": "Additional notes (Optional)",
-        "additionalNotesPlaceholder": "Share any additional context…"
+        "heading": "Program priorities",
+        "modulesLabel": "Operational priorities of interest *",
+        "goalsLabel": "Modernization objectives (select all that apply) *",
+        "additionalNotesLabel": "Additional institutional context (Optional)",
+        "additionalNotesPlaceholder": "Share any executive, procurement, or implementation context…"
       },
       "step4": {
-        "heading": "Governance readiness",
-        "leadershipSupportLabel": "Do you have executive leadership support?",
+        "heading": "Implementation readiness",
+        "leadershipSupportLabel": "Do you have executive sponsorship for modernization?",
         "leadershipYes": "Yes",
         "leadershipNo": "No",
         "leadershipUnsure": "Unsure",
-        "timelineLabel": "What is your preferred deployment timeline?",
+        "timelineLabel": "What is your preferred modernization start window?",
         "timelineSelect": "Select…",
         "timelineImmediate": "Immediately",
         "timeline3months": "Within 3 months",
         "timeline6months": "Within 6 months",
-        "timelineExploring": "Just exploring"
+        "timelineExploring": "Evaluating options"
       },
       "step5": {
-        "heading": "Your Deployment Readiness Assessment",
-        "estimatedTimeline": "Estimated deployment timeline:",
+        "heading": "Your Institutional Readiness Assessment",
+        "estimatedTimeline": "Estimated implementation pathway:",
         "strengths": "Strengths",
         "areasToAddress": "Areas to address",
         "recommendations": "Recommendations"
       },
       "step6": {
-        "heading": "Pilot request received!",
-        "body": "Thank you for your interest in UnionEyes. Our deployment team will review your request and be in touch within 2–3 business days to discuss scoping."
+        "heading": "Executive briefing request received",
+        "body": "Thank you for your interest in UnionEyes. Our institutional modernization team will review your submission and connect within 2–3 business days to discuss program scope."
       },
       "sectors": {
         "Healthcare": "Healthcare",
@@ -7615,24 +7625,43 @@
     "footer": {
       "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
       "platform": "Modules",
+      "solutions": "Solutions",
+      "governanceAndTrust": "Governance & Trust",
       "product": "Modules",
       "resources": "Resources",
       "company": "Company",
       "legal": "Legal",
+      "institutionalContinuity": "Institutional Continuity",
+      "governanceIntelligence": "Governance Intelligence",
+      "organizationalMemory": "Organizational Memory",
+      "executiveIntelligence": "Executive Intelligence",
+      "operationalCoherence": "Operational Coherence",
+      "explainableIntelligence": "Explainable Intelligence",
+      "executiveLeadership": "Executive Leadership",
+      "governanceLeadership": "Governance Leadership",
+      "operationsLeadership": "Operations Leadership",
+      "technologyLeadership": "Technology Leadership",
+      "policyAndLabour": "Policy & Labour",
+      "procurement": "Procurement",
+      "trustCenter": "Trust Center",
+      "governanceStructure": "Governance Structure",
+      "labourSafeAi": "Labour-Safe AI",
+      "explainabilityStandards": "Explainability Standards",
+      "insights": "Insights",
       "governance": "Governance & Oversight",
       "grievanceTracking": "Case & Grievance Management",
       "memberPortal": "Member Portal & Engagement",
       "aiWorkbench": "Intelligence & Insights",
       "analyticsReporting": "Financial Allocation & Billing",
       "features": "Modules",
-      "pricing": "Pricing & Deployment",
+      "pricing": "Modernization Programs",
       "systemStatus": "System Status",
       "caseStudies": "Case Studies",
       "status": "Status",
       "story": "Our Story",
-      "pilotProgram": "Controlled Pilot",
+      "pilotProgram": "Modernization Pilot",
       "contact": "Contact Us",
-      "pilotRequest": "Start a Pilot",
+      "pilotRequest": "Executive Briefing Request",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "security": "Security",

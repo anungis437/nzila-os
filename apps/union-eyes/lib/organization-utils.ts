@@ -85,6 +85,22 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
         if (userOrg.length > 0) {
           return orgById[0].id;
         }
+
+        const authUserOrg = await db
+          .select({ organizationId: authOrganizationUsers.organizationId })
+          .from(authOrganizationUsers)
+          .where(
+            and(
+              eq(authOrganizationUsers.userId, userId),
+              eq(authOrganizationUsers.organizationId, orgById[0].id),
+              eq(authOrganizationUsers.isActive, true),
+            )
+          )
+          .limit(1)
+
+        if (authUserOrg.length > 0) {
+          return orgById[0].id
+        }
       }
     }
 
@@ -142,20 +158,45 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
         if (userOrg.length > 0) {
           return org[0].id;
         }
+
+        const authUserOrg = await db
+          .select({ organizationId: authOrganizationUsers.organizationId })
+          .from(authOrganizationUsers)
+          .where(
+            and(
+              eq(authOrganizationUsers.userId, userId),
+              eq(authOrganizationUsers.organizationId, org[0].id),
+              eq(authOrganizationUsers.isActive, true),
+            )
+          )
+          .limit(1)
+
+        if (authUserOrg.length > 0 && authUserOrg[0].organizationId) {
+          return authUserOrg[0].organizationId
+        }
       }
     }
     
-    // Get user's first organization (primary/default) - return UUID
-    const userOrgs = await db
-      .select({ organizationId: organizationMembers.organizationId })
-      .from(organizationMembers)
-      .where(eq(organizationMembers.userId, userId))
-      .limit(1);
-    
-    if (userOrgs.length > 0 && userOrgs[0].organizationId) {
-      return userOrgs[0].organizationId;
+    // No explicit org selection: prefer platform auth primary membership.
+    // This keeps organization context aligned with centralized auth state and
+    // avoids default local org rows masking true tenant membership.
+    const authPrimaryOrg = await db
+      .select({ organizationId: authOrganizationUsers.organizationId })
+      .from(authOrganizationUsers)
+      .where(
+        and(
+          eq(authOrganizationUsers.userId, userId),
+          eq(authOrganizationUsers.isActive, true),
+          eq(authOrganizationUsers.isPrimary, true),
+        )
+      )
+      .limit(1)
+
+    if (authPrimaryOrg.length > 0 && authPrimaryOrg[0].organizationId) {
+      return authPrimaryOrg[0].organizationId
     }
 
+    // Fallback to any active platform auth membership.
     const authUserOrgs = await db
       .select({ organizationId: authOrganizationUsers.organizationId })
       .from(authOrganizationUsers)
@@ -169,6 +210,17 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
 
     if (authUserOrgs.length > 0 && authUserOrgs[0].organizationId) {
       return authUserOrgs[0].organizationId
+    }
+
+    // Legacy fallback: local organization membership.
+    const userOrgs = await db
+      .select({ organizationId: organizationMembers.organizationId })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.userId, userId))
+      .limit(1);
+    
+    if (userOrgs.length > 0 && userOrgs[0].organizationId) {
+      return userOrgs[0].organizationId;
     }
     
     // Final fallback to default organization

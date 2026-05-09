@@ -8,6 +8,8 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Mail, MapPin, Clock } from 'lucide-react';
 import { ContactForm } from '@/app/(marketing)/contact/contact-form';
+import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { heroImagery } from '@/lib/marketing-hero-imagery';
 
 const CONTACT_COPY: Record<string, {
   sendMessage: string;
@@ -85,13 +87,12 @@ export default async function LocaleContactPage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-slate-50 border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">{t('heroHeading')}</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">{t('heroDescription')}</p>
-        </div>
-      </header>
+      {/* Header with Hero Imagery */}
+      <MarketingHeroSection
+        imageUrl={heroImagery.contact}
+        heading={t('heroHeading')}
+        description={t('heroDescription')}
+      />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

@@ -234,6 +234,27 @@ describe('@nzila/zonga-control-plane — Offline Sync', () => {
       expect(state.conflictCount).toBe(1)
       expect(state.isOnline).toBe(false)
     })
+
+    it('preserves offline backlog until the device reconnects', () => {
+      const queue: SyncQueue = {
+        items: [
+          makeSyncItem({ id: 'offline-1', type: 'playlist_change' }),
+          makeSyncItem({ id: 'offline-2', type: 'listening_history' }),
+        ],
+        lastSyncAt: new Date('2025-01-01T00:00:00Z'),
+        deviceId: 'dev-offline',
+      }
+
+      const offlineState = buildSyncState('dev-offline', queue, false)
+      const onlineState = buildSyncState('dev-offline', queue, true)
+
+      expect(offlineState.pendingCount).toBe(2)
+      expect(offlineState.lastSyncAt).toEqual(new Date('2025-01-01T00:00:00Z'))
+      expect(needsSync(offlineState)).toBe(false)
+
+      expect(onlineState.pendingCount).toBe(2)
+      expect(needsSync(onlineState)).toBe(true)
+    })
   })
 
   describe('needsSync', () => {
@@ -268,6 +289,23 @@ describe('@nzila/zonga-control-plane — Offline Sync', () => {
         isOnline: true,
       }
       expect(needsSync(state)).toBe(false)
+    })
+
+    it('becomes syncable again after reconnecting with queued offline work', () => {
+      const offlineState = {
+        deviceId: 'd-reconnect',
+        lastSyncAt: new Date('2025-01-01T00:00:00Z'),
+        pendingCount: 1,
+        conflictCount: 0,
+        isOnline: false,
+      }
+      const reconnectedState = {
+        ...offlineState,
+        isOnline: true,
+      }
+
+      expect(needsSync(offlineState)).toBe(false)
+      expect(needsSync(reconnectedState)).toBe(true)
     })
   })
 })

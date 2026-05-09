@@ -1,0 +1,16 @@
+{
+  "name": "@nzila/governance-review",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Governance-safe review workflow primitives. Append-only decisions, sparse single-channel queue, no escalation flooding.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

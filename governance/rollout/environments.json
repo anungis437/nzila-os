@@ -1,0 +1,81 @@
+{
+  "$schema": "./environments.schema.json",
+  "version": "1.0.0",
+  "effective": "2026-05-09",
+  "authority": "docs/nzila-rollout-governance/master-rollout-governance-index.md",
+  "environments": {
+    "local": {
+      "tier": "local",
+      "purpose": "Developer workstation. No institutional data. No promotion target.",
+      "topology": "isolated",
+      "secret_topology": "developer-local",
+      "promotion": { "promotes_to": [], "promotes_from": [] },
+      "attestation_required": false,
+      "snapshot_source": "synthetic",
+      "operator_review": "self",
+      "rollback_policy": "free",
+      "continuity_window_minutes": 0
+    },
+    "dev": {
+      "tier": "dev",
+      "purpose": "Integration of in-flight features. Shared developer environment.",
+      "topology": "shared-dev",
+      "secret_topology": "shared-dev-kv",
+      "promotion": { "promotes_to": ["staging"], "promotes_from": ["local"] },
+      "attestation_required": true,
+      "snapshot_source": "synthetic",
+      "operator_review": "engineering",
+      "rollback_policy": "free",
+      "continuity_window_minutes": 0
+    },
+    "staging": {
+      "tier": "staging",
+      "purpose": "Pre-promotion validation. Mirrors production governance posture without production data.",
+      "topology": "staging-isolated",
+      "secret_topology": "nzila-staging-kv",
+      "promotion": { "promotes_to": ["demo", "pilot"], "promotes_from": ["dev"] },
+      "attestation_required": true,
+      "snapshot_source": "canonical-sanitized",
+      "operator_review": "platform",
+      "rollback_policy": "governed",
+      "continuity_window_minutes": 60
+    },
+    "demo": {
+      "tier": "demo",
+      "purpose": "Institutional demonstration environment. Governed; not throwaway.",
+      "topology": "demo-isolated",
+      "secret_topology": "nzila-canada-demo-kv",
+      "shared_secret_topology_exception": "TSOSA — see docs/union-eyes/release/transitional-shared-secret-topology.md",
+      "promotion": { "promotes_to": [], "promotes_from": ["staging"] },
+      "attestation_required": true,
+      "snapshot_source": "canonical-sanitized",
+      "operator_review": "platform",
+      "rollback_policy": "governed",
+      "continuity_window_minutes": 30
+    },
+    "pilot": {
+      "tier": "pilot",
+      "purpose": "Live institutional pilot. Real operators. Real continuity obligations. NOT a beta.",
+      "topology": "pilot-isolated",
+      "secret_topology": "per-pilot-kv",
+      "promotion": { "promotes_to": ["prod"], "promotes_from": ["staging"] },
+      "attestation_required": true,
+      "snapshot_source": "operator-curated",
+      "operator_review": "platform-and-institutional-sponsor",
+      "rollback_policy": "governed-with-sponsor-notification",
+      "continuity_window_minutes": 240
+    },
+    "prod": {
+      "tier": "prod",
+      "purpose": "Production. Canonical institutional operating environment.",
+      "topology": "prod-isolated",
+      "secret_topology": "per-prod-kv",
+      "promotion": { "promotes_to": [], "promotes_from": ["pilot"] },
+      "attestation_required": true,
+      "snapshot_source": "production-only",
+      "operator_review": "platform-and-institutional-authority",
+      "rollback_policy": "governed-with-formal-review",
+      "continuity_window_minutes": 1440
+    }
+  }
+}

@@ -7139,6 +7139,17 @@
   "marketing": {
     "nav": {
       "home": "Accueil",
+      "solutions": "Solutions",
+      "insights": "Perspectives",
+      "proof": "Preuves",
+      "solutionsItems": {
+        "executive": { "name": "Direction exécutive syndicale", "desc": "Continuité stratégique" },
+        "governance": { "name": "Leadership de gouvernance", "desc": "Modernisation de la gouvernance" },
+        "operations": { "name": "Leadership des opérations", "desc": "Coordination interéquipes" },
+        "technology": { "name": "Leadership technologique", "desc": "IA sécuritaire en entreprise" },
+        "labour": { "name": "Leadership politique et travail", "desc": "Supervision humaine" },
+        "procurement": { "name": "Parties prenantes en approvisionnement", "desc": "Préparation au déploiement" }
+      },
       "story": "Notre histoire",
       "modules": "Modules",
       "pricing": "Tarification",
@@ -7361,6 +7372,15 @@
         "heading": "Demande de projet pilote reçue!",
         "body": "Merci pour votre intérêt envers UnionEyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter de la portée."
       },
+      "phase6": {
+        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "onboardingTitle": "Intelligence de continuite pour l integration",
+        "federationTitle": "Scenarios de continuite a echelle federative",
+        "decisionTitle": "Systemes de parcours de decision executive",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gerer par :"
+      },
       "sectors": {
         "Healthcare": "Soins de santé",
         "Education": "Éducation",
@@ -7410,10 +7430,30 @@
     "footer": {
       "description": "Un système d'exploitation gouverné pour les syndicats canadiens — déployé par contrat, activé par module et conçu pour la reddition de comptes.",
       "platform": "Modules",
+      "solutions": "Solutions",
+      "governanceAndTrust": "Gouvernance et confiance",
       "product": "Modules",
       "resources": "Ressources",
       "company": "Entreprise",
       "legal": "Légal",
+      "institutionalContinuity": "Continuité institutionnelle",
+      "governanceIntelligence": "Intelligence de gouvernance",
+      "organizationalMemory": "Mémoire organisationnelle",
+      "executiveIntelligence": "Renseignements exécutifs",
+      "operationalCoherence": "Cohérence opérationnelle",
+      "explainableIntelligence": "Intelligence explicable",
+      "executiveLeadership": "Leadership exécutif",
+      "governanceLeadership": "Leadership de gouvernance",
+      "operationsLeadership": "Leadership des opérations",
+      "technologyLeadership": "Leadership technologique",
+      "policyAndLabour": "Politique et travail",
+      "procurement": "Approvisionnement",
+      "trustCenter": "Centre de confiance",
+      "governanceStructure": "Structure de gouvernance",
+      "labourSafeAi": "IA sécuritaire pour le travail",
+      "explainabilityStandards": "Normes d'explicabilité",
+      "insights": "Perspectives",
+      "institutionalProof": "Preuves institutionnelles",
       "governance": "Gouvernance et surveillance",
       "grievanceTracking": "Gestion des dossiers et griefs",
       "memberPortal": "Portail des membres et engagement",
@@ -7699,7 +7739,19 @@
       "entitlementTitle": "Contrôle des droits",
       "entitlementDesc": "Chaque bénéfice, chaque crédit, chaque allocation est lié à une règle, un rôle et une piste d'audit. Les gestionnaires de régimes voient exactement ce qui a été décaissé et pourquoi.",
       "defensibilityTitle": "Défensibilité juridique",
-      "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen."
+      "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen.",
+      "phase6": {
+        "tabScenario": "Intelligence de scenarios",
+        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
+        "leadershipDesc": "Ces scenarios reflettent des transitions institutionnelles reelles et montrent des reponses calmes qui preservent la coherence de gouvernance.",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "disruptionTitle": "Modelisation des perturbations operationnelles",
+        "stabilizationTitle": "Simulation de stabilisation organisationnelle",
+        "committeeTitle": "Simulations de coordination des comites",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gerer par :",
+        "stabilizeWithLabel": "Stabiliser avec :"
+      }
     },
     "statusBody": {
       "systemStatus": "État du système",

@@ -5,7 +5,7 @@ import LayoutWrapper from "@/components/layout-wrapper";
 import { AuthProvider } from '@nzila/platform-auth/entra/client';
 import { NzilaAppShell } from '@nzila/platform-shell';
 import * as Sentry from '@sentry/nextjs';
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
 import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
@@ -21,6 +21,10 @@ const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-poppins'
 });
+
+export const viewport: Viewport = {
+  themeColor: '#1e3a5f',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = getUnionEyesSiteTopology();
@@ -60,7 +64,6 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: '/apple-touch-icon.png',
     },
     manifest: '/manifest.json',
-    themeColor: '#1e3a5f',
     // Next.js will automatically use app/icon.tsx for favicon and icon
     other: {
       ...(site.isStaging ? { 'x-robots-tag': 'noindex, nofollow' } : {}),

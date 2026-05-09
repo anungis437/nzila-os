@@ -1,0 +1,26 @@
+{
+  "name": "@nzila/doctrine-enforcement",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Doctrine policy registry, evaluator, AI capability registry, and runtime enforcement adapters for Nzila runtime governance.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./registry": "./src/registry.ts",
+    "./evaluator": "./src/evaluator.ts",
+    "./ai-capability-registry": "./src/ai-capability-registry.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}

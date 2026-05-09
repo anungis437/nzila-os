@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { motion } from "framer-motion";
@@ -18,38 +19,27 @@ const locales = [
   { code: "pt", label: "Português", flag: "🇵🇹" },
 ] as const;
 
+type LocaleCode = (typeof locales)[number]["code"];
+
 export default function LanguageSwitcher() {
+  // next-intl's usePathname strips the locale prefix, giving the "clean" path.
+  // e.g. on /en-CA/solutions it returns /solutions
   const pathname = usePathname();
   const router = useRouter();
-  
-  // Extract locale from pathname (e.g., /en-CA/... or /fr-CA/...)
-  const pathSegments = pathname.split("/");
-  const localeFromPath = pathSegments[1];
-  const locale = locales.find((l) => l.code === localeFromPath)?.code || "en-CA";
+  const params = useParams();
 
-  const currentLocale = locales.find((l) => l.code === locale) || locales[0];
+  // Read active locale from URL params (most reliable vs. parsing the raw path)
+  const localeParam = (params?.locale as string) ?? "en-CA";
+  const locale: LocaleCode =
+    (locales.find((l) => l.code === localeParam)?.code as LocaleCode) ?? "en-CA";
 
-  const switchLocale = (newLocale: string) => {
-    const segments = pathname.split("/");
-    // segments[1] is either a locale code (e.g. "fr-CA") or a root marketing
-    // page segment (e.g. "story", "pricing").  Only replace it when it IS a
-    // locale; otherwise prepend the new locale to the full path.
-    const knownLocaleCodes: string[] = locales.map((l) => l.code);
-    const hasLocalePrefix = knownLocaleCodes.includes(segments[1]);
+  const currentLocale = locales.find((l) => l.code === locale) ?? locales[0];
 
-    let newPath: string;
-    if (hasLocalePrefix) {
-      // /fr-CA/story  →  /en-CA/story
-      segments[1] = newLocale;
-      newPath = segments.join("/");
-    } else {
-      // /story  →  /fr-CA/story
-      // /       →  /fr-CA
-      const rest = pathname === "/" ? "" : pathname;
-      newPath = `/${newLocale}${rest}`;
-    }
-
-    router.replace(newPath);
+  const switchLocale = (newLocale: LocaleCode) => {
+    // next-intl's router.replace(path, { locale }) swaps the [locale] segment
+    // and properly invalidates NextIntlClientProvider, triggering a server
+    // component re-render with the new messages bundle.
+    router.replace(pathname, { locale: newLocale });
   };
 
   return (
