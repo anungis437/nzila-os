@@ -298,8 +298,8 @@ const GUIDE_BY_ROUTE: Array<{ prefix: string; guide: GuideConfig }> = [
   {
     prefix: '/autopilot',
     guide: {
-      title: 'Autopilot proposes high-confidence actions you can approve quickly',
-      summary: 'Use it when you want the system to suggest next actions, but still want a human approval gate before execution is tracked.',
+      title: 'Autopilot proposes high-confidence actions for reviewer-of-record approval',
+      summary: 'A bounded recommendation surface: deterministic inputs in, ranked candidate actions out, human approval gate before anything is executed or tracked.',
       bestUse: 'Review the cards when you want leverage, then approve only the actions with clear upside and ownership.',
       actions: [
         'Read rationale and upside before clicking approve; do not approve based on confidence alone.',
@@ -409,13 +409,13 @@ const GUIDE_BY_ROUTE: Array<{ prefix: string; guide: GuideConfig }> = [
   {
     prefix: '/revenue/executive',
     guide: {
-      title: 'Executive RevOps is the AI-powered commercial intelligence surface',
-      summary: 'The RevOps agent synthesizes commerce opportunities, pipeline velocity, and growth signals into actionable executive insights.',
+      title: 'Executive RevOps is the commercial cognition surface',
+      summary: 'A bounded synthesis of commerce opportunities, pipeline velocity, and growth signals into reviewer-resolved executive interpretations \u2014 evidence-anchored, not generative.',
       bestUse: 'Use when you need a cross-account commercial read rather than drilling into a single opportunity.',
       actions: [
-        'Run the agent after updating deal stages to get fresh synthesis.',
-        'Read insights before pipeline meetings so you enter with a pre-formed view.',
-        'Use opportunity data to validate or challenge the sales team\'s pipeline estimate.',
+        'Re-run the synthesis after updating deal stages to refresh the interpretation.',
+        'Read interpretations before pipeline meetings so you enter with a pre-formed view.',
+        'Use opportunity data to validate or challenge the sales team\u2019s pipeline estimate.',
       ],
       related: [
         { label: 'Revenue Pipeline', href: '/revenue' },
@@ -424,7 +424,7 @@ const GUIDE_BY_ROUTE: Array<{ prefix: string; guide: GuideConfig }> = [
       glossary: [
         { term: 'Commerce Opportunity', definition: 'A tracked deal or expansion signal in the commercial pipeline with stage, value, and probability.' },
         { term: 'Deal Velocity', definition: 'How quickly opportunities are progressing through pipeline stages on average.' },
-        { term: 'RevOps Agent', definition: 'An AI agent that synthesizes commercial data into revenue operations insights.' },
+        { term: 'RevOps Synthesis', definition: 'A bounded, evidence-anchored interpretation of commercial data \u2014 reviewer-of-record resolved, not autonomously authoritative.' },
       ],
     },
   },
