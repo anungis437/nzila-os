@@ -10,10 +10,21 @@
 CREATE SCHEMA IF NOT EXISTS user_management;
 CREATE SCHEMA IF NOT EXISTS audit_security;
 
--- Create enums for organizations table
-CREATE TYPE IF NOT EXISTS organization_type AS ENUM ('platform', 'congress', 'federation', 'union', 'local', 'region', 'district');
-CREATE TYPE IF NOT EXISTS labour_sector AS ENUM ('healthcare', 'education', 'public_service', 'trades', 'manufacturing', 'transportation', 'retail', 'hospitality', 'technology', 'construction', 'utilities', 'telecommunications', 'financial_services', 'agriculture', 'arts_culture', 'other');
-CREATE TYPE IF NOT EXISTS organization_status AS ENUM ('active', 'inactive', 'suspended', 'archived');
+-- Create enums for organizations table (no IF NOT EXISTS support for types, so use DO block)
+DO $$ BEGIN
+  CREATE TYPE organization_type AS ENUM ('platform', 'congress', 'federation', 'union', 'local', 'region', 'district');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE labour_sector AS ENUM ('healthcare', 'education', 'public_service', 'trades', 'manufacturing', 'transportation', 'retail', 'hospitality', 'technology', 'construction', 'utilities', 'telecommunications', 'financial_services', 'agriculture', 'arts_culture', 'other');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE organization_status AS ENUM ('active', 'inactive', 'suspended', 'archived');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.organizations (
   id uuid PRIMARY KEY,
