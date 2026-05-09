@@ -47,6 +47,12 @@ function isMissingColumnError(error: unknown): boolean {
   return cause?.code === '42703'
 }
 
+function isMissingRelationError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const cause = (error as { cause?: { code?: string } }).cause
+  return cause?.code === '42P01'
+}
+
 function assertDeterministicInputs(): void {
   const orgIds = Object.values(UE_TEST_ORGS).map((o) => o.id)
   const userIds = Object.values(UE_TEST_USERS).map((u) => u.userId)
@@ -75,9 +81,35 @@ async function seed(): Promise<void> {
 
   // Main transaction: wipe and reseed core tables
   await db.transaction(async (tx) => {
+    const safeCleanup = async (label: string, fn: () => Promise<void>): Promise<void> => {
+      try {
+        await fn()
+      } catch (error) {
+        if (isMissingRelationError(error)) {
+          console.warn(`[ue:seed:test-env] cleanup skipped, relation missing: ${label}`)
+          return
+        }
+        throw error
+      }
+    }
+
+    const tableExists = async (qualifiedName: string): Promise<boolean> => {
+      const result = await tx.execute(sql`select to_regclass(${qualifiedName}) as regclass`)
+      const row = (result as unknown as Array<{ regclass?: string | null }>)[0]
+      return Boolean(row?.regclass)
+    }
+
     // Wipe deterministic test footprint only.
-    await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
-    await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+    if (await tableExists('claim_updates')) {
+      await safeCleanup('claim_updates', async () => {
+        await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
+      })
+    }
+    if (await tableExists('claims')) {
+      await safeCleanup('claims', async () => {
+        await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+      })
+    }
 
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))

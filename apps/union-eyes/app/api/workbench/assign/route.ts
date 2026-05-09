@@ -3,19 +3,14 @@
  * Assign a claim to the current user (or a specified steward).
  */
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { assignSchema } from './schemas';
 
 export const dynamic = 'force-dynamic';
-
-const assignSchema = z.object({
-  claimId: z.string().uuid(),
-  assignTo: z.string().optional(), // defaults to current user
-});
 
 export const POST = withApi(
   {

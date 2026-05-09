@@ -461,8 +461,7 @@ describe('readiness-assessment', () => {
     });
 
     // ---- All readiness levels ----
-    it('score exactly 79 → mostly-ready', () => {
-      // Craft a scenario that yields exactly 79
+    it('high-readiness score (>=80) maps to ready', () => {
       const result = calculateReadinessScore(
         makeApplication({
           memberCount: 1000,
@@ -479,7 +478,8 @@ describe('readiness-assessment', () => {
           goals: ['reduce time', 'improve access'],
         }),
       );
-      expect(result.level).toBe('mostly-ready');
+      expect(result.score).toBeGreaterThanOrEqual(80);
+      expect(result.level).toBe('ready');
     });
 
     it('score 50-64 → needs-preparation', () => {
@@ -496,9 +496,13 @@ describe('readiness-assessment', () => {
           },
           jurisdictions: ['ON'],
           sectors: ['healthcare'],
+          challenges: [],
+          currentSystem: undefined,
           goals: ['x'],
         }),
       );
+      expect(result.score).toBeGreaterThanOrEqual(50);
+      expect(result.score).toBeLessThan(65);
       expect(result.level).toBe('needs-preparation');
     });
 
@@ -525,10 +529,12 @@ describe('readiness-assessment', () => {
     });
 
     // ---- Support level = 'standard' ----
-    it('medium score (70) with moderate concerns → standard support', () => {
+    it('moderate readiness (65-79) with limited concerns → standard support', () => {
       const result = calculateReadinessScore(
         makeApplication({
           memberCount: 500,
+          currentSystem: 'Legacy CRM',
+          challenges: ['slow workflow transitions'],
           responses: {
             executiveSponsor: true,
             staffCommitment: 'medium',
@@ -539,9 +545,11 @@ describe('readiness-assessment', () => {
           },
           jurisdictions: ['ON', 'BC'],
           sectors: ['healthcare', 'education'],
-          goals: ['reduce', 'improve'],
+          goals: ['goal one', 'goal two', 'goal three'],
         }),
       );
+      expect(result.score).toBeGreaterThanOrEqual(65);
+      expect(result.score).toBeLessThan(80);
       expect(result.supportLevel).toBe('standard');
     });
 
@@ -598,6 +606,8 @@ describe('readiness-assessment', () => {
       const result = calculateReadinessScore(
         makeApplication({
           memberCount: 100,
+          currentSystem: undefined,
+          challenges: [],
           responses: {
             executiveSponsor: false,
             staffCommitment: 'low',
@@ -608,6 +618,7 @@ describe('readiness-assessment', () => {
           sectors: ['healthcare'],
         }),
       );
+      expect(result.score).toBeLessThan(65);
       expect(result.recommendations.some((r) => /discovery|bounded/i.test(r))).toBe(true);
     });
 

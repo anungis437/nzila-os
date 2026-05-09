@@ -33,6 +33,31 @@ function relPath(fullPath: string): string {
   return fullPath.replace(ROOT, '').replace(/\\/g, '/')
 }
 
+function collectRouteFiles(rootDir: string): string[] {
+  if (!existsSync(rootDir)) return []
+
+  const fs = require('node:fs') as typeof import('node:fs')
+  const entries: string[] = []
+
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        if (!['admin', 'internal'].includes(entry.name)) {
+          walk(path)
+        }
+        continue
+      }
+      if (entry.name === 'route.ts') {
+        entries.push(path)
+      }
+    }
+  }
+
+  walk(rootDir)
+  return entries
+}
+
 // ── FF_EVAL_001: Feature flag guards evaluate in correct order ─────────────
 
 describe('FF_EVAL_001 — Feature flag guards evaluate in correct order', () => {
@@ -65,43 +90,34 @@ describe('FF_EVAL_001 — Feature flag guards evaluate in correct order', () => 
   })
 
   it('organization scope is verified before resource access', () => {
-      const routeDir = join(ROOT, 'apps', 'union-eyes', 'app', 'api')
-      // This is a structural validation test - optional as it depends on file structure
-      if (!existsSync(routeDir)) {
-        expect(true).toBe(true) // Skip if directory doesn't exist
-        return
+    const routeFiles = collectRouteFiles(join(ROOT, 'apps', 'union-eyes', 'app', 'api'))
+    if (routeFiles.length === 0) {
+      expect(true).toBe(true)
+      return
+    }
+
+    const frameworkPath = join(ROOT, 'apps', 'union-eyes', 'lib', 'api', 'framework.ts')
+    if (existsSync(frameworkPath)) {
+      const frameworkContent = readContent(frameworkPath)
+      const hasOrgScopeCapability = /withOrgScope|organizationId|getOrganizationIdForUser|auth\s*:\s*\{[^}]*required/s.test(frameworkContent)
+      expect(hasOrgScopeCapability).toBe(true)
+    }
+
+    let orgScopedRouteCount = 0
+    for (const file of routeFiles) {
+      const content = readContent(file)
+      const relativePath = relPath(file)
+      if (relativePath.includes('/app/api/auth/')) continue
+      if (relativePath.includes('/app/api/case-studies/')) continue
+
+      if (/orgScoped\s*:\s*true|organizationId|withOrganizationAuth/.test(content)) {
+        orgScopedRouteCount += 1
+        const explicitlyUnscoped = /withApiAuthOptional|auth\s*:\s*\{[^}]*required\s*:\s*false/s.test(content)
+        expect(explicitlyUnscoped, `${relPath(file)} should not combine org-scoped flow with optional auth`).toBe(false)
       }
+    }
 
-      const entries: string[] = []
-      const walk = (dir: string) => {
-        try {
-          const fs = require('node:fs')
-          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-            const path = join(dir, entry.name)
-            if (entry.isDirectory() && !['admin', 'internal'].includes(entry.name)) walk(path)
-            else if (entry.name === 'route.ts') entries.push(path)
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-      walk(routeDir)
-
-      let foundProperGuarding = false
-
-      for (const file of entries) {
-        const content = readContent(file)
-        if (!content.includes('withApi') && !content.includes('withOrgScope')) continue
-
-        const hasOrgScope = /withOrgScope|withApi.*auth.*required/.test(content)
-        if (hasOrgScope) {
-          foundProperGuarding = true
-          break
-        }
-      }
-
-      // Allow pass if no routes found or proper guarding exists
-      expect(foundProperGuarding || entries.length === 0).toBe(true)
+    expect(orgScopedRouteCount > 0).toBe(true)
   })
 })
 
@@ -128,8 +144,10 @@ describe('FF_EVAL_002 — Pilot mode gates are evaluated before feature access',
       return
     }
 
-    // Pilot mode package should exist - documentation is implicit in presence
-    expect(existsSync(pilotPath)).toBe(true)
+    const enginePath = join(pilotPath, 'src', 'engine.ts')
+    const typesPath = join(pilotPath, 'src', 'types.ts')
+    expect(existsSync(enginePath)).toBe(true)
+    expect(existsSync(typesPath)).toBe(true)
   })
 })
 
@@ -181,64 +199,33 @@ describe('FF_EVAL_003 — Feature flag dependencies form a DAG (no cycles)', () 
 
 describe('FF_EVAL_004 — Role-based flags cannot grant higher permissions', () => {
   it('pilot mode entitlements cannot be combined to escalate roles', () => {
-    const entitlementFiles = [
-      join(ROOT, 'apps', 'union-eyes', 'app', 'api'),
-    ]
-      .filter((d) => existsSync(d))
-      .flatMap((d) => {
-        const entries: string[] = []
-        const walk = (dir: string) => {
-          const fs = require('node:fs')
-          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-            const path = join(dir, entry.name)
-            if (entry.isDirectory() && !['admin', 'internal'].includes(entry.name)) walk(path)
-            else if (entry.name === 'route.ts') entries.push(path)
-          }
-        }
-        try {
-          walk(d)
-        } catch {
-            it('framework avoids randomness in guard logic', () => {
-        }
-        return entries
-      })
+    const entitlementFiles = collectRouteFiles(join(ROOT, 'apps', 'union-eyes', 'app', 'api'))
 
+    let entitlementRouteCount = 0
     for (const file of entitlementFiles) {
       const content = readContent(file)
+      if (!/requiredEntitlements|entitlement/i.test(content)) continue
+      entitlementRouteCount += 1
 
-              // Framework shouldn't use Math.random or similar in core guard logic
-              const hasDangerousRandom = /export.*function.*withApi.*Math\.random/.test(content)
-              expect(hasDangerousRandom).toBe(false)
+      const hasRoleOrAuthConstraint = /requiredRole|allowedRoles|hasMinRole|readRole|writeRole|orgScoped\s*:\s*true|withOrganizationAuth|withRoleAuth|withMinRole|withApiAuth|withApi\s*\(|requireEntitlement|auth\s*:\s*\{[^}]*required\s*:\s*true|auth\s*:\s*\{[^}]*minRole/s.test(content)
+      expect(hasRoleOrAuthConstraint, `${relPath(file)} should pair entitlements with auth/role constraints`).toBe(true)
+
+      const allowsAnonymous = /withApiAuthOptional|auth\s*:\s*\{[^}]*required\s*:\s*false/s.test(content)
+      expect(allowsAnonymous, `${relPath(file)} should not expose entitlements on anonymous flows`).toBe(false)
+    }
+
+    expect(entitlementRouteCount > 0).toBe(true)
+  })
+
   it('role hierarchy is enforced: lower roles do not gain higher role permissions via flags', () => {
     const rbacFile = join(ROOT, 'apps', 'union-eyes', 'lib', 'auth', 'roles.ts')
-            it('pilot mode engine is deterministic', () => {
-              const pilotPath = join(ROOT, 'packages', 'pilot-mode')
-              if (!existsSync(pilotPath)) {
-                expect(true).toBe(true)
-                return
-              }
-
-              // Pilot mode exists as a package - determinism is enforced through type system
-              expect(existsSync(pilotPath)).toBe(true)
-            })
-
-            it('auth utilities use deterministic sources', () => {
-              const authPath = join(ROOT, 'apps', 'union-eyes', 'lib', 'auth')
-              if (!existsSync(authPath)) {
-                expect(true).toBe(true)
-                return
-              }
-
-              // Auth directory exists - implementation of determinism is verified through runtime
-              expect(existsSync(authPath)).toBe(true)
-            })
-
-          })
+    if (!existsSync(rbacFile)) {
+      expect(true).toBe(true)
+      return
+    }
 
     const content = readContent(rbacFile)
-
-    // Check that roles are defined as a hierarchy (not as a flat list with overrides)
-    const hasHierarchy = /HIERARCHY|ROLE.*LEVEL|ranking|level|priority/i.test(content)
+    const hasHierarchy = /HIERARCHY|ROLE.*LEVEL|ranking|level|priority|ADMIN|STEWARD|VIEWER/i.test(content)
     expect(hasHierarchy).toBe(true)
   })
 })
@@ -253,7 +240,6 @@ describe('FF_EVAL_005 — Feature flag evaluation is deterministic', () => {
     const content = readContent(frameworkPath)
 
     // Check for non-deterministic patterns (random numbers, current time in critical paths)
-    const hasRandom = /Math\.random|Date\.now|crypto\.random/i.test(content)
     const inGuardLogic = content.split('function withApi')[1]?.split('return')[0] || ''
 
     // Random should not be in guard evaluation logic
@@ -266,17 +252,15 @@ describe('FF_EVAL_005 — Feature flag evaluation is deterministic', () => {
 
   it('org scope resolution is deterministic (same user, same org, same result)', () => {
     const authGuardPath = join(ROOT, 'apps', 'union-eyes', 'lib', 'api-auth-guard.ts')
-    if (!existsSync(authGuardPath)) return
+    const orgUtilsPath = join(ROOT, 'apps', 'union-eyes', 'lib', 'organization-utils.ts')
+    const pathToCheck = existsSync(orgUtilsPath) ? orgUtilsPath : authGuardPath
+    if (!existsSync(pathToCheck)) return
 
-    const content = readContent(authGuardPath)
+    const content = readContent(pathToCheck)
 
-    // Check that org resolution doesn't depend on randomness or timestamps
-    const getOrgIdLogic = content.split('getOrganizationIdForUser')[1]?.split('\n').slice(0, 20).join('\n') || ''
-
-    const usesCaching = /cache|memoize|store|remember/.test(getOrgIdLogic)
-    const usesDeterministicSource = /session|database|jwt|token|claim/.test(getOrgIdLogic)
-
-    expect(usesDeterministicSource || usesCaching).toBe(true)
+    // Deterministic org resolution should not rely on random/time-based behavior.
+    const hasNondeterminism = /Math\.random|crypto\.random|Date\.now/.test(content)
+    expect(hasNondeterminism).toBe(false)
   })
 
   it('pilot mode evaluation uses consistent source of truth', () => {
@@ -288,5 +272,15 @@ describe('FF_EVAL_005 — Feature flag evaluation is deterministic', () => {
     // Engine should be pure (no side effects during evaluation)
     const hasPure = /pure|deterministic|no.*side.*effect/.test(content) || !/(fetch|http|socket)/i.test(content)
     expect(hasPure).toBe(true)
+  })
+
+  it('auth utilities use deterministic sources', () => {
+    const authPath = join(ROOT, 'apps', 'union-eyes', 'lib', 'auth')
+    if (!existsSync(authPath)) {
+      expect(true).toBe(true)
+      return
+    }
+
+    expect(existsSync(authPath)).toBe(true)
   })
 })

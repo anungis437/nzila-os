@@ -19,7 +19,6 @@ import { eq, and, count } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { wrapSchemaQuery } from '@/lib/schema-error'
-import { z } from 'zod'
 import { eventBus, AppEvents } from '@/lib/events'
 import '@/lib/events/pilot-event-listeners'
 import {
@@ -28,6 +27,8 @@ import {
   recordUnionEyesWorkflowTransition,
   recordUnionEyesWorkflowTransitionFailure,
 } from '@/lib/pilot-metrics'
+import { transitionSchema } from './schemas'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -42,21 +43,6 @@ function statusForAuthError(message: string): number {
 
   return 500
 }
-
-const transitionSchema = z.object({
-  claimNumber: z.string().min(1).max(100),
-  targetStatus: z.enum([
-    'submitted',
-    'under_review',
-    'assigned',
-    'investigation',
-    'pending_documentation',
-    'resolved',
-    'rejected',
-    'closed',
-  ]),
-  notes: z.string().max(5000).optional(),
-})
 
 export async function POST(request: NextRequest) {
   try {
