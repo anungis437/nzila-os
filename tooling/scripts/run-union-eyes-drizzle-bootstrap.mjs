@@ -43,6 +43,11 @@ const LEGACY_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations');
 const LEGACY_FREEZE_SENTINEL = path.join(LEGACY_MIGRATIONS_DIR, '.lineage-frozen');
 const SCOPED_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-cache');
 const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json');
+const CI_BASELINE_SQL_FILES = [
+  path.join(appRoot, 'db', 'migrations', '20260507_fixup_pre_0008_missing_tables.sql'),
+  path.join(appRoot, 'db', 'migrations', '20260509_fixup_auth_mfa_magic_invites.sql'),
+  path.join(appRoot, 'db', 'migrations', '20260711_auth_password_reset_tokens.sql'),
+];
 
 const REQUIRED_EXTENSIONS = [
   'uuid-ossp',
@@ -67,6 +72,10 @@ if (!databaseUrl) {
 const restoreSnapshotUrl = process.env.UE_DB_RESTORE_SNAPSHOT_URL || '';
 const replayOverride = process.env.UE_LINEAGE_REPLAY_OVERRIDE === '1';
 const replayReason = process.env.UE_LINEAGE_REPLAY_REASON || '';
+const isQaOrCiBootstrap =
+  process.env.QA_TEST_ENV === 'true' ||
+  process.env.UE_QA_GATE === 'true' ||
+  process.env.CI === 'true';
 
 function fail(msg) {
   process.stderr.write(`[bootstrap] ${msg}\n`);
@@ -213,6 +222,68 @@ async function applyScopedMigrations(client) {
   return { applied: count };
 }
 
+async function applySqlFile(client, sqlFilePath, label) {
+  if (!fs.existsSync(sqlFilePath)) {
+    fail(`Required baseline SQL missing: ${sqlFilePath}`);
+  }
+  const sql = fs.readFileSync(sqlFilePath, 'utf8');
+  const statements = sql
+    .split('--> statement-breakpoint')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (statements.length === 0) {
+    info(`${label}: no statements found, skipping.`);
+    return;
+  }
+
+  info(`${label}: applying ${statements.length} statements`);
+  await client.query('BEGIN');
+  try {
+    for (const stmt of statements) {
+      await client.query(stmt);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    fail(`${label} failed: ${err.message}`);
+  }
+}
+
+async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
+  if (restoreSnapshotUrl || scopedEntriesCount > 0) {
+    return { applied: false };
+  }
+
+  const [authUsersRegclass, organizationsRegclass] = await Promise.all([
+    client.query(`select to_regclass('user_management.users') as regclass`),
+    client.query(`select to_regclass('public.organizations') as regclass`),
+  ]);
+  const hasCanonicalBaseline =
+    Boolean(authUsersRegclass.rows?.[0]?.regclass) ||
+    Boolean(organizationsRegclass.rows?.[0]?.regclass);
+
+  if (hasCanonicalBaseline) {
+    info('Snapshot/migrations absent but canonical baseline tables already exist; skipping QA baseline SQL set.');
+    return { applied: false };
+  }
+
+  if (!isQaOrCiBootstrap) {
+    fail(
+      'Fresh bootstrap has neither UE_DB_RESTORE_SNAPSHOT_URL nor scoped migrations. ' +
+        'Refusing to materialize an empty database outside QA/CI mode.',
+    );
+  }
+
+  info(
+    'No snapshot and zero scoped migrations in QA/CI mode; applying canonical QA baseline SQL set to prevent missing-table bootstraps.',
+  );
+  for (const [index, sqlFilePath] of CI_BASELINE_SQL_FILES.entries()) {
+    await applySqlFile(client, sqlFilePath, `qa-baseline-${index + 1}`);
+  }
+  return { applied: true };
+}
+
 async function writeBootstrapAttestation(client, summary) {
   await client.query('CREATE SCHEMA IF NOT EXISTS drizzle');
   await client.query(`
@@ -261,12 +332,17 @@ async function main() {
 
     const restoreSummary = await maybeRestoreSnapshot();
 
+    const scopedJournal = JSON.parse(fs.readFileSync(SCOPED_JOURNAL, 'utf8'));
+    const scopedEntries = scopedJournal.entries ?? [];
+    const baselineSummary = await applyCiBaselineIfNeeded(client, scopedEntries.length);
+
     info('Applying scoped Drizzle migrations from db/migrations-cache/ ...');
     const migrateSummary = await applyScopedMigrations(client);
 
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
       restored: restoreSummary.restored,
+      qaBaselineApplied: baselineSummary.applied,
       scopedMigrationsApplied: migrateSummary.applied,
       timestamp: new Date().toISOString(),
     });
