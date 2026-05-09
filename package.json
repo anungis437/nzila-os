@@ -200,6 +200,7 @@
     "validate:ue-infrastructure": "node tooling/scripts/validate-ue-infrastructure.mjs",
     "validate:navigation-monetization": "node tooling/scripts/validate-navigation-monetization.mjs",
     "validate:live-readiness": "node tooling/scripts/validate-live-operational-readiness.mjs",
+    "validate:infra-convergence": "node tooling/scripts/validate-live-infrastructure-convergence.mjs",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
     "validate:runtime": "tsx scripts/validate-runtime.ts",
     "validate:runtime-truth": "vitest run --project contract-tests tooling/contract-tests/no-fake-production-behavior.test.ts tooling/contract-tests/api-completeness.test.ts tooling/contract-tests/observability-coverage.test.ts tooling/contract-tests/generated-runtime-separation.test.ts tooling/contract-tests/crypto-integrity.test.ts tooling/contract-tests/evidence-chain-integrity.test.ts tooling/contract-tests/ue-domain-service-boundary.test.ts tooling/contract-tests/ue-demo-mode-surface.test.ts",
