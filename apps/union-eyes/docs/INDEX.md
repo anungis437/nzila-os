@@ -45,7 +45,8 @@
 | [Domain Model](./DOMAIN_MODEL.md) | Entities, relationships, state machines |
 | [Terminology Alignment](./TERMINOLOGY_ALIGNMENT.md) | Vocabulary contract across product, docs, and APIs |
 | [Enterprise Hardening](./enterprise-hardening-architecture.md) | Security, observability, deployment |
-| [CBA Intelligence API](./cba-intelligence-openapi.yaml) | Public source intelligence API spec |
+| [Labor Continuity Intelligence API](./cba-intelligence-openapi.yaml) | Governance-safe labor continuity operations API spec |
+| [Labor Continuity Intelligence Authority](../../../docs/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md) | Canonical institutional labor continuity philosophy and controls |
 | [Pilot Playbook](./CAPE-PILOT-PLAYBOOK.md) | Adoption and rollout strategy |
 | [Pilot Audit Report](./CAPE-PILOT-AUDIT-REPORT.md) | Historical audit reference |
 

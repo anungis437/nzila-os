@@ -2,16 +2,16 @@
  * @nzila/ai-sdk — barrel export
  *
  * ╔══════════════════════════════════════════════════════════════╗
- * ║  SINGLE ENTRY POINT FOR ALL NZILA AI CAPABILITIES           ║
- * ║                                                              ║
- * ║  All Nzila apps MUST import AI functions from this package.  ║
- * ║  Direct imports from @nzila/ai-core/providers/* or raw       ║
- * ║  OpenAI/Azure SDK calls are PROHIBITED — they bypass the     ║
- * ║  governance control plane (profiles, budgets, redaction,     ║
- * ║  auditing, policy enforcement, and attestation).             ║
- * ║                                                              ║
- * ║  Usage:                                                      ║
- * ║    import { createAiClient } from '@nzila/ai-sdk'            ║
+ * ║  SINGLE ENTRY POINT FOR ALL NZILA COGNITION CAPABILITIES       ║
+ * ║                                                                ║
+ * ║  All Nzila apps MUST import cognition functions from here.     ║
+ * ║  Direct imports from @nzila/ai-core/providers/* or raw         ║
+ * ║  OpenAI/Azure SDK calls are PROHIBITED — they bypass the       ║
+ * ║  governance control plane (profiles, budgets, redaction,       ║
+ * ║  auditing, policy enforcement, and attestation).               ║
+ * ║                                                                ║
+ * ║  Usage:                                                        ║
+ * ║    import { createAiClient } from '@nzila/ai-sdk'              ║
  * ╚══════════════════════════════════════════════════════════════╝
  */
 

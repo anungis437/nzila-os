@@ -1,8 +1,11 @@
 /**
  * @nzila/platform-reasoning-engine
  *
- * Cross-vertical reasoning engine with citations, explainability,
- * and built-in strategies: deductive, causal, abductive, risk-based.
+ * Governance-safe bounded reasoning substrate with citations, explainability,
+ * and audit-safe strategies: deductive, causal, abductive, risk-based.
+ *
+ * All conclusions are interpretive and bounded by the context envelope.
+ * No autonomous actions are produced — human operators evaluate all conclusions.
  */
 
 // Types & schemas

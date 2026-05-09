@@ -1,7 +1,7 @@
 /**
- * Union-Eyes E2E — CBA Intelligence Smoke Test
+ * Union-Eyes E2E — Labor Continuity Intelligence Smoke Test
  *
- * Validates the CBA Intelligence page renders, all 6 tabs are
+ * Validates the labor continuity intelligence page renders, all 6 tabs are
  * present, and tab navigation works.
  *
  * Requires test auth mode (PLAYWRIGHT_TEST_AUTH=true) since the
@@ -13,7 +13,7 @@ import { ensureServerReady } from '../tests/e2e/_helpers';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
-test.describe("CBA Intelligence page", () => {
+test.describe("Labor continuity intelligence page", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
 
   test.beforeAll(async ({ request }) => {
@@ -25,7 +25,7 @@ test.describe("CBA Intelligence page", () => {
 
   test("page loads with heading", async ({ page }) => {
     await page.goto(PAGE_URL);
-    await expect(page.getByRole("heading", { name: "CBA Intelligence" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Institutional Labor Continuity Intelligence" })).toBeVisible({
       timeout: 15_000,
     });
   });

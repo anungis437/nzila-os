@@ -30,14 +30,14 @@ export function AIBanner({
 
   const contextLabel =
     context === "summary"
-      ? "AI-generated summary"
+      ? "Continuity intelligence summary"
       : context === "recommendation"
-        ? "AI-generated recommendation"
+        ? "Institutional continuity guidance"
         : context === "analysis"
-          ? "AI-generated analysis"
+          ? "Governance-safe analysis"
           : context === "prediction"
-            ? "AI-generated prediction"
-            : "AI-assisted output";
+            ? "Continuity trend reading"
+            : "Institutional intelligence output";
 
   const baseClasses =
     "flex items-start gap-3 rounded-md border px-4 py-3 text-sm";
@@ -48,7 +48,7 @@ export function AIBanner({
   return (
     <div
       role="note"
-      aria-label="AI content disclosure"
+      aria-label="Institutional intelligence disclosure"
       className={[baseClasses, colorClasses, className].filter(Boolean).join(" ")}
     >
       {showIcon && (

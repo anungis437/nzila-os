@@ -1,17 +1,18 @@
 /**
- * Executive Insights AI Service
+ * Executive Operational Cognition Service
  *
- * Generates forward-looking intelligence for union leadership:
- * - Trend forecasts (grievance volume, compliance, financials)
- * - Employer hotspot detection
- * - Steward capacity projections
- * - Arbitration escalation predictions
- * - Executive summaries
+ * Generates governance-safe continuity intelligence for union leadership:
+ * - Grievance volume trend contextualisation
+ * - Employer posture monitoring
+ * - Steward capacity stabilisation signals
+ * - Arbitration escalation continuity readings
+ * - Executive continuity summaries
  *
  * CONSTRAINTS:
  * - Every output: confidence + explanation
- * - All insights are advisory — no automatic actions
+ * - All outputs are advisory — no automatic actions
  * - Org-scoped, audited
+ * - Executives interpret; the system contextualises. No autonomous authority.
  *
  * @module lib/ai/executive-insights
  */

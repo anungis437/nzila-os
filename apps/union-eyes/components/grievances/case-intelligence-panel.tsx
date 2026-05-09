@@ -67,6 +67,10 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
           <h2 className="text-base font-semibold">{t("title")}</h2>
           <p className="text-xs text-gray-500">{t("description")}</p>
         </div>
+        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          Continuity interpretation support only. Use this context for stewardship continuity and
+          governance readability, then escalate final determinations to human review.
+        </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           <input
             value={reasonFilter}

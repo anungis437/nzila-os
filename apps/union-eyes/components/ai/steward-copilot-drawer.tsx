@@ -1,8 +1,10 @@
 /**
- * Steward Copilot Drawer
+ * Steward Continuity Cognition Drawer
  *
- * A slide-out panel that lets stewards query the AI copilot,
- * view AI responses, and provide accept/edit/reject feedback.
+ * A slide-out panel that lets stewards query the institutional cognition layer,
+ * review bounded interpretive outputs, and provide accept/edit/reject feedback.
+ *
+ * All outputs are governance-safe and require human confirmation before any action.
  *
  * @module components/ai/steward-copilot-drawer
  */
@@ -60,11 +62,11 @@ interface StewardCopilotDrawerProps {
 
 const ACTION_LABELS: Record<ActionType, string> = {
   timeline_summary: "Summarise Timeline",
-  suggest_action: "Suggest Next Action",
-  draft_response: "Draft Response",
-  explain_clause: "Explain Clause",
-  risk_brief: "Risk Brief",
-  custom_query: "Custom Query",
+  suggest_action: "Suggest Continuity Step",
+  draft_response: "Draft Steward Response",
+  explain_clause: "Interpret Clause",
+  risk_brief: "Governance Risk Brief",
+  custom_query: "Institutional Query",
 };
 
 export function StewardCopilotDrawer({

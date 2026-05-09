@@ -1,13 +1,15 @@
 /**
- * @nzila/platform-intelligence-home — Michel Panel Service
+ * @nzila/platform-intelligence-home — Founder Operational Continuity Panel
  *
- * Generates a tailored weekly action list for Michel Nungisa's role as
- * Legal Counsel + President. Actions leverage Michel's unique advantages:
- * legal training (MOU review, data governance, IP), executive signing authority
- * (grant submissions, partner agreements), and founder-level relationship capital.
+ * Generates a contextualised weekly action set for Michel Nungisa’s role as
+ * Legal Counsel + President, grounded in current pipeline and governance posture.
+ * Actions leverage Michel’s institutional advantages: legal training (MOU review,
+ * data governance, IP), executive signing authority (grant submissions, partner
+ * agreements), and founder-level relationship capital.
  *
- * Each action includes why Michel specifically should own it (leverage),
- * estimated time, and strategic context.
+ * Each action includes the institutional rationale for Michel’s ownership,
+ * estimated time, and operational context. This surface contextualises and
+ * supports — it does not direct or substitute for Michel’s judgment.
  */
 import type { MichelAction } from './types'
 import { getDealPipeline, getHighProbabilityDeals, getStaleDeals } from './deal-service'

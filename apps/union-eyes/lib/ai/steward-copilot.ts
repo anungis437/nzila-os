@@ -1,16 +1,19 @@
 /**
- * Steward Copilot AI Service
+ * Steward Continuity Cognition Service
  *
- * Provides AI-assisted capabilities for union stewards:
- * - Timeline summarisation
- * - Suggested next actions
- * - Draft response generation
- * - Custom Q&A (free-form copilot queries)
+ * Provides bounded institutional interpretation support for union stewards:
+ * - Timeline contextualisation
+ * - Continuity step guidance
+ * - Draft steward response support
+ * - Collective agreement clause interpretation
+ * - Governance risk contextualisation
+ * - Institutional Q&A (bounded to org knowledge base)
  *
  * CONSTRAINTS:
- * - Every output: confidence + explanation
- * - All copilot outputs are "pending" until human approves/edits
+ * - Every output carries confidence + explanation
+ * - All outputs are governance-pending until a human steward confirms/edits
  * - Org-scoped, audited
+ * - No autonomous actions — human authority is preserved at every step
  *
  * @module lib/ai/steward-copilot
  */

@@ -455,10 +455,11 @@ function StrategyStep() {
       </div>
 
       <div className="bg-blue-50 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-2">Your AI Assistant</h4>
+        <h4 className="font-medium text-blue-900 mb-2">Continuity Guidance Support</h4>
         <p className="text-blue-800 text-sm">
-          Your AI assistant can help with research, report generation, and answering 
-          questions about union procedures. It&apos;s trained on labor law and best practices!
+          Use continuity guidance to prepare research briefs, summarize operational history,
+          and orient governance reviews. Final authority remains with union governance,
+          committee review, and executive stewardship.
         </p>
       </div>
 

@@ -1,8 +1,14 @@
 /**
  * @nzila/intelligence — Barrel Exports
  *
- * Nzila Intelligence Layer (NIL): the single, governed entry-point for
- * all AI and intelligence capabilities across NzilaOS.
+ * Nzila Governance Intelligence Substrate (GIS): the single, governed
+ * entry-point for all institutional cognition capabilities across NzilaOS.
+ *
+ * This substrate exists to:
+ *   - Preserve operational continuity
+ *   - Surface governance-safe interpretive readings
+ *   - Support bounded institutional reasoning
+ *   - Maintain audit accountability for every inference
  *
  * Wraps:
  *   - @nzila/ai-sdk

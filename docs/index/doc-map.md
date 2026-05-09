@@ -53,7 +53,8 @@
 | Pilot Validation | `apps/union-eyes/docs/PILOT_VALIDATION.md` | Developers |
 | Terminology Alignment | `apps/union-eyes/docs/TERMINOLOGY_ALIGNMENT.md` | Developers |
 | Enterprise Hardening | `apps/union-eyes/docs/enterprise-hardening-architecture.md` | Developers |
-| CBA Intelligence API | `apps/union-eyes/docs/cba-intelligence-openapi.yaml` | Developers |
+| Labor Continuity Intelligence API | `apps/union-eyes/docs/cba-intelligence-openapi.yaml` | Developers |
+| Labor Continuity Intelligence Authority | `docs/union-eyes/labor-continuity-intelligence/` | Developers, Leadership |
 | Pilot Playbook | `apps/union-eyes/docs/CAPE-PILOT-PLAYBOOK.md` | Developers, PMs |
 | Pilot Demo Flow | `apps/union-eyes/docs/CAPE-DEMO-FLOW.md` | PMs |
 | Pilot Audit Report | `apps/union-eyes/docs/CAPE-PILOT-AUDIT-REPORT.md` | Developers |
@@ -126,8 +127,8 @@
 | App Gold Standard | `docs/governance/APP_GOLD_STANDARD.md` | Developers |
 | App Lifecycle Matrix | `docs/governance/APP_LIFECYCLE_MATRIX.md` | Developers |
 | Assurance Dashboard | `docs/governance/assurance-dashboard.md` | Ops |
-| CBA Intelligence Validation | `docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md` | Developers |
-| CBA Adversarial Validation | `docs/governance/CBA_INTELLIGENCE_ADVERSARIAL_VALIDATION.md` | Security |
+| Labor Continuity Validation (legacy filename) | `docs/governance/CBA_INTELLIGENCE_VALIDATION_REPORT.md` | Developers |
+| Labor Continuity Adversarial Validation (legacy filename) | `docs/governance/CBA_INTELLIGENCE_ADVERSARIAL_VALIDATION.md` | Security |
 | Change Calendar Model | `docs/governance/CHANGE_CALENDAR_MODEL.md` | Ops |
 | Change Enablement | `docs/governance/CHANGE_ENABLEMENT_ARCHITECTURE.md` | Developers |
 | Change Policy | `docs/governance/CHANGE_POLICY.md` | All |
@@ -154,7 +155,7 @@
 | Deployment Promotion | `docs/ops/DEPLOYMENT_PROMOTION_MODEL.md` | Ops |
 | Environment Operations | `docs/ops/ENVIRONMENT_OPERATIONS.md` | Ops |
 | Repo Operator Runbook | `docs/ops/REPO_OPERATOR_RUNBOOK.md` | Ops |
-| CBA Intelligence Runbook | `docs/ops/cba-intelligence-runbook.md` | Ops |
+| Labor Continuity Intelligence Runbook (legacy filename) | `docs/ops/cba-intelligence-runbook.md` | Ops |
 | Incident Response | `docs/ops/incident-response.md` | Ops |
 | Disaster Recovery | `docs/ops/disaster-recovery.md` | Ops |
 | On-Call | `docs/ops/on-call.md` | Ops |

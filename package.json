@@ -193,6 +193,7 @@
     "validate:architecture": "tsx packages/platform-validation/src/architecture-audit.ts",
     "validate:claims": "tsx packages/platform-validation/src/claim-verification.ts",
     "validate:docs": "tsx packages/platform-validation/src/doc-consistency.ts",
+    "validate:labor-continuity": "node tooling/scripts/validate-labor-continuity-governance.mjs",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
     "validate:runtime": "tsx scripts/validate-runtime.ts",
     "validate:runtime-truth": "vitest run --project contract-tests tooling/contract-tests/no-fake-production-behavior.test.ts tooling/contract-tests/api-completeness.test.ts tooling/contract-tests/observability-coverage.test.ts tooling/contract-tests/generated-runtime-separation.test.ts tooling/contract-tests/crypto-integrity.test.ts tooling/contract-tests/evidence-chain-integrity.test.ts tooling/contract-tests/ue-domain-service-boundary.test.ts tooling/contract-tests/ue-demo-mode-surface.test.ts",

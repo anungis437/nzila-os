@@ -2364,12 +2364,12 @@
     }
   },
   "aiAssistantPage": {
-    "metaTitle": "AI Assistant | UnionEyes",
-    "metaDescription": "AI-assisted casework support and guided stewardship workflows"
+    "metaTitle": "Continuity Guidance | UnionEyes",
+    "metaDescription": "Governance-safe continuity support for casework and stewardship workflows"
   },
   "cbaIntelligencePage": {
-    "metaTitle": "CBA Intelligence | UnionEyes",
-    "metaDescription": "Analyze collective agreements with sources, ingestion, review, and benchmarks"
+    "metaTitle": "Labor Continuity Intelligence | UnionEyes",
+    "metaDescription": "Governed labor continuity operations for sources, ingestion, review, and benchmarks"
   },
   "intelligencePage": {
     "metaTitle": "Intelligence | UnionEyes",
@@ -7105,7 +7105,7 @@
     "system": "System",
     "ourAgreements": "Agreements",
     "clauseLibrary": "Clauses",
-    "cbaIntelligence": "CBA Intelligence",
+    "cbaIntelligence": "Labor Continuity",
     "insights": "Insights",
     "alerts": "Alerts",
     "preferences": "Settings",

@@ -501,8 +501,9 @@ function ResourcesStep() {
       <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
         <h4 className="font-medium text-yellow-900 mb-2">Need Help?</h4>
         <p className="text-yellow-800 text-sm">
-          Your AI assistant can help answer questions about grievance procedures, 
-          CBA interpretation, and member rights. Look for the chat icon in your dashboard!
+          Use continuity guidance in your dashboard for grievance procedure context,
+          agreement references, and member-rights workflow support. Escalate final
+          interpretation questions to your chief steward or governance reviewer.
         </p>
       </div>
     </div>

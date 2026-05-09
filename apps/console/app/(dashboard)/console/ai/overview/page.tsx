@@ -1,8 +1,11 @@
 /**
- * /console/ai/overview — AI Engine Overview Dashboard
+ * /console/ai/overview — Governance Intelligence Substrate Overview
  *
- * Unified view of the Nzila AI Engine: request metrics, cost,
- * latency, action success rates, budget status, and refusal counts.
+ * Operational view of the Nzila institutional cognition substrate:
+ * request cadence, cost posture, interpretation latency, action confirmation
+ * rates, budget status, and refusal audit counts.
+ *
+ * Operators govern this substrate; it does not govern operators.
  */
 import { platformDb } from '@nzila/db/platform'
 import {
