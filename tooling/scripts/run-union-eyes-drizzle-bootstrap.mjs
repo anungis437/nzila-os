@@ -43,11 +43,7 @@ const LEGACY_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations');
 const LEGACY_FREEZE_SENTINEL = path.join(LEGACY_MIGRATIONS_DIR, '.lineage-frozen');
 const SCOPED_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-cache');
 const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json');
-const CI_BASELINE_SQL_FILES = [
-  path.join(appRoot, 'db', 'migrations', '20260507_fixup_pre_0008_missing_tables.sql'),
-  path.join(appRoot, 'db', 'migrations', '20260509_fixup_auth_mfa_magic_invites.sql'),
-  path.join(appRoot, 'db', 'migrations', '20260711_auth_password_reset_tokens.sql'),
-];
+const QA_BASELINE_SQL = path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql');
 
 const REQUIRED_EXTENSIONS = [
   'uuid-ossp',
@@ -255,10 +251,12 @@ async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
     return { applied: false };
   }
 
-  const [authUsersRegclass, organizationsRegclass] = await Promise.all([
-    client.query(`select to_regclass('user_management.users') as regclass`),
-    client.query(`select to_regclass('public.organizations') as regclass`),
-  ]);
+  const authUsersRegclass = await client.query(
+    `select to_regclass('user_management.users') as regclass`,
+  );
+  const organizationsRegclass = await client.query(
+    `select to_regclass('public.organizations') as regclass`,
+  );
   const hasCanonicalBaseline =
     Boolean(authUsersRegclass.rows?.[0]?.regclass) ||
     Boolean(organizationsRegclass.rows?.[0]?.regclass);
@@ -276,11 +274,9 @@ async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
   }
 
   info(
-    'No snapshot and zero scoped migrations in QA/CI mode; applying canonical QA baseline SQL set to prevent missing-table bootstraps.',
+    'No snapshot and zero scoped migrations in QA/CI mode; applying canonical QA baseline SQL to prevent missing-table bootstraps.',
   );
-  for (const [index, sqlFilePath] of CI_BASELINE_SQL_FILES.entries()) {
-    await applySqlFile(client, sqlFilePath, `qa-baseline-${index + 1}`);
-  }
+  await applySqlFile(client, QA_BASELINE_SQL, 'qa-baseline');
   return { applied: true };
 }
 
