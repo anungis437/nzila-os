@@ -201,6 +201,7 @@
     "validate:navigation-monetization": "node tooling/scripts/validate-navigation-monetization.mjs",
     "validate:runtime-convergence": "node tooling/scripts/validate-runtime-convergence.mjs",
     "validate:runtime-integrity": "node tooling/scripts/validate-runtime-integrity.mjs",
+    "validate:tier2-hardening": "node tooling/scripts/validate-tier2-hardening.mjs",
     "validate:live-readiness": "node tooling/scripts/validate-live-operational-readiness.mjs",
     "validate:infra-convergence": "node tooling/scripts/validate-live-infrastructure-convergence.mjs",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
