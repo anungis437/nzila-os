@@ -3,7 +3,7 @@
 **Authority:** Re-evaluation of UE monetization under doctrine convergence.
 **Source anchors:**
 [docs/nzila-cognition-doctrine/](../nzila-cognition-doctrine/),
-[apps/union-eyes/lib/billing/](../../apps/union-eyes/lib/billing/),
+[apps/union-eyes/app/api/billing/](../../apps/union-eyes/app/api/billing/),
 `docs/business/`.
 
 ---

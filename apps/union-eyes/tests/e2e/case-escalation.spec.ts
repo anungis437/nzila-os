@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
+import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 
 test.describe('UE E2E - case escalation', () => {
   test.beforeAll(async ({ request }) => {

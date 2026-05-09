@@ -3,7 +3,7 @@
 **Authority:** Reality of feature gating across roles, orgs, environments, demo modes.
 **Source anchors:**
 [apps/union-eyes/lib/feature-flags.ts](../../apps/union-eyes/lib/feature-flags.ts),
-[apps/union-eyes/db/schema/feature-flags.ts](../../apps/union-eyes/db/schema/feature-flags.ts),
+[apps/union-eyes/lib/services/feature-flags-service.ts](../../apps/union-eyes/lib/services/feature-flags-service.ts),
 [apps/console/lib/nav-config.ts](../../apps/console/lib/nav-config.ts).
 
 ---

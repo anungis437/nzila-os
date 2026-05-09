@@ -111,8 +111,7 @@ export async function cleanupDatabaseConnections(request: APIRequestContext): Pr
   try {
     // Send a dummy request to trigger any cleanup handlers
     await request.get('/api/auth_core/health/', { timeout: 5_000 }).catch(() => undefined)
-  } catch (error) {
-    // Silently ignore cleanup errors
-    console.debug('[ue:e2e] Connection cleanup error (non-fatal):', error instanceof Error ? error.message : String(error))
+  } catch {
+    // Silently ignore cleanup errors — non-fatal in e2e teardown
   }
 }
