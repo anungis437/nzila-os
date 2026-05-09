@@ -1,5 +1,9 @@
+import { createHash } from 'crypto'
 import { inArray, sql } from 'drizzle-orm'
+import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
+
+assertNotProduction('seed-test-env')
 import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
@@ -63,6 +67,7 @@ async function seed(): Promise<void> {
   const orgs = Object.values(UE_TEST_ORGS)
   const usersFixture = Object.values(UE_TEST_USERS)
   const casesFixture = Object.values(UE_TEST_CASES)
+  const orgSlugById = new Map(orgs.map((org) => [org.id, org.slug]))
 
   const orgIds = orgs.map((o) => o.id)
   const userIds = usersFixture.map((u) => u.userId)
@@ -210,6 +215,26 @@ async function seed(): Promise<void> {
         },
       })
 
+    // Seed one deterministic localhost session per user to keep risk scoring
+    // in low tier for QA E2E password logins.
+    await tx.insert(authUserSessions).values(
+      usersFixture.map((u) => {
+        const rawToken = `ue-seed-session-${u.userId}`
+        return {
+          userId: u.userId,
+          organizationId: u.orgId,
+          sessionToken: rawToken,
+          sessionTokenHash: createHash('sha256').update(rawToken).digest('hex'),
+          ipAddress: '127.0.0.1',
+          userAgent: 'playwright-e2e-auth',
+          expiresAt: new Date('2099-01-01T00:00:00.000Z'),
+          isActive: true,
+          createdAt: NOW,
+          lastUsedAt: NOW,
+        }
+      }),
+    )
+
     await tx.insert(authOrgPolicies).values(
       orgs.map((org) => ({
         organizationId: org.id,
@@ -255,7 +280,7 @@ async function seed(): Promise<void> {
       await tx.insert(organizationMembers).values(
         usersFixture.map((u) => ({
           userId: u.userId,
-          organizationId: u.orgId,
+          organizationId: orgSlugById.get(u.orgId) ?? u.orgId,
           role: u.role,
           status: u.status,
           name: `${u.firstName} ${u.lastName}`,

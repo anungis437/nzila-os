@@ -10,10 +10,13 @@
  *   npx tsx scripts/seed-union-eyes-demo.ts
  */
 
+import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
 import { eq } from 'drizzle-orm'
+
+assertNotProduction('seed-union-eyes-demo')
 
 // ── Fixed IDs for determinism ───────────────────────────
 

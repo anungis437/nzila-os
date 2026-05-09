@@ -8,7 +8,10 @@
 import fs from "fs/promises";
 import path from "path";
 import { and, eq } from "drizzle-orm";
+import { assertNotProduction } from "@/lib/runtime/production-guard";
 import { db } from "@/db/db";
+
+assertNotProduction("seed-employer-execution-marathon");
 import {
   organizationMembers,
   memberEmployment,
