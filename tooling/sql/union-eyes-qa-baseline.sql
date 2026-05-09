@@ -10,16 +10,49 @@
 CREATE SCHEMA IF NOT EXISTS user_management;
 CREATE SCHEMA IF NOT EXISTS audit_security;
 
+-- Create enums for organizations table
+CREATE TYPE IF NOT EXISTS organization_type AS ENUM ('platform', 'congress', 'federation', 'union', 'local', 'region', 'district');
+CREATE TYPE IF NOT EXISTS labour_sector AS ENUM ('healthcare', 'education', 'public_service', 'trades', 'manufacturing', 'transportation', 'retail', 'hospitality', 'technology', 'construction', 'utilities', 'telecommunications', 'financial_services', 'agriculture', 'arts_culture', 'other');
+CREATE TYPE IF NOT EXISTS organization_status AS ENUM ('active', 'inactive', 'suspended', 'archived');
+
 CREATE TABLE IF NOT EXISTS public.organizations (
   id uuid PRIMARY KEY,
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
-  organization_type text NOT NULL,
+  display_name text,
+  short_name text,
+  description text,
+  organization_type organization_type NOT NULL,
+  parent_id uuid,
   hierarchy_path text[] NOT NULL DEFAULT ARRAY[]::text[],
   hierarchy_level integer NOT NULL DEFAULT 0,
+  province_territory text,
+  sectors labour_sector[] DEFAULT ARRAY[]::labour_sector[],
+  email text,
+  phone text,
+  website text,
+  address jsonb DEFAULT '{}'::jsonb,
+  clc_affiliated boolean DEFAULT false,
+  affiliation_date date,
+  charter_number text,
+  member_count integer DEFAULT 0,
+  active_member_count integer DEFAULT 0,
+  last_member_count_update timestamptz,
+  subscription_tier text,
+  billing_contact_id uuid,
+  settings jsonb DEFAULT '{}'::jsonb,
+  features_enabled text[] DEFAULT ARRAY[]::text[],
   status text DEFAULT 'active',
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  created_by uuid,
+  app_id uuid,
+  legacy_tenant_id uuid,
+  clc_affiliate_code varchar(20),
+  per_capita_rate numeric(10, 2),
+  remittance_day integer DEFAULT 15,
+  last_remittance_date timestamptz,
+  fiscal_year_end date DEFAULT '2024-12-31'
 );
 
 CREATE TABLE IF NOT EXISTS user_management.users (
