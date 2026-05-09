@@ -47,6 +47,8 @@ pnpm test:fast          # Run unit tests (skip contract tests)
 pnpm build              # Build everything
 ```
 
+Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
+
 ## Repo Structure
 
 ```

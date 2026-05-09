@@ -133,7 +133,8 @@ describe('PILOT_API_004 — Exit-interviews entitlement controls feature access'
 
   it('schema requires title and key lessons for interview', () => {
     const routePath = join(UE_APP, 'app', 'api', 'exit-interviews', 'route.ts')
-    const content = readContent(routePath)
+    const schemaPath = join(UE_APP, 'app', 'api', 'exit-interviews', 'schemas.ts')
+    const content = `${readContent(routePath)}\n${readContent(schemaPath)}`
     const hasTitle = /title\s*:\s*z\.string\(\)\.min\(5\)/.test(content)
     const hasLessons = /keyLessons\s*:\s*z\.string\(\)\.min\(10\)/.test(content)
     expect(hasTitle && hasLessons, 'Title and keyLessons should be required').toBe(true)

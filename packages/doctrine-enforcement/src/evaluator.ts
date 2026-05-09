@@ -111,6 +111,9 @@ function readField(
       if (head === 'id') return subject.id
       return subject.attributes[head]
     }
+    if (rest[0] === 'attributes') {
+      return readNested(subject.attributes, rest.slice(1))
+    }
     return readNested(subject.attributes, rest)
   }
 
@@ -121,6 +124,9 @@ function readField(
       if (head === 'environment') return context.environment
       if (head === 'releaseId') return context.releaseId
       return context.attributes[head]
+    }
+    if (rest[0] === 'attributes') {
+      return readNested(context.attributes, rest.slice(1))
     }
     return readNested(context.attributes, rest)
   }

@@ -80,13 +80,13 @@ describe('RBAC_PROPERTY_002 — Permission definitions are consistent across rol
     const content = readContent(rbacPath)
     
     // Simple check: look for FIRM_PERMISSIONS object and verify structure
-    const hasPermissions = /FIRM_PERMISSIONS\s*=/.test(content)
+    const hasPermissions = /FIRM_PERMISSIONS(?:\s*:\s*[^=]+)?\s*=/.test(content)
     expect(hasPermissions).toBe(true)
 
     // Check that permissions arrays exist for expected roles
     const expectedRoles = ['firm_owner', 'partner', 'manager', 'senior_accountant', 'staff_accountant', 'bookkeeper']
     for (const role of expectedRoles) {
-      const hasRole = new RegExp(`['"]${role}['"]\\s*:`).test(content)
+      const hasRole = new RegExp(`(?:['"]${role}['"]|\\b${role}\\b)\\s*:`).test(content)
       expect(hasRole, `RBAC should define role '${role}'`).toBe(true)
     }
   })
@@ -140,7 +140,7 @@ describe('RBAC_PROPERTY_004 — Permission matrices have consistent structure', 
       const content = readContent(file)
       
       // Count permission arrays
-      const permArrays = [...content.matchAll(/:\s*\[(.*?)\]/g)]
+      const permArrays = [...content.matchAll(/:\s*\[[\s\S]*?\]/g)]
       expect(permArrays.length).toBeGreaterThan(0)
     }
   })

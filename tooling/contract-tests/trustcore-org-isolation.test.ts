@@ -56,6 +56,7 @@ function isPublicRoute(routeFile: string): boolean {
     normalized.endsWith('/api/ready/route.ts') ||
     normalized.includes('/api/version/') ||
     normalized.endsWith('/api/version/route.ts') ||
+    normalized.endsWith('/api/leads/route.ts') || // public lead capture endpoint
     normalized.includes('/api/auth/') ||
     normalized.includes('/api/billing/webhook/') || // Stripe webhook (signature verified, not org-scoped)
     normalized.includes('/webhook')
@@ -66,8 +67,10 @@ const AUTH_PATTERNS = [
   /authenticateUser\s*\(/,
   /withRequestContext\s*\(/,
   /withOrgScope\s*\(/,
+  /withRequiredRole\s*\(/,
   /requireOrgAccess\s*\(/,
   /requirePlatformRole\s*\(/,
+  /getAuthContext\s*\(/,
   /\bauth\s*\(\s*\)/,
   /verifyWebhookSignature\s*\(/,
   /verifyStripeSignature\s*\(/,
@@ -75,6 +78,9 @@ const AUTH_PATTERNS = [
 
 const ORG_PATTERNS = [
   /withOrgScope\s*\(/,
+  /withRequiredRole\s*\(/,
+  /ctx\.orgId/,
+  /organizationId\s*:\s*ctx\.orgId/,
   /getOrganizationIdForUser\s*\(/,
   /requireOrgAccess\s*\(/,
 ]

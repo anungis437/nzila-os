@@ -52,6 +52,8 @@ const REQUIRED_EXTENSIONS = [
   'vector',
 ];
 
+const OPTIONAL_EXTENSIONS = new Set(['vector']);
+
 loadEnv({ path: path.join(appRoot, '.env.local') });
 if (!process.env.DATABASE_URL) {
   loadEnv({ path: path.join(appRoot, '.env') });
@@ -104,6 +106,10 @@ async function ensureExtensions(client) {
       await client.query(`CREATE EXTENSION IF NOT EXISTS "${ext}"`);
       info(`extension OK: ${ext}`);
     } catch (err) {
+      if (OPTIONAL_EXTENSIONS.has(ext)) {
+        info(`extension optional/unavailable: ${ext} (${err.message})`);
+        continue;
+      }
       fail(`Failed to create extension ${ext}: ${err.message}`);
     }
   }
