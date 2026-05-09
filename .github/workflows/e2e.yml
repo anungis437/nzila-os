@@ -28,7 +28,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E · ${{ matrix.app }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:

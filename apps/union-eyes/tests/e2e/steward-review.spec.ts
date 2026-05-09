@@ -1,10 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS } from './_helpers'
+import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 
 test.describe('UE E2E - steward review', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('steward reviews assigned case and comment path is authorized', async ({ request }) => {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState } from './_helpers'
+import { ensureServerReady, loginAsTestUser, seedOrVerifyTestState, cleanupDatabaseConnections } from './_helpers'
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
 async function getRole(request: Parameters<typeof test>[0] extends never ? never : any): Promise<string> {
@@ -15,6 +15,10 @@ test.describe('UE E2E - auth session switching', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('sequential logins replace the active session and role context', async ({ request }) => {

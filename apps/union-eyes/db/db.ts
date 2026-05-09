@@ -25,15 +25,21 @@ import { logger } from "@/lib/logger";
 // Consider migrating to getUnifiedDatabase() for multi-database support
 
 // Configure connection pool size based on environment
+// CI/E2E environments: 5 connections (prevent exhaustion)
 // Test environments: 1 connection (single-threaded)
 // Development: 20 connections (default)
 // Production: 50-100 connections (configurable via DB_POOL_MAX)
-const maxConnections = (process.env.NODE_ENV === "test" || process.env.VITEST)
+const maxConnections = (process.env.CI || process.env.PLAYWRIGHT_TEST_AUTH)
+  ? 5
+  : (process.env.NODE_ENV === "test" || process.env.VITEST)
   ? 1
   : parseInt(process.env.DB_POOL_MAX || '20');
 
 // Configure timeouts based on environment
-const idleTimeout = parseInt(process.env.DB_IDLE_TIMEOUT || '30');
+// CI/E2E: shorter idle timeout to release connections faster
+const idleTimeout = (process.env.CI || process.env.PLAYWRIGHT_TEST_AUTH)
+  ? 5  // 5 second idle timeout in CI to aggressively release connections
+  : parseInt(process.env.DB_IDLE_TIMEOUT || '30');
 const connectTimeout = parseInt(process.env.DB_CONNECTION_TIMEOUT || '10');
 const queryTimeout = parseInt(process.env.DB_QUERY_TIMEOUT || '30000');
 

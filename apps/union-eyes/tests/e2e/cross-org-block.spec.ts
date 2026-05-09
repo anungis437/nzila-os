@@ -1,10 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { assertNoCrossOrgLeak, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS } from './_helpers'
+import { assertNoCrossOrgLeak, assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 
 test.describe('UE E2E - cross-org containment', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('wrong-org user cannot access case or audit export', async ({ request }) => {
