@@ -198,6 +198,7 @@
     "validate:maturity-elevation": "node tooling/scripts/validate-maturity-convergence.mjs",
     "validate:final-convergence": "node tooling/scripts/validate-final-convergence.mjs",
     "validate:ue-infrastructure": "node tooling/scripts/validate-ue-infrastructure.mjs",
+    "validate:navigation-monetization": "node tooling/scripts/validate-navigation-monetization.mjs",
     "validate:live-readiness": "node tooling/scripts/validate-live-operational-readiness.mjs",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
     "validate:runtime": "tsx scripts/validate-runtime.ts",
