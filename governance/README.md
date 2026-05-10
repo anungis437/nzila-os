@@ -24,8 +24,6 @@ Governance policy, controls, assurance, and portfolio strategy.
 ### Knowledge and Content
 - [docs/](./docs/) - Governance architecture and specification docs
 - [corporate/](./corporate/) - Corporate policy and legal governance
-- [profiles/](./profiles/) - Governance profile definitions
-- [rollout/](./rollout/) - Governance rollout plans
 - [ai/](./ai/) - AI governance controls and operating doctrine
 
 ### Foundations
@@ -34,9 +32,11 @@ Governance policy, controls, assurance, and portfolio strategy.
 - [foundations/content/](./foundations/content/) - Governance content standards
 - [foundations/finops/](./foundations/finops/) - Financial operations governance
 - [foundations/knowledge/](./foundations/knowledge/) - Institutional knowledge governance
+- [foundations/profiles/](./foundations/profiles/) - Governance profile definitions
 - [foundations/releases/](./foundations/releases/) - Historical release governance records
 - [foundations/repo/](./foundations/repo/) - Repository governance rules and standards
 - [foundations/resilience/](./foundations/resilience/) - Resilience policy and continuity governance
+- [foundations/rollout/](./foundations/rollout/) - Governance rollout plans
 
 ## Root Metadata Files
 

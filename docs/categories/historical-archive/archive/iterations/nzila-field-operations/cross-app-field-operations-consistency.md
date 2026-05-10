@@ -75,7 +75,7 @@ a link to the authority document.
 
 All field operations surfaces are deterministic projections of:
 
-- `governance/rollout/environments.json`
+- `governance/foundations/rollout/environments.json`
 - `proof-artifacts/rollout-attestations/*.jsonl`
 
 There is no per-app operational state. There is no per-app cache

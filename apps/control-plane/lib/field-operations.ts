@@ -272,7 +272,7 @@ export async function buildFieldOperationsSnapshot(
     },
     {
       category: "Legitimacy review",
-      authority: "nzila-rollout-governance/rollout-legitimacy-review-system.md",
+      authority: "nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md",
       cadence: "Bi-weekly",
       lastClosedAt: lastTimestamp(ledger.readiness),
       posture: withinDays(lastTimestamp(ledger.readiness), 14) ? "OK" : "DUE",
@@ -417,7 +417,7 @@ export async function buildFieldOperationsSnapshot(
     openWorkflows.push({
       workflow: "Rollout readiness review",
       authority:
-        "nzila-rollout-governance/rollout-legitimacy-review-system.md",
+        "nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md",
       trigger: "Bi-weekly cadence due",
     });
   }

@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-04-29T00:32:02.300Z
+Generated: 2026-05-10T19:57:27.903Z
 
-Total documents indexed: 558
+Total documents indexed: 925
 Stale documents (>90 days since repo validation): 0
 
 ## Category Summary
@@ -14,12 +14,13 @@ Stale documents (>90 days since repo validation): 0
 | README.md | 1 | 0 |
 | REMEDIATION_TASKS.md | 1 | 0 |
 | agri | 12 | 0 |
-| architecture | 42 | 0 |
-| archive | 10 | 0 |
-| backlog | 2 | 0 |
+| ai-dev-agents | 5 | 0 |
+| architecture | 60 | 0 |
+| archive | 256 | 0 |
 | builders | 4 | 0 |
 | buyers | 14 | 0 |
-| commerce | 18 | 0 |
+| categories | 5 | 0 |
+| commerce | 20 | 0 |
 | commercial | 70 | 0 |
 | control-plane | 1 | 0 |
 | decision-layer | 13 | 0 |
@@ -30,35 +31,36 @@ Stale documents (>90 days since repo validation): 0
 | faircase | 30 | 0 |
 | flow | 1 | 0 |
 | ga | 2 | 0 |
-| governance | 32 | 0 |
+| governance | 36 | 0 |
 | gtm | 20 | 0 |
 | hardening | 18 | 0 |
 | how-to | 4 | 0 |
 | index | 3 | 0 |
+| intelligence | 1 | 0 |
 | investor | 8 | 0 |
 | itsm | 4 | 0 |
 | migration | 12 | 0 |
-| nzila-hq | 2 | 0 |
+| nzila-assurance | 14 | 0 |
 | operators | 1 | 0 |
 | ops | 37 | 0 |
 | personas | 3 | 0 |
 | pilot | 14 | 0 |
-| plans | 8 | 0 |
 | platform | 66 | 0 |
-| platform-surface-migrations | 1 | 0 |
 | procurement | 3 | 0 |
 | proof-center | 3 | 0 |
 | public | 3 | 0 |
 | reference | 5 | 0 |
+| releases | 1 | 0 |
 | repo-contract | 3 | 0 |
 | risk | 3 | 0 |
 | root | 4 | 0 |
-| runbooks | 16 | 0 |
-| security | 7 | 0 |
+| runbooks | 22 | 0 |
+| runtime-proof.md | 1 | 0 |
+| security | 9 | 0 |
 | stress-test | 4 | 0 |
 | templates | 6 | 0 |
 | tutorials | 4 | 0 |
-| union-eyes | 27 | 0 |
+| union-eyes | 102 | 0 |
 | zonga | 7 | 0 |
 
 ## Documents
@@ -66,7 +68,7 @@ Stale documents (>90 days since repo validation): 0
 | Path | Category | Last Validated | Status |
 | --- | --- | --- | --- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-04-17 | current |
-| [CHANGELOG.md](CHANGELOG.md) | root | 2026-04-20 | current |
+| [CHANGELOG.md](CHANGELOG.md) | root | 2026-05-09 | current |
 | [docs/agri/00-overview.md](docs/agri/00-overview.md) | agri | 2026-03-22 | current |
 | [docs/agri/01-market-map.md](docs/agri/01-market-map.md) | agri | 2026-03-22 | current |
 | [docs/agri/02-architecture.md](docs/agri/02-architecture.md) | agri | 2026-03-22 | current |
@@ -79,12 +81,18 @@ Stale documents (>90 days since repo validation): 0
 | [docs/agri/CANONICAL_REPORTING_SCHEMA.md](docs/agri/CANONICAL_REPORTING_SCHEMA.md) | agri | 2026-03-22 | current |
 | [docs/agri/CORAGOV_INGESTION_GUIDE.md](docs/agri/CORAGOV_INGESTION_GUIDE.md) | agri | 2026-03-22 | current |
 | [docs/agri/FINAL_LOCK_IN.md](docs/agri/FINAL_LOCK_IN.md) | agri | 2026-03-22 | current |
+| [docs/ai-dev-agents/agent-charters.md](docs/ai-dev-agents/agent-charters.md) | ai-dev-agents | 2026-05-02 | current |
+| [docs/ai-dev-agents/agent-operating-model.md](docs/ai-dev-agents/agent-operating-model.md) | ai-dev-agents | 2026-05-02 | current |
+| [docs/ai-dev-agents/human-review-policy.md](docs/ai-dev-agents/human-review-policy.md) | ai-dev-agents | 2026-05-02 | current |
+| [docs/ai-dev-agents/prompt-library.md](docs/ai-dev-agents/prompt-library.md) | ai-dev-agents | 2026-05-02 | current |
+| [docs/ai-dev-agents/validation-gates.md](docs/ai-dev-agents/validation-gates.md) | ai-dev-agents | 2026-05-02 | current |
 | [docs/architecture/AI_INTELLIGENCE_LAYER.md](docs/architecture/AI_INTELLIGENCE_LAYER.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/AI_PLATFORM_CONTRACT.md](docs/architecture/AI_PLATFORM_CONTRACT.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/APP_DOMAIN_CORE_STANDARD.md](docs/architecture/APP_DOMAIN_CORE_STANDARD.md) | architecture | 2026-04-24 | current |
 | [docs/architecture/ARCHITECTURAL_BOUNDARIES.md](docs/architecture/ARCHITECTURAL_BOUNDARIES.md) | architecture | 2026-03-19 | current |
 | [docs/architecture/ARCHITECTURAL_LAYERS.md](docs/architecture/ARCHITECTURAL_LAYERS.md) | architecture | 2026-04-20 | current |
 | [docs/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md](docs/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md) | architecture | 2026-04-20 | current |
+| [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md) | architecture | 2026-05-02 | current |
 | [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/AUTH_ARCHITECTURE.md](docs/architecture/AUTH_ARCHITECTURE.md) | architecture | 2026-04-24 | current |
 | [docs/architecture/aws-streaming-architecture.md](docs/architecture/aws-streaming-architecture.md) | architecture | 2026-04-14 | current |
@@ -95,6 +103,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/architecture/CONTROL_PLANE_PRINCIPLES.md](docs/architecture/CONTROL_PLANE_PRINCIPLES.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/DAPL_PLATFORM_LEDGER.md](docs/architecture/DAPL_PLATFORM_LEDGER.md) | architecture | 2026-04-24 | current |
 | [docs/architecture/DECISION_LAYER_ARCHITECTURE.md](docs/architecture/DECISION_LAYER_ARCHITECTURE.md) | architecture | 2026-03-13 | current |
+| [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md) | architecture | 2026-05-02 | current |
 | [docs/architecture/DOMAIN_VS_AUDIT_MODEL.md](docs/architecture/DOMAIN_VS_AUDIT_MODEL.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/ENFORCEMENT_SUMMARY.md](docs/architecture/ENFORCEMENT_SUMMARY.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/ENTERPRISE_ARCHITECTURE_DIAGRAMS.md](docs/architecture/ENTERPRISE_ARCHITECTURE_DIAGRAMS.md) | architecture | 2026-04-24 | current |
@@ -102,6 +111,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/architecture/EVIDENCE_INTEGRATION_GUIDE.md](docs/architecture/EVIDENCE_INTEGRATION_GUIDE.md) | architecture | 2026-04-03 | current |
 | [docs/architecture/EVIDENCE_LIFECYCLE.md](docs/architecture/EVIDENCE_LIFECYCLE.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/evidence-packs.md](docs/architecture/evidence-packs.md) | architecture | 2026-03-13 | current |
+| [docs/architecture/finance-core.md](docs/architecture/finance-core.md) | architecture | 2026-04-29 | current |
 | [docs/architecture/HARDENING_SUMMARY.md](docs/architecture/HARDENING_SUMMARY.md) | architecture | 2026-04-03 | current |
 | [docs/architecture/innovation-future-tech-investments-strategy.md](docs/architecture/innovation-future-tech-investments-strategy.md) | architecture | 2026-03-21 | current |
 | [docs/architecture/integration-control-plane.md](docs/architecture/integration-control-plane.md) | architecture | 2026-03-13 | current |
@@ -111,12 +121,27 @@ Stale documents (>90 days since repo validation): 0
 | [docs/architecture/ORG_ISOLATION.md](docs/architecture/ORG_ISOLATION.md) | architecture | 2026-02-28 | current |
 | [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-02-28 | current |
 | [docs/architecture/ORM_BOUNDARY.md](docs/architecture/ORM_BOUNDARY.md) | architecture | 2026-04-24 | current |
+| [docs/architecture/orm-boundary.md](docs/architecture/orm-boundary.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/canonical-schema-topology.md](docs/architecture/orm-governance/canonical-schema-topology.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/deployment-legitimacy-reconciliation.md](docs/architecture/orm-governance/deployment-legitimacy-reconciliation.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/django-canonical-authority-formalization.md](docs/architecture/orm-governance/django-canonical-authority-formalization.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/drizzle-scope-reconstruction.md](docs/architecture/orm-governance/drizzle-scope-reconstruction.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/environment-bootstrap-strategy.md](docs/architecture/orm-governance/environment-bootstrap-strategy.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md](docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/governance-attachment-to-orm-authority.md](docs/architecture/orm-governance/governance-attachment-to-orm-authority.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/historical-migration-lineage-governance.md](docs/architecture/orm-governance/historical-migration-lineage-governance.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/master-orm-governance-index.md](docs/architecture/orm-governance/master-orm-governance-index.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/migration-execution-governance.md](docs/architecture/orm-governance/migration-execution-governance.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/migration-legitimacy-validation-system.md](docs/architecture/orm-governance/migration-legitimacy-validation-system.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/orm-authority-governance.md](docs/architecture/orm-governance/orm-authority-governance.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/orm-authority-runtime-governance-attachment.md](docs/architecture/orm-governance/orm-authority-runtime-governance-attachment.md) | architecture | 2026-05-09 | current |
+| [docs/architecture/orm-governance/orm-governance-readiness-review.md](docs/architecture/orm-governance/orm-governance-readiness-review.md) | architecture | 2026-05-09 | current |
 | [docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md](docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md) | architecture | 2026-04-15 | current |
 | [docs/architecture/platform-event-bus.md](docs/architecture/platform-event-bus.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/policy-engine.md](docs/architecture/policy-engine.md) | architecture | 2026-03-13 | current |
 | [docs/architecture/POLYGLOT_PERSISTENCE.md](docs/architecture/POLYGLOT_PERSISTENCE.md) | architecture | 2026-04-11 | current |
 | [docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md](docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md) | architecture | 2026-04-24 | current |
-| [docs/architecture/STACK_AUTHORITY.md](docs/architecture/STACK_AUTHORITY.md) | architecture | 2026-04-27 | current |
+| [docs/architecture/STACK_AUTHORITY.md](docs/architecture/STACK_AUTHORITY.md) | architecture | 2026-05-07 | current |
 | [docs/architecture/STACK_FRAGMENTATION_MATRIX.md](docs/architecture/STACK_FRAGMENTATION_MATRIX.md) | architecture | 2026-04-11 | current |
 | [docs/architecture/tools-nzila-cto-technical-strategy-summary.md](docs/architecture/tools-nzila-cto-technical-strategy-summary.md) | architecture | 2026-03-21 | current |
 | [docs/architecture/VERTICAL_SCAFFOLDING.md](docs/architecture/VERTICAL_SCAFFOLDING.md) | architecture | 2026-02-28 | current |
@@ -130,9 +155,253 @@ Stale documents (>90 days since repo validation): 0
 | [docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md](docs/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md) | archive | 2026-04-24 | current |
 | [docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md](docs/archive/audit-reports/PREDEPLOYMENT_AUDIT_2026-04-09.md) | archive | 2026-04-24 | current |
 | [docs/archive/CLEANUP_CHANGE_SUMMARY.md](docs/archive/CLEANUP_CHANGE_SUMMARY.md) | archive | 2026-04-24 | current |
-| [docs/archive/README.md](docs/archive/README.md) | archive | 2026-04-10 | current |
-| [docs/backlog/abr-backend.md](docs/backlog/abr-backend.md) | backlog | 2026-03-02 | current |
-| [docs/backlog/REMEDIATION_TASKS.md](docs/backlog/REMEDIATION_TASKS.md) | backlog | 2026-04-24 | current |
+| [docs/archive/iterations/backlog/abr-backend.md](docs/archive/iterations/backlog/abr-backend.md) | archive | 2026-03-02 | current |
+| [docs/archive/iterations/backlog/REMEDIATION_TASKS.md](docs/archive/iterations/backlog/REMEDIATION_TASKS.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/architecture.md](docs/archive/iterations/institutional-operating-intelligence/architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/explainability.md](docs/archive/iterations/institutional-operating-intelligence/explainability.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/extension-guide.md](docs/archive/iterations/institutional-operating-intelligence/extension-guide.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/governance-safety.md](docs/archive/iterations/institutional-operating-intelligence/governance-safety.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/ontology.md](docs/archive/iterations/institutional-operating-intelligence/ontology.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/institutional-operating-intelligence/README.md](docs/archive/iterations/institutional-operating-intelligence/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/cfo-cognition-realignment.md](docs/archive/iterations/nzila-cognition-doctrine/cfo-cognition-realignment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/cross-app-cognition-consistency.md](docs/archive/iterations/nzila-cognition-doctrine/cross-app-cognition-consistency.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/executiveos-cognition-realignment.md](docs/archive/iterations/nzila-cognition-doctrine/executiveos-cognition-realignment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/faircase-governance-realignment.md](docs/archive/iterations/nzila-cognition-doctrine/faircase-governance-realignment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/final-cognition-convergence-readiness-review.md](docs/archive/iterations/nzila-cognition-doctrine/final-cognition-convergence-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md](docs/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/global-ux-cognition-refactor.md](docs/archive/iterations/nzila-cognition-doctrine/global-ux-cognition-refactor.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md](docs/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/knowledge-memory-infrastructure-refactor.md](docs/archive/iterations/nzila-cognition-doctrine/knowledge-memory-infrastructure-refactor.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/platform-cognition-substrate-refactor.md](docs/archive/iterations/nzila-cognition-doctrine/platform-cognition-substrate-refactor.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/procurement-governance-positioning-refactor.md](docs/archive/iterations/nzila-cognition-doctrine/procurement-governance-positioning-refactor.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/README.md](docs/archive/iterations/nzila-cognition-doctrine/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/repo-wide-intelligence-audit.md](docs/archive/iterations/nzila-cognition-doctrine/repo-wide-intelligence-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-cognition-doctrine/ue-intelligence-realignment.md](docs/archive/iterations/nzila-cognition-doctrine/ue-intelligence-realignment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/cross-app-field-operations-consistency.md](docs/archive/iterations/nzila-field-operations/cross-app-field-operations-consistency.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/environment-lifecycle-governance.md](docs/archive/iterations/nzila-field-operations/environment-lifecycle-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/executive-briefing-rhythm.md](docs/archive/iterations/nzila-field-operations/executive-briefing-rhythm.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/field-operations-readiness-review.md](docs/archive/iterations/nzila-field-operations/field-operations-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/field-operations-workflow-fabric.md](docs/archive/iterations/nzila-field-operations/field-operations-workflow-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/governance-review-cadence.md](docs/archive/iterations/nzila-field-operations/governance-review-cadence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/institutional-field-operations-framework.md](docs/archive/iterations/nzila-field-operations/institutional-field-operations-framework.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/live-operational-readiness-system.md](docs/archive/iterations/nzila-field-operations/live-operational-readiness-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/master-field-operations-index.md](docs/archive/iterations/nzila-field-operations/master-field-operations-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/onboarding-governance-operations.md](docs/archive/iterations/nzila-field-operations/onboarding-governance-operations.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/operational-legitimacy-audit-system.md](docs/archive/iterations/nzila-field-operations/operational-legitimacy-audit-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/operational-rehearsal-governance.md](docs/archive/iterations/nzila-field-operations/operational-rehearsal-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/operator-cadence-system.md](docs/archive/iterations/nzila-field-operations/operator-cadence-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/pilot-execution-discipline.md](docs/archive/iterations/nzila-field-operations/pilot-execution-discipline.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-field-operations/stabilization-operations-system.md](docs/archive/iterations/nzila-field-operations/stabilization-operations-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/cross-app-live-e2e-realism-matrix.md](docs/archive/iterations/nzila-final-convergence/cross-app-live-e2e-realism-matrix.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/cross-app-ux-embodiment-finalization.md](docs/archive/iterations/nzila-final-convergence/cross-app-ux-embodiment-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/executive-procurement-realism-hardening.md](docs/archive/iterations/nzila-final-convergence/executive-procurement-realism-hardening.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/final-full-maturity-review.md](docs/archive/iterations/nzila-final-convergence/final-full-maturity-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/institutional-field-pressure-hardening.md](docs/archive/iterations/nzila-final-convergence/institutional-field-pressure-hardening.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/live-operational-adoption-hardening.md](docs/archive/iterations/nzila-final-convergence/live-operational-adoption-hardening.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/master-final-convergence-index.md](docs/archive/iterations/nzila-final-convergence/master-final-convergence-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/package-naming-substrate-finalization.md](docs/archive/iterations/nzila-final-convergence/package-naming-substrate-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/README.md](docs/archive/iterations/nzila-final-convergence/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/real-operator-journey-finalization.md](docs/archive/iterations/nzila-final-convergence/real-operator-journey-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-final-convergence/runtime-semantic-convergence.md](docs/archive/iterations/nzila-final-convergence/runtime-semantic-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/canonical-operating-system-navigation.md](docs/archive/iterations/nzila-finalization/canonical-operating-system-navigation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/cross-app-e2e-validation-matrix.md](docs/archive/iterations/nzila-finalization/cross-app-e2e-validation-matrix.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/executive-operating-system-finalization.md](docs/archive/iterations/nzila-finalization/executive-operating-system-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/final-operating-system-readiness-review.md](docs/archive/iterations/nzila-finalization/final-operating-system-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/final-operational-legitimacy-audit.md](docs/archive/iterations/nzila-finalization/final-operational-legitimacy-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/full-ecosystem-convergence-finalization.md](docs/archive/iterations/nzila-finalization/full-ecosystem-convergence-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/full-environment-go-certification-program.md](docs/archive/iterations/nzila-finalization/full-environment-go-certification-program.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/full-role-experience-convergence.md](docs/archive/iterations/nzila-finalization/full-role-experience-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/live-full-chain-operational-rehearsal.md](docs/archive/iterations/nzila-finalization/live-full-chain-operational-rehearsal.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/master-finalization-index.md](docs/archive/iterations/nzila-finalization/master-finalization-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-finalization/production-readiness-hardening.md](docs/archive/iterations/nzila-finalization/production-readiness-hardening.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/continuity-posture-experience.md](docs/archive/iterations/nzila-governance-experience/continuity-posture-experience.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/cross-product-governance-experience-fabric.md](docs/archive/iterations/nzila-governance-experience/cross-product-governance-experience-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/deployment-legitimacy-experience.md](docs/archive/iterations/nzila-governance-experience/deployment-legitimacy-experience.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/executive-governance-experience.md](docs/archive/iterations/nzila-governance-experience/executive-governance-experience.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/governance-evidence-experience.md](docs/archive/iterations/nzila-governance-experience/governance-evidence-experience.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/governance-experience-design-system.md](docs/archive/iterations/nzila-governance-experience/governance-experience-design-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/governance-experience-readiness-review.md](docs/archive/iterations/nzila-governance-experience/governance-experience-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/governance-experience-system.md](docs/archive/iterations/nzila-governance-experience/governance-experience-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/governance-review-experience.md](docs/archive/iterations/nzila-governance-experience/governance-review-experience.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/institutional-operator-validation-program.md](docs/archive/iterations/nzila-governance-experience/institutional-operator-validation-program.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/live-governance-surfaces.md](docs/archive/iterations/nzila-governance-experience/live-governance-surfaces.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/live-operational-governance-panels.md](docs/archive/iterations/nzila-governance-experience/live-operational-governance-panels.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/master-governance-experience-index.md](docs/archive/iterations/nzila-governance-experience/master-governance-experience-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/README.md](docs/archive/iterations/nzila-governance-experience/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/real-operational-workflows.md](docs/archive/iterations/nzila-governance-experience/real-operational-workflows.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-experience/runtime-ui-embodiment.md](docs/archive/iterations/nzila-governance-experience/runtime-ui-embodiment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/continuity-posture-review-system.md](docs/archive/iterations/nzila-governance-operations/continuity-posture-review-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/cross-product-governance-operations-fabric.md](docs/archive/iterations/nzila-governance-operations/cross-product-governance-operations-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/deployment-legitimacy-review-panels.md](docs/archive/iterations/nzila-governance-operations/deployment-legitimacy-review-panels.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/executive-governance-review-workflows.md](docs/archive/iterations/nzila-governance-operations/executive-governance-review-workflows.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-evidence-explorer.md](docs/archive/iterations/nzila-governance-operations/governance-evidence-explorer.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-operations-dashboard-system.md](docs/archive/iterations/nzila-governance-operations/governance-operations-dashboard-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-operations-event-interpretation.md](docs/archive/iterations/nzila-governance-operations/governance-operations-event-interpretation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-operations-readiness-review.md](docs/archive/iterations/nzila-governance-operations/governance-operations-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-operations-role-model.md](docs/archive/iterations/nzila-governance-operations/governance-operations-role-model.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/governance-operations-ui-system.md](docs/archive/iterations/nzila-governance-operations/governance-operations-ui-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/live-governance-review-panels.md](docs/archive/iterations/nzila-governance-operations/live-governance-review-panels.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/master-governance-operations-index.md](docs/archive/iterations/nzila-governance-operations/master-governance-operations-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/README.md](docs/archive/iterations/nzila-governance-operations/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/runtime-attestation-visibility-system.md](docs/archive/iterations/nzila-governance-operations/runtime-attestation-visibility-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance-operations/stabilization-signals-system.md](docs/archive/iterations/nzila-governance-operations/stabilization-signals-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/architectural-doctrine-review-system.md](docs/archive/iterations/nzila-governance/architectural-doctrine-review-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/continuity-safe-ai-governance.md](docs/archive/iterations/nzila-governance/continuity-safe-ai-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md](docs/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/doctrine-compatible-product-expansion-framework.md](docs/archive/iterations/nzila-governance/doctrine-compatible-product-expansion-framework.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/doctrine-compliance-review-framework.md](docs/archive/iterations/nzila-governance/doctrine-compliance-review-framework.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/doctrine-governance-scorecard.md](docs/archive/iterations/nzila-governance/doctrine-governance-scorecard.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/doctrine-operationalization-readiness-review.md](docs/archive/iterations/nzila-governance/doctrine-operationalization-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/doctrine-to-product-mapping.md](docs/archive/iterations/nzila-governance/doctrine-to-product-mapping.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/executable-doctrine-enforcement.md](docs/archive/iterations/nzila-governance/executable-doctrine-enforcement.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md](docs/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/institutional-design-governance.md](docs/archive/iterations/nzila-governance/institutional-design-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md](docs/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/master-governance-index.md](docs/archive/iterations/nzila-governance/master-governance-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-governance/README.md](docs/archive/iterations/nzila-governance/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-hq/README.md](docs/archive/iterations/nzila-hq/README.md) | archive | 2026-04-30 | current |
+| [docs/archive/iterations/nzila-hq/ROADMAP.md](docs/archive/iterations/nzila-hq/ROADMAP.md) | archive | 2026-04-30 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/environment-isolation-implementation.md](docs/archive/iterations/nzila-infrastructure-convergence/environment-isolation-implementation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/final-live-infrastructure-certification.md](docs/archive/iterations/nzila-infrastructure-convergence/final-live-infrastructure-certification.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-database-migration-legitimacy.md](docs/archive/iterations/nzila-infrastructure-convergence/full-database-migration-legitimacy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-deployment-parity-convergence.md](docs/archive/iterations/nzila-infrastructure-convergence/full-deployment-parity-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-domain-url-convergence.md](docs/archive/iterations/nzila-infrastructure-convergence/full-domain-url-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-live-e2e-certification.md](docs/archive/iterations/nzila-infrastructure-convergence/full-live-e2e-certification.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-persona-auth-reality-convergence.md](docs/archive/iterations/nzila-infrastructure-convergence/full-persona-auth-reality-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-pilot-mode-feature-flag-convergence.md](docs/archive/iterations/nzila-infrastructure-convergence/full-pilot-mode-feature-flag-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-production-readiness-hardening.md](docs/archive/iterations/nzila-infrastructure-convergence/full-production-readiness-hardening.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/full-release-rollback-legitimacy.md](docs/archive/iterations/nzila-infrastructure-convergence/full-release-rollback-legitimacy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/live-infrastructure-discovery.md](docs/archive/iterations/nzila-infrastructure-convergence/live-infrastructure-discovery.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-infrastructure-convergence/README.md](docs/archive/iterations/nzila-infrastructure-convergence/README.md) | archive | 2026-05-10 | current |
+| [docs/archive/iterations/nzila-ip/category-creation-strategy.md](docs/archive/iterations/nzila-ip/category-creation-strategy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/competitive-paradigm-analysis.md](docs/archive/iterations/nzila-ip/competitive-paradigm-analysis.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/continuity-field-activation.md](docs/archive/iterations/nzila-ip/continuity-field-activation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/continuity-metrics-philosophy.md](docs/archive/iterations/nzila-ip/continuity-metrics-philosophy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/continuity-ontology.md](docs/archive/iterations/nzila-ip/continuity-ontology.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/continuity-signals-taxonomy.md](docs/archive/iterations/nzila-ip/continuity-signals-taxonomy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/cross-vertical-doctrine-mapping.md](docs/archive/iterations/nzila-ip/cross-vertical-doctrine-mapping.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/doctrine-drift-governance.md](docs/archive/iterations/nzila-ip/doctrine-drift-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/doctrine-governance-hierarchy.md](docs/archive/iterations/nzila-ip/doctrine-governance-hierarchy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/doctrine-vs-implementation-boundary.md](docs/archive/iterations/nzila-ip/doctrine-vs-implementation-boundary.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/executable-experience-governance.md](docs/archive/iterations/nzila-ip/executable-experience-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/executive-cognitive-governance.md](docs/archive/iterations/nzila-ip/executive-cognitive-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/governance-safe-intelligence.md](docs/archive/iterations/nzila-ip/governance-safe-intelligence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/institutional-memory-governance.md](docs/archive/iterations/nzila-ip/institutional-memory-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/institutional-modernization-methodology.md](docs/archive/iterations/nzila-ip/institutional-modernization-methodology.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/institutional-risk-philosophy.md](docs/archive/iterations/nzila-ip/institutional-risk-philosophy.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/ip-commercialization-pathways.md](docs/archive/iterations/nzila-ip/ip-commercialization-pathways.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/ip-formalization-readiness-review.md](docs/archive/iterations/nzila-ip/ip-formalization-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/master-ip-index.md](docs/archive/iterations/nzila-ip/master-ip-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/operational-legitimacy-framework.md](docs/archive/iterations/nzila-ip/operational-legitimacy-framework.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/README.md](docs/archive/iterations/nzila-ip/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/role-centered-continuity-architecture.md](docs/archive/iterations/nzila-ip/role-centered-continuity-architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-ip/scenario-intelligence-framework.md](docs/archive/iterations/nzila-ip/scenario-intelligence-framework.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/authoritative-url-domain-audit.md](docs/archive/iterations/nzila-live-audit/authoritative-url-domain-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/final-live-operational-status-report.md](docs/archive/iterations/nzila-live-audit/final-live-operational-status-report.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/full-e2e-environment-validation.md](docs/archive/iterations/nzila-live-audit/full-e2e-environment-validation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/full-environment-inventory-audit.md](docs/archive/iterations/nzila-live-audit/full-environment-inventory-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/full-page-navigation-reality-audit.md](docs/archive/iterations/nzila-live-audit/full-page-navigation-reality-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/live-auth-role-access-audit.md](docs/archive/iterations/nzila-live-audit/live-auth-role-access-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/live-feature-gating-audit.md](docs/archive/iterations/nzila-live-audit/live-feature-gating-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/monetization-doctrine-alignment-audit.md](docs/archive/iterations/nzila-live-audit/monetization-doctrine-alignment-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/README.md](docs/archive/iterations/nzila-live-audit/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/test-persona-credentials-audit.md](docs/archive/iterations/nzila-live-audit/test-persona-credentials-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-live-audit/ue-whole-system-review.md](docs/archive/iterations/nzila-live-audit/ue-whole-system-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/cross-app-e2e-maturity-matrix.md](docs/archive/iterations/nzila-maturity-elevation/cross-app-e2e-maturity-matrix.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/cross-app-ux-maturity-convergence.md](docs/archive/iterations/nzila-maturity-elevation/cross-app-ux-maturity-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/executive-cognition-maturity-elevation.md](docs/archive/iterations/nzila-maturity-elevation/executive-cognition-maturity-elevation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/final-maturity-readiness-review.md](docs/archive/iterations/nzila-maturity-elevation/final-maturity-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/full-maturity-gap-audit.md](docs/archive/iterations/nzila-maturity-elevation/full-maturity-gap-audit.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/full-role-continuity-maturity.md](docs/archive/iterations/nzila-maturity-elevation/full-role-continuity-maturity.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/master-maturity-index.md](docs/archive/iterations/nzila-maturity-elevation/master-maturity-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/operational-cadence-maturity-finalization.md](docs/archive/iterations/nzila-maturity-elevation/operational-cadence-maturity-finalization.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/package-substrate-maturity-convergence.md](docs/archive/iterations/nzila-maturity-elevation/package-substrate-maturity-convergence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/procurement-maturity-elevation.md](docs/archive/iterations/nzila-maturity-elevation/procurement-maturity-elevation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/README.md](docs/archive/iterations/nzila-maturity-elevation/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-maturity-elevation/stabilization-ux-maturity.md](docs/archive/iterations/nzila-maturity-elevation/stabilization-ux-maturity.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/canonical-information-architecture.md](docs/archive/iterations/nzila-operational-convergence/canonical-information-architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/canonical-operational-architecture.md](docs/archive/iterations/nzila-operational-convergence/canonical-operational-architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/cross-app-operational-cadence.md](docs/archive/iterations/nzila-operational-convergence/cross-app-operational-cadence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/cross-app-operational-validation-program.md](docs/archive/iterations/nzila-operational-convergence/cross-app-operational-validation-program.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/cross-app-review-workflow-fabric.md](docs/archive/iterations/nzila-operational-convergence/cross-app-review-workflow-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/executive-cognitive-consistency.md](docs/archive/iterations/nzila-operational-convergence/executive-cognitive-consistency.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/governance-embodiment-consistency.md](docs/archive/iterations/nzila-operational-convergence/governance-embodiment-consistency.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/live-cross-app-convergence-implementation.md](docs/archive/iterations/nzila-operational-convergence/live-cross-app-convergence-implementation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/master-operational-convergence-index.md](docs/archive/iterations/nzila-operational-convergence/master-operational-convergence-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/operational-convergence-readiness-review.md](docs/archive/iterations/nzila-operational-convergence/operational-convergence-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/operator-journey-consistency.md](docs/archive/iterations/nzila-operational-convergence/operator-journey-consistency.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/README.md](docs/archive/iterations/nzila-operational-convergence/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/shared-navigation-grammar.md](docs/archive/iterations/nzila-operational-convergence/shared-navigation-grammar.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/shared-operational-design-system.md](docs/archive/iterations/nzila-operational-convergence/shared-operational-design-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/shared-operational-language-system.md](docs/archive/iterations/nzila-operational-convergence/shared-operational-language-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/shared-role-experience-model.md](docs/archive/iterations/nzila-operational-convergence/shared-role-experience-model.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-convergence/shared-stabilization-ux-system.md](docs/archive/iterations/nzila-operational-convergence/shared-stabilization-ux-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/cross-app-operational-convergence-proving.md](docs/archive/iterations/nzila-operational-proving/cross-app-operational-convergence-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/environment-restoration-proving.md](docs/archive/iterations/nzila-operational-proving/environment-restoration-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/executive-operational-readability-proving.md](docs/archive/iterations/nzila-operational-proving/executive-operational-readability-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/full-environment-traversal-rehearsal.md](docs/archive/iterations/nzila-operational-proving/full-environment-traversal-rehearsal.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/live-cadence-sustainability-validation.md](docs/archive/iterations/nzila-operational-proving/live-cadence-sustainability-validation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/live-operator-walkthrough-program.md](docs/archive/iterations/nzila-operational-proving/live-operator-walkthrough-program.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/live-pilot-operations-proving.md](docs/archive/iterations/nzila-operational-proving/live-pilot-operations-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/live-rollback-proving.md](docs/archive/iterations/nzila-operational-proving/live-rollback-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/master-operational-proving-index.md](docs/archive/iterations/nzila-operational-proving/master-operational-proving-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/phase-c-final-readiness-review.md](docs/archive/iterations/nzila-operational-proving/phase-c-final-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-operational-proving/promotion-refusal-proving.md](docs/archive/iterations/nzila-operational-proving/promotion-refusal-proving.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/continuity-safe-rollout-system.md](docs/archive/iterations/nzila-rollout-governance/continuity-safe-rollout-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/cross-environment-governance-fabric.md](docs/archive/iterations/nzila-rollout-governance/cross-environment-governance-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/demo-governance-system.md](docs/archive/iterations/nzila-rollout-governance/demo-governance-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/environment-legitimacy-visibility.md](docs/archive/iterations/nzila-rollout-governance/environment-legitimacy-visibility.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/environment-promotion-governance.md](docs/archive/iterations/nzila-rollout-governance/environment-promotion-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/governed-rollback-system.md](docs/archive/iterations/nzila-rollout-governance/governed-rollback-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/institutional-onboarding-governance.md](docs/archive/iterations/nzila-rollout-governance/institutional-onboarding-governance.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/master-rollout-governance-index.md](docs/archive/iterations/nzila-rollout-governance/master-rollout-governance-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/operational-rollout-workflows.md](docs/archive/iterations/nzila-rollout-governance/operational-rollout-workflows.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/operator-rollout-workflows.md](docs/archive/iterations/nzila-rollout-governance/operator-rollout-workflows.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/pilot-governance-system.md](docs/archive/iterations/nzila-rollout-governance/pilot-governance-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/release-governance-cadence.md](docs/archive/iterations/nzila-rollout-governance/release-governance-cadence.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/foundations/rollout-attestation-fabric.md](docs/archive/iterations/nzila-rollout-governance/foundations/rollout-attestation-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/foundations/rollout-governance-readiness-review.md](docs/archive/iterations/nzila-rollout-governance/foundations/rollout-governance-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md](docs/archive/iterations/nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/continuity-observability-system.md](docs/archive/iterations/nzila-runtime-governance/continuity-observability-system.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/cross-product-governance-runtime-fabric.md](docs/archive/iterations/nzila-runtime-governance/cross-product-governance-runtime-fabric.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/deployment-legitimacy-validation-engine.md](docs/archive/iterations/nzila-runtime-governance/deployment-legitimacy-validation-engine.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/executive-cognitive-safety-monitoring.md](docs/archive/iterations/nzila-runtime-governance/executive-cognitive-safety-monitoring.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/governance-evidence-ledger.md](docs/archive/iterations/nzila-runtime-governance/governance-evidence-ledger.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/governance-policy-engine.md](docs/archive/iterations/nzila-runtime-governance/governance-policy-engine.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/governance-safe-ai-runtime-validation.md](docs/archive/iterations/nzila-runtime-governance/governance-safe-ai-runtime-validation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/governance-telemetry-architecture.md](docs/archive/iterations/nzila-runtime-governance/governance-telemetry-architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/master-runtime-governance-index.md](docs/archive/iterations/nzila-runtime-governance/master-runtime-governance-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/README.md](docs/archive/iterations/nzila-runtime-governance/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/runtime-assurance-engine.md](docs/archive/iterations/nzila-runtime-governance/runtime-assurance-engine.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/runtime-attestation-pipeline.md](docs/archive/iterations/nzila-runtime-governance/runtime-attestation-pipeline.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md](docs/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/runtime-governance-dashboard-architecture.md](docs/archive/iterations/nzila-runtime-governance/runtime-governance-dashboard-architecture.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-governance/runtime-governance-readiness-review.md](docs/archive/iterations/nzila-runtime-governance/runtime-governance-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/cicd-governance-automation.md](docs/archive/iterations/nzila-runtime-integration/cicd-governance-automation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/continuity-observability-runtime-embedding.md](docs/archive/iterations/nzila-runtime-integration/continuity-observability-runtime-embedding.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/cross-product-governance-runtime-activation.md](docs/archive/iterations/nzila-runtime-integration/cross-product-governance-runtime-activation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/e2e-governance-validation-harness.md](docs/archive/iterations/nzila-runtime-integration/e2e-governance-validation-harness.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/governance-evidence-emission.md](docs/archive/iterations/nzila-runtime-integration/governance-evidence-emission.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/governance-native-dashboard-embedding.md](docs/archive/iterations/nzila-runtime-integration/governance-native-dashboard-embedding.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/governance-policy-engine-live-execution.md](docs/archive/iterations/nzila-runtime-integration/governance-policy-engine-live-execution.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/governance-telemetry-live-pipeline.md](docs/archive/iterations/nzila-runtime-integration/governance-telemetry-live-pipeline.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/live-deployment-legitimacy-validation.md](docs/archive/iterations/nzila-runtime-integration/live-deployment-legitimacy-validation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/live-doctrine-enforcement-integration.md](docs/archive/iterations/nzila-runtime-integration/live-doctrine-enforcement-integration.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/live-runtime-attestation-generation.md](docs/archive/iterations/nzila-runtime-integration/live-runtime-attestation-generation.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/master-runtime-integration-index.md](docs/archive/iterations/nzila-runtime-integration/master-runtime-integration-index.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/opentelemetry-governance-integration.md](docs/archive/iterations/nzila-runtime-integration/opentelemetry-governance-integration.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/README.md](docs/archive/iterations/nzila-runtime-integration/README.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/nzila-runtime-integration/runtime-governance-activation-readiness-review.md](docs/archive/iterations/nzila-runtime-integration/runtime-governance-activation-readiness-review.md) | archive | 2026-05-09 | current |
+| [docs/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md](docs/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/plans/LOAD_PROJECTION_CAPACITY_PLAN.md](docs/archive/iterations/plans/LOAD_PROJECTION_CAPACITY_PLAN.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/plans/MASTER_ROLLOUT_PLAN.md](docs/archive/iterations/plans/MASTER_ROLLOUT_PLAN.md) | archive | 2026-04-26 | current |
+| [docs/archive/iterations/plans/partner-app-validation.md](docs/archive/iterations/plans/partner-app-validation.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/plans/probabilistic-cardinality-replicability-plan.md](docs/archive/iterations/plans/probabilistic-cardinality-replicability-plan.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/plans/REPO_ASSESSMENT.md](docs/archive/iterations/plans/REPO_ASSESSMENT.md) | archive | 2026-04-14 | current |
+| [docs/archive/iterations/plans/studio-maturity-10-of-10.md](docs/archive/iterations/plans/studio-maturity-10-of-10.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md](docs/archive/iterations/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md) | archive | 2026-04-24 | current |
+| [docs/archive/iterations/platform-surface-migrations/README.md](docs/archive/iterations/platform-surface-migrations/README.md) | archive | 2026-04-24 | current |
+| [docs/archive/README.md](docs/archive/README.md) | archive | 2026-05-10 | current |
 | [docs/builders/ARCHITECTURE_MAP.md](docs/builders/ARCHITECTURE_MAP.md) | builders | 2026-04-20 | current |
 | [docs/builders/COMMANDS.md](docs/builders/COMMANDS.md) | builders | 2026-04-20 | current |
 | [docs/builders/CONTRIBUTING.md](docs/builders/CONTRIBUTING.md) | builders | 2026-04-20 | current |
@@ -151,12 +420,19 @@ Stale documents (>90 days since repo validation): 0
 | [docs/buyers/sla-support-model.md](docs/buyers/sla-support-model.md) | buyers | 2026-04-24 | current |
 | [docs/buyers/union-eyes-buyer-pack.md](docs/buyers/union-eyes-buyer-pack.md) | buyers | 2026-04-19 | current |
 | [docs/buyers/union-eyes-revenue-playbook.md](docs/buyers/union-eyes-revenue-playbook.md) | buyers | 2026-04-18 | current |
+| [docs/categories/historical-archive/README.md](docs/categories/historical-archive/README.md) | categories | 2026-05-10 | current |
+| [docs/categories/platform-and-operations/README.md](docs/categories/platform-and-operations/README.md) | categories | 2026-05-10 | current |
+| [docs/categories/products-and-market/README.md](docs/categories/products-and-market/README.md) | categories | 2026-05-10 | current |
+| [docs/categories/README.md](docs/categories/README.md) | categories | 2026-05-10 | current |
+| [docs/categories/stakeholders/README.md](docs/categories/stakeholders/README.md) | categories | 2026-05-10 | current |
 | [docs/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md](docs/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md) | commerce | 2026-04-24 | current |
+| [docs/commerce/ADR/ADR-PE-002-engine-product-separation.md](docs/commerce/ADR/ADR-PE-002-engine-product-separation.md) | commerce | 2026-04-30 | current |
 | [docs/commerce/ADR/ADR-SQ-001-adapter-pattern.md](docs/commerce/ADR/ADR-SQ-001-adapter-pattern.md) | commerce | 2026-03-19 | current |
 | [docs/commerce/ADR/ADR-SQ-002-pricing-extraction.md](docs/commerce/ADR/ADR-SQ-002-pricing-extraction.md) | commerce | 2026-02-25 | current |
 | [docs/commerce/ADR/README.md](docs/commerce/ADR/README.md) | commerce | 2026-03-13 | current |
 | [docs/commerce/COMMERCIAL_INTEGRATION_REPORT.md](docs/commerce/COMMERCIAL_INTEGRATION_REPORT.md) | commerce | 2026-04-24 | current |
 | [docs/commerce/DOMAIN_MODEL_DRAFT.md](docs/commerce/DOMAIN_MODEL_DRAFT.md) | commerce | 2026-03-13 | current |
+| [docs/commerce/FLOW-MAESTRIA-COMMERCIAL-EXTRACTION.md](docs/commerce/FLOW-MAESTRIA-COMMERCIAL-EXTRACTION.md) | commerce | 2026-04-30 | current |
 | [docs/commerce/gtm-sales-engine.md](docs/commerce/gtm-sales-engine.md) | commerce | 2026-04-24 | current |
 | [docs/commerce/IRAP_TECHNICAL_DESIGN.md](docs/commerce/IRAP_TECHNICAL_DESIGN.md) | commerce | 2026-03-19 | current |
 | [docs/commerce/LEGACY_REVIEW.md](docs/commerce/LEGACY_REVIEW.md) | commerce | 2026-02-24 | current |
@@ -256,7 +532,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/demos/union-eyes-demo-seed.md](docs/demos/union-eyes-demo-seed.md) | demos | 2026-04-24 | current |
 | [docs/deploy/data-residency-audit.md](docs/deploy/data-residency-audit.md) | deploy | 2026-04-24 | current |
 | [docs/deploy/profiles.md](docs/deploy/profiles.md) | deploy | 2026-03-13 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-04-24 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-05-10 | current |
 | [docs/explanation/ai-risk-management.md](docs/explanation/ai-risk-management.md) | explanation | 2026-03-21 | current |
 | [docs/explanation/evidence-first.md](docs/explanation/evidence-first.md) | explanation | 2026-03-13 | current |
 | [docs/explanation/README.md](docs/explanation/README.md) | explanation | 2026-03-21 | current |
@@ -309,7 +585,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/governance/data-retention-policy.md](docs/governance/data-retention-policy.md) | governance | 2026-04-24 | current |
 | [docs/governance/DECISION_POLICY_MODEL.md](docs/governance/DECISION_POLICY_MODEL.md) | governance | 2026-03-13 | current |
 | [docs/governance/DECISION_REVIEW_WORKFLOW.md](docs/governance/DECISION_REVIEW_WORKFLOW.md) | governance | 2026-03-13 | current |
+| [docs/governance/decision-coverage-inventory.md](docs/governance/decision-coverage-inventory.md) | governance | 2026-05-02 | current |
+| [docs/governance/decision-intelligence-revenue.md](docs/governance/decision-intelligence-revenue.md) | governance | 2026-05-02 | current |
 | [docs/governance/enterprise-readiness.md](docs/governance/enterprise-readiness.md) | governance | 2026-04-20 | current |
+| [docs/governance/finance-controls.md](docs/governance/finance-controls.md) | governance | 2026-04-29 | current |
 | [docs/governance/GOVERNANCE_ARCHITECTURE.md](docs/governance/GOVERNANCE_ARCHITECTURE.md) | governance | 2026-03-13 | current |
 | [docs/governance/incident-response-summary.md](docs/governance/incident-response-summary.md) | governance | 2026-04-18 | current |
 | [docs/governance/PACKAGE_LIFECYCLE_POLICY.md](docs/governance/PACKAGE_LIFECYCLE_POLICY.md) | governance | 2026-03-13 | current |
@@ -321,6 +600,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/governance/PROCUREMENT_EVIDENCE_SYSTEM.md](docs/governance/PROCUREMENT_EVIDENCE_SYSTEM.md) | governance | 2026-03-19 | current |
 | [docs/governance/procurement-faq.md](docs/governance/procurement-faq.md) | governance | 2026-04-18 | current |
 | [docs/governance/procurement-pack.md](docs/governance/procurement-pack.md) | governance | 2026-03-13 | current |
+| [docs/governance/README.md](docs/governance/README.md) | governance | 2026-05-02 | current |
 | [docs/governance/rfp-generator.md](docs/governance/rfp-generator.md) | governance | 2026-03-13 | current |
 | [docs/governance/secure-coding-training.md](docs/governance/secure-coding-training.md) | governance | 2026-04-24 | current |
 | [docs/governance/security-overview.md](docs/governance/security-overview.md) | governance | 2026-04-18 | current |
@@ -368,10 +648,11 @@ Stale documents (>90 days since repo validation): 0
 | [docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | how-to | 2026-04-24 | current |
 | [docs/how-to/README.md](docs/how-to/README.md) | how-to | 2026-03-21 | current |
 | [docs/how-to/rotate-secrets.md](docs/how-to/rotate-secrets.md) | how-to | 2026-03-05 | current |
-| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-04-20 | current |
-| [docs/index/doc-map.md](docs/index/doc-map.md) | index | 2026-04-24 | current |
+| [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-05-10 | current |
+| [docs/index/doc-map.md](docs/index/doc-map.md) | index | 2026-05-09 | current |
 | [docs/index/glossary.md](docs/index/glossary.md) | index | 2026-04-11 | current |
 | [docs/index/README.md](docs/index/README.md) | index | 2026-04-24 | current |
+| [docs/intelligence/decision-pipeline-operations.md](docs/intelligence/decision-pipeline-operations.md) | intelligence | 2026-05-02 | current |
 | [docs/investor/defensible-moat-analysis.md](docs/investor/defensible-moat-analysis.md) | investor | 2026-04-18 | current |
 | [docs/investor/final-investor-onepager.md](docs/investor/final-investor-onepager.md) | investor | 2026-04-24 | current |
 | [docs/investor/product-expansion-strategy.md](docs/investor/product-expansion-strategy.md) | investor | 2026-04-18 | current |
@@ -396,8 +677,20 @@ Stale documents (>90 days since repo validation): 0
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-03-13 | current |
 | [docs/migration/trade/TRADE-DELIVERABLES.md](docs/migration/trade/TRADE-DELIVERABLES.md) | migration | 2026-03-13 | current |
 | [docs/migration/zonga-legacy-inventory.md](docs/migration/zonga-legacy-inventory.md) | migration | 2026-03-13 | current |
-| [docs/nzila-hq/README.md](docs/nzila-hq/README.md) | nzila-hq | 2026-04-28 | current |
-| [docs/nzila-hq/ROADMAP.md](docs/nzila-hq/ROADMAP.md) | nzila-hq | 2026-04-28 | current |
+| [docs/nzila-assurance/assurance-readiness-review.md](docs/nzila-assurance/assurance-readiness-review.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/automated-governance-evidence-system.md](docs/nzila-assurance/automated-governance-evidence-system.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/continuity-governance-attestation-model.md](docs/nzila-assurance/continuity-governance-attestation-model.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/continuous-doctrine-compliance-observability.md](docs/nzila-assurance/continuous-doctrine-compliance-observability.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/environment-governance-assurance.md](docs/nzila-assurance/environment-governance-assurance.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/executive-cognitive-safety-assurance.md](docs/nzila-assurance/executive-cognitive-safety-assurance.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/governance-evidence-pipeline-architecture.md](docs/nzila-assurance/governance-evidence-pipeline-architecture.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/governance-safe-ai-assurance-model.md](docs/nzila-assurance/governance-safe-ai-assurance-model.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/institutional-certification-framework.md](docs/nzila-assurance/institutional-certification-framework.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/institutional-trust-scoring-model.md](docs/nzila-assurance/institutional-trust-scoring-model.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/master-assurance-index.md](docs/nzila-assurance/master-assurance-index.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/operational-legitimacy-assurance-system.md](docs/nzila-assurance/operational-legitimacy-assurance-system.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/procurement-assurance-framework.md](docs/nzila-assurance/procurement-assurance-framework.md) | nzila-assurance | 2026-05-09 | current |
+| [docs/nzila-assurance/README.md](docs/nzila-assurance/README.md) | nzila-assurance | 2026-05-09 | current |
 | [docs/operators/WORKFLOW_MAP.md](docs/operators/WORKFLOW_MAP.md) | operators | 2026-04-24 | current |
 | [docs/ops/cba-intelligence-runbook.md](docs/ops/cba-intelligence-runbook.md) | ops | 2026-04-01 | current |
 | [docs/ops/COMMAND_CENTER.md](docs/ops/COMMAND_CENTER.md) | ops | 2026-04-24 | current |
@@ -430,8 +723,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md](docs/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md) | ops | 2026-04-24 | current |
 | [docs/ops/REPO_OPERATOR_RUNBOOK.md](docs/ops/REPO_OPERATOR_RUNBOOK.md) | ops | 2026-04-01 | current |
 | [docs/ops/revenue-metrics-canonical-layer.md](docs/ops/revenue-metrics-canonical-layer.md) | ops | 2026-04-24 | current |
-| [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-04-20 | current |
-| [docs/ops/sre/portfolio-reliability-audit.md](docs/ops/sre/portfolio-reliability-audit.md) | ops | 2026-04-20 | current |
+| [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-04 | current |
+| [docs/ops/sre/portfolio-reliability-audit.md](docs/ops/sre/portfolio-reliability-audit.md) | ops | 2026-05-04 | current |
 | [docs/ops/sre/staging-recovery-dashboard.md](docs/ops/sre/staging-recovery-dashboard.md) | ops | 2026-04-20 | current |
 | [docs/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md](docs/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md) | ops | 2026-04-24 | current |
 | [docs/ops/staging-recovery-runbook.md](docs/ops/staging-recovery-runbook.md) | ops | 2026-04-23 | current |
@@ -453,15 +746,6 @@ Stale documents (>90 days since repo validation): 0
 | [docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md](docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md) | pilot | 2026-04-14 | current |
 | [docs/pilot/cupe/CUPE_RBAC_MATRIX.md](docs/pilot/cupe/CUPE_RBAC_MATRIX.md) | pilot | 2026-04-01 | current |
 | [docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md](docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md) | pilot | 2026-04-14 | current |
-| [docs/plans/IMPLEMENTATION_PLAN_FINAL.md](docs/plans/IMPLEMENTATION_PLAN_FINAL.md) | plans | 2026-04-24 | current |
-| [docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md](docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md) | plans | 2026-04-24 | current |
-| [docs/plans/MASTER_ROLLOUT_PLAN.md](docs/plans/MASTER_ROLLOUT_PLAN.md) | plans | 2026-04-26 | current |
-| [docs/plans/partner-app-validation.md](docs/plans/partner-app-validation.md) | plans | 2026-04-24 | current |
-| [docs/plans/probabilistic-cardinality-replicability-plan.md](docs/plans/probabilistic-cardinality-replicability-plan.md) | plans | 2026-04-24 | current |
-| [docs/plans/REPO_ASSESSMENT.md](docs/plans/REPO_ASSESSMENT.md) | plans | 2026-04-14 | current |
-| [docs/plans/studio-maturity-10-of-10.md](docs/plans/studio-maturity-10-of-10.md) | plans | 2026-04-24 | current |
-| [docs/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md](docs/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md) | plans | 2026-04-24 | current |
-| [docs/platform-surface-migrations/README.md](docs/platform-surface-migrations/README.md) | platform-surface-migrations | 2026-04-24 | current |
 | [docs/platform/acceptance-matrix.md](docs/platform/acceptance-matrix.md) | platform | 2026-02-28 | current |
 | [docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md) | platform | 2026-04-17 | current |
 | [docs/platform/AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md](docs/platform/AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md) | platform | 2026-04-17 | current |
@@ -502,8 +786,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/platform/PLATFORM_CONSOLIDATION_COMPLETION_REPORT.md](docs/platform/PLATFORM_CONSOLIDATION_COMPLETION_REPORT.md) | platform | 2026-04-15 | current |
 | [docs/platform/PLATFORM_OPERATING_MODEL.md](docs/platform/PLATFORM_OPERATING_MODEL.md) | platform | 2026-04-24 | current |
 | [docs/platform/PLATFORM_SURFACE_MODEL.md](docs/platform/PLATFORM_SURFACE_MODEL.md) | platform | 2026-04-20 | current |
-| [docs/platform/platform-boundaries.md](docs/platform/platform-boundaries.md) | platform | 2026-04-29 | current |
-| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-04-28 | current |
+| [docs/platform/platform-boundaries.md](docs/platform/platform-boundaries.md) | platform | 2026-05-07 | current |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-07 | current |
 | [docs/platform/proof/ai-controlled-request.md](docs/platform/proof/ai-controlled-request.md) | platform | 2026-03-19 | current |
 | [docs/platform/proof/compliance-sensitive-action.md](docs/platform/proof/compliance-sensitive-action.md) | platform | 2026-03-19 | current |
 | [docs/platform/proof/demo-script.md](docs/platform/proof/demo-script.md) | platform | 2026-04-24 | current |
@@ -537,12 +821,13 @@ Stale documents (>90 days since repo validation): 0
 | [docs/public/procurement-statements.md](docs/public/procurement-statements.md) | public | 2026-04-24 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-04-27 | current |
 | [docs/public/trust-center.md](docs/public/trust-center.md) | public | 2026-04-27 | current |
-| [docs/README.md](docs/README.md) | README.md | 2026-04-20 | current |
+| [docs/README.md](docs/README.md) | README.md | 2026-05-10 | current |
 | [docs/reference/DEFERRED_ITEMS.md](docs/reference/DEFERRED_ITEMS.md) | reference | 2026-04-11 | current |
 | [docs/reference/packages.md](docs/reference/packages.md) | reference | 2026-03-05 | current |
 | [docs/reference/README.md](docs/reference/README.md) | reference | 2026-03-13 | current |
 | [docs/reference/TENANT_INVENTORY.md](docs/reference/TENANT_INVENTORY.md) | reference | 2026-04-10 | current |
 | [docs/reference/UNION_EYES_CURRENT_STATE.md](docs/reference/UNION_EYES_CURRENT_STATE.md) | reference | 2026-04-24 | current |
+| [docs/releases/finance-core-readiness.md](docs/releases/finance-core-readiness.md) | releases | 2026-04-29 | current |
 | [docs/REMEDIATION_TASKS.md](docs/REMEDIATION_TASKS.md) | REMEDIATION_TASKS.md | 2026-04-20 | current |
 | [docs/repo-contract/invariants.md](docs/repo-contract/invariants.md) | repo-contract | 2026-03-13 | current |
 | [docs/repo-contract/README.md](docs/repo-contract/README.md) | repo-contract | 2026-02-20 | current |
@@ -553,10 +838,16 @@ Stale documents (>90 days since repo validation): 0
 | [docs/runbooks/branching-tagging-governance.md](docs/runbooks/branching-tagging-governance.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/cloudflare-dns-migration.md](docs/runbooks/cloudflare-dns-migration.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/conference-playbook.md](docs/runbooks/conference-playbook.md) | runbooks | 2026-04-24 | current |
+| [docs/runbooks/data-recovery.md](docs/runbooks/data-recovery.md) | runbooks | 2026-04-30 | current |
+| [docs/runbooks/degraded-mode.md](docs/runbooks/degraded-mode.md) | runbooks | 2026-04-30 | current |
 | [docs/runbooks/dns-cutover-zero-downtime.md](docs/runbooks/dns-cutover-zero-downtime.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/final-ops-backlog.md](docs/runbooks/final-ops-backlog.md) | runbooks | 2026-04-23 | current |
+| [docs/runbooks/finance-operations.md](docs/runbooks/finance-operations.md) | runbooks | 2026-04-29 | current |
 | [docs/runbooks/growthos-operator-runbook.md](docs/runbooks/growthos-operator-runbook.md) | runbooks | 2026-04-24 | current |
+| [docs/runbooks/incident-response.md](docs/runbooks/incident-response.md) | runbooks | 2026-04-30 | current |
 | [docs/runbooks/outbound-operator-runbook.md](docs/runbooks/outbound-operator-runbook.md) | runbooks | 2026-04-24 | current |
+| [docs/runbooks/pipeline-alerting-incident-playbook.md](docs/runbooks/pipeline-alerting-incident-playbook.md) | runbooks | 2026-05-02 | current |
+| [docs/runbooks/rollback-procedure.md](docs/runbooks/rollback-procedure.md) | runbooks | 2026-04-30 | current |
 | [docs/runbooks/UNION_EYES_DB_AND_MIGRATION_STATE.md](docs/runbooks/UNION_EYES_DB_AND_MIGRATION_STATE.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/UNION_EYES_FINAL_READINESS_MATRIX.md](docs/runbooks/UNION_EYES_FINAL_READINESS_MATRIX.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/UNION_EYES_INTEGRATION_REGISTER.md](docs/runbooks/UNION_EYES_INTEGRATION_REGISTER.md) | runbooks | 2026-04-24 | current |
@@ -566,10 +857,13 @@ Stale documents (>90 days since repo validation): 0
 | [docs/runbooks/union-eyes-auth-operations.md](docs/runbooks/union-eyes-auth-operations.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/union-eyes-domain-topology.md](docs/runbooks/union-eyes-domain-topology.md) | runbooks | 2026-04-24 | current |
 | [docs/runbooks/union-eyes-identity-lifecycle.md](docs/runbooks/union-eyes-identity-lifecycle.md) | runbooks | 2026-04-24 | current |
+| [docs/runtime-proof.md](docs/runtime-proof.md) | runtime-proof.md | 2026-05-01 | current |
+| [docs/security/ai-security-overview.md](docs/security/ai-security-overview.md) | security | 2026-05-04 | current |
 | [docs/security/dns-secrets-policy.md](docs/security/dns-secrets-policy.md) | security | 2026-04-22 | current |
 | [docs/security/pentest-readiness-self-assessment.md](docs/security/pentest-readiness-self-assessment.md) | security | 2026-04-24 | current |
 | [docs/security/secrets-hardening-report.md](docs/security/secrets-hardening-report.md) | security | 2026-04-24 | current |
 | [docs/security/static-analysis-suppressions.md](docs/security/static-analysis-suppressions.md) | security | 2026-04-24 | current |
+| [docs/security/ue-ai-surface-inventory.md](docs/security/ue-ai-surface-inventory.md) | security | 2026-05-04 | current |
 | [docs/security/UNION_EYES_AI_RUNTIME_AND_GOVERNANCE.md](docs/security/UNION_EYES_AI_RUNTIME_AND_GOVERNANCE.md) | security | 2026-04-24 | current |
 | [docs/security/UNION_EYES_AUTH_MODEL.md](docs/security/UNION_EYES_AUTH_MODEL.md) | security | 2026-04-23 | current |
 | [docs/security/UNION_EYES_MFA_AND_PASSWORDLESS.md](docs/security/UNION_EYES_MFA_AND_PASSWORDLESS.md) | security | 2026-04-23 | current |
@@ -589,6 +883,20 @@ Stale documents (>90 days since repo validation): 0
 | [docs/tutorials/README.md](docs/tutorials/README.md) | tutorials | 2026-03-21 | current |
 | [docs/union-eyes/admin-guide.md](docs/union-eyes/admin-guide.md) | union-eyes | 2026-04-14 | current |
 | [docs/union-eyes/case-intelligence.md](docs/union-eyes/case-intelligence.md) | union-eyes | 2026-04-16 | current |
+| [docs/union-eyes/clc/booth-operations-runbook.md](docs/union-eyes/clc/booth-operations-runbook.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-environment-guide.md](docs/union-eyes/clc/demo-environment-guide.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-environment-realism-backlog.md](docs/union-eyes/clc/demo-environment-realism-backlog.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-scripts/executive-demo.md](docs/union-eyes/clc/demo-scripts/executive-demo.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-scripts/governance-demo.md](docs/union-eyes/clc/demo-scripts/governance-demo.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-scripts/member-demo.md](docs/union-eyes/clc/demo-scripts/member-demo.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-scripts/procurement-demo.md](docs/union-eyes/clc/demo-scripts/procurement-demo.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/demo-scripts/steward-demo.md](docs/union-eyes/clc/demo-scripts/steward-demo.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/executive-visual-polish-checklist.md](docs/union-eyes/clc/executive-visual-polish-checklist.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/final-clc-readiness-report.md](docs/union-eyes/clc/final-clc-readiness-report.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/human-walkthrough-validation.md](docs/union-eyes/clc/human-walkthrough-validation.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/live-demo-rehearsal-scorecards.md](docs/union-eyes/clc/live-demo-rehearsal-scorecards.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/clc/pilot-scope-freeze.md](docs/union-eyes/clc/pilot-scope-freeze.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/deployment/cupe-pilot-to-prod-transition.md](docs/union-eyes/deployment/cupe-pilot-to-prod-transition.md) | union-eyes | 2026-05-04 | current |
 | [docs/union-eyes/dr/blob-recovery.md](docs/union-eyes/dr/blob-recovery.md) | union-eyes | 2026-04-24 | current |
 | [docs/union-eyes/dr/continuity-matrix.md](docs/union-eyes/dr/continuity-matrix.md) | union-eyes | 2026-04-24 | current |
 | [docs/union-eyes/dr/database-restore.md](docs/union-eyes/dr/database-restore.md) | union-eyes | 2026-04-27 | current |
@@ -606,21 +914,82 @@ Stale documents (>90 days since repo validation): 0
 | [docs/union-eyes/employer-execution/rollout-plan.md](docs/union-eyes/employer-execution/rollout-plan.md) | union-eyes | 2026-04-24 | current |
 | [docs/union-eyes/employer-execution/scenario-pack.md](docs/union-eyes/employer-execution/scenario-pack.md) | union-eyes | 2026-04-24 | current |
 | [docs/union-eyes/faq.md](docs/union-eyes/faq.md) | union-eyes | 2026-04-14 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md](docs/union-eyes/institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md](docs/union-eyes/institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-executive-value-repositioning.md](docs/union-eyes/institutional-operating-infrastructure/full-executive-value-repositioning.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-feature-gating-rearchitecture.md](docs/union-eyes/institutional-operating-infrastructure/full-feature-gating-rearchitecture.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-institutional-value-expansion-analysis.md](docs/union-eyes/institutional-operating-infrastructure/full-institutional-value-expansion-analysis.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-marketing-category-positioning-refactor.md](docs/union-eyes/institutional-operating-infrastructure/full-marketing-category-positioning-refactor.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-module-architecture-review.md](docs/union-eyes/institutional-operating-infrastructure/full-module-architecture-review.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-monetization-rearchitecture.md](docs/union-eyes/institutional-operating-infrastructure/full-monetization-rearchitecture.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-navigation-ia-rearchitecture.md](docs/union-eyes/institutional-operating-infrastructure/full-navigation-ia-rearchitecture.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md](docs/union-eyes/institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/README.md](docs/union-eyes/institutional-operating-infrastructure/README.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/institutional-operating-infrastructure/ue-operating-system-reclassification.md](docs/union-eyes/institutional-operating-infrastructure/ue-operating-system-reclassification.md) | union-eyes | 2026-05-09 | current |
 | [docs/union-eyes/integration-playbook.md](docs/union-eyes/integration-playbook.md) | union-eyes | 2026-04-14 | current |
+| [docs/union-eyes/labor-continuity-intelligence/cross-app-continuity-intelligence-consistency.md](docs/union-eyes/labor-continuity-intelligence/cross-app-continuity-intelligence-consistency.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/executive-labor-continuity-briefings.md](docs/union-eyes/labor-continuity-intelligence/executive-labor-continuity-briefings.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md](docs/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md](docs/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md](docs/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md](docs/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md](docs/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md](docs/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/operational-embedding-refactor.md](docs/union-eyes/labor-continuity-intelligence/operational-embedding-refactor.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/procurement-positioning-refactor.md](docs/union-eyes/labor-continuity-intelligence/procurement-positioning-refactor.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/labor-continuity-intelligence/stewardship-continuity-architecture.md](docs/union-eyes/labor-continuity-intelligence/stewardship-continuity-architecture.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md](docs/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md](docs/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md](docs/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/final-ux-structure.md](docs/union-eyes/navigation-monetization-matrix/final-ux-structure.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/homepage-demo-sales-impact.md](docs/union-eyes/navigation-monetization-matrix/homepage-demo-sales-impact.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/marketing-impact-narrative-shift.md](docs/union-eyes/navigation-monetization-matrix/marketing-impact-narrative-shift.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/README.md](docs/union-eyes/navigation-monetization-matrix/README.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md](docs/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md](docs/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md](docs/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md](docs/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md) | union-eyes | 2026-05-09 | current |
 | [docs/union-eyes/partner-overview.md](docs/union-eyes/partner-overview.md) | union-eyes | 2026-04-14 | current |
 | [docs/union-eyes/pilot-kpis.md](docs/union-eyes/pilot-kpis.md) | union-eyes | 2026-04-24 | current |
 | [docs/union-eyes/pilot-overview.md](docs/union-eyes/pilot-overview.md) | union-eyes | 2026-04-14 | current |
+| [docs/union-eyes/qa/external-tester-containment.md](docs/union-eyes/qa/external-tester-containment.md) | union-eyes | 2026-05-02 | current |
+| [docs/union-eyes/qa/qa-readiness-model.md](docs/union-eyes/qa/qa-readiness-model.md) | union-eyes | 2026-05-02 | current |
+| [docs/union-eyes/qa/rbac-reality-map.md](docs/union-eyes/qa/rbac-reality-map.md) | union-eyes | 2026-05-02 | current |
+| [docs/union-eyes/qa/user-story-coverage-matrix.md](docs/union-eyes/qa/user-story-coverage-matrix.md) | union-eyes | 2026-05-03 | current |
 | [docs/union-eyes/quick-start.md](docs/union-eyes/quick-start.md) | union-eyes | 2026-04-14 | current |
 | [docs/union-eyes/README.md](docs/union-eyes/README.md) | union-eyes | 2026-04-14 | current |
+| [docs/union-eyes/release/demo-environment-validation-report.md](docs/union-eyes/release/demo-environment-validation-report.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/environment-topology-audit.md](docs/union-eyes/release/environment-topology-audit.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/final-environment-go-no-go.md](docs/union-eyes/release/final-environment-go-no-go.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/phase-a-remediation-report.md](docs/union-eyes/release/phase-a-remediation-report.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/release-governance-standard.md](docs/union-eyes/release/release-governance-standard.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/schema-parity-report.md](docs/union-eyes/release/schema-parity-report.md) | union-eyes | 2026-05-09 | current |
+| [docs/union-eyes/release/transitional-shared-secret-topology.md](docs/union-eyes/release/transitional-shared-secret-topology.md) | union-eyes | 2026-05-09 | current |
 | [docs/union-eyes/revenue-profile.md](docs/union-eyes/revenue-profile.md) | union-eyes | 2026-04-24 | current |
+| [docs/union-eyes/runtime-authority-audit/full-canonical-module-inventory.md](docs/union-eyes/runtime-authority-audit/full-canonical-module-inventory.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-doctrine-alignment-sweep.md](docs/union-eyes/runtime-authority-audit/full-doctrine-alignment-sweep.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-feature-gating-hardening.md](docs/union-eyes/runtime-authority-audit/full-feature-gating-hardening.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-legacy-surface-elimination.md](docs/union-eyes/runtime-authority-audit/full-legacy-surface-elimination.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-monetization-runtime-alignment.md](docs/union-eyes/runtime-authority-audit/full-monetization-runtime-alignment.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-page-route-authority-audit.md](docs/union-eyes/runtime-authority-audit/full-page-route-authority-audit.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/full-stakeholder-visibility-matrix.md](docs/union-eyes/runtime-authority-audit/full-stakeholder-visibility-matrix.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/README.md](docs/union-eyes/runtime-authority-audit/README.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/scan-snapshot.md](docs/union-eyes/runtime-authority-audit/scan-snapshot.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave3-runtime-consolidation-review.md](docs/union-eyes/runtime-authority-audit/wave3-runtime-consolidation-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave4-experience-convergence-review.md](docs/union-eyes/runtime-authority-audit/wave4-experience-convergence-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave5-institutional-refinement-review.md](docs/union-eyes/runtime-authority-audit/wave5-institutional-refinement-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave6-institutional-inevitability-review.md](docs/union-eyes/runtime-authority-audit/wave6-institutional-inevitability-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave7-procurement-inevitability-review.md](docs/union-eyes/runtime-authority-audit/wave7-procurement-inevitability-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave8-institutional-permanence-review.md](docs/union-eyes/runtime-authority-audit/wave8-institutional-permanence-review.md) | union-eyes | 2026-05-10 | current |
+| [docs/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md](docs/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md) | union-eyes | 2026-05-10 | current |
 | [docs/union-eyes/user-guide.md](docs/union-eyes/user-guide.md) | union-eyes | 2026-04-14 | current |
-| [docs/zonga/dr/restore-drill-runbook.md](docs/zonga/dr/restore-drill-runbook.md) | zonga | 2026-04-28 | current |
+| [docs/zonga/dr/restore-drill-runbook.md](docs/zonga/dr/restore-drill-runbook.md) | zonga | 2026-04-30 | current |
 | [docs/zonga/mobile-qa-checklist.md](docs/zonga/mobile-qa-checklist.md) | zonga | 2026-04-24 | current |
 | [docs/zonga/monetization-model.md](docs/zonga/monetization-model.md) | zonga | 2026-04-24 | current |
 | [docs/zonga/pilot-commercial-model.md](docs/zonga/pilot-commercial-model.md) | zonga | 2026-04-24 | current |
 | [docs/zonga/pilot-go-no-go.md](docs/zonga/pilot-go-no-go.md) | zonga | 2026-04-24 | current |
 | [docs/zonga/pilot-kpis.md](docs/zonga/pilot-kpis.md) | zonga | 2026-04-24 | current |
 | [docs/zonga/pilot-readiness-audit.md](docs/zonga/pilot-readiness-audit.md) | zonga | 2026-04-24 | current |
-| [README.md](README.md) | root | 2026-04-29 | current |
+| [README.md](README.md) | root | 2026-05-09 | current |
 | [SECURITY.md](SECURITY.md) | root | 2026-02-20 | current |
 

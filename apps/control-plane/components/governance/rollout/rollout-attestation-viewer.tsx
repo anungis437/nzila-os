@@ -7,7 +7,7 @@ interface Props {
 
 /**
  * Rollout Attestation Viewer — interpretable, not audit noise.
- * Authority: docs/nzila-rollout-governance/rollout-attestation-fabric.md
+ * Authority: docs/nzila-rollout-governance/foundations/rollout-attestation-fabric.md
  */
 export function RolloutAttestationViewer({ ledger, limit = 20 }: Props) {
   const merged = [

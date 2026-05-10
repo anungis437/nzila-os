@@ -10,7 +10,7 @@ interface Props {
 
 /**
  * Rollout Readiness Panel — sparse executive-readable summary.
- * Authority: docs/nzila-rollout-governance/rollout-legitimacy-review-system.md
+ * Authority: docs/nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md
  */
 export function RolloutReadinessPanel({ postures }: Props) {
   const nominal = postures.filter(

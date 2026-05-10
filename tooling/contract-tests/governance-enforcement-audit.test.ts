@@ -103,12 +103,12 @@ describe('GOV-AUDIT-03 — ResilientDispatcher is available from integrations-ru
 // ── GOV-AUDIT-04: Governance profile immutable controls ─────────────────────
 
 describe('GOV-AUDIT-04 — Governance profiles enforce immutable controls', () => {
-  it('governance/profiles/index.ts exists', () => {
-    expect(fileExists('governance/profiles/index.ts')).toBe(true)
+  it('governance/foundations/profiles/index.ts exists', () => {
+    expect(fileExists('governance/foundations/profiles/index.ts')).toBe(true)
   })
 
   it('profiles declare immutable controls', () => {
-    const profileSrc = readFile('governance/profiles/index.ts')
+    const profileSrc = readFile('governance/foundations/profiles/index.ts')
     expect(profileSrc).toContain('immutable')
   })
 
@@ -121,7 +121,7 @@ describe('GOV-AUDIT-04 — Governance profiles enforce immutable controls', () =
 
   for (const control of requiredImmutables) {
     it(`immutable control '${control}' is present`, () => {
-      const profileSrc = readFile('governance/profiles/index.ts')
+      const profileSrc = readFile('governance/foundations/profiles/index.ts')
       expect(profileSrc).toContain(control)
     })
   }

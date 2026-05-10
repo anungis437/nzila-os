@@ -7,7 +7,7 @@ interface Props {
 
 /**
  * Promotion Ledger Viewer — append-only institutional rollout memory.
- * Authority: docs/nzila-rollout-governance/rollout-attestation-fabric.md
+ * Authority: docs/nzila-rollout-governance/foundations/rollout-attestation-fabric.md
  */
 export function PromotionLedgerViewer({ promotions, limit = 25 }: Props) {
   const rows = promotions.slice(0, limit);

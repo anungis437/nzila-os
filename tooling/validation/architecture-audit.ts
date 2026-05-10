@@ -344,7 +344,7 @@ function checkGovernanceProfiles(): ArchRule {
     violations.push({
       rule: 'GOV-PROFILES',
       severity: 'high',
-      file: 'governance/profiles/',
+      file: 'governance/foundations/profiles/',
       detail: 'Governance profiles directory does not exist',
     })
     return { id: 'GOV-PROFILES', name: 'Governance Profiles', description: 'Governance profiles exist and are complete', violations, passed: false }
@@ -355,8 +355,8 @@ function checkGovernanceProfiles(): ArchRule {
     violations.push({
       rule: 'GOV-PROFILES',
       severity: 'high',
-      file: 'governance/profiles/',
-      detail: 'governance/profiles/index.ts does not exist',
+      file: 'governance/foundations/profiles/',
+      detail: 'governance/foundations/profiles/index.ts does not exist',
     })
   } else {
     const content = readFileSync(indexPath, 'utf-8')
@@ -366,7 +366,7 @@ function checkGovernanceProfiles(): ArchRule {
         violations.push({
           rule: 'GOV-PROFILES',
           severity: 'high',
-          file: 'governance/profiles/index.ts',
+          file: 'governance/foundations/profiles/index.ts',
           detail: `Profile "${p}" not found in governance profiles registry`,
         })
       }

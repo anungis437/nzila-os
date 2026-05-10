@@ -68,7 +68,7 @@ Reviews are interpretive, not pass/fail.
 
 ## 5. Stabilization windows
 
-Per `governance/rollout/environments.json`. Windows are monotonic
+Per `governance/foundations/rollout/environments.json`. Windows are monotonic
 non-decreasing along the promotion path; this is enforced by the
 rollout legitimacy validator.
 

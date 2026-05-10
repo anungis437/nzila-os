@@ -10,7 +10,7 @@ promotion graph end to end.
 
 ## 1. Promotion graph
 
-Per [governance/rollout/environments.json](../../governance/rollout/environments.json):
+Per [governance/foundations/rollout/environments.json](../../governance/foundations/rollout/environments.json):
 
 ```
 local      (terminal)

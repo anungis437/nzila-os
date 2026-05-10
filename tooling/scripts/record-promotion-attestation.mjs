@@ -7,7 +7,7 @@
  * open continuity window for the target tier.
  *
  * Authority: docs/nzila-rollout-governance/environment-promotion-governance.md
- *           docs/nzila-rollout-governance/rollout-attestation-fabric.md
+ *           docs/nzila-rollout-governance/foundations/rollout-attestation-fabric.md
  *
  * Usage:
  *   pnpm rollout:promote:attest -- \

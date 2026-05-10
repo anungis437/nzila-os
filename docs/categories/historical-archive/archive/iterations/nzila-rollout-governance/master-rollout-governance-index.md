@@ -62,7 +62,7 @@ for the question at hand.
 
 | Area                              | Location                                                   |
 |-----------------------------------|------------------------------------------------------------|
-| Environment registry              | `governance/rollout/environments.json`                     |
+| Environment registry              | `governance/foundations/rollout/environments.json`                     |
 | Rollout legitimacy validator      | `tooling/scripts/validate-rollout-legitimacy.mjs`          |
 | Promotion attestation recorder    | `tooling/scripts/record-promotion-attestation.mjs`         |
 | Readiness review aggregator       | `tooling/scripts/run-rollout-readiness-review.mjs`         |

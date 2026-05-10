@@ -8,7 +8,7 @@
  *   - Disable evidence sealing
  *   - Disable scanner gates
  *
- * @module governance/profiles
+ * @module governance/foundations/profiles
  */
 
 // ── Core controls that are IMMUTABLE across all profiles ────────────────────

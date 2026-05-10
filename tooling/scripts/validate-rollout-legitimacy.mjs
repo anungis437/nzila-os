@@ -2,7 +2,7 @@
 /**
  * Rollout Legitimacy Validator
  *
- * Static checks against governance/rollout/environments.json and the
+ * Static checks against governance/foundations/rollout/environments.json and the
  * doctrine corpus under docs/nzila-rollout-governance/.
  *
  * Authority: docs/nzila-rollout-governance/master-rollout-governance-index.md
@@ -71,7 +71,7 @@ function check(label, fn) {
 process.stdout.write('Rollout legitimacy validation\n');
 
 check('environments registry exists', () => {
-  if (!fs.existsSync(registryPath)) return 'missing governance/rollout/environments.json';
+  if (!fs.existsSync(registryPath)) return 'missing governance/foundations/rollout/environments.json';
 });
 
 let registry;

@@ -6,7 +6,7 @@
  * environments based on the registry and the rollout attestation
  * ledger. Records a readiness attestation as a side effect.
  *
- * Authority: docs/nzila-rollout-governance/rollout-legitimacy-review-system.md
+ * Authority: docs/nzila-rollout-governance/foundations/rollout-legitimacy-review-system.md
  */
 
 import fs from 'node:fs';

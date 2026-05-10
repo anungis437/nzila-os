@@ -40,7 +40,7 @@ Applies to:
 
 | # | Control Statement | Frameworks | Nzila Implementation |
 |---|-------------------|------------|----------------------|
-| 1 | Security requirements identified before development (incl. outsourced) | NIST CSF 2.0 GV.SC, NIST 800-53 SA-3, ISO 27002 8.25, SOC2 CC8.1 | `governance/profiles/`, `tooling/contract-tests/`, PRD gate via `scripts/validate-readmes.ts` |
+| 1 | Security requirements identified before development (incl. outsourced) | NIST CSF 2.0 GV.SC, NIST 800-53 SA-3, ISO 27002 8.25, SOC2 CC8.1 | `governance/foundations/profiles/`, `tooling/contract-tests/`, PRD gate via `scripts/validate-readmes.ts` |
 | 2 | Developer secure-coding training | NIST 800-53 AT-3, ISO 27002 6.3, CMMC AT.L2-3.2.2 | **GAP** — see §7 |
 | 3 | Dev/test logically separated from production | NIST 800-53 SC-7, ISO 27002 8.31, PCI DSS 6.5.4 | Container Apps environments per env (`nzila-canada-staging-env`); separate ACR repos; no shared DB |
 | 4 | Test data anonymized / synthetic | NIST 800-53 SC-28, ISO 27002 8.33, GDPR Art.5 | `packages/staging-seed-*` produces synthetic data; production data never copied to staging — see §7 |

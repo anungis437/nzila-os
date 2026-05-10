@@ -21,7 +21,7 @@ The Nzila OS platform has **strong governance foundations** with 23/23 GA gate c
 | Org Isolation | scoped DB + ESLint boundary | ✅ | ✅ | ✅ (6 tests) | 9/10 |
 | Audit Emission | withAudit() + hash chain | ✅ | ✅ | ✅ (4 tests) | 9/10 |
 | Evidence Sealing | SHA-256 + HMAC + Merkle | ✅ | ✅ | ✅ (3 tests) | 9/10 |
-| Authentication | Clerk OIDC + middleware | ✅ | ✅ | ✅ (2 tests) | 9/10 |
+| Authentication | Platform-auth OIDC + middleware | ✅ | ✅ | ✅ (2 tests) | 9/10 |
 | Authorization | Policy engine + roles | ✅ | ✅ | ✅ (3 tests) | 8/10 |
 | Dual Control | Approval state machine | ✅ | ✅ | ✅ (2 tests) | 7/10 |
 | Integration Resilience | Retry + CB + DLQ | ✅ | ✅ | ✅ (7 tests) | 8/10 |
@@ -59,7 +59,7 @@ All 4 policy files (access, approval, financial, voting) include version metadat
 
 **Severity**: Info  
 **Status**: Verified  
-**Evidence**: `governance/profiles/index.ts` declares immutable controls that cannot be disabled by any vertical profile: org-isolation, audit-emission, evidence-sealing, hash-chain-integrity, secret-scanning, dependency-audit, contract-tests, eslint-governance-rules.
+**Evidence**: `governance/foundations/profiles/index.ts` declares immutable controls that cannot be disabled by any vertical profile: org-isolation, audit-emission, evidence-sealing, hash-chain-integrity, secret-scanning, dependency-audit, contract-tests, eslint-governance-rules.
 
 ### F-05: GA Gate Report Freshness
 

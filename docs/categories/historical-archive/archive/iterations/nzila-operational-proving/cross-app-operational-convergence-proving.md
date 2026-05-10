@@ -52,7 +52,7 @@ No app introduces a competing posture vocabulary.
 
 All three apps project the same source:
 
-- `governance/rollout/environments.json`
+- `governance/foundations/rollout/environments.json`
 - `proof-artifacts/rollout-attestations/*.jsonl`
 
 There is no per-app cache. Refreshing any surface re-reads the

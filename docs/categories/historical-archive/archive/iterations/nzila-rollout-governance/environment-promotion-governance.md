@@ -10,7 +10,7 @@
 
 Governs all environment promotion behavior across the Nzila ecosystem.
 The canonical environment registry lives at
-`governance/rollout/environments.json`.
+`governance/foundations/rollout/environments.json`.
 
 ## 2. Recognized Environments
 

@@ -22,7 +22,7 @@ everywhere; only the strictness varies.
 | Bootstrap attestation      | ORM governance bootstrap orchestrator.                      |
 | Readiness review           | `pnpm rollout:readiness`.                                   |
 | Rollback attestation       | `pnpm rollout:rollback:attest`.                             |
-| Continuity windows         | Per-tier minutes in `governance/rollout/environments.json`. |
+| Continuity windows         | Per-tier minutes in `governance/foundations/rollout/environments.json`. |
 
 ## 3. Strictness Matrix
 
@@ -41,7 +41,7 @@ everywhere; only the strictness varies.
 
 Adding a new environment tier requires:
 
-1. Entry in `governance/rollout/environments.json` with all required
+1. Entry in `governance/foundations/rollout/environments.json` with all required
    fields.
 2. Update of the strictness matrix above.
 3. Update of the master index decision tree.

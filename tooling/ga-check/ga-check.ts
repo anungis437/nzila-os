@@ -569,9 +569,9 @@ const checkEslintBoundaries = runGate('ESLINT-GOVERNANCE', 'ESLint: All apps enf
 })
 
 const checkGovernanceProfiles = runGate('GOVERNANCE-PROFILES', 'Governance profiles: Registry exists + validation', 'org-boundary', () => {
-  const profileFile = join(ROOT, 'governance/profiles/index.ts')
+  const profileFile = join(ROOT, 'governance/foundations/profiles/index.ts')
   if (!existsSync(profileFile)) {
-    return { status: 'FAIL', details: 'governance/profiles/index.ts not found' }
+    return { status: 'FAIL', details: 'governance/foundations/profiles/index.ts not found' }
   }
 
   const content = readFileSync(profileFile, 'utf-8')
