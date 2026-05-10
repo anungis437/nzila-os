@@ -105,7 +105,7 @@ const getQuickLinks = (t: any, locale: string): QuickLink[] => [
   {
     title: t('claims.caseQueue'),
     description: t('dashboard.reviewCases'),
-    href: `/${locale}/dashboard/workbench`,
+    href: `/${locale}/dashboard/work`,
     icon: <Shield size={24} />,
     color: "from-orange-500 to-orange-600",
     roles: ["steward", "officer", "admin"]

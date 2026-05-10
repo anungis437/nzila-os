@@ -124,9 +124,9 @@ export const PATCH = withApi(
       description: 'Partially update a case (claim). Steward-only.',
     },
   },
-  async ({ request, params, organizationId, userId }) => {
+  async ({ body: parsedBody, params, organizationId, userId }) => {
     const id = params.caseId;
-    const body = await request.json();
+    const body = (parsedBody ?? {}) as Record<string, unknown>;
 
     // Resolve organizationId fallback
     let orgId = organizationId;

@@ -443,3 +443,22 @@ CREATE TABLE IF NOT EXISTS public.integration_api_keys (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS public.stewards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  region varchar(255),
+  specialization varchar(255),
+  active boolean NOT NULL DEFAULT true,
+  max_caseload integer NOT NULL DEFAULT 10,
+  current_caseload integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.platform_services (
+  service_name varchar(100) PRIMARY KEY,
+  status varchar(50) NOT NULL DEFAULT 'unknown',
+  updated_at timestamptz NOT NULL DEFAULT now()
+);

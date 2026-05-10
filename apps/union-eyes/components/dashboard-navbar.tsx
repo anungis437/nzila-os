@@ -74,7 +74,7 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
     
     // Representative tools (steward+)
     ...((isSteward || isOfficer || isAdmin) && !isCrossOrgStaff ? [
-      { label: "Workbench", href: `/${locale}/dashboard/workbench`, icon: FileBarChart },
+      { label: "Workbench", href: `/${locale}/dashboard/work`, icon: FileBarChart },
       { label: "Members", href: `/${locale}/dashboard/members`, icon: Users },
     ] : []),
     

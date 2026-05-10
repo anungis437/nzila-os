@@ -1,19 +1,29 @@
 import { expect, type Page } from '@playwright/test';
 
+function sidebarNav(page: Page) {
+  return page.locator('aside nav').first();
+}
+
 export async function assertVisibleNavLabels(page: Page, labels: string[]): Promise<void> {
+  const nav = sidebarNav(page);
+  await expect(nav).toBeVisible();
   for (const label of labels) {
-    await expect(page.getByRole('link', { name: label }).first()).toBeVisible();
+    await expect(nav.getByRole('link', { name: label }).first()).toBeVisible();
   }
 }
 
 export async function assertForbiddenNavLabels(page: Page, labels: string[]): Promise<void> {
+  const nav = sidebarNav(page);
+  await expect(nav).toBeVisible();
   for (const label of labels) {
-    await expect(page.getByRole('link', { name: label }).first()).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: label }).first()).toHaveCount(0);
   }
 }
 
 export async function assertSidebarActiveLabel(page: Page, label: string): Promise<void> {
-  const link = page.getByRole('link', { name: label }).first();
+  const nav = sidebarNav(page);
+  await expect(nav).toBeVisible();
+  const link = nav.getByRole('link', { name: label }).first();
   await expect(link).toBeVisible();
   await expect(link).toHaveClass(/bg-blue-600/);
 }
