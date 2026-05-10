@@ -53,23 +53,17 @@ function serializeUnknownError(error: unknown) {
 export default async function StewardsDashboardPage() {
   const t = await getTranslations("stewardsDashboardPage");
   const user = await requireUser();
-  const resolvedOrgId = await getOrganizationIdForUser(user.userId);
-  const orgId = resolvedOrgId || user.organizationId;
-  logger.info('[TEMP][StewardsDashboard] Page load start', {
+  // R9 hardening: canonical resolver only — no `|| user.organizationId`
+  // fallback. user.organizationId may carry an Entra group GUID that never
+  // matches an app-level org UUID; relying on it would silently fail to a
+  // value that produces zero-row downstream queries instead of an honest
+  // no-org redirect. See docs/nzila-residual-closure/r9-org-resolver-callsite-audit.md.
+  const orgId = await getOrganizationIdForUser(user.userId);
+  logger.info('[StewardsDashboard] Page load start', {
     userId: user.userId,
     organizationId: orgId,
-    requireUserOrganizationId: user.organizationId,
-    resolvedOrganizationId: resolvedOrgId,
     roles: user.roles,
   });
-
-  if (resolvedOrgId && user.organizationId !== resolvedOrgId) {
-    logger.warn('[TEMP][StewardsDashboard] Organization mismatch detected', {
-      userId: user.userId,
-      requireUserOrganizationId: user.organizationId,
-      resolvedOrganizationId: resolvedOrgId,
-    });
-  }
 
   // Require chief_steward level (70) to access
   const hasAccess = await hasMinRole("chief_steward");
