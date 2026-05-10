@@ -31,7 +31,7 @@ Sentry.init({
 
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: process.env.NODE_ENV !== 'production',
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
