@@ -57,7 +57,7 @@
       ]
     },
     "claims": {
-      "source": "apps/union-eyes/db/schema/domains/claims/claims.ts",
+      "source": "apps/union-eyes/db/schema/claims-schema.ts",
       "requiredColumns": [
         "id", "claim_id", "claim_number", "organization_id", "member_id",
         "claim_type", "status", "priority", "incident_date", "location",
