@@ -11,6 +11,7 @@ import { Heart, Users, Shield, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -22,6 +23,7 @@ export async function generateMetadata({
   return {
     title: t('pageTitle'),
     description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/story'),
   };
 }
 

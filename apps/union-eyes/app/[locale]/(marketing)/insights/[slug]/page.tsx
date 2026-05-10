@@ -9,6 +9,7 @@ import {
 } from '@/components/marketing/insights-section-pages';
 import { parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { getInsightBySlug, getRelatedInsights, insightArticles } from '@/lib/insights-content';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 type InsightArticlePageProps = {
   params: Promise<{ locale: string; slug: string }>;
@@ -20,12 +21,13 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: InsightArticlePageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   if (slug === 'doctrine') {
     return {
       title: 'Doctrine | Insights | Union Eyes',
       description: 'Editorial standards and narrative architecture for institutional continuity insights.',
+      alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
     };
   }
 
@@ -33,6 +35,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
     return {
       title: 'Methodology | Insights | Union Eyes',
       description: 'Canonical frameworks and continuity visualization for institutional modernization.',
+      alternates: buildLocaleAlternates(locale, '/insights/methodology'),
     };
   }
 
@@ -40,6 +43,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
     return {
       title: 'Resonance | Insights | Union Eyes',
       description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
+      alternates: buildLocaleAlternates(locale, '/insights/resonance'),
     };
   }
 
@@ -47,6 +51,7 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
     return {
       title: 'Categories | Insights | Union Eyes',
       description: 'Browse the governance domains and topic pathways in the Union Eyes Insights system.',
+      alternates: buildLocaleAlternates(locale, '/insights/categories'),
     };
   }
 
@@ -56,12 +61,14 @@ export async function generateMetadata({ params }: InsightArticlePageProps): Pro
     return {
       title: 'Insight Not Found | Union Eyes',
       description: 'The requested insight article could not be found.',
+      alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
     };
   }
 
   return {
     title: `${article.title} | Insights | Union Eyes`,
     description: article.excerpt,
+    alternates: buildLocaleAlternates(locale, `/insights/${slug}`),
   };
 }
 

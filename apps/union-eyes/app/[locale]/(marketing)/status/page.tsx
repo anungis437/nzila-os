@@ -10,6 +10,7 @@ import { StatusPage } from '@/components/monitoring/StatusPage';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import type { StatusLabels } from '@/components/monitoring/StatusPage';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -21,6 +22,7 @@ export async function generateMetadata({
   return {
     title: t('pageTitle'),
     description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/status'),
   };
 }
 

@@ -87,7 +87,7 @@
           "B2_OrgContextServerSide": {
             "status": "PASS",
             "remediatedBy": "PR-ABR-01",
-            "notes": "_get_org_id() now derives org exclusively from user.organization_id (Clerk JWT). Query-param fallback removed. PermissionDenied on missing org.",
+            "notes": "_get_org_id() now derives org exclusively from user.organization_id (authenticated session JWT). Query-param fallback removed. PermissionDenied on missing org.",
             "contractTest": "tooling/contract-tests/abr-org-context.test.ts (INV-30)"
           },
           "B3_OrgScopedRegistry": {
@@ -418,7 +418,7 @@
       "POST-GA: Resolve organizationMembers.organizationId text/slug vs UUID type mismatch"
     ],
     "API": [
-      "DONE (PR-ABR-01): Removed query_params.get('org_id') fallback in abr_views.py — org_id now comes from Clerk JWT only",
+      "DONE (PR-ABR-01): Removed query_params.get('org_id') fallback in abr_views.py — org_id now comes from authenticated session JWT only",
       "POST-GA: Remove DEFAULT_ORGANIZATION_ID hardcoded fallback in apps/union-eyes/lib/organization-utils.ts:18"
     ],
     "Evidence": [],

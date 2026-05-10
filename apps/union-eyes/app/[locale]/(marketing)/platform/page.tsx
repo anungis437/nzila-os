@@ -15,12 +15,17 @@ import {
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'The Platform | Eight Canonical Operational Surfaces | Union Eyes',
-  description:
-    'Union Eyes is organized as eight canonical operational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Institutional Memory, and Trust — composed into one institutional operating experience.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'The Platform | Eight Canonical Operational Surfaces | Union Eyes',
+    description:
+      'Union Eyes is organized as eight canonical operational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Institutional Memory, and Trust — composed into one institutional operating experience.',
+    alternates: buildLocaleAlternates(locale, '/platform'),
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The 8 canonical pillars. These are the high-level marketing surfaces that
@@ -85,7 +90,7 @@ const pillars = [
   {
     id: 'institutional-memory',
     icon: Library,
-    name: 'Institutional Memory',
+    name: 'Corporate Memory',
     posture: 'Continuity substrate',
     body:
       'Doctrine, precedents, prior decisions, and the continuity archive. Survives leadership transitions because it is held by the institution, not by individuals.',

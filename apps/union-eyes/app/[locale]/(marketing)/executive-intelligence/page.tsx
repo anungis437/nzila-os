@@ -9,12 +9,17 @@ import Link from 'next/link';
 import { BarChart3, FileText, Users, TrendingUp, ShieldCheck, Layers } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Executive Intelligence | Union Eyes',
-  description:
-    'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Executive Intelligence | Union Eyes',
+    description:
+      'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
+    alternates: buildLocaleAlternates(locale, '/executive-intelligence'),
+  };
+}
 
 const surfaces = [
   {
@@ -44,7 +49,7 @@ const surfaces = [
   },
   {
     icon: Layers,
-    title: 'Institutional Memory Snapshots',
+    title: 'Corporate Memory Snapshots',
     desc: 'Point-in-time views of organizational knowledge, historical precedents, and institutional context available for executive review.',
   },
 ];

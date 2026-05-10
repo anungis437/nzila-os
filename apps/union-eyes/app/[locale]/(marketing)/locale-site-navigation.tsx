@@ -47,7 +47,7 @@ export default function LocaleSiteNavigation() {
     { name: 'Intelligence',         href: `${platformHref}#intelligence`,         desc: 'Executive, federation, and analytics views' },
     { name: 'Cognition',            href: `${platformHref}#cognition`,            desc: 'Sovereign reasoning and memory queries' },
     { name: 'Governance',           href: `${platformHref}#governance`,           desc: 'Charter, motions, and decisions of record' },
-    { name: 'Institutional Memory', href: `${platformHref}#institutional-memory`, desc: 'Doctrine, precedents, and continuity archive' },
+    { name: 'Corporate Memory', href: `${platformHref}#institutional-memory`, desc: 'Doctrine, precedents, and continuity archive' },
     { name: 'Trust',                href: `${platformHref}#trust`,                desc: 'Audit, explainability, and Canadian sovereignty' },
   ];
 

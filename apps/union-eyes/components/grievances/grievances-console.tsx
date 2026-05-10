@@ -239,7 +239,7 @@ export function GrievancesConsole() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        alert(body?.error || `Failed to assign steward (${res.status})`);
+        alert(body?.error || `Failed to assign representative (${res.status})`);
         return;
       }
       await fetchGrievances();

@@ -13,19 +13,24 @@ import {
   Users,
   ArrowRight,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Priorities | UnionEyes',
-  description:
-    'Priorities is the role-routed queue for next actions, escalations, assignments, and overdue representation work.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Priorities | UnionEyes',
+    description:
+      'Priorities is the role-routed queue for next actions, escalations, assignments, and overdue union representative work.',
+    alternates: buildLocaleAlternates(locale, '/features/priorities'),
+  };
+}
 
 const features = [
   {
     icon: ListChecks,
     title: 'One queue for next actions',
     description:
-      'Priorities tells each steward, LRO, or officer what needs action next instead of forcing them to interpret raw activity feeds.',
+      'Priorities tells each union representative or officer what needs action next instead of forcing them to interpret raw activity feeds.',
   },
   {
     icon: AlertTriangle,

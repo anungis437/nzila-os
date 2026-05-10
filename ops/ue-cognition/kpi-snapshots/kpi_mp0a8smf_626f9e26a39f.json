@@ -1,0 +1,60 @@
+{
+  "id": "kpi_mp0a8smf_626f9e26a39f",
+  "subject": {
+    "tenantId": "union-eyes",
+    "orgId": "11111111-1111-4111-8111-111111111111"
+  },
+  "windowDays": 30,
+  "windowStart": "2026-04-10T21:26:15.014Z",
+  "windowEnd": "2026-05-10T21:26:15.014Z",
+  "avgCycleTimeDays": null,
+  "baselineCycleTimeDays": null,
+  "cycleTimeReductionPct": null,
+  "casesSavedFromSlaBreach": null,
+  "casesReassignedBeforeOverload": null,
+  "backlogRiskCurrent": null,
+  "backlogRiskBaseline": null,
+  "backlogRiskReductionPct": null,
+  "utilizationFairnessCurrent": null,
+  "utilizationFairnessBaseline": null,
+  "utilizationFairnessImprovementPct": null,
+  "precedentRetrievalsCount": 0,
+  "estimatedHoursSavedPerRetrieval": 1.5,
+  "precedentHoursSaved": 0,
+  "disengagedMembersStart": null,
+  "disengagedMembersEnd": 0,
+  "engagementRecoveryPct": null,
+  "highRiskCasesSurfacedEarly": 0,
+  "estimatedAdminHoursSaved": 0,
+  "loadedHourlyRateCad": 65,
+  "estimatedRoiCad": 0,
+  "assumptions": [
+    {
+      "key": "hoursSavedPerPrecedentRetrieval",
+      "value": 1.5,
+      "note": "Replaces ~1.5h of manual case-history research per retrieval. Validate with operator log."
+    },
+    {
+      "key": "hoursSavedPerEarlyWarning",
+      "value": 0.75,
+      "note": "Conservative estimate of admin time avoided when escalation is prevented."
+    },
+    {
+      "key": "hoursSavedPerReassignmentRecommendation",
+      "value": 1,
+      "note": "Time saved coordinating an organic vs. emergency reassignment."
+    },
+    {
+      "key": "loadedHourlyRateCad",
+      "value": 65,
+      "note": "Loaded steward wage in CAD. Override per pilot via input.loadedHourlyRateCad."
+    },
+    {
+      "key": "stewardCount",
+      "value": 0,
+      "note": "Stewards in scope; surfaced for transparency on the fairness denominator."
+    }
+  ],
+  "modelVersion": "ue-kpi-v1 (ue-0.1.0)",
+  "computedAt": "2026-05-10T21:26:15.015Z"
+}

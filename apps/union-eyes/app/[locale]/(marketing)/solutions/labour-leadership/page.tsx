@@ -3,12 +3,17 @@ import Link from 'next/link';
 import { ShieldCheck, Users, Eye, Scale, HeartHandshake, ArrowRight } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Policy & Labour Leadership | Solutions | Union Eyes',
-  description:
-    'Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Policy & Labour Leadership | Solutions | Union Eyes',
+    description:
+      'Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls.',
+    alternates: buildLocaleAlternates(locale, '/solutions/labour-leadership'),
+  };
+}
 
 const outcomes = [
   {

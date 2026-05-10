@@ -16,7 +16,7 @@ ABR Insights is built on a modern serverless-first stack designed for scalabilit
 │  Next.js 14+ App Router (SSR/RSC) │ PWA Mobile Shell    │
 ├─────────────────────────────────────────────────────────┤
 │                    Auth Layer                            │
-│  Clerk (SSO, SAML, MFA) │ RBAC Middleware               │
+│  Nzila Platform Auth (SSO, SAML, MFA) │ RBAC Middleware │
 ├─────────────────────────────────────────────────────────┤
 │                    API Layer                              │
 │  Next.js Route Handlers │ tRPC │ REST API v1             │
@@ -191,7 +191,7 @@ Where:
 
 ---
 
-## 6. Clerk Auth — Enterprise SSO
+## 6. Platform Auth — Enterprise SSO
 
 | Feature | Configuration |
 |---------|--------------|
@@ -225,7 +225,7 @@ Where:
 | Phase 2: Schema Migration | Week 3-4 | DDL migration, index creation, constraint validation |
 | Phase 3: Data Migration | Week 5-7 | Full data transfer, pgVector index rebuild |
 | Phase 4: Application Layer | Week 8-9 | Drizzle schema generation, API endpoint migration |
-| Phase 5: Auth Migration | Week 10 | Supabase Auth → Clerk migration (user accounts) |
+| Phase 5: Auth Migration | Week 10 | Supabase Auth → Nzila Platform Auth migration (user accounts) |
 | Phase 6: Validation | Week 11-12 | Integration testing, performance benchmarks, cutover |
 
 ---

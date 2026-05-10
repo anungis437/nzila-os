@@ -213,9 +213,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Creates a new ${resourceName} record.`,
         },
       },
-      async ({ request, organizationId, userId }) => {
-        const body = await request.json();
-        const values: Record<string, unknown> = { ...body };
+      async ({ body, organizationId, userId }) => {
+        const values: Record<string, unknown> =
+          body && typeof body === 'object' && !Array.isArray(body)
+            ? { ...(body as Record<string, unknown>) }
+            : {};
 
         if (orgScoped && orgCol && organizationId) {
           values.organizationId = organizationId;
@@ -273,10 +275,12 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Updates an existing ${resourceName} record.`,
         },
       },
-      async ({ request, params, organizationId }) => {
+      async ({ body, params, organizationId }) => {
         const id = params[paramName];
-        const body = await request.json();
-        const updates: Record<string, unknown> = { ...body };
+        const updates: Record<string, unknown> =
+          body && typeof body === 'object' && !Array.isArray(body)
+            ? { ...(body as Record<string, unknown>) }
+            : {};
 
         // Auto-set updatedAt if column exists
         const updatedAtCol = getColumn(table, 'updatedAt');

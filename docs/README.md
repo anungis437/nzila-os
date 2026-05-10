@@ -1,5 +1,16 @@
 # Nzila OS Documentation
 
+> Iteration, planning, and convergence history is archived under [archive/iterations](archive/iterations/).
+> Use this page and [documentation-index.md](documentation-index.md) for active documentation only.
+
+## High-Level Categories
+
+- [Documentation Categories](categories/README.md)
+- [Stakeholders](categories/stakeholders/README.md)
+- [Platform and Operations](categories/platform-and-operations/README.md)
+- [Products and Market](categories/products-and-market/README.md)
+- [Historical Archive](categories/historical-archive/README.md)
+
 ## Start Here
 
 - Canonical docs index: [Documentation Index](documentation-index.md)

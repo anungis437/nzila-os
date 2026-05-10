@@ -146,7 +146,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 | **Cloud Infrastructure (Azure)** | $80K | $140K | $220K | $320K | $420K | PostgreSQL + Container Apps + AI services (scales with MAU) |
 | **Sales & Marketing** | $120K | $300K | $550K | $850K | $1.1M | 35% of ARR invested in growth (CAC payback 6-24 months) |
 | **Legal & Compliance** | $50K | $70K | $90K | $110K | $130K | IP filings, contracts, PIPEDA/Law 25 audits |
-| **Third-Party Services** | $60K | $100K | $150K | $200K | $250K | Clerk auth, Stripe, SendGrid, Twilio, AI APIs (GPT-4, pgVector) |
+| **Third-Party Services** | $60K | $100K | $150K | $200K | $250K | Platform auth services, Stripe, SendGrid, Twilio, AI APIs (GPT-4, pgVector) |
 | **Office & Equipment** | $30K | $50K | $80K | $110K | $140K | Remote-first, co-working spaces (Toronto, Montreal, Vancouver) |
 | **R&D Tax Credits** | ($80K) | ($140K) | ($220K) | ($300K) | ($380K) | SR&ED credits (Canada 35-40% R&D spend) |
 | **TOTAL OPEX** | $710K | $1.47M | $2.67M | $3.99M | $5.16M | |

@@ -19,12 +19,17 @@ import {
   getFeaturedInsights,
   getInsightHref,
 } from '@/lib/insights-content';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Insights | Union Eyes',
-  description:
-    'Institutional continuity, governance modernization, and labour-safe organizational intelligence — thought leadership from Union Eyes.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Insights | Union Eyes',
+    description:
+      'Institutional continuity, governance modernization, and labour-safe organizational intelligence — thought leadership from Union Eyes.',
+    alternates: buildLocaleAlternates(locale, '/insights'),
+  };
+}
 
 export default async function InsightsPage({
   params,

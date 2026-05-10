@@ -15,7 +15,7 @@
 ### **Technical Specifications**
 - **Database Entities:** 79+
 - **Algorithm:** Multi-carrier rate arbitrage (parallel rate requests across 20+ carriers)
-- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle, Clerk (Profile: nodeapi-aca-azurepg-clerk)
+- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle, Nzila Platform Auth (Profile: nodeapi-aca-azurepg-auth)
 - **Migration Timeline:** 18-22 weeks manual → 10-12 weeks automated
 
 ### **Market Opportunity**

@@ -10,6 +10,7 @@ import { Mail, MapPin, Clock } from 'lucide-react';
 import { ContactForm } from '@/app/(marketing)/contact/contact-form';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const CONTACT_COPY: Record<string, {
   sendMessage: string;
@@ -73,6 +74,7 @@ export async function generateMetadata({
   return {
     title: t('pageTitle'),
     description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/contact'),
   };
 }
 

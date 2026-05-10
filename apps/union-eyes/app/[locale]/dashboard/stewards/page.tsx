@@ -15,8 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Users, FileText, TrendingUp, AlertCircle, Calendar } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Chief Steward Dashboard | UnionEyes",
-  description: "Steward supervision and case management tools",
+  title: "Union Representative Dashboard | UnionEyes",
+  description: "Union representative supervision and case management tools",
 };
 
 function serializeUnknownError(error: unknown) {

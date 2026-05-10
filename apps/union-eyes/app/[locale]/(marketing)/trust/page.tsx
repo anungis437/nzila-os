@@ -39,6 +39,7 @@ import {
   organizationalStabilizationSimulationFlow,
   procurementEvidenceBinder,
 } from '@/lib/operational-legitimacy';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -47,7 +48,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.trust' });
-  return { title: t('pageTitle'), description: t('heroDescription') };
+  return {
+    title: t('pageTitle'),
+    description: t('heroDescription'),
+    alternates: buildLocaleAlternates(locale, '/trust'),
+  };
 }
 
 const pillars = [

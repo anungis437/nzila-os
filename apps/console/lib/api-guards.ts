@@ -37,7 +37,7 @@ export interface AuthContext {
 }
 
 /**
- * Authenticate the user via Clerk session or service-to-service key.
+ * Authenticate the user via platform session or service-to-service key.
  *
  * Service auth: if AI_SERVICE_KEY is set and the request sends
  * `Authorization: Bearer <key>` with a matching value, the caller
@@ -59,7 +59,7 @@ export async function authenticateUser(): Promise<
     }
   }
 
-  // ── Normal Clerk session auth ──────────────────────────────────────
+  // ── Normal user session auth ───────────────────────────────────────
   const { userId } = await auth()
   if (!userId) {
     return {
@@ -75,7 +75,7 @@ export async function authenticateUser(): Promise<
  * Verify that the user is an active member of the entity.
  *
  * @param orgId  The entity UUID
- * @param userId    The Clerk user ID
+ * @param userId    The authenticated user ID
  * @returns membership row or null
  */
 export async function getOrgMembership(orgId: string, userId: string) {

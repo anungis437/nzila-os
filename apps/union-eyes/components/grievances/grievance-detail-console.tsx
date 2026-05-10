@@ -377,7 +377,7 @@ export function GrievanceDetailConsole() {
               <p><span className="font-medium">Assigned Steward:</span> {grievance.unionRepId}</p>
             )}
             {grievance.primaryLroId && (
-              <p><span className="font-medium">Primary LRO:</span> {grievance.primaryLroId}</p>
+              <p><span className="font-medium">Primary Representative:</span> {grievance.primaryLroId}</p>
             )}
           </CardContent>
         </Card>
@@ -516,13 +516,13 @@ export function GrievanceDetailConsole() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Users className="h-4 w-4" /> Secondary LRO Access
+            <Users className="h-4 w-4" /> Secondary Representative Access
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
             <Shield className="mr-1 inline h-4 w-4" />
-            Primary ownership remains with {grievance.primaryLroId ?? grievance.unionRepId ?? 'assigned LRO'}. Collaborators get scoped rights only.
+            Primary ownership remains with {grievance.primaryLroId ?? grievance.unionRepId ?? 'assigned representative'}. Collaborators get scoped rights only.
           </div>
 
           {(grievance.collaborators?.length ?? 0) === 0 ? (

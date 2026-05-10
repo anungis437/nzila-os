@@ -77,10 +77,43 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // to avoid calling auth() in the root layout which causes middleware detection issues
   const locale = await getLocale();
   const site = getUnionEyesSiteTopology();
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Union Eyes',
+    url: site.marketingUrl,
+    logo: `${site.marketingUrl}/icon.svg`,
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Union Eyes',
+    url: site.marketingUrl,
+    inLanguage: locale,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Union Eyes',
+      url: site.marketingUrl,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${site.marketingUrl}/${locale}/insights?query={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return (
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth" data-product="union-eyes">
       <body className={poppins.className} suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
         {site.isStaging ? (
           <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
             Staging environment. Pre-production data and behavior may change without notice.

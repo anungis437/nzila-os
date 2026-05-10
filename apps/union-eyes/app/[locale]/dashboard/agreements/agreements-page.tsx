@@ -562,7 +562,7 @@ export default function AgreementsPage() {
                     Need Help Understanding an Agreement?
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Your steward or union representative can help explain any terms or provisions in these agreements.
+                    Your union representative can help explain any terms or provisions in these agreements.
                   </p>
                 </div>
               </div>

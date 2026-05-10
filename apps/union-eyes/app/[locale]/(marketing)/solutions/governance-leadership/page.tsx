@@ -3,11 +3,16 @@ import Link from 'next/link';
 import { ShieldCheck, Eye, FileCheck, GitBranch, Vote, ArrowRight } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Governance Leadership | Solutions | Union Eyes',
-  description: 'Modernize governance operations with explainable intelligence, full audit trails, and democratic oversight controls. Union Eyes for governance leaders.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Governance Leadership | Solutions | Union Eyes',
+    description: 'Modernize governance operations with explainable intelligence, full audit trails, and democratic oversight controls. Union Eyes for governance leaders.',
+    alternates: buildLocaleAlternates(locale, '/solutions/governance-leadership'),
+  };
+}
 
 const outcomes = [
   { icon: ShieldCheck, title: 'Governance modernization you can defend',  desc: 'Every governance change is explainable, evidence-traceable, and auditable — governance that earns democratic legitimacy.' },
@@ -21,7 +26,7 @@ const challenges = [
   'Governance decisions lack historical context — the precedent exists, but no one can find it',
   'Modernization efforts stall because the rationale for current structures is undocumented',
   'Audit and compliance requests take weeks to compile when evidence is fragmented across systems',
-  'Leadership transitions erode governance institutional memory faster than it can be rebuilt',
+  'Leadership transitions erode corporate memory faster than it can be rebuilt',
 ];
 
 export default function GovernanceLeadershipPage() {

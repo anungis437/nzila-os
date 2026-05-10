@@ -16,12 +16,17 @@ import {
   ArrowRight,
   Scale,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Intelligence | UnionEyes',
-  description:
-    'Research, analytics, reporting, and AI-assisted decision support for union teams that need better context before they act.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Intelligence | UnionEyes',
+    description:
+      'Research, analytics, reporting, and AI-assisted decision support for union teams that need better context before they act.',
+    alternates: buildLocaleAlternates(locale, '/features/ai-workbench'),
+  };
+}
 
 const capabilities = [
   {
@@ -61,7 +66,7 @@ const safeguards = [
     icon: ToggleRight,
     title: 'Human controlled',
     description:
-      'Recommendations assist stewards, LROs, and officers. They do not decide outcomes for them.',
+      'Recommendations assist union representatives and officers. They do not decide outcomes for them.',
   },
   {
     icon: ShieldCheck,

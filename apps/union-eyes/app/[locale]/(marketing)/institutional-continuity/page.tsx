@@ -19,18 +19,23 @@ import {
   operationalMaturityPathway,
   organizationalTransformationPathway,
 } from '@/lib/operational-legitimacy';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Institutional Continuity | Union Eyes',
-  description:
-    'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. Union Eyes Institutional Continuity platform.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Institutional Continuity | Union Eyes',
+    description:
+      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. Union Eyes Institutional Continuity platform.',
+    alternates: buildLocaleAlternates(locale, '/institutional-continuity'),
+  };
+}
 
 const pillars = [
   {
     icon: BookOpen,
-    title: 'Organizational Memory',
-    desc: 'Preserve the institutional knowledge that lives in individuals — decisions, precedents, relationships, and operational history — so it outlasts any leadership transition.',
+    title: 'Corporate Memory',
+    desc: 'Capture the institutional knowledge that lives in individuals — decisions, precedents, relationships, and operational history — and make it outlast any leadership transition.',
   },
   {
     icon: RefreshCw,
@@ -61,7 +66,7 @@ const pillars = [
 
 const journeySteps = [
   { step: '01', label: 'Fragmentation Problem',     desc: 'Knowledge fragmentation and continuity risk become visible across the organization.' },
-  { step: '02', label: 'Organizational Memory',      desc: 'Institutional memory is mapped, preserved, and made operationally accessible.' },
+  { step: '02', label: 'Corporate Memory',          desc: 'Corporate memory is captured, preserved, and made operationally accessible at scale.' },
   { step: '03', label: 'Continuity Visibility',      desc: 'Leadership gains a longitudinal view of organizational context and resilience status.' },
   { step: '04', label: 'Explainable Intelligence',   desc: 'Every continuity insight is traceable, human-readable, and governance-safe.' },
   { step: '05', label: 'Governance Continuity',      desc: 'Governance structures are preserved and modernized without losing institutional coherence.' },

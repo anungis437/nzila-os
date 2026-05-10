@@ -2,7 +2,7 @@
  * PHASE 4 — API / Server Workflow Certification
  *
  * Validates that all API routes follow hardened patterns:
- *  - Auth checks present (Clerk auth() or withApiAuth or authenticateUser)
+ *  - Auth checks present (auth() / withApiAuth / authenticateUser patterns)
  *  - Request validation present (Zod safeParse, validateIntakeRequest, etc.)
  *  - Audit logging present on mutation routes
  *  - No open routes that should be gated
@@ -43,7 +43,7 @@ function walkRouteFiles(dir: string): { relPath: string; content: string }[] {
 }
 
 const AUTH_PATTERNS = [
-  /\bauth\s*\(\s*\)/,           // Clerk auth() direct call
+  /\bauth\s*\(\s*\)/,           // auth() direct call
   /\bwithApiAuth\b/,            // withApiAuth wrapper
   /\bwithAdminAuth\b/,          // withAdminAuth admin wrapper
   /\bwithApi\b/,                // withApi declarative framework
@@ -52,7 +52,7 @@ const AUTH_PATTERNS = [
   /\bgetAuth\b/,                // getAuth pattern
   /\bcurrentUser\b/,            // currentUser pattern
   /\badminClient\b/,            // Auth admin client
-  /\bverifyToken\b/,            // Financial service Clerk verify
+  /\bverifyToken\b/,            // financial service token verify
   /\bgetCurrentUser\b/,         // getCurrentUser helper
   /\bauth:\s*\{/,               // { auth: { required: true } } config
   /\breadRole\b/,               // crudRoutes readRole param

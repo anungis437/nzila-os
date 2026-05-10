@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { FileText, Users, AlertTriangle, Scale, CreditCard } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -11,7 +12,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.legal.terms' });
-  return { title: t('pageTitle'), description: t('pageDescription') };
+  return {
+    title: t('pageTitle'),
+    description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/legal/terms'),
+  };
 }
 
 export default async function TermsOfServicePage({

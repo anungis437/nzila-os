@@ -2,7 +2,7 @@
 
 **Last Updated: February 2026**
 **Platform:** ABR Insights
-**Architecture:** Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Clerk Auth, Azure OpenAI GPT-4
+**Architecture:** Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth, Azure OpenAI GPT-4
 
 ---
 
@@ -35,7 +35,7 @@ ABR Insights is Canada's first AI-powered Anti-Black Racism learning platform. T
 | GPT-4 Coach v1 | Conversational learning assistant (Companion Prompt Library) | 85%+ helpfulness rating, <3s response time |
 | Gamification v1 | XP, badges, streaks, leaderboards (18-table engine) | 80%+ course completion rate |
 | Admin Dashboard v1 | Learner progress tracking, completion reports | HR managers can export compliance reports |
-| Clerk Auth Integration | SSO, email/password, social login | <500ms auth latency, 99.9% uptime |
+| Platform Auth Integration | SSO, email/password, social login | <500ms auth latency, 99.9% uptime |
 
 ### Technical Milestones
 

@@ -14,7 +14,7 @@
 
 ### **Technical Specifications**
 - **Database Entities:** 30 tables
-- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle ORM, Clerk auth (Profile: nextjs-aca-azurepg-clerk)
+- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth (Profile: nextjs-aca-azurepg-auth)
 - **Migration Timeline:** 12-14 weeks manual → 6-8 weeks automated
 
 ### **Market Opportunity**

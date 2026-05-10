@@ -3,11 +3,16 @@ import Link from 'next/link';
 import { Cpu, ShieldCheck, Lock, Eye, CheckCircle, ArrowRight } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Technology Leadership | Solutions | Union Eyes',
-  description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. Union Eyes for technology leaders in labour organizations.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Technology Leadership | Solutions | Union Eyes',
+    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. Union Eyes for technology leaders in labour organizations.',
+    alternates: buildLocaleAlternates(locale, '/solutions/technology-leadership'),
+  };
+}
 
 const outcomes = [
   { icon: ShieldCheck, title: 'Governance-safe AI architecture',        desc: 'AI systems that operate within democratic governance structures — explainable outputs, human oversight enforced by design.' },

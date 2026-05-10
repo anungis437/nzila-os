@@ -15,19 +15,24 @@ import {
   Scale,
   Layers,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Work | UnionEyes',
-  description:
-    'The core UnionEyes representation surface for steward-led casework, evidence management, deadlines, and formal grievance flow.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Work | UnionEyes',
+    description:
+      'The core UnionEyes representation surface for union representative casework, evidence management, deadlines, and formal grievance flow.',
+    alternates: buildLocaleAlternates(locale, '/features/grievance-tracking'),
+  };
+}
 
 const features = [
   {
     icon: FileText,
     title: 'Convert intake into governed casework',
     description:
-      'Stewards and LROs turn intake into official representation records with ownership, context, and next steps captured from the start.',
+      'Union representatives turn intake into official representation records with ownership, context, and next steps captured from the start.',
   },
   {
     icon: Layers,
@@ -65,7 +70,7 @@ const steps = [
   {
     step: '1',
     label: 'Review intake',
-    desc: 'A steward or LRO reviews what arrived through the member-facing intake flow.',
+    desc: 'A union representative reviews what arrived through the member-facing intake flow.',
   },
   {
     step: '2',
@@ -108,7 +113,7 @@ export default async function LocaleGrievanceTrackingPage({
             Work is where representation actually happens
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            Intake becomes governed casework here. Stewards and LROs manage evidence,
+            Intake becomes governed casework here. Union representatives manage evidence,
             deadlines, updates, and formal grievance flow in one defensible workspace.
           </p>
         </div>

@@ -3,18 +3,23 @@ import Link from 'next/link';
 import { Network, RefreshCw, Users, AlertCircle, Layers, ArrowRight } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Operations Leadership | Solutions | Union Eyes',
-  description: 'Maintain operational coherence across distributed teams and leadership transitions. Union Eyes for operations leaders.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Operations Leadership | Solutions | Union Eyes',
+    description: 'Maintain operational coherence across distributed teams and leadership transitions. Union Eyes for operations leaders.',
+    alternates: buildLocaleAlternates(locale, '/solutions/operations-leadership'),
+  };
+}
 
 const outcomes = [
   { icon: Network,     title: 'Cross-functional alignment surfaced',      desc: 'See alignment and coherence across distributed teams, regional offices, and functional areas — in one operational view.' },
   { icon: RefreshCw,   title: 'Continuity through organizational change',  desc: 'Maintain operational coherence through reorganization, expansion, and leadership transitions without losing institutional context.' },
   { icon: Users,       title: 'Team continuity planning',                  desc: 'Identify knowledge gaps across teams and build transfer pathways before operational fragilities become crises.' },
   { icon: AlertCircle, title: 'Fragmentation risk made visible',           desc: 'Understand the organizational fragmentation patterns undermining long-term operational effectiveness.' },
-  { icon: Layers,      title: 'Institutional memory for operations',       desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
+  { icon: Layers,      title: 'Corporate Memory for operations',        desc: 'Surface the operational precedents, decisions, and context that inform how your organization actually works.' },
 ];
 
 const challenges = [

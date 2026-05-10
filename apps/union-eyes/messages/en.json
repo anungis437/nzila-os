@@ -952,7 +952,7 @@
     "partiesInvolved": "Parties Involved",
     "partyLabels": {
       "grievant": "Grievant",
-      "steward": "Union Steward",
+      "steward": "Union Representative",
       "management": "Management"
     },
     "contractViolation": "Contract Violation",
@@ -972,7 +972,7 @@
       "withdrawn": "Withdrawn",
       "closed": "Closed"
     },
-    "assignSteward": "Assign Steward",
+    "assignSteward": "Assign Representative",
     "addDocumentation": "Add Documentation",
     "guidelines": {
       "title": "Grievance Process Guidelines",
@@ -2416,28 +2416,28 @@
   },
   "stewardRatingsPage": {
     "back": "Back",
-    "title": "LRO Satisfaction Ratings",
+    "title": "Union Rep Satisfaction Ratings",
     "subtitle": "Member feedback on representative performance"
   },
   "stewardsDashboardPage": {
     "activeCases": "Active Cases",
     "activeCasesLabel": "{count} active cases",
-    "activeStewards": "Active stewards",
+    "activeStewards": "Active representatives",
     "capacityFreeLabel": "{percent}% capacity free",
     "completed": "Completed",
     "escalatedBadge": "Escalated",
     "escalations": "Escalations",
     "inProgress": "In progress",
     "memberLabel": "Member: {name}",
-    "pageSubtitle": "Supervise stewards and manage case escalations",
-    "pageTitle": "Chief Steward Dashboard",
+    "pageSubtitle": "Supervise representatives and manage case escalations",
+    "pageTitle": "Union Representative Dashboard",
     "pendingEscalations": "Pending Escalations",
-    "pendingEscalationsDescription": "Cases requiring chief steward review",
+    "pendingEscalationsDescription": "Cases requiring representative review",
     "requireReview": "Require review",
-    "stewardLabel": "Steward: {name}",
-    "stewardWorkloadDescription": "Caseload distribution and capacity check — ensuring no steward is overburdened",
-    "stewardWorkloadTitle": "Steward Workload Overview",
-    "stewardsLabel": "Stewards",
+    "stewardLabel": "Representative: {name}",
+    "stewardWorkloadDescription": "Caseload distribution and capacity check — ensuring no representative is overburdened",
+    "stewardWorkloadTitle": "Representative Workload Overview",
+    "stewardsLabel": "Representatives",
     "successRate": "Success Rate",
     "successRateTrend": "+5% vs last month",
     "thisMonth": "This month",
@@ -2446,7 +2446,7 @@
   },
   "analyticsPage": {
     "metaTitle": "Analytics | UnionEyes",
-    "metaDescription": "View analytics dashboards and steward-level performance trends"
+    "metaDescription": "View analytics dashboards and representative-level performance trends"
   },
   "dashboardCalendarPage": {
     "metaTitle": "Calendar | UnionEyes",
@@ -3829,26 +3829,26 @@
       "title": "Detailed Timeline"
     },
     "steward": {
-      "title": "Your Union Steward",
-      "description": "Your steward is handling your case and will contact you if they need anything."
+      "title": "Your Union Representative",
+      "description": "Your representative is handling your case and will contact you if they need anything."
     },
     "questions": {
       "title": "Questions About Your Case?",
       "newInfo": {
         "question": "What if I have new information?",
-        "answer": "Contact your steward directly or add a note to your case through the dashboard. New information can help strengthen your case."
+        "answer": "Contact your union representative directly or add a note to your case through the dashboard. New information can help strengthen your case."
       },
       "duration": {
         "question": "Why is my case taking this long?",
-        "answer": "Every case is different. Some require more investigation, documentation, or coordination with management. Your steward is working to get the best outcome, not just the fastest one."
+        "answer": "Every case is different. Some require more investigation, documentation, or coordination with management. Your union representative is working to get the best outcome, not just the fastest one."
       },
       "support": {
         "question": "Can I talk to someone?",
-        "answer": "Absolutely. Your steward is here for you. If you need to talk through what's happening, reach out directly. Union solidarity means you're never alone in this."
+        "answer": "Absolutely. Your union representative is here for you. If you need to talk through what's happening, reach out directly. Union solidarity means you're never alone in this."
       }
     },
     "actions": {
-      "messageSteward": "Message Your Steward",
+      "messageSteward": "Message Your Representative",
       "viewCaseDetails": "View Case Details"
     },
     "footer": {
@@ -5072,7 +5072,7 @@
       "closed": "Closed"
     },
     "escalateToGrievance": "Escalate to Grievance",
-    "lroBestPractices": "LRO Best Practices",
+    "lroBestPractices": "Union Rep Best Practices",
     "lroTips": {
       "review": "Review and assign pending cases within 24 hours",
       "notes": "Update case notes regularly to track progress",
@@ -5080,7 +5080,7 @@
       "contact": "Contact members promptly to gather additional information",
       "coordinate": "Coordinate with HR and management as needed"
     },
-    "viewLroGuidelines": "View LRO Guidelines",
+    "viewLroGuidelines": "View Union Rep Guidelines",
     "expand": "Expand",
     "collapse": "Collapse"
   },
@@ -6982,7 +6982,7 @@
     "support": "Support",
     "contactSupport": "Contact Support",
     "needHelp": "Need Help?",
-    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your steward for guidance."
+    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your union representative for guidance."
   },
   "pilot": {
     "dashboard": {
@@ -6992,7 +6992,7 @@
       "createCaseHint": "Report a workplace issue — we'll guide you step by step",
       "startNow": "Start now",
       "emptyTitle": "Track your cases so nothing gets missed",
-      "emptyDescription": "Create a case and your steward will be notified automatically.",
+      "emptyDescription": "Create a case and your union representative will be notified automatically.",
       "createFirstCase": "Create Your First Case",
       "resolvedLabel": "Cases Resolved",
       "teamLabel": "Your Team",
@@ -7633,7 +7633,8 @@
       "legal": "Legal",
       "institutionalContinuity": "Institutional Continuity",
       "governanceIntelligence": "Governance Intelligence",
-      "organizationalMemory": "Organizational Memory",
+      "organizationalMemory": "Corporate Memory",
+      "corporateMemory": "Corporate Memory",
       "executiveIntelligence": "Executive Intelligence",
       "operationalCoherence": "Operational Coherence",
       "explainableIntelligence": "Explainable Intelligence",
@@ -9381,7 +9382,7 @@
       "fair": "Fair",
       "needsImprovement": "Needs Improvement"
     },
-    "loading": "Loading LRO performance data...",
+    "loading": "Loading representative performance data...",
     "empty": {
       "title": "No Ratings Yet",
       "description": "Satisfaction surveys will appear here after cases are closed."
@@ -9392,11 +9393,11 @@
       "recommendRate": "Recommend Rate"
     },
     "rankings": {
-      "title": "LRO Performance Rankings",
+      "title": "Representative Performance Rankings",
       "description": "Based on {totalReviews} satisfaction surveys across {representatives} representatives"
     },
     "lro": {
-      "fallbackName": "LRO {idShort}",
+      "fallbackName": "Rep {idShort}",
       "reviews": "{count} reviews",
       "recommend": "{percent}% recommend"
     }
@@ -9653,7 +9654,7 @@
         "status": "Status",
         "priority": "Priority",
         "employer": "Employer",
-        "steward": "Steward",
+        "steward": "Representative",
         "deadline": "Deadline",
         "updated": "Updated"
       },
@@ -9662,7 +9663,7 @@
       "daysLeft": "{days}d left",
       "actions": {
         "viewDetails": "View Details",
-        "assignSteward": "Assign Steward",
+        "assignSteward": "Assign Representative",
         "contactEmployer": "Contact Employer",
         "escalate": "Escalate",
         "sendArbitration": "Send to Arbitration",
@@ -9826,8 +9827,8 @@
       "title": "Recommended Next Actions",
       "actions": {
         "assign_steward": {
-          "label": "Assign Steward",
-          "description": "Assign a steward to represent the grievant."
+          "label": "Assign Representative",
+          "description": "Assign a representative to represent the grievant."
         },
         "contact_employer": {
           "label": "Contact Employer",

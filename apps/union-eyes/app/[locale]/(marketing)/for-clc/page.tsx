@@ -21,6 +21,7 @@ import {
   qrJourneyArchitecture,
   stakeholderTalkTrackSystem,
 } from '@/lib/operational-legitimacy';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const CLC_COPY = {
   'en-CA': {
@@ -84,7 +85,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const copy = CLC_COPY[locale as keyof typeof CLC_COPY] ?? CLC_COPY['en-CA'];
-  return { title: copy.title, description: copy.description };
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: buildLocaleAlternates(locale, '/for-clc'),
+  };
 }
 
 export default async function LocaleForCLCPage({

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import ScrollReveal from '@/components/public/scroll-reveal';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import LocaleSiteNavigation from './(marketing)/locale-site-navigation';
 import LocaleSiteFooter from './(marketing)/locale-site-footer';
 
@@ -20,9 +21,7 @@ export async function generateMetadata({
     title: 'Union Eyes | Institutional Continuity for Labour Organizations',
     description:
       'Governance-safe intelligence, institutional memory, and operational coherence for labour organizations.',
-    alternates: {
-      canonical: `/${locale}`,
-    },
+    alternates: buildLocaleAlternates(locale),
   };
 }
 

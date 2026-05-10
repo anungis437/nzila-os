@@ -14,12 +14,17 @@ import {
   executiveScenarioModels,
   procurementEvidenceBinder,
 } from '@/lib/operational-legitimacy';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Procurement Stakeholders | Solutions | Union Eyes',
-  description:
-    'Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Procurement Stakeholders | Solutions | Union Eyes',
+    description:
+      'Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments.',
+    alternates: buildLocaleAlternates(locale, '/solutions/procurement'),
+  };
+}
 
 const outcomes = [
   {

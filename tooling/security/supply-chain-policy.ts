@@ -111,7 +111,7 @@ export interface VulnerabilityWaiver {
   package: string
   /** Reason for acceptance */
   reason: string
-  /** Approver (Clerk user ID or GitHub username) */
+  /** Approver (platform user ID or GitHub username) */
   approvedBy: string
   /** ISO date of approval */
   approvedAt: string

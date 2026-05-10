@@ -3,12 +3,17 @@ import Link from 'next/link';
 import { Shield, Users, FileText, Vote } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Governance Structure | UnionEyes',
-  description:
-    'How the UnionEyes golden share works and how labour governance protections are enforced.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Governance Structure | UnionEyes',
+    description:
+      'How the UnionEyes golden share works and how labour governance protections are enforced.',
+    alternates: buildLocaleAlternates(locale, '/governance'),
+  };
+}
 
 const provisions = [
   {

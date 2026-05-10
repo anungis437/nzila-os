@@ -17,12 +17,17 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Pricing | Union Eyes',
-  description:
-    'Union Eyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Pricing | Union Eyes',
+    description:
+      'Union Eyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
+    alternates: buildLocaleAlternates(locale, '/pricing'),
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Operational reality — the conditions that drive institutions to UE.
@@ -46,10 +51,10 @@ const operationalReality = [
   },
   {
     title: 'Steward overload',
-    body: 'Front-line representatives carrying institutional memory the institution itself does not retain.',
+    body: 'Front-line representatives carrying corporate memory the institution itself does not retain.',
   },
   {
-    title: 'Institutional memory loss',
+    title: 'Corporate memory loss',
     body: 'Precedents, doctrines, and prior decisions degrading every year they remain unrecorded.',
   },
 ];
@@ -99,14 +104,14 @@ const maturityTiers = [
     fit: 'National unions and federations preserving institutional memory across transitions.',
     feels: 'Durable. Inherited. Continuous.',
     focus: [
-      'Institutional memory preserved across leadership transitions',
+      'Corporate memory preserved across leadership transitions',
       'Continuity preservation and operational resilience',
       'Succession continuity for officers, stewards, and staff',
       'Governance-safe cognition across the federation',
     ],
     surfaces: [
       'Governance Operations surfaces',
-      'Institutional Memory',
+      'Corporate Memory',
       'Continuity Intelligence',
       'Longitudinal Cognition',
       'Cross-Union Analytics',

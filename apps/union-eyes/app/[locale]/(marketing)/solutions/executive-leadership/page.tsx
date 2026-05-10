@@ -3,22 +3,27 @@ import Link from 'next/link';
 import { TrendingUp, BookOpen, BarChart3, Users, ArrowRight, ShieldCheck } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Union Executive Leadership | Solutions | Union Eyes',
-  description: 'Preserve strategic continuity, lead through leadership transitions, and maintain institutional coherence. Union Eyes for union executive leaders.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Union Executive Leadership | Solutions | Union Eyes',
+    description: 'Preserve strategic continuity, lead through leadership transitions, and maintain institutional coherence. Union Eyes for union executive leaders.',
+    alternates: buildLocaleAlternates(locale, '/solutions/executive-leadership'),
+  };
+}
 
 const outcomes = [
   { icon: TrendingUp, title: 'Strategic continuity through change',       desc: 'Maintain organizational direction and coherence through succession, reorganization, and strategic transitions.' },
-  { icon: BookOpen,   title: 'Institutional memory at your fingertips',   desc: 'Decades of negotiation history, governance decisions, and precedents — accessible in executive-grade summaries.' },
+  { icon: BookOpen,   title: 'Corporate Memory at your fingertips',      desc: 'Decades of negotiation history, governance decisions, and precedents — accessible in executive-grade summaries.' },
   { icon: BarChart3,  title: 'Governance oversight with confidence',       desc: 'Understand governance health, continuity risks, and modernization progress without reading technical reports.' },
   { icon: Users,      title: 'Succession planning that works',             desc: 'Identify continuity vulnerabilities early and build knowledge transfer pathways before leadership transitions occur.' },
   { icon: ShieldCheck,'title': 'Labour-safe intelligence, guaranteed',     desc: 'All intelligence is explainable, human-reviewed, and built on anti-surveillance principles.' },
 ];
 
 const challenges = [
-  'Decades of institutional knowledge disappears when senior officers retire or leave',
+  'Decades of corporate knowledge disappears when senior officers retire or leave',
   'New leaders take 12–18 months to build the context they need to be effective',
   'Governance decisions lack historical context — the same mistakes repeat',
   'Strategic continuity is at risk during every leadership transition',

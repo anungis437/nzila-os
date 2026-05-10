@@ -89,7 +89,7 @@ The AI Control Plane is the **single gateway** through which all Nzila apps acce
 
 Every request goes through this pipeline:
 
-1. **Verify entity membership** (Clerk RBAC)
+1. **Verify entity membership** (platform RBAC)
 2. **Load capability profile** (orgId + appKey + env + profileKey)
 3. **Check feature + modality allowed**
 4. **Check data class allowed**

@@ -12,7 +12,7 @@
 **Strategic Decision:** Standardize all 15 platforms to **3 technology profiles** on **unified Azure infrastructure** with **shared backbone services** — enabling:
 - **85% time reduction** (54 weeks sequential → 8 weeks parallel execution)
 - **>60% code reuse** through pattern extraction and shared modules
-- **100% infrastructure consistency** (Azure PostgreSQL, Container Apps, Clerk auth)
+- **100% infrastructure consistency** (Azure PostgreSQL, Container Apps, Nzila Platform Auth)
 - **Enterprise-grade reliability** (multi-tenant, compliance, security, observability)
 - **Rapid product activation** (backbone-first strategy, then activate platforms Week 17+)
 
@@ -36,7 +36,7 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 **Technology Stack:**
 - **Framework:** Django 5 (modern Python backend)
 - **Database:** Drizzle ORM → Azure PostgreSQL
-- **Authentication:** Clerk (optional) OR Django built-in auth
+- **Authentication:** Nzila Platform Auth (optional) OR Django built-in auth
 - **Deployment:** Azure Container Apps
 - **API:** Django REST Framework (DRF) or Django Ninja
 - **Background Jobs:** Celery + Azure Redis
@@ -60,14 +60,14 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 
 ---
 
-### **Profile 2: nextjs-aca-azurepg-clerk** (Full-Stack Web Applications)
+### **Profile 2: nextjs-aca-azurepg-auth** (Full-Stack Web Applications)
 
 **Use Case:** Modern web apps requiring SSR, SEO, real-time UI, customer-facing platforms
 
 **Technology Stack:**
 - **Framework:** Next.js 14+ (App Router, React 18, Server Components)
 - **Database:** Drizzle ORM → Azure PostgreSQL (type-safe schema)
-- **Authentication:** Clerk (mandatory for multi-tenant, SSO, user management)
+- **Authentication:** Nzila Platform Auth (mandatory for multi-tenant, SSO, user management)
 - **Deployment:** Azure Container Apps (containerized Next.js)
 - **API Layer:** Next.js API Routes + tRPC (type-safe client-server)
 - **Styling:** Tailwind CSS + shadcn/ui components
@@ -93,7 +93,7 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 - `core-governance`
 - `repo-bootstrap`
 - `db-azurepg`
-- `auth-clerk` — Clerk integration, SSO, multi-tenant user management
+- `auth-platform` — Nzila Platform Auth integration, SSO, multi-tenant user management
 - `deploy-aca-oidc`
 - `security-baseline`
 - `observability-audit`
@@ -101,14 +101,14 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 
 ---
 
-### **Profile 3: nodeapi-aca-azurepg-clerk** (API-First Platforms & Microservices)
+### **Profile 3: nodeapi-aca-azurepg-auth** (API-First Platforms & Microservices)
 
 **Use Case:** RESTful APIs, GraphQL servers, microservices, backend-for-frontend (BFF), headless platforms
 
 **Technology Stack:**
 - **Framework:** Express.js OR Fastify (Node.js runtime)
 - **Database:** Drizzle ORM → Azure PostgreSQL
-- **Authentication:** Clerk (multi-tenant API keys, OAuth integration)
+- **Authentication:** Nzila Platform Auth (multi-tenant API keys, OAuth integration)
 - **Deployment:** Azure Container Apps
 - **API Design:** RESTful + OpenAPI/Swagger OR GraphQL (Apollo Server)
 - **Validation:** Zod schemas (type-safe input validation)
@@ -132,7 +132,7 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 - `core-governance`
 - `repo-bootstrap`
 - `db-azurepg`
-- `auth-clerk`
+- `auth-platform`
 - `deploy-aca-oidc`
 - `security-baseline`
 - `observability-audit`
@@ -152,7 +152,7 @@ All 15 platforms will be migrated to ONE of these three carefully designed profi
 - **Scaling:** Horizontal read replicas, vertical scaling for write loads
 
 ### **Authentication & Authorization**
-- **Provider:** Clerk (90% of platforms, Django can opt-out)
+- **Provider:** Nzila Platform Auth (90% of platforms, Django can opt-out)
 - **Features:** Multi-tenant organizations, SSO (SAML, Azure AD, Google), RBAC, user management
 - **Session Management:** JWT tokens, refresh tokens, secure cookie handling
 - **SSO Enterprise:** SAML 2.0 for Fortune 500, government clients
@@ -488,11 +488,11 @@ def _select_profile(self, framework):
     if framework == "Django":
         return "django-aca-azurepg"
     elif framework == "Next.js":
-        return "nextjs-aca-azurepg-clerk"
+        return "nextjs-aca-azurepg-auth"
     elif framework in ["Express", "Fastify"]:
-        return "nodeapi-aca-azurepg-clerk"
+        return "nodeapi-aca-azurepg-auth"
     else:
-        return "nodeapi-aca-azurepg-clerk"  # Default
+        return "nodeapi-aca-azurepg-auth"  # Default
 ```
 
 **Tenant Key Inference (by vertical):**
@@ -516,7 +516,7 @@ tenant_key_mapping = {
 
 ### **Architecture Standardization: ✅ CONFIRMED**
 
-✅ **Three Profiles Defined:** django-aca-azurepg, nextjs-aca-azurepg-clerk, nodeapi-aca-azurepg-clerk  
+✅ **Three Profiles Defined:** django-aca-azurepg, nextjs-aca-azurepg-auth, nodeapi-aca-azurepg-auth  
 ✅ **100% Azure Infrastructure:** PostgreSQL, Container Apps, Application Insights, Blob Storage  
 ✅ **Automated Manifest Generation:** Intelligent framework detection, standardized defaults  
 ✅ **Shared Backbone Architecture:** 8 core components, Django 5, 16-week build timeline  

@@ -15,19 +15,24 @@ import {
   MessageSquare,
   ArrowRight,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Member Intake & Follow-up | UnionEyes',
-  description:
-    'Member-facing intake submission and lightweight case follow-up, while stewards and LROs manage the full UnionEyes workflow.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Member Intake & Follow-up | UnionEyes',
+    description:
+      'Member-facing intake submission and lightweight case follow-up, while union representatives manage the full UnionEyes workflow.',
+    alternates: buildLocaleAlternates(locale, '/features/member-portal'),
+  };
+}
 
 const features = [
   {
     icon: ClipboardList,
     title: 'Structured intake submission',
     description:
-      'Members submit a clear intake with issue details, desired outcome, and supporting context before a steward turns it into formal casework.',
+      'Members submit a clear intake with issue details, desired outcome, and supporting context before a union representative turns it into formal casework.',
   },
   {
     icon: FileUp,
@@ -51,7 +56,7 @@ const features = [
     icon: MessageSquare,
     title: 'Representative handoff',
     description:
-      'Once intake is reviewed, stewards and LROs take over inside the core app while members stay in a narrow, controlled follow-up flow.',
+      'Once intake is reviewed, union representatives take over inside the core app while members stay in a narrow, controlled follow-up flow.',
   },
 ];
 
@@ -75,8 +80,7 @@ export default async function LocaleMemberPortalPage({
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
             Members do not work inside the full UnionEyes application. They submit intake,
-            share supporting material, and follow lightweight updates while stewards and
-            LROs operate Inbox, Priorities, Work, Intelligence, and Outcomes.
+            share supporting material, and follow lightweight updates while union representatives operate Inbox, Priorities, Work, Intelligence, and Outcomes.
           </p>
         </div>
       </header>
@@ -110,7 +114,7 @@ export default async function LocaleMemberPortalPage({
             </ul>
           </div>
           <div className="bg-violet-50 rounded-xl p-8">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">For stewards and LROs</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">For union representatives</h3>
             <ul className="space-y-2 text-slate-700 text-sm">
               <li>• Triage intake from Inbox without exposing the rest of the app to members.</li>
               <li>• Request missing information without falling back to email chaos.</li>

@@ -17,7 +17,7 @@ export interface DatasetWriteOptions {
   csvContent: string
   schemaJson: Record<string, string>   // column → dtype
   buildConfigJson: Record<string, unknown>
-  createdBy: string            // clerk_user_id or 'system'
+  createdBy: string            // platform user ID or 'system'
 }
 
 export interface DatasetWriteResult {

@@ -15,7 +15,7 @@
 ### **Technical Specifications**
 - **Database Entities:** 485 (comprehensive banking platform)
 - **Compliance:** FINTRAC (MSB registration), PCI-DSS Level 1, KYC/AML (Veriff, Onfido), sanctions screening (OFAC, UN, EU)
-- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle ORM, Clerk auth (Profile: nodeapi-aca-azurepg-clerk)
+- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth (Profile: nodeapi-aca-azurepg-auth)
 - **Migration Complexity:** EXTREME (regulatory compliance, real-time payments, multi-currency)
 - **Migration Timeline:** 24-30 weeks manual → 14-18 weeks automated
 

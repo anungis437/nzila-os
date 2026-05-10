@@ -17,12 +17,17 @@ import {
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Solutions | Union Eyes',
-  description:
-    'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Solutions | Union Eyes',
+    description:
+      'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
+    alternates: buildLocaleAlternates(locale, '/solutions'),
+  };
+}
 
 const solutions = [
   {

@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
 import { InsightsDoctrinePageView } from '@/components/marketing/insights-section-pages';
 import { parseInstitutionalMode } from '@/lib/institutional-context';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   return {
     title: `Doctrine | Insights | Union Eyes`,
     description: `Editorial standards and narrative architecture for institutional continuity insights.`,
+    alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
   };
 }
 

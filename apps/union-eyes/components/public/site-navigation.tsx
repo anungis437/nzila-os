@@ -46,7 +46,7 @@ const modulesLinks = [
     desc: 'Decision traceability and oversight',
   },
   {
-    name: 'Institutional Memory Vault',
+    name: 'Corporate Memory Vault',
     href: '/platform/organizational-memory',
     desc: 'Protected organizational knowledge',
   },

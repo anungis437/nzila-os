@@ -299,7 +299,7 @@ export function GrievanceTimeline({
                                 This stage is taking longer than usual
                               </p>
                               <p className="text-sm text-yellow-800">
-                                Your steward is aware and will reach out if there&apos;s anything you need to do.
+                                Your union representative is aware and will reach out if there&apos;s anything you need to do.
                               </p>
                             </div>
                           </div>

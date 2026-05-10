@@ -221,12 +221,21 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
     setIsSubmitting(true);
 
     try {
-      if (!user?.id) {
+      let submittingUserId = user?.id ?? null;
+      if (!submittingUserId) {
+        const meResponse = await fetch('/api/auth/me', { cache: 'no-store' }).catch(() => null);
+        if (meResponse?.ok) {
+          const mePayload = await meResponse.json().catch(() => null) as { user?: { id?: string } } | null;
+          submittingUserId = mePayload?.user?.id ?? null;
+        }
+      }
+
+      if (!submittingUserId) {
         throw new Error("Authentication required before submitting a case");
       }
 
       const claimData = {
-        memberId: user.id,
+        memberId: submittingUserId,
         title: formData.title,
         caseType: categoryToCaseType[formData.category] || "other",
         priority: priorityToIntakePriority[formData.priority],

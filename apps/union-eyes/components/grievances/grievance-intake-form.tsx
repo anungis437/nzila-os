@@ -544,7 +544,7 @@ function IssueStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined,
         </div>
         <HelpTip>
           Citing the specific collective agreement article strengthens the grievance.
-          If you&apos;re unsure, your steward can help identify the relevant provision.
+          If you&apos;re unsure, your union representative can help identify the relevant provision.
         </HelpTip>
       </div>
 
@@ -668,7 +668,7 @@ function SubmissionOutcome({
       <div>
         <h2 className="text-2xl font-bold text-foreground">Intake Submitted Successfully</h2>
         <p className="text-muted-foreground mt-2">
-          Your intake has been submitted. A steward will review it and create a formal case shortly.
+          Your intake has been submitted. A union representative will review it and create a formal case shortly.
         </p>
       </div>
 
@@ -695,18 +695,18 @@ function SubmissionOutcome({
           What happens next?
         </h3>
         <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-decimal list-inside">
-          <li>A steward is assigned to your case</li>
-          <li>Your steward reviews the details and may contact you</li>
+            <li>A union representative is assigned to your case</li>
+            <li>Your union representative reviews the details and may contact you</li>
           <li>The employer is formally notified</li>
           <li>You&apos;ll receive updates as the case progresses</li>
         </ol>
       </div>
 
       <div className="text-sm text-muted-foreground">
-        <p>
-          Questions? Contact your steward or reach out at{" "}
-          <span className="font-medium text-foreground">grievances@cape-acep.ca</span>
-        </p>
+          <p>
+            Questions? Contact your union representative or reach out at{" "}
+            <span className="font-medium text-foreground">grievances@cape-acep.ca</span>
+          </p>
       </div>
     </div>
   );

@@ -255,9 +255,9 @@ Public companies listed on TSX and NYSE face increasing ESG reporting requiremen
 
 ### Key Controls
 
-- **Access Management:** Clerk RBAC, MFA for admin roles, quarterly access reviews
+- **Access Management:** Platform RBAC, MFA for admin roles, quarterly access reviews
 - **Change Management:** GitHub PR reviews required, CI/CD automated testing, staging environment
 - **Monitoring:** Azure Application Insights, anomaly detection, alert escalation (PagerDuty)
 - **Backup & Recovery:** Daily automated backups (Azure PostgreSQL), 30-day retention, tested quarterly
-- **Vendor Management:** Azure DPA, Clerk DPA, Azure OpenAI DPA — all documented
+- **Vendor Management:** Azure DPA, identity-provider DPA, Azure OpenAI DPA — all documented
 - **Employee Security:** Background checks, security training (annual), NDA signed

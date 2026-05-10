@@ -188,28 +188,28 @@ All platforms implement append-only audit logs for regulatory compliance:
 
 UnionEyes relies on third-party SaaS services that process Canadian member PII. Under PIPEDA (Principle 4.1.3) and Québec Law 25 (s. 17), Nzila must ensure all processors provide a comparable level of protection.
 
-### 8.1 Clerk (Authentication Provider)
+### 8.1 Identity Provider (Authentication Layer)
 
 | Attribute | Detail |
 |-----------|--------|
 | **Service** | Authentication, user profile management, session management |
 | **PII processed** | Name, email, phone (optional), IP address, device identifiers, session tokens |
 | **Data hosting** | Google Cloud (US) + Cloudflare (global edge) |
-| **Canadian data centre** | **Not available.** Clerk does not offer Canadian data residency as of April 2026. |
-| **Data Processing Agreement** | Available at [clerk.com/legal/dpa](https://clerk.com/legal/dpa) — covers GDPR, UK, Swiss, Australian, Japanese, Brazilian transfers; **no Canadian-specific addendum** |
+| **Canadian data centre** | Depends on selected identity provider deployment/region strategy. |
+| **Data Processing Agreement** | Identity-provider DPA required and reviewed with legal before go-live. |
 | **Certifications** | SOC 2 Type II; EU-U.S. Data Privacy Framework (DPF) certified |
 | **Sub-processors** | Google Cloud, Cloudflare — both ISO 27001 + SOC 2 certified |
-| **PII minimization** | Clerk stores only auth-necessary fields; sensitive union data (SIN, banking, health info, grievances, pension records) is **never sent to Clerk** — stored exclusively in Azure Canada Central PostgreSQL |
-| **Cross-border transfer basis (PIPEDA)** | PIPEDA Principle 4.1.3 permits transfers to "a comparable level of protection." Clerk's SOC 2 + DPA + encryption (AES-256 at rest, TLS 1.3 in transit) satisfies this standard. |
-| **Cross-border transfer basis (Law 25)** | Québec Law 25 s. 17 requires a Privacy Impact Assessment (PIA) before any transfer to a jurisdiction without substantially similar protection. **Action required:** complete PIA for Clerk data flows before processing Quebec union member data. |
+| **PII minimization** | Identity layer stores only auth-necessary fields; sensitive union data (SIN, banking, health info, grievances, pension records) is **never sent to the identity provider** — stored exclusively in Azure Canada Central PostgreSQL |
+| **Cross-border transfer basis (PIPEDA)** | PIPEDA Principle 4.1.3 permits transfers to "a comparable level of protection." Enforce SOC 2 + DPA + encryption (AES-256 at rest, TLS 1.3 in transit) for the selected provider. |
+| **Cross-border transfer basis (Law 25)** | Québec Law 25 s. 17 requires a Privacy Impact Assessment (PIA) before any transfer to a jurisdiction without substantially similar protection. **Action required:** complete PIA for identity-provider data flows before processing Quebec union member data. |
 
 **Risk mitigation measures:**
-- No sensitive union data (SIN, pension, grievance, financial) touches Clerk — stored exclusively in Canadian-resident Azure PostgreSQL
-- Clerk DPA provides contractual commitments on data purpose limitation, sub-processor oversight, breach notification, and data subject requests
+- No sensitive union data (SIN, pension, grievance, financial) touches the identity provider — stored exclusively in Canadian-resident Azure PostgreSQL
+- Identity-provider DPA must include contractual commitments on data purpose limitation, sub-processor oversight, breach notification, and data subject requests
 - Session tokens are short-lived (configurable session lifetime); no bulk PII export via Clerk API
-- Clerk provides data export + deletion APIs for PIPEDA right-of-access and right-of-deletion obligations
+- Identity provider must support data export + deletion APIs for PIPEDA right-of-access and right-of-deletion obligations
 
-**Recommendation for full Canadian data sovereignty (future):** Evaluate self-hosted authentication (e.g., Keycloak on Azure Canada Central) when union membership exceeds 50,000 or when a client contract mandates zero cross-border PII transfer. Until then, Clerk's SOC 2 posture + PII minimization is the pragmatic choice.
+**Recommendation for full Canadian data sovereignty (future):** Evaluate self-hosted authentication (e.g., Keycloak on Azure Canada Central) when union membership exceeds 50,000 or when a client contract mandates zero cross-border PII transfer.
 
 ### 8.2 Other Third-Party Processors
 

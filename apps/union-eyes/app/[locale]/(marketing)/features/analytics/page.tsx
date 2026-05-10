@@ -16,12 +16,17 @@ import {
   ArrowRight,
   DollarSign,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Outcomes | UnionEyes',
-  description:
-    'Track resolutions, follow-through, and reporting so union leadership can see what representation delivered and what still needs action.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Outcomes | UnionEyes',
+    description:
+      'Track resolutions, follow-through, and reporting so union leadership can see what representation delivered and what still needs action.',
+    alternates: buildLocaleAlternates(locale, '/features/analytics'),
+  };
+}
 
 const features = [
   {

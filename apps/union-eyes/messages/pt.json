@@ -6919,7 +6919,7 @@
     "support": "Suporte",
     "contactSupport": "Contatar Suporte",
     "needHelp": "Precisa de Ajuda?",
-    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your steward for guidance."
+    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your union representative for guidance."
   },
   "pilot": {
     "dashboard": {
@@ -7438,7 +7438,8 @@
       "legal": "Legal",
       "institutionalContinuity": "Continuidade institucional",
       "governanceIntelligence": "Inteligencia de governanca",
-      "organizationalMemory": "Memoria organizacional",
+      "organizationalMemory": "Memória corporativa",
+      "corporateMemory": "Memória corporativa",
       "executiveIntelligence": "Inteligencia executiva",
       "operationalCoherence": "Coerencia operacional",
       "explainableIntelligence": "Inteligencia explicavel",

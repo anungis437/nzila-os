@@ -33,6 +33,7 @@ import {
   pilotSimulationArtifacts,
   procurementEvidenceBinder,
 } from '@/lib/operational-legitimacy';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const PROOF_COPY = {
   'en-CA': {
@@ -403,6 +404,7 @@ export async function generateMetadata({
   return {
     title: copy.title,
     description: copy.description,
+    alternates: buildLocaleAlternates(locale, '/proof'),
   };
 }
 

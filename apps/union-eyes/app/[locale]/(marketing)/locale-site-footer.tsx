@@ -70,7 +70,7 @@ export default function LocaleSiteFooter() {
       { name: 'Intelligence',         href: `/${locale}/platform#intelligence` },
       { name: 'Cognition',            href: `/${locale}/platform#cognition` },
       { name: 'Governance',           href: `/${locale}/platform#governance` },
-      { name: 'Institutional Memory', href: `/${locale}/platform#institutional-memory` },
+      { name: 'Corporate Memory',     href: `/${locale}/platform#institutional-memory` },
       { name: 'Trust',                href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [

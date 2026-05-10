@@ -58,7 +58,7 @@ const featuredSlugs = new Set([
 
 const categoryDescriptions: Record<string, string> = {
   'Institutional Continuity':
-    'How labour organizations preserve organizational memory, navigate leadership transitions, and build continuity resilience.',
+    'How labour organizations build corporate memory, navigate leadership transitions, and strengthen continuity resilience.',
   'Governance Modernization':
     'Transforming governance operations with explainable intelligence and modern oversight controls.',
   'Explainable Organizational Intelligence':
@@ -66,7 +66,7 @@ const categoryDescriptions: Record<string, string> = {
   'Labour-Safe AI':
     'The principles, practices, and governance safeguards for responsible AI in labour organizations.',
   'Organizational Memory':
-    'Preserving institutional knowledge and making it operationally accessible across leadership generations.',
+    'Capturing corporate memory: preserving institutional knowledge and making it operationally accessible across leadership transitions.',
   'Governance Resilience':
     'Building governance structures that withstand leadership transitions, disputes, and modernization pressure.',
   'Operational Fragility':

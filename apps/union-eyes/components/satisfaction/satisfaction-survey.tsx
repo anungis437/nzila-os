@@ -1,5 +1,5 @@
 /**
- * Satisfaction Survey Component — "Rate My LRO"
+ * Satisfaction Survey Component — "Rate My Representative"
  *
  * Post-case-closure survey with 6 metrics:
  * Communication, Responsiveness, Knowledge, Advocacy, Professionalism, Outcome
@@ -254,7 +254,7 @@ export function SatisfactionSurvey({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl">Rate Your Representation</CardTitle>
+            <CardTitle className="text-xl">Rate Your Union Representative</CardTitle>
             <CardDescription className="mt-1">
               {claimNumber && (
                 <span className="text-muted-foreground">

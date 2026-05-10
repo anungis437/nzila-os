@@ -17,6 +17,7 @@ import {
   getInsightsByCategory,
   insightCategories,
 } from '@/lib/insights-content';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 type InsightCategoryPageProps = {
   params: Promise<{ locale: string; slug: string }>;
@@ -28,19 +29,21 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: InsightCategoryPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const category = getInsightCategory(slug);
 
   if (!category) {
     return {
       title: 'Category Not Found | Insights | Union Eyes',
       description: 'The requested insight category could not be found.',
+      alternates: buildLocaleAlternates(locale, `/insights/category/${slug}`),
     };
   }
 
   return {
     title: `${category.name} | Insights | Union Eyes`,
     description: category.description,
+    alternates: buildLocaleAlternates(locale, `/insights/category/${slug}`),
   };
 }
 
