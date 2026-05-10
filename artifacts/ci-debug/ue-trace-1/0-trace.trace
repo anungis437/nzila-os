@@ -1,0 +1,115 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.59.1","options":{},"platform":"linux","wallTime":1778381959475,"monotonicTime":221715.676,"sdkLanguage":"javascript","contextId":"request-context@c4c90df424c40cf50febd9a636c90d81","title":"e2e/authenticated-role-navigation.spec.ts:52 › Union Eyes authenticated role-centric navigation › governance: mobile landing keeps nav and primary action reachable"}
+{"type":"before","callId":"call@5","startTime":221723.76,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/auth_core/health/","method":"GET","timeout":10000},"stepId":"pw:api@28"}
+{"type":"log","callId":"call@5","time":221732.43,"message":"→ GET http://localhost:3002/api/auth_core/health/"}
+{"type":"log","callId":"call@5","time":221732.471,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@5","time":221732.485,"message":"  accept: */*"}
+{"type":"log","callId":"call@5","time":221732.498,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@5","time":222039.318,"message":"← 308 Permanent Redirect"}
+{"type":"log","callId":"call@5","time":222039.347,"message":"  location: /api/auth_core/health"}
+{"type":"log","callId":"call@5","time":222039.411,"message":"  refresh: 0;url=/api/auth_core/health"}
+{"type":"log","callId":"call@5","time":222039.431,"message":"  date: Sun, 10 May 2026 02:59:19 GMT"}
+{"type":"log","callId":"call@5","time":222039.445,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@5","time":222039.464,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@5","time":222039.476,"message":"  transfer-encoding: chunked"}
+{"type":"log","callId":"call@5","time":222039.939,"message":"→ GET http://localhost:3002/api/auth_core/health"}
+{"type":"log","callId":"call@5","time":222039.959,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@5","time":222039.968,"message":"  accept: */*"}
+{"type":"log","callId":"call@5","time":222039.976,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@5","time":222344.958,"message":"← 200 OK"}
+{"type":"log","callId":"call@5","time":222344.985,"message":"  content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"}
+{"type":"log","callId":"call@5","time":222344.999,"message":"  referrer-policy: strict-origin-when-cross-origin"}
+{"type":"log","callId":"call@5","time":222345.007,"message":"  x-content-type-options: nosniff"}
+{"type":"log","callId":"call@5","time":222345.016,"message":"  x-frame-options: DENY"}
+{"type":"log","callId":"call@5","time":222345.023,"message":"  permissions-policy: camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"}
+{"type":"log","callId":"call@5","time":222345.032,"message":"  strict-transport-security: max-age=63072000; includeSubDomains; preload"}
+{"type":"log","callId":"call@5","time":222345.039,"message":"  x-dns-prefetch-control: on"}
+{"type":"log","callId":"call@5","time":222345.046,"message":"  x-download-options: noopen"}
+{"type":"log","callId":"call@5","time":222345.055,"message":"  x-permitted-cross-domain-policies: none"}
+{"type":"log","callId":"call@5","time":222345.061,"message":"  cross-origin-embedder-policy: credentialless"}
+{"type":"log","callId":"call@5","time":222345.07,"message":"  cross-origin-opener-policy: same-origin"}
+{"type":"log","callId":"call@5","time":222345.077,"message":"  cross-origin-resource-policy: same-origin"}
+{"type":"log","callId":"call@5","time":222345.086,"message":"  origin-agent-cluster: ?1"}
+{"type":"log","callId":"call@5","time":222345.093,"message":"  x-request-id: 385f29e9-2587-49e6-95bc-d6e0ad77da02"}
+{"type":"log","callId":"call@5","time":222345.101,"message":"  vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"}
+{"type":"log","callId":"call@5","time":222345.108,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@5","time":222345.115,"message":"  date: Sun, 10 May 2026 02:59:20 GMT"}
+{"type":"log","callId":"call@5","time":222345.124,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@5","time":222345.131,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@5","time":222345.14,"message":"  transfer-encoding: chunked"}
+{"type":"after","callId":"call@5","endTime":222346.418,"result":{"response":{"url":"http://localhost:3002/api/auth_core/health","status":200,"statusText":"OK","headers":[{"name":"Content-Security-Policy","value":"default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"},{"name":"Referrer-Policy","value":"strict-origin-when-cross-origin"},{"name":"X-Content-Type-Options","value":"nosniff"},{"name":"X-Frame-Options","value":"DENY"},{"name":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"},{"name":"Strict-Transport-Security","value":"max-age=63072000; includeSubDomains; preload"},{"name":"X-DNS-Prefetch-Control","value":"on"},{"name":"X-Download-Options","value":"noopen"},{"name":"X-Permitted-Cross-Domain-Policies","value":"none"},{"name":"Cross-Origin-Embedder-Policy","value":"credentialless"},{"name":"Cross-Origin-Opener-Policy","value":"same-origin"},{"name":"Cross-Origin-Resource-Policy","value":"same-origin"},{"name":"Origin-Agent-Cluster","value":"?1"},{"name":"x-request-id","value":"385f29e9-2587-49e6-95bc-d6e0ad77da02"},{"name":"vary","value":"rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"},{"name":"content-type","value":"application/json"},{"name":"Date","value":"Sun, 10 May 2026 02:59:20 GMT"},{"name":"Connection","value":"keep-alive"},{"name":"Keep-Alive","value":"timeout=5"},{"name":"Transfer-Encoding","value":"chunked"}],"fetchUid":"a4e19081263f2c900343c9494ff4db3d"}}}
+{"type":"before","callId":"call@7","startTime":222353.376,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/auth_core/health/","method":"GET","timeout":10000},"stepId":"pw:api@29"}
+{"type":"log","callId":"call@7","time":222354.327,"message":"→ GET http://localhost:3002/api/auth_core/health/"}
+{"type":"log","callId":"call@7","time":222354.347,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@7","time":222354.359,"message":"  accept: */*"}
+{"type":"log","callId":"call@7","time":222354.369,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@7","time":222355.993,"message":"← 308 Permanent Redirect"}
+{"type":"log","callId":"call@7","time":222356.015,"message":"  location: /api/auth_core/health"}
+{"type":"log","callId":"call@7","time":222356.027,"message":"  refresh: 0;url=/api/auth_core/health"}
+{"type":"log","callId":"call@7","time":222356.037,"message":"  date: Sun, 10 May 2026 02:59:20 GMT"}
+{"type":"log","callId":"call@7","time":222356.046,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@7","time":222356.056,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@7","time":222356.066,"message":"  transfer-encoding: chunked"}
+{"type":"log","callId":"call@7","time":222356.474,"message":"→ GET http://localhost:3002/api/auth_core/health"}
+{"type":"log","callId":"call@7","time":222356.494,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@7","time":222356.507,"message":"  accept: */*"}
+{"type":"log","callId":"call@7","time":222356.518,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@7","time":222661.765,"message":"← 200 OK"}
+{"type":"log","callId":"call@7","time":222661.789,"message":"  content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"}
+{"type":"log","callId":"call@7","time":222661.8,"message":"  referrer-policy: strict-origin-when-cross-origin"}
+{"type":"log","callId":"call@7","time":222661.806,"message":"  x-content-type-options: nosniff"}
+{"type":"log","callId":"call@7","time":222661.812,"message":"  x-frame-options: DENY"}
+{"type":"log","callId":"call@7","time":222661.817,"message":"  permissions-policy: camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"}
+{"type":"log","callId":"call@7","time":222661.823,"message":"  strict-transport-security: max-age=63072000; includeSubDomains; preload"}
+{"type":"log","callId":"call@7","time":222661.828,"message":"  x-dns-prefetch-control: on"}
+{"type":"log","callId":"call@7","time":222661.833,"message":"  x-download-options: noopen"}
+{"type":"log","callId":"call@7","time":222661.839,"message":"  x-permitted-cross-domain-policies: none"}
+{"type":"log","callId":"call@7","time":222661.844,"message":"  cross-origin-embedder-policy: credentialless"}
+{"type":"log","callId":"call@7","time":222661.849,"message":"  cross-origin-opener-policy: same-origin"}
+{"type":"log","callId":"call@7","time":222661.855,"message":"  cross-origin-resource-policy: same-origin"}
+{"type":"log","callId":"call@7","time":222661.86,"message":"  origin-agent-cluster: ?1"}
+{"type":"log","callId":"call@7","time":222661.865,"message":"  x-request-id: 24859eda-2325-4b2e-aabd-ba400d9d4ecb"}
+{"type":"log","callId":"call@7","time":222661.87,"message":"  vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"}
+{"type":"log","callId":"call@7","time":222661.876,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@7","time":222661.881,"message":"  date: Sun, 10 May 2026 02:59:20 GMT"}
+{"type":"log","callId":"call@7","time":222661.886,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@7","time":222661.892,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@7","time":222661.897,"message":"  transfer-encoding: chunked"}
+{"type":"after","callId":"call@7","endTime":222662.702,"result":{"response":{"url":"http://localhost:3002/api/auth_core/health","status":200,"statusText":"OK","headers":[{"name":"Content-Security-Policy","value":"default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"},{"name":"Referrer-Policy","value":"strict-origin-when-cross-origin"},{"name":"X-Content-Type-Options","value":"nosniff"},{"name":"X-Frame-Options","value":"DENY"},{"name":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"},{"name":"Strict-Transport-Security","value":"max-age=63072000; includeSubDomains; preload"},{"name":"X-DNS-Prefetch-Control","value":"on"},{"name":"X-Download-Options","value":"noopen"},{"name":"X-Permitted-Cross-Domain-Policies","value":"none"},{"name":"Cross-Origin-Embedder-Policy","value":"credentialless"},{"name":"Cross-Origin-Opener-Policy","value":"same-origin"},{"name":"Cross-Origin-Resource-Policy","value":"same-origin"},{"name":"Origin-Agent-Cluster","value":"?1"},{"name":"x-request-id","value":"24859eda-2325-4b2e-aabd-ba400d9d4ecb"},{"name":"vary","value":"rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"},{"name":"content-type","value":"application/json"},{"name":"Date","value":"Sun, 10 May 2026 02:59:20 GMT"},{"name":"Connection","value":"keep-alive"},{"name":"Keep-Alive","value":"timeout=5"},{"name":"Transfer-Encoding","value":"chunked"}],"fetchUid":"931705901567bd6406121c76d9eb3762"}}}
+{"type":"before","callId":"call@9","startTime":222664.746,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/auth_core/health/","method":"GET","timeout":10000},"stepId":"pw:api@30"}
+{"type":"log","callId":"call@9","time":222665.281,"message":"→ GET http://localhost:3002/api/auth_core/health/"}
+{"type":"log","callId":"call@9","time":222665.295,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@9","time":222665.303,"message":"  accept: */*"}
+{"type":"log","callId":"call@9","time":222665.31,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@9","time":222666.943,"message":"← 308 Permanent Redirect"}
+{"type":"log","callId":"call@9","time":222666.961,"message":"  location: /api/auth_core/health"}
+{"type":"log","callId":"call@9","time":222666.969,"message":"  refresh: 0;url=/api/auth_core/health"}
+{"type":"log","callId":"call@9","time":222666.983,"message":"  date: Sun, 10 May 2026 02:59:20 GMT"}
+{"type":"log","callId":"call@9","time":222666.996,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@9","time":222667.009,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@9","time":222667.02,"message":"  transfer-encoding: chunked"}
+{"type":"log","callId":"call@9","time":222667.384,"message":"→ GET http://localhost:3002/api/auth_core/health"}
+{"type":"log","callId":"call@9","time":222667.406,"message":"  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36"}
+{"type":"log","callId":"call@9","time":222667.419,"message":"  accept: */*"}
+{"type":"log","callId":"call@9","time":222667.432,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@9","time":222972.433,"message":"← 200 OK"}
+{"type":"log","callId":"call@9","time":222972.465,"message":"  content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"}
+{"type":"log","callId":"call@9","time":222972.48,"message":"  referrer-policy: strict-origin-when-cross-origin"}
+{"type":"log","callId":"call@9","time":222972.491,"message":"  x-content-type-options: nosniff"}
+{"type":"log","callId":"call@9","time":222972.501,"message":"  x-frame-options: DENY"}
+{"type":"log","callId":"call@9","time":222972.511,"message":"  permissions-policy: camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"}
+{"type":"log","callId":"call@9","time":222972.522,"message":"  strict-transport-security: max-age=63072000; includeSubDomains; preload"}
+{"type":"log","callId":"call@9","time":222972.533,"message":"  x-dns-prefetch-control: on"}
+{"type":"log","callId":"call@9","time":222972.544,"message":"  x-download-options: noopen"}
+{"type":"log","callId":"call@9","time":222972.555,"message":"  x-permitted-cross-domain-policies: none"}
+{"type":"log","callId":"call@9","time":222972.565,"message":"  cross-origin-embedder-policy: credentialless"}
+{"type":"log","callId":"call@9","time":222972.575,"message":"  cross-origin-opener-policy: same-origin"}
+{"type":"log","callId":"call@9","time":222972.585,"message":"  cross-origin-resource-policy: same-origin"}
+{"type":"log","callId":"call@9","time":222972.597,"message":"  origin-agent-cluster: ?1"}
+{"type":"log","callId":"call@9","time":222972.608,"message":"  x-request-id: c15dff0d-1618-4a5e-be76-e56f10851fcd"}
+{"type":"log","callId":"call@9","time":222972.619,"message":"  vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"}
+{"type":"log","callId":"call@9","time":222972.629,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@9","time":222972.639,"message":"  date: Sun, 10 May 2026 02:59:20 GMT"}
+{"type":"log","callId":"call@9","time":222972.649,"message":"  connection: keep-alive"}
+{"type":"log","callId":"call@9","time":222972.691,"message":"  keep-alive: timeout=5"}
+{"type":"log","callId":"call@9","time":222972.703,"message":"  transfer-encoding: chunked"}
+{"type":"after","callId":"call@9","endTime":222973.648,"result":{"response":{"url":"http://localhost:3002/api/auth_core/health","status":200,"statusText":"OK","headers":[{"name":"Content-Security-Policy","value":"default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://login.microsoftonline.com; script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io; frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com; worker-src 'self' blob:; media-src 'self' https:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"},{"name":"Referrer-Policy","value":"strict-origin-when-cross-origin"},{"name":"X-Content-Type-Options","value":"nosniff"},{"name":"X-Frame-Options","value":"DENY"},{"name":"Permissions-Policy","value":"camera=(), microphone=(), geolocation=(self), interest-cohort=(), payment=(), usb=()"},{"name":"Strict-Transport-Security","value":"max-age=63072000; includeSubDomains; preload"},{"name":"X-DNS-Prefetch-Control","value":"on"},{"name":"X-Download-Options","value":"noopen"},{"name":"X-Permitted-Cross-Domain-Policies","value":"none"},{"name":"Cross-Origin-Embedder-Policy","value":"credentialless"},{"name":"Cross-Origin-Opener-Policy","value":"same-origin"},{"name":"Cross-Origin-Resource-Policy","value":"same-origin"},{"name":"Origin-Agent-Cluster","value":"?1"},{"name":"x-request-id","value":"c15dff0d-1618-4a5e-be76-e56f10851fcd"},{"name":"vary","value":"rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"},{"name":"content-type","value":"application/json"},{"name":"Date","value":"Sun, 10 May 2026 02:59:20 GMT"},{"name":"Connection","value":"keep-alive"},{"name":"Keep-Alive","value":"timeout=5"},{"name":"Transfer-Encoding","value":"chunked"}],"fetchUid":"0d8657ee4a642ed4a0319e7e8ab8ae60"}}}

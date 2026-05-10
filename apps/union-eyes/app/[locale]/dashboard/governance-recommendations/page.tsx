@@ -1,21 +1,16 @@
-import type { Metadata } from 'next';
+/**
+ * /dashboard/governance-recommendations — Wave 5 collapse.
+ * Canonical surface: /dashboard/governance (recommendations tab).
+ */
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/api-auth-guard';
-import { GovernanceRecommendationsWorkspace } from '@/components/knowledge-transfer/governance-recommendations-workspace';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Governance Recommendations',
-  description:
-    'Evidence-grounded governance recommendation review workspace. Approve, defer, or reject organizational continuity recommendations with full reasoning transparency.',
-};
-
-export default async function GovernanceRecommendationsPage() {
-  const user = await requireUser();
-  if (!user) {
-    redirect('/sign-in');
-  }
-
-  return <GovernanceRecommendationsWorkspace />;
+export default async function GovernanceRecommendationsRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/dashboard/governance?tab=recommendations`);
 }

@@ -103,6 +103,22 @@ const required = [
       'Final verdicts',
     ],
   },
+  {
+    file: 'wave5-institutional-refinement-review.md',
+    sections: [
+      'Executive collapse results',
+      'Governance collapse results',
+      'Institutional-memory collapse results',
+      'Operations collapse results',
+      'Sovereignty embodiment results',
+      'Runtime density metrics',
+      'Nav contraction metrics',
+      'Stakeholder-lane refinement',
+      'Procurement calmness',
+      'Remaining deferred overlaps',
+      'Final verdicts',
+    ],
+  },
 ];
 
 const failures = [];

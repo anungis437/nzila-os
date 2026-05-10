@@ -1,0 +1,1 @@
+{"status":"ok","app":"union-eyes","environment":"production","gitSha":"1aa7103116447115a99f484ebff5c19cff0f4c5a","buildTimestamp":"unknown","artifactId":"unknown","releaseId":"unknown","appVersion":"0.0.0","timestamp":"2026-05-10T02:59:20.731Z","checks":{"process":"ok","database":"ok"}}

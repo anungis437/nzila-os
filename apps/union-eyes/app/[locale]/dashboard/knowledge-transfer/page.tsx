@@ -1,20 +1,20 @@
-import type { Metadata } from 'next';
+/**
+ * /dashboard/knowledge-transfer — Wave 5 collapse (root only).
+ * Canonical surface: /dashboard/institutional-memory (transfer tab).
+ *
+ * NOTE: `/dashboard/knowledge-transfer/new` and `/dashboard/knowledge-transfer/[id]`
+ * remain authoritative drilldowns under this segment. Only the root
+ * page.tsx is converted to a redirect to the canonical surface.
+ */
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/api-auth-guard';
-import { KnowledgeTransferConsole } from '@/components/knowledge-transfer/knowledge-transfer-console';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Knowledge Transfer',
-  description: 'Institutional memory capture and retrieval for union continuity.',
-};
-
-export default async function KnowledgeTransferPage() {
-  const user = await requireUser();
-  if (!user) {
-    redirect('/sign-in');
-  }
-
-  return <KnowledgeTransferConsole />;
+export default async function KnowledgeTransferRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/dashboard/institutional-memory?tab=transfer`);
 }

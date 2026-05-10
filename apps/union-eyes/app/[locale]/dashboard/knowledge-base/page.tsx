@@ -1,31 +1,16 @@
 /**
- * /dashboard/knowledge-base — Union Documents Library
- * Server component with auth guard, delegates to client component
+ * /dashboard/knowledge-base — Wave 5 collapse.
+ * Canonical surface: /dashboard/institutional-memory (knowledge-base tab).
  */
-import { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { requireUser } from "@/lib/api-auth-guard";
-import KnowledgeBaseBrowser from "@/components/knowledge/knowledge-base-browser";
+import { redirect } from 'next/navigation';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
-type PageProps = {
+export default async function KnowledgeBaseRedirect({
+  params,
+}: {
   params: Promise<{ locale: string }>;
-};
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+}) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "knowledgeBasePage" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
-}
-
-export default async function KnowledgeBaseServerPage() {
-  const user = await requireUser();
-  if (!user) redirect("/sign-in");
-
-  return <KnowledgeBaseBrowser />;
+  redirect(`/${locale}/dashboard/institutional-memory?tab=knowledge-base`);
 }
