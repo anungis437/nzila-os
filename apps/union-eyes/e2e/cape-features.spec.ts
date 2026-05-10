@@ -25,33 +25,33 @@ test.describe("Grievance draft save & resume", () => {
   });
 
   test("intake page renders form with required fields", async ({ page }) => {
-    await page.goto("/grievances/new");
+    await page.goto("/en-CA/dashboard/claims/new");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
-    // Page heading
+    // Page heading — canonical claim intake form
     await expect(
-      page.getByRole("heading", { name: /Open New Case/i })
+      page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible({ timeout: 10_000 });
 
-    // Required form fields are present
-    await expect(page.getByLabel(/Case Title/i)).toBeVisible();
-    await expect(page.getByLabel(/Detailed Description/i)).toBeVisible();
-    await expect(page.getByLabel(/Incident Date/i)).toBeVisible();
+    // Required form fields are present (labels are rendered text, not htmlFor-bound)
+    await expect(page.getByText(/Case Title/i).first()).toBeVisible();
+    await expect(page.getByText(/Detailed Description/i).first()).toBeVisible();
+    await expect(page.getByText(/When did this occur/i).first()).toBeVisible();
 
     // Submit button exists
     await expect(
-      page.getByRole("button", { name: /Create Case/i })
+      page.getByRole("button", { name: /Create a Case/i })
     ).toBeVisible();
   });
 
   test("draft is saved to sessionStorage on field input", async ({ page }) => {
-    await page.goto("/grievances/new");
+    await page.goto("/en-CA/dashboard/claims/new");
     await expect(
-      page.getByRole("heading", { name: /Open New Case/i })
+      page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible({ timeout: 15_000 });
 
-    // Fill in the title field
-    const titleInput = page.getByLabel(/Case Title/i);
+    // Fill in the title field — first text input on the form
+    const titleInput = page.locator('input[type="text"]').first();
     await titleInput.fill("Test Draft Grievance — E2E");
 
     // Give the debounced auto-save time to fire
@@ -71,7 +71,7 @@ test.describe("Grievance draft save & resume", () => {
     page,
   }) => {
     // Step 1: Create a draft by setting sessionStorage directly
-    await page.goto("/grievances/new");
+    await page.goto("/en-CA/dashboard/claims/new");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     await page.evaluate(() => {
@@ -85,8 +85,8 @@ test.describe("Grievance draft save & resume", () => {
     });
 
     // Step 2: Navigate away and return
-    await page.goto("/grievances");
-    await page.goto("/grievances/new");
+    await page.goto("/en-CA/dashboard/grievances");
+    await page.goto("/en-CA/dashboard/claims/new");
 
     // Step 3: Resume modal should appear
     const resumeDialog = page.getByRole("dialog");
@@ -119,7 +119,8 @@ test.describe("Grievance submission flow", () => {
   });
 
   test("grievance queue page loads with content", async ({ page }) => {
-    await page.goto("/grievances");
+    // /dashboard/grievances is now a soft-redirect to /dashboard/work
+    await page.goto("/en-CA/dashboard/grievances");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Should show some content — at minimum a heading or empty state
@@ -134,17 +135,17 @@ test.describe("Grievance submission flow", () => {
   test("intake form validates required fields before submission", async ({
     page,
   }) => {
-    await page.goto("/grievances/new");
+    await page.goto("/en-CA/dashboard/claims/new");
     await expect(
-      page.getByRole("heading", { name: /Open New Case/i })
+      page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible({ timeout: 15_000 });
 
     // Click submit without filling required fields
-    await page.getByRole("button", { name: /Create Case/i }).click();
+    await page.getByRole("button", { name: /Create a Case/i }).click();
 
     // Form should not navigate away — still on the same page
     await expect(
-      page.getByRole("heading", { name: /Open New Case/i })
+      page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible();
   });
 });
@@ -159,7 +160,7 @@ test.describe("Pilot readiness checklist", () => {
   });
 
   test("onboarding page renders checklist with 7 items", async ({ page }) => {
-    await page.goto("/dashboard/pilot/onboarding");
+    await page.goto("/en-CA/dashboard/pilot/onboarding");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Should show "Pilot Readiness" heading
@@ -172,7 +173,7 @@ test.describe("Pilot readiness checklist", () => {
   });
 
   test("checklist displays all 7 expected items", async ({ page }) => {
-    await page.goto("/dashboard/pilot/onboarding");
+    await page.goto("/en-CA/dashboard/pilot/onboarding");
     await expect(
       page.getByRole("heading", { name: /Pilot Readiness/i })
     ).toBeVisible({ timeout: 15_000 });
@@ -221,7 +222,7 @@ test.describe("Leadership dashboard", () => {
   });
 
   test("dashboard renders 6 KPI cards", async ({ page }) => {
-    await page.goto("/dashboard/leadership");
+    await page.goto("/en-CA/dashboard/leadership");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // All 6 KPI card labels should be visible
