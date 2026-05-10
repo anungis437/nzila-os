@@ -1,11 +1,11 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { ContinuityWindowPanel } from "@/components/governance/foundations/rollout/continuity-window-panel";
-import { EnvironmentLegitimacyPanel } from "@/components/governance/foundations/rollout/environment-legitimacy-panel";
-import { PromotionLedgerViewer } from "@/components/governance/foundations/rollout/promotion-ledger-viewer";
-import { PromotionReviewPanel } from "@/components/governance/foundations/rollout/promotion-review-panel";
-import { RollbackGovernancePanel } from "@/components/governance/foundations/rollout/rollback-governance-panel";
-import { RolloutAttestationViewer } from "@/components/governance/foundations/rollout/rollout-attestation-viewer";
-import { RolloutReadinessPanel } from "@/components/governance/foundations/rollout/rollout-readiness-panel";
+import { ContinuityWindowPanel } from "@/components/governance/rollout/continuity-window-panel";
+import { EnvironmentLegitimacyPanel } from "@/components/governance/rollout/environment-legitimacy-panel";
+import { PromotionLedgerViewer } from "@/components/governance/rollout/promotion-ledger-viewer";
+import { PromotionReviewPanel } from "@/components/governance/rollout/promotion-review-panel";
+import { RollbackGovernancePanel } from "@/components/governance/rollout/rollback-governance-panel";
+import { RolloutAttestationViewer } from "@/components/governance/rollout/rollout-attestation-viewer";
+import { RolloutReadinessPanel } from "@/components/governance/rollout/rollout-readiness-panel";
 import {
   buildTierPostures,
   loadAttestationLedger,
