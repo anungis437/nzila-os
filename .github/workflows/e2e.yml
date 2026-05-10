@@ -97,6 +97,9 @@ jobs:
           QA_TEST_ENV: 'true'
           PLAYWRIGHT_TEST_AUTH: 'true'
           UE_E2E_RISK_BYPASS: 'true'
+          # Surface API errors in /tmp/app-server.log (Next.js prod is otherwise silent)
+          NEXT_LOG_LEVEL: debug
+          DEBUG: 'next:*'
           # boot-env requires these in production mode (control-plane, console)
           CONTROL_PLANE_API_KEY: ci-e2e-placeholder-key
           CONTROL_PLANE_URL: http://localhost:3010
@@ -128,8 +131,11 @@ jobs:
       - name: Dump app server log on failure
         if: failure()
         run: |
-          echo '===== app server log ====='
-          tail -n 500 /tmp/app-server.log || true
+          echo '===== app server log (full) ====='
+          cat /tmp/app-server.log || true
+          echo ''
+          echo '===== playwright error contexts ====='
+          find apps/${{ matrix.app }}/test-results -name 'error-context.md' -print -exec cat {} \; 2>/dev/null || true
 
       - name: Upload app server log
         uses: actions/upload-artifact@v4

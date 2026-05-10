@@ -104,7 +104,7 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   steward: [
     'Workbench',
     'Cases',
-    'Assignments',
+    'Priorities',
     'Members',
     'Documents',
     'Communications',
@@ -115,7 +115,7 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
   staff: [
     'Workbench',
     'Cases',
-    'Assignments',
+    'Priorities',
     'Members',
     'Documents',
     'Communications',
