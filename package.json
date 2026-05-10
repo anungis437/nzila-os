@@ -203,6 +203,7 @@
     "validate:runtime-integrity": "node tooling/scripts/validate-runtime-integrity.mjs",
     "validate:tier2-hardening": "node tooling/scripts/validate-tier2-hardening.mjs",
     "validate:sovereignty-proving": "node tooling/scripts/validate-sovereignty-proving.mjs",
+    "validate:residual-closure": "node tooling/scripts/validate-residual-closure.mjs",
     "validate:live-readiness": "node tooling/scripts/validate-live-operational-readiness.mjs",
     "validate:infra-convergence": "node tooling/scripts/validate-live-infrastructure-convergence.mjs",
     "validate:all": "tsx packages/platform-validation/src/run-all.ts",
