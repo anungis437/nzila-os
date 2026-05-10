@@ -51,34 +51,35 @@ test.describe("Labor continuity intelligence page", () => {
 
   test("renders tabbed workflow when entitled, otherwise remains stable under module gating", async ({ page }) => {
     await authenticateExecutiveSession(page);
-    const entitled = await hasCommercialReportingAccess(page);
+    // Probe API entitlement only for diagnostic visibility; the page itself is
+    // role-gated (not entitlement-gated) per the canonical implementation in
+    // app/[locale]/dashboard/cba-intelligence/page.tsx — once on route, the
+    // tabbed workflow always renders for any authorized role.
+    await hasCommercialReportingAccess(page);
 
     await page.goto(PAGE_URL, { waitUntil: "networkidle" });
     const onContinuityRoute = page.url().includes("/dashboard/cba-intelligence");
 
-    if (entitled && onContinuityRoute) {
-      for (const tabName of TABS) {
-        await expect(page.getByRole("tab", { name: tabName })).toBeVisible({ timeout: 10_000 });
-      }
-
-      const sourcesTab = page.getByRole("tab", { name: "Sources" });
-      await expect(sourcesTab).toHaveAttribute("data-state", "active", { timeout: 10_000 });
-
-      for (const tabName of ["Ingestion", "Agreements", "Review", "Benchmark", "Freshness"]) {
-        const tab = page.getByRole("tab", { name: tabName });
-        await tab.click();
-        await expect(tab).toHaveAttribute("data-state", "active");
-        await expect(page.getByRole("tabpanel")).toBeVisible();
-      }
-      return;
-    }
-
     if (!onContinuityRoute) {
+      // Role gate redirected away — verify we landed somewhere safe inside the dashboard.
       await expect(page).toHaveURL(/\/dashboard(\/|$)/);
       await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible({ timeout: 10_000 });
       return;
     }
 
-    await expect(page.getByRole("tab", { name: "Sources" })).toHaveCount(0);
+    // Canonical: tabs render unconditionally for authorized users.
+    for (const tabName of TABS) {
+      await expect(page.getByRole("tab", { name: tabName })).toBeVisible({ timeout: 10_000 });
+    }
+
+    const sourcesTab = page.getByRole("tab", { name: "Sources" });
+    await expect(sourcesTab).toHaveAttribute("data-state", "active", { timeout: 10_000 });
+
+    for (const tabName of ["Ingestion", "Agreements", "Review", "Benchmark", "Freshness"]) {
+      const tab = page.getByRole("tab", { name: tabName });
+      await tab.click();
+      await expect(tab).toHaveAttribute("data-state", "active");
+      await expect(page.getByRole("tabpanel")).toBeVisible();
+    }
   });
 });

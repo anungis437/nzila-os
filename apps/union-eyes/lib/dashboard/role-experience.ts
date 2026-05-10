@@ -66,7 +66,11 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 export function getRoleLandingPath(role?: string | null): string {
   const experience = getDashboardExperience(role);
   if (experience === 'member') return '/dashboard/inbox';
-  if (experience === 'staff') return '/dashboard/workbench';
+  // staff lands on the Workbench tile, which is the first nav item below
+  // (`/dashboard/work` — the staff/steward work surface). Keeping these in
+  // sync ensures the sidebar's first item resolves as the active route on
+  // first arrival.
+  if (experience === 'staff') return '/dashboard/work';
   if (experience === 'executive') return '/dashboard/intelligence';
   if (experience === 'governance') return '/dashboard/governance';
   return '/dashboard/admin/organizations';

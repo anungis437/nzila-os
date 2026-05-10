@@ -12,6 +12,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureServerReady } from '../tests/e2e/_helpers';
+import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -22,6 +23,12 @@ test.describe("Grievance draft save & resume", () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    // Member can submit a new claim — canonical role for the intake form.
+    await loginAsRole(page, 'member');
   });
 
   test("intake page renders form with required fields", async ({ page }) => {
@@ -116,6 +123,11 @@ test.describe("Grievance submission flow", () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await loginAsRole(page, 'member');
   });
 
   test("grievance queue page loads with content", async ({ page }) => {
@@ -157,6 +169,12 @@ test.describe("Pilot readiness checklist", () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    // Pilot onboarding is officer-gated.
+    await loginAsRole(page, 'admin');
   });
 
   test("onboarding page renders checklist with 7 items", async ({ page }) => {
@@ -219,6 +237,12 @@ test.describe("Leadership dashboard", () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    // Leadership dashboard is officer/admin-gated.
+    await loginAsRole(page, 'admin');
   });
 
   test("dashboard renders 6 KPI cards", async ({ page }) => {
@@ -301,6 +325,11 @@ test.describe("Steward workbench", () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await loginAsRole(page, 'staff');
   });
 
   test("dashboard page loads with content", async ({ page }) => {

@@ -175,11 +175,16 @@ class Logger {
     // Indirect access avoids Next.js Edge Runtime static-analysis warnings
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _proc = (globalThis as any)['process'];
-    if (_proc?.env?.NODE_ENV !== 'production' && _proc?.stdout) {
-      const stream = level === 'error' || level === 'warn'
-        ? _proc.stderr
-        : _proc.stdout;
-      stream.write(formatted + '\n');
+    if (_proc?.stdout) {
+      // Always emit warn/error to stderr (including production) so that
+      // server logs surface 500-causing stack traces; debug/info only emit
+      // outside production to keep prod logs clean.
+      const isProduction = _proc?.env?.NODE_ENV === 'production';
+      const isErrorOrWarn = level === 'error' || level === 'warn';
+      if (isErrorOrWarn || !isProduction) {
+        const stream = isErrorOrWarn ? _proc.stderr : _proc.stdout;
+        stream.write(formatted + '\n');
+      }
     }
 
     // Send to Sentry based on level (async, fire-and-forget)

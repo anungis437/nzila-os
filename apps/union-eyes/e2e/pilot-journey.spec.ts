@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ensureServerReady } from '../tests/e2e/_helpers';
+import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
 
@@ -8,9 +9,13 @@ test.describe('CUPE pilot journey', () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
   });
 
   test('member intake uses the approved intake and evidence endpoints', async ({ page }) => {
+    // Intake form requires an authenticated member context.
+    await loginAsRole(page, 'member');
+
     const intakeRequests: Array<Record<string, unknown>> = [];
     const evidenceRequests: string[] = [];
 
@@ -78,6 +83,8 @@ test.describe('CUPE pilot journey', () => {
   });
 
   test('staff pilot APIs have authenticated coverage for assign, transition, audit, and export', async ({ page }) => {
+    // Staff (steward) auth context for the workbench-side journey.
+    await loginAsRole(page, 'staff');
     const hits = new Set<string>();
 
     await page.route('**/api/cases/CASE-TEST-0001/assign', async (route) => {
