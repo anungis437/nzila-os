@@ -10,7 +10,7 @@ export const heroImagery = {
   story: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920&q=80&auto=format',
   governance: 'https://images.unsplash.com/photo-1552664751-121d75d85e4d?w=1920&q=80&auto=format',
   contact: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1920&q=80&auto=format',
-  pilotRequest: 'https://images.unsplash.com/photo-1552664704-5fefe8c9ef14?w=1920&q=80&auto=format',
+  pilotRequest: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1920&q=80&auto=format',
   caseStudies: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=80&auto=format',
   status: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&q=80&auto=format',
   pricing: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80&auto=format',

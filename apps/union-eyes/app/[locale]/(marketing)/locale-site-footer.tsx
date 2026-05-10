@@ -7,7 +7,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { ArrowRight, Linkedin, Twitter, Github, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -57,8 +57,10 @@ const FOOTER_COPY: Record<string, {
 export default function LocaleSiteFooter() {
   const t  = useTranslations('marketing.footer');
   const params = useParams();
+  const pathname = usePathname() ?? '';
   const locale = (params?.locale as string) || 'en-CA';
   const copy = FOOTER_COPY[locale] ?? FOOTER_COPY['en-CA'];
+  const hidePreFooterCta = /\/(pilot-request|contact)(\/|$)/.test(pathname);
 
   const footerLinks = {
     [t('platform') as string]: [
@@ -104,7 +106,8 @@ export default function LocaleSiteFooter() {
 
   return (
     <footer className="bg-navy text-gray-200">
-      {/* Pre-footer CTA */}
+      {/* Pre-footer CTA — hidden on intake surfaces (pilot-request, contact) where it would bounce in place */}
+      {!hidePreFooterCta && (
       <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="text-center lg:text-left max-w-xl">
@@ -131,6 +134,7 @@ export default function LocaleSiteFooter() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

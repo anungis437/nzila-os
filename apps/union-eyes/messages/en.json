@@ -11000,5 +11000,23 @@
     "npsPromoter": "Promoter",
     "npsPassive": "Passive",
     "npsDetractor": "Detractor"
+  },
+  "continuityNotes": {
+    "trust": {
+      "label": "Trust posture",
+      "posture": "Trust in Union Eyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
+    },
+    "procurement": {
+      "label": "Procurement posture",
+      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities Union Eyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
+    },
+    "pilot": {
+      "label": "Pilot posture",
+      "posture": "This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an institutional record that survives leadership transitions. Workers are never the subject of pilot assessment."
+    },
+    "ontology": {
+      "label": "Institutional ontology",
+      "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
+    }
   }
 }

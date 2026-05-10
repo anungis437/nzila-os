@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import {
   ArrowRight,
   CheckCircle2,
@@ -219,7 +220,13 @@ const procurementCommitments = [
   },
 ];
 
-export default function LocalePricingPage() {
+export default async function LocalePricingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const tNote = await getTranslations({ locale, namespace: 'continuityNotes.procurement' });
   return (
     <div className="institution-shell min-h-screen">
       <MarketingHeroSection
@@ -237,8 +244,8 @@ export default function LocalePricingPage() {
       />
 
       <InstitutionalContinuityNote
-        surface="Procurement posture"
-        posture="Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities Union Eyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
+        surface={tNote('label')}
+        posture={tNote('posture')}
       />
 
       {/* ── 1. Operational reality ── */}

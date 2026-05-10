@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import {
   Inbox as InboxIcon,
   Briefcase,
@@ -107,6 +108,7 @@ export default async function PlatformOverviewPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const tNote = await getTranslations({ locale, namespace: 'continuityNotes.ontology' });
 
   return (
     <main className="min-h-screen bg-white">
@@ -118,8 +120,8 @@ export default async function PlatformOverviewPage({
       />
 
       <InstitutionalContinuityNote
-        surface="Institutional ontology"
-        posture="The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
+        surface={tNote('label')}
+        posture={tNote('posture')}
       />
 
       <section className="mx-auto max-w-6xl px-6 py-20">

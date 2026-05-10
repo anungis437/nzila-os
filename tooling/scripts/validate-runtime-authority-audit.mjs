@@ -152,6 +152,25 @@ const required = [
       'institutional trust',
     ],
   },
+  {
+    file: 'wave8-institutional-permanence-review.md',
+    sections: [
+      'Procurement-grade language convergence results',
+      'fr-CA continuity parity results',
+      'Operational rhythm choreography results',
+      'Stakeholder emotional permanence results',
+      'Trust-center constitutionalization results',
+      'Pilot/procurement choreography results',
+      'Runtime calmness results',
+      'Remaining deferred refinements',
+      'Final verdicts',
+      'procurement-grade',
+      'fr-CA continuity parity',
+      'operational rhythm',
+      'constitutional trust',
+      'institutional permanence',
+    ],
+  },
 ];
 
 const failures = [];

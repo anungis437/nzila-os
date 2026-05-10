@@ -64,28 +64,16 @@ export function InsightsHubSubmenu({
     conference: 'Conference',
   };
 
-  const modeConcern: Record<InstitutionalMode, string> = {
-    executive: 'Continuity and resilience',
-    governance: 'Explainability and accountability',
-    operations: 'Coordination and organizational coherence',
-    procurement: 'Trust and reviewability',
-    conference: 'Narrative simplicity and memorability',
-  };
-
   const activeSection = insightsHubSections.find((section) => section.key === active);
+  // Conference mode is intentionally hidden from the audience selector;
+  // it remains a valid contextMode value carried via withInstitutionalContext.
+  const visibleModes = institutionalModes.filter((mode) => mode !== 'conference');
 
   return (
     <nav className="border-b border-slate-200/70 bg-white/95 backdrop-blur-sm sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-slate-500">
-            Context Mode: {modeLabel[contextMode]}
-          </p>
-          <p className="text-xs text-slate-500 truncate">{modeConcern[contextMode]}</p>
-        </div>
-
         <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
-          {institutionalModes.map((mode) => {
+          {visibleModes.map((mode) => {
             const isActiveMode = mode === contextMode;
             const activeHref = activeSection ? activeSection.href(locale) : `/${locale}/insights`;
 

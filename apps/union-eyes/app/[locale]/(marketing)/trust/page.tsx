@@ -71,6 +71,7 @@ export default async function TrustPage({
   const contextMode = parseInstitutionalMode(resolvedSearch?.context);
   const contextProfile = getInstitutionalModeProfile(contextMode);
   const t = await getTranslations({ locale, namespace: 'marketing.trust' });
+  const tNote = await getTranslations({ locale, namespace: 'continuityNotes.trust' });
 
   return (
     <div className="min-h-screen bg-white">
@@ -107,8 +108,8 @@ export default async function TrustPage({
       />
 
       <InstitutionalContinuityNote
-        surface="Trust posture"
-        posture="Trust in Union Eyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
+        surface={tNote('label')}
+        posture={tNote('posture')}
       />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

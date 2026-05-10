@@ -18,7 +18,6 @@ import {
   calculateReadinessScore,
   ReadinessAssessmentResult,
 } from '@/lib/pilot/readiness-assessment';
-import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
@@ -32,7 +31,6 @@ import {
   leadershipTransitionContinuityScenarios,
   onboardingContinuityIntelligenceScenarios,
   institutionalRolloutPathway,
-  pilotFramework,
   executiveBriefingFlows,
   pilotSimulationArtifacts,
 } from '@/lib/operational-legitimacy';
@@ -88,6 +86,7 @@ export default function LocalePilotRequestPage() {
   const searchParams = useSearchParams();
   const locale = (params.locale as string) ?? 'en-CA';
   const t = useTranslations('marketing.pilotRequest');
+  const tNote = useTranslations('continuityNotes.pilot');
   const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
   const contextProfile = getInstitutionalModeProfile(contextMode);
 
@@ -195,53 +194,11 @@ export default function LocalePilotRequestPage() {
       />
 
       <InstitutionalContinuityNote
-        surface="Pilot posture"
-        posture="This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an institutional record that survives leadership transitions. Workers are never the subject of pilot assessment."
+        surface={tNote('label')}
+        posture={tNote('posture')}
       />
 
       <div className="max-w-3xl mx-auto mt-12">
-
-        <HumanCenteredCallout
-          variant="trust"
-          message={t('trustCallout')}
-          className="mb-8"
-        />
-
-        <section className="mb-8 p-6 bg-white border border-gray-100 rounded-lg shadow-sm">
-          <p className="text-xs uppercase tracking-widest text-blue-700 font-semibold mb-2">
-            Pilot Readiness Framework
-          </p>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Operationally safe and governance-first pilot design</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Pilot assessment is directional and institution-focused. It does not score workers or individual performance.
-          </p>
-          <div className="grid gap-4 md:grid-cols-3 text-sm">
-            <article className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-2">Pilot Scope Definition</h3>
-              <ul className="space-y-1 text-gray-700">
-                {pilotFramework.scopeDefinition.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </article>
-            <article className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-2">Pilot Safety Layer</h3>
-              <ul className="space-y-1 text-gray-700">
-                {pilotFramework.safetyLayer.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </article>
-            <article className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-2">Pilot Success Indicators</h3>
-              <ul className="space-y-1 text-gray-700">
-                {pilotFramework.successIndicators.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </article>
-          </div>
-        </section>
 
         {/* Progress */}
         <div className="mb-8">

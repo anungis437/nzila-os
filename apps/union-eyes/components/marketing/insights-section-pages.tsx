@@ -9,7 +9,6 @@ import {
   ExecutiveResonanceLayer,
   FragmentationToCoherenceSequence,
   MethodologyVisualizationSystem,
-  StakeholderVisualPathways,
 } from '@/components/marketing/institutional-visual-systems';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import {
@@ -123,25 +122,7 @@ const realizationMoments = [
   },
 ];
 
-function InstitutionalModeCallout({ contextMode }: { contextMode: InstitutionalMode }) {
-  const profile = getInstitutionalModeProfile(contextMode);
 
-  return (
-    <section className="py-8 bg-white border-b border-slate-200/70">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.82} distance={10} tempo="conference">
-          <article className="institution-panel p-4 sm:p-5">
-            <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-slate-500 mb-2">
-              {profile.label} Context
-            </p>
-            <p className="text-sm font-semibold text-navy mb-1">Primary concern: {profile.concern}</p>
-            <p className="text-sm text-slate-600 leading-relaxed">{profile.continuityCallout}</p>
-          </article>
-        </ScrollReveal>
-      </div>
-    </section>
-  );
-}
 
 export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
   const featuredInsights = getFeaturedInsights();
@@ -156,13 +137,16 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         revealTempo="conference"
         heading={<>Editorial standards and canonical story architecture</>}
         description="The doctrine layer defines how Union Eyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
-        contextKicker={`${profile.label} framing`}
-        contextNote={profile.heroFraming}
+        contextKicker={`${profile.label} context`}
+        contextNote={(
+          <>
+            <span className="block font-semibold">Primary concern: {profile.concern}</span>
+            <span className="block mt-1">{profile.heroFraming}</span>
+          </>
+        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="doctrine" contextMode={contextMode} />
-
-      <InstitutionalModeCallout contextMode={contextMode} />
 
       <section className="py-16 border-b border-slate-200/70 bg-[#f8f6f2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -318,13 +302,16 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
         revealTempo="conference"
         heading={<>Continuity flow, transformation rhythm, and governance symbolism</>}
         description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm institutional motion."
-        contextKicker={`${profile.label} focus`}
-        contextNote={`Priority framework: ${profile.methodologyFocus}. ${profile.continuityCallout}`}
+        contextKicker={`${profile.label} context`}
+        contextNote={(
+          <>
+            <span className="block font-semibold">Primary concern: {profile.concern}</span>
+            <span className="block mt-1">Priority framework: {profile.methodologyFocus}. {profile.continuityCallout}</span>
+          </>
+        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="methodology" contextMode={contextMode} />
-
-      <InstitutionalModeCallout contextMode={contextMode} />
 
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -400,13 +387,16 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
         revealTempo="conference"
         heading={<>Emotional memorability without theatrics</>}
         description="This section turns institutional continuity into a remembered idea: trust, resilience, clarity, and continuity flow."
-        contextKicker={`${profile.label} emphasis`}
-        contextNote={profile.heroFraming}
+        contextKicker={`${profile.label} context`}
+        contextNote={(
+          <>
+            <span className="block font-semibold">Primary concern: {profile.concern}</span>
+            <span className="block mt-1">{profile.heroFraming}</span>
+          </>
+        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="resonance" contextMode={contextMode} />
-
-      <InstitutionalModeCallout contextMode={contextMode} />
 
       <ExecutiveResonanceLayer />
 
@@ -453,15 +443,16 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         revealTempo="conference"
         heading={<>Browse by governance domain</>}
         description="Use this section to move through the insight library by organizational need, not just by article title."
-        contextKicker={`${profile.label} pathway`}
-        contextNote={profile.continuityCallout}
+        contextKicker={`${profile.label} context`}
+        contextNote={(
+          <>
+            <span className="block font-semibold">Primary concern: {profile.concern}</span>
+            <span className="block mt-1">{profile.continuityCallout}</span>
+          </>
+        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="categories" contextMode={contextMode} />
-
-      <InstitutionalModeCallout contextMode={contextMode} />
-
-      <StakeholderVisualPathways />
 
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
