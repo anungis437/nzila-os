@@ -34,7 +34,7 @@ test.describe('No FSM overexposure in pilot-facing UX', () => {
 
       for (const path of sampleRoutes) {
         await page.goto(toLocalizedPath(path, fixture.locale), { waitUntil: 'domcontentloaded' });
-        await expect(page.locator('body')).toBeVisible();
+        await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
         await assertNoTextExposure(page, FORBIDDEN_FSM_TERMS);
       }
 

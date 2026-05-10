@@ -67,18 +67,21 @@ test.describe("Labor continuity intelligence page", () => {
       return;
     }
 
+    const primaryTabList = page.locator('main [role="tablist"]').first();
+    await expect(primaryTabList).toBeVisible({ timeout: 10_000 });
+
     // Canonical: tabs render unconditionally for authorized users.
     for (const tabName of TABS) {
-      await expect(page.getByRole("tab", { name: tabName })).toBeVisible({ timeout: 10_000 });
+      await expect(primaryTabList.getByRole("tab", { name: tabName })).toBeVisible({ timeout: 10_000 });
     }
 
-    const sourcesTab = page.getByRole("tab", { name: "Sources" });
-    await expect(sourcesTab).toHaveAttribute("data-state", "active", { timeout: 10_000 });
+    const sourcesTab = primaryTabList.getByRole("tab", { name: "Sources" });
+    await expect(sourcesTab).toHaveAttribute("aria-selected", "true", { timeout: 10_000 });
 
     for (const tabName of ["Ingestion", "Agreements", "Review", "Benchmark", "Freshness"]) {
-      const tab = page.getByRole("tab", { name: tabName });
+      const tab = primaryTabList.getByRole("tab", { name: tabName });
       await tab.click();
-      await expect(tab).toHaveAttribute("data-state", "active");
+      await expect(tab).toHaveAttribute("aria-selected", "true");
       await expect(page.getByRole("tabpanel")).toBeVisible();
     }
   });

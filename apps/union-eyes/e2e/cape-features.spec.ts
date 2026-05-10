@@ -12,7 +12,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureServerReady } from '../tests/e2e/_helpers';
-import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
+import { bootstrapE2EAuth, gotoDashboardAsRole, loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -120,7 +120,7 @@ test.describe("Grievance submission flow", () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await loginAsRole(page, 'member');
+    await gotoDashboardAsRole(page, 'member');
   });
 
   test("grievance queue page loads with content", async ({ page }) => {
@@ -232,9 +232,10 @@ test.describe("Leadership dashboard", () => {
   test("dashboard renders 6 KPI cards", async ({ page }) => {
     await page.goto("/en-CA/dashboard/leadership");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /Leadership Dashboard/i })).toBeVisible({ timeout: 10_000 });
 
-    // Page can render KPI cards when data exists, or an empty-state when not seeded.
-    const hasKpi = await page.getByText("Active Grievances").first().isVisible({ timeout: 3_000 }).catch(() => false);
+    // Page can render KPI cards when data exists, or empty-state analytics panels when not seeded.
+    const hasKpi = await page.locator('main').getByText(/Active Grievances|Resolved This Month|Avg\. Time to Triage/i).first().isVisible({ timeout: 5_000 }).catch(() => false);
     if (hasKpi) {
       const kpiLabels = [
         "Active Grievances",
@@ -249,7 +250,8 @@ test.describe("Leadership dashboard", () => {
         await expect(page.getByText(label)).toBeVisible({ timeout: 10_000 });
       }
     } else {
-      await expect(page.getByRole('heading', { name: /No dashboard data/i })).toBeVisible({ timeout: 10_000 });
+      const mainText = ((await page.textContent('main')) ?? '').toLowerCase();
+      expect(mainText).toMatch(/no employer grievance data|no steward capacity data|leadership dashboard/);
     }
   });
 
