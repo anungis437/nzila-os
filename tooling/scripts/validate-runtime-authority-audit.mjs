@@ -76,6 +76,19 @@ const required = [
       'Mandatory sections checklist',
     ],
   },
+  {
+    file: 'wave3-runtime-consolidation-review.md',
+    sections: [
+      'Deleted route inventory',
+      'Retained canonical routes',
+      'Gating expansion',
+      'Navigation convergence',
+      'Doctrine normalization',
+      'Runtime reduction metrics',
+      'Stakeholder-boundary verdicts',
+      'Final verdict',
+    ],
+  },
 ];
 
 const failures = [];

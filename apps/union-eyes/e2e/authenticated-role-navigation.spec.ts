@@ -88,6 +88,18 @@ test.describe('Union Eyes authenticated role-centric navigation', () => {
     { role: 'steward', target: '/dashboard/compliance-admin' },
     { role: 'steward', target: '/dashboard/debug' },
     { role: 'steward', target: '/dashboard/clc' },
+    // Wave 3 — Sovereignty layer + governance ops gates.
+    // member (20) and steward (50) cannot reach internal sovereignty surfaces.
+    { role: 'member', target: '/dashboard/cognition' },
+    { role: 'member', target: '/dashboard/longitudinal-cognition' },
+    { role: 'member', target: '/dashboard/security' },
+    { role: 'member', target: '/dashboard/customer-success' },
+    { role: 'member', target: '/dashboard/operations' },
+    { role: 'member', target: '/dashboard/ops' },
+    { role: 'steward', target: '/dashboard/cognition' },
+    { role: 'steward', target: '/dashboard/longitudinal-cognition' },
+    { role: 'steward', target: '/dashboard/customer-success' },
+    { role: 'steward', target: '/dashboard/ops' },
   ];
 
   for (const attempt of leakageAttempts) {

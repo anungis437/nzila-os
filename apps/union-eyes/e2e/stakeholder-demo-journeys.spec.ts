@@ -54,8 +54,8 @@ test.describe('Union Eyes stakeholder demo journeys', () => {
     await gotoDashboardAsRole(page, 'steward');
 
     const path: Array<{ label: string; href: string }> = [
-      { label: 'Workbench', href: '/dashboard/workbench' },
-      { label: 'Cases', href: '/dashboard/claims' },
+      { label: 'Workbench', href: '/dashboard/work' },
+      { label: 'Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Communications', href: '/dashboard/correspondence' },
       { label: 'Assignments', href: '/dashboard/priorities' },
       { label: 'Documents', href: '/dashboard/documents' },
@@ -97,9 +97,9 @@ test.describe('Union Eyes stakeholder demo journeys', () => {
     await gotoDashboardAsRole(page, 'member');
 
     const path: Array<{ label: string; href: string }> = [
-      { label: 'My Cases', href: '/dashboard/inbox' },
+      { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Submit Request', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/messages' },
+      { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
     ];
 

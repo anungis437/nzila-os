@@ -85,7 +85,7 @@ test.describe("Grievance draft save & resume", () => {
     });
 
     // Step 2: Navigate away and return
-    await page.goto("/en-CA/dashboard/grievances");
+    await page.goto("/en-CA/dashboard/work");
     await page.goto("/en-CA/dashboard/claims/new");
 
     // Step 3: Resume modal should appear
@@ -119,8 +119,8 @@ test.describe("Grievance submission flow", () => {
   });
 
   test("grievance queue page loads with content", async ({ page }) => {
-    // /dashboard/grievances is now a soft-redirect to /dashboard/work
-    await page.goto("/en-CA/dashboard/grievances");
+    // /dashboard/grievances was consolidated into /dashboard/work in Wave 3
+    await page.goto("/en-CA/dashboard/work");
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Should show some content — at minimum a heading or empty state

@@ -30,8 +30,8 @@ test.describe('Dashboard flows', () => {
 
   test('cases page loads', async ({ page }) => {
     await page.goto('/en-CA/dashboard');
-    // Navigate to cases via sidebar or direct URL (claims now under /dashboard)
-    await page.goto('/en-CA/dashboard/claims');
+    // Cases consolidated into Inbox (intake filter) per Wave 3 runtime authority audit
+    await page.goto('/en-CA/dashboard/inbox?type=intake');
     await expect(page.locator('body')).toBeVisible();
   });
 

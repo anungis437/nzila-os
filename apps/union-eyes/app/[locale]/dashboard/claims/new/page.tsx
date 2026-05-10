@@ -286,7 +286,7 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
 
       // Redirect after success
       setTimeout(() => {
-        router.push(`/${locale}/dashboard/claims`);
+        router.push(`/${locale}/dashboard/inbox?type=intake`);
       }, 2000);
     } catch (error) {
 setIsSubmitting(false);
@@ -327,7 +327,7 @@ setIsSubmitting(false);
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Link href={`/${locale}/dashboard/claims`}>
+          <Link href={`/${locale}/dashboard/inbox?type=intake`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}
@@ -623,7 +623,7 @@ setIsSubmitting(false);
                     )}
                   </motion.button>
 
-                  <Link href={`/${locale}/dashboard/claims`} className="shrink-0">
+                  <Link href={`/${locale}/dashboard/inbox?type=intake`} className="shrink-0">
                     <button
                       type="button"
                       className="px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
