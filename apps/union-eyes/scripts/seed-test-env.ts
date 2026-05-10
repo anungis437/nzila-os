@@ -8,6 +8,7 @@ import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
 import { users, organizationUsers } from '@/db/schema/domains/member/user-management'
+import { profiles } from '@/db/schema/profiles-schema'
 import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
@@ -134,6 +135,7 @@ async function seed(): Promise<void> {
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    await tx.delete(profiles).where(inArray(profiles.userId, userIds))
 
     // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
     await tx.execute(sql`delete from audit_security.security_events`)
@@ -300,6 +302,31 @@ async function seed(): Promise<void> {
         createdAt: NOW,
       })),
     )
+
+    // Seed profiles deterministically so dashboard layout's profile lookup
+    // resolves on the first request. Without this, the layout takes the
+    // auto-create branch which races dashboard/page.tsx in parallel and can
+    // leave the role redirect un-issued (institutional identity substrate gap).
+    await tx
+      .insert(profiles)
+      .values(
+        usersFixture.map((u) => ({
+          userId: u.userId,
+          email: u.email,
+          membership: 'free' as const,
+          status: u.status,
+          createdAt: NOW,
+          updatedAt: NOW,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: {
+          email: sql`excluded.email`,
+          status: sql`excluded.status`,
+          updatedAt: NOW,
+        },
+      })
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({

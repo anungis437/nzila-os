@@ -34,6 +34,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const { userId } = await auth();
 
   if (!userId) {
+    logger.error('[dashboard:identity] auth() returned null userId — redirecting to /login', {
+      stage: 'auth',
+      hasSessionCookie: undefined,
+    });
     return redirect("/login");
   }
 
@@ -176,6 +180,21 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // Get user's organization and role via proper RBAC chain
   const organizationId = await getOrganizationIdForUser(userId);
   const userRole = await getUserRole(userId, organizationId);
+
+  if (!organizationId) {
+    logger.error('[dashboard:identity] getOrganizationIdForUser returned no organizationId', {
+      stage: 'organization',
+      userId,
+      userEmail,
+    });
+  }
+  if (!userRole) {
+    logger.error('[dashboard:identity] getUserRole returned no role', {
+      stage: 'role',
+      userId,
+      organizationId,
+    });
+  }
 
   // Fetch organization province for QC bilingual banner (Bill 96 / Law 25)
   let organizationProvince: string | null = null;
