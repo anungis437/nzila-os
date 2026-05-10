@@ -281,6 +281,38 @@ ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_appro
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_approved_at timestamptz;
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS search_vector text;
 
+-- Profiles table is the canonical user profile substrate consulted by the
+-- dashboard layout (apps/union-eyes/app/[locale]/dashboard/layout.tsx). The
+-- enums mirror profiles-schema.ts so the seed and runtime selects align.
+DO $$ BEGIN
+  CREATE TYPE membership AS ENUM ('free', 'pro');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_provider AS ENUM ('stripe', 'whop');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text NOT NULL UNIQUE,
+  email text,
+  membership membership NOT NULL DEFAULT 'free',
+  payment_provider payment_provider DEFAULT 'whop',
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  whop_user_id text,
+  whop_membership_id text,
+  plan_duration text,
+  billing_cycle_start timestamptz,
+  billing_cycle_end timestamptz,
+  next_credit_renewal timestamptz,
+  usage_credits integer DEFAULT 0,
+  used_credits integer DEFAULT 0,
+  status text DEFAULT 'active',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS public.claims (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   claim_id uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(),

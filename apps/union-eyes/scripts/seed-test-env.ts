@@ -135,7 +135,14 @@ async function seed(): Promise<void> {
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
-    await tx.delete(profiles).where(inArray(profiles.userId, userIds))
+    const profilesAvailable = await tableExists('profiles')
+    if (profilesAvailable) {
+      await safeCleanup('profiles', async () => {
+        await tx.delete(profiles).where(inArray(profiles.userId, userIds))
+      })
+    } else {
+      console.warn('[ue:seed:test-env] profiles table absent in this environment; skipping profile seed')
+    }
 
     // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
     await tx.execute(sql`delete from audit_security.security_events`)
@@ -307,26 +314,28 @@ async function seed(): Promise<void> {
     // resolves on the first request. Without this, the layout takes the
     // auto-create branch which races dashboard/page.tsx in parallel and can
     // leave the role redirect un-issued (institutional identity substrate gap).
-    await tx
-      .insert(profiles)
-      .values(
-        usersFixture.map((u) => ({
-          userId: u.userId,
-          email: u.email,
-          membership: 'free' as const,
-          status: u.status,
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: profiles.userId,
-        set: {
-          email: sql`excluded.email`,
-          status: sql`excluded.status`,
-          updatedAt: NOW,
-        },
-      })
+    if (profilesAvailable) {
+      await tx
+        .insert(profiles)
+        .values(
+          usersFixture.map((u) => ({
+            userId: u.userId,
+            email: u.email,
+            membership: 'free' as const,
+            status: u.status,
+            createdAt: NOW,
+            updatedAt: NOW,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: profiles.userId,
+          set: {
+            email: sql`excluded.email`,
+            status: sql`excluded.status`,
+            updatedAt: NOW,
+          },
+        })
+    }
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
