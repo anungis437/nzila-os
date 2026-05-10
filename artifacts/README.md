@@ -12,13 +12,14 @@ Working artifact outputs for pilots, QA, and supporting operational flows.
 
 ## Runtime/Debug Buckets
 
-- [ci-debug/](./ci-debug/) - CI troubleshooting outputs
-- [logs/](./logs/) - Root-level log captures and execution logs
-- [ue-pw/](./ue-pw/) - Playwright outputs (set 1)
-- [ue-pw2/](./ue-pw2/) - Playwright outputs (set 2)
-- [ue-srv/](./ue-srv/) - Service runtime captures (set 1)
-- [ue-srv2/](./ue-srv2/) - Service runtime captures (set 2)
-- [ue3/](./ue3/) - Additional Union Eyes runtime artifacts
+- [runtime/](./runtime/) - Consolidated runtime/debug artifacts
+	- [runtime/ci-debug/](./runtime/ci-debug/) - CI troubleshooting outputs
+	- [runtime/logs/](./runtime/logs/) - Execution logs and captures
+	- [runtime/ue-pw/](./runtime/ue-pw/) - Playwright outputs (set 1)
+	- [runtime/ue-pw2/](./runtime/ue-pw2/) - Playwright outputs (set 2)
+	- [runtime/ue-srv/](./runtime/ue-srv/) - Service runtime captures (set 1)
+	- [runtime/ue-srv2/](./runtime/ue-srv2/) - Service runtime captures (set 2)
+	- [runtime/ue3/](./runtime/ue3/) - Additional Union Eyes runtime artifacts
 
 ## Optimization Notes
 
