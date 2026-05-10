@@ -5,252 +5,499 @@ import Link from 'next/link';
 import {
   ArrowRight,
   CheckCircle2,
-  Compass,
-  FileCheck,
+  Layers,
+  Building2,
+  Landmark,
+  Globe2,
   ShieldCheck,
   Users,
-  Workflow,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import ScrollReveal from '@/components/public/scroll-reveal';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 
 export const metadata: Metadata = {
-  title: 'Pricing | Institutional Modernization Programs | Union Eyes',
+  title: 'Operational Maturity Programs | Union Eyes',
   description:
-    'Program-based commercial packaging for institutional continuity modernization, governance transformation, and operational trust infrastructure.',
+    'Union Eyes is institutional operational infrastructure. Programs are organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
 };
 
-const programs = [
+// ─────────────────────────────────────────────────────────────────────────────
+// Operational reality — the conditions that drive institutions to UE.
+// ─────────────────────────────────────────────────────────────────────────────
+const operationalReality = [
   {
-    name: 'Governance Continuity Foundation',
-    fit: 'Best fit: Locals, smaller unions, and associations establishing governance modernization foundations.',
+    title: 'Institutional complexity',
+    body: 'Multiple locals, mandates, and committees operating without a coherent operational picture.',
+  },
+  {
+    title: 'Continuity risk',
+    body: 'Critical knowledge held by individuals — lost on every leadership transition.',
+  },
+  {
+    title: 'Governance fragmentation',
+    body: 'Decisions, motions, and commitments scattered across inboxes, drives, and meeting notes.',
+  },
+  {
+    title: 'Operational turnover',
+    body: 'New stewards, officers, and staff inheriting unfinished casework with no operating record.',
+  },
+  {
+    title: 'Steward overload',
+    body: 'Front-line representatives carrying institutional memory the institution itself does not retain.',
+  },
+  {
+    title: 'Institutional memory loss',
+    body: 'Precedents, doctrines, and prior decisions degrading every year they remain unrecorded.',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Maturity ladder — four canonical tiers.
+// Restrained brand palette only. No multi-color accents.
+// ─────────────────────────────────────────────────────────────────────────────
+const maturityTiers = [
+  {
+    key: 'foundation',
+    icon: Layers,
+    name: 'Foundation',
+    posture: 'Operational stabilization',
+    fit: 'Locals and small unions establishing a coherent operating record.',
+    feels: 'Stable. Coordinated. Auditable.',
     focus: [
-      'Operational continuity baselines',
-      'Organizational memory foundations',
-      'Governance workflow modernization',
-      'Explainable operational visibility',
+      'Unified intake across cases and member messages',
+      'Continuity-safe communication and steward coordination',
+      'Bounded operational memory with explicit retention',
+      'Operational visibility for officers and committees',
     ],
+    surfaces: ['Inbox', 'Work', 'Priorities', 'Baseline Governance', 'Communications'],
+    range: 'Annual program — typically $12K–$30K',
   },
   {
-    name: 'Institutional Intelligence Program',
-    fit: 'Best fit: Larger unions, federations, and multi-unit organizations coordinating cross-functional modernization.',
+    key: 'governance',
+    icon: Building2,
+    name: 'Governance Operations',
+    posture: 'Governance maturity infrastructure',
+    fit: 'Mid-sized organizations modernizing governance cadence and federation reporting.',
+    feels: 'Disciplined. Measurable. Transparent.',
     focus: [
-      'Continuity intelligence across leadership structures',
-      'Executive-grade institutional visibility',
-      'Memory mapping across teams and mandates',
-      'Operational coherence modernization',
+      'Governance operations and decisions of record',
+      'Federation reporting and compliance continuity',
+      'Executive visibility across the operating institution',
+      'Operational cadence with defensible audit trails',
     ],
+    surfaces: ['Foundation surfaces', 'Governance', 'Analytics', 'Federation', 'Compliance', 'Executive Intelligence'],
+    range: 'Annual program — typically $40K–$120K',
   },
   {
-    name: 'Enterprise Governance & Continuity',
-    fit: 'Best fit: National federations and large public-sector governance ecosystems with complex institutional scope.',
+    key: 'continuity',
+    icon: Landmark,
+    name: 'Institutional Continuity',
+    posture: 'Continuity infrastructure',
+    fit: 'National unions and federations preserving institutional memory across transitions.',
+    feels: 'Durable. Inherited. Continuous.',
     focus: [
-      'Enterprise continuity resilience planning',
-      'Governance modernization at scale',
-      'Explainability and oversight frameworks',
-      'Strategic implementation partnership',
+      'Institutional memory preserved across leadership transitions',
+      'Continuity preservation and operational resilience',
+      'Succession continuity for officers, stewards, and staff',
+      'Governance-safe cognition across the federation',
     ],
-  },
-];
-
-const pricingPrinciples = [
-  'Commercial structure reflects organizational complexity, not feature checklists.',
-  'Program scope aligns to governance maturity and operational coordination needs.',
-  'Packaging is designed around continuity outcomes, not consumption metrics.',
-  'Implementation pathways are staged to match institutional readiness.',
-];
-
-const pilotTracks = [
-  {
-    title: 'Institutional Continuity Modernization Pilot',
-    body: 'A structured pilot pathway focused on continuity visibility, governance-safe modernization, and executive readiness.',
+    surfaces: [
+      'Governance Operations surfaces',
+      'Institutional Memory',
+      'Continuity Intelligence',
+      'Longitudinal Cognition',
+      'Cross-Union Analytics',
+      'Continuity Simulation',
+    ],
+    range: 'Scoped with executive leadership — let’s talk',
   },
   {
-    title: 'Governance Explainability Pilot',
-    body: 'A pilot designed for policy and governance teams to validate explainability standards and human oversight controls.',
+    key: 'sovereignty',
+    icon: Globe2,
+    name: 'Sovereignty Layer',
+    posture: 'Institutional operational sovereignty',
+    fit: 'Strategic federation-wide infrastructure with sovereign operational topology.',
+    feels: 'Sovereign. Resilient. Federation-grade.',
+    focus: [
+      'Sovereign operational topology under your governance',
+      'Continuity-safe cognition with fail-closed degradation',
+      'Federation-level operational coordination',
+      'Institutional resilience tooling and shared continuity infrastructure',
+    ],
+    surfaces: [
+      'Institutional Continuity surfaces',
+      'Cognition',
+      'Sovereignty Operations',
+      'Federation Coordination',
+      'Governance-Safe AI',
+      'Advanced Continuity Systems',
+    ],
+    range: 'Strategic federation engagement — let’s talk',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Visibility matrix — what each stakeholder band sees at each tier.
+// ─────────────────────────────────────────────────────────────────────────────
+const visibilityBands = [
+  {
+    band: 'Stewards & front-line representatives',
+    foundation: 'Unified intake, casework, and continuity-safe communication.',
+    governance: 'Casework with governance context and policy precedents.',
+    continuity: 'Casework anchored to institutional memory and prior decisions.',
+    sovereignty: 'Federation-wide casework patterns and cross-union precedents.',
   },
   {
-    title: 'Operational Coherence Pilot',
-    body: 'A pilot centered on cross-team coordination, institutional memory recovery, and transition resilience.',
+    band: 'Officers & committees',
+    foundation: 'Operational visibility and decisions of record.',
+    governance: 'Governance cadence, motions, and compliance continuity.',
+    continuity: 'Continuity intelligence across mandates and transitions.',
+    sovereignty: 'Sovereign operating intelligence at federation scope.',
+  },
+  {
+    band: 'Executive leadership',
+    foundation: 'Operational picture across the institution.',
+    governance: 'Executive intelligence with federation reporting.',
+    continuity: 'Longitudinal executive intelligence across leadership cycles.',
+    sovereignty: 'Federation-grade executive coordination and resilience posture.',
+  },
+  {
+    band: 'Members & the institution',
+    foundation: 'Confidence that intake and commitments are not lost.',
+    governance: 'Confidence that governance is operating to a defensible cadence.',
+    continuity: 'Confidence that institutional memory will outlive any individual.',
+    sovereignty: 'Confidence that operational sovereignty is preserved by design.',
   },
 ];
 
-const services = [
-  'Executive onboarding and modernization planning sessions',
-  'Governance and trust alignment workshops',
-  'Institutional operating model configuration',
-  'Change enablement and phased rollout support',
-  'Operational KPI and continuity baseline definition',
-  'Procurement and implementation brief support',
+// ─────────────────────────────────────────────────────────────────────────────
+// Continuity progression — institutions evolve operationally over time.
+// ─────────────────────────────────────────────────────────────────────────────
+const progression = [
+  {
+    from: 'Foundation',
+    to: 'Governance Operations',
+    trigger: 'Governance cadence becomes the binding constraint, not casework throughput.',
+  },
+  {
+    from: 'Governance Operations',
+    to: 'Institutional Continuity',
+    trigger: 'Leadership transitions, succession, and federation reporting become institutional risks.',
+  },
+  {
+    from: 'Institutional Continuity',
+    to: 'Sovereignty Layer',
+    trigger: 'Operational sovereignty, federation coordination, and shared continuity become strategic priorities.',
+  },
 ];
 
-export default function LocalePricingPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Procurement-safe positioning — institutional commitments.
+// ─────────────────────────────────────────────────────────────────────────────
+const procurementCommitments = [
+  {
+    title: 'Operational honesty',
+    body: 'Capabilities, limits, and degradation behaviour are documented before procurement, not after.',
+  },
+  {
+    title: 'Governance-safe cognition',
+    body: 'Reasoning surfaces operate under institutional governance — not autonomous agent assumptions.',
+  },
+  {
+    title: 'Fail-closed degradation',
+    body: 'When systems degrade, they degrade safely — operations remain governable, not opaque.',
+  },
+  {
+    title: 'Sovereignty posture',
+    body: 'Canadian data residency and sovereign hosting are structural commitments, not configuration toggles.',
+  },
+  {
+    title: 'Continuity-safe operations',
+    body: 'No operational pathway depends on a single individual, vendor, or undocumented practice.',
+  },
+];
+
+export default function LocalePricingPage() {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="institution-shell min-h-screen">
       <MarketingHeroSection
         imageUrl={heroImagery.pricing}
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white backdrop-blur-sm">
-            Institutional Modernization Programs
-          </span>
-        }
+        tone="dark"
+        revealTempo="conference"
         heading={
           <>
-            Pricing for institutional transformation,
+            Institutional operational infrastructure,
             <br />
-            not software access.
+            organized by operational maturity.
           </>
         }
-        description="Union Eyes is packaged as an operational modernization partnership. Commercial structure is based on institutional scope, governance complexity, and continuity outcomes."
+        description="We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters."
       />
 
-      <section className="py-16 bg-gray-50 border-y border-gray-100">
+      {/* ── 1. Operational reality ── */}
+      <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-8 text-center">Program structure</h2>
-          <div className="grid lg:grid-cols-3 gap-6">
-            {programs.map((program) => (
-              <article key={program.name} className="rounded-2xl border border-gray-100 bg-white p-6">
-                <h3 className="text-lg font-bold text-navy mb-2">{program.name}</h3>
-                <p className="text-xs text-gray-500 mb-4 leading-relaxed">{program.fit}</p>
-                <ul className="space-y-2">
-                  {program.focus.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-electric mt-0.5 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-6 text-center">Commercial architecture principles</h2>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 p-7">
-            <ul className="space-y-3">
-              {pricingPrinciples.map((principle) => (
-                <li key={principle} className="flex items-start gap-3 text-sm text-gray-700 leading-relaxed">
-                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-2 shrink-0" />
-                  {principle}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-navy">Pilot pathways</h2>
-            <p className="text-sm text-gray-600 mt-2 max-w-3xl mx-auto">
-              Pilot programs are framed as institutional modernization pathways, not product trials.
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <h2 className="text-3xl font-semibold text-navy mb-3">Operational reality</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              Institutions adopt Union Eyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-5">
-            {pilotTracks.map((track) => (
-              <article key={track.title} className="rounded-2xl border border-gray-100 bg-white p-6">
-                <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
-                  <Compass className="h-5 w-5 text-electric" />
-                </div>
-                <h3 className="text-base font-bold text-navy mb-2">{track.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{track.body}</p>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
+            {operationalReality.map((item) => (
+              <article key={item.title} className="institution-panel calm-elevation p-5">
+                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-8">
-          <article className="rounded-2xl border border-gray-100 bg-gray-50 p-7">
-            <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
-              <Workflow className="h-5 w-5 text-electric" />
-            </div>
-            <h3 className="text-xl font-bold text-navy mb-3">Implementation services</h3>
-            <ul className="space-y-2">
-              {services.map((item) => (
-                <li key={item} className="text-sm text-gray-700 leading-relaxed flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-electric mt-0.5 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </article>
+      {/* ── 2. Maturity ladder ── */}
+      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <h2 className="text-3xl font-semibold text-navy mb-3">Find the tier that fits you today</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              Four operational maturity states. Each one is a coherent place to live for a while — not a feature bundle. You don’t need to start at the top; you need to start where your institution actually is.
+            </p>
+          </ScrollReveal>
 
-          <article className="rounded-2xl border border-gray-100 bg-gray-50 p-7">
-            <div className="w-10 h-10 rounded-xl bg-electric/10 flex items-center justify-center mb-4">
-              <ShieldCheck className="h-5 w-5 text-electric" />
+          <div className="grid md:grid-cols-2 gap-5 narrative-sequence">
+            {maturityTiers.map((tier) => {
+              const Icon = tier.icon;
+              return (
+                <article key={tier.key} className="institution-panel calm-elevation p-6 flex flex-col">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                      <Icon className="h-5 w-5 text-navy" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-navy leading-tight">{tier.name}</h3>
+                      <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">{tier.posture}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 italic mb-4">{tier.feels}</p>
+
+                  <p className="text-sm text-slate-700 leading-relaxed mb-5">
+                    <span className="font-semibold text-navy">Best for: </span>{tier.fit}
+                  </p>
+
+                  <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
+                    What you focus on
+                  </div>
+                  <ul className="space-y-2 mb-5">
+                    {tier.focus.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
+                        <CheckCircle2 className="h-4 w-4 text-[#1f5b84] mt-0.5 shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">
+                    What’s included
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {tier.surfaces.map((s) => (
+                      <span
+                        key={s}
+                        className="inline-block px-2.5 py-1 rounded-full bg-slate-100 text-xs text-slate-700"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto pt-4 border-t border-slate-200/70">
+                    <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">
+                      Investment
+                    </div>
+                    <p className="text-sm font-semibold text-navy">{tier.range}</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      A starting range — we shape the final scope with you and your procurement team.
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {/* Friendly fit-finder */}
+          <div className="institution-panel calm-elevation mt-8 p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-navy mb-1">Not sure where you fit?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                That’s the most common starting point. A short conversation usually makes the right tier obvious — and we’ll tell you honestly if you don’t need the bigger one yet.
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-navy mb-3">Governance & trust references</h3>
-            <div className="space-y-3 text-sm text-gray-700 leading-relaxed">
-              <p>Explainability standards and human oversight posture are embedded in every program scope.</p>
-              <p>Governance architecture and trust controls are documented for procurement and executive review.</p>
-              <p>Commercial pathways include implementation governance checkpoints, not just software deployment milestones.</p>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="../trust" className="inline-flex items-center gap-1 text-sm font-semibold text-electric hover:text-blue-700 transition-colors">
-                View Trust Center <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="../governance" className="inline-flex items-center gap-1 text-sm font-semibold text-electric hover:text-blue-700 transition-colors">
-                Review Governance Structure <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </article>
+            <Link
+              href="../contact"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-navy text-white text-sm font-semibold rounded-xl hover:bg-[#1f5b84] transition-colors whitespace-nowrap"
+            >
+              Talk it through with us <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
+      {/* ── 3. Visibility matrix ── */}
+      <section className="py-16 bg-white border-b border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <h2 className="text-3xl font-semibold text-navy mb-3">What everyone gets out of it</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              Each tier changes what stewards, officers, executives, and members can see and rely on. High-level on purpose — we keep the feature talk for the conversation.
+            </p>
+          </ScrollReveal>
+
+          <div className="institution-panel overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-slate-200/70">
+                <tr className="text-navy">
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Who</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Foundation</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Governance Operations</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Institutional Continuity</th>
+                  <th className="text-left px-5 py-4 font-semibold text-xs uppercase tracking-wider">Sovereignty Layer</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200/70">
+                {visibilityBands.map((row) => (
+                  <tr key={row.band} className="hover:bg-[#f8f6f2]/60 transition-colors">
+                    <td className="px-5 py-4 font-semibold text-navy align-top">{row.band}</td>
+                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.foundation}</td>
+                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.governance}</td>
+                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.continuity}</td>
+                    <td className="px-5 py-4 text-slate-700 align-top leading-relaxed">{row.sovereignty}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4. Continuity progression ── */}
+      <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <h2 className="text-3xl font-semibold text-navy mb-3">Grow when you’re ready</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              Institutions evolve. The ladder is designed to be lived in — each tier earns the next when something concrete in your operations changes.
+            </p>
+          </ScrollReveal>
+
+          <div className="space-y-4 narrative-sequence">
+            {progression.map((step) => (
+              <article
+                key={`${step.from}-${step.to}`}
+                className="institution-panel calm-elevation p-5 flex flex-col md:flex-row md:items-center gap-4"
+              >
+                <div className="flex items-center gap-3 md:w-1/3">
+                  <span className="text-sm font-semibold text-navy">{step.from}</span>
+                  <ArrowRight className="h-4 w-4 text-[#1f5b84]" />
+                  <span className="text-sm font-semibold text-navy">{step.to}</span>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed md:flex-1">
+                  <span className="font-semibold text-navy">When it happens: </span>
+                  {step.trigger}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. Procurement-safe positioning ── */}
+      <section className="py-16 bg-white border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
+            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-100 text-navy text-xs font-semibold tracking-wide uppercase mb-4">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Procurement-safe by design
+            </div>
+            <h2 className="text-3xl font-semibold text-navy mb-3">Institutional commitments, not feature claims</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+              Every maturity tier inherits the same institutional commitments. These are the positions that distinguish operational infrastructure from generic AI tooling.
+            </p>
+          </ScrollReveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">
+            {procurementCommitments.map((item) => (
+              <article key={item.title} className="institution-panel calm-elevation p-5">
+                <h3 className="text-sm font-semibold text-navy mb-2">{item.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{item.body}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-5">
+            <Link
+              href="../trust"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
+            >
+              Trust Center <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="../governance"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
+            >
+              Governance Structure <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="../proof"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f5b84] hover:text-navy transition-colors"
+            >
+              Institutional Proof <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Executive briefing CTA ── */}
       <section className="py-16 bg-navy text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-white/15 text-xs font-semibold tracking-wide uppercase mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-white/10 text-xs font-semibold tracking-wide uppercase mb-4">
             <Users className="h-3.5 w-3.5" />
-            Executive Briefing Pathway
+            Let’s find the right fit
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Discuss institutional modernization packaging
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4">
+            Start with a conversation, not a quote
           </h2>
-          <p className="text-white/75 text-lg max-w-3xl mx-auto mb-8 leading-relaxed">
-            We provide consultative program packaging and implementation pathways aligned to your governance maturity,
-            organizational scale, and continuity priorities.
+          <p className="text-white/75 text-base max-w-3xl mx-auto mb-8 leading-relaxed">
+            Tell us where your institution is today. We’ll help you identify the right tier, walk through what it looks like in practice, and shape the program with you — at the pace that fits your governance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="../pilot-request"
-              className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
+              className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all"
             >
               Request Executive Briefing
             </Link>
             <Link
               href="../contact"
-              className="inline-flex items-center justify-center px-8 py-4 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all"
+              className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all"
             >
-              Discuss Institutional Modernization
+              Discuss Operational Maturity
             </Link>
           </div>
-          <p className="text-xs text-white/60 mt-6">
-            Public program structure is shown for planning alignment. Commercial proposals are finalized through executive and procurement briefing.
+          <p className="text-xs text-white/55 mt-6 max-w-2xl mx-auto leading-relaxed">
+            Maturity tiers and ranges are positioning structure for institutional planning. Final program scope is set jointly with executive and procurement leadership.
           </p>
-        </div>
-      </section>
-
-      <section className="py-14 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-gray-100 p-6 bg-gray-50">
-            <div className="flex items-start gap-3">
-              <FileCheck className="h-5 w-5 text-electric mt-0.5 shrink-0" />
-              <p className="text-sm text-gray-700 leading-relaxed">
-                Procurement-safe language, governance evidence, implementation approach, and onboarding methodology are available in the executive briefing pack.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
     </div>

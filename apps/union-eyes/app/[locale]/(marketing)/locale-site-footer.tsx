@@ -62,12 +62,14 @@ export default function LocaleSiteFooter() {
 
   const footerLinks = {
     [t('platform') as string]: [
-      { name: 'Continuity Command Center', href: `/${locale}/institutional-continuity` },
-      { name: 'Governance Intelligence Hub', href: `/${locale}/platform/governance-intelligence` },
-      { name: 'Institutional Memory Vault', href: `/${locale}/platform/organizational-memory` },
-      { name: 'Executive Briefing Engine', href: `/${locale}/executive-intelligence` },
-      { name: 'Operations Coherence Layer', href: `/${locale}/platform/operational-coherence` },
-      { name: 'Explainability and Audit Layer', href: `/${locale}/platform/explainable-intelligence` },
+      { name: 'Inbox',                href: `/${locale}/platform#inbox` },
+      { name: 'Work',                 href: `/${locale}/platform#work` },
+      { name: 'Priorities',           href: `/${locale}/platform#priorities` },
+      { name: 'Intelligence',         href: `/${locale}/platform#intelligence` },
+      { name: 'Cognition',            href: `/${locale}/platform#cognition` },
+      { name: 'Governance',           href: `/${locale}/platform#governance` },
+      { name: 'Institutional Memory', href: `/${locale}/platform#institutional-memory` },
+      { name: 'Trust',                href: `/${locale}/platform#trust` },
     ],
     [t('solutions') as string]: [
       { name: t('executiveLeadership'),   href: `/${locale}/solutions/executive-leadership` },

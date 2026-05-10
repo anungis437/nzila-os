@@ -36,6 +36,21 @@ export default function LocaleSiteNavigation() {
     { name: t('solutionsItems.procurement.name'), href: `/${locale}/solutions/procurement`, desc: t('solutionsItems.procurement.desc') },
   ];
 
+  // Canonical 8-pillar spine (high-level marketing surface).
+  // All entries deep-link into the single /platform overview page; sub-pages
+  // will land in Wave 3 alongside the runtime module rename.
+  const platformHref = `/${locale}/platform`;
+  const modulesLinks = [
+    { name: 'Inbox',                href: `${platformHref}#inbox`,                desc: 'Unified intake for cases and member messages' },
+    { name: 'Work',                 href: `${platformHref}#work`,                 desc: 'Active grievance and case workbench' },
+    { name: 'Priorities',           href: `${platformHref}#priorities`,           desc: 'Deadlines, commitments, and next actions' },
+    { name: 'Intelligence',         href: `${platformHref}#intelligence`,         desc: 'Executive, federation, and analytics views' },
+    { name: 'Cognition',            href: `${platformHref}#cognition`,            desc: 'Sovereign reasoning and memory queries' },
+    { name: 'Governance',           href: `${platformHref}#governance`,           desc: 'Charter, motions, and decisions of record' },
+    { name: 'Institutional Memory', href: `${platformHref}#institutional-memory`, desc: 'Doctrine, precedents, and continuity archive' },
+    { name: 'Trust',                href: `${platformHref}#trust`,                desc: 'Audit, explainability, and Canadian sovereignty' },
+  ];
+
   const primaryNav = [
     { name: t('insights'), href: `/${locale}/insights` },
     { name: t('proof'), href: `/${locale}/proof` },
@@ -47,7 +62,10 @@ export default function LocaleSiteNavigation() {
   const [scrolled, setScrolled]                       = useState(false);
   const [solutionsOpen, setSolutionsOpen]             = useState(false);
   const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
+  const [modulesOpen, setModulesOpen]                 = useState(false);
+  const [mobileModulesOpen, setMobileModulesOpen]     = useState(false);
   const solutionsTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const modulesTimeout   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -161,6 +179,38 @@ export default function LocaleSiteNavigation() {
               </AnimatePresence>
             </div>
 
+            {/* Modules (high-level canonical pillars) */}
+            <div
+              className="relative"
+              onMouseEnter={() => { clearTimeout(modulesTimeout.current); setModulesOpen(true); }}
+              onMouseLeave={() => { modulesTimeout.current = setTimeout(() => setModulesOpen(false), 150); }}
+            >
+              <button className={navLinkClass(pathname?.startsWith(`/${locale}/platform`) ?? false)}>
+                {t('modules')}
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${modulesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <AnimatePresence>
+                {modulesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-50"
+                  >
+                    {modulesLinks.map((link) => (
+                      <Link key={link.href} href={link.href}
+                        className="block px-4 py-3 rounded-lg text-sm transition-colors text-gray-700 hover:bg-gray-50 hover:text-navy"
+                      >
+                        <span className="block font-medium leading-tight">{link.name}</span>
+                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Primary nav */}
             {primaryNav.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href);
@@ -234,6 +284,27 @@ export default function LocaleSiteNavigation() {
               {mobileSolutionsOpen && (
                 <div className="pl-4 space-y-1">
                   {solutionsLinks.map((link) => (
+                    <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+                      <span className="block font-medium leading-tight">{link.name}</span>
+                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Modules mobile */}
+              <button
+                onClick={() => setMobileModulesOpen(!mobileModulesOpen)}
+                className={`flex w-full items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  pathname?.startsWith(`/${locale}/platform`) ? 'bg-electric/10 text-electric' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {t('modules')}
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileModulesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileModulesOpen && (
+                <div className="pl-4 space-y-1">
+                  {modulesLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight">{link.name}</span>
                       <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>

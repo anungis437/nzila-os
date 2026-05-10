@@ -89,6 +89,20 @@ const required = [
       'Final verdict',
     ],
   },
+  {
+    file: 'wave4-experience-convergence-review.md',
+    sections: [
+      'Executive convergence results',
+      'Navigation reduction results',
+      'Pricing convergence results',
+      'Stakeholder simplification results',
+      'Sovereignty-layer differentiation results',
+      'Runtime contraction metrics',
+      'Remaining overlap candidates',
+      'Remaining deferred runtime surfaces',
+      'Final verdicts',
+    ],
+  },
 ];
 
 const failures = [];
