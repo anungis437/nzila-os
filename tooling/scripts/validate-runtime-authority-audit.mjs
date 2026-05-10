@@ -119,6 +119,22 @@ const required = [
       'Final verdicts',
     ],
   },
+  {
+    file: 'wave6-institutional-inevitability-review.md',
+    sections: [
+      'Sovereignty atmosphere refinement results',
+      'Cadence embodiment results',
+      'Executive calmness results',
+      'Procurement atmosphere results',
+      'Platform ontology collapse results',
+      'Runtime pacing results',
+      'Stakeholder emotional clarity review',
+      'Continuity-language finalization review',
+      'Remaining deferred refinement items',
+      'Final verdicts',
+      'Institutional inevitability',
+    ],
+  },
 ];
 
 const failures = [];
