@@ -212,14 +212,20 @@ try {
 # Django sidecar loopback
 try {
   $raw = az containerapp exec -n $DjangoApp -g $ResourceGroup `
-           --command "curl -s http://localhost:8000/api/auth_core/health/" 2>&1 |
-         Select-Object -Last 1
-  $j = $raw | ConvertFrom-Json -ErrorAction Stop
+           --command "curl -s http://localhost:8000/api/auth_core/health/" 2>&1
+  # az containerapp exec mixes INFO/WARNING lines with the curl output.
+  # Extract the first {...} JSON object from the combined stream.
+  $rawText = ($raw | Out-String)
+  $m = [regex]::Match($rawText, '\{[^{}]*"checks"[^{}]*\{[^{}]*\}[^{}]*\}')
+  if (-not $m.Success) {
+    throw "could not find JSON health payload in exec output: $rawText"
+  }
+  $j = $m.Value | ConvertFrom-Json -ErrorAction Stop
   if ($j.status -eq 'ok' -and $j.checks.redis -eq $true -and $j.checks.celery_broker -eq $true) {
     $upstashOk = if ($null -ne $j.checks.upstash_rest) { $j.checks.upstash_rest } else { '<absent>' }
     Write-Ok "django: redis=true celery_broker=true upstash_rest=$upstashOk"
   } else {
-    $failures += "django sidecar: $raw"
+    $failures += "django sidecar: $($m.Value)"
     Write-Fail $failures[-1]
   }
 } catch { $failures += "django sidecar probe threw: $($_.Exception.Message)"; Write-Fail $failures[-1] }
@@ -254,7 +260,7 @@ $utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm") + "Z"
   - Operator rotated the REST token from the Upstash console.
   - Pre-flight verified new token against existing REST endpoint
     (set/get/del round-trip green).
-  - Updated KV secrets in $VaultName:
+  - Updated KV secrets in ${VaultName}:
       UPSTASH-REDIS-REST-TOKEN  -> new token (verbatim)
       UPSTASH-REDIS-URL         -> rebuilt rediss:// (length-stable)
   - Bumped both pilot apps to revision-suffix $suffix.

@@ -172,6 +172,56 @@ verification passed, and what remains open. It does not inflate readiness.
   - PG admin password rotation should be added to the formalized
     dependency-rotation cadence (see `r8-provider-key-rotation-cadence.md`)
     rather than relying on incident-driven rotations.
+
+---
+
+## 2026-05-10T02:35Z — ROTATE Upstash REST token (operator-initiated, FULL GO)
+
+- reviewer: anungis437
+- rationale: prior REST token was exposed in operator transcript twice during
+  the initial Upstash binding (2026-05-10T02:05Z entry). Single P0 blocker
+  remaining for Tier 2 verdict to lift to FULL GO.
+- actions:
+  - Operator rotated the REST token from the Upstash console (no agent path).
+  - Ran `tooling/scripts/r1-pilot-upstash-token-rotate.ps1` with the new
+    token. Script flow:
+    1. Snapshotted current KV state to
+       `.cache/upstash-rotate-snapshot-20260509-223339.json` (gitignored).
+    2. Pre-flight: REST `set/get/del` round-trip with new token against
+       the live Upstash endpoint → `OK` / `ok` / `1`.
+    3. Rebuilt native `rediss://` URL preserving host:port (length-stable
+       111 → 111).
+    4. Updated KV secrets in `nzila-canada-pilot-kv`:
+       `UPSTASH-REDIS-REST-TOKEN` (verbatim new token),
+       `UPSTASH-REDIS-URL` (rebuilt native).
+    5. Revision-suffix bump `tokrot-223353` on both pilot apps to force KV
+       re-resolution.
+- verification:
+  - public `/api/health`  → `{"status":"ok","checks":{"process":"ok","database":"ok","queue":"ok"}}`
+  - public `/api/ready`   → `{"ready":true}`
+  - Django sidecar loopback → `{"status":"ok","checks":{"db":true,"redis":true,"celery_broker":true}}`
+    (`upstash_rest` field absent — sidecar image predates the
+    `upstash-redis` SDK addition; the field will appear on the next
+    Django sidecar image rebuild and is informational only).
+- script residual:
+  - First rotation attempt (`tokrot-223131`) triggered a false-negative
+    rollback because the verification parser used `Select-Object -Last 1`
+    on `az containerapp exec` output, which picks up the trailing
+    `INFO: received success status from cluster` line instead of the JSON.
+    Fixed by extracting the first `{...}` JSON object via regex from the
+    combined stream. The rollback was correct (KV restored), but the
+    rotation had actually succeeded — the running revision had pulled the
+    new token before rollback. Re-ran with the fixed parser; reconciled
+    cleanly.
+  - Snapshots from both attempts retained in `.cache/`. The aborted
+    snapshot can be deleted after verifying KV state.
+- verdict:
+  - **Tier 2 lifts from CONDITIONAL GO → FULL GO** for the Upstash
+    credential surface. Token rotation is now scripted, transactional,
+    and rollback-safe.
+  - Upstash credential rotation MUST be folded into
+    `r8-provider-key-rotation-cadence.md` as a formalized cadence (next
+    rotation due ≤ 90 days).
     A direct Next-runtime cross-app probe trace remains a deferred follow-up.
   - The ACR repo name is `nzila-os-union-eyes-backend`, not `-django` as
     earlier doctrine drafts implied; doctrine has been updated.
