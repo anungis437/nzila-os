@@ -91,7 +91,6 @@ async function seed(): Promise<void> {
   const orgs = Object.values(UE_TEST_ORGS)
   const usersFixture = Object.values(UE_TEST_USERS)
   const casesFixture = Object.values(UE_TEST_CASES)
-  const orgSlugById = new Map(orgs.map((org) => [org.id, org.slug]))
 
   const orgIds = orgs.map((o) => o.id)
   const userIds = usersFixture.map((u) => u.userId)
@@ -330,7 +329,11 @@ async function seed(): Promise<void> {
       await tx.insert(organizationMembers).values(
         usersFixture.map((u) => ({
           userId: u.userId,
-          organizationId: orgSlugById.get(u.orgId) ?? u.orgId,
+          // organization_members.organization_id is uuid in the canonical Drizzle
+          // schema; pass the org UUID directly. (The slug variant lives in the
+          // legacy schema-organizations.ts mirror; the canonical schema wins for
+          // seed inserts so the seeded rows resolve under getUserRole().)
+          organizationId: u.orgId,
           role: u.role,
           status: u.status,
           name: `${u.firstName} ${u.lastName}`,
