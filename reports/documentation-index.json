@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-29T00:32:02.300Z",
-  "totalDocuments": 558,
+  "generatedAt": "2026-05-10T19:57:27.903Z",
+  "totalDocuments": 925,
   "staleDocuments": 0,
   "categories": [
     {
@@ -29,18 +29,18 @@
       "staleCount": 0
     },
     {
+      "category": "ai-dev-agents",
+      "count": 5,
+      "staleCount": 0
+    },
+    {
       "category": "architecture",
-      "count": 42,
+      "count": 60,
       "staleCount": 0
     },
     {
       "category": "archive",
-      "count": 10,
-      "staleCount": 0
-    },
-    {
-      "category": "backlog",
-      "count": 2,
+      "count": 256,
       "staleCount": 0
     },
     {
@@ -54,8 +54,13 @@
       "staleCount": 0
     },
     {
+      "category": "categories",
+      "count": 5,
+      "staleCount": 0
+    },
+    {
       "category": "commerce",
-      "count": 18,
+      "count": 20,
       "staleCount": 0
     },
     {
@@ -110,7 +115,7 @@
     },
     {
       "category": "governance",
-      "count": 32,
+      "count": 36,
       "staleCount": 0
     },
     {
@@ -134,6 +139,11 @@
       "staleCount": 0
     },
     {
+      "category": "intelligence",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
       "category": "investor",
       "count": 8,
       "staleCount": 0
@@ -149,8 +159,8 @@
       "staleCount": 0
     },
     {
-      "category": "nzila-hq",
-      "count": 2,
+      "category": "nzila-assurance",
+      "count": 14,
       "staleCount": 0
     },
     {
@@ -174,18 +184,8 @@
       "staleCount": 0
     },
     {
-      "category": "plans",
-      "count": 8,
-      "staleCount": 0
-    },
-    {
       "category": "platform",
       "count": 66,
-      "staleCount": 0
-    },
-    {
-      "category": "platform-surface-migrations",
-      "count": 1,
       "staleCount": 0
     },
     {
@@ -209,6 +209,11 @@
       "staleCount": 0
     },
     {
+      "category": "releases",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
       "category": "repo-contract",
       "count": 3,
       "staleCount": 0
@@ -225,12 +230,17 @@
     },
     {
       "category": "runbooks",
-      "count": 16,
+      "count": 22,
+      "staleCount": 0
+    },
+    {
+      "category": "runtime-proof.md",
+      "count": 1,
       "staleCount": 0
     },
     {
       "category": "security",
-      "count": 7,
+      "count": 9,
       "staleCount": 0
     },
     {
@@ -250,7 +260,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 27,
+      "count": 102,
       "staleCount": 0
     },
     {
@@ -269,7 +279,7 @@
     {
       "path": "CHANGELOG.md",
       "category": "root",
-      "lastValidated": "2026-04-20",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
@@ -345,6 +355,36 @@
       "stale": false
     },
     {
+      "path": "docs/ai-dev-agents/agent-charters.md",
+      "category": "ai-dev-agents",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/ai-dev-agents/agent-operating-model.md",
+      "category": "ai-dev-agents",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/ai-dev-agents/human-review-policy.md",
+      "category": "ai-dev-agents",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/ai-dev-agents/prompt-library.md",
+      "category": "ai-dev-agents",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/ai-dev-agents/validation-gates.md",
+      "category": "ai-dev-agents",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
       "path": "docs/architecture/AI_INTELLIGENCE_LAYER.md",
       "category": "architecture",
       "lastValidated": "2026-03-13",
@@ -378,6 +418,12 @@
       "path": "docs/architecture/ARCHITECTURE_GOVERNANCE_INDEX.md",
       "category": "architecture",
       "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURE_MAP.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-02",
       "stale": false
     },
     {
@@ -441,6 +487,12 @@
       "stale": false
     },
     {
+      "path": "docs/architecture/decision-infrastructure-map.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
       "path": "docs/architecture/DOMAIN_VS_AUDIT_MODEL.md",
       "category": "architecture",
       "lastValidated": "2026-03-13",
@@ -480,6 +532,12 @@
       "path": "docs/architecture/evidence-packs.md",
       "category": "architecture",
       "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/finance-core.md",
+      "category": "architecture",
+      "lastValidated": "2026-04-29",
       "stale": false
     },
     {
@@ -537,6 +595,96 @@
       "stale": false
     },
     {
+      "path": "docs/architecture/orm-boundary.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/canonical-schema-topology.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/deployment-legitimacy-reconciliation.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/django-canonical-authority-formalization.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/drizzle-scope-reconstruction.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/environment-bootstrap-strategy.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/governance-attachment-to-orm-authority.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/historical-migration-lineage-governance.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/master-orm-governance-index.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/migration-execution-governance.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/migration-legitimacy-validation-system.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/orm-authority-governance.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/orm-authority-runtime-governance-attachment.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/architecture/orm-governance/orm-governance-readiness-review.md",
+      "category": "architecture",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
       "path": "docs/architecture/PLATFORM_PACKAGE_AUTHORITY.md",
       "category": "architecture",
       "lastValidated": "2026-04-15",
@@ -569,7 +717,7 @@
     {
       "path": "docs/architecture/STACK_AUTHORITY.md",
       "category": "architecture",
-      "lastValidated": "2026-04-27",
+      "lastValidated": "2026-05-07",
       "stale": false
     },
     {
@@ -651,21 +799,1485 @@
       "stale": false
     },
     {
-      "path": "docs/archive/README.md",
+      "path": "docs/archive/iterations/backlog/abr-backend.md",
       "category": "archive",
-      "lastValidated": "2026-04-10",
-      "stale": false
-    },
-    {
-      "path": "docs/backlog/abr-backend.md",
-      "category": "backlog",
       "lastValidated": "2026-03-02",
       "stale": false
     },
     {
-      "path": "docs/backlog/REMEDIATION_TASKS.md",
-      "category": "backlog",
+      "path": "docs/archive/iterations/backlog/REMEDIATION_TASKS.md",
+      "category": "archive",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/explainability.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/extension-guide.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/governance-safety.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/ontology.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/institutional-operating-intelligence/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/cfo-cognition-realignment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/cross-app-cognition-consistency.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/executiveos-cognition-realignment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/faircase-governance-realignment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/final-cognition-convergence-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/global-anti-surveillance-enforcement.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/global-ux-cognition-refactor.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/knowledge-memory-infrastructure-refactor.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/platform-cognition-substrate-refactor.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/procurement-governance-positioning-refactor.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/repo-wide-intelligence-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-cognition-doctrine/ue-intelligence-realignment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/cross-app-field-operations-consistency.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/environment-lifecycle-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/executive-briefing-rhythm.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/field-operations-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/field-operations-workflow-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/governance-review-cadence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/institutional-field-operations-framework.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/live-operational-readiness-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/master-field-operations-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/onboarding-governance-operations.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/operational-legitimacy-audit-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/operational-rehearsal-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/operator-cadence-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/pilot-execution-discipline.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-field-operations/stabilization-operations-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/cross-app-live-e2e-realism-matrix.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/cross-app-ux-embodiment-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/executive-procurement-realism-hardening.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/final-full-maturity-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/institutional-field-pressure-hardening.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/live-operational-adoption-hardening.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/master-final-convergence-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/package-naming-substrate-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/real-operator-journey-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-final-convergence/runtime-semantic-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/canonical-operating-system-navigation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/cross-app-e2e-validation-matrix.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/executive-operating-system-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/final-operating-system-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/final-operational-legitimacy-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/full-ecosystem-convergence-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/full-environment-go-certification-program.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/full-role-experience-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/live-full-chain-operational-rehearsal.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/master-finalization-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-finalization/production-readiness-hardening.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/continuity-posture-experience.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/cross-product-governance-experience-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/deployment-legitimacy-experience.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/executive-governance-experience.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/governance-evidence-experience.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/governance-experience-design-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/governance-experience-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/governance-experience-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/governance-review-experience.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/institutional-operator-validation-program.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/live-governance-surfaces.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/live-operational-governance-panels.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/master-governance-experience-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/real-operational-workflows.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-experience/runtime-ui-embodiment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/continuity-posture-review-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/cross-product-governance-operations-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/deployment-legitimacy-review-panels.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/executive-governance-review-workflows.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-evidence-explorer.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-operations-dashboard-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-operations-event-interpretation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-operations-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-operations-role-model.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/governance-operations-ui-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/live-governance-review-panels.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/master-governance-operations-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/runtime-attestation-visibility-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance-operations/stabilization-signals-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/architectural-doctrine-review-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/continuity-safe-ai-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/doctrine-compatible-product-expansion-framework.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/doctrine-compliance-review-framework.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/doctrine-governance-scorecard.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/doctrine-operationalization-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/doctrine-to-product-mapping.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/executable-doctrine-enforcement.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/institutional-design-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/master-governance-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-governance/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-hq/README.md",
+      "category": "archive",
+      "lastValidated": "2026-04-30",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-hq/ROADMAP.md",
+      "category": "archive",
+      "lastValidated": "2026-04-30",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/environment-isolation-implementation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/final-live-infrastructure-certification.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-database-migration-legitimacy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-deployment-parity-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-domain-url-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-live-e2e-certification.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-persona-auth-reality-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-pilot-mode-feature-flag-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-production-readiness-hardening.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/full-release-rollback-legitimacy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/live-infrastructure-discovery.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-infrastructure-convergence/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/category-creation-strategy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/competitive-paradigm-analysis.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/continuity-field-activation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/continuity-metrics-philosophy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/continuity-ontology.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/continuity-signals-taxonomy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/cross-vertical-doctrine-mapping.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/doctrine-drift-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/doctrine-governance-hierarchy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/doctrine-vs-implementation-boundary.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/executable-experience-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/executive-cognitive-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/governance-safe-intelligence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/institutional-memory-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/institutional-modernization-methodology.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/institutional-risk-philosophy.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/ip-commercialization-pathways.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/ip-formalization-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/master-ip-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/operational-legitimacy-framework.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/role-centered-continuity-architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-ip/scenario-intelligence-framework.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/authoritative-url-domain-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/final-live-operational-status-report.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/full-e2e-environment-validation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/full-environment-inventory-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/full-page-navigation-reality-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/live-auth-role-access-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/live-feature-gating-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/monetization-doctrine-alignment-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/test-persona-credentials-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-live-audit/ue-whole-system-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/cross-app-e2e-maturity-matrix.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/cross-app-ux-maturity-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/executive-cognition-maturity-elevation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/final-maturity-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/full-maturity-gap-audit.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/full-role-continuity-maturity.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/master-maturity-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/operational-cadence-maturity-finalization.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/package-substrate-maturity-convergence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/procurement-maturity-elevation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-maturity-elevation/stabilization-ux-maturity.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/canonical-information-architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/canonical-operational-architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/cross-app-operational-cadence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/cross-app-operational-validation-program.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/cross-app-review-workflow-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/executive-cognitive-consistency.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/governance-embodiment-consistency.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/live-cross-app-convergence-implementation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/master-operational-convergence-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/operational-convergence-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/operator-journey-consistency.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/shared-navigation-grammar.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/shared-operational-design-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/shared-operational-language-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/shared-role-experience-model.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-convergence/shared-stabilization-ux-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/cross-app-operational-convergence-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/environment-restoration-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/executive-operational-readability-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/full-environment-traversal-rehearsal.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/live-cadence-sustainability-validation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/live-operator-walkthrough-program.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/live-pilot-operations-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/live-rollback-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/master-operational-proving-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/phase-c-final-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-operational-proving/promotion-refusal-proving.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/continuity-safe-rollout-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/cross-environment-governance-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/demo-governance-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/environment-legitimacy-visibility.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/environment-promotion-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/governed-rollback-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/institutional-onboarding-governance.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/master-rollout-governance-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/operational-rollout-workflows.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/operator-rollout-workflows.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/pilot-governance-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/release-governance-cadence.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/rollout-attestation-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/rollout-governance-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-rollout-governance/rollout-legitimacy-review-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/continuity-observability-system.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/cross-product-governance-runtime-fabric.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/deployment-legitimacy-validation-engine.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/executive-cognitive-safety-monitoring.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/governance-evidence-ledger.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/governance-policy-engine.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/governance-safe-ai-runtime-validation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/governance-telemetry-architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/master-runtime-governance-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/runtime-assurance-engine.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/runtime-attestation-pipeline.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/runtime-governance-dashboard-architecture.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-governance/runtime-governance-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/cicd-governance-automation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/continuity-observability-runtime-embedding.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/cross-product-governance-runtime-activation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/e2e-governance-validation-harness.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/governance-evidence-emission.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/governance-native-dashboard-embedding.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/governance-policy-engine-live-execution.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/governance-telemetry-live-pipeline.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/live-deployment-legitimacy-validation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/live-doctrine-enforcement-integration.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/live-runtime-attestation-generation.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/master-runtime-integration-index.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/opentelemetry-governance-integration.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/nzila-runtime-integration/runtime-governance-activation-readiness-review.md",
+      "category": "archive",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/IMPLEMENTATION_PLAN_FINAL.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/LOAD_PROJECTION_CAPACITY_PLAN.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/MASTER_ROLLOUT_PLAN.md",
+      "category": "archive",
+      "lastValidated": "2026-04-26",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/partner-app-validation.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/probabilistic-cardinality-replicability-plan.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/REPO_ASSESSMENT.md",
+      "category": "archive",
+      "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/studio-maturity-10-of-10.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/iterations/platform-surface-migrations/README.md",
+      "category": "archive",
+      "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/archive/README.md",
+      "category": "archive",
+      "lastValidated": "2026-05-10",
       "stale": false
     },
     {
@@ -777,9 +2389,45 @@
       "stale": false
     },
     {
+      "path": "docs/categories/historical-archive/README.md",
+      "category": "categories",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/platform-and-operations/README.md",
+      "category": "categories",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/README.md",
+      "category": "categories",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/README.md",
+      "category": "categories",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/stakeholders/README.md",
+      "category": "categories",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
       "path": "docs/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md",
       "category": "commerce",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/ADR/ADR-PE-002-engine-product-separation.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-30",
       "stale": false
     },
     {
@@ -810,6 +2458,12 @@
       "path": "docs/commerce/DOMAIN_MODEL_DRAFT.md",
       "category": "commerce",
       "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/commerce/FLOW-MAESTRIA-COMMERCIAL-EXTRACTION.md",
+      "category": "commerce",
+      "lastValidated": "2026-04-30",
       "stale": false
     },
     {
@@ -1409,7 +3063,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-04-24",
+      "lastValidated": "2026-05-10",
       "stale": false
     },
     {
@@ -1725,9 +3379,27 @@
       "stale": false
     },
     {
+      "path": "docs/governance/decision-coverage-inventory.md",
+      "category": "governance",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/decision-intelligence-revenue.md",
+      "category": "governance",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
       "path": "docs/governance/enterprise-readiness.md",
       "category": "governance",
       "lastValidated": "2026-04-20",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/finance-controls.md",
+      "category": "governance",
+      "lastValidated": "2026-04-29",
       "stale": false
     },
     {
@@ -1794,6 +3466,12 @@
       "path": "docs/governance/procurement-pack.md",
       "category": "governance",
       "lastValidated": "2026-03-13",
+      "stale": false
+    },
+    {
+      "path": "docs/governance/README.md",
+      "category": "governance",
+      "lastValidated": "2026-05-02",
       "stale": false
     },
     {
@@ -2081,13 +3759,13 @@
     {
       "path": "docs/INDEX.md",
       "category": "INDEX.md",
-      "lastValidated": "2026-04-20",
+      "lastValidated": "2026-05-10",
       "stale": false
     },
     {
       "path": "docs/index/doc-map.md",
       "category": "index",
-      "lastValidated": "2026-04-24",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
@@ -2100,6 +3778,12 @@
       "path": "docs/index/README.md",
       "category": "index",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/intelligence/decision-pipeline-operations.md",
+      "category": "intelligence",
+      "lastValidated": "2026-05-02",
       "stale": false
     },
     {
@@ -2247,15 +3931,87 @@
       "stale": false
     },
     {
-      "path": "docs/nzila-hq/README.md",
-      "category": "nzila-hq",
-      "lastValidated": "2026-04-28",
+      "path": "docs/nzila-assurance/assurance-readiness-review.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
-      "path": "docs/nzila-hq/ROADMAP.md",
-      "category": "nzila-hq",
-      "lastValidated": "2026-04-28",
+      "path": "docs/nzila-assurance/automated-governance-evidence-system.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/continuity-governance-attestation-model.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/continuous-doctrine-compliance-observability.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/environment-governance-assurance.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/executive-cognitive-safety-assurance.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/governance-evidence-pipeline-architecture.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/governance-safe-ai-assurance-model.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/institutional-certification-framework.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/institutional-trust-scoring-model.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/master-assurance-index.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/operational-legitimacy-assurance-system.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/procurement-assurance-framework.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-assurance/README.md",
+      "category": "nzila-assurance",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
@@ -2453,13 +4209,13 @@
     {
       "path": "docs/ops/sre/executive-reliability-dashboard.md",
       "category": "ops",
-      "lastValidated": "2026-04-20",
+      "lastValidated": "2026-05-04",
       "stale": false
     },
     {
       "path": "docs/ops/sre/portfolio-reliability-audit.md",
       "category": "ops",
-      "lastValidated": "2026-04-20",
+      "lastValidated": "2026-05-04",
       "stale": false
     },
     {
@@ -2586,60 +4342,6 @@
       "path": "docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md",
       "category": "pilot",
       "lastValidated": "2026-04-14",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/IMPLEMENTATION_PLAN_FINAL.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/MASTER_ROLLOUT_PLAN.md",
-      "category": "plans",
-      "lastValidated": "2026-04-26",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/partner-app-validation.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/probabilistic-cardinality-replicability-plan.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/REPO_ASSESSMENT.md",
-      "category": "plans",
-      "lastValidated": "2026-04-14",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/studio-maturity-10-of-10.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/plans/UE_ABR_FLAGSHIP_REFACTOR_PLAN.md",
-      "category": "plans",
-      "lastValidated": "2026-04-24",
-      "stale": false
-    },
-    {
-      "path": "docs/platform-surface-migrations/README.md",
-      "category": "platform-surface-migrations",
-      "lastValidated": "2026-04-24",
       "stale": false
     },
     {
@@ -2885,13 +4587,13 @@
     {
       "path": "docs/platform/platform-boundaries.md",
       "category": "platform",
-      "lastValidated": "2026-04-29",
+      "lastValidated": "2026-05-07",
       "stale": false
     },
     {
       "path": "docs/platform/portfolio-matrix.md",
       "category": "platform",
-      "lastValidated": "2026-04-28",
+      "lastValidated": "2026-05-07",
       "stale": false
     },
     {
@@ -3095,7 +4797,7 @@
     {
       "path": "docs/README.md",
       "category": "README.md",
-      "lastValidated": "2026-04-20",
+      "lastValidated": "2026-05-10",
       "stale": false
     },
     {
@@ -3126,6 +4828,12 @@
       "path": "docs/reference/UNION_EYES_CURRENT_STATE.md",
       "category": "reference",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/releases/finance-core-readiness.md",
+      "category": "releases",
+      "lastValidated": "2026-04-29",
       "stale": false
     },
     {
@@ -3189,6 +4897,18 @@
       "stale": false
     },
     {
+      "path": "docs/runbooks/data-recovery.md",
+      "category": "runbooks",
+      "lastValidated": "2026-04-30",
+      "stale": false
+    },
+    {
+      "path": "docs/runbooks/degraded-mode.md",
+      "category": "runbooks",
+      "lastValidated": "2026-04-30",
+      "stale": false
+    },
+    {
       "path": "docs/runbooks/dns-cutover-zero-downtime.md",
       "category": "runbooks",
       "lastValidated": "2026-04-24",
@@ -3201,15 +4921,39 @@
       "stale": false
     },
     {
+      "path": "docs/runbooks/finance-operations.md",
+      "category": "runbooks",
+      "lastValidated": "2026-04-29",
+      "stale": false
+    },
+    {
       "path": "docs/runbooks/growthos-operator-runbook.md",
       "category": "runbooks",
       "lastValidated": "2026-04-24",
       "stale": false
     },
     {
+      "path": "docs/runbooks/incident-response.md",
+      "category": "runbooks",
+      "lastValidated": "2026-04-30",
+      "stale": false
+    },
+    {
       "path": "docs/runbooks/outbound-operator-runbook.md",
       "category": "runbooks",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/runbooks/pipeline-alerting-incident-playbook.md",
+      "category": "runbooks",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/runbooks/rollback-procedure.md",
+      "category": "runbooks",
+      "lastValidated": "2026-04-30",
       "stale": false
     },
     {
@@ -3267,6 +5011,18 @@
       "stale": false
     },
     {
+      "path": "docs/runtime-proof.md",
+      "category": "runtime-proof.md",
+      "lastValidated": "2026-05-01",
+      "stale": false
+    },
+    {
+      "path": "docs/security/ai-security-overview.md",
+      "category": "security",
+      "lastValidated": "2026-05-04",
+      "stale": false
+    },
+    {
       "path": "docs/security/dns-secrets-policy.md",
       "category": "security",
       "lastValidated": "2026-04-22",
@@ -3288,6 +5044,12 @@
       "path": "docs/security/static-analysis-suppressions.md",
       "category": "security",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/security/ue-ai-surface-inventory.md",
+      "category": "security",
+      "lastValidated": "2026-05-04",
       "stale": false
     },
     {
@@ -3405,6 +5167,90 @@
       "stale": false
     },
     {
+      "path": "docs/union-eyes/clc/booth-operations-runbook.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-environment-guide.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-environment-realism-backlog.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-scripts/executive-demo.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-scripts/governance-demo.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-scripts/member-demo.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-scripts/procurement-demo.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/demo-scripts/steward-demo.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/executive-visual-polish-checklist.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/final-clc-readiness-report.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/human-walkthrough-validation.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/live-demo-rehearsal-scorecards.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/clc/pilot-scope-freeze.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/deployment/cupe-pilot-to-prod-transition.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-04",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/dr/blob-recovery.md",
       "category": "union-eyes",
       "lastValidated": "2026-04-24",
@@ -3507,9 +5353,213 @@
       "stale": false
     },
     {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-executive-value-repositioning.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-feature-gating-rearchitecture.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-institutional-value-expansion-analysis.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-marketing-category-positioning-refactor.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-module-architecture-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-monetization-rearchitecture.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-navigation-ia-rearchitecture.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/institutional-operating-infrastructure/ue-operating-system-reclassification.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/integration-playbook.md",
       "category": "union-eyes",
       "lastValidated": "2026-04-14",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/cross-app-continuity-intelligence-consistency.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/executive-labor-continuity-briefings.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/final-labor-continuity-readiness-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/governance-safe-labor-intelligence-model.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/grievance-continuity-intelligence.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/institutional-labor-continuity-framework.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/labor-continuity-ux-refactor.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/onboarding-continuity-intelligence.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/operational-embedding-refactor.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/procurement-positioning-refactor.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/labor-continuity-intelligence/stewardship-continuity-architecture.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/final-ux-structure.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/homepage-demo-sales-impact.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/marketing-impact-narrative-shift.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
@@ -3531,6 +5581,30 @@
       "stale": false
     },
     {
+      "path": "docs/union-eyes/qa/external-tester-containment.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/qa/qa-readiness-model.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/qa/rbac-reality-map.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-02",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/qa/user-story-coverage-matrix.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-03",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/quick-start.md",
       "category": "union-eyes",
       "lastValidated": "2026-04-14",
@@ -3543,9 +5617,147 @@
       "stale": false
     },
     {
+      "path": "docs/union-eyes/release/demo-environment-validation-report.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/environment-topology-audit.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/final-environment-go-no-go.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/phase-a-remediation-report.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/release-governance-standard.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/schema-parity-report.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/release/transitional-shared-secret-topology.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-09",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/revenue-profile.md",
       "category": "union-eyes",
       "lastValidated": "2026-04-24",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-canonical-module-inventory.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-doctrine-alignment-sweep.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-feature-gating-hardening.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-legacy-surface-elimination.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-monetization-runtime-alignment.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-page-route-authority-audit.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/full-stakeholder-visibility-matrix.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/scan-snapshot.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave3-runtime-consolidation-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave4-experience-convergence-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave5-institutional-refinement-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave6-institutional-inevitability-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave7-procurement-inevitability-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave8-institutional-permanence-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/runtime-authority-audit/wave9-constitutional-runtime-finalization-review.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-05-10",
       "stale": false
     },
     {
@@ -3557,7 +5769,7 @@
     {
       "path": "docs/zonga/dr/restore-drill-runbook.md",
       "category": "zonga",
-      "lastValidated": "2026-04-28",
+      "lastValidated": "2026-04-30",
       "stale": false
     },
     {
@@ -3599,7 +5811,7 @@
     {
       "path": "README.md",
       "category": "root",
-      "lastValidated": "2026-04-29",
+      "lastValidated": "2026-05-09",
       "stale": false
     },
     {
