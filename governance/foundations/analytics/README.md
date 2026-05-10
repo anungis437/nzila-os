@@ -37,7 +37,7 @@ operating model in [`governance/ai/`](../ai/).
 
 1. Request lands in the owning vertical's product backlog (no separate analytics backlog).
 2. Cross-vertical requests escalate to Platform Lead.
-3. New KPI definitions are proposed in PR against the KPI catalog (TODO: `governance/analytics/kpi-catalog.md`).
+3. New KPI definitions are proposed in PR against the KPI catalog (TODO: `governance/foundations/analytics/kpi-catalog.md`).
 4. Net-new data movement (new source, new sink, new cross-tenant view) follows the **Data Integration Pattern Selection** rubric (§6) and requires a privacy/security touchpoint.
 
 ## 5. Service levels

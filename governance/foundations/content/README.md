@@ -12,7 +12,7 @@ storage tiers. It complements (and intentionally does **not** duplicate):
 
 - [`governance/privacy/`](../privacy/) — what personal data we hold, how we lawfully process it
 - [`governance/security/`](../security/) — how content is protected at rest / in transit
-- [`governance/knowledge/`](../knowledge/) — how curated knowledge is published internally
+- [`governance/foundations/knowledge/`](../knowledge/) — how curated knowledge is published internally
 - [`governance/ai/`](../ai/) — what content is allowed into AI prompts and indexes
 
 ECM provides the **classification, retention, disposition, taxonomy, and

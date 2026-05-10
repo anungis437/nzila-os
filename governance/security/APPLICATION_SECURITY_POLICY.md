@@ -34,7 +34,7 @@ Applies to:
 
 - **Production**: Any deployed Container App in the `nzila-canada-{staging|prod}-rg` resource groups.
 - **Audit trail**: Append-only, time-ordered record of security-relevant events with actor, action, target, and outcome.
-- **Approved app**: An application present in `governance/portfolio/` and `governance/repo/` registries.
+- **Approved app**: An application present in `governance/portfolio/` and `governance/foundations/repo/` registries.
 
 ## 4. Governing Frameworks & Mappings
 

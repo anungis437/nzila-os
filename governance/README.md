@@ -22,18 +22,21 @@ Governance policy, controls, assurance, and portfolio strategy.
 - [ga/](./ga/) - Governance automation checks and gating logic
 - [finops/](./finops/) - Financial operations governance
 - [sre/](./sre/) - Reliability governance and SRE controls
-- [repo/](./repo/) - Repository governance rules and standards
 - [reports/](./reports/) - Governance reports and audits
 
 ### Knowledge and Content
 - [docs/](./docs/) - Governance architecture and specification docs
 - [corporate/](./corporate/) - Corporate policy and legal governance
-- [content/](./content/) - Governance content standards
 - [profiles/](./profiles/) - Governance profile definitions
-- [analytics/](./analytics/) - Governance analytics artifacts
-- [knowledge/](./knowledge/) - Institutional knowledge governance
 - [rollout/](./rollout/) - Governance rollout plans
 - [ai/](./ai/) - AI governance controls and operating doctrine
+
+### Foundations
+- [foundations/analytics/](./foundations/analytics/) - Governance analytics artifacts
+- [foundations/content/](./foundations/content/) - Governance content standards
+- [foundations/knowledge/](./foundations/knowledge/) - Institutional knowledge governance
+- [foundations/releases/](./foundations/releases/) - Historical release governance records
+- [foundations/repo/](./foundations/repo/) - Repository governance rules and standards
 
 ## Root Metadata Files
 
