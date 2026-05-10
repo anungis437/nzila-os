@@ -339,7 +339,7 @@ function checkCircularDeps(): ArchRule {
 
 function checkGovernanceProfiles(): ArchRule {
   const violations: ArchViolation[] = []
-  const profilesDir = join(ROOT, 'governance', 'profiles')
+  const profilesDir = join(ROOT, 'governance', 'foundations', 'profiles')
   if (!existsSync(profilesDir)) {
     violations.push({
       rule: 'GOV-PROFILES',

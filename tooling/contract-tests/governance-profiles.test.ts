@@ -14,7 +14,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = join(__dirname, '..', '..')
-const PROFILES_PATH = join(ROOT, 'governance', 'profiles', 'index.ts')
+const PROFILES_PATH = join(ROOT, 'governance', 'foundations', 'profiles', 'index.ts')
 
 describe('INV-15 — Governance profiles integrity', () => {
   it('profiles module exists', () => {
