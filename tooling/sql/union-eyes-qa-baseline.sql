@@ -238,6 +238,7 @@ CREATE TABLE IF NOT EXISTS public.organization_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id text NOT NULL,
   organization_id uuid NOT NULL,
+  tenant_id uuid,
   role text NOT NULL,
   status text NOT NULL,
   name text,
@@ -250,6 +251,7 @@ CREATE TABLE IF NOT EXISTS public.organization_members (
   hire_date timestamptz,
   seniority integer,
   union_join_date timestamptz,
+  preferred_contact_method text,
   metadata jsonb,
   is_primary boolean,
   member_category member_category,
@@ -280,6 +282,9 @@ ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_reaso
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_approved_by varchar(255);
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_approved_at timestamptz;
 ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS search_vector text;
+-- Canonical schema-organizations.ts columns required by runtime SELECTs.
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS tenant_id uuid;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS preferred_contact_method text;
 
 -- Profiles table is the canonical user profile substrate consulted by the
 -- dashboard layout (apps/union-eyes/app/[locale]/dashboard/layout.tsx). The

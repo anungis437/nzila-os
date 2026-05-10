@@ -202,7 +202,14 @@ async function main() {
 
     if (!exists) {
       await db.insert(organizationMembers).values({
-        ...m,
+        userId: m.userId,
+        organizationId: m.organizationId,
+        role: m.role,
+        status: m.status,
+        // Canonical schema requires name + email; derive from displayName
+        // when the demo fixture only carries a display name.
+        name: m.displayName,
+        email: `${m.userId}@demo.nzila.local`,
         joinedAt: NOW,
       })
       console.log(`  ✓ Member: ${m.displayName} (${m.role})`)
