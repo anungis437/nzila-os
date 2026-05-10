@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+// Validates that the Union Eyes runtime authority audit Wave 1 deliverables
+// exist and contain their required mandatory sections.
+
+import { readFile, stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(__dirname, '..', '..');
+const auditDir = join(repoRoot, 'docs', 'union-eyes', 'runtime-authority-audit');
+
+const required = [
+  {
+    file: 'README.md',
+    sections: ['Wave 1 deliverables', 'Outstanding waves', 'Validator'],
+  },
+  {
+    file: 'scan-snapshot.md',
+    sections: ['Provenance', 'Raw counts', 'Implications'],
+  },
+  {
+    file: 'full-page-route-authority-audit.md',
+    sections: [
+      'Marketing surface',
+      'Auth surface',
+      'Dashboard surface',
+      'Portal surface',
+      'Mandatory sections checklist',
+    ],
+  },
+  {
+    file: 'full-canonical-module-inventory.md',
+    sections: [
+      'Canonical platform pillars',
+      'Operational modules',
+      'Confirmed retire',
+      'merge candidates',
+      'Mandatory sections checklist',
+    ],
+  },
+  {
+    file: 'full-legacy-surface-elimination.md',
+    sections: ['Tier A', 'Tier B', 'Tier C', 'Execution status', 'Mandatory sections checklist'],
+  },
+  {
+    file: 'full-feature-gating-hardening.md',
+    sections: ['Current posture', 'Posture analysis', 'Hardening plan', 'Mandatory sections checklist'],
+  },
+];
+
+const failures = [];
+
+for (const entry of required) {
+  const path = join(auditDir, entry.file);
+  try {
+    await stat(path);
+  } catch {
+    failures.push(`Missing file: docs/union-eyes/runtime-authority-audit/${entry.file}`);
+    continue;
+  }
+  const text = await readFile(path, 'utf8');
+  for (const section of entry.sections) {
+    if (!text.toLowerCase().includes(section.toLowerCase())) {
+      failures.push(`File ${entry.file}: missing required section "${section}"`);
+    }
+  }
+}
+
+if (failures.length > 0) {
+  console.error('Runtime authority audit validation FAILED:');
+  for (const f of failures) console.error(`  - ${f}`);
+  process.exit(1);
+}
+
+console.log(`OK — ${required.length} runtime authority audit documents validated.`);
