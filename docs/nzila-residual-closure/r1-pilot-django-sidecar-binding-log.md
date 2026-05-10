@@ -83,6 +83,95 @@ verification passed, and what remains open. It does not inflate readiness.
     Next runtime logs (Next 16.2 streaming logs hit a Windows
     `cp1252` encoding issue in the Azure CLI logs viewer). The proof relied on
     sidecar-side response capture and the green `database` check on Next.
+
+---
+
+## 2026-05-10T02:05Z — BIND Upstash Redis (REST + native), close queue gate
+
+- reviewer: anungis437
+- actions:
+  - STORE Upstash credentials in `nzila-canada-pilot-kv`:
+    - `UPSTASH-REDIS-REST-URL` = REST endpoint (Upstash project
+      `hot-lamb-120369`, region eu-west-1; full host stored in KV only).
+    - `UPSTASH-REDIS-REST-TOKEN` = REST token (treat as exposed in transcript;
+      rotate from Upstash console — see residuals).
+    - `UPSTASH-REDIS-URL` = canonical native `rediss://` URL from the Upstash
+      console "Connect" tab; full value stored in KV only. Upstash's
+      documented native auth uses the REST token as the RESP AUTH password
+      (single credential, two protocols).
+  - BIND on Next pilot app (`nzila-os-union-eyes-pilot`):
+    - secret `upstash-redis-rest-url` → KV `UPSTASH-REDIS-REST-URL`
+    - secret `upstash-redis-rest-token` → KV `UPSTASH-REDIS-REST-TOKEN`
+    - env `UPSTASH_REDIS_REST_URL=secretref:upstash-redis-rest-url`
+    - env `UPSTASH_REDIS_REST_TOKEN=secretref:upstash-redis-rest-token`
+  - BIND on Django sidecar (`nzila-os-union-eyes-django-pilot`):
+    - secret `redis-url` → KV `UPSTASH-REDIS-URL`
+    - env `REDIS_URL=secretref:redis-url`
+    - env `CELERY_BROKER_URL=secretref:redis-url`
+  - REVISION-SUFFIX `redis-220132` on both apps to force KV pull.
+  - RE-ENABLE strict queue gate on Next: `HEALTH_REQUIRE_QUEUE=true`.
+- verification:
+  - Operator REST round-trip against the Upstash REST endpoint:
+    `set/get/del` returned `{"result":"OK"}` / `{"result":"ok"}` /
+    `{"result":1}`.
+  - Django sidecar `/api/auth_core/health/` (loopback exec) →
+    `{"status":"ok","checks":{"db":true,"redis":true,"celery_broker":true}}`.
+  - Public `https://pilot.unioneyes.app/api/health` →
+    `{"status":"ok","checks":{"process":"ok","database":"ok","queue":"ok"}}`.
+  - Public `https://pilot.unioneyes.app/api/ready` →
+    `{"ready":true,"status":"ready",...}`.
+  - Latest Next revision: `nzila-os-union-eyes-pilot--0000008`.
+- residual:
+  - **Upstash REST token exposed in operator transcript twice.** Rotate from
+    Upstash console; then update both `UPSTASH-REDIS-REST-TOKEN` and
+    `UPSTASH-REDIS-URL` in `nzila-canada-pilot-kv` (token is embedded in the
+    native URL), then revision-suffix bump both pilot apps. This is the
+    single P0 left for Tier 2 verdict to lift to FULL GO.
+  - **No Celery worker** is provisioned in pilot. Broker accepts tasks; nobody
+    consumes them. Out of scope for R1; track separately if/when async
+    features are exercised in pilot.
+  - Upstash now sits inside the trust boundary. It MUST appear in the
+    dependency-rotation log when that cadence is formalized (see
+    `r8-provider-key-rotation-cadence.md`).
+  - Tier 2 verdict remains **CONDITIONAL GO** until the token is rotated
+    out-of-band. After rotation, this entry should be amended with a final
+    `2026-05-10T??Z — ROTATE Upstash REST token` event.
+
+---
+
+## 2026-05-10T02:16Z — ROTATE PG admin password (handled-by-operator → fresh)
+
+- reviewer: anungis437
+- rationale: prior `nzila` admin password was generated and embedded in the
+  KV `database-url` secret mid-session, exposing the rotated value to
+  transcript handling. Re-rotated to a fresh 44-char RNG value never written
+  to chat output.
+- actions:
+  - Generated new 44-char base64url password via
+    `RandomNumberGenerator.GetBytes(33)`; persisted to
+    `.cache/pilot-pg-pwd-rot2.txt` (gitignored).
+  - `az postgres flexible-server update --admin-password` on
+    `nzila-canada-pilot-db` → returned name (success).
+  - `az keyvault secret set` on `nzila-canada-pilot-kv`:
+    - `PILOT-PG-ADMIN-PASSWORD` → new password
+    - `database-url` → rebuilt `postgresql://nzila:<urlencoded-pwd>@...`
+      preserving host/db/sslmode tail (length-stable proof: 143 → 143).
+  - REVISION-SUFFIX `pgrot-221527` on both pilot apps to force KV pull.
+- verification:
+  - Public `/api/health` → `{"checks":{"process":"ok","database":"ok","queue":"ok"}}`.
+  - Public `/api/ready` → `{"ready":true}`.
+  - Django sidecar loopback `/api/auth_core/health/` →
+    `{"status":"ok","checks":{"db":true,"redis":true,"celery_broker":true}}`.
+  - Both new revisions: `*--pgrot-221527`.
+- residual:
+  - **Upstash REST token still pending out-of-band rotation** (operator must
+    rotate from Upstash console; agent has no console access). Once rotated:
+    update `UPSTASH-REDIS-REST-TOKEN` + `UPSTASH-REDIS-URL` in KV, bump
+    revisions, append rotation entry. This is the LAST P0 blocker for
+    Tier 2 verdict to lift to FULL GO.
+  - PG admin password rotation should be added to the formalized
+    dependency-rotation cadence (see `r8-provider-key-rotation-cadence.md`)
+    rather than relying on incident-driven rotations.
     A direct Next-runtime cross-app probe trace remains a deferred follow-up.
   - The ACR repo name is `nzila-os-union-eyes-backend`, not `-django` as
     earlier doctrine drafts implied; doctrine has been updated.
