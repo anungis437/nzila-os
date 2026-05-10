@@ -28,6 +28,12 @@ type SovereigntyPostureBannerProps = {
    * institutional responsibility a viewer is taking on by being here.
    */
   posture: string;
+  /** Optional translated label for the sovereignty layer (defaults to English). */
+  layerLabel?: string;
+  /** Optional translated role label override (defaults to English ROLE_LABELS lookup). */
+  roleLabel?: string;
+  /** Optional translated access note (defaults to English). */
+  accessNote?: string;
 };
 
 const ROLE_LABELS: Record<SovereigntyPostureBannerProps['minRole'], string> = {
@@ -43,7 +49,11 @@ export function SovereigntyPostureBanner({
   surface,
   minRole,
   posture,
+  layerLabel = 'Sovereignty layer',
+  roleLabel,
+  accessNote = 'Access is logged; actions taken here are part of the institutional record.',
 }: SovereigntyPostureBannerProps) {
+  const resolvedRoleLabel = roleLabel ?? ROLE_LABELS[minRole];
   return (
     <div
       role="note"
@@ -57,12 +67,11 @@ export function SovereigntyPostureBanner({
         />
         <div className="flex flex-col gap-0.5 text-xs leading-snug text-amber-900">
           <span className="font-semibold uppercase tracking-wider">
-            Sovereignty layer · {surface}
+            {layerLabel} · {surface}
           </span>
           <span>
-            <span className="font-medium">{ROLE_LABELS[minRole]}.</span>{' '}
-            {posture} Access is logged; actions taken here are part of the
-            institutional record.
+            <span className="font-medium">{resolvedRoleLabel}.</span>{' '}
+            {posture} {accessNote}
           </span>
         </div>
       </div>

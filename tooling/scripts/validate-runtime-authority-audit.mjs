@@ -171,6 +171,25 @@ const required = [
       'institutional permanence',
     ],
   },
+  {
+    file: 'wave9-constitutional-runtime-finalization-review.md',
+    sections: [
+      'Sovereignty bilingualization results',
+      'Operational choreography completion results',
+      'Constitutional trust finalization results',
+      'Executive continuity confidence results',
+      'Stakeholder certainty results',
+      'Legacy language eradication results',
+      'Runtime calmness hardening results',
+      'Procurement & pilot inevitability hardening results',
+      'Remaining deferred refinements',
+      'Final verdicts',
+      'sovereignty parity',
+      'constitutional coherence',
+      'bilingual continuity permanence',
+      'procurement permanence',
+    ],
+  },
 ];
 
 const failures = [];

@@ -11038,5 +11038,43 @@
       "label": "Ontologie institutionnelle",
       "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter Union Eyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
     }
+  },
+  "sovereignty": {
+    "layerLabel": "Couche de souveraineté",
+    "accessNote": "L'accès est journalisé; les actions posées ici font partie du registre institutionnel.",
+    "roleLabels": {
+      "officer": "Officier au registre",
+      "admin": "Administrateur au registre",
+      "national_officer": "Officier national au registre",
+      "fed_staff": "Personnel fédéral au registre",
+      "system_admin": "Opérateur de souveraineté au registre",
+      "president": "Président au registre"
+    },
+    "surfaces": {
+      "cognition": {
+        "name": "Cognition",
+        "posture": "Raisonnement borné sur la mémoire institutionnelle; les sorties sont des recommandations pour le responsable au registre, et non des décisions autonomes."
+      },
+      "longitudinalCognition": {
+        "name": "Cognition longitudinale",
+        "posture": "Raisonnement institutionnel à travers le temps; examiner les motifs pertinents à la continuité avant toute escalade."
+      },
+      "security": {
+        "name": "Sécurité",
+        "posture": "Configuration critique pour la continuité; les changements font partie de la piste d'audit institutionnelle."
+      },
+      "customerSuccess": {
+        "name": "Réussite client",
+        "posture": "Gérance institutionnelle des comptes; agir au nom des syndicats partenaires avec la discipline du responsable au registre."
+      },
+      "operations": {
+        "name": "Opérations",
+        "posture": "Cadence opérationnelle et répartition; ordonnancer le travail comme responsable au registre de l'exécution institutionnelle."
+      },
+      "ops": {
+        "name": "Ops souverains",
+        "posture": "Contrôles d'exécution de la couche de souveraineté; chaque action est journalisée et affecte la continuité."
+      }
+    }
   }
 }

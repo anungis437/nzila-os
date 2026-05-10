@@ -11018,5 +11018,43 @@
       "label": "Institutional ontology",
       "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
     }
+  },
+  "sovereignty": {
+    "layerLabel": "Sovereignty layer",
+    "accessNote": "Access is logged; actions taken here are part of the institutional record.",
+    "roleLabels": {
+      "officer": "Officer of record",
+      "admin": "Administrator of record",
+      "national_officer": "National officer of record",
+      "fed_staff": "Federation staff of record",
+      "system_admin": "Sovereignty operator of record",
+      "president": "President of record"
+    },
+    "surfaces": {
+      "cognition": {
+        "name": "Cognition",
+        "posture": "Bounded reasoning over institutional memory; outputs are recommendations for the reviewer of record, not autonomous decisions."
+      },
+      "longitudinalCognition": {
+        "name": "Longitudinal cognition",
+        "posture": "Cross-time institutional reasoning; review continuity-relevant patterns before any escalation."
+      },
+      "security": {
+        "name": "Security",
+        "posture": "Continuity-critical configuration; changes are part of the institutional audit trail."
+      },
+      "customerSuccess": {
+        "name": "Customer success",
+        "posture": "Institutional account stewardship; act on behalf of partner unions with reviewer-of-record discipline."
+      },
+      "operations": {
+        "name": "Operations",
+        "posture": "Operational cadence and dispatch; sequence work as the reviewer of record for institutional execution."
+      },
+      "ops": {
+        "name": "Sovereign ops",
+        "posture": "Sovereignty-layer runtime controls; every action is logged and continuity-affecting."
+      }
+    }
   }
 }
