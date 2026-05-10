@@ -32,7 +32,7 @@
       "name": "My Cases",
       "short_name": "My Cases",
       "description": "View your active cases",
-      "url": "/dashboard/claims?filter=mine",
+      "url": "/dashboard/inbox?type=intake&filter=mine",
       "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {

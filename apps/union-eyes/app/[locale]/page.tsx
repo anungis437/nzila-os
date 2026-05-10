@@ -46,10 +46,10 @@ const outcomes = [
 ];
 
 const proofPoints = [
-  { metric: '-58%', label: 'Grievance cycle time', sub: 'Healthcare Local, ON' },
-  { metric: '-44%', label: 'Admin burden per rep', sub: 'Regional Council, BC' },
-  { metric: '+71%', label: 'Cases filed to resolution', sub: 'Education Local, AB' },
-  { metric: '-88%', label: 'Board report prep', sub: 'Manufacturing Region' },
+  { metric: '100%', label: 'Explainable decisions', sub: 'Every recommendation auditable' },
+  { metric: '0', label: 'Worker surveillance paths', sub: 'Anti-surveillance by design' },
+  { metric: 'Canada', label: 'Data residency', sub: 'Sovereign hosting, no cross-border egress' },
+  { metric: '24/7', label: 'Institutional memory', sub: 'Continuity across leadership transitions' },
 ];
 
 const principles = [
@@ -131,7 +131,7 @@ export default async function LocaleRootPage({
         <section className="py-10 bg-white border-y border-gray-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs font-semibold tracking-widest uppercase text-gray-400 mb-6">
-              Early pilot outcomes
+              Built-in platform guarantees
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               {proofPoints.map((item) => (
@@ -148,11 +148,7 @@ export default async function LocaleRootPage({
         <section className="py-24 bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
-              <div className="text-center mb-12">
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  Core outcomes
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
+              <div className="text-center mb-12">                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
                   Enterprise-grade operations, institution-first design
                 </h2>
                 <p className="text-lg text-gray-700 max-w-3xl mx-auto">
@@ -177,11 +173,7 @@ export default async function LocaleRootPage({
         <section className="py-24 bg-gray-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <ScrollReveal>
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                  Governance & Trust
-                </span>
-                <h2 className="text-3xl md:text-4xl font-bold text-navy mb-5">
+              <ScrollReveal>                <h2 className="text-3xl md:text-4xl font-bold text-navy mb-5">
                   Explainable intelligence with democratic safeguards
                 </h2>
                 <p className="text-lg text-gray-700 leading-relaxed mb-6">

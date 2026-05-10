@@ -193,9 +193,7 @@ export function InsightArticleView({
       <section className="py-14 bg-[#f8f6f2]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10">
           <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 lg:self-start narrative-sequence">
-            <div className="institution-panel p-6">
-              <p className="institution-kicker mb-3">Key Takeaways</p>
-              <h2 className="text-sm font-semibold text-navy mb-4">Executive Summary Anchors</h2>
+            <div className="institution-panel p-6">              <h2 className="text-sm font-semibold text-navy mb-4">Executive Summary Anchors</h2>
               <ul className="space-y-3">
                 {article.takeaways.map((takeaway) => (
                   <li key={takeaway} className="text-sm text-slate-700 leading-relaxed">
@@ -205,9 +203,7 @@ export function InsightArticleView({
               </ul>
             </div>
 
-            <div className="institution-panel p-6">
-              <p className="institution-kicker mb-3">Reading Map</p>
-              <h2 className="text-sm font-semibold text-navy mb-4">On this page</h2>
+            <div className="institution-panel p-6">              <h2 className="text-sm font-semibold text-navy mb-4">On this page</h2>
               <ul className="space-y-2 text-sm text-slate-700">
                 {article.headings.map((heading) => (
                   <li key={heading} className="leading-relaxed">
@@ -219,16 +215,12 @@ export function InsightArticleView({
               </ul>
             </div>
 
-            <div className="institution-panel p-6">
-              <p className="institution-kicker mb-3">Trust Safeguard</p>
-              <p className="text-sm text-slate-700 leading-relaxed">
+            <div className="institution-panel p-6">              <p className="text-sm text-slate-700 leading-relaxed">
                 This publication is designed for governance-safe modernization: explainable rationale, human oversight, and continuity-first implementation.
               </p>
             </div>
 
-            <div className="institution-panel p-6">
-              <p className="institution-kicker mb-3">Methodology Anchor</p>
-              <h2 className="text-sm font-semibold text-navy mb-4">Visual execution pathway</h2>
+            <div className="institution-panel p-6">              <h2 className="text-sm font-semibold text-navy mb-4">Visual execution pathway</h2>
               <PillarDiagram nodes={methodologyNodes} compact />
             </div>
 
@@ -267,9 +259,7 @@ export function InsightArticleView({
 
       <section className="py-16 bg-white border-y border-slate-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.03} duration={0.8} distance={12} tempo="conference">
-            <p className="institution-kicker mb-3">Related Doctrine</p>
-          </ScrollReveal>
+          <ScrollReveal delay={0.03} duration={0.8} distance={12} tempo="conference">          </ScrollReveal>
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
             <h2 className="text-2xl font-semibold text-navy mb-8">Continue the strategic reading path</h2>
           </ScrollReveal>

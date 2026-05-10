@@ -154,11 +154,6 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-[0.18em] uppercase rounded-full bg-[#12324a] text-white border border-[#12324a]">
-            Doctrine • {profile.label}
-          </span>
-        }
         heading={<>Editorial standards and canonical story architecture</>}
         description="The doctrine layer defines how Union Eyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
         contextKicker={`${profile.label} framing`}
@@ -171,9 +166,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 
       <section className="py-16 border-b border-slate-200/70 bg-[#f8f6f2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Institutional Editorial Standard</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-4">Designed for institutional adoption confidence</h2>
           </ScrollReveal>
@@ -197,9 +190,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Canonical Story Architecture</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-4">From institutional fragmentation to operational trust</h2>
           </ScrollReveal>
@@ -228,9 +219,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Continuity Realization</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-4">What leaders realize as visibility improves</h2>
           </ScrollReveal>
@@ -254,9 +243,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Featured Doctrine</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-3">Executive publications in active use</h2>
           </ScrollReveal>
@@ -329,11 +316,6 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-[0.18em] uppercase rounded-full bg-[#12324a] text-white border border-[#12324a]">
-            Methodology • {profile.label}
-          </span>
-        }
         heading={<>Continuity flow, transformation rhythm, and governance symbolism</>}
         description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm institutional motion."
         contextKicker={`${profile.label} focus`}
@@ -346,9 +328,7 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
 
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={0.85} distance={12} tempo="conference">
-            <p className="institution-kicker mb-3">Methodology Layer</p>
-          </ScrollReveal>
+          <ScrollReveal duration={0.85} distance={12} tempo="conference">          </ScrollReveal>
           <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
             <h2 className="text-3xl font-semibold text-navy mb-4">Operational frameworks visualized for governance use</h2>
           </ScrollReveal>
@@ -418,11 +398,6 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-[0.18em] uppercase rounded-full bg-[#12324a] text-white border border-[#12324a]">
-            Resonance • {profile.label}
-          </span>
-        }
         heading={<>Emotional memorability without theatrics</>}
         description="This section turns institutional continuity into a remembered idea: trust, resilience, clarity, and continuity flow."
         contextKicker={`${profile.label} emphasis`}
@@ -476,11 +451,6 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-[0.18em] uppercase rounded-full bg-[#12324a] text-white border border-[#12324a]">
-            Categories • {profile.label}
-          </span>
-        }
         heading={<>Browse by governance domain</>}
         description="Use this section to move through the insight library by organizational need, not just by article title."
         contextKicker={`${profile.label} pathway`}
@@ -495,9 +465,7 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
 
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Governance Domains</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-8">Browse the doctrine library by category</h2>
           </ScrollReveal>
@@ -522,9 +490,7 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
 
       <section className="py-16 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="institution-kicker mb-3">Pipeline Visibility</p>
-          </ScrollReveal>
+          <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <h2 className="text-3xl font-semibold text-navy mb-3">Next in doctrine development</h2>
           </ScrollReveal>

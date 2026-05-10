@@ -48,11 +48,6 @@ export default async function InsightsPage({
         imageUrl={heroImagery.insights}
         tone="dark"
         revealTempo="conference"
-        badge={
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-[0.18em] uppercase rounded-full bg-[#12324a] text-white border border-[#12324a]">
-            {profile.label} Insights Doctrine
-          </span>
-        }
         heading={<>Institutional continuity and governance intelligence</>}
         description="A doctrine publication movement for executive teams preserving institutional memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence."
         contextKicker={`${profile.label} context`}
@@ -62,7 +57,7 @@ export default async function InsightsPage({
             <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">
               Request Executive Briefing
             </Link>
-            <Link href={withInstitutionalContext(`/${locale}/contact`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-transparent text-white font-medium rounded-xl border border-white/40 hover:bg-white/10 transition-all">
+            <Link href={withInstitutionalContext(`/${locale}/contact`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">
               Receive Doctrine Updates
             </Link>
           </div>
@@ -73,9 +68,7 @@ export default async function InsightsPage({
 
       <section className="py-12 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.02} duration={0.8} distance={12} tempo="conference">
-            <p className="institution-kicker mb-3">Navigation</p>
-          </ScrollReveal>
+          <ScrollReveal delay={0.02} duration={0.8} distance={12} tempo="conference">          </ScrollReveal>
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
             <h2 className="text-3xl font-semibold text-navy mb-4">Move through the Insights system by theme</h2>
           </ScrollReveal>
@@ -100,9 +93,7 @@ export default async function InsightsPage({
       {/* ── Featured Insights ── */}
       <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal delay={0.02} duration={0.8} distance={12} tempo="conference">
-            <p className="institution-kicker mb-3">Featured Doctrine</p>
-          </ScrollReveal>
+          <ScrollReveal delay={0.02} duration={0.8} distance={12} tempo="conference">          </ScrollReveal>
           <ScrollReveal delay={0.08} duration={0.95} distance={16} tempo="conference">
             <h2 className="text-3xl font-semibold text-navy mb-3">Executive publications in active use</h2>
           </ScrollReveal>

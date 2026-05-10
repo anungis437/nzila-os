@@ -89,7 +89,7 @@ const getQuickLinks = (t: any, locale: string): QuickLink[] => [
   {
     title: t('claims.myCases'),
     description: t('dashboard.trackSubmissions'),
-    href: `/${locale}/dashboard/claims`,
+    href: `/${locale}/dashboard/inbox?type=intake`,
     icon: <FileText size={24} />,
     color: "from-green-500 to-green-600",
     roles: ["member", "steward", "officer", "admin"]
@@ -129,7 +129,7 @@ const getQuickLinks = (t: any, locale: string): QuickLink[] => [
   {
     title: t('grievance.title'),
     description: t('grievance.formalProcesses'),
-    href: `/${locale}/dashboard/grievances`,
+    href: `/${locale}/dashboard/work`,
     icon: <Scale size={24} />,
     color: "from-amber-500 to-amber-600",
     roles: ["officer", "admin"]
@@ -576,7 +576,7 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
           summary={deadlineSummary}
           criticalDeadlines={criticalDeadlines}
           loading={isLoadingDeadlines}
-          onViewAll={() => router.push(`/${locale}/dashboard/deadlines`)}
+          onViewAll={() => router.push(`/${locale}/dashboard/priorities`)}
         />
       </motion.div>
       )}

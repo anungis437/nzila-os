@@ -76,9 +76,9 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
   if (experience === 'member') {
     return [
       { label: 'Home', href: '/dashboard/inbox' },
-      { label: 'My Cases', href: '/dashboard/inbox' },
+      { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Submit Request', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/messages' },
+      { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Profile & Settings', href: '/dashboard/settings' },
       { label: 'Help & Support', href: '/dashboard/support' },
@@ -87,9 +87,9 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 
   if (experience === 'staff') {
     return [
-      { label: 'Workbench', href: '/dashboard/workbench' },
-      { label: 'Cases', href: '/dashboard/claims' },
-      { label: 'Assignments', href: '/dashboard/priorities' },
+      { label: 'Workbench', href: '/dashboard/work' },
+      { label: 'Cases', href: '/dashboard/inbox?type=intake' },
+      { label: 'Priorities', href: '/dashboard/priorities' },
       { label: 'Members', href: '/dashboard/members' },
       { label: 'Documents', href: '/dashboard/documents' },
       { label: 'Communications', href: '/dashboard/correspondence' },
@@ -144,7 +144,6 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard',
     '/dashboard/inbox',
     '/dashboard/claims/new',
-    '/dashboard/messages',
     '/dashboard/documents',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -153,7 +152,8 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   staff: [
     '/dashboard',
     '/dashboard/workbench',
-    '/dashboard/claims',
+    '/dashboard/work',
+    '/dashboard/inbox',
     '/dashboard/priorities',
     '/dashboard/members',
     '/dashboard/documents',

@@ -151,7 +151,7 @@ export default function PilotDashboard() {
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
           >
             {/* My Cases card */}
-            <Link href={`/${locale}/dashboard/claims`}>
+            <Link href={`/${locale}/dashboard/inbox?type=intake`}>
               <Card className="h-full border-blue-200 bg-blue-50/60 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer group">
                 <CardContent className="p-6 flex flex-col justify-between h-full">
                   <div>

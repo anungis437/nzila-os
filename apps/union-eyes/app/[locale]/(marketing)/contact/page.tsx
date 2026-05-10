@@ -113,13 +113,13 @@ export default async function LocaleContactPage({
               <ContactInfoItem
                 icon={<Mail className="h-5 w-5" />}
                 label={copy.email}
-                value="hello@union-eyes.ca"
-                href="mailto:hello@union-eyes.ca"
+                value="hello@unioneyes.app"
+                href="mailto:hello@unioneyes.app"
               />
               <ContactInfoItem
                 icon={<MapPin className="h-5 w-5" />}
                 label={copy.address}
-                value="Toronto, Ontario, Canada"
+                value="Ottawa, ON"
               />
               <ContactInfoItem
                 icon={<Clock className="h-5 w-5" />}

@@ -874,7 +874,7 @@ export default async function ProofPage({
             <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
               {copy.pilotCta}
             </Link>
-            <Link href={withInstitutionalContext(`/${locale}/trust`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
+            <Link href={withInstitutionalContext(`/${locale}/trust`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white/90 text-navy font-semibold rounded-xl border border-white hover:bg-white transition-all">
               {copy.trustCta}
             </Link>
           </div>
@@ -904,11 +904,7 @@ export default async function ProofPage({
           </div>
 
           <TabsContent value="overview" className="space-y-12">
-            <section>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                {copy.briefingLabel}
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-3">{copy.briefingTitle}</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-3">{copy.briefingTitle}</h2>
               <p className="text-gray-600 max-w-3xl mb-8">{copy.briefingIntro}</p>
               <div className="grid lg:grid-cols-2 gap-4">
                 <article className="p-5 rounded-2xl bg-gray-50 border border-gray-100">
@@ -930,11 +926,7 @@ export default async function ProofPage({
               </div>
             </section>
 
-            <section>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                {copy.evidenceLabel}
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-3">{copy.evidenceTitle}</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-3">{copy.evidenceTitle}</h2>
               <p className="text-gray-600 max-w-3xl mb-8">{copy.evidenceDesc}</p>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {localizedEvidenceArchitecture.map((item, index) => {
@@ -953,11 +945,7 @@ export default async function ProofPage({
               </div>
             </section>
 
-            <section>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                {copy.walkthroughLabel}
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-3">{copy.walkthroughTitle}</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-3">{copy.walkthroughTitle}</h2>
               <div className="grid md:grid-cols-2 gap-4 mb-8">
                 {localizedGovernanceOperationalWalkthroughs.map((walkthrough) => (
                   <article key={walkthrough.type} className="p-5 rounded-2xl border border-gray-100 bg-white">
@@ -969,11 +957,7 @@ export default async function ProofPage({
               </div>
             </section>
 
-            <section>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                {copy.deploymentLabel}
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-4">{copy.deploymentTitle}</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-4">{copy.deploymentTitle}</h2>
               <div className="relative">
                 <div className="hidden xl:block absolute top-7 left-10 right-10 h-px bg-electric/25" aria-hidden="true" />
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1001,11 +985,7 @@ export default async function ProofPage({
           </TabsContent>
 
           <TabsContent value="simulation" className="space-y-12">
-            <section>
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            {copy.pilotLabel}
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-3">{copy.pilotTitle}</h2>
+            <section>          <h2 className="text-3xl font-bold text-navy mb-3">{copy.pilotTitle}</h2>
           <div className="grid lg:grid-cols-2 gap-6">
             {localizedPilotSimulationArtifacts.map((artifact) => (
               <article key={artifact.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
@@ -1048,11 +1028,7 @@ export default async function ProofPage({
           </div>
             </section>
 
-            <section>
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            {copy.operationalSimulationLabel}
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-3">{copy.operationalSimulationTitle}</h2>
+            <section>          <h2 className="text-3xl font-bold text-navy mb-3">{copy.operationalSimulationTitle}</h2>
           <div className="grid lg:grid-cols-2 gap-6">
             {localizedOperationalContinuitySimulationArtifacts.map((artifact) => (
               <article key={artifact.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">
@@ -1070,11 +1046,7 @@ export default async function ProofPage({
           </div>
             </section>
 
-            <section>
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            {copy.scenarioLabel}
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-3">{copy.scenarioTitle}</h2>
+            <section>          <h2 className="text-3xl font-bold text-navy mb-3">{copy.scenarioTitle}</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {localizedExecutiveScenarioModels.map((scenario) => (
               <article key={scenario.title} className="p-5 rounded-2xl border border-gray-100 bg-white">
@@ -1087,11 +1059,7 @@ export default async function ProofPage({
           </TabsContent>
 
           <TabsContent value="scenario" className="space-y-12">
-            <section>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Leadership Transition Continuity Scenarios
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-3">Lived transition pressure points and calm continuity responses</h2>
+            <section>              <h2 className="text-3xl font-bold text-navy mb-3">Lived transition pressure points and calm continuity responses</h2>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {localizedLeadershipTransitionContinuityScenarios.map((item) => (
                   <article key={item.scenario} className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm">
@@ -1248,11 +1216,7 @@ export default async function ProofPage({
 
           <TabsContent value="continuity" className="space-y-12">
             <section className="grid lg:grid-cols-2 gap-8">
-          <div>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              {copy.beforeAfterLabel}
-            </span>
-            <h2 className="text-2xl font-bold text-navy mb-3">{copy.beforeAfterTitle}</h2>
+          <div>            <h2 className="text-2xl font-bold text-navy mb-3">{copy.beforeAfterTitle}</h2>
             <div className="space-y-2">
               {localizedInstitutionalBeforeAfterMap.map((item, index) => (
                 <div key={item} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50">
@@ -1263,11 +1227,7 @@ export default async function ProofPage({
             </div>
           </div>
 
-          <div>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              {copy.maturityLabel}
-            </span>
-            <h2 className="text-2xl font-bold text-navy mb-3">{copy.maturityTitle}</h2>
+          <div>            <h2 className="text-2xl font-bold text-navy mb-3">{copy.maturityTitle}</h2>
             <div className="space-y-3">
               {localizedOrganizationalMaturitySnapshots.map((snapshot) => (
                 <article key={snapshot.dimension} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1281,11 +1241,7 @@ export default async function ProofPage({
             </section>
 
             <section className="grid lg:grid-cols-2 gap-8">
-          <div>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              {copy.timelineLabel}
-            </span>
-            <h2 className="text-2xl font-bold text-navy mb-3">{copy.timelineTitle}</h2>
+          <div>            <h2 className="text-2xl font-bold text-navy mb-3">{copy.timelineTitle}</h2>
             <div className="space-y-3">
               {localizedDeploymentTimelines.map((timeline) => (
                 <article key={timeline.title} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
@@ -1313,11 +1269,7 @@ export default async function ProofPage({
             </div>
           </div>
 
-          <div>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase bg-electric/10 text-electric mb-4 rounded-full">
-              {copy.briefingFlowsLabel}
-            </span>
-            <h2 className="text-2xl font-bold text-navy mb-3">{copy.briefingFlowsTitle}</h2>
+          <div>            <h2 className="text-2xl font-bold text-navy mb-3">{copy.briefingFlowsTitle}</h2>
             <div className="space-y-3 mb-6">
               {localizedExecutiveBriefingFlows.map((item) => (
                 <article key={item} className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
@@ -1373,11 +1325,7 @@ export default async function ProofPage({
             </section>
 
             <section className="bg-gray-50 border border-gray-100 rounded-3xl p-8 md:p-10">
-              <div className="max-w-3xl">
-                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase bg-electric/10 text-electric mb-4 rounded-full">
-                  {copy.proofPackLabel}
-                </span>
-                <h2 className="text-3xl font-bold text-navy mb-3">{copy.proofPackTitle}</h2>
+              <div className="max-w-3xl">                <h2 className="text-3xl font-bold text-navy mb-3">{copy.proofPackTitle}</h2>
                 <p className="text-gray-600 leading-relaxed mb-6">
                   {copy.proofPackDesc}
                 </p>

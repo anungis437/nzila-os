@@ -64,9 +64,7 @@ export function MethodologyVisualizationSystem() {
   return (
     <section className="py-16 bg-white border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Methodology Visualization System</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={18}>
           <h2 className="text-3xl font-semibold text-navy mb-4">Institutional doctrine, operationalized visually</h2>
         </ScrollReveal>
@@ -168,9 +166,7 @@ export function ContinuityFlowSignature() {
   return (
     <section className="py-16 bg-white border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Signature Symbolism</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4">Continuity Flow as institutional language</h2>
         </ScrollReveal>
@@ -210,9 +206,7 @@ export function FragmentationToCoherenceSequence() {
   return (
     <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Canonical Transformation</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4">Fragmentation to resilience, without disruption theatre</h2>
         </ScrollReveal>
@@ -254,9 +248,7 @@ export function ExecutiveResonanceLayer() {
   return (
     <section className="py-16 bg-white border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Executive Emotional Resonance</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-8">Strategic calmness, made memorable</h2>
         </ScrollReveal>
@@ -330,9 +322,7 @@ export function ContinuityMappingLanguage() {
   return (
     <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Continuity Mapping Language</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4">A recognizable visual language for institutional resilience</h2>
         </ScrollReveal>
@@ -364,9 +354,7 @@ export function ConferenceStoryFlow() {
   return (
     <section className="py-16 bg-white border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={12} tempo="conference">
-          <p className="institution-kicker mb-3">Conference Storytelling Sequence</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={12} tempo="conference">        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
           <h2 className="text-3xl font-semibold text-navy mb-4">Narrative choreography for executive environments</h2>
         </ScrollReveal>
@@ -423,9 +411,7 @@ export function StakeholderVisualPathways() {
   return (
     <section className="py-16 bg-[#f8f6f2] border-b border-slate-200/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollReveal duration={0.85} distance={14}>
-          <p className="institution-kicker mb-3">Stakeholder Visual Pathways</p>
-        </ScrollReveal>
+        <ScrollReveal duration={0.85} distance={14}>        </ScrollReveal>
         <ScrollReveal delay={0.06} duration={0.9} distance={16}>
           <h2 className="text-3xl font-semibold text-navy mb-4">Role-aware visual emphasis by decision context</h2>
         </ScrollReveal>

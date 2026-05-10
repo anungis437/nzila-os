@@ -102,11 +102,7 @@ export default function ExecutiveIntelligencePage() {
       {/* ── Surfaces ── */}
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              Executive Surfaces
-            </span>
-            <h2 className="text-3xl font-bold text-navy mb-3">
+          <div className="text-center mb-12">            <h2 className="text-3xl font-bold text-navy mb-3">
               Built for institutional leadership
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -132,11 +128,7 @@ export default function ExecutiveIntelligencePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Executive Leadership Journey
-              </span>
-              <h2 className="text-3xl font-bold text-navy mb-4">
+            <div>              <h2 className="text-3xl font-bold text-navy mb-4">
                 For union executives who lead through complexity
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">

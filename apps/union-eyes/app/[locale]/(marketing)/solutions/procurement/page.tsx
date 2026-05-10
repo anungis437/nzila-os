@@ -114,11 +114,7 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-3">
-            Procurement-Safe Implementation UX
-          </span>
-          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through phased, governable deployment</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Build confidence through phased, governable deployment</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
             Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption.
           </p>
@@ -194,11 +190,7 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase bg-electric/10 text-electric mb-3 rounded-full">
-            Deployment Timeline Systems
-          </span>
-          <h2 className="text-2xl font-bold text-navy mb-3">Phased pacing for procurement and leadership confidence</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Phased pacing for procurement and leadership confidence</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
             Reviewers can see how deployment would be staged over time, where governance stays engaged, and how continuity is protected during adoption.
           </p>
@@ -223,11 +215,7 @@ export default function ProcurementPage() {
       </section>
 
       <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase bg-electric/10 text-electric mb-3 rounded-full">
-            Procurement Evidence Binder
-          </span>
-          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content in one operational package</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-2xl font-bold text-navy mb-3">Due diligence content in one operational package</h2>
           <p className="text-sm text-gray-600 max-w-3xl mb-6">
             Procurement teams receive implementation-aware evidence organized for reviewability, governance confidence, and continuity-safe deployment decisions.
           </p>

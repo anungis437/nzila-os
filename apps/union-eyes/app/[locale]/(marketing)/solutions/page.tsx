@@ -28,7 +28,7 @@ const solutions = [
   {
     icon: Users,
     audience: 'Union Executive Leadership',
-    href: './executive-leadership',
+    href: 'solutions/executive-leadership',
     challenge: 'Strategic continuity is at risk when institutional knowledge lives in individuals, not in the organization.',
     outcomes: [
       'Organizational continuity visibility across leadership transitions',
@@ -40,7 +40,7 @@ const solutions = [
   {
     icon: ShieldCheck,
     audience: 'Governance Leadership',
-    href: './governance-leadership',
+    href: 'solutions/governance-leadership',
     challenge: 'Governance modernization requires explainability, oversight controls, and continuity — not opaque AI.',
     outcomes: [
       'Explainable governance intelligence with human oversight',
@@ -52,7 +52,7 @@ const solutions = [
   {
     icon: Settings,
     audience: 'Operations Leadership',
-    href: './operations-leadership',
+    href: 'solutions/operations-leadership',
     challenge: 'Operational fragmentation erodes institutional resilience over time.',
     outcomes: [
       'Operational coherence across distributed teams',
@@ -64,7 +64,7 @@ const solutions = [
   {
     icon: Cpu,
     audience: 'Technology Leadership',
-    href: './technology-leadership',
+    href: 'solutions/technology-leadership',
     challenge: 'Labour organizations need enterprise-safe AI that is explainable, governed, and trusted — not experimental.',
     outcomes: [
       'Governance-safe AI with full explainability guarantees',
@@ -76,7 +76,7 @@ const solutions = [
   {
     icon: Heart,
     audience: 'Policy & Labour Leadership',
-    href: './labour-leadership',
+    href: 'solutions/labour-leadership',
     challenge: 'AI adoption in labour environments requires unambiguous labour-safe postures and human oversight.',
     outcomes: [
       'Anti-surveillance by design — no worker scoring or monitoring',
@@ -88,7 +88,7 @@ const solutions = [
   {
     icon: Briefcase,
     audience: 'Procurement Stakeholders',
-    href: './procurement',
+    href: 'solutions/procurement',
     challenge: 'Procurement decisions require operational credibility, implementation readiness, and institutional trust validation.',
     outcomes: [
       'Modular deployment with phased implementation pathways',
@@ -99,7 +99,8 @@ const solutions = [
   },
 ];
 
-export default function SolutionsPage() {
+export default async function SolutionsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return (
     <div className="bg-white min-h-screen">
       {/* Hero with Imagery */}
@@ -139,7 +140,7 @@ export default function SolutionsPage() {
                   ))}
                 </ul>
                 <Link
-                  href={sol.href}
+                  href={`/${locale}/${sol.href}`}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-electric hover:text-blue-700 transition-colors"
                 >
                   {sol.cta}
@@ -161,7 +162,7 @@ export default function SolutionsPage() {
             Request a demo tailored to your role and institutional context.
           </p>
           <Link
-            href="/pilot-request"
+            href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
             Request a Demo

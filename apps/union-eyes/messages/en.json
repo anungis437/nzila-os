@@ -7624,10 +7624,10 @@
     },
     "footer": {
       "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-      "platform": "Modules",
+      "platform": "Capabilities",
       "solutions": "Solutions",
       "governanceAndTrust": "Governance & Trust",
-      "product": "Modules",
+      "product": "Capabilities",
       "resources": "Resources",
       "company": "Company",
       "legal": "Legal",

@@ -130,11 +130,7 @@ export default async function InstitutionalContinuityPage({
       {/* ── The Core Problem ── */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              The Institutional Challenge
-            </span>
-            <h2 className="text-3xl font-bold text-navy mb-4">
+          <div className="max-w-2xl">            <h2 className="text-3xl font-bold text-navy mb-4">
               Knowledge that lives in people disappears when they leave
             </h2>
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
@@ -155,11 +151,7 @@ export default async function InstitutionalContinuityPage({
       {/* ── Continuity Journey ── */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              The Continuity Journey
-            </span>
-            <h2 className="text-3xl font-bold text-navy mb-2">
+          <div className="mb-12">            <h2 className="text-3xl font-bold text-navy mb-2">
               From fragmentation to institutional resilience
             </h2>
           </div>
@@ -235,11 +227,7 @@ export default async function InstitutionalContinuityPage({
           <TabsContent value="pathways" className="space-y-12">
 
       <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            Institutional Rollout Architecture
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-3">Canonical deployment pathway for governed adoption</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-3">Canonical deployment pathway for governed adoption</h2>
           <p className="text-gray-600 max-w-3xl mb-8">
             Union Eyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
           </p>
@@ -255,11 +243,7 @@ export default async function InstitutionalContinuityPage({
       </section>
 
       <section className="py-20 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            Governance Modernization Journey
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-8">How modernization safely becomes operational</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-8">How modernization safely becomes operational</h2>
           <div className="space-y-3">
             {governanceModernizationJourney.map((item) => (
               <article key={item.stage} className="p-5 rounded-xl bg-gray-50 border border-gray-100">
@@ -274,11 +258,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-gray-50 border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10">
-            <div>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Operational Maturity Pathway
-              </span>
-              <h3 className="text-2xl font-bold text-navy mb-3">Directional maturity, not performance ranking</h3>
+            <div>              <h3 className="text-2xl font-bold text-navy mb-3">Directional maturity, not performance ranking</h3>
               <p className="text-sm text-gray-600 mb-6">
                 Organizations can locate current operating maturity and progress safely through governed continuity stages.
               </p>
@@ -294,11 +274,7 @@ export default async function InstitutionalContinuityPage({
               </div>
             </div>
 
-            <div>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Transformation Pathway
-              </span>
-              <h3 className="text-2xl font-bold text-navy mb-3">Stabilizing institutional evolution sequence</h3>
+            <div>              <h3 className="text-2xl font-bold text-navy mb-3">Stabilizing institutional evolution sequence</h3>
               <p className="text-sm text-gray-600 mb-6">
                 Union Eyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
               </p>
@@ -316,11 +292,7 @@ export default async function InstitutionalContinuityPage({
       </section>
 
       <section className="py-16 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            Executive Deployment Confidence System
-          </span>
-          <h2 className="text-3xl font-bold text-navy mb-8">Operational reassurance for leadership and procurement review</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-8">Operational reassurance for leadership and procurement review</h2>
           <div className="grid md:grid-cols-3 gap-4">
             <article className="p-5 rounded-xl bg-gray-50 border border-gray-100">
               <h3 className="text-sm font-bold text-navy mb-2">Deployment Simplicity</h3>
@@ -349,11 +321,7 @@ export default async function InstitutionalContinuityPage({
           <TabsContent value="proof" className="space-y-12">
 
       <section className="py-20 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-            Institutional Evidence Architecture
-          </span>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
             <div>
               <h2 className="text-3xl font-bold text-navy mb-3">Proof surfaces that make deployment reviewable</h2>
               <p className="text-gray-600 max-w-3xl">
@@ -379,11 +347,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8">
-            <div>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Institutional Before/After Map
-              </span>
-              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
+            <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
               <div className="space-y-2">
                 {institutionalBeforeAfterMap.map((stage, index) => (
                   <article key={stage} className="p-3 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between">
@@ -393,11 +357,7 @@ export default async function InstitutionalContinuityPage({
                 ))}
               </div>
             </div>
-            <div>
-              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Institutional Rollout Simulation Flow
-              </span>
-              <h2 className="text-2xl font-bold text-navy mb-3">How adoption remains calm and governable</h2>
+            <div>              <h2 className="text-2xl font-bold text-navy mb-3">How adoption remains calm and governable</h2>
               <div className="space-y-2">
                 {institutionalRolloutSimulationFlow.map((stage, index) => (
                   <article key={stage} className="p-3 rounded-lg border border-gray-100 bg-white">
