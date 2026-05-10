@@ -45,9 +45,9 @@ test.describe("Grievance draft save & resume", () => {
     await expect(page.getByText(/Detailed Description/i).first()).toBeVisible();
     await expect(page.getByText(/When did this occur/i).first()).toBeVisible();
 
-    // Submit button exists
+    // Submit button exists — canonical label is "Submit Intake" (forms.submitCase namespace).
     await expect(
-      page.getByRole("button", { name: /Create a Case/i })
+      page.getByRole("button", { name: /Submit Intake/i })
     ).toBeVisible();
   });
 
@@ -153,7 +153,7 @@ test.describe("Grievance submission flow", () => {
     ).toBeVisible({ timeout: 15_000 });
 
     // Click submit without filling required fields
-    await page.getByRole("button", { name: /Create a Case/i }).click();
+    await page.getByRole("button", { name: /Submit Intake/i }).click();
 
     // Form should not navigate away — still on the same page
     await expect(

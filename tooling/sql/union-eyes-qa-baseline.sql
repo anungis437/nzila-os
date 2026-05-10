@@ -393,3 +393,53 @@ CREATE TABLE IF NOT EXISTS audit_security.security_events (
   description text NOT NULL,
   created_at timestamptz DEFAULT now()
 );
+
+-- ============================================================================
+-- Stub tables for routes that query relations not yet in the canonical baseline.
+-- These are intentionally minimal: schema/columns chosen to satisfy active
+-- read paths in the e2e suite. Real domain seeding lives elsewhere.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.grievances (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  grievance_number varchar(50),
+  type varchar(50),
+  status varchar(50) DEFAULT 'draft',
+  priority varchar(50) DEFAULT 'medium',
+  step varchar(50),
+  title varchar(500),
+  description text,
+  organization_id uuid,
+  filed_date timestamptz,
+  resolved_at timestamptz,
+  closed_at timestamptz,
+  response_deadline timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Compatibility alias: some legacy paths query unqualified `audit_logs`
+-- (PG search_path = public). Provide an empty stub so those queries don't 500.
+-- The canonical, write-target table is `audit_security.audit_logs`.
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid,
+  user_id varchar(255),
+  action varchar(100),
+  resource_type varchar(50),
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.integration_api_keys (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid,
+  name varchar(255),
+  key_prefix varchar(50),
+  environment varchar(50),
+  status varchar(50) DEFAULT 'active',
+  scopes jsonb DEFAULT '[]'::jsonb,
+  request_count bigint DEFAULT 0,
+  last_used_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);

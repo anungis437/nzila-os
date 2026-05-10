@@ -242,33 +242,62 @@ class Logger {
 
   /**
    * Error level logging
+   *
+   * Supports two call shapes used across the codebase:
+   *   logger.error(message, error)                  // Error/unknown thrown value
+   *   logger.error(message, error, context)         // Error + extra context
+   *   logger.error(message, context)                // Plain context object (no Error)
+   *
+   * The third shape is the most common one in route handlers
+   * (e.g. `logger.error('Unhandled error', { error: msg, stack, path, traceId })`).
+   * Without disambiguation, the context object would be coerced to "[object Object]"
+   * by `String(error)` and the entire diagnostic payload would be lost.
    */
-  error(message: string, error?: Error | unknown, context?: LogContext): void {
+  error(message: string, errorOrContext?: Error | unknown, context?: LogContext): void {
     const isProduction = process.env.NODE_ENV === 'production';
-    
-    const errorContext = {
-      ...context,
-      error: error instanceof Error ? {
-        name: error.name,
-        message: error.message,
-        // Only include first 3 lines of stack trace in production (for debugging)
-        // Full stack trace leaks file paths and internal structure
-        stack: isProduction 
-          ? error.stack?.split('\n').slice(0, 3).join('\n')
-          : error.stack,
-        // Additional error properties (if any)
-        ...(error.cause ? { cause: String(error.cause) } : {}),
-      } : String(error),
-    };
+
+    const isErrorValue =
+      errorOrContext instanceof Error ||
+      typeof errorOrContext === 'string' ||
+      typeof errorOrContext === 'number' ||
+      typeof errorOrContext === 'boolean' ||
+      errorOrContext === null;
+
+    // If the second arg is a plain object (not an Error/primitive), treat it as context.
+    const effectiveError: Error | unknown | undefined = isErrorValue ? errorOrContext : undefined;
+    const effectiveContext: LogContext | undefined = isErrorValue
+      ? context
+      : (errorOrContext as LogContext | undefined);
+
+    const errorContext: LogContext =
+      effectiveError !== undefined
+        ? {
+            ...effectiveContext,
+            error:
+              effectiveError instanceof Error
+                ? {
+                    name: effectiveError.name,
+                    message: effectiveError.message,
+                    // Only include first 3 lines of stack trace in production (for debugging)
+                    // Full stack trace leaks file paths and internal structure
+                    stack: isProduction
+                      ? effectiveError.stack?.split('\n').slice(0, 3).join('\n')
+                      : effectiveError.stack,
+                    // Additional error properties (if any)
+                    ...(effectiveError.cause ? { cause: String(effectiveError.cause) } : {}),
+                  }
+                : String(effectiveError),
+          }
+        : (effectiveContext ?? {});
 
     this.log('error', message, errorContext);
 
     // Capture full error in Sentry (async, fire-and-forget)
-    if (error instanceof Error) {
+    if (effectiveError instanceof Error) {
       getSentry().then(S => {
         if (!S) return;
-        S.captureException(error, {
-          extra: context,
+        S.captureException(effectiveError, {
+          extra: effectiveContext,
           tags: {
             correlationId: this.correlationId,
           },
