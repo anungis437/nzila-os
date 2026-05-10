@@ -23,6 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusPage } from '@/components/monitoring/StatusPage';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import {
@@ -92,17 +93,22 @@ export default async function TrustPage({
               href={withInstitutionalContext(`/${locale}/proof`, contextMode)}
               className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/20 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/30"
             >
-              Explore Proof Layer
+              Review the proof record
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)}
               className="inline-flex items-center gap-2 rounded-xl border border-electric/40 bg-electric px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
             >
-              Request Executive Briefing
+              Begin a continuity briefing
             </Link>
           </div>
         }
+      />
+
+      <InstitutionalContinuityNote
+        surface="Trust posture"
+        posture="Trust in Union Eyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
       />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

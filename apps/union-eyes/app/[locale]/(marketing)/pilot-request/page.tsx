@@ -20,6 +20,7 @@ import {
 } from '@/lib/pilot/readiness-assessment';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { logger } from '@/lib/logger';
@@ -191,6 +192,11 @@ export default function LocalePilotRequestPage() {
         description={t('heroDescription')}
         contextKicker={`${contextProfile.label} context`}
         contextNote={contextProfile.heroFraming}
+      />
+
+      <InstitutionalContinuityNote
+        surface="Pilot posture"
+        posture="This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an institutional record that survives leadership transitions. Workers are never the subject of pilot assessment."
       />
 
       <div className="max-w-3xl mx-auto mt-12">

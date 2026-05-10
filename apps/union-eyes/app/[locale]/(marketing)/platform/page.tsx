@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 
 export const metadata: Metadata = {
@@ -114,6 +115,11 @@ export default async function PlatformOverviewPage({
         heading="One institutional operating experience."
         description="Union Eyes is organized as eight canonical operational surfaces — composed, not bundled — into one continuous institutional operating record."
         imageUrl={heroImagery.platform}
+      />
+
+      <InstitutionalContinuityNote
+        surface="Institutional ontology"
+        posture="The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
       />
 
       <section className="mx-auto max-w-6xl px-6 py-20">

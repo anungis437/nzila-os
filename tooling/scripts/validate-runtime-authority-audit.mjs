@@ -135,6 +135,23 @@ const required = [
       'Institutional inevitability',
     ],
   },
+  {
+    file: 'wave7-procurement-inevitability-review.md',
+    sections: [
+      'Procurement trust refinement results',
+      'Trust-center convergence results',
+      'Executive reassurance results',
+      'Onboarding trust refinement results',
+      'Stakeholder operational confidence results',
+      'Continuity-language sweep results',
+      'Operational rhythm refinement results',
+      'Pilot/procurement walkthrough results',
+      'Remaining deferred refinements',
+      'Final verdicts',
+      'procurement inevitability',
+      'institutional trust',
+    ],
+  },
 ];
 
 const failures = [];

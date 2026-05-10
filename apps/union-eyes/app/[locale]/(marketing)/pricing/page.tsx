@@ -13,13 +13,14 @@ import {
   Users,
 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 
 export const metadata: Metadata = {
-  title: 'Operational Maturity Programs | Union Eyes',
+  title: 'Pricing | Union Eyes',
   description:
-    'Union Eyes is institutional operational infrastructure. Programs are organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
+    'Union Eyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -233,6 +234,11 @@ export default function LocalePricingPage() {
           </>
         }
         description="We meet institutions where they are. Programs are organized as operational maturity states — chosen with you, not handed down as seat counts or feature matrices. Start where it fits, grow when it matters."
+      />
+
+      <InstitutionalContinuityNote
+        surface="Procurement posture"
+        posture="Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities Union Eyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
       />
 
       {/* ── 1. Operational reality ── */}
