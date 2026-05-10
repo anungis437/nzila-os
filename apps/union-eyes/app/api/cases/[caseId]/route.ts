@@ -159,10 +159,12 @@ export const PATCH = withApi(
         throw ApiError.unauthorized('Authentication required for status transitions');
       }
 
+      const nextStatus: ClaimStatus = body.status;
+
       const transitionResult = await withRLSContext(async (tx) =>
         updateClaimStatusById(
           claimId,
-          body.status,
+          nextStatus,
           userId,
           typeof body.notes === 'string' ? body.notes : undefined,
           tx,
