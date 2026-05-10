@@ -215,9 +215,9 @@ export interface BuildAllocationOptions {
   overrides?: CapitalOverrideLog
 }
 
-const CAPITAL_OVERRIDE_LOG_PATH = 'governance/capital/override-log.json'
-const CAPITAL_CASH_CALENDAR_PATH = 'governance/capital/cash-calendar.json'
-const CAPITAL_SCENARIO_PACK_PATH = 'governance/capital/scenario-pack.json'
+const CAPITAL_OVERRIDE_LOG_PATH = 'governance/foundations/capital/override-log.json'
+const CAPITAL_CASH_CALENDAR_PATH = 'governance/foundations/capital/cash-calendar.json'
+const CAPITAL_SCENARIO_PACK_PATH = 'governance/foundations/capital/scenario-pack.json'
 
 const REQUIRED_NUMERIC_FIELDS: Array<keyof CapitalProduct> = [
   'monthly_burn',

@@ -74,7 +74,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 
 ## Mandatory Cross-Training Program (Enforced)
 
-All domains must complete mandatory cross-training hours every quarter. Targets are tracked in `governance/resilience/succession-and-cross-training.json` and validated in CI.
+All domains must complete mandatory cross-training hours every quarter. Targets are tracked in `governance/foundations/resilience/succession-and-cross-training.json` and validated in CI.
 
 | Rule | Minimum |
 |---|---|

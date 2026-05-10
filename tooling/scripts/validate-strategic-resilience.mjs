@@ -43,7 +43,7 @@ function check(name, fn) {
 check('vendor strategy docs exist', () => {
   const required = [
     'docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md',
-    'governance/resilience/vendor-diversification-registry.json',
+    'governance/foundations/resilience/vendor-diversification-registry.json',
   ]
   for (const rel of required) {
     if (!existsSync(resolve(ROOT, rel))) throw new Error(`Missing ${rel}`)
@@ -52,7 +52,7 @@ check('vendor strategy docs exist', () => {
 })
 
 check('vendor registry has fallback providers', () => {
-  const data = readJson('governance/resilience/vendor-diversification-registry.json')
+  const data = readJson('governance/foundations/resilience/vendor-diversification-registry.json')
   const capabilities = Array.isArray(data.capabilities) ? data.capabilities : []
   if (capabilities.length < 3) throw new Error('Expected at least 3 critical capabilities')
   const missing = capabilities
@@ -63,7 +63,7 @@ check('vendor registry has fallback providers', () => {
 })
 
 check('emerging threat register covers required risks', () => {
-  const data = readJson('governance/resilience/emerging-threat-register.json')
+  const data = readJson('governance/foundations/resilience/emerging-threat-register.json')
   const ids = new Set((data.threats ?? []).map((t) => t.id))
   const required = [
     'THREAT-AI-HALLUCINATION',
@@ -76,7 +76,7 @@ check('emerging threat register covers required risks', () => {
 })
 
 check('regulatory watchlist is current', () => {
-  const data = readJson('governance/resilience/regulatory-watchlist.json')
+  const data = readJson('governance/foundations/resilience/regulatory-watchlist.json')
   const entries = Array.isArray(data.watchlist) ? data.watchlist : []
   if (entries.length < 5) throw new Error('Expected at least 5 watchlist entries')
   const age = daysSinceIsoDate(data.last_reviewed)
@@ -87,7 +87,7 @@ check('regulatory watchlist is current', () => {
 })
 
 check('succession and cross-training policy is measurable', () => {
-  const data = readJson('governance/resilience/succession-and-cross-training.json')
+  const data = readJson('governance/foundations/resilience/succession-and-cross-training.json')
   const domains = Array.isArray(data.domains) ? data.domains : []
   if (domains.length < 5) throw new Error('Expected at least 5 domains in succession policy')
   const missingTargets = domains

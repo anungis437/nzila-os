@@ -385,11 +385,11 @@ function main(): void {
   const catalog = loadJson<ProductCatalog>('governance/portfolio/product-catalog.json')
   const pilotsEnvelope = loadJson<{ pilots: PilotRecord[] }>('governance/commercial/pilots.json')
   const costAllocation = loadJson<CostAllocationOutput>('ops/outputs/cost-allocation.json')
-  const appCostMap = loadJson<AppCostMap>('governance/finops/app-cost-map.json')
-  const budgets = loadJson<BudgetGovernance>('governance/finops/budget-governance.json')
-  const sharedAllocation = loadJson<SharedCostAllocation>('governance/finops/shared-cost-allocation.json')
-  const zongaEconomics = loadJson<ZongaMediaEconomics>('governance/finops/zonga-media-economics.json')
-  const forecastAssumptions = loadJson<ForecastAssumptions>('governance/finops/forecast-assumptions.json')
+  const appCostMap = loadJson<AppCostMap>('governance/foundations/finops/app-cost-map.json')
+  const budgets = loadJson<BudgetGovernance>('governance/foundations/finops/budget-governance.json')
+  const sharedAllocation = loadJson<SharedCostAllocation>('governance/foundations/finops/shared-cost-allocation.json')
+  const zongaEconomics = loadJson<ZongaMediaEconomics>('governance/foundations/finops/zonga-media-economics.json')
+  const forecastAssumptions = loadJson<ForecastAssumptions>('governance/foundations/finops/forecast-assumptions.json')
 
   const productById = new Map(catalog.products.map((product) => [product.id, product]))
   const costById = new Map(costAllocation.apps.map((item) => [item.app_id, item.monthly_cost_usd]))
@@ -748,7 +748,7 @@ function main(): void {
     '- governance/portfolio/product-catalog.json',
     '- governance/commercial/pilots.json',
     '- ops/outputs/cost-allocation.json',
-    '- governance/finops/*',
+    '- governance/foundations/finops/*',
     '',
     '## Generated Artifacts',
     '',

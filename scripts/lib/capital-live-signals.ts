@@ -65,7 +65,7 @@ const METRIC_WEIGHTS: Record<CapitalMetricKey, number> = {
   engineering_velocity: 0.2,
 }
 
-const MANUAL_SIGNALS_PATH = 'governance/capital/manual-live-signals.csv'
+const MANUAL_SIGNALS_PATH = 'governance/foundations/capital/manual-live-signals.csv'
 
 function safeJoinWithinRoot(root: string, ...segments: string[]): string | null {
   const resolvedRoot = resolve(root)

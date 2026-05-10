@@ -13,7 +13,7 @@ Generated: 2026-04-20T04:21:27.344Z
 - governance/portfolio/product-catalog.json
 - governance/commercial/pilots.json
 - ops/outputs/cost-allocation.json
-- governance/finops/*
+- governance/foundations/finops/*
 
 ## Generated Artifacts
 

@@ -43,7 +43,7 @@ This model tracks forward-looking threats that can bypass conventional controls 
 
 ## Evidence and Validation
 
-- Machine-readable register: governance/resilience/emerging-threat-register.json
+- Machine-readable register: governance/foundations/resilience/emerging-threat-register.json
 - Validation command: pnpm validate:strategic-resilience
 - Governance gate: GOV-GATE-022 ensures required threat families are tracked
 - Operational playbooks:
