@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: ['steward', 'chief_steward', 'admin'] },
     openapi: {
       tags: ['Workbench'],
       summary: 'Assign a claim',
@@ -22,8 +22,7 @@ export const POST = withApi(
     },
   },
   async (ctx) => {
-    const body = await ctx.request.json();
-    const parsed = assignSchema.safeParse(body);
+    const parsed = assignSchema.safeParse(ctx.body);
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: 'Invalid input', details: parsed.error.flatten() },
