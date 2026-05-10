@@ -70,6 +70,24 @@ test.describe('Union Eyes authenticated role-centric navigation', () => {
     { role: 'staff', target: '/dashboard/admin/organizations' },
     { role: 'executive', target: '/dashboard/admin/organizations' },
     { role: 'governance', target: '/dashboard/claims/new' },
+    // Wave 2 — Runtime Authority Audit: high-risk surfaces that must be gated.
+    // member (level 20) and steward (level 50) are below all new gates.
+    { role: 'member', target: '/dashboard/analytics-admin' },
+    { role: 'member', target: '/dashboard/billing-admin' },
+    { role: 'member', target: '/dashboard/compliance-admin' },
+    { role: 'member', target: '/dashboard/debug' },
+    { role: 'member', target: '/dashboard/cross-union-analytics' },
+    { role: 'member', target: '/dashboard/sector-analytics' },
+    { role: 'member', target: '/dashboard/executive-operating-intelligence' },
+    { role: 'member', target: '/dashboard/clc' },
+    { role: 'member', target: '/dashboard/pension/admin' },
+    { role: 'member', target: '/dashboard/pension/trustee' },
+    { role: 'member', target: '/dashboard/strike-fund' },
+    { role: 'member', target: '/dashboard/employer-execution' },
+    { role: 'steward', target: '/dashboard/billing-admin' },
+    { role: 'steward', target: '/dashboard/compliance-admin' },
+    { role: 'steward', target: '/dashboard/debug' },
+    { role: 'steward', target: '/dashboard/clc' },
   ];
 
   for (const attempt of leakageAttempts) {

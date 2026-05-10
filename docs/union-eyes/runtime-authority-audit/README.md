@@ -6,7 +6,7 @@ every legacy surface, and the gating posture that protects them.
 All numbers in this folder are derived from a real repository scan
 (see `scan-snapshot.md`). They are not aspirational.
 
-## Wave 1 deliverables (this revision)
+## Wave 1 deliverables
 
 | # | Document | Purpose |
 | - | -------- | ------- |
@@ -16,15 +16,28 @@ All numbers in this folder are derived from a real repository scan
 | 4 | [`full-legacy-surface-elimination.md`](./full-legacy-surface-elimination.md) | 17 verified retire candidates |
 | 5 | [`full-feature-gating-hardening.md`](./full-feature-gating-hardening.md) | Current gating posture + gaps |
 
+## Wave 2 deliverables (this revision)
+
+| # | Document | Purpose |
+| - | -------- | ------- |
+| 6 | [`full-stakeholder-visibility-matrix.md`](./full-stakeholder-visibility-matrix.md) | Stakeholder × surface visibility |
+| 7 | [`full-monetization-runtime-alignment.md`](./full-monetization-runtime-alignment.md) | Four-tier model × runtime gates |
+| 8 | [`full-doctrine-alignment-sweep.md`](./full-doctrine-alignment-sweep.md) | Doctrine vs SaaS-framing inventory |
+
+Real code in this revision: 12 new `layout.tsx` server-side gates across the
+highest-risk dashboard surfaces (analytics-admin, billing-admin,
+compliance-admin, debug, cross-union-analytics, sector-analytics,
+executive-operating-intelligence, clc, pension/admin, pension/trustee,
+strike-fund, employer-execution). E2E deny coverage extended in
+`apps/union-eyes/e2e/authenticated-role-navigation.spec.ts`.
+
 ## Outstanding waves
 
 | Wave | Doc | State |
 | ---- | --- | ----- |
-| 2 | `full-stakeholder-visibility-matrix.md` | Pending — requires module-to-stakeholder mapping work |
 | 3 | Real deletions (portal/*, 6 soft-redirects) | Pending — flagged as confirmation-required (see legacy doc) |
-| 4 | `full-doctrine-alignment-sweep.md` | Pending |
-| 4 | `full-monetization-runtime-alignment.md` | Pending |
 | 4 | `full-executive-procurement-experience-audit.md` | Pending |
+| 4 | Doctrine copy normalisation (sweep queue from doctrine doc) | Pending |
 | 5 | `full-live-runtime-traversal-audit.md` | Pending — requires live `pnpm dev` traversal |
 | 5 | `final-union-eyes-runtime-authority-review.md` | Pending — depends on all above |
 

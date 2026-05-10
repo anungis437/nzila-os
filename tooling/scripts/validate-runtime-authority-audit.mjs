@@ -47,6 +47,35 @@ const required = [
     file: 'full-feature-gating-hardening.md',
     sections: ['Current posture', 'Posture analysis', 'Hardening plan', 'Mandatory sections checklist'],
   },
+  {
+    file: 'full-stakeholder-visibility-matrix.md',
+    sections: [
+      'Stakeholder bands',
+      'Surface',
+      'Visibility per existing E2E fixture',
+      'Mandatory sections checklist',
+    ],
+  },
+  {
+    file: 'full-monetization-runtime-alignment.md',
+    sections: [
+      'Tier model',
+      'Surface',
+      'Tier coherence check',
+      'Pricing alignment',
+      'Mandatory sections checklist',
+    ],
+  },
+  {
+    file: 'full-doctrine-alignment-sweep.md',
+    sections: [
+      'Doctrine pillars',
+      'doctrine-aligned naming',
+      'generic / SaaS framing',
+      'Wave 4 work queue',
+      'Mandatory sections checklist',
+    ],
+  },
 ];
 
 const failures = [];
