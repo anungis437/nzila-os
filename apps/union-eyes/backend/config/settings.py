@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "compliance",
     "content",
     "core",
+    "exit_interviews",
     "grievances",
     "notifications",
     "unions",
