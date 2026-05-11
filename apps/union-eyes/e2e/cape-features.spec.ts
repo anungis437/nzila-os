@@ -208,7 +208,6 @@ test.describe("Pilot readiness checklist", () => {
 
     // Extra buffer: even after the "Loading..." disappears, React may still be
     // committing the wizard tree. Give the event loop a beat before clicking.
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(750);
 
     // Retry-on-no-advance: click Continue and verify Step 2 appears. If not,
