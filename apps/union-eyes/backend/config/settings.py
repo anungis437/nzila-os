@@ -148,6 +148,13 @@ CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
+# Upstash REST credentials (optional, parallel path to native RESP). When
+# both are set, the deep health check pings Upstash over HTTPS as an
+# independent verification of the REST token — useful during token
+# rotation where the native URL is rebuilt from the same token.
+UPSTASH_REDIS_REST_URL = os.environ.get("UPSTASH_REDIS_REST_URL", "")
+UPSTASH_REDIS_REST_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+
 
 def _redis_db(url: str, db: int) -> str:
     """Return url with the database number replaced (handles ip addresses safely)."""

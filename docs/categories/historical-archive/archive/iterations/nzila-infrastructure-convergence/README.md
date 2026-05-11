@@ -24,6 +24,7 @@
 | 09 | [full-release-rollback-legitimacy.md](full-release-rollback-legitimacy.md) | Release / rollback recoverability |
 | 10 | [full-production-readiness-hardening.md](full-production-readiness-hardening.md) | Prod posture |
 | 11 | [final-live-infrastructure-certification.md](final-live-infrastructure-certification.md) | Final per-tier verdict |
+| 12 | [tier-1-execution-log.md](tier-1-execution-log.md) | Tier 1 remediation execution log (May 9, 2026 — EXECUTED) |
 
 ## Verdict markers (per `docs/nzila-live-audit/`)
 

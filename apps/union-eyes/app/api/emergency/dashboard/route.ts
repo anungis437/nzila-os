@@ -52,7 +52,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
         'Update breach notification templates',
         'Test geofence failover mechanisms',
       ],
-      message: `Emergency dashboard for ${province} - All systems operational`,
+      message: `Emergency dashboard for ${province} - no degradation reported`,
     });
   } catch (error) {
 return NextResponse.json(
