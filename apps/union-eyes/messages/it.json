@@ -5066,7 +5066,7 @@
       "fromLastMonth": "{change} rispetto al mese scorso",
       "allActive": "Tutti attivi",
       "requireAttention": "{count} richiedono attenzione",
-      "allOperational": "Tutti i sistemi operativi",
+      "allOperational": "Nessuna degradazione segnalata",
       "recentActivity": "Attività Recente"
     },
     "users": {
@@ -7756,7 +7756,7 @@
     "statusBody": {
       "systemStatus": "Stato del Sistema",
       "statusDescription": "Stato operativo attuale di tutti i servizi",
-      "allOperational": "Tutti i Sistemi Operativi",
+      "allOperational": "Nessuna Degradazione Segnalata",
       "someDegraded": "Prestazioni Degradate",
       "systemIssues": "Problemi del Sistema",
       "serviceDetails": "Dettagli del Servizio",
