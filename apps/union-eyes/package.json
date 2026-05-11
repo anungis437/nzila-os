@@ -166,7 +166,7 @@
     "node-geocoder": "^4.4.1",
     "papaparse": "^5.5.3",
     "pdf-parse": "^2.4.5",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^5.7.284",
     "pdfkit": "^0.15.0",
     "pg": "^8.20.0",
     "postgres": "^3.4.4",
