@@ -12,3 +12,10 @@ CVE-2025-68121   # golang crypto/tls: unexpected session resumption (in base ima
 # next-intl advisory still flagged by Trivy on pnpm-lock.yaml although repository is on patched next-intl@4.9.1.
 # Review: 2026-05-16 after Trivy DB refresh to remove this waiver once detection matches patched version.
 GHSA-8f24-v5vv-gm5j   # next-intl open redirect (CVE-2026-40299) false positive/stale advisory metadata in current Trivy scan
+
+# @opentelemetry/sdk-node 0.57.2 is the latest released version (no 0.217.0 exists for sdk-node).
+# Trivy maps CVE-2026-44902 to sdk-node because it bundles the vulnerable @opentelemetry/exporter-prometheus.
+# We have already pinned exporter-prometheus >=0.217.0 via pnpm overrides (lockfile verified), neutralizing the
+# actual vulnerable code path. Trivy still flags the parent package metadata until upstream sdk-node ships a
+# new release pinning the patched exporter. Review: 2026-06-11.
+CVE-2026-44902   # opentelemetry sdk-node Prometheus exporter crash — patched via pnpm override on exporter-prometheus@>=0.217.0
