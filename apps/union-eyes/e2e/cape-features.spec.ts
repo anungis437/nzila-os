@@ -203,22 +203,41 @@ test.describe("Pilot readiness checklist", () => {
         // Selector may simply not exist if header hydrates fast — that's fine.
       });
 
+    // Confirm OverviewStep content has hydrated before interacting.
+    await expect(
+      page.getByRole("heading", { name: "Admin Capabilities" }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+
     const continueBtn = page.getByRole("button", { name: /^Continue$/i });
     await expect(continueBtn).toBeEnabled({ timeout: 10_000 });
+    await continueBtn.scrollIntoViewIfNeeded();
 
-    // Extra buffer: even after the "Loading..." disappears, React may still be
-    // committing the wizard tree. Give the event loop a beat before clicking.
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(750);
+    // Step 2 indicator (text node may be split across spans in CI); also
+    // assert against the Step 2 CardTitle heading "User Management" which is
+    // unique to Step 2 (Step 1 only renders it as a list item, not a heading).
+    const stepTwoIndicator = page.getByText(/Step\s*2\s*of\s*5/i);
+    const stepTwoHeading = page.getByRole("heading", { name: /^User Management$/i });
 
-    // Retry-on-no-advance: click Continue and verify Step 2 appears. If not,
-    // the next iteration clicks again. Wider intervals give React time to
-    // bind handlers and run the state update commit phase between attempts.
+    // Retry-on-no-advance. Use a DOM click via evaluate() as the primary
+    // mechanism — React's event delegation at document root reliably picks
+    // it up even when Playwright's pointer-based click is dropped due to
+    // late hydration or transient overlays observed in CI.
     await expect(async () => {
-      if (!(await page.getByText(/Step 2 of 5/i).isVisible())) {
-        await continueBtn.click({ timeout: 5_000 });
+      const advanced =
+        (await stepTwoIndicator.isVisible().catch(() => false)) ||
+        (await stepTwoHeading.isVisible().catch(() => false));
+      if (!advanced) {
+        await continueBtn
+          .evaluate((el) => (el as HTMLButtonElement).click())
+          .catch(async () => {
+            await continueBtn.click({ timeout: 5_000, force: true });
+          });
       }
-      await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 3_000 });
+      await expect(stepTwoHeading.or(stepTwoIndicator).first()).toBeVisible({
+        timeout: 3_000,
+      });
     }).toPass({ timeout: 30_000, intervals: [1500, 2500, 3500] });
   });
 
