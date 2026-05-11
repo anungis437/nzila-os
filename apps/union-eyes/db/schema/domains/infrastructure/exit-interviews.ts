@@ -16,6 +16,7 @@ export const exitInterviewStatusEnum = pgEnum('exit_interview_status', [
   'submitted',
   'reviewed',
   'published',
+  'handover_complete',
   'archived',
 ]);
 
@@ -47,6 +48,38 @@ export const exitInterviewEventTypeEnum = pgEnum('exit_interview_event_type', [
   'indexed',
   'summarized',
   'governance_updated',
+  'session_scheduled',
+  'session_completed',
+  'successor_assigned',
+  'successor_accepted',
+  'followup_scheduled',
+  'followup_completed',
+  'followup_overdue',
+  'manager_signed_off',
+  'rotation_triggered',
+]);
+
+/**
+ * Type of handover session: walkthrough (officer guides successor),
+ * shadow (successor observes), qa (Q&A), recording_review (async).
+ */
+export const exitInterviewSessionTypeEnum = pgEnum('exit_interview_session_type', [
+  'walkthrough',
+  'shadow',
+  'qa',
+  'recording_review',
+]);
+
+/**
+ * Complexity tier drives required handover rigor:
+ *   high   — officer/chief_steward or 10+ yrs of service: ≥1 completed session before sign-off
+ *   medium — default
+ *   low    — short tenure / member rotation
+ */
+export const exitInterviewComplexityTierEnum = pgEnum('exit_interview_complexity_tier', [
+  'high',
+  'medium',
+  'low',
 ]);
 
 /**
@@ -122,6 +155,22 @@ export const exitInterviews = pgTable(
 
     knowledgeBaseId: uuid('knowledge_base_id'),
 
+    // --- Handover Lifecycle Layer ---
+    /** Identified successor user. Set on assignment; transitions interview into handover phase. */
+    successorUserId: text('successor_user_id'),
+    /** Timestamp when successor explicitly acknowledged the handover. */
+    successorAcceptedAt: timestamp('successor_accepted_at', { withTimezone: true }),
+    /** Auto-derived rigor tier (high/medium/low) — drives sign-off preconditions. */
+    complexityTier: exitInterviewComplexityTierEnum('complexity_tier').notNull().default('medium'),
+    /** Scheduled date of the 21-day post-publication knowledge follow-up. */
+    followupDueAt: timestamp('followup_due_at', { withTimezone: true }),
+    followupCompletedAt: timestamp('followup_completed_at', { withTimezone: true }),
+    followupNotes: text('followup_notes'),
+    /** Manager sign-off — closes the handover loop and transitions to handover_complete. */
+    managerSignedOffAt: timestamp('manager_signed_off_at', { withTimezone: true }),
+    managerSignedOffBy: text('manager_signed_off_by'),
+    // --- end Handover Lifecycle Layer ---
+
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     reviewedBy: text('reviewed_by'),
@@ -141,6 +190,47 @@ export const exitInterviews = pgTable(
     sensitivityIdx: index('idx_exit_interviews_sensitivity').on(table.sensitivityLevel),
     indexingStatusIdx: index('idx_exit_interviews_indexing_status').on(table.indexingStatus),
     riskScoreIdx: index('idx_exit_interviews_risk_score').on(table.continuityRiskScore),
+    successorIdx: index('idx_exit_interviews_successor').on(table.successorUserId),
+    followupDueIdx: index('idx_exit_interviews_followup_due').on(table.followupDueAt),
+    complexityIdx: index('idx_exit_interviews_complexity').on(table.complexityTier),
+  }),
+);
+
+/**
+ * Handover session — concrete walkthrough/shadow/Q&A/recording-review event
+ * scheduled between the retiring officer and the identified successor.
+ * Completion of ≥1 session is required for sign-off when complexityTier='high'.
+ */
+export const exitInterviewSessions = pgTable(
+  'exit_interview_sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    interviewId: uuid('interview_id')
+      .notNull()
+      .references(() => exitInterviews.id, { onDelete: 'cascade' }),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+
+    sessionType: exitInterviewSessionTypeEnum('session_type').notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
+    durationMinutes: integer('duration_minutes').notNull().default(30),
+
+    facilitatorUserId: text('facilitator_user_id').notNull(),
+    successorUserId: text('successor_user_id'),
+
+    recordingUrl: text('recording_url'),
+    notes: text('notes'),
+
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    interviewIdx: index('idx_exit_interview_sessions_interview').on(table.interviewId),
+    orgIdx: index('idx_exit_interview_sessions_org').on(table.organizationId),
+    scheduledIdx: index('idx_exit_interview_sessions_scheduled').on(table.scheduledAt),
   }),
 );
 
@@ -200,5 +290,9 @@ export type ExitInterview = typeof exitInterviews.$inferSelect;
 export type NewExitInterview = typeof exitInterviews.$inferInsert;
 export type ExitInterviewDocument = typeof exitInterviewDocuments.$inferSelect;
 export type ExitInterviewEvent = typeof exitInterviewEvents.$inferSelect;
+export type ExitInterviewSession = typeof exitInterviewSessions.$inferSelect;
+export type NewExitInterviewSession = typeof exitInterviewSessions.$inferInsert;
 export type ExitInterviewSensitivityLevel = (typeof exitInterviewSensitivityEnum.enumValues)[number];
 export type ExitInterviewIndexingStatus = (typeof exitInterviewIndexingStatusEnum.enumValues)[number];
+export type ExitInterviewSessionType = (typeof exitInterviewSessionTypeEnum.enumValues)[number];
+export type ExitInterviewComplexityTier = (typeof exitInterviewComplexityTierEnum.enumValues)[number];
