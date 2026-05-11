@@ -32,10 +32,10 @@
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.39.0",
     "framer-motion": "^11.3.30",
-    "next": "16.2.3",
+    "next": "16.2.6",
     "next-intl": "^4.9.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "zod": "^3.24.0"
   },
   "devDependencies": {
