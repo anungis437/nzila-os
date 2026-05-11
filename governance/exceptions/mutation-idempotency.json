@@ -86,6 +86,108 @@
       "owner": "platform-core",
       "justification": "Internal daily portfolio snapshot persist (upsert). Idempotent by design. Bearer-token guarded via NZILA_HQ_SNAPSHOT_TOKEN. Idempotency key to be added before PILOT promotion.",
       "expiresOn": "2026-10-01"
+    },
+    {
+      "path": "apps/trustcore/app/api/billing/create-checkout-session/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Stripe Checkout session is idempotent via Stripe session_id. Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/billing/webhook/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Stripe webhook delivery is deduplicated by Stripe (event.id idempotency). Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/data-inventory/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/evidence/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/export/audit/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Audit export is read-only (POST for params). Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/incidents/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/internal/notify/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Internal notification dispatch — notify-on-retry is low risk. Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/leads/convert/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Lead conversion is guarded by org_admin role — retries are safe (upsert semantics). Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/leads/route.ts",
+      "owner": "trustcore-team",
+      "justification": "Public lead capture (pre-onboarding). Upsert by email is naturally idempotent — re-submitting same email is a no-op. Full Idempotency-Key enforcement to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/onboarding/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/pia/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/reminders/generate/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Reminder generation is deduplicated by existing reminders check. Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/reminders/\\[id\\]/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/requests/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/snapshots/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Snapshot creation is guarded by org_admin role. Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore/app/api/vendors/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore is INCUBATING (founder-internal). Idempotency to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/trustcore-trustops/app/api/mandates/\\[mandateId\\]/transition/route.ts",
+      "owner": "trustcore-team",
+      "justification": "TrustCore TrustOps is INCUBATING (founder-internal). Stage transitions are guarded by org_admin role. Idempotency-Key to be added before PILOT promotion.",
+      "expiresOn": "2026-12-31"
     }
   ]
 }

@@ -29,12 +29,14 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('@/db/schema-organizations', () => ({
   organizationMembers: { userId: 'userId', organizationId: 'organizationId', role: 'role', status: 'status' },
-  organizations: { id: 'id', clerkOrganizationId: 'clerkOrganizationId' },
+  organizations: { id: 'id' },
 }));
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
   and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
+  sql: vi.fn((str: unknown) => ({ type: 'sql', value: str })),
+  relations: vi.fn(() => ({})),
 }));
 
 vi.mock('@nzila/os-core', () => ({

@@ -288,9 +288,9 @@ gate('NO-DIRECT-PROVIDER: Apps use SDK wrappers only', () => {
 // ── 8. Governance Profiles — profile registry exists ────────────────────────
 
 gate('GOVERNANCE-PROFILES: Profile registry exists and is valid', () => {
-  const profileFile = join(ROOT, 'governance/profiles/index.ts')
+  const profileFile = join(ROOT, 'governance/foundations/profiles/index.ts')
   if (!existsSync(profileFile)) {
-    return { passed: false, details: 'governance/profiles/index.ts not found' }
+    return { passed: false, details: 'governance/foundations/profiles/index.ts not found' }
   }
 
   const content = readFileSync(profileFile, 'utf-8')

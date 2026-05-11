@@ -163,7 +163,7 @@ const claimsTooltips: TooltipContent[] = [
   },
   {
     id: 'claim-assign',
-    title: 'Assign Steward',
+    title: 'Assign Representative',
     content: 'Assign an appropriate steward based on the member\'s worksite and the grievance type.',
     category: 'action'
   },

@@ -18,7 +18,18 @@ import type { AuthContext, Role } from '@/types/core'
 
 // ── Role hierarchy (higher index = higher privilege) ───────────────────────
 
-const ROLE_HIERARCHY: Role[] = ['auditor', 'staff', 'org_admin', 'platform_admin']
+const ROLE_HIERARCHY: Role[] = [
+  'read_only',
+  'auditor',
+  'external_auditor',
+  'staff',
+  'legal_reviewer',
+  'privacy_officer',
+  'security_officer',
+  'compliance_officer',
+  'org_admin',
+  'platform_admin',
+]
 
 function getRoleLevel(role: Role): number {
   return ROLE_HIERARCHY.indexOf(role)

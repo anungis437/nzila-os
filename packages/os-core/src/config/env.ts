@@ -171,6 +171,8 @@ type AppName =
   | 'platform-admin'
   | 'control-plane'
   | 'nzila-hq'
+  | 'trustcore'
+  | 'trustcore-trustops'
   | 'base'
 
 const SCHEMAS: Record<AppName, ZodTypeAny> = {
@@ -193,6 +195,8 @@ const SCHEMAS: Record<AppName, ZodTypeAny> = {
   'platform-admin': platformAdminSchema,
   'control-plane': controlPlaneSchema,
   'nzila-hq': baseSchema,
+  trustcore: baseSchema,
+  'trustcore-trustops': baseSchema,
 }
 
 export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
@@ -229,6 +233,10 @@ export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
                                 ? z.infer<typeof platformAdminSchema>
                                 : T extends 'control-plane'
                                   ? z.infer<typeof controlPlaneSchema>
+                                  : T extends 'trustcore'
+                                    ? z.infer<typeof baseSchema>
+                                    : T extends 'trustcore-trustops'
+                                      ? z.infer<typeof baseSchema>
                                   : z.infer<typeof baseSchema>
 
 /**

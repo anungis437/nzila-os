@@ -342,8 +342,8 @@ function buildClaims(): ClaimResult[] {
       id, category: 'Compliance', source: 'content/public/partner-integration.md',
       statement: 'SOC 2 Type II, ISO 27001 certifications (via Azure regions)',
       status: 'PARTIALLY_VERIFIED',
-      evidence: ['Claims reference Azure/Clerk certifications, which are vendor-provided'],
-      gaps: ['Own SOC 2 not demonstrated — Clerk and Azure provide their own. Nzila inherits, not holds, these certs.'],
+      evidence: ['Claims reference Azure/identity-provider certifications, which are vendor-provided'],
+      gaps: ['Own SOC 2 not demonstrated — identity provider and Azure provide their own. Nzila inherits, not holds, these certs.'],
       recommendation: 'Distinguish between "our infrastructure provider has SOC 2" vs "we are SOC 2 certified". Add clarity.',
     })
   }

@@ -952,7 +952,7 @@
     "partiesInvolved": "Parties Involved",
     "partyLabels": {
       "grievant": "Grievant",
-      "steward": "Union Steward",
+      "steward": "Union Representative",
       "management": "Management"
     },
     "contractViolation": "Contract Violation",
@@ -972,7 +972,7 @@
       "withdrawn": "Withdrawn",
       "closed": "Closed"
     },
-    "assignSteward": "Assign Steward",
+    "assignSteward": "Assign Representative",
     "addDocumentation": "Add Documentation",
     "guidelines": {
       "title": "Grievance Process Guidelines",
@@ -2364,12 +2364,12 @@
     }
   },
   "aiAssistantPage": {
-    "metaTitle": "AI Assistant | UnionEyes",
-    "metaDescription": "AI-assisted casework support and guided stewardship workflows"
+    "metaTitle": "Continuity Guidance | UnionEyes",
+    "metaDescription": "Governance-safe continuity support for casework and stewardship workflows"
   },
   "cbaIntelligencePage": {
-    "metaTitle": "CBA Intelligence | UnionEyes",
-    "metaDescription": "Analyze collective agreements with sources, ingestion, review, and benchmarks"
+    "metaTitle": "Labor Continuity Intelligence | UnionEyes",
+    "metaDescription": "Governed labor continuity operations for sources, ingestion, review, and benchmarks"
   },
   "intelligencePage": {
     "metaTitle": "Intelligence | UnionEyes",
@@ -2416,28 +2416,28 @@
   },
   "stewardRatingsPage": {
     "back": "Back",
-    "title": "LRO Satisfaction Ratings",
+    "title": "Union Rep Satisfaction Ratings",
     "subtitle": "Member feedback on representative performance"
   },
   "stewardsDashboardPage": {
     "activeCases": "Active Cases",
     "activeCasesLabel": "{count} active cases",
-    "activeStewards": "Active stewards",
+    "activeStewards": "Active representatives",
     "capacityFreeLabel": "{percent}% capacity free",
     "completed": "Completed",
     "escalatedBadge": "Escalated",
     "escalations": "Escalations",
     "inProgress": "In progress",
     "memberLabel": "Member: {name}",
-    "pageSubtitle": "Supervise stewards and manage case escalations",
-    "pageTitle": "Chief Steward Dashboard",
+    "pageSubtitle": "Supervise representatives and manage case escalations",
+    "pageTitle": "Union Representative Dashboard",
     "pendingEscalations": "Pending Escalations",
-    "pendingEscalationsDescription": "Cases requiring chief steward review",
+    "pendingEscalationsDescription": "Cases requiring representative review",
     "requireReview": "Require review",
-    "stewardLabel": "Steward: {name}",
-    "stewardWorkloadDescription": "Caseload distribution and capacity check — ensuring no steward is overburdened",
-    "stewardWorkloadTitle": "Steward Workload Overview",
-    "stewardsLabel": "Stewards",
+    "stewardLabel": "Representative: {name}",
+    "stewardWorkloadDescription": "Caseload distribution and capacity check — ensuring no representative is overburdened",
+    "stewardWorkloadTitle": "Representative Workload Overview",
+    "stewardsLabel": "Representatives",
     "successRate": "Success Rate",
     "successRateTrend": "+5% vs last month",
     "thisMonth": "This month",
@@ -2446,7 +2446,7 @@
   },
   "analyticsPage": {
     "metaTitle": "Analytics | UnionEyes",
-    "metaDescription": "View analytics dashboards and steward-level performance trends"
+    "metaDescription": "View analytics dashboards and representative-level performance trends"
   },
   "dashboardCalendarPage": {
     "metaTitle": "Calendar | UnionEyes",
@@ -3829,26 +3829,26 @@
       "title": "Detailed Timeline"
     },
     "steward": {
-      "title": "Your Union Steward",
-      "description": "Your steward is handling your case and will contact you if they need anything."
+      "title": "Your Union Representative",
+      "description": "Your representative is handling your case and will contact you if they need anything."
     },
     "questions": {
       "title": "Questions About Your Case?",
       "newInfo": {
         "question": "What if I have new information?",
-        "answer": "Contact your steward directly or add a note to your case through the dashboard. New information can help strengthen your case."
+        "answer": "Contact your union representative directly or add a note to your case through the dashboard. New information can help strengthen your case."
       },
       "duration": {
         "question": "Why is my case taking this long?",
-        "answer": "Every case is different. Some require more investigation, documentation, or coordination with management. Your steward is working to get the best outcome, not just the fastest one."
+        "answer": "Every case is different. Some require more investigation, documentation, or coordination with management. Your union representative is working to get the best outcome, not just the fastest one."
       },
       "support": {
         "question": "Can I talk to someone?",
-        "answer": "Absolutely. Your steward is here for you. If you need to talk through what's happening, reach out directly. Union solidarity means you're never alone in this."
+        "answer": "Absolutely. Your union representative is here for you. If you need to talk through what's happening, reach out directly. Union solidarity means you're never alone in this."
       }
     },
     "actions": {
-      "messageSteward": "Message Your Steward",
+      "messageSteward": "Message Your Representative",
       "viewCaseDetails": "View Case Details"
     },
     "footer": {
@@ -5072,7 +5072,7 @@
       "closed": "Closed"
     },
     "escalateToGrievance": "Escalate to Grievance",
-    "lroBestPractices": "LRO Best Practices",
+    "lroBestPractices": "Union Rep Best Practices",
     "lroTips": {
       "review": "Review and assign pending cases within 24 hours",
       "notes": "Update case notes regularly to track progress",
@@ -5080,7 +5080,7 @@
       "contact": "Contact members promptly to gather additional information",
       "coordinate": "Coordinate with HR and management as needed"
     },
-    "viewLroGuidelines": "View LRO Guidelines",
+    "viewLroGuidelines": "View Union Rep Guidelines",
     "expand": "Expand",
     "collapse": "Collapse"
   },
@@ -6982,7 +6982,7 @@
     "support": "Support",
     "contactSupport": "Contact Support",
     "needHelp": "Need Help?",
-    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your steward for guidance."
+    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your union representative for guidance."
   },
   "pilot": {
     "dashboard": {
@@ -6992,7 +6992,7 @@
       "createCaseHint": "Report a workplace issue — we'll guide you step by step",
       "startNow": "Start now",
       "emptyTitle": "Track your cases so nothing gets missed",
-      "emptyDescription": "Create a case and your steward will be notified automatically.",
+      "emptyDescription": "Create a case and your union representative will be notified automatically.",
       "createFirstCase": "Create Your First Case",
       "resolvedLabel": "Cases Resolved",
       "teamLabel": "Your Team",
@@ -7105,7 +7105,7 @@
     "system": "System",
     "ourAgreements": "Agreements",
     "clauseLibrary": "Clauses",
-    "cbaIntelligence": "CBA Intelligence",
+    "cbaIntelligence": "Labor Continuity",
     "insights": "Insights",
     "alerts": "Alerts",
     "preferences": "Settings",
@@ -7202,6 +7202,16 @@
   "marketing": {
     "nav": {
       "home": "Home",
+      "solutions": "Solutions",
+      "insights": "Insights",
+      "solutionsItems": {
+        "executive": { "name": "Union Executive Leadership", "desc": "Strategic continuity" },
+        "governance": { "name": "Governance Leadership", "desc": "Governance modernization" },
+        "operations": { "name": "Operations Leadership", "desc": "Cross-team coordination" },
+        "technology": { "name": "Technology Leadership", "desc": "Enterprise-safe AI" },
+        "labour": { "name": "Policy & Labour Leadership", "desc": "Human oversight" },
+        "procurement": { "name": "Procurement Stakeholders", "desc": "Deployment readiness" }
+      },
       "story": "Our Story",
       "modules": "Modules",
       "pricing": "Pricing",
@@ -7209,7 +7219,7 @@
       "caseStudies": "Case Studies",
       "status": "Status",
       "contact": "Contact",
-      "requestPilot": "Start a Pilot",
+      "requestPilot": "Executive Briefing",
       "signIn": "Sign In"
     },
     "home": {
@@ -7291,14 +7301,14 @@
     "story": {
       "badge": "Our Story",
       "heroHeading": "Two brothers. Two careers. One shared conviction.",
-      "heroDescription": "A Labour Relations Officer turned lawyer and a CIO turned SaaS builder — together they are building the operating system that unions have never had.",
+      "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
       "readMore": "Read more",
       "backToHome": "Back to home",
       "pageTitle": "Our Story | UnionEyes",
       "pageDescription": "UnionEyes was founded by two brothers who lived the gaps in union infrastructure — and decided to close them.",
       "originHeading": "Where it all began",
       "originParagraph1": "Mike spent years on the inside — first as a Labour Relations Officer for a national union, then as a lawyer conducting workplace investigations and assessments. Moving from working in a union to working with unions gave him an unfiltered view of where the friction lived: the workflows, the gaps, the moments where the right information simply wasn't in the right hands.",
-      "originParagraph2": "Oby took a different path. As CIO of a national sporting association and a seasoned SaaS builder, he made a career out of one idea — that technology should feel human. That the most powerful platforms are the ones people actually use.",
+      "originParagraph2": "Oby took a different path. As a seasoned technologist, he made a career out of one idea — that technology should feel human. That the most powerful platforms are the ones people actually use.",
       "originParagraph3": "When their paths converged, the opportunity was obvious. Mike knew exactly what was broken. Oby knew exactly how to fix it.",
       "originParagraph4": "UnionEyes is what happened next.",
       "missionHeading": "Our mission",
@@ -7318,15 +7328,15 @@
       "ctaContact": "Start a conversation"
     },
     "pricing": {
-      "heroHeading": "Contract-Based Deployment",
-      "heroDescription": "UnionEyes is deployed through governed contracts — not self-serve subscriptions. Pricing is scoped to your organization, your modules, and your rollout plan.",
+      "heroHeading": "Institutional Modernization Programs",
+      "heroDescription": "UnionEyes is packaged as a consultative modernization program aligned to governance complexity, organizational scope, and continuity outcomes.",
       "monthly": "Monthly",
       "yearly": "Yearly",
       "perMonth": "/ month",
       "perYear": "/ year",
-      "getStarted": "Start a Pilot",
-      "pageTitle": "Pricing & Deployment | UnionEyes",
-      "pageDescription": "Contract-based deployment pricing for Canadian unions. Parent-level billing with local allocation."
+      "getStarted": "Request Executive Briefing",
+      "pageTitle": "Institutional Modernization Programs | UnionEyes",
+      "pageDescription": "Program-based commercial packaging for governance modernization, continuity resilience, and operational trust infrastructure."
     },
     "contact": {
       "heroHeading": "Get in touch",
@@ -7349,23 +7359,23 @@
       "pageDescription": "How Canadian unions deploy UnionEyes through governed contracts and controlled pilots."
     },
     "pilotRequest": {
-      "heroHeading": "Start a Controlled Pilot",
-      "heroDescription": "Every UnionEyes deployment begins with a scoped pilot — structured around your organization's governance, modules, and readiness.",
-      "pageTitle": "Controlled Pilot Deployment | UnionEyes",
-      "pageDescription": "Begin a governed pilot deployment of UnionEyes scoped to your organization.",
-      "trustCallout": "Every pilot deployment is contract-scoped, module-controlled, and subject to your organization's governance requirements.",
+      "heroHeading": "Request an Institutional Modernization Briefing",
+      "heroDescription": "Every UnionEyes engagement begins with a structured modernization pilot pathway aligned to governance maturity, continuity priorities, and implementation scope.",
+      "pageTitle": "Institutional Continuity Modernization Pilot | UnionEyes",
+      "pageDescription": "Begin a structured institutional modernization pilot aligned to governance and operational maturity.",
+      "trustCallout": "Every pilot pathway is governance-scoped, implementation-structured, and designed for executive and procurement confidence.",
       "stepLabels": {
         "organization": "Organization",
         "context": "Context",
-        "modulesGoals": "Modules & Goals",
+        "modulesGoals": "Priorities",
         "readiness": "Readiness",
         "assessment": "Assessment"
       },
       "buttons": {
         "continue": "Continue",
         "back": "Back",
-        "assessReadiness": "Assess deployment readiness",
-        "submit": "Submit pilot request",
+        "assessReadiness": "Assess institutional readiness",
+        "submit": "Submit executive briefing request",
         "submitting": "Submitting…"
       },
       "alerts": {
@@ -7386,43 +7396,43 @@
         "memberCountHint": "Approximate total membership"
       },
       "step2": {
-        "heading": "Your operational context",
+        "heading": "Your institutional operating context",
         "jurisdictionsLabel": "Jurisdictions *",
         "sectorsLabel": "Sectors *",
-        "currentSystemLabel": "Current System (Optional)",
-        "currentSystemPlaceholder": "e.g., Excel spreadsheets, paper files, legacy software",
-        "challengesLabel": "Current governance challenges (select all that apply)"
+        "currentSystemLabel": "Current Operating Environment (Optional)",
+        "currentSystemPlaceholder": "e.g., spreadsheets, paper workflows, legacy systems",
+        "challengesLabel": "Current continuity and governance challenges (select all that apply)"
       },
       "step3": {
-        "heading": "Modules & goals",
-        "modulesLabel": "Modules of Interest *",
-        "goalsLabel": "Governance objectives (select all that apply) *",
-        "additionalNotesLabel": "Additional notes (Optional)",
-        "additionalNotesPlaceholder": "Share any additional context…"
+        "heading": "Program priorities",
+        "modulesLabel": "Operational priorities of interest *",
+        "goalsLabel": "Modernization objectives (select all that apply) *",
+        "additionalNotesLabel": "Additional institutional context (Optional)",
+        "additionalNotesPlaceholder": "Share any executive, procurement, or implementation context…"
       },
       "step4": {
-        "heading": "Governance readiness",
-        "leadershipSupportLabel": "Do you have executive leadership support?",
+        "heading": "Implementation readiness",
+        "leadershipSupportLabel": "Do you have executive sponsorship for modernization?",
         "leadershipYes": "Yes",
         "leadershipNo": "No",
         "leadershipUnsure": "Unsure",
-        "timelineLabel": "What is your preferred deployment timeline?",
+        "timelineLabel": "What is your preferred modernization start window?",
         "timelineSelect": "Select…",
         "timelineImmediate": "Immediately",
         "timeline3months": "Within 3 months",
         "timeline6months": "Within 6 months",
-        "timelineExploring": "Just exploring"
+        "timelineExploring": "Evaluating options"
       },
       "step5": {
-        "heading": "Your Deployment Readiness Assessment",
-        "estimatedTimeline": "Estimated deployment timeline:",
+        "heading": "Your Institutional Readiness Assessment",
+        "estimatedTimeline": "Estimated implementation pathway:",
         "strengths": "Strengths",
         "areasToAddress": "Areas to address",
         "recommendations": "Recommendations"
       },
       "step6": {
-        "heading": "Pilot request received!",
-        "body": "Thank you for your interest in UnionEyes. Our deployment team will review your request and be in touch within 2–3 business days to discuss scoping."
+        "heading": "Executive briefing request received",
+        "body": "Thank you for your interest in UnionEyes. Our institutional modernization team will review your submission and connect within 2–3 business days to discuss program scope."
       },
       "sectors": {
         "Healthcare": "Healthcare",
@@ -7614,25 +7624,45 @@
     },
     "footer": {
       "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-      "platform": "Modules",
-      "product": "Modules",
+      "platform": "Capabilities",
+      "solutions": "Solutions",
+      "governanceAndTrust": "Governance & Trust",
+      "product": "Capabilities",
       "resources": "Resources",
       "company": "Company",
       "legal": "Legal",
+      "institutionalContinuity": "Institutional Continuity",
+      "governanceIntelligence": "Governance Intelligence",
+      "organizationalMemory": "Corporate Memory",
+      "corporateMemory": "Corporate Memory",
+      "executiveIntelligence": "Executive Intelligence",
+      "operationalCoherence": "Operational Coherence",
+      "explainableIntelligence": "Explainable Intelligence",
+      "executiveLeadership": "Executive Leadership",
+      "governanceLeadership": "Governance Leadership",
+      "operationsLeadership": "Operations Leadership",
+      "technologyLeadership": "Technology Leadership",
+      "policyAndLabour": "Policy & Labour",
+      "procurement": "Procurement",
+      "trustCenter": "Trust Center",
+      "governanceStructure": "Governance Structure",
+      "labourSafeAi": "Labour-Safe AI",
+      "explainabilityStandards": "Explainability Standards",
+      "insights": "Insights",
       "governance": "Governance & Oversight",
       "grievanceTracking": "Case & Grievance Management",
       "memberPortal": "Member Portal & Engagement",
       "aiWorkbench": "Intelligence & Insights",
       "analyticsReporting": "Financial Allocation & Billing",
       "features": "Modules",
-      "pricing": "Pricing & Deployment",
+      "pricing": "Pricing",
       "systemStatus": "System Status",
       "caseStudies": "Case Studies",
       "status": "Status",
       "story": "Our Story",
-      "pilotProgram": "Controlled Pilot",
+      "pilotProgram": "Modernization Pilot",
       "contact": "Contact Us",
-      "pilotRequest": "Start a Pilot",
+      "pilotRequest": "Executive Briefing Request",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "security": "Security",
@@ -9352,7 +9382,7 @@
       "fair": "Fair",
       "needsImprovement": "Needs Improvement"
     },
-    "loading": "Loading LRO performance data...",
+    "loading": "Loading representative performance data...",
     "empty": {
       "title": "No Ratings Yet",
       "description": "Satisfaction surveys will appear here after cases are closed."
@@ -9363,11 +9393,11 @@
       "recommendRate": "Recommend Rate"
     },
     "rankings": {
-      "title": "LRO Performance Rankings",
+      "title": "Representative Performance Rankings",
       "description": "Based on {totalReviews} satisfaction surveys across {representatives} representatives"
     },
     "lro": {
-      "fallbackName": "LRO {idShort}",
+      "fallbackName": "Rep {idShort}",
       "reviews": "{count} reviews",
       "recommend": "{percent}% recommend"
     }
@@ -9624,7 +9654,7 @@
         "status": "Status",
         "priority": "Priority",
         "employer": "Employer",
-        "steward": "Steward",
+        "steward": "Representative",
         "deadline": "Deadline",
         "updated": "Updated"
       },
@@ -9633,7 +9663,7 @@
       "daysLeft": "{days}d left",
       "actions": {
         "viewDetails": "View Details",
-        "assignSteward": "Assign Steward",
+        "assignSteward": "Assign Representative",
         "contactEmployer": "Contact Employer",
         "escalate": "Escalate",
         "sendArbitration": "Send to Arbitration",
@@ -9797,8 +9827,8 @@
       "title": "Recommended Next Actions",
       "actions": {
         "assign_steward": {
-          "label": "Assign Steward",
-          "description": "Assign a steward to represent the grievant."
+          "label": "Assign Representative",
+          "description": "Assign a representative to represent the grievant."
         },
         "contact_employer": {
           "label": "Contact Employer",
@@ -10971,5 +11001,61 @@
     "npsPromoter": "Promoter",
     "npsPassive": "Passive",
     "npsDetractor": "Detractor"
+  },
+  "continuityNotes": {
+    "trust": {
+      "label": "Trust posture",
+      "posture": "Trust in Union Eyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
+    },
+    "procurement": {
+      "label": "Procurement posture",
+      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities Union Eyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
+    },
+    "pilot": {
+      "label": "Pilot posture",
+      "posture": "This is a continuity briefing, not a sales intake. The form below frames a bounded pilot whose success is measured in operational stabilization — fewer dropped commitments, clearer escalation, and an institutional record that survives leadership transitions. Workers are never the subject of pilot assessment."
+    },
+    "ontology": {
+      "label": "Institutional ontology",
+      "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
+    }
+  },
+  "sovereignty": {
+    "layerLabel": "Sovereignty layer",
+    "accessNote": "Access is logged; actions taken here are part of the institutional record.",
+    "roleLabels": {
+      "officer": "Officer of record",
+      "admin": "Administrator of record",
+      "national_officer": "National officer of record",
+      "fed_staff": "Federation staff of record",
+      "system_admin": "Sovereignty operator of record",
+      "president": "President of record"
+    },
+    "surfaces": {
+      "cognition": {
+        "name": "Cognition",
+        "posture": "Bounded reasoning over institutional memory; outputs are recommendations for the reviewer of record, not autonomous decisions."
+      },
+      "longitudinalCognition": {
+        "name": "Longitudinal cognition",
+        "posture": "Cross-time institutional reasoning; review continuity-relevant patterns before any escalation."
+      },
+      "security": {
+        "name": "Security",
+        "posture": "Continuity-critical configuration; changes are part of the institutional audit trail."
+      },
+      "customerSuccess": {
+        "name": "Customer success",
+        "posture": "Institutional account stewardship; act on behalf of partner unions with reviewer-of-record discipline."
+      },
+      "operations": {
+        "name": "Operations",
+        "posture": "Operational cadence and dispatch; sequence work as the reviewer of record for institutional execution."
+      },
+      "ops": {
+        "name": "Sovereign ops",
+        "posture": "Sovereignty-layer runtime controls; every action is logged and continuity-affecting."
+      }
+    }
   }
 }

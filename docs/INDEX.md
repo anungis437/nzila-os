@@ -2,6 +2,18 @@
 
 Complete index of all documentation in Nzila OS, organized by audience.
 
+> Historical planning and iteration docs have been moved to [archive/iterations](archive/iterations/).
+> Keep this index focused on active, maintained documentation.
+
+## Category-First Navigation
+
+| Category | Purpose | Location |
+|----------|---------|----------|
+| Stakeholders | Audience-first docs (builders, operators, buyers, investors) | [categories/stakeholders/README.md](categories/stakeholders/README.md) |
+| Platform & Operations | Architecture, platform, governance, runtime ops | [categories/platform-and-operations/README.md](categories/platform-and-operations/README.md) |
+| Products & Market | Product surfaces, pilots, commercial and GTM docs | [categories/products-and-market/README.md](categories/products-and-market/README.md) |
+| Historical Archive | Archived iterations and historical reference | [categories/historical-archive/README.md](categories/historical-archive/README.md) |
+
 ## Builders (Engineering)
 
 | Document | Purpose | Location |

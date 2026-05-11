@@ -1,0 +1,22 @@
+{
+  "slug": "trustcore",
+  "name": "TrustCore",
+  "tier": 3,
+  "tierLabel": "component",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": false,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "hold",
+  "proofLevel": "internal-proof",
+  "strategicRole": "TrustCore marketing/portal Next.js 16 surface — public face of Trust Ops platform.",
+  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

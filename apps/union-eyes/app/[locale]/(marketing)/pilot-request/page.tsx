@@ -10,15 +10,30 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { PilotApplicationInput } from '@/types/marketing';
 import {
   calculateReadinessScore,
   ReadinessAssessmentResult,
 } from '@/lib/pilot/readiness-assessment';
-import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
+import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { InstitutionalContinuityNote } from '@/components/marketing/institutional-continuity-note';
+import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { logger } from '@/lib/logger';
+import {
+  executiveDecisionPathwaySystems,
+  buildContinuityReadinessProfile,
+  federationScaleContinuityScenarios,
+  governanceFrictionSimulationFlows,
+  leadershipTransitionContinuityScenarios,
+  onboardingContinuityIntelligenceScenarios,
+  institutionalRolloutPathway,
+  executiveBriefingFlows,
+  pilotSimulationArtifacts,
+} from '@/lib/operational-legitimacy';
 
 // Canonical (English) values stored in form data, but rendered via t().
 const SECTORS = [
@@ -68,8 +83,12 @@ const MODULES = [
 
 export default function LocalePilotRequestPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const locale = (params.locale as string) ?? 'en-CA';
   const t = useTranslations('marketing.pilotRequest');
+  const tNote = useTranslations('continuityNotes.pilot');
+  const contextMode = parseInstitutionalMode(searchParams.get('context') ?? undefined);
+  const contextProfile = getInstitutionalModeProfile(contextMode);
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<PilotApplicationInput>>({
@@ -158,23 +177,28 @@ export default function LocalePilotRequestPage() {
     t('stepLabels.assessment'),
   ];
 
+  const continuityProfile = buildContinuityReadinessProfile(formData);
+
   // Tag locale so React renders updated strings on locale change.
   void locale;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('heroHeading')}</h1>
-          <p className="text-xl text-gray-600">{t('heroDescription')}</p>
-        </div>
+      {/* Hero Section with Imagery */}
+      <MarketingHeroSection
+        imageUrl={heroImagery.pilotRequest}
+        heading={t('heroHeading')}
+        description={t('heroDescription')}
+        contextKicker={`${contextProfile.label} context`}
+        contextNote={contextProfile.heroFraming}
+      />
 
-        <HumanCenteredCallout
-          variant="trust"
-          message={t('trustCallout')}
-          className="mb-8"
-        />
+      <InstitutionalContinuityNote
+        surface={tNote('label')}
+        posture={tNote('posture')}
+      />
+
+      <div className="max-w-3xl mx-auto mt-12">
 
         {/* Progress */}
         <div className="mb-8">
@@ -492,6 +516,190 @@ export default function LocalePilotRequestPage() {
                   </ul>
                 </div>
               )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                  <h3 className="font-semibold text-gray-900 mb-3">Continuity profile</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-3">{assessment.continuityProfile}</p>
+                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Governance alignment:</span> {assessment.governanceAlignmentSummary}</p>
+                </section>
+
+                <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                  <h3 className="font-semibold text-gray-900 mb-3">Institutional resilience direction</h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-3">{assessment.institutionalResilienceDirection}</p>
+                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Rollout recommendation:</span> {assessment.rolloutRecommendation}</p>
+                </section>
+              </div>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                <h3 className="font-semibold text-gray-900 mb-3">Executive continuity overview</h3>
+                <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700">
+                  <article className="p-3 rounded bg-gray-50 border border-gray-100">
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Continuity posture</p>
+                    <p>{assessment.continuityOverview.continuityPosture}</p>
+                  </article>
+                  <article className="p-3 rounded bg-gray-50 border border-gray-100">
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Governance coherence</p>
+                    <p>{assessment.continuityOverview.governanceCoherence}</p>
+                  </article>
+                  <article className="p-3 rounded bg-gray-50 border border-gray-100">
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Operational stability</p>
+                    <p>{assessment.continuityOverview.operationalStability}</p>
+                  </article>
+                  <article className="p-3 rounded bg-gray-50 border border-gray-100">
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Institutional memory health</p>
+                    <p>{assessment.continuityOverview.institutionalMemoryHealth}</p>
+                  </article>
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-gray-50">
+                <h3 className="font-semibold text-gray-900 mb-3">Fragmentation observations</h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  {assessment.fragmentationObservations.map((observation) => (
+                    <li key={observation} className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-0.5">•</span>
+                      <span>{observation}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-navy text-white">
+                <h3 className="font-semibold mb-3">Continuity risk narratives</h3>
+                <ul className="space-y-2 text-sm text-white/85">
+                  {assessment.continuityRiskNarratives.map((narrative) => (
+                    <li key={narrative}>• {narrative}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Pilot simulation artifacts</h3>
+                    <p className="text-sm text-gray-600">Reviewable institutional examples for controlled modernization.</p>
+                  </div>
+                  <Link href={withInstitutionalContext(`/${locale}/proof`, contextMode)} className="text-sm font-semibold text-blue-700 hover:text-blue-800 inline-flex items-center gap-1">
+                    View proof architecture <span aria-hidden>→</span>
+                  </Link>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {pilotSimulationArtifacts.map((artifact) => (
+                    <article key={artifact.title} className="p-4 rounded-lg bg-gray-50 border border-gray-100">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-2">{artifact.title}</h4>
+                      <p className="text-xs text-gray-600 leading-relaxed mb-2">{artifact.continuityProfile}</p>
+                      <p className="text-xs text-gray-500">Stabilization outcomes: {artifact.stabilizationOutcomes[0]}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.leadershipTitle')}</h3>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {leadershipTransitionContinuityScenarios.map((item) => (
+                    <article key={item.scenario} className="p-4 rounded-lg bg-gray-50 border border-gray-100">
+                      <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
+                      <h4 className="text-sm font-semibold text-gray-900 mb-1">{item.scenario}</h4>
+                      <p className="text-xs text-gray-600 mb-1">{item.livedSignal}</p>
+                      <p className="text-xs text-gray-700"><span className="font-medium text-gray-900">{t('phase6.stabilizationMoveLabel')}</span> {item.stabilizationMove}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-gray-50">
+                <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.frictionTitle')}</h3>
+                <div className="space-y-2">
+                  {governanceFrictionSimulationFlows.map((item) => (
+                    <article key={item.friction} className="p-3 rounded-md bg-white border border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{item.friction}</p>
+                      <p className="text-xs text-gray-600 mt-1">{item.continuityImpact}</p>
+                      <p className="text-xs text-gray-700 mt-1"><span className="font-medium text-gray-900">{t('phase6.manageThroughLabel')}</span> {item.managementPath}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="grid gap-4 md:grid-cols-2">
+                <article className="p-5 rounded-lg border border-gray-200 bg-white">
+                  <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.onboardingTitle')}</h3>
+                  <div className="space-y-2">
+                    {onboardingContinuityIntelligenceScenarios.map((item) => (
+                      <div key={item.scenario} className="p-3 rounded-md bg-gray-50 border border-gray-100">
+                        <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
+                        <p className="text-sm font-medium text-gray-900">{item.scenario}</p>
+                        <p className="text-xs text-gray-600 mt-1">{item.continuityGuide}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+
+                <article className="p-5 rounded-lg border border-gray-200 bg-white">
+                  <h3 className="font-semibold text-gray-900 mb-3">{t('phase6.federationTitle')}</h3>
+                  <div className="space-y-2">
+                    {federationScaleContinuityScenarios.map((item) => (
+                      <div key={item.area} className="p-3 rounded-md bg-gray-50 border border-gray-100">
+                        <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">{item.focus}</p>
+                        <p className="text-sm font-medium text-gray-900">{item.area}</p>
+                        <p className="text-xs text-gray-600 mt-1">{item.realism}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              </section>
+
+              <section className="p-5 rounded-lg border border-blue-100 bg-blue-50/70">
+                <h3 className="font-semibold text-blue-950 mb-3">{t('phase6.decisionTitle')}</h3>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {executiveDecisionPathwaySystems.map((item) => (
+                    <article key={item.decision} className="p-3 rounded-md bg-white border border-blue-100">
+                      <p className="text-[11px] uppercase tracking-widest text-blue-400 mb-1">{item.continuityFocus}</p>
+                      <p className="text-sm font-medium text-gray-900">{item.decision}</p>
+                      <p className="text-xs text-gray-600 mt-1">{item.pathway}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                <h3 className="font-semibold text-gray-900 mb-3">Executive continuity briefing flow</h3>
+                <div className="grid sm:grid-cols-2 gap-2 text-sm text-gray-700">
+                  {executiveBriefingFlows.map((item) => (
+                    <div key={item} className="p-3 rounded bg-gray-50 border border-gray-100">{item}</div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-blue-100 bg-blue-50/70">
+                <h3 className="font-semibold text-blue-950 mb-2">Continuity and Governance Readiness Profile</h3>
+                <p className="text-sm text-blue-900 mb-4">
+                  {continuityProfile.level}: {continuityProfile.summary}
+                </p>
+                <div className="space-y-2">
+                  {continuityProfile.dimensions.map((dimension) => (
+                    <article key={dimension.label} className="p-3 rounded-md bg-white border border-blue-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium text-gray-900">{dimension.label}</p>
+                        <span className="text-xs font-semibold text-blue-700">{dimension.score}/5</span>
+                      </div>
+                      <p className="text-xs text-gray-600">{dimension.summary}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="p-5 rounded-lg border border-gray-200 bg-white">
+                <h3 className="font-semibold text-gray-900 mb-3">Recommended Institutional Rollout Pathway</h3>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {institutionalRolloutPathway.map((stage, index) => (
+                    <div key={stage} className="text-sm text-gray-700 p-2 rounded bg-gray-50 border border-gray-100">
+                      {index + 1}. {stage}
+                    </div>
+                  ))}
+                </div>
+              </section>
 
               <div className="flex gap-4">
                 <Btn variant="secondary" onClick={() => setStep(4)}>{t('buttons.back')}</Btn>

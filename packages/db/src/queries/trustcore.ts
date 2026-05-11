@@ -7,6 +7,11 @@
  * @module @nzila/db/queries/trustcore
  */
 import { eq, desc, and } from 'drizzle-orm'
+import {
+  evaluateLaw25Compliance,
+  dashboardSummaryFromEvaluation,
+  type DashboardSummary,
+} from '@nzila/trustcore-core/compliance'
 import { db } from '../client'
 import {
   trustcorePrivacyPrograms,
@@ -22,6 +27,9 @@ import {
   trustcoreReminders,
   trustcoreSubscriptions,
   trustcoreLeads,
+  trustcoreRisks,
+  trustcoreRiskReviews,
+  trustcoreRiskMitigations,
 } from '../schema/trustcore'
 // ── Re-export types for app consumption ───────────────────────────────────
 
@@ -53,146 +61,44 @@ export type NewTrustcoreLead = typeof trustcoreLeads.$inferInsert
 
 // ── Dashboard summary ──────────────────────────────────────────────────────
 
-export interface TrustcoreDashboardSummary {
-  orgId: string
-  complianceScore: number
-  openRisks: number
-  pendingRequests: number
-  incidentAlerts: number
-  auditReadinessStatus: 'ready' | 'partial' | 'not_ready'
-  evaluatedAt: string
-}
+/**
+ * Live compliance dashboard summary for an org.
+ *
+ * The actual scoring rules live in `@nzila/trustcore-core/compliance` so the
+ * dashboard score and the `/compliance` page score are guaranteed to be in
+ * sync. This type is a re-export of the canonical `DashboardSummary` shape.
+ */
+export type TrustcoreDashboardSummary = DashboardSummary
 
 /**
  * Compute a live compliance dashboard summary for an org.
  *
- * Delegates scoring to the TrustCore compliance engine so that
- * the dashboard score and the compliance page score are always in sync.
- * The engine data is fetched in a single parallel round-trip.
+ * Fetches the six TrustCore inputs (programs, assets, PIAs, incidents, DSR
+ * requests, vendors) in a single parallel round-trip, then delegates scoring
+ * and audit-readiness derivation to `@nzila/trustcore-core/compliance`.
  */
 export async function getTrustcoreDashboardSummary(
   orgId: string,
 ): Promise<TrustcoreDashboardSummary> {
-  // Fetch all required data in one parallel pass (no N+1)
-  const [
+  const [programs, assets, pias, incidents, dsrRequests, vendors] = await Promise.all([
+    listTrustcorePrivacyPrograms(orgId),
+    listTrustcoreDataAssets(orgId),
+    listTrustcorePias(orgId),
+    listTrustcoreIncidents(orgId),
+    listTrustcoreDsrRequests(orgId),
+    listTrustcoreVendors(orgId),
+  ])
+
+  const evaluation = evaluateLaw25Compliance(orgId, {
     programs,
     assets,
     pias,
     incidents,
     dsrRequests,
     vendors,
-  ] = await Promise.all([
-    db.select().from(trustcorePrivacyPrograms).where(eq(trustcorePrivacyPrograms.orgId, orgId)),
-    db.select().from(trustcoreDataAssets).where(eq(trustcoreDataAssets.orgId, orgId)),
-    db.select().from(trustcorePias).where(eq(trustcorePias.orgId, orgId)),
-    db.select().from(trustcoreIncidents).where(eq(trustcoreIncidents.orgId, orgId)),
-    db.select().from(trustcoreDsrRequests).where(eq(trustcoreDsrRequests.orgId, orgId)),
-    db.select().from(trustcoreVendors).where(eq(trustcoreVendors.orgId, orgId)),
-  ])
+  })
 
-  // ── Score ─────────────────────────────────────────────────────────────────
-  // Mirror the engine rules so dashboard and /compliance are always aligned.
-
-  let score = 100
-
-  // Governance
-  const activeProgram = programs.find((p) => p.status === 'active')
-  if (!activeProgram) score -= 25
-  else if (!activeProgram.privacyOfficerEmail) score -= 10
-
-  // Data inventory
-  const activeAssets = assets.filter((a) => a.status === 'active')
-  if (activeAssets.length === 0) {
-    score -= 20
-  } else {
-    const highCritical = activeAssets.filter(
-      (a) => a.sensitivityLevel === 'high' || a.sensitivityLevel === 'critical',
-    )
-    if (highCritical.length > 0 && pias.length === 0) {
-      score -= Math.min(highCritical.length * 10, 30)
-    }
-    const crossBorderNoCountry = activeAssets.filter(
-      (a) => a.crossBorderTransfer && !a.destinationCountry,
-    )
-    if (crossBorderNoCountry.length > 0) score -= 10
-  }
-
-  // PIAs
-  if (pias.length === 0 && activeAssets.length > 0) {
-    score -= 15
-  } else {
-    const mitigationReq = pias.filter((p) => p.status === 'mitigation_required')
-    score -= Math.min(mitigationReq.length * 5, 20)
-    const highRiskNoMitigation = pias.filter((p) => (p.riskScore ?? 0) >= 70 && !p.mitigationPlan)
-    score -= Math.min(highRiskNoMitigation.length * 10, 20)
-  }
-
-  // Incidents
-  const openCritical = incidents.filter(
-    (i) => i.severity === 'critical' && (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained'),
-  )
-  score -= Math.min(openCritical.length * 20, 40)
-
-  const unreportedSerious = incidents.filter((i) => i.seriousHarmLikely && !i.reportedToCai)
-  score -= Math.min(unreportedSerious.length * 25, 50)
-
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000
-  const stalledOpen = incidents.filter(
-    (i) =>
-      (i.resolutionStatus === 'open' || i.resolutionStatus === 'contained') &&
-      Date.now() - i.createdAt.getTime() > thirtyDaysMs,
-  )
-  score -= Math.min(stalledOpen.length * 10, 30)
-
-  // DSR
-  const overdue = dsrRequests.filter((r) => r.status === 'overdue')
-  score -= Math.min(overdue.length * 15, 45)
-  const activeUnverified = dsrRequests.filter(
-    (r) =>
-      r.status !== 'completed' &&
-      r.status !== 'denied' &&
-      !r.identityVerified,
-  )
-  score -= Math.min(activeUnverified.length * 5, 15)
-
-  // Vendors
-  const activeVendors = vendors.filter((v) => v.status === 'active')
-  const highRiskNoPia = activeVendors.filter(
-    (v) => (v.riskLevel === 'high' || v.riskLevel === 'critical') && !v.piaRequired,
-  )
-  score -= Math.min(highRiskNoPia.length * 10, 30)
-  const crossBorderNoContract = activeVendors.filter(
-    (v) => v.crossBorderTransfer && !v.contractReviewed,
-  )
-  score -= Math.min(crossBorderNoContract.length * 10, 20)
-
-  score = Math.max(0, Math.min(100, score))
-
-  // ── Derived counters ───────────────────────────────────────────────────────
-  const openIncidents = incidents.filter(
-    (i) => i.resolutionStatus === 'open' || i.resolutionStatus === 'contained',
-  ).length
-  const pendingRequests = dsrRequests.filter(
-    (r) => r.status !== 'completed' && r.status !== 'denied',
-  ).length
-
-  const hasCriticalRisks = openCritical.length > 0 || unreportedSerious.length > 0
-  const auditReadinessStatus: TrustcoreDashboardSummary['auditReadinessStatus'] =
-    score >= 85 && !hasCriticalRisks
-      ? 'ready'
-      : score >= 60
-        ? 'partial'
-        : 'not_ready'
-
-  return {
-    orgId,
-    complianceScore: score,
-    openRisks: openIncidents,
-    pendingRequests,
-    incidentAlerts: openCritical.length,
-    auditReadinessStatus,
-    evaluatedAt: new Date().toISOString(),
-  }
+  return dashboardSummaryFromEvaluation(evaluation, { incidents, dsrRequests })
 }
 
 // ── List helpers ───────────────────────────────────────────────────────────
@@ -690,4 +596,111 @@ export async function convertTrustcoreLead(
  */
 export async function listTrustcoreLeads(): Promise<TrustcoreLead[]> {
   return db.select().from(trustcoreLeads).orderBy(desc(trustcoreLeads.capturedAt))
+}
+
+// ── Risk Register ─────────────────────────────────────────────────────────
+
+export type TrustcoreRisk = typeof trustcoreRisks.$inferSelect
+export type TrustcoreRiskReview = typeof trustcoreRiskReviews.$inferSelect
+export type TrustcoreRiskMitigation = typeof trustcoreRiskMitigations.$inferSelect
+
+export type NewTrustcoreRisk = typeof trustcoreRisks.$inferInsert
+export type NewTrustcoreRiskReview = typeof trustcoreRiskReviews.$inferInsert
+export type NewTrustcoreRiskMitigation = typeof trustcoreRiskMitigations.$inferInsert
+
+/**
+ * List all risks for an org, newest first.
+ */
+export async function listTrustcoreRisks(orgId: string): Promise<TrustcoreRisk[]> {
+  return db
+    .select()
+    .from(trustcoreRisks)
+    .where(eq(trustcoreRisks.orgId, orgId))
+    .orderBy(desc(trustcoreRisks.createdAt))
+}
+
+/**
+ * Get a single risk by id, scoped to org.
+ */
+export async function getTrustcoreRisk(
+  orgId: string,
+  riskId: string,
+): Promise<TrustcoreRisk | null> {
+  const [row] = await db
+    .select()
+    .from(trustcoreRisks)
+    .where(and(eq(trustcoreRisks.orgId, orgId), eq(trustcoreRisks.id, riskId)))
+    .limit(1)
+  return row ?? null
+}
+
+/**
+ * Create a new risk. orgId is mandatory.
+ */
+export async function createTrustcoreRisk(input: NewTrustcoreRisk): Promise<TrustcoreRisk> {
+  const [row] = await db.insert(trustcoreRisks).values(input).returning()
+  if (!row) throw new Error('createTrustcoreRisk: insert returned no row')
+  return row
+}
+
+/**
+ * Update a risk. Caller must pass orgId for safety.
+ */
+export async function updateTrustcoreRisk(
+  orgId: string,
+  riskId: string,
+  patch: Partial<NewTrustcoreRisk>,
+): Promise<TrustcoreRisk | null> {
+  const [row] = await db
+    .update(trustcoreRisks)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(and(eq(trustcoreRisks.orgId, orgId), eq(trustcoreRisks.id, riskId)))
+    .returning()
+  return row ?? null
+}
+
+/**
+ * Append a mitigation entry to a risk.
+ */
+export async function addTrustcoreRiskMitigation(
+  input: NewTrustcoreRiskMitigation,
+): Promise<TrustcoreRiskMitigation> {
+  const [row] = await db.insert(trustcoreRiskMitigations).values(input).returning()
+  if (!row) throw new Error('addTrustcoreRiskMitigation: insert returned no row')
+  return row
+}
+
+/**
+ * Append a review entry to a risk.
+ */
+export async function addTrustcoreRiskReview(
+  input: NewTrustcoreRiskReview,
+): Promise<TrustcoreRiskReview> {
+  const [row] = await db.insert(trustcoreRiskReviews).values(input).returning()
+  if (!row) throw new Error('addTrustcoreRiskReview: insert returned no row')
+  return row
+}
+
+/**
+ * List mitigations for a single risk, newest first.
+ */
+export async function listTrustcoreRiskMitigations(
+  riskId: string,
+): Promise<TrustcoreRiskMitigation[]> {
+  return db
+    .select()
+    .from(trustcoreRiskMitigations)
+    .where(eq(trustcoreRiskMitigations.riskId, riskId))
+    .orderBy(desc(trustcoreRiskMitigations.createdAt))
+}
+
+/**
+ * List reviews for a single risk, newest first.
+ */
+export async function listTrustcoreRiskReviews(riskId: string): Promise<TrustcoreRiskReview[]> {
+  return db
+    .select()
+    .from(trustcoreRiskReviews)
+    .where(eq(trustcoreRiskReviews.riskId, riskId))
+    .orderBy(desc(trustcoreRiskReviews.reviewedAt))
 }

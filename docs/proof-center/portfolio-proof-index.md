@@ -1,44 +1,20 @@
 # Portfolio Proof Index
 
-Canonical source: governance/portfolio/product-catalog.json
-Last reviewed: 2026-04-17
+This index tracks all generated proof artifacts for the Nzila OS portfolio.
 
-## SELL NOW Proof Surfaces
+## Portfolio Artifacts
 
-- Union Eyes: [union-eyes-proof.md](union-eyes-proof.md)
-- Flow: [flow-proof.md](flow-proof.md)
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| Truth Manifest | `nzila-truth-manifest.json` | Single source of portfolio truth |
+| Portfolio Status (JSON) | `reports/portfolio-status.json` | Machine-readable portfolio state |
+| Portfolio Status (MD) | `reports/portfolio-status.md` | Human-readable portfolio summary |
+| Portfolio Matrix | `docs/platform/portfolio-matrix.md` | Cross-app capability matrix |
+| Portfolio Ops Dashboard | `reports/portfolio-ops-dashboard.json` | Operational dashboard data |
+| Investor View | `reports/portfolio-investor-view.md` | Investor-facing summary |
 
-## Proof status scale
+## Proof Trail
 
-- no-proof
-- internal-proof
-- pilot-proof
-- paid-proof
-- scaled-proof
+Portfolio proof flows from `nzila-truth-manifest.json` → generated reports → this index.
 
-## Portfolio snapshot
-
-| Product | Proof Status | Commercial Priority | Focus Classification | Freshness Status |
-|---|---|---:|---|---|
-| union-eyes | pilot-proof | 1 | DOUBLE DOWN | daily sync |
-| flow | internal-proof | 2 | DOUBLE DOWN | daily sync |
-| cfo | internal-proof | 3 | MAINTAIN | daily sync |
-| partners | no-proof | 4 | MAINTAIN | weekly sync |
-| web | internal-proof | 5 | MAINTAIN | live |
-| console | internal-proof | 5 | INTERNAL ONLY | live |
-| control-plane | internal-proof | 5 | INTERNAL ONLY | live |
-| zonga | no-proof | 3 | HOLD | manual |
-| agrimo | no-proof | 4 | HOLD | manual |
-| trade | no-proof | 5 | HOLD | manual |
-| cora | no-proof | 5 | HOLD | manual |
-| nacp-exams | no-proof | 5 | HOLD | manual |
-| mobility | no-proof | 5 | HOLD | manual |
-| mobility-client-portal | no-proof | 5 | CUT | stale |
-| abr | no-proof | 5 | HOLD | manual |
-| platform-admin | no-proof | 5 | CUT | stale |
-| orchestrator-api | no-proof | 5 | CUT | stale |
-
-## Notes
-
-- Freshness status contract: live, daily sync, weekly sync, manual, stale.
-- No paid/scaled proof is claimed without explicit external evidence.
+All portfolio artifacts are regenerated via `pnpm generate:portfolio-artifacts`.

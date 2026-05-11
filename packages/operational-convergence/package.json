@@ -1,0 +1,24 @@
+{
+  "name": "@nzila/operational-convergence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical contract for the Nzila operational convergence layer: information architecture, navigation grammar, role experience model, operational language, review workflows, and cadence registry. Pure data primitives; rendering is a host concern.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ia": "./src/ia.ts",
+    "./glossary": "./src/glossary.ts",
+    "./roles": "./src/roles.ts",
+    "./workflows": "./src/workflows.ts",
+    "./cadence": "./src/cadence.ts",
+    "./navigation": "./src/navigation.ts",
+    "./embodiment": "./src/embodiment.ts",
+    "./executive": "./src/executive.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

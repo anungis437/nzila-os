@@ -53,11 +53,7 @@ export default function WorkflowSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-      >
-        <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-          One System. One Workflow.
-        </span>
-        <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">
+      >        <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">
           From intake to outcome
         </h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">

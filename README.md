@@ -47,10 +47,12 @@ pnpm test:fast          # Run unit tests (skip contract tests)
 pnpm build              # Build everything
 ```
 
+Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
+
 ## Repo Structure
 
 ```
-apps/              24 applications
+apps/              26 applications
 packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools

@@ -1,18 +1,19 @@
 /**
- * Grievance Triage AI Service
+ * Grievance Intake Contextualisation Service
  *
- * Analyses a grievance and recommends:
- *  - Priority (low / medium / high / urgent)
- *  - Category (contract / harassment / safety … )
- *  - Complexity (routine / moderate / complex / unprecedented)
- *  - Estimated days to resolve
- *  - Similar past grievances
+ * Analyses a grievance intake and produces a bounded interpretive reading:
+ *  - Priority signal (low / medium / high / urgent)
+ *  - Category contextualisation (contract / harassment / safety …)
+ *  - Complexity signal (routine / moderate / complex / unprecedented)
+ *  - Estimated resolution trajectory
+ *  - Institutional precedent proximity (similar historical grievances)
  *
  * CONSTRAINTS:
  * - Uses @nzila/ai-sdk via the singleton `getAiClient()`
  * - Every output carries confidence + explanation
- * - No action is auto-applied — results are stored as "pending"
+ * - No action is auto-applied — results are stored as "pending" pending steward review
  * - Org-scoped: all queries filter on organizationId
+ * - Outputs are interpretive support, not classification authority
  *
  * @module lib/ai/grievance-triage
  */

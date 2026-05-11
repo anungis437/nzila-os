@@ -10,10 +10,13 @@
  *   npx tsx scripts/seed-union-eyes-demo.ts
  */
 
+import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
 import { eq } from 'drizzle-orm'
+
+assertNotProduction('seed-union-eyes-demo')
 
 // ── Fixed IDs for determinism ───────────────────────────
 
@@ -199,7 +202,14 @@ async function main() {
 
     if (!exists) {
       await db.insert(organizationMembers).values({
-        ...m,
+        userId: m.userId,
+        organizationId: m.organizationId,
+        role: m.role,
+        status: m.status,
+        // Canonical schema requires name + email; derive from displayName
+        // when the demo fixture only carries a display name.
+        name: m.displayName,
+        email: `${m.userId}@demo.nzila.local`,
         joinedAt: NOW,
       })
       console.log(`  ✓ Member: ${m.displayName} (${m.role})`)

@@ -63,9 +63,8 @@ export const POST = withApi(
       description: 'Creates a new claim with auto-generated claim number.',
     },
   },
-  async ({ request, organizationId, userId }) => {
-    const body = await request.json();
-    const parsed = claimCreateSchema.safeParse(body);
+  async ({ body, organizationId, userId }) => {
+    const parsed = claimCreateSchema.safeParse(body ?? {});
     if (!parsed.success) {
       throw ApiError.badRequest(parsed.error.errors.map(e => e.message).join('; '));
     }

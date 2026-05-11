@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-01T00:00:00.000Z",
-  "appCount": 24,
-  "packageCount": 189,
-  "workspacePackageCount": 219,
-  "workflowCount": 47,
-  "contractTestCount": 233,
-  "tsTestFileCount": 1290,
+  "generatedAt": "2026-05-10T00:00:00.000Z",
+  "appCount": 26,
+  "packageCount": 213,
+  "workspacePackageCount": 245,
+  "workflowCount": 48,
+  "contractTestCount": 248,
+  "tsTestFileCount": 1380,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -22,10 +22,12 @@
         "blob",
         "config",
         "db",
+        "decision-core",
         "governed-workflow",
         "integrations-core",
         "integrations-runtime",
         "ml-sdk",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-performance",
@@ -71,7 +73,7 @@
         "ui"
       ],
       "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
-      "codeFileCount": 102
+      "codeFileCount": 104
     },
     {
       "name": "cfo",
@@ -121,6 +123,7 @@
       "nzilaDeps": [
         "ai-core",
         "ai-sdk",
+        "attestation-visibility",
         "blob",
         "chatops-slack",
         "chatops-teams",
@@ -129,13 +132,18 @@
         "comms-push",
         "comms-sms",
         "config",
+        "continuity-review",
         "crm-hubspot",
         "db",
         "deal-engine",
+        "decision-intelligence",
         "executive-os",
+        "governance-operations",
+        "governance-review",
         "governed-workflow",
         "itsm-core",
         "ml-sdk",
+        "operational-convergence",
         "os-core",
         "payments-stripe",
         "platform-assurance",
@@ -159,11 +167,12 @@
         "platform-shell",
         "qbo",
         "schema-core",
+        "stabilization-signals",
         "tax",
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 355
+      "codeFileCount": 364
     },
     {
       "name": "control-plane",
@@ -175,14 +184,23 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "attestation-visibility",
         "config",
+        "continuity-review",
         "db",
         "deal-engine",
+        "decision-core",
+        "decision-intelligence",
+        "governance-operations",
+        "governance-review",
         "governed-workflow",
         "metrics-commercial",
+        "nar",
         "observability",
         "operating-evidence",
+        "operational-convergence",
         "os-core",
+        "pipeline-alerting",
         "platform-agent-workflows",
         "platform-ai-governance",
         "platform-ai-query",
@@ -208,11 +226,13 @@
         "platform-revenue",
         "platform-shell",
         "policies",
+        "policy-intelligence",
         "schema-core",
+        "stabilization-signals",
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 250
+      "codeFileCount": 300
     },
     {
       "name": "cora",
@@ -269,9 +289,11 @@
         "config",
         "crm-hubspot",
         "db",
+        "decision-core",
         "flow-engine",
         "governed-workflow",
         "ml-sdk",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-commerce-org",
@@ -417,8 +439,10 @@
       "dependsOnPlatformAuth": false,
       "nzilaDeps": [
         "db",
+        "decision-core",
         "fsm-core",
         "itsm-core",
+        "nar",
         "operating-evidence",
         "os-core",
         "platform-event-fabric",
@@ -472,10 +496,12 @@
       "nzilaDeps": [
         "config",
         "db",
+        "decision-core",
         "governed-workflow",
         "integrations-core",
         "integrations-runtime",
         "itsm-core",
+        "nar",
         "os-core",
         "platform-auth",
         "platform-context-orchestrator",
@@ -544,6 +570,59 @@
       "codeFileCount": 53
     },
     {
+      "name": "trustcore",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3010,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": true,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "ai-sdk",
+        "config",
+        "db",
+        "ml-sdk",
+        "os-core",
+        "payments-stripe",
+        "platform-auth",
+        "platform-shell",
+        "trustcore-core",
+        "ui"
+      ],
+      "purpose": "",
+      "codeFileCount": 96
+    },
+    {
+      "name": "trustcore-trustops",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3018,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": true,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "ai-sdk",
+        "config",
+        "db",
+        "ml-sdk",
+        "org",
+        "os-core",
+        "otel-core",
+        "platform-auth",
+        "platform-decision-engine",
+        "platform-events",
+        "platform-shell",
+        "trustcore-contracts",
+        "trustcore-trustops",
+        "trustops-intelligence",
+        "ui"
+      ],
+      "purpose": "",
+      "codeFileCount": 20
+    },
+    {
       "name": "union-eyes",
       "language": "polyglot",
       "framework": "Next.js + Django",
@@ -554,26 +633,38 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "ai-sdk",
+        "attestation-visibility",
         "blob",
         "clc-executive-intelligence",
         "config",
+        "continuity-review",
         "crm-hubspot",
         "cupe-vocabulary",
         "db",
+        "decision-core",
         "evidence",
+        "governance-middleware",
+        "governance-operations",
+        "governance-otel",
+        "governance-review",
+        "institutional-cognition-core",
         "ml-sdk",
+        "nar",
+        "operational-convergence",
         "os-core",
         "payments-stripe",
         "platform-auth",
         "platform-cognition-core",
         "platform-pilot-metrics",
         "platform-shell",
+        "policies",
+        "stabilization-signals",
         "ue-cognition",
         "ui",
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 3191
+      "codeFileCount": 3514
     },
     {
       "name": "veridian-admin",
@@ -590,7 +681,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 18
+      "codeFileCount": 20
     },
     {
       "name": "veridian-care",
@@ -607,7 +698,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 21
+      "codeFileCount": 23
     },
     {
       "name": "veridian-site",
@@ -624,7 +715,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 21
+      "codeFileCount": 24
     },
     {
       "name": "web",
@@ -690,8 +781,10 @@
         "config",
         "crm-hubspot",
         "db",
+        "decision-core",
         "governed-workflow",
         "ml-sdk",
+        "nar",
         "os-core",
         "payments-stripe",
         "platform-auth",
@@ -711,7 +804,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 450
+      "codeFileCount": 454
     }
   ],
   "workflows": [
@@ -757,6 +850,7 @@
     "release-train.yml",
     "reliability-guard.yml",
     "repo-inventory-check.yml",
+    "runtime-governance-attestation.yml",
     "sbom.yml",
     "secret-scan.yml",
     "security-design-review.yml",

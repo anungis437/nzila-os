@@ -1,0 +1,28 @@
+{
+  "name": "@nzila/trustops-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mandate-risk-score": "./src/mandate-risk-score/index.ts",
+    "./claim-batch-classifier": "./src/claim-batch-classifier/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nzila/trustcore-contracts": "workspace:*",
+    "@nzila/trustcore-trustops": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

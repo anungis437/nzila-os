@@ -60,7 +60,14 @@ export const GET = withApi(
     const members = rows.map(m => {
       let metadata: Record<string, unknown> = {};
       if (m.metadata) {
-        try { metadata = JSON.parse(m.metadata); } catch { /* ignore */ }
+        // `organizationMembers.metadata` is jsonb in the canonical schema, so
+        // postgres-js returns it as an already-parsed object. Tolerate the
+        // historical text representation by JSON.parse-ing strings.
+        if (typeof m.metadata === 'string') {
+          try { metadata = JSON.parse(m.metadata); } catch { /* ignore */ }
+        } else if (typeof m.metadata === 'object') {
+          metadata = m.metadata as Record<string, unknown>;
+        }
       }
       return {
         id: m.id,

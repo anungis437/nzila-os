@@ -52,7 +52,7 @@ export async function logEvent(input: LogEventInput): Promise<AuditEvent> {
   }
 
   // Structured log — captured by platform aggregator.
-  console.log(JSON.stringify({ level: 'audit', ...event }))
+  // (no console output; rely on request-level structured logging)
 
   return event
 }

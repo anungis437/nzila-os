@@ -49,6 +49,7 @@ export const PLATFORM_MODULES = {
   EMPLOYER_REMITTANCE_GENERATION: 'employer_remittance_generation',
   EMPLOYER_EXECUTION_REPLAY: 'employer_execution_replay',
   EMPLOYER_EXECUTION_COMPLIANCE: 'employer_execution_compliance',
+  UNION_KNOWLEDGE_SUITE: 'union_knowledge_suite',
 } as const;
 
 export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES];

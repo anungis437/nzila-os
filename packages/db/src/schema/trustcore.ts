@@ -23,6 +23,7 @@ import {
   timestamp,
   boolean,
   integer,
+  bigint,
   jsonb,
   pgEnum,
   index,
@@ -151,6 +152,13 @@ export const trustcorePrivacyPrograms = pgTable(
     orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
+    /**
+     * Public display name for the organisation as shown on the Trust Center.
+     * Denormalised from `orgs.name` (or the org's chosen brand) so the
+     * public page can render without dereferencing the orgs table.
+     * Nullable — the page falls back to `orgId` when unset.
+     */
+    orgName: text('org_name'),
     framework: text('framework').notNull().default('law25'),
     privacyOfficerName: text('privacy_officer_name'),
     privacyOfficerEmail: text('privacy_officer_email'),
@@ -560,3 +568,282 @@ export const trustcoreLeads = pgTable(
     index('tc_leads_captured_at_idx').on(t.capturedAt),
   ],
 )
+
+// ── N) trustcoreRisks (Risk Register v1) ──────────────────────────────────
+
+export const tcRiskRegisterCategoryEnum = pgEnum('tc_risk_register_category', [
+  'governance',
+  'data',
+  'pia',
+  'incidents',
+  'dsr',
+  'vendors',
+  'security',
+  'operational',
+  'legal',
+  'financial',
+])
+
+export const tcRiskRegisterSeverityEnum = pgEnum('tc_risk_register_severity', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+])
+
+export const tcRiskRegisterStatusEnum = pgEnum('tc_risk_register_status', [
+  'open',
+  'mitigating',
+  'accepted',
+  'transferred',
+  'closed',
+])
+
+export const tcRiskMitigationStatusEnum = pgEnum('tc_risk_mitigation_status', [
+  'planned',
+  'in_progress',
+  'completed',
+  'blocked',
+])
+
+/**
+ * Trust Operations Risk Register entry. Org-scoped, deterministic,
+ * extends compliance-engine signals with structured risk tracking.
+ */
+export const trustcoreRisks = pgTable(
+  'trustcore_risks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    title: text('title').notNull(),
+    description: text('description'),
+    category: tcRiskRegisterCategoryEnum('category').notNull(),
+    severity: tcRiskRegisterSeverityEnum('severity').notNull(),
+    status: tcRiskRegisterStatusEnum('status').notNull().default('open'),
+    owner: text('owner'),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    evidenceRefs: jsonb('evidence_refs').$type<string[]>().notNull().default([]),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risks_org_idx').on(t.orgId),
+    index('tc_risks_org_status_idx').on(t.orgId, t.status),
+    index('tc_risks_org_severity_idx').on(t.orgId, t.severity),
+    index('tc_risks_org_category_idx').on(t.orgId, t.category),
+  ],
+)
+
+/**
+ * Reviews (acceptance/decision events) attached to a risk.
+ */
+export const trustcoreRiskReviews = pgTable(
+  'trustcore_risk_reviews',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    riskId: uuid('risk_id')
+      .notNull()
+      .references(() => trustcoreRisks.id, { onDelete: 'cascade' }),
+    reviewerName: text('reviewer_name').notNull(),
+    decision: text('decision').notNull(),
+    notes: text('notes'),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risk_reviews_org_idx').on(t.orgId),
+    index('tc_risk_reviews_risk_idx').on(t.riskId),
+  ],
+)
+
+/**
+ * Mitigation actions attached to a risk.
+ */
+export const trustcoreRiskMitigations = pgTable(
+  'trustcore_risk_mitigations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    riskId: uuid('risk_id')
+      .notNull()
+      .references(() => trustcoreRisks.id, { onDelete: 'cascade' }),
+    action: text('action').notNull(),
+    owner: text('owner'),
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    status: tcRiskMitigationStatusEnum('status').notNull().default('planned'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('tc_risk_mitigations_org_idx').on(t.orgId),
+    index('tc_risk_mitigations_risk_idx').on(t.riskId),
+    index('tc_risk_mitigations_org_status_idx').on(t.orgId, t.status),
+  ],
+)
+
+// ── TrustOps v1 ────────────────────────────────────────────────────────────
+
+export const trustopsMandateStageEnum = pgEnum('trustops_mandate_stage', [
+  'mandate_intake',
+  'engagement_signed',
+  'asset_inventory',
+  'creditor_list_published',
+  'proofs_of_claim_collection',
+  'claims_classification',
+  'restructuring_plan_drafted',
+  'stakeholder_review',
+  'court_filing',
+  'distribution',
+  'discharge',
+  'archived',
+])
+
+export const trustopsCreditorClassificationEnum = pgEnum(
+  'trustops_creditor_classification',
+  ['secured', 'unsecured', 'priority', 'subordinated', 'equity'],
+)
+
+export const trustopsProofOfClaimStatusEnum = pgEnum('trustops_proof_of_claim_status', [
+  'submitted',
+  'under_review',
+  'classified',
+  'admitted',
+  'partially_admitted',
+  'rejected',
+  'withdrawn',
+])
+
+export const trustopsTransitionTriggerEnum = pgEnum('trustops_transition_trigger', [
+  'manual',
+  'automatic',
+  'deadline',
+  'approval',
+  'rejection',
+])
+
+/**
+ * TrustOps mandates — top-level engagement record for a debtor file.
+ */
+export const trustopsMandates = pgTable(
+  'trustops_mandates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    stage: trustopsMandateStageEnum('stage').notNull().default('mandate_intake'),
+    name: text('name').notNull(),
+    debtorName: text('debtor_name'),
+    openedAt: timestamp('opened_at', { withTimezone: true }).notNull().defaultNow(),
+    closedAt: timestamp('closed_at', { withTimezone: true }),
+    metadata: jsonb('metadata').notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_mandates_org_idx').on(t.orgId),
+    index('trustops_mandates_org_stage_idx').on(t.orgId, t.stage),
+  ],
+)
+
+/**
+ * TrustOps creditors — parties with a financial interest in a mandate.
+ */
+export const trustopsCreditors = pgTable(
+  'trustops_creditors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    classification: trustopsCreditorClassificationEnum('classification').notNull(),
+    contact: jsonb('contact').notNull().default({}),
+    claimAmountCents: bigint('claim_amount_cents', { mode: 'bigint' }),
+    approvedAmountCents: bigint('approved_amount_cents', { mode: 'bigint' }),
+    currency: text('currency').notNull().default('CAD'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_creditors_org_idx').on(t.orgId),
+    index('trustops_creditors_mandate_idx').on(t.mandateId),
+    index('trustops_creditors_org_class_idx').on(t.orgId, t.classification),
+  ],
+)
+
+/**
+ * TrustOps proofs of claim — submitted claims linked to a creditor and mandate.
+ */
+export const trustopsProofsOfClaim = pgTable(
+  'trustops_proofs_of_claim',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    creditorId: uuid('creditor_id')
+      .notNull()
+      .references(() => trustopsCreditors.id, { onDelete: 'cascade' }),
+    status: trustopsProofOfClaimStatusEnum('status').notNull().default('submitted'),
+    amountClaimedCents: bigint('amount_claimed_cents', { mode: 'bigint' }),
+    amountAdmittedCents: bigint('amount_admitted_cents', { mode: 'bigint' }),
+    currency: text('currency').notNull().default('CAD'),
+    evidenceEventId: uuid('evidence_event_id'),
+    classificationDecisionId: uuid('classification_decision_id'),
+    notes: text('notes'),
+    submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_pocs_org_idx').on(t.orgId),
+    index('trustops_pocs_mandate_idx').on(t.mandateId),
+    index('trustops_pocs_creditor_idx').on(t.creditorId),
+    index('trustops_pocs_org_status_idx').on(t.orgId, t.status),
+  ],
+)
+
+/**
+ * TrustOps mandate stage history — append-only FSM transition log.
+ */
+export const trustopsMandateStageHistory = pgTable(
+  'trustops_mandate_stage_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    mandateId: uuid('mandate_id')
+      .notNull()
+      .references(() => trustopsMandates.id, { onDelete: 'cascade' }),
+    fromStage: trustopsMandateStageEnum('from_stage'),
+    toStage: trustopsMandateStageEnum('to_stage').notNull(),
+    trigger: trustopsTransitionTriggerEnum('trigger').notNull(),
+    reason: text('reason'),
+    actorUserId: text('actor_user_id').notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('trustops_stage_history_org_idx').on(t.orgId),
+    index('trustops_stage_history_mandate_time_idx').on(t.mandateId, t.occurredAt),
+  ],
+)
+
+

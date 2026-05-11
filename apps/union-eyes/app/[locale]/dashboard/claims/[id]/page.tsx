@@ -164,7 +164,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">{t('errors.loadingError')}</h2>
             <p className="text-gray-600 mb-4">{error || t('claims.notFound')}</p>
-            <Link href={`/${locale}/dashboard/claims`}>
+            <Link href={`/${locale}/dashboard/inbox?type=intake`}>
               <Button>{t('claims.backToClaims')}</Button>
             </Link>
           </CardContent>
@@ -185,7 +185,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Link href={`/${locale}/dashboard/claims`}>
+          <Link href={`/${locale}/dashboard/inbox?type=intake`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}

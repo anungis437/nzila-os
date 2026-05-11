@@ -272,6 +272,16 @@ export function withApi<
       }
 
       // ── 4. Role / permission checks ────────────────────────────────────
+      let resolvedOrganizationId = user?.organizationId ?? null;
+      if (user) {
+        try {
+          const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
+          resolvedOrganizationId = await getOrganizationIdForUser(user.id);
+        } catch {
+          // Keep auth metadata organization as fallback.
+        }
+      }
+
       if (user && minRoleLevel !== null) {
         let userRole = normalizeRole(user.role ?? 'member');
         let userLevel = ROLE_HIERARCHY[userRole] ?? 0;
@@ -325,7 +335,7 @@ export function withApi<
       }
 
       // ── 4b. Org-scope enforcement ─────────────────────────────────────
-      if (requireOrg && user && !user.organizationId) {
+      if (requireOrg && user && !resolvedOrganizationId) {
         return standardErrorResponse(
           ErrorCode.INSUFFICIENT_PERMISSIONS,
           'Organization context required — select an organization before accessing this resource',
@@ -335,9 +345,9 @@ export function withApi<
       }
 
       // ── 4c. Entitlement check ─────────────────────────────────────────
-      if (options.entitlement && user?.organizationId) {
+      if (options.entitlement && resolvedOrganizationId && user) {
         try {
-          await requireEntitlement(user.organizationId, options.entitlement, user.id);
+          await requireEntitlement(resolvedOrganizationId, options.entitlement, user.id);
         } catch (_err) {
           return standardErrorResponse(
             ErrorCode.INSUFFICIENT_PERMISSIONS,
@@ -430,7 +440,7 @@ export function withApi<
         request,
         user,
         userId: user?.id ?? null,
-        organizationId: user?.organizationId ?? null,
+        organizationId: resolvedOrganizationId,
         body,
         query,
         params,

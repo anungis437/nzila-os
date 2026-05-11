@@ -137,9 +137,6 @@ export const organizations = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
     createdBy: uuid('created_by'),
-    
-    // Clerk Integration
-    clerkOrganizationId: text('clerk_organization_id'),
 
     // Application Registry
     appId: uuid('app_id').references(() => applications.id),
@@ -316,8 +313,20 @@ export const organizationMembers = pgTable(
     seniority: integer('seniority'),
     unionJoinDate: timestamp('union_join_date', { withTimezone: true }),
     preferredContactMethod: text('preferred_contact_method'),
-    metadata: text('metadata'),
-    
+    metadata: jsonb('metadata').$type<Record<string, unknown> | null>(),
+
+    // Member category & per-capita exemptions (mirrors QA baseline + Phase 5A
+    // production schema). The `member_category` enum is created in
+    // tooling/sql/union-eyes-qa-baseline.sql.
+    memberCategory: text('member_category'),
+    exemptFromPerCapita: boolean('exempt_from_per_capita'),
+    exemptionReason: text('exemption_reason'),
+    exemptionApprovedBy: varchar('exemption_approved_by', { length: 255 }),
+    exemptionApprovedAt: timestamp('exemption_approved_at', { withTimezone: true }),
+
+    // Full-text search vector (populated by trigger / migration)
+    searchVector: text('search_vector'),
+
     // Timestamps
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),

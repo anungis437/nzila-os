@@ -5,6 +5,7 @@ import {
   ensureServerReady,
   loginAsTestUser,
   seedOrVerifyTestState,
+  cleanupDatabaseConnections,
 } from './_helpers'
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
@@ -12,6 +13,10 @@ test.describe('Union Eyes QA E2E Flows', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('1) intake -> review -> assign -> escalate -> resolve', async ({ request }) => {

@@ -24,6 +24,21 @@ export const platformRoleValues = [
   'itsm_change_approver',
   /** Read-only portal access for MSP client users */
   'itsm_client_viewer',
+  // ── TrustCore roles ──────────────────────────────────────────────────────────
+  /** Owns the Law 25 program; full create/update on all compliance records */
+  'privacy_officer',
+  /** Can create/update security incidents and risk register entries */
+  'security_officer',
+  /** Manages PIAs, DSR requests, consent records, and risk reviews */
+  'compliance_officer',
+  /** Read + comment access for in-house legal review of PIAs and policies */
+  'legal_reviewer',
+  /** Internal auditor — full read on all org evidence and snapshots */
+  'auditor',
+  /** External auditor — scoped read-only access granted per engagement */
+  'external_auditor',
+  /** Baseline read-only consumer — no create/update permissions */
+  'read_only',
 ] as const
 
 export type PlatformRole = (typeof platformRoleValues)[number]
@@ -85,6 +100,14 @@ const roleHierarchy: Record<PlatformRole, number> = {
   itsm_manager: 65,
   itsm_change_approver: 55,
   itsm_client_viewer: 20,
+  // ── TrustCore roles ────────────────────────────────────────────────────────
+  privacy_officer: 48,
+  security_officer: 47,
+  compliance_officer: 46,
+  legal_reviewer: 35,
+  auditor: 32,
+  external_auditor: 22,
+  read_only: 10,
 }
 
 /** Check if `userRole` meets or exceeds `requiredRole` in hierarchy. */

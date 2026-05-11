@@ -21,6 +21,14 @@ export async function register() {
       const { initMetrics } = await import('@nzila/os-core/telemetry');
       initMetrics('union-eyes');
     } catch { /* non-critical */ }
+
+    // Bind governance runtime: register OTel sink + in-memory mirror, bind
+    // release identity. Safe under nodejs runtime only — never call from
+    // edge middleware (proxy.ts) because the OTel adapter pulls node:crypto.
+    try {
+      const { bindGovernanceRuntime } = await import('./lib/governance/runtime');
+      bindGovernanceRuntime();
+    } catch { /* governance bootstrap is non-critical to request serving */ }
   }
 
   // Skip Sentry initialization during build to prevent "self is not defined" errors

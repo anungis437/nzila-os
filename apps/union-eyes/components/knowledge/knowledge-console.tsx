@@ -38,7 +38,7 @@ export function KnowledgeConsole() {
 
   const sections: KnowledgeLink[] = [
     {
-      href: `/${locale}/dashboard/knowledge-base`,
+      href: `/${locale}/dashboard/institutional-memory?tab=knowledge-base`,
       icon: <FileText size={20} className="text-teal-600" />,
       titleKey: "sidebar.unionDocuments",
       description: "Constitutions, bylaws, forms, and policy guides.",

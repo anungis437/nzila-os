@@ -9,6 +9,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { ensureServerReady } from '../tests/e2e/_helpers';
+import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
 
 // Skip dashboard tests if test auth mode is not enabled
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
@@ -18,9 +19,11 @@ test.describe('Dashboard flows', () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
   });
 
   test('dashboard loads with navigation sidebar', async ({ page }) => {
+    await loginAsRole(page, 'admin');
     await page.goto('/en-CA/dashboard');
     // Should show dashboard layout
     await expect(page.locator('nav, [role="navigation"]').first()).toBeVisible({
@@ -29,13 +32,15 @@ test.describe('Dashboard flows', () => {
   });
 
   test('cases page loads', async ({ page }) => {
+    await loginAsRole(page, 'admin');
     await page.goto('/en-CA/dashboard');
-    // Navigate to cases via sidebar or direct URL
-    await page.goto('/en-CA/claims');
+    // Cases consolidated into Inbox (intake filter) per Wave 3 runtime authority audit
+    await page.goto('/en-CA/dashboard/inbox?type=intake');
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('admin page loads for admin users', async ({ page }) => {
+    await loginAsRole(page, 'admin');
     await page.goto('/en-CA/dashboard/admin');
     await expect(page.locator('body')).toBeVisible();
   });

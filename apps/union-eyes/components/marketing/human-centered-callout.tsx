@@ -1,3 +1,4 @@
+// cognition-governance-ci: file-allow-vocabulary — Marketing/anti-surveillance copy: this file declares what the platform DOES NOT DO. Forbidden terms appear deliberately in negated context.
 /**
  * Human-Centered Callout Component
  * 
@@ -140,7 +141,7 @@ export const CalloutPresets = {
     <HumanCenteredCallout
       variant="solidarity"
       title="Built with unions, not for unions"
-      description="Every feature co-designed with union stewards who understand the real challenges of case management and member advocacy."
+      description="Every feature co-designed with union representatives who understand the real challenges of case management and member advocacy."
     />
   ),
 
@@ -164,7 +165,7 @@ export const CalloutPresets = {
     <HumanCenteredCallout
       variant="human"
       title="Organizers are the central actors"
-      description="Technology serves people, never replaces them. Stewards make the decisions, the system provides support."
+      description="Technology serves people, never replaces them. Representatives make the decisions, the system provides support."
     />
   ),
 };

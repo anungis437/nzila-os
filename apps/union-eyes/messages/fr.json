@@ -7139,6 +7139,16 @@
   "marketing": {
     "nav": {
       "home": "Accueil",
+      "solutions": "Solutions",
+      "insights": "Perspectives",
+      "solutionsItems": {
+        "executive": { "name": "Direction exécutive syndicale", "desc": "Continuité stratégique" },
+        "governance": { "name": "Leadership de gouvernance", "desc": "Modernisation de la gouvernance" },
+        "operations": { "name": "Leadership des opérations", "desc": "Coordination interéquipes" },
+        "technology": { "name": "Leadership technologique", "desc": "IA sécuritaire en entreprise" },
+        "labour": { "name": "Leadership politique et travail", "desc": "Supervision humaine" },
+        "procurement": { "name": "Parties prenantes en approvisionnement", "desc": "Préparation au déploiement" }
+      },
       "story": "Notre histoire",
       "modules": "Modules",
       "pricing": "Tarification",
@@ -7235,7 +7245,7 @@
       "pageDescription": "UnionEyes a été construit par des gens qui comprennent le travail, pas la Silicon Valley.",
       "originHeading": "Où tout a commencé",
       "originParagraph1": "Mike a passé des années à l'intérieur — d'abord en tant qu'agent de relations de travail pour un syndicat national, puis en tant qu'avocat menant des enquêtes et des évaluations sur le lieu de travail. Passer de travailler dans un syndicat à travailler avec des syndicats lui a donné une vue sans filtre des points de friction : les flux de travail, les lacunes, les moments où la bonne information n'était tout simplement pas entre les bonnes mains.",
-      "originParagraph2": "Oby a suivi un chemin différent. En tant que DSI d'une association sportive nationale et constructeur expérimenté de SaaS, il a fait carrière à partir d'une idée — que la technologie doit sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
+      "originParagraph2": "Oby a suivi un chemin différent. En tant que technologue chevronné, il a fait carrière à partir d'une idée — que la technologie doit sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
       "originParagraph3": "Lorsque leurs chemins se sont croisés, l'opportunité était évidente. Mike savait exactement ce qui était cassé. Oby savait exactement comment le réparer.",
       "originParagraph4": "UnionEyes est ce qui s'est passé ensuite.",
       "missionHeading": "Notre mission",
@@ -7410,10 +7420,30 @@
     "footer": {
       "description": "Gestion syndicale propulsée par IA, co-conçue avec les syndicats canadiens. Maintenant en pilote.",
       "platform": "Plateforme",
+      "solutions": "Solutions",
+      "governanceAndTrust": "Gouvernance et confiance",
       "product": "Plateforme",
       "resources": "Ressources",
       "company": "Entreprise",
       "legal": "Légal",
+      "institutionalContinuity": "Continuité institutionnelle",
+      "governanceIntelligence": "Intelligence de gouvernance",
+      "organizationalMemory": "Mémoire collective",
+      "corporateMemory": "Mémoire collective",
+      "executiveIntelligence": "Renseignements exécutifs",
+      "operationalCoherence": "Cohérence opérationnelle",
+      "explainableIntelligence": "Intelligence explicable",
+      "executiveLeadership": "Leadership exécutif",
+      "governanceLeadership": "Leadership de gouvernance",
+      "operationsLeadership": "Leadership des opérations",
+      "technologyLeadership": "Leadership technologique",
+      "policyAndLabour": "Politique et travail",
+      "procurement": "Approvisionnement",
+      "trustCenter": "Centre de confiance",
+      "governanceStructure": "Structure de gouvernance",
+      "labourSafeAi": "IA sécuritaire pour le travail",
+      "explainabilityStandards": "Normes d'explicabilité",
+      "insights": "Perspectives",
       "governance": "Gouvernance & Surveillance",
       "grievanceTracking": "Suivi des griefs",
       "memberPortal": "Portail des membres",
@@ -10967,6 +10997,62 @@
       "title": "Équipe de Négociation",
       "role": "Rôle",
       "member": "Membre de l'Équipe"
+    }
+  },
+  "continuityNotes": {
+    "trust": {
+      "label": "Posture de confiance",
+      "posture": "La confiance envers Union Eyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
+    },
+    "procurement": {
+      "label": "Posture d'approvisionnement",
+      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'Union Eyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
+    },
+    "pilot": {
+      "label": "Posture pilote",
+      "posture": "Ceci est un breffage de continuité, non une prise de contact commerciale. Le formulaire ci-dessous encadre un pilote borné dont la réussite se mesure en stabilisation opérationnelle — moins d'engagements abandonnés, une escalade plus claire, et un registre institutionnel qui survit aux transitions de leadership. Les travailleurs ne sont jamais l'objet d'évaluation du pilote."
+    },
+    "ontology": {
+      "label": "Ontologie institutionnelle",
+      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter Union Eyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
+    }
+  },
+  "sovereignty": {
+    "layerLabel": "Couche de souveraineté",
+    "accessNote": "L'accès est journalisé; les actions posées ici font partie du registre institutionnel.",
+    "roleLabels": {
+      "officer": "Officier au registre",
+      "admin": "Administrateur au registre",
+      "national_officer": "Officier national au registre",
+      "fed_staff": "Personnel fédéral au registre",
+      "system_admin": "Opérateur de souveraineté au registre",
+      "president": "Président au registre"
+    },
+    "surfaces": {
+      "cognition": {
+        "name": "Cognition",
+        "posture": "Raisonnement borné sur la mémoire institutionnelle; les sorties sont des recommandations pour le responsable au registre, et non des décisions autonomes."
+      },
+      "longitudinalCognition": {
+        "name": "Cognition longitudinale",
+        "posture": "Raisonnement institutionnel à travers le temps; examiner les motifs pertinents à la continuité avant toute escalade."
+      },
+      "security": {
+        "name": "Sécurité",
+        "posture": "Configuration critique pour la continuité; les changements font partie de la piste d'audit institutionnelle."
+      },
+      "customerSuccess": {
+        "name": "Réussite client",
+        "posture": "Gérance institutionnelle des comptes; agir au nom des syndicats partenaires avec la discipline du responsable au registre."
+      },
+      "operations": {
+        "name": "Opérations",
+        "posture": "Cadence opérationnelle et répartition; ordonnancer le travail comme responsable au registre de l'exécution institutionnelle."
+      },
+      "ops": {
+        "name": "Ops souverains",
+        "posture": "Contrôles d'exécution de la couche de souveraineté; chaque action est journalisée et affecte la continuité."
+      }
     }
   }
 }

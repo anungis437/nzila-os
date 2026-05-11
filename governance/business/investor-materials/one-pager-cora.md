@@ -97,7 +97,7 @@ Database:         Drizzle ORM → Azure PostgreSQL (80+ entities)
 Payment:          Stripe, Interac API, Canadian banking integrations (RBC, TD, BMO)
 Maps & Routing:   Google Maps API (Canadian coverage), route optimization
 SMS/Email:        Twilio (alerts, notifications), SendGrid
-Auth:             Clerk (multi-role, SSO for enterprise cooperatives)
+Auth:             Nzila Platform Auth (multi-role, SSO for enterprise cooperatives)
 Hosting:          Azure canadacentral (low latency, data residency)
 API Integrations: Farm Credit Canada, Agricorp, Canadian Grain Commission
 ```

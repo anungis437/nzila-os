@@ -180,7 +180,7 @@ Trade secrets protected via:
 
 #### **Nzila Scripts-Book Template** (Open-Source Candidate)
 
-**What**: Migration automation framework with 3 standardized profiles (django-aca-azurepg, nextjs-aca-azurepg-clerk, nodeapi-aca-azurepg-clerk)
+**What**: Migration automation framework with 3 standardized profiles (django-aca-azurepg, nextjs-aca-azurepg-auth, nodeapi-aca-azurepg-auth)
 
 **Components**:
 - 6-phase migration workflow (Infrastructure → Database → Auth → Application → Frontend → Testing → Cutover)

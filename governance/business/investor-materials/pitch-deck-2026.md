@@ -233,15 +233,15 @@ investors@nzila.ventures
 ### **Three Standardized Profiles:**
 
 **1. django-aca-azurepg** (4 platforms)
-- Django 5, Azure PostgreSQL, Drizzle ORM, optional Clerk auth
+- Django 5, Azure PostgreSQL, Drizzle ORM, optional Nzila Platform Auth
 - **Platforms:** UnionEyes, Court Lens, AgrimoOps, CongoWave
 
-**2. nextjs-aca-azurepg-clerk** (8 platforms)
-- Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Clerk mandatory
+**2. nextjs-aca-azurepg-auth** (8 platforms)
+- Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth mandatory
 - **Platforms:** ABR, CORA, eEXPORTS, Shop Quoter, Memora, ClinicConnect, CyberLearn, Insight CFO
 
-**3. nodeapi-aca-azurepg-clerk** (3 hybrid platforms)
-- Express/Fastify APIs, Azure PostgreSQL, Drizzle ORM, Clerk auth
+**3. nodeapi-aca-azurepg-auth** (3 hybrid platforms)
+- Express/Fastify APIs, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth
 - **Platforms:** DiasporaCore, SentryIQ, Trade OS (combined with Next.js frontends)
 
 ### **Shared Backbone (8 Components, Django 5, 16-Week Build):**

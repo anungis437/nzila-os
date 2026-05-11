@@ -1,9 +1,11 @@
 /**
- * AI Insights Generator
- * Q1 2025 - Advanced Analytics
- * 
- * Generates natural language insights from analytics data
- * Integrates with existing AI workbench for content generation
+ * Institutional Continuity Signal Generator
+ *
+ * Produces natural-language continuity readings from operational analytics data.
+ * Integrates with the governance intelligence substrate for contextualised interpretation.
+ *
+ * All outputs are interpretive signals — not directives. Human executive review
+ * precedes any operational response.
  */
 
 import { db } from '@/db';

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "trustcore",
+  "version": "1.0.0",
+  "riskLevel": "high",
+  "policyProfile": "trustcore",
+  "controls": {
+    "enforcement": true,
+    "governance": true,
+    "audit": true,
+    "observability": true,
+    "security": true,
+    "aiControl": true,
+    "contracts": true,
+    "events": true
+  },
+  "exceptions": []
+}

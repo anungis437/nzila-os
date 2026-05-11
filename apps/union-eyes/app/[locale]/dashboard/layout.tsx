@@ -13,6 +13,7 @@ import { OrganizationSelector } from "@/components/organization/organization-sel
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
+import RoleExperienceGuard from "@/components/dashboard/role-experience-guard";
 import { PilotModeProvider } from "@/contexts/pilot-mode-context";
 import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
@@ -33,6 +34,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const { userId } = await auth();
 
   if (!userId) {
+    logger.error('[dashboard:identity] auth() returned null userId — redirecting to /login', {
+      stage: 'auth',
+      hasSessionCookie: undefined,
+    });
     return redirect("/login");
   }
 
@@ -176,6 +181,21 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const organizationId = await getOrganizationIdForUser(userId);
   const userRole = await getUserRole(userId, organizationId);
 
+  if (!organizationId) {
+    logger.error('[dashboard:identity] getOrganizationIdForUser returned no organizationId', {
+      stage: 'organization',
+      userId,
+      userEmail,
+    });
+  }
+  if (!userRole) {
+    logger.error('[dashboard:identity] getUserRole returned no role', {
+      stage: 'role',
+      userId,
+      organizationId,
+    });
+  }
+
   // Fetch organization province for QC bilingual banner (Bill 96 / Law 25)
   let organizationProvince: string | null = null;
   if (organizationId) {
@@ -247,6 +267,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           {/* Page content */}
           <div className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
             <FeatureFlagProvider>
+              <RoleExperienceGuard userRole={userRole} />
               {children}
             </FeatureFlagProvider>
           </div>

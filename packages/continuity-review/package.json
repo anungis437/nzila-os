@@ -1,0 +1,16 @@
+{
+  "name": "@nzila/continuity-review",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Continuity posture review primitives. System-scoped, banded, stabilization-oriented. Refuses person-resolving content structurally.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

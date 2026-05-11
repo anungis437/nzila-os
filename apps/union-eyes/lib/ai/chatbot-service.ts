@@ -1,9 +1,14 @@
 /**
- * AI Chatbot Service
- * 
- * Union rights Q&A bot with RAG (Retrieval-Augmented Generation)
- * Multi-provider support: OpenAI, Anthropic, Google
- * Vector search with pgvector
+ * Institutional Rights Cognition Service
+ *
+ * Governance-safe Q&A and institutional memory retrieval for union rights,
+ * collective agreement interpretation, and stewardship continuity support.
+ * Uses retrieval-augmented generation bounded to the organization knowledge base.
+ *
+ * Multi-provider substrate: OpenAI, Anthropic, Google — routed via @nzila/ai-sdk.
+ * Vector search with pgvector for institutional memory proximity.
+ *
+ * All outputs are interpretive and advisory. Human stewardship is preserved at all times.
  */
 
 import { db } from "@/db";

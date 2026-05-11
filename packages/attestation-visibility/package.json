@@ -1,0 +1,16 @@
+{
+  "name": "@nzila/attestation-visibility",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Viewer-facing projections of runtime attestations: release lineage, deployment legitimacy summaries, environment integrity. Append-only, no silent downgrades.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

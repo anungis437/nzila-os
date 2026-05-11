@@ -450,23 +450,11 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     const metadataOrgId =
       (publicMetadata.organizationId as string) || (privateMetadata.organizationId as string) || null;
 
-    // Resolve organizationId: auth orgId (org_xxx format) must be mapped to
-    // the database UUID via organizations.clerk_organization_id. DB columns are
-    // uuid type and will throw "invalid input syntax for type uuid" if given a
-    // non-UUID string directly.
+    // Resolve organizationId from metadata / legacy fields. Authentication
+    // orgId is treated as the canonical app org UUID.
     let resolvedOrganizationId = metadataOrgId || legacyTenantId || null;
     if (orgId) {
-      try {
-        const [org] = await db
-          .select({ id: organizations.id })
-          .from(organizations)
-          .where(eq(organizations.clerkOrganizationId, orgId))
-          .limit(1);
-        resolvedOrganizationId = org?.id ?? resolvedOrganizationId;
-      } catch {
-        // Fallback to metadata if the lookup fails
-        logger.warn('Failed to resolve auth orgId to DB UUID', { orgId });
-      }
+      resolvedOrganizationId = orgId;
     }
 
     // Validate resolvedOrganizationId actually exists in the organizations
@@ -619,7 +607,7 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
     return null;
   }
 
-  let membership: Awaited<ReturnType<typeof db.query.organizationMembers.findFirst>> = undefined;
+  let membership: { id: string; organizationId: string; role: string | null } | undefined;
 
   try {
     const { getOrganizationIdForUser } = await import('./organization-utils');
@@ -628,12 +616,14 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
     if (resolvedOrgId) {
       membership = await db.query.organizationMembers.findFirst({
         where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, resolvedOrgId)),
+        columns: { id: true, organizationId: true, role: true },
       });
     }
 
     if (!membership) {
       membership = await db.query.organizationMembers.findFirst({
         where: (om, { eq }) => eq(om.userId, userId),
+        columns: { id: true, organizationId: true, role: true },
       });
     }
   } catch (dbErr) {
@@ -726,9 +716,33 @@ export async function getUserContextForOrganization(
 
   const membership = await db.query.organizationMembers.findFirst({
     where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+    columns: { id: true, organizationId: true, role: true },
   });
 
   if (!membership) {
+    const [authMembership] = await db
+      .select({ role: authOrganizationUsers.role })
+      .from(authOrganizationUsers)
+      .where(
+        and(
+          eq(authOrganizationUsers.userId, userId),
+          eq(authOrganizationUsers.organizationId, organizationId),
+          eq(authOrganizationUsers.isActive, true),
+        ),
+      )
+      .limit(1)
+
+    if (authMembership?.role) {
+      const role = authMembership.role
+      return {
+        userId,
+        organizationId,
+        roles: [role],
+        permissions: getPermissionsForRole(role),
+        memberId: `auth-org:${organizationId}`,
+      };
+    }
+
     // ─── Fallback: PLATFORM_ADMIN_USER_IDS env var ───────────────────
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
       .split(',')
@@ -847,13 +861,32 @@ export async function requireRole(role: string): Promise<UnifiedUserContext> {
 /**
  * Get user role from database
  */
-async function getUserRoleFromDatabase(userId: string): Promise<string> {
-  const membership = await db.query.organizationMembers.findFirst({
-    where: (om, { eq }) => eq(om.userId, userId),
-  });
+async function getUserRoleFromDatabase(userId: string, organizationId?: string | null): Promise<string> {
+  if (organizationId) {
+    const [authMembershipByOrg] = await db
+      .select({ role: authOrganizationUsers.role })
+      .from(authOrganizationUsers)
+      .where(
+        and(
+          eq(authOrganizationUsers.userId, userId),
+          eq(authOrganizationUsers.organizationId, organizationId),
+          eq(authOrganizationUsers.isActive, true),
+        ),
+      )
+      .limit(1)
 
-  if (membership?.role) {
-    return membership.role
+    if (authMembershipByOrg?.role) {
+      return authMembershipByOrg.role
+    }
+
+    const membershipByOrg = await db.query.organizationMembers.findFirst({
+      where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
+      columns: { role: true },
+    });
+
+    if (membershipByOrg?.role) {
+      return membershipByOrg.role
+    }
   }
 
   const [authMembership] = await db
@@ -867,7 +900,16 @@ async function getUserRoleFromDatabase(userId: string): Promise<string> {
     )
     .limit(1)
 
-  return authMembership?.role || 'member';
+  if (authMembership?.role) {
+    return authMembership.role
+  }
+
+  const membership = await db.query.organizationMembers.findFirst({
+    where: (om, { eq }) => eq(om.userId, userId),
+    columns: { role: true },
+  });
+
+  return membership?.role || 'member';
 }
 
 /**
@@ -914,9 +956,18 @@ export async function requireApiAuth(options: RequireApiAuthOptions = {}) {
     throw new Error('Unauthorized: Authentication required');
   }
 
-  const organizationId = options.orgScoped && userId
-    ? await getOrganizationIdForUser(userId)
-    : null;
+  let organizationId: string | null = null;
+  if (options.orgScoped && userId) {
+    try {
+      organizationId = await getOrganizationIdForUser(userId);
+    } catch (error) {
+      logger.warn('[Auth] Failed to resolve organization context in requireApiAuth', {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error('Forbidden: Organization context unavailable');
+    }
+  }
   
   const context = {
     userId: userId || null,
@@ -926,7 +977,7 @@ export async function requireApiAuth(options: RequireApiAuthOptions = {}) {
   
   // If roles are specified, verify user has one of them
   if (options.roles && options.roles.length > 0 && userId) {
-    const userRole = await getUserRoleFromDatabase(userId);
+    const userRole = await getUserRoleFromDatabase(userId, organizationId);
     
     if (!options.roles.includes(userRole)) {
       throw new Error(`Forbidden: Requires one of roles: ${options.roles.join(', ')}`);

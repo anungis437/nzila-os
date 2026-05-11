@@ -1,7 +1,10 @@
 /**
- * @nzila/platform-decision-engine — Decision generation engine
+ * @nzila/platform-decision-engine — Governance signal generation engine
  *
  * Pipeline: Ingest signals → Evaluate rules → Enrich evidence → Rank → Output
+ *
+ * Produces bounded governance signals, not autonomous decisions.
+ * All signal outputs require human operator review before any action is taken.
  *
  * @module @nzila/platform-decision-engine/engine
  */

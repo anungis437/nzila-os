@@ -77,6 +77,15 @@ const ENTITY_ID_EXCEPTIONS = [
   /entityId:\s*z\.string/,  // Zod schema definition in canonical event/workflow schemas
   /entityId:\s*UUID/,       // test fixture referencing canonical schema entityId field
   /LEGACY_TARGET_ID_COLUMN/, // documented legacy DB column constant (employer-execution routes)
+  // TrustCore evidence events: entityId = the tracked subject (incident, vendor, pia, etc.)
+  // These are domain-level identity fields, not org-scoping context.
+  /entityId:\s*string\b/,   // TypeScript type declaration for evidence subject field
+  /entityId:\s*\w+(?:\.\w+)+/, // evidence event subject from chained property (vendor.id, ctx.orgId)
+  /entityId:\s*\w+[,;)\s]/,  // evidence event subject from single variable (orgId, id, etc.)
+  /\.entityId\b/,            // reading evidence subject from a data row/object (r.entityId, row.entityId)
+  // QueryFinding domain results: entityId names a finding/result subject (path id, summary id, node id)
+  /entityId:\s*`/,           // template-literal value (e.g. entityId: `path_${...}`)
+  /entityId:\s*'[^']+'/,     // string-literal value (e.g. entityId: 'redundancy_summary')
 ]
 
 function isExceptionLine(line: string): boolean {

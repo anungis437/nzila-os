@@ -5,7 +5,7 @@ import LayoutWrapper from "@/components/layout-wrapper";
 import { AuthProvider } from '@nzila/platform-auth/entra/client';
 import { NzilaAppShell } from '@nzila/platform-shell';
 import * as Sentry from '@sentry/nextjs';
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
 import { DemoModeOverlay } from "@/components/pilot/demo-mode-overlay";
@@ -21,6 +21,10 @@ const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-poppins'
 });
+
+export const viewport: Viewport = {
+  themeColor: '#1e3a5f',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = getUnionEyesSiteTopology();
@@ -60,7 +64,6 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: '/apple-touch-icon.png',
     },
     manifest: '/manifest.json',
-    themeColor: '#1e3a5f',
     // Next.js will automatically use app/icon.tsx for favicon and icon
     other: {
       ...(site.isStaging ? { 'x-robots-tag': 'noindex, nofollow' } : {}),
@@ -74,10 +77,43 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // to avoid calling auth() in the root layout which causes middleware detection issues
   const locale = await getLocale();
   const site = getUnionEyesSiteTopology();
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Union Eyes',
+    url: site.marketingUrl,
+    logo: `${site.marketingUrl}/icon.svg`,
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Union Eyes',
+    url: site.marketingUrl,
+    inLanguage: locale,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Union Eyes',
+      url: site.marketingUrl,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${site.marketingUrl}/${locale}/insights?query={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return (
     <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth" data-product="union-eyes">
       <body className={poppins.className} suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
         {site.isStaging ? (
           <div className="sticky top-0 z-100 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
             Staging environment. Pre-production data and behavior may change without notice.

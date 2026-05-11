@@ -274,6 +274,42 @@
       "evalDataset": null,
       "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
       "status": "DEV"
+    },
+    {
+      "id": "trustcore-ai",
+      "name": "TrustCore AI surface (governance · evidence assist)",
+      "app": "trustcore",
+      "package": "@nzila/ai-sdk",
+      "owner": "TrustCore Lead",
+      "riskTier": 2,
+      "tierRationale": "Provisional — governance/evidence assist surface, no autonomous decisions",
+      "provider": "Azure OpenAI",
+      "models": ["gpt-4.1-mini"],
+      "region": "eastus",
+      "highestDataTier": "Confidential",
+      "pia": null,
+      "piaStatus": "TODO",
+      "evalDataset": null,
+      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
+      "status": "DEV"
+    },
+    {
+      "id": "trustcore-trustops-ai",
+      "name": "TrustCore TrustOps AI surface (operations assist)",
+      "app": "trustcore-trustops",
+      "package": "@nzila/ai-sdk",
+      "owner": "TrustCore TrustOps Lead",
+      "riskTier": 2,
+      "tierRationale": "Provisional — trust operations assist surface, advisory only",
+      "provider": "Azure OpenAI",
+      "models": ["gpt-4.1-mini"],
+      "region": "eastus",
+      "highestDataTier": "Confidential",
+      "pia": null,
+      "piaStatus": "TODO",
+      "evalDataset": null,
+      "approval": { "by": "Surface Owner", "date": null, "decision": "draft" },
+      "status": "DEV"
     }
   ]
 }

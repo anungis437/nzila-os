@@ -342,7 +342,7 @@ export function PushNotificationBuilder({
                   <SelectContent>
                     <SelectItem value="active">Active Members</SelectItem>
                     <SelectItem value="executive">Executive Board</SelectItem>
-                    <SelectItem value="stewards">Union Stewards</SelectItem>
+                    <SelectItem value="stewards">Union Representatives</SelectItem>
                     <SelectItem value="engaged">Highly Engaged</SelectItem>
                   </SelectContent>
                 </Select>

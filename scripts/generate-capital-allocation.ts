@@ -41,7 +41,7 @@ function buildCapitalAllocationReport(outputs: CapitalOutputs): string {
   return [
     '# Capital Allocation Report',
     '',
-    'Generated from governance/portfolio/product-catalog.json plus governance/capital/* operating inputs.',
+    'Generated from governance/portfolio/product-catalog.json plus governance/foundations/capital/* operating inputs.',
     '',
     '| Product | Score | Confidence | Engine | Final | Revenue Source | Pipeline Source |',
     '| --- | ---: | ---: | --- | --- | --- | --- |',

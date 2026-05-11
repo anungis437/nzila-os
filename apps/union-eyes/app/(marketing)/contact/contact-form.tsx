@@ -167,7 +167,7 @@ export function ContactForm() {
               <SelectValue placeholder="Select your role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="steward">Union Steward</SelectItem>
+              <SelectItem value="steward">Union Representative</SelectItem>
               <SelectItem value="business-rep">Business Representative</SelectItem>
               <SelectItem value="organizer">Organizer</SelectItem>
               <SelectItem value="executive">Union Executive</SelectItem>

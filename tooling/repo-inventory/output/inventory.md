@@ -1,17 +1,17 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-05-01 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-05-10 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Apps | 24 |
-| Packages (packages/*) | 189 |
-| Workspace Packages (apps|packages|services|tooling) | 219 |
-| GitHub Workflows | 47 |
-| Contract Test Files | 233 |
-| TS/JS Test Files | 1290 |
+| Apps | 26 |
+| Packages (packages/*) | 213 |
+| Workspace Packages (apps|packages|services|tooling) | 245 |
+| GitHub Workflows | 48 |
+| Contract Test Files | 248 |
+| TS/JS Test Files | 1380 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -19,10 +19,10 @@
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
 | abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 248 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
-| agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 102 | Agricultural field operations — harvest tracking, production management, logisti |
+| agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 104 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 237 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
-| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 355 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 250 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 364 | Internal operations console — platform governance, compliance, analytics, integr |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 300 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 39 | Agricultural intelligence dashboard — yield forecasting, price signals, risk ana |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 346 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
@@ -35,13 +35,15 @@
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 53 | Cross-border trade management — deals, listings, shipments, and commission track |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3191 | Full-stack union case management platform — grievance lifecycle, collective barg |
-| veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 18 |  |
-| veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 21 |  |
-| veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 21 |  |
+| trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 96 |  |
+| trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 3514 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 20 |  |
+| veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 23 |  |
+| veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 24 |  |
 | web | Next.js | 3000 | ✅ | ✅ | ❌ | ✅ | 81 | Public marketing site for the Nzila platform — landing pages, resource library,  |
 | weekone | Next.js | 3016 | ✅ | ✅ | ✅ | ✅ | 97 |  |
-| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 450 | Africa-first music distribution, streaming, and royalty management platform. |
+| zonga | Next.js + Django | 3006 | ✅ | ✅ | ✅ | ✅ | 454 | Africa-first music distribution, streaming, and royalty management platform. |
 
 ## Workflows
 
@@ -87,6 +89,7 @@
 - release-train.yml
 - reliability-guard.yml
 - repo-inventory-check.yml
+- runtime-governance-attestation.yml
 - sbom.yml
 - secret-scan.yml
 - security-design-review.yml

@@ -17,7 +17,7 @@ const DETERMINISTIC_DEFAULTS: E2ENormalizedEnv = {
   QA_TEST_ENV: 'true',
   NODE_ENV: 'test',
   DATABASE_URL: '',
-  PLAYWRIGHT_BASE_URL: 'http://127.0.0.1:3002',
+  PLAYWRIGHT_BASE_URL: 'http://localhost:3002',
 }
 
 let cached: E2ENormalizedEnv | null = null

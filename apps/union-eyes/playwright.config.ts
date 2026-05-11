@@ -11,13 +11,13 @@ process.env.PLAYWRIGHT_TEST_AUTH ??= 'true';
  */
 export default defineConfig({
   testDir: '.',
-  testMatch: ['e2e/smoke.spec.ts', 'e2e/ue-workflow.spec.ts', 'tests/e2e/**/*.spec.ts'],
+  testMatch: ['e2e/**/*.spec.ts', 'tests/e2e/**/*.spec.ts'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   timeout: 60_000,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  testIgnore: ['tests/e2e/ue-workflow.spec.ts'],
+  testIgnore: ['tests/e2e/ue-workflow.spec.ts', '**/.next/**', '**/node_modules/**'],
   reporter: process.env.CI
     ? [['html', { open: 'never' }], ['github']]
     : [['html', { open: 'on-failure' }]],
@@ -45,7 +45,7 @@ export default defineConfig({
         webServer: {
           command: 'pnpm dev',
           port: 3002,
-          reuseExistingServer: true,
+          reuseExistingServer: false,
           timeout: 120_000,
           env: {
             ...process.env,

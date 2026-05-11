@@ -1,8 +1,9 @@
 /**
- * CFO — Advisory AI Page (Server Component + Client Islands).
+ * CFO — Financial Operational Cognition Page (Server Component + Client Islands).
  *
- * Conversational financial advisor with AI-powered insights,
- * anomaly detection, and cash flow forecasting.
+ * Bounded financial operational cognition surface providing continuity-safe
+ * interpretation, anomaly signaling, and cash-flow continuity forecasts.
+ * Final authority remains with accountable financial operators.
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
@@ -59,36 +60,35 @@ export default async function AdvisoryAIPage() {
         </div>
         <div>
           <h2 className="font-poppins text-2xl font-bold text-foreground">
-            Advisory AI
+            Financial Operational Cognition
           </h2>
           <p className="text-sm text-muted-foreground">
-            AI-powered financial intelligence, anomaly detection &amp; forecasting
+            Bounded institutional interpretation, continuity-safe anomaly signaling, and cash-flow continuity briefings. Final authority remains with accountable financial operators.
           </p>
         </div>
       </div>
 
-      {/* Chat Prompt */}
+      {/* Continuity Inquiry Prompt */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-electric" />
           <h3 className="font-poppins text-base font-semibold text-foreground">
-            Ask LedgerIQ
+            Operational Continuity Inquiry
           </h3>
         </div>
         <p className="mb-4 text-sm text-muted-foreground">
-          Ask any financial question — cash flow analysis, budget variance,
-          tax planning, or compliance review.
+          Submit a bounded financial continuity inquiry — cash-flow context, budget variance interpretation, tax-planning continuity, or compliance review. Responses are interpretive support only; final authority remains with accountable financial operators.
         </p>
         <AdvisoryChatForm />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* AI Insights */}
+        {/* Financial Operational Interpretations */}
         <div>
           <div className="mb-3 flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-amber-500" />
             <h3 className="font-poppins text-base font-semibold text-foreground">
-              AI Insights
+              Financial Operational Interpretations
             </h3>
           </div>
           {insights.length === 0 ? (

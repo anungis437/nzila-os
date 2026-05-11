@@ -87,7 +87,7 @@ Build shared infrastructure once, deploy across all verticals:
 │  Multi-Org Core     │  AI Engine  │  Compliance Layer     │
 │  (Django + pgVector)│ (Azure OpenAI)│ (PIPEDA/GDPR/HIPAA)│
 ├─────────────────────────────────────────────────────────────┤
-│  Auth (Clerk)  │  Billing (Stripe)  │  Notifications     │
+│  Auth (Platform Auth)  │  Billing (Stripe)  │  Notifications     │
 │  Analytics  │  Integrations  │  File Storage           │
 └─────────────────────────────────────────────────────────────┘
          ↑              ↑              ↑
@@ -106,7 +106,7 @@ Build shared infrastructure once, deploy across all verticals:
 | **Database** | PostgreSQL, pgVector, PostGIS, Supabase |
 | **AI/ML** | Azure OpenAI (GPT-4), scikit-learn |
 | **Cloud** | Azure (Container Apps, PostgreSQL, Redis) |
-| **Auth** | Clerk, SAML SSO |
+| **Auth** | Nzila Platform Auth, SAML SSO |
 | **Payments** | Stripe, Mobile Money (M-Pesa) |
 
 ---

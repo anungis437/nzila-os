@@ -7,7 +7,17 @@
 
 // ── Roles ─────────────────────────────────────────────────────────────────
 
-export type Role = 'platform_admin' | 'org_admin' | 'staff' | 'auditor'
+export type Role =
+  | 'platform_admin'
+  | 'org_admin'
+  | 'compliance_officer'
+  | 'security_officer'
+  | 'privacy_officer'
+  | 'legal_reviewer'
+  | 'staff'
+  | 'external_auditor'
+  | 'auditor'
+  | 'read_only'
 
 // ── Org-scoped entity base ────────────────────────────────────────────────
 
@@ -49,61 +59,18 @@ export interface AuditEvent {
 }
 
 // ── Compliance ────────────────────────────────────────────────────────────
+// Single source of truth: @nzila/trustcore-core/compliance
+// Re-exported here for ergonomics in app code.
 
-export type ComplianceStatus = 'compliant' | 'at-risk' | 'non-compliant'
+export type {
+  ComplianceStatus,
+  RiskCategory,
+  RiskSeverity,
+  RiskItem,
+  ComplianceEvaluation,
+} from '@nzila/trustcore-core/compliance'
 
-export type RiskCategory = 'governance' | 'data' | 'pia' | 'incident' | 'dsr' | 'vendor'
-
-export type RiskSeverity = 'low' | 'medium' | 'high' | 'critical'
-
-export interface RiskItem {
-  /** Stable identifier for deduplication (deterministic, based on rule). */
-  id: string
-  category: RiskCategory
-  severity: RiskSeverity
-  message: string
-  recommendation: string
-  /**
-   * When true this risk blocks audit readiness regardless of score.
-   * Examples: unreported serious-harm incident, overdue DSR request.
-   */
-  blocking: boolean
-  /** Deep-link to the TrustCore module where the user should act. */
-  actionUrl?: string
-  /** Rough effort estimate to resolve this risk. */
-  effort?: 'low' | 'medium' | 'high'
-  /**
-   * ISO 8601 deadline imposed by Law 25 (e.g., CAI 72-hour reporting window).
-   * Undefined when no statutory deadline applies.
-   */
-  slaDeadline?: string
-  /**
-   * IDs of evidence events or entity records that support this risk finding.
-   * Allows auditors to trace from risk → raw log.
-   */
-  evidenceRefs?: string[]
-}
-
-export interface ComplianceEvaluation {
-  orgId: string
-  score: number
-  /**
-   * Confidence in the score (0–100).
-   * Low when few modules have been populated (e.g., no assets, no PIAs).
-   * A low-confidence high score does not indicate real compliance.
-   */
-  confidence: number
-  status: ComplianceStatus
-  risks: RiskItem[]
-  summary: {
-    totalAssets: number
-    missingPias: number
-    overdueRequests: number
-    openIncidents: number
-    highRiskVendors: number
-  }
-  evaluatedAt: string
-}
+import type { ComplianceStatus } from '@nzila/trustcore-core/compliance'
 
 /** @deprecated Use ComplianceEvaluation — kept for backward compat */
 export interface ComplianceResult {

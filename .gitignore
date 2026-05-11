@@ -251,3 +251,7 @@ email-otp.json
 # Extra safety net in case files are saved elsewhere:
 docs/commercial/**/*.pptx
 docs/commercial/**/*.pdf
+
+# TrustCore personal/private GTM content (not for repo)
+apps/trustcore/gtm/
+

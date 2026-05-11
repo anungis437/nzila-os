@@ -191,7 +191,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
   { path: 'agreements/page.tsx',                         minRole: 'member',               description: 'Collective agreements browser' },
-  { path: 'claims/page.tsx',                             minRole: 'member',               description: 'Claims list' },
+  // claims/page.tsx removed: directory holds only new/ and [id]/ sub-pages on disk
   { path: 'claims/new/page.tsx',                         minRole: 'member',               description: 'File new claim' },
   { path: 'claims/[id]/page.tsx',                        minRole: 'member',               description: 'Claim detail view' },
   { path: 'compliance/page.tsx',                         minRole: 'member',               description: 'Compliance dashboard (client-side)' },
@@ -236,9 +236,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'organizer/impact/page.tsx',                   minRole: 'member',               description: 'Organizer impact dashboard (client-side)' },
   { path: 'ai-assistant/page.tsx',                       minRole: 'member',               description: 'AI Assistant chatbot (client-side)' },
   { path: 'calendar/page.tsx',                           minRole: 'member',               description: 'Calendar & events (client-side)' },
-  { path: 'deadlines/page.tsx',                          minRole: 'member',               description: 'Deadline tracking (client-side)' },
-  { path: 'insights/page.tsx',                           minRole: 'member',               description: 'AI insights (client-side)' },
-  { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Messages inbox (client-side)' },
+  // deadlines/, insights/, messages/ pages do not exist on disk under app/[locale]/dashboard/
   { path: 'cognition/page.tsx',                          minRole: 'member',               description: 'Cognition operations dashboard' },
 
   // ── Health & safety (client-side pages) ────────────────────────────────
@@ -255,7 +253,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'communications/page.tsx',                     minRole: 'steward',              description: 'Communications hub' },
   { path: 'communications/sms/page.tsx',                 minRole: 'steward',              description: 'SMS communications' },
   { path: 'cross-union-analytics/page.tsx',              minRole: 'steward',              description: 'Cross-union analytics' },
-  { path: 'grievances/page.tsx',                         minRole: 'steward',              description: 'Grievances console' },
+  // grievances/page.tsx removed: directory holds only [id]/ sub-page on disk
   { path: 'grievances/[id]/page.tsx',                    minRole: 'steward',              description: 'Grievance detail' },
   { path: 'members/page.tsx',                            minRole: 'steward',              description: 'Members directory' },
   { path: 'members/new/page.tsx',                        minRole: 'steward',              description: 'Create new member' },
@@ -282,7 +280,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'stewards/ratings/page.tsx',                   minRole: 'chief_steward',        description: 'Rep ratings & satisfaction dashboard' },
 
   // ── Executive-level pages (level 85) ───────────────────────────────────
-  { path: 'executive/page.tsx',                          minRole: 'vice_president',       description: 'Executive dashboard' },
+  // executive/page.tsx removed: no such directory on disk; see executive-operating-intelligence/ instead
 
   // ── CLC pages (clc_staff access) ──────────────────────────────────────
   { path: 'clc/page.tsx',                                minRole: 'clc_staff',            description: 'CLC executive dashboard' },
@@ -314,7 +312,21 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Debug (dev-only, gated by NODE_ENV) ────────────────────────────────
   { path: 'debug/page.tsx',                              minRole: 'admin',                description: 'Debug info (dev-only)' },
-]
+  // ── Knowledge transfer & institutional cognition (Finalization v1) ──────
+  { path: 'continuity-intelligence/page.tsx',            minRole: 'officer',              description: 'Continuity intelligence dashboard' },
+  { path: 'continuity-planning/page.tsx',                minRole: 'officer',              description: 'Continuity planning workspace' },
+  { path: 'continuity-simulation/page.tsx',              minRole: 'officer',              description: 'Continuity simulation workspace' },
+  { path: 'executive-operating-intelligence/page.tsx',   minRole: 'vice_president',       description: 'Executive operating intelligence dashboard' },
+  { path: 'governance-center/page.tsx',                  minRole: 'officer',              description: 'Governance center' },
+  { path: 'governance-culture/page.tsx',                 minRole: 'officer',              description: 'Governance culture dashboard' },
+  { path: 'governance-recommendations/page.tsx',         minRole: 'officer',              description: 'Governance recommendations workspace' },
+  { path: 'institutional-intelligence/page.tsx',         minRole: 'officer',              description: 'Institutional intelligence dashboard' },
+  { path: 'institutional-memory/page.tsx',               minRole: 'officer',              description: 'Institutional memory workspace' },
+  { path: 'institutional-operating-intelligence/page.tsx', minRole: 'vice_president',     description: 'Institutional operating intelligence workspace' },
+  { path: 'knowledge-transfer/page.tsx',                 minRole: 'officer',              description: 'Knowledge transfer index' },
+  { path: 'knowledge-transfer/new/page.tsx',             minRole: 'officer',              description: 'Knowledge transfer create' },
+  { path: 'knowledge-transfer/[id]/page.tsx',            minRole: 'officer',              description: 'Knowledge transfer detail' },
+  { path: 'longitudinal-cognition/page.tsx',             minRole: 'vice_president',       description: 'Longitudinal cognition workspace' },]
 
 // ── API routes backing dashboard pages ──────────────────────────────────────
 

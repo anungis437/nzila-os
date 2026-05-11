@@ -10,6 +10,7 @@
  *   npx tsx apps/union-eyes/scripts/seed-cba-intelligence.ts
  */
 
+import { assertNotProduction } from "../lib/runtime/production-guard";
 import { db } from "../db/db";
 import {
   cbaIntelSources,
@@ -20,6 +21,8 @@ import {
   cbaIntelReviewDecisions,
 } from "../db/schema";
 import { eq } from "drizzle-orm";
+
+assertNotProduction("seed-cba-intelligence");
 
 // ── Fixed IDs for determinism ───────────────────────────────────────────────
 

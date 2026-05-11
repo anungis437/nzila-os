@@ -1,0 +1,16 @@
+{
+  "name": "@nzila/stabilization-signals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Calm stabilization indicators. Banded readings only; refuses composite scores; encourages slowing, distributing, and extending.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

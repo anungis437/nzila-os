@@ -1,11 +1,15 @@
 import { expect, test } from '@playwright/test'
-import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS } from './_helpers'
+import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 import { UE_TEST_USERS } from '../fixtures/test-users'
 
 test.describe('UE E2E - external UX tester containment', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('external tester is limited to isolated UX scope', async ({ request }) => {

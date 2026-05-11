@@ -56,7 +56,7 @@ function DailyOpsView({ daily }: { daily: WeeklyReviewData['daily'] }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-300 leading-relaxed">
-        High-signal items that need a decision or action today. Pulled from execution initiatives, support risk, and account attention signals.
+        High-signal items that need continuity-safe decisions or actions today. Pulled from execution initiatives, support risk, and account attention signals.
       </p>
       <div className="space-y-2">
         {daily.items.length === 0 ? (
@@ -101,7 +101,7 @@ function DailyOpsView({ daily }: { daily: WeeklyReviewData['daily'] }) {
 function WeeklyExecView({ weekly }: { weekly: WeeklyReviewData['weekly'] }) {
   return (
     <div className="space-y-6">
-      <p className="text-sm text-slate-300">{weekly.summary}</p>
+      <p className="text-sm text-slate-300">{weekly.summary} Interpretive support only; final authority remains with accountable human operators.</p>
 
       <div>
         <h3 className="text-xs font-semibold uppercase text-slate-400 mb-2">Decision Queue</h3>

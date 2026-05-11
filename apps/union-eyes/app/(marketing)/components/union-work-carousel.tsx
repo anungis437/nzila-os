@@ -13,7 +13,7 @@ type WorkSlide = {
 const slides: WorkSlide[] = [
   {
     title: "Grievance Intake Review",
-    subtitle: "Steward triage and evidence tracking in one shared queue",
+    subtitle: "Union representative triage and evidence tracking in one shared queue",
     image:
       "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=800&fit=crop&q=80",
     alt: "Union representatives reviewing case intake items",

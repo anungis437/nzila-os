@@ -11,7 +11,8 @@
 import { auth, currentUser } from '@/lib/api-auth-guard';
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 import { db } from "@/db/db";
-import { organizationMembers, organizations } from "@/db/schema-organizations";
+import { organizationMembers } from "@/db/schema-organizations";
+import { authOrganizationUsers } from '@nzila/db/schema';
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
 import { createLogger } from '@nzila/os-core'
@@ -60,12 +61,63 @@ function resolveNzilaRole(raw: string | null | undefined): UserRole | null {
 }
 
 /**
+ * Map platform auth organization roles to Union Eyes app roles.
+ * These are roles stored in user_management.organization_users.role
+ * and need to be normalized to UserRole equivalents.
+ */
+function resolvePlatformOrgRole(raw: string | null | undefined): UserRole | null {
+  if (!raw) return null;
+  const key = raw.toLowerCase();
+  
+  // Direct matches - platform roles that have equivalent app roles
+  const directMap: Record<string, UserRole> = {
+    'admin': UserRole.ADMIN,
+    'system_admin': UserRole.SYSTEM_ADMIN,
+    'app_owner': UserRole.APP_OWNER,
+    'platform_lead': UserRole.PLATFORM_LEAD,
+    'steward': UserRole.STEWARD,
+    'chief_steward': UserRole.CHIEF_STEWARD,
+    'member': UserRole.MEMBER,
+    'officer': UserRole.OFFICER,
+    'clerk': UserRole.CLERK,
+    'president': UserRole.PRESIDENT,
+    'vice_president': UserRole.VICE_PRESIDENT,
+    'secretary_treasurer': UserRole.SECRETARY_TREASURER,
+    'bargaining_committee': UserRole.BARGAINING_COMMITTEE,
+    'health_safety_rep': UserRole.HEALTH_SAFETY_REP,
+  };
+  
+  if (directMap[key]) return directMap[key];
+  
+  // Executive roles
+  if (key === 'executive' || key === 'ceo') return UserRole.PRESIDENT;
+  
+  // Governance roles
+  if (key === 'compliance_manager') return UserRole.COMPLIANCE_MANAGER;
+  if (key === 'auditor' || key === 'auditor_readonly') return UserRole.COMPLIANCE_MANAGER;
+  if (key === 'governance') return UserRole.OFFICER; // governance role -> officer (governance rep)
+  
+  // Staff roles
+  if (key === 'support_agent') return UserRole.SUPPORT_AGENT;
+  if (key === 'staff' || key === 'support_staff') return UserRole.SUPPORT_AGENT;
+  
+  // Default to null (not resolved)
+  return null;
+}
+
+/**
  * Get user role from database.
  *
- * Resolution order:
- *   1. `organization_members` table (canonical RBAC source, org-scoped)
- *   2. Clerk `publicMetadata.role` / `publicMetadata.nzilaRole`
- *   3. Fail-closed: throws if none of the above resolve.
+ * Resolution order (PRIORITIZES SELECTED ORGANIZATION):
+ *   1. Platform auth `user_management.organization_users` (selected org only)
+ *   2. Local `organization_members` (org-scoped, fallback if no auth record)
+ *   3. Clerk `publicMetadata.role` / `publicMetadata.nzilaRole`
+ *   4. Default to MEMBER
+ *
+ * IMPORTANT: When organizationId is provided, we prioritize platform auth
+ * to ensure selected-org roles take precedence over default-org roles.
+ * This prevents local organization_members default-org rows from overriding
+ * correct platform roles in the selected organization.
  */
 export async function getUserRole(
   userId: string,
@@ -108,25 +160,37 @@ export async function getUserRole(
       logger.warn('[getUserRole] Super-admin email check failed, falling through', { detail: emailCheckError instanceof Error ? emailCheckError.message : emailCheckError });
     }
 
-    // 1. Try organization_members (org-scoped membership)
+    // 1. PRIORITY: Check platform auth table FIRST when organizationId is specified.
+    //    This ensures selected-org roles take precedence over default-org roles.
+    //    Test users (and any users in alternate orgs) will have their roles here.
     if (organizationId) {
-      // Clerk auth() returns Clerk org IDs (org_xxx), but organization_members
-      // stores UUID references. Resolve Clerk ID → UUID when needed.
-      let resolvedOrgId = organizationId;
-      if (organizationId.startsWith('org_')) {
-        try {
-          const org = await db
-            .select({ id: organizations.id })
-            .from(organizations)
-            .where(eq(organizations.clerkOrganizationId, organizationId))
-            .limit(1);
-          if (org[0]?.id) {
-            resolvedOrgId = org[0].id;
-          }
-        } catch (lookupErr) {
-          logger.warn('[getUserRole] Clerk org ID lookup failed', { detail: lookupErr instanceof Error ? lookupErr.message : lookupErr });
+      const authOrgUser = await db
+        .select({ role: authOrganizationUsers.role })
+        .from(authOrganizationUsers)
+        .where(
+          and(
+            eq(authOrganizationUsers.userId, userId),
+            eq(authOrganizationUsers.organizationId, organizationId),
+            eq(authOrganizationUsers.isActive, true),
+          ),
+        )
+        .limit(1);
+
+        const rawRole = authOrgUser[0]?.role;
+        const fromAuthOrgUsers = resolvePlatformOrgRole(rawRole) 
+                               ?? resolveUserRole(rawRole);
+        if (fromAuthOrgUsers) {
+          logger.info('[getUserRole] Found role via platform auth', { 
+            userId, organizationId, rawRole, resolved: fromAuthOrgUsers 
+          });
+          return fromAuthOrgUsers;
         }
-      }
+    }
+
+    // 2. Fallback: Check local organization_members (only if auth lookup returned nothing)
+    //    This is the legacy/canonical RBAC source for production orgs.
+    if (organizationId) {
+      const resolvedOrgId = organizationId;
 
       const orgMember = await db
         .select({ role: organizationMembers.role })
@@ -141,26 +205,31 @@ export async function getUserRole(
         .limit(1);
 
       const fromOrgMembers = resolveUserRole(orgMember[0]?.role);
-      if (fromOrgMembers) return fromOrgMembers;
+      if (fromOrgMembers) {
+        logger.debug('[getUserRole] Found role via local organization_members', { 
+          detail: { userId, organizationId, role: orgMember[0]?.role, resolved: fromOrgMembers } 
+        });
+        return fromOrgMembers;
+      }
     }
 
     // 2. Fallback to Clerk publicMetadata
     const user = await currentUser();
 
-    // 2a. publicMetadata.role (union-eyes native key)
+    // 3a. publicMetadata.role (union-eyes native key)
     const fromClerk = resolveUserRole(
       user?.publicMetadata?.role as string | undefined,
     );
     if (fromClerk) return fromClerk;
 
-    // 2b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
+    // 3b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
     //     console, CFO, partners apps all write to this key)
     const fromNzilaRole = resolveNzilaRole(
       user?.publicMetadata?.nzilaRole as string | undefined,
     );
     if (fromNzilaRole) return fromNzilaRole;
 
-    // Default role
+    // 4. Default role
     return UserRole.MEMBER;
   } catch (error) {
     // SECURITY FIX: Fail closed — authorization errors must not grant access

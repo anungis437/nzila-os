@@ -1,11 +1,12 @@
 /**
- * Intelligence Home — Executive Operating System
+ * Executive Operational Cognition Home
  *
- * Palantir × Bloomberg × Stripe Internal Ops × Founder OS
- * Answers: Where is money? Which grants? Which partners? Which products?
- * Which deals are moving? Which risks are emerging? What should Michel do next?
+ * Governance-safe situational intelligence for executive operational cadence.
+ * Surfaces continuity signals across: funding posture, deal progression,
+ * partner stability, product readiness, risk indicators, and operational rhythms.
  *
  * Server Component — all data loaded at request time, zero client JS.
+ * Executive interprets; this surface contextualises. No autonomous authority.
  */
 import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'

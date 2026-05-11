@@ -1,17 +1,18 @@
 /**
- * Financial Insights AI Service
+ * Governance-Safe Financial Cognition Service
  *
- * Generates AI-powered financial intelligence for the executive dashboard:
- * - Collection anomaly detection
- * - Arrears risk scoring
- * - Budget variance analysis
- * - Remittance trend interpretation
- * - Natural-language executive summary
+ * Produces bounded operational finance intelligence for the executive dashboard:
+ * - Collection health contextualisation
+ * - Arrears posture reading
+ * - Budget variance interpretation
+ * - Remittance cadence trend contextualisation
+ * - Executive financial continuity narrative
  *
  * CONSTRAINTS:
  * - Every output: confidence + explanation
- * - All insights are advisory — no automatic actions
+ * - All outputs are advisory — no automatic actions
  * - Org-scoped, audited
+ * - Executives interpret financial posture; this system contextualises cadence signals.
  *
  * @module lib/ai/financial-insights
  */

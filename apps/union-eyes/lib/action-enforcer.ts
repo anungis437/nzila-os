@@ -23,6 +23,11 @@ export const CUPE_ACTIONS = [
   'note_add_internal',
   'attachment_upload',
   'attachment_delete',
+  'exit_interview_create',
+  'exit_interview_submit',
+  'exit_interview_read_all',
+  'exit_interview_publish',
+  'exit_interview_search',
   'user_manage',
   'admin_config',
 ] as const;
@@ -80,6 +85,11 @@ const MIN_LEVEL: Record<CUPEAction, number> = {
   note_add_internal: 1,
   attachment_upload: 0,
   attachment_delete: 4,
+  exit_interview_create: 1,
+  exit_interview_submit: 1,
+  exit_interview_read_all: 1,
+  exit_interview_publish: 4,
+  exit_interview_search: 0,
   user_manage: 4,
   admin_config: 5,
 };

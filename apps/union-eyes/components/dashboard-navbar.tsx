@@ -65,7 +65,7 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
     
     // Core features for all users
     ...(!isCrossOrgStaff ? [
-      { label: "Claims", href: `/${locale}/dashboard/claims`, icon: FileText },
+      { label: "Cases", href: `/${locale}/dashboard/inbox?type=intake`, icon: FileText },
       { label: "Voting", href: `/${locale}/dashboard/voting`, icon: Vote },
     ] : []),
     
@@ -74,14 +74,14 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
     
     // Representative tools (steward+)
     ...((isSteward || isOfficer || isAdmin) && !isCrossOrgStaff ? [
-      { label: "Workbench", href: `/${locale}/dashboard/workbench`, icon: FileBarChart },
+      { label: "Workbench", href: `/${locale}/dashboard/work`, icon: FileBarChart },
       { label: "Members", href: `/${locale}/dashboard/members`, icon: Users },
     ] : []),
     
     // Leadership tools (officer+)
     ...((isOfficer || isAdmin) && !isCrossOrgStaff ? [
       { label: "Targets", href: `/${locale}/dashboard/targets`, icon: Target },
-      { label: "Grievances", href: `/${locale}/dashboard/grievances`, icon: Scale },
+      { label: "Representation", href: `/${locale}/dashboard/work`, icon: Scale },
     ] : []),
     
     // Cross-organizational tools (congress/federation staff)

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Shield, Lock, Eye, Database, Trash2, Download } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -11,7 +12,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.legal.privacy' });
-  return { title: t('pageTitle'), description: t('pageDescription') };
+  return {
+    title: t('pageTitle'),
+    description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/legal/privacy'),
+  };
 }
 
 export default async function PrivacyPolicyPage({

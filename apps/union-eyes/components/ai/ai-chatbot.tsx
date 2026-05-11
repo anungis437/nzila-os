@@ -1,9 +1,11 @@
 /**
- * AI Chatbot Component
- * 
- * Union rights Q&A chatbot with RAG support
- * Real-time messaging interface
- * Citation display and helpful feedback
+ * Institutional Rights Intelligence Interface
+ *
+ * Governance-safe Q&A surface for union rights interpretation, continuity
+ * guidance, and institutional memory support. Uses retrieval-augmented
+ * generation bounded to the organization's knowledge base.
+ *
+ * All outputs are interpretive and advisory — human stewardship is always preserved.
  */
 
 "use client";
@@ -56,11 +58,11 @@ export function AIChatbot() {
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  // Sample suggestions
+  // Continuity guidance entry points — scoped to rights, governance, and stewardship
   const suggestions = [
     { category: "Grievance", title: "How do I submit an intake?", icon: <ClipboardList size={24} className="text-blue-600" /> },
     { category: "Rights", title: "What are my workplace rights?", icon: <Scale size={24} className="text-blue-600" /> },
-    { category: "Contract", title: "Explain my collective agreement", icon: <FileSignature size={24} className="text-blue-600" /> },
+    { category: "Agreement", title: "Interpret my collective agreement", icon: <FileSignature size={24} className="text-blue-600" /> },
     { category: "Safety", title: "Report a safety concern", icon: <ShieldAlert size={24} className="text-amber-600" /> },
   ];
   

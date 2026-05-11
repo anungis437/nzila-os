@@ -1,10 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS } from './_helpers'
+import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
 
 test.describe('UE E2E - case escalation', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)
+  })
+
+  test.afterEach(async ({ request }) => {
+    await cleanupDatabaseConnections(request)
   })
 
   test('authorized escalation succeeds and unauthorized escalation is blocked', async ({ request }) => {
@@ -18,7 +22,7 @@ test.describe('UE E2E - case escalation', () => {
       },
     })
 
-    expect([200, 400, 409, 422]).toContain(escalate.status())
+    expect([200, 400, 409, 422], `escalate body: ${await escalate.text()}`).toContain(escalate.status())
 
     await loginAsTestUser(request, UE_E2E_USERS.member)
 

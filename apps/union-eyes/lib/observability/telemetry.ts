@@ -48,6 +48,25 @@ import { trace, context, propagation } from '@opentelemetry/api';
 // @ts-ignore
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 
+function parseOtelHeaders(raw: string | undefined): Record<string, string> {
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return Object.fromEntries(
+        Object.entries(parsed as Record<string, unknown>).map(([key, value]) => [key, String(value)]),
+      );
+    }
+  } catch {
+    // Keep telemetry optional: invalid header config should not break request handling.
+  }
+
+  return {};
+}
+
 /**
  * Initialize OpenTelemetry SDK
  * 
@@ -80,9 +99,7 @@ return null;
   // Configure trace exporter
   const traceExporter = new OTLPTraceExporter({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
-    headers: process.env.OTEL_EXPORTER_OTLP_HEADERS 
-      ? JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS)
-      : {},
+    headers: parseOtelHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
   });
 
   // Initialize SDK

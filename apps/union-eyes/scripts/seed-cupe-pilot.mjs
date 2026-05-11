@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+import { assertNotProduction } from '../lib/runtime/production-guard.mjs'
+
+assertNotProduction('seed-cupe-pilot')
+
 /**
  * Seed Script: Load CUPE Pilot Fixtures
  * 

@@ -55,6 +55,9 @@ export interface AuthSessionResult {
  *   1. PG session cookie (`nzila_session`) — email/password auth
  *   2. Entra / NextAuth JWT — SSO
  */
+const isE2ETestAuthEnabled = (): boolean =>
+  (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true'
+
 export async function auth(): Promise<AuthSessionResult> {
   // ── 1. Try PG session-based auth ────────────────────────────────────────
   try {
@@ -66,7 +69,51 @@ export async function auth(): Promise<AuthSessionResult> {
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
       const { getAuthUser } = await import('../password/auth-service')
-      const pgUser = await getAuthUser()
+      let pgUser = await getAuthUser()
+      // E2E test escape hatch: when PLAYWRIGHT_TEST_AUTH=true and the cookie
+      // value matches the deterministic seed token shape `ue-seed-session-<userId>`,
+      // accept it directly without depending on opaque DB session validation.
+      // Fail-closed: only active when PLAYWRIGHT_TEST_AUTH is explicitly set,
+      // which is never true in production runtimes.
+      if (!pgUser && isE2ETestAuthEnabled() && pgToken.startsWith('ue-seed-session-')) {
+        const userId = pgToken.slice('ue-seed-session-'.length)
+        if (userId) {
+          try {
+            const { db } = await import('@nzila/db/client')
+            const { authUsers, authOrganizationUsers } = await import('@nzila/db/schema')
+            const { eq, and } = await import('drizzle-orm')
+            const [authRow] = await db
+              .select({
+                id: authUsers.userId,
+                email: authUsers.email,
+                firstName: authUsers.firstName,
+                lastName: authUsers.lastName,
+              })
+              .from(authUsers)
+              .where(and(eq(authUsers.userId, userId), eq(authUsers.isActive, true)))
+              .limit(1)
+            if (authRow) {
+              const [membership] = await db
+                .select({ organizationId: authOrganizationUsers.organizationId })
+                .from(authOrganizationUsers)
+                .where(
+                  and(
+                    eq(authOrganizationUsers.userId, userId),
+                    eq(authOrganizationUsers.isActive, true),
+                  ),
+                )
+                .limit(1)
+              pgUser = {
+                ...authRow,
+                organizationId: membership?.organizationId ?? null,
+                sessionId: pgToken,
+              }
+            }
+          } catch {
+            // E2E auth bridge lookup failed; fall through to standard paths.
+          }
+        }
+      }
       if (pgUser) {
         // Resolve org role from DB
         let orgRole: string | null = null
@@ -158,7 +205,47 @@ export async function currentUser() {
     const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
     if (pgToken) {
       const { getAuthUser } = await import('../password/auth-service')
-      const pgUser = await getAuthUser()
+      let pgUser = await getAuthUser()
+      // Same E2E test escape hatch as auth() above. See note there.
+      if (!pgUser && isE2ETestAuthEnabled() && pgToken.startsWith('ue-seed-session-')) {
+        const userId = pgToken.slice('ue-seed-session-'.length)
+        if (userId) {
+          try {
+            const { db } = await import('@nzila/db/client')
+            const { authUsers, authOrganizationUsers } = await import('@nzila/db/schema')
+            const { eq, and } = await import('drizzle-orm')
+            const [authRow] = await db
+              .select({
+                id: authUsers.userId,
+                email: authUsers.email,
+                firstName: authUsers.firstName,
+                lastName: authUsers.lastName,
+              })
+              .from(authUsers)
+              .where(and(eq(authUsers.userId, userId), eq(authUsers.isActive, true)))
+              .limit(1)
+            if (authRow) {
+              const [membership] = await db
+                .select({ organizationId: authOrganizationUsers.organizationId })
+                .from(authOrganizationUsers)
+                .where(
+                  and(
+                    eq(authOrganizationUsers.userId, userId),
+                    eq(authOrganizationUsers.isActive, true),
+                  ),
+                )
+                .limit(1)
+              pgUser = {
+                ...authRow,
+                organizationId: membership?.organizationId ?? null,
+                sessionId: pgToken,
+              }
+            }
+          } catch {
+            // E2E auth bridge lookup failed; fall through to standard paths.
+          }
+        }
+      }
       if (pgUser) {
         return {
           id: pgUser.id,

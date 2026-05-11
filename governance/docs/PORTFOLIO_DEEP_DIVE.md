@@ -144,7 +144,7 @@ Platform: NzilaOS (migrated from Base44)
 Frontend: Next.js 16 + React 19 (TypeScript)
 Modules: 22 business modules
 API: NzilaOS server actions + Drizzle ORM
-Authentication: Clerk (multi-tenant)
+Authentication: Nzila Platform Auth (multi-Org)
 ```
 
 #### Key Features
@@ -476,7 +476,7 @@ Platform: NzilaOS (migrated from Base44)
 Frontend: Next.js 16 + React 19 (TypeScript)
 Modules: 70+ business modules
 ORM: Drizzle (PostgreSQL)
-Authentication: Clerk (multi-tenant)
+Authentication: Nzila Platform Auth (multi-Org)
 CI/CD: Turborepo + GitHub Actions
 ```
 

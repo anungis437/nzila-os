@@ -1,0 +1,23 @@
+{
+  "name": "@nzila/governance-operations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Governance operations primitives: posture cards, governance-safe timeline shapes, role model, calm interpretation helpers. Pure data primitives consumed by host UIs.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./posture": "./src/posture.ts",
+    "./timeline": "./src/timeline.ts",
+    "./role-model": "./src/role-model.ts",
+    "./interpret": "./src/interpret.ts",
+    "./design-tokens": "./src/design-tokens.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "zod": "^3.25.0" },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

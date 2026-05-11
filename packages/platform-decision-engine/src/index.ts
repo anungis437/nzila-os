@@ -1,6 +1,10 @@
 /**
  * @nzila/platform-decision-engine — Barrel export
  *
+ * Governance signal generation substrate — produces bounded operational
+ * signals for human operator review. All outputs are advisory and require
+ * explicit confirmation before any operational consequence.
+ *
  * @module @nzila/platform-decision-engine
  */
 

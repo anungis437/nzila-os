@@ -40,9 +40,19 @@ export async function generateMetadata({
   params: Promise<{ orgId: string }>
 }): Promise<Metadata> {
   const { orgId } = await params
-  const programs = await listTrustcorePrivacyPrograms(orgId).catch(() => [])
-  const activeProgram = programs.find((p) => p.status === 'active') ?? null
-  const orgName = activeProgram?.orgName ?? orgId
+  // Resolve org display name from the active privacy program (denormalised
+  // `org_name` column added in migration 0025). Falls back to `orgId` when
+  // unset so the page remains renderable for newly-onboarded orgs.
+  let orgName = orgId
+  try {
+    const programs = await listTrustcorePrivacyPrograms(orgId)
+    const active = programs.find((p) => p.status === 'active') ?? programs[0]
+    if (active?.orgName) {
+      orgName = active.orgName
+    }
+  } catch {
+    // Metadata generation is best-effort; never fail the page render here.
+  }
 
   return {
     title: `Trust Center — ${orgName}`,

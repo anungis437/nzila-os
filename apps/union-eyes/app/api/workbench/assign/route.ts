@@ -3,23 +3,18 @@
  * Assign a claim to the current user (or a specified steward).
  */
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { assignSchema } from './schemas';
 
 export const dynamic = 'force-dynamic';
 
-const assignSchema = z.object({
-  claimId: z.string().uuid(),
-  assignTo: z.string().optional(), // defaults to current user
-});
-
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: ['steward', 'chief_steward', 'admin'] },
     openapi: {
       tags: ['Workbench'],
       summary: 'Assign a claim',
@@ -27,8 +22,7 @@ export const POST = withApi(
     },
   },
   async (ctx) => {
-    const body = await ctx.request.json();
-    const parsed = assignSchema.safeParse(body);
+    const parsed = assignSchema.safeParse(ctx.body);
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: 'Invalid input', details: parsed.error.flatten() },

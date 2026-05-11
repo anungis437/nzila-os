@@ -6,13 +6,11 @@
  * message regardless of account existence (anti-enumeration).
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { forgotPassword } from '@nzila/platform-auth/password'
 import { sendPasswordResetEmail, logEmailDeliveryFailure } from '@/lib/auth-emails'
+import { forgotPasswordBodySchema } from './schemas'
 
 export const runtime = 'nodejs'
-
-const bodySchema = z.object({ email: z.string().email() })
 
 function extractIp(r: NextRequest): string | undefined {
   return (
@@ -27,7 +25,7 @@ const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const parsed = bodySchema.safeParse(body)
+    const parsed = forgotPasswordBodySchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
     }

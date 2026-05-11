@@ -20,6 +20,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { upsertTrustcoreSubscription } from '@nzila/db/queries/trustcore'
+import { getStripeClient } from '@nzila/payments-stripe'
 
 // In-process idempotency cache (sufficient for single-instance deployments)
 const processedEventIds = new Set<string>()
@@ -33,10 +34,6 @@ export async function POST(req: NextRequest) {
 
   // ── No Stripe configured — log and ack ───────────────────────────────────
   if (!stripeKey || !webhookSecret) {
-    console.info('[TrustCore billing webhook] received (Stripe not yet configured)', {
-      bodyLength: body.length,
-      sig,
-    })
     return NextResponse.json({ received: true, note: 'Stripe not yet configured' })
   }
 
@@ -47,11 +44,9 @@ export async function POST(req: NextRequest) {
 
   let event: import('stripe').Stripe.Event
   try {
-    const { default: Stripe } = await import('stripe')
-    const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+    const stripe = getStripeClient()
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-  } catch (err) {
-    console.error('[TrustCore billing webhook] signature verification failed', err)
+  } catch {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
@@ -74,7 +69,6 @@ export async function POST(req: NextRequest) {
         const orgId = session.metadata?.orgId
         const plan = (session.metadata?.plan ?? 'pro') as 'pro' | 'premium'
         if (!orgId) {
-          console.warn('[TrustCore webhook] checkout.session.completed missing orgId metadata')
           break
         }
         await upsertTrustcoreSubscription({
@@ -96,8 +90,7 @@ export async function POST(req: NextRequest) {
         if (!subId) break
 
         // Fetch subscription to get metadata (orgId) and period dates
-        const { default: Stripe } = await import('stripe')
-        const stripe = new Stripe(stripeKey, { apiVersion: '2026-04-22.dahlia' })
+        const stripe = getStripeClient()
         const sub = await stripe.subscriptions.retrieve(subId)
         const orgId = sub.metadata?.orgId
         if (!orgId) break
@@ -120,7 +113,6 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as import('stripe').Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
-          console.warn('[TrustCore webhook] subscription.updated missing orgId metadata')
           break
         }
         const item = sub.items.data[0]
@@ -140,7 +132,6 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as import('stripe').Stripe.Subscription
         const orgId = sub.metadata?.orgId
         if (!orgId) {
-          console.warn('[TrustCore webhook] subscription.deleted missing orgId metadata')
           break
         }
         // Downgrade to free — do NOT delete the record
@@ -158,8 +149,7 @@ export async function POST(req: NextRequest) {
         // Unhandled event types are acknowledged without error
         break
     }
-  } catch (err) {
-    console.error('[TrustCore billing webhook] event processing error', { eventType: event.type, err })
+  } catch {
     // Return 500 so Stripe retries the event
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
   }

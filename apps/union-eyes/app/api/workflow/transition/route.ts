@@ -19,7 +19,6 @@ import { eq, and, count } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { wrapSchemaQuery } from '@/lib/schema-error'
-import { z } from 'zod'
 import { eventBus, AppEvents } from '@/lib/events'
 import '@/lib/events/pilot-event-listeners'
 import {
@@ -28,6 +27,8 @@ import {
   recordUnionEyesWorkflowTransition,
   recordUnionEyesWorkflowTransitionFailure,
 } from '@/lib/pilot-metrics'
+import { transitionSchema } from './schemas'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -42,21 +43,6 @@ function statusForAuthError(message: string): number {
 
   return 500
 }
-
-const transitionSchema = z.object({
-  claimNumber: z.string().min(1).max(100),
-  targetStatus: z.enum([
-    'submitted',
-    'under_review',
-    'assigned',
-    'investigation',
-    'pending_documentation',
-    'resolved',
-    'rejected',
-    'closed',
-  ]),
-  notes: z.string().max(5000).optional(),
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -211,9 +197,23 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error('Workflow transition failed', { error: String(err) })
     const message = err instanceof Error ? err.message : 'Internal error'
+    const exposeDetails = process.env.QA_TEST_ENV === 'true' || process.env.NODE_ENV !== 'production'
+    const e = err as Error & { cause?: unknown }
+    const cause = e?.cause as { message?: string; code?: string } | undefined
 
     return NextResponse.json(
-      { success: false, error: message.startsWith('Unauthorized') || message.startsWith('Forbidden') ? message : 'Internal error' },
+      {
+        success: false,
+        error: message.startsWith('Unauthorized') || message.startsWith('Forbidden') ? message : 'Internal error',
+        ...(exposeDetails && !(message.startsWith('Unauthorized') || message.startsWith('Forbidden'))
+          ? {
+              detail: e?.message ?? String(err),
+              cause: cause?.message ?? (cause ? String(cause) : undefined),
+              causeCode: cause?.code,
+              stack: e?.stack,
+            }
+          : {}),
+      },
       { status: statusForAuthError(message) },
     )
   }

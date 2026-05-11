@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-05-04",
+  "last_audit": "2026-05-11",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -114,6 +114,8 @@
     "control-plane": "internal",
     "nzila-hq": "incubating",
     "orchestrator-api": "internal",
+    "trustcore": "incubating",
+    "trustcore-trustops": "incubating",
     "web": "pilot",
     "agrimo": "incubating",
     "cora": "incubating",
@@ -229,6 +231,28 @@
       "proof_level": "internal-proof",
       "revenue_status": "internal-cost-center",
       "priority": "medium"
+    },
+    "trustcore": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "public",
+      "portfolio_tier": 3,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "high"
+    },
+    "trustcore-trustops": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 3,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pre-revenue",
+      "priority": "high"
     },
     "web": {
       "registry_tier": "PRODUCTION",
@@ -418,6 +442,8 @@
         "control-plane",
         "nzila-hq",
         "orchestrator-api",
+        "trustcore",
+        "trustcore-trustops",
         "web"
       ],
       "TIER 4 — Incubate": [
@@ -457,6 +483,8 @@
         "control-plane",
         "nzila-hq",
         "orchestrator-api",
+        "trustcore",
+        "trustcore-trustops",
         "web"
       ],
       "incubate": [

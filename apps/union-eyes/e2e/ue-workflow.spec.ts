@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import {
   assertNoCrossOrgLeak,
   assertPermissionDenied,
+  assertRoleGatedReadStatus,
   ensureServerReady,
   loginAsTestUser,
   seedOrVerifyTestState,
@@ -66,7 +67,7 @@ test.describe('Union Eyes QA E2E Flows', () => {
 
     const response = await request.get('/api/cognition/kpis?windowDays=30')
 
-    expect([200, 403]).toContain(response.status())
+    assertRoleGatedReadStatus(response.status())
   })
 
   test('6) export audit pack route is role and org constrained', async ({ request }) => {

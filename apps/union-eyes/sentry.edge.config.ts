@@ -9,10 +9,12 @@ import * as Sentry from "@sentry/nextjs";
 // The build currently disables withSentryConfig, so hard-coding a DSN here
 // causes silent failures inside the Edge runtime on Azure Container Apps.
 if (process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   Sentry.init({
     dsn: process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
-    tracesSampleRate: 1,
+    tracesSampleRate: isProduction ? 0.1 : 1,
     enableLogs: true,
-    sendDefaultPii: true,
+    sendDefaultPii: !isProduction,
   });
 }

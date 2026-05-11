@@ -43,8 +43,8 @@ export function getHumanExplainer(context: ExplainerContext): HumanExplanation {
 const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisStage' | 'priorityContext'>> = {
   submitted: {
     title: 'Your grievance has been received',
-    explanation:
-      'Your case is now in our system and will be reviewed by a steward within 48 hours. We\'ve sent you a confirmation email with your case number.',
+       explanation:
+       'Your case is now in our system and will be reviewed by a union representative within 48 hours. We\'ve sent you a confirmation email with your case number.',
     nextSteps: [
       'A steward will be assigned to your case',
       'You\'ll receive an email when review begins',
@@ -60,7 +60,7 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
         url: '/resources/grievance-process',
       },
       {
-        title: 'Contact your steward',
+        title: 'Contact your union representative',
         description: 'You can reach out anytime if you have questions',
       },
     ],
@@ -68,16 +68,16 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
 
   under_review: {
     title: '{steward} is carefully reviewing your case',
-    explanation:
-      'A dedicated steward is examining the details of your situation, reviewing relevant policies, and gathering information to support your case.',
+       explanation:
+       'A dedicated union representative is examining the details of your situation, reviewing relevant policies, and gathering information to support your case.',
     nextSteps: [
-      'Steward may reach out for additional details',
+         'Your representative may reach out for additional details',
       'Case will move to investigation if evidence supports your claim',
       'You\'ll be notified of the decision and next steps',
     ],
     expectedTimeline: 'Review process takes 3-7 business days',
     empathyMessage:
-      'We understand this is a difficult time. Your steward is your advocate throughout this process.',
+      'We understand this is a difficult time. Your union representative is your advocate throughout this process.',
     resourcesAvailable: [
       {
         title: 'Your rights during review',
@@ -92,19 +92,19 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     explanation:
       'A steward with experience in cases like yours has been assigned. They will be your primary contact throughout the process.',
     nextSteps: [
-      'Your steward will contact you within 24 hours',
+      'Your union representative will contact you within 24 hours',
       'They\'ll explain the process and answer your questions',
       'Together you\'ll develop a strategy for your case',
     ],
     expectedTimeline: 'Initial contact within 1 business day',
     empathyMessage:
-      'You\'re not alone in this. Your steward is here to fight for your rights.',
+      'You\'re not alone in this. Your union representative is here to fight for your rights.',
   },
 
   investigation: {
     title: 'Active investigation underway',
     explanation:
-      'Your steward is conducting a thorough investigation, which may include interviewing witnesses, reviewing documents, and consulting with union representatives. This is a critical phase where we build the strongest possible case.',
+      'Your union representative is conducting a thorough investigation, which may include interviewing witnesses, reviewing documents, and consulting with union representatives. This is a critical phase where we build the strongest possible case.',
     nextSteps: [
       'Investigation findings will be documented',
       'Evidence will be organized to support your case',
@@ -123,12 +123,12 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
     nextSteps: [
       'Check your email for specific document requests',
       'Gather and submit the requested materials',
-      'Your steward can help you understand what\'s needed',
+         'Your union representative can help you understand what\'s needed',
       'Case will resume once documentation is received',
     ],
     expectedTimeline: 'Provide documentation within 7 days if possible',
     empathyMessage:
-      'We know gathering paperwork can be frustrating. Your steward is here to help guide you through this.',
+      'We know gathering paperwork can be frustrating. Your union representative is here to help guide you through this.',
     resourcesAvailable: [
       {
         title: 'Document checklist',
@@ -144,7 +144,7 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
       'After careful review and advocacy, your case has reached a resolution. This means an agreement or outcome has been achieved.',
     nextSteps: [
       'Review the resolution details sent to you',
-      'Contact your steward if you have questions',
+      'Contact your union representative if you have questions',
       'Any agreed-upon actions will be implemented',
     ],
     expectedTimeline: 'Resolution implementation varies by case',
@@ -169,12 +169,12 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
       'After thorough review, we were unable to proceed with your case as a formal grievance. This doesn\'t mean your concerns aren\'t valid, but we may need to explore alternative approaches.',
     nextSteps: [
       'Review the detailed explanation sent to you',
-      'Discuss alternative options with your steward',
+      'Discuss alternative options with your union representative',
       'You may have other avenues for addressing the issue',
     ],
-    expectedTimeline: 'Contact your steward within 48 hours to discuss',
+    expectedTimeline: 'Contact your union representative within 48 hours to discuss',
     empathyMessage:
-      'We understand this isn\'t the outcome you hoped for. Your steward can help you understand the decision and explore other options.',
+      'We understand this isn\'t the outcome you hoped for. Your union representative can help you understand the decision and explore other options.',
     resourcesAvailable: [
       {
         title: 'Alternative resources',
@@ -190,7 +190,7 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
       'This case has been completed and is now closed. All documentation has been archived and is available for your records.',
     nextSteps: [
       'Download your case documents for your records',
-      'Contact your steward if you have follow-up questions',
+         'Contact your union representative if you have follow-up questions',
       'We\'re here if you need support in the future',
     ],
     expectedTimeline: 'Case records retained for 7 years',
@@ -239,15 +239,15 @@ export function getEncouragementMessage(
   daysInState: number
 ): string | null {
   if (status === 'investigation' && daysInState > 14) {
-    return 'We know the wait can be difficult. Your steward is working hard to ensure a thorough investigation.';
+    return 'We know the wait can be difficult. Your union representative is working hard to ensure a thorough investigation.';
   }
 
   if (status === 'pending_documentation' && daysInState > 5) {
-    return 'If you\'re having trouble gathering the requested documents, please reach out to your steward for assistance.';
+    return 'If you\'re having trouble gathering the requested documents, please reach out to your union representative for assistance.';
   }
 
   if (status === 'under_review' && daysInState > 7) {
-    return 'Your case is taking longer than usual due to its complexity. Your steward remains committed to achieving the best outcome.';
+    return 'Your case is taking longer than usual due to its complexity. Your union representative remains committed to achieving the best outcome.';
   }
 
   return null;
@@ -261,17 +261,17 @@ export function explainTransitionRules(currentStatus: ClaimStatus): string {
     submitted:
       'Once submitted, your case will be assigned to a steward for review. In rare cases, it may be rejected if it falls outside union jurisdiction.',
     under_review:
-      'During review, your steward will determine next steps: moving to investigation, requesting additional documentation, or resolving if the issue is straightforward.',
+      'During review, your union representative will determine next steps: moving to investigation, requesting additional documentation, or resolving if the issue is straightforward.',
     assigned:
       'Now that a steward is assigned, they\'ll begin their review and decide whether to investigate further or request additional information.',
     investigation:
       'The investigation can lead to resolution if findings are clear, or may require additional documentation to strengthen the case.',
     pending_documentation:
-      'Once you provide the requested documents, your steward will resume the investigation or move toward resolution.',
+      'Once you provide the requested documents, your union representative will resume the investigation or move toward resolution.',
     resolved:
       'Your case is complete. It will be archived with all supporting documentation.',
     rejected:
-      'This decision can be discussed with your steward to explore other options.',
+      'This decision can be discussed with your union representative to explore other options.',
     closed:
       'Closed cases are archived but remain accessible for your records.',
   };

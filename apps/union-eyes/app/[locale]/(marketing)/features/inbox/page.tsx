@@ -14,19 +14,24 @@ import {
   ShieldCheck,
   ArrowRight,
 } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export const metadata: Metadata = {
-  title: 'Inbox | UnionEyes',
-  description:
-    'Inbox is the steward and LRO signal hub for intake, follow-up requests, and time-sensitive representation work.',
-};
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  return {
+    title: 'Inbox | UnionEyes',
+    description:
+      'Inbox is the union representative signal hub for intake, follow-up requests, and time-sensitive representation work.',
+    alternates: buildLocaleAlternates(locale, '/features/inbox'),
+  };
+}
 
 const features = [
   {
     icon: ClipboardList,
     title: 'Intake arrives in context',
     description:
-      'New intake lands where stewards and LROs can review it with the right organizational context instead of chasing email threads.',
+      'New intake lands where union representatives can review it with the right organizational context instead of chasing email threads.',
   },
   {
     icon: Bell,
@@ -44,7 +49,7 @@ const features = [
     icon: ShieldCheck,
     title: 'Role-appropriate visibility',
     description:
-      'Inbox is for stewards, LROs, and admins. Members use the intake and follow-up flow instead of the full signal queue.',
+      'Inbox is for union representatives and admins. Members use the intake and follow-up flow instead of the full signal queue.',
   },
 ];
 
@@ -61,14 +66,13 @@ export default async function LocaleInboxPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 border border-sky-200 rounded-full text-sm text-sky-700 font-medium mb-6">
             <Inbox className="h-4 w-4" />
-            <span>Steward / LRO Signal Hub</span>
+            <span>Union Representative Signal Hub</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
             Inbox is where the union team sees what needs attention first
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            Inbox is not a member portal. It is the governed signal queue for stewards,
-            LROs, and admins reviewing new intake, follow-up requests, and time-sensitive updates.
+            Inbox is not a member portal. It is the governed signal queue for union representatives and admins reviewing new intake, follow-up requests, and time-sensitive updates.
           </p>
         </div>
       </header>

@@ -7139,6 +7139,17 @@
   "marketing": {
     "nav": {
       "home": "Accueil",
+      "solutions": "Solutions",
+      "insights": "Perspectives",
+      "proof": "Preuves",
+      "solutionsItems": {
+        "executive": { "name": "Direction exécutive syndicale", "desc": "Continuité stratégique" },
+        "governance": { "name": "Leadership de gouvernance", "desc": "Modernisation de la gouvernance" },
+        "operations": { "name": "Leadership des opérations", "desc": "Coordination interéquipes" },
+        "technology": { "name": "Leadership technologique", "desc": "IA sécuritaire en entreprise" },
+        "labour": { "name": "Leadership politique et travail", "desc": "Supervision humaine" },
+        "procurement": { "name": "Parties prenantes en approvisionnement", "desc": "Préparation au déploiement" }
+      },
       "story": "Notre histoire",
       "modules": "Modules",
       "pricing": "Tarification",
@@ -7228,14 +7239,14 @@
     "story": {
       "badge": "Notre histoire",
       "heroHeading": "Deux frères. Deux carrières. Une seule conviction.",
-      "heroDescription": "Un agent de relations de travail devenu avocat et un directeur des systèmes d'information devenu bâtisseur SaaS — ensemble, ils construisent le système d'exploitation que les syndicats n'ont jamais eu.",
+      "heroDescription": "Un agent de relations de travail devenu avocat et un technologue chevronné — ensemble, ils construisent le système d'exploitation que les syndicats n'ont jamais eu.",
       "readMore": "En savoir plus",
       "backToHome": "Retour à l'accueil",
       "pageTitle": "Notre histoire | UnionEyes",
       "pageDescription": "UnionEyes a été fondé par deux frères qui ont vécu les lacunes de l'infrastructure syndicale — et ont décidé de les combler.",
       "originHeading": "Où tout a commencé",
       "originParagraph1": "Mike a passé des années à l'intérieur — d'abord comme agent de relations de travail pour un syndicat national, puis comme avocat menant des enquêtes et des évaluations en milieu de travail. Passer de travailler dans un syndicat à travailler avec des syndicats lui a donné une vue sans filtre de l'endroit où se trouvait la friction : les flux de travail, les lacunes, les moments où la bonne information n'était tout simplement pas entre les bonnes mains.",
-      "originParagraph2": "Oby a pris un chemin différent. En tant que DSI d'une association sportive nationale et constructeur expérimenté de SaaS, il a fait carrière à partir d'une idée — que la technologie devrait sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
+      "originParagraph2": "Oby a pris un chemin différent. En tant que technologue chevronné, il a fait carrière à partir d'une idée — que la technologie devrait sembler humaine. Que les plateformes les plus puissantes sont celles que les gens utilisent réellement.",
       "originParagraph3": "Lorsque leurs chemins se sont croisés, l'opportunité était évidente. Mike savait exactement ce qui était défaillant. Oby savait exactement comment le réparer.",
       "originParagraph4": "UnionEyes est ce qui est arrivé ensuite.",
       "missionHeading": "Notre mission",
@@ -7361,6 +7372,15 @@
         "heading": "Demande de projet pilote reçue!",
         "body": "Merci pour votre intérêt envers UnionEyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter de la portée."
       },
+      "phase6": {
+        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "onboardingTitle": "Intelligence de continuite pour l integration",
+        "federationTitle": "Scenarios de continuite a echelle federative",
+        "decisionTitle": "Systemes de parcours de decision executive",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gerer par :"
+      },
       "sectors": {
         "Healthcare": "Soins de santé",
         "Education": "Éducation",
@@ -7409,11 +7429,32 @@
     },
     "footer": {
       "description": "Un système d'exploitation gouverné pour les syndicats canadiens — déployé par contrat, activé par module et conçu pour la reddition de comptes.",
-      "platform": "Modules",
-      "product": "Modules",
+      "platform": "Capacités",
+      "solutions": "Solutions",
+      "governanceAndTrust": "Gouvernance et confiance",
+      "product": "Capacités",
       "resources": "Ressources",
       "company": "Entreprise",
       "legal": "Légal",
+      "institutionalContinuity": "Continuité institutionnelle",
+      "governanceIntelligence": "Intelligence de gouvernance",
+      "organizationalMemory": "Mémoire collective",
+      "corporateMemory": "Mémoire collective",
+      "executiveIntelligence": "Renseignements exécutifs",
+      "operationalCoherence": "Cohérence opérationnelle",
+      "explainableIntelligence": "Intelligence explicable",
+      "executiveLeadership": "Leadership exécutif",
+      "governanceLeadership": "Leadership de gouvernance",
+      "operationsLeadership": "Leadership des opérations",
+      "technologyLeadership": "Leadership technologique",
+      "policyAndLabour": "Politique et travail",
+      "procurement": "Approvisionnement",
+      "trustCenter": "Centre de confiance",
+      "governanceStructure": "Structure de gouvernance",
+      "labourSafeAi": "IA sécuritaire pour le travail",
+      "explainabilityStandards": "Normes d'explicabilité",
+      "insights": "Perspectives",
+      "institutionalProof": "Preuves institutionnelles",
       "governance": "Gouvernance et surveillance",
       "grievanceTracking": "Gestion des dossiers et griefs",
       "memberPortal": "Portail des membres et engagement",
@@ -7699,7 +7740,19 @@
       "entitlementTitle": "Contrôle des droits",
       "entitlementDesc": "Chaque bénéfice, chaque crédit, chaque allocation est lié à une règle, un rôle et une piste d'audit. Les gestionnaires de régimes voient exactement ce qui a été décaissé et pourquoi.",
       "defensibilityTitle": "Défensibilité juridique",
-      "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen."
+      "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen.",
+      "phase6": {
+        "tabScenario": "Intelligence de scenarios",
+        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
+        "leadershipDesc": "Ces scenarios reflettent des transitions institutionnelles reelles et montrent des reponses calmes qui preservent la coherence de gouvernance.",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "disruptionTitle": "Modelisation des perturbations operationnelles",
+        "stabilizationTitle": "Simulation de stabilisation organisationnelle",
+        "committeeTitle": "Simulations de coordination des comites",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gerer par :",
+        "stabilizeWithLabel": "Stabiliser avec :"
+      }
     },
     "statusBody": {
       "systemStatus": "État du système",
@@ -10967,6 +11020,62 @@
       "title": "Équipe de négociation",
       "role": "Rôle",
       "member": "Membre de l'équipe"
+    }
+  },
+  "continuityNotes": {
+    "trust": {
+      "label": "Posture de confiance",
+      "posture": "La confiance envers Union Eyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
+    },
+    "procurement": {
+      "label": "Posture d'approvisionnement",
+      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'Union Eyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
+    },
+    "pilot": {
+      "label": "Posture pilote",
+      "posture": "Ceci est un breffage de continuité, non une prise de contact commerciale. Le formulaire ci-dessous encadre un pilote borné dont la réussite se mesure en stabilisation opérationnelle — moins d'engagements abandonnés, une escalade plus claire, et un registre institutionnel qui survit aux transitions de leadership. Les travailleurs ne sont jamais l'objet d'évaluation du pilote."
+    },
+    "ontology": {
+      "label": "Ontologie institutionnelle",
+      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter Union Eyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
+    }
+  },
+  "sovereignty": {
+    "layerLabel": "Couche de souveraineté",
+    "accessNote": "L'accès est journalisé; les actions posées ici font partie du registre institutionnel.",
+    "roleLabels": {
+      "officer": "Officier au registre",
+      "admin": "Administrateur au registre",
+      "national_officer": "Officier national au registre",
+      "fed_staff": "Personnel fédéral au registre",
+      "system_admin": "Opérateur de souveraineté au registre",
+      "president": "Président au registre"
+    },
+    "surfaces": {
+      "cognition": {
+        "name": "Cognition",
+        "posture": "Raisonnement borné sur la mémoire institutionnelle; les sorties sont des recommandations pour le responsable au registre, et non des décisions autonomes."
+      },
+      "longitudinalCognition": {
+        "name": "Cognition longitudinale",
+        "posture": "Raisonnement institutionnel à travers le temps; examiner les motifs pertinents à la continuité avant toute escalade."
+      },
+      "security": {
+        "name": "Sécurité",
+        "posture": "Configuration critique pour la continuité; les changements font partie de la piste d'audit institutionnelle."
+      },
+      "customerSuccess": {
+        "name": "Réussite client",
+        "posture": "Gérance institutionnelle des comptes; agir au nom des syndicats partenaires avec la discipline du responsable au registre."
+      },
+      "operations": {
+        "name": "Opérations",
+        "posture": "Cadence opérationnelle et répartition; ordonnancer le travail comme responsable au registre de l'exécution institutionnelle."
+      },
+      "ops": {
+        "name": "Ops souverains",
+        "posture": "Contrôles d'exécution de la couche de souveraineté; chaque action est journalisée et affecte la continuité."
+      }
     }
   }
 }

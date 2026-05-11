@@ -6919,7 +6919,7 @@
     "support": "Supporto",
     "contactSupport": "Contatta il supporto",
     "needHelp": "Hai bisogno di aiuto?",
-    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your steward for guidance."
+    "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your union representative for guidance."
   },
   "pilot": {
     "dashboard": {
@@ -7139,6 +7139,17 @@
   "marketing": {
     "nav": {
       "home": "Home",
+      "solutions": "Soluzioni",
+      "insights": "Approfondimenti",
+      "proof": "Prove",
+      "solutionsItems": {
+        "executive": { "name": "Leadership esecutiva sindacale", "desc": "Continuità strategica" },
+        "governance": { "name": "Leadership di governance", "desc": "Modernizzazione della governance" },
+        "operations": { "name": "Leadership operativa", "desc": "Coordinamento tra team" },
+        "technology": { "name": "Leadership tecnologica", "desc": "IA sicura per l'impresa" },
+        "labour": { "name": "Leadership politica e lavoro", "desc": "Supervisione umana" },
+        "procurement": { "name": "Stakeholder degli acquisti", "desc": "Prontezza al deployment" }
+      },
       "story": "La nostra storia",
       "modules": "Moduli",
       "pricing": "Prezzi",
@@ -7228,14 +7239,14 @@
     "story": {
       "badge": "La nostra storia",
       "heroHeading": "Due fratelli. Due carriere. Una convinzione condivisa.",
-      "heroDescription": "Un funzionario delle relazioni sindacali diventato avvocato e un CIO diventato costruttore di SaaS — insieme stanno costruendo il sistema operativo che i sindacati non hanno mai avuto.",
+      "heroDescription": "Un funzionario delle relazioni sindacali diventato avvocato e un tecnologo esperto — insieme stanno costruendo il sistema operativo che i sindacati non hanno mai avuto.",
       "readMore": "Leggi di più",
       "backToHome": "Torna alla home",
       "pageTitle": "La nostra storia | UnionEyes",
       "pageDescription": "UnionEyes è stata fondata da due fratelli che hanno vissuto le lacune nell'infrastruttura sindacale — e hanno deciso di colmarle.",
       "originHeading": "Dove tutto è iniziato",
       "originParagraph1": "Mike ha trascorso anni all'interno — prima come Responsabile delle Relazioni Sindacali per un sindacato nazionale, poi come avvocato conducendo indagini e valutazioni sul posto di lavoro. Passare dal lavorare in un sindacato al lavorare con i sindacati gli ha dato una visione non filtrata di dove viveva l'attrito: i flussi di lavoro, le lacune, i momenti in cui le informazioni giuste semplicemente non erano nelle mani giuste.",
-      "originParagraph2": "Oby ha preso un percorso diverso. Come CIO di un'associazione sportiva nazionale e costruttore esperto di SaaS, ha costruito una carriera su un'idea — che la tecnologia dovrebbe sembrare umana. Che le piattaforme più potenti sono quelle che le persone effettivamente usano.",
+      "originParagraph2": "Oby ha preso un percorso diverso. Come tecnologo esperto, ha costruito una carriera su un'idea — che la tecnologia dovrebbe sembrare umana. Che le piattaforme più potenti sono quelle che le persone effettivamente usano.",
       "originParagraph3": "Quando i loro percorsi si sono incrociati, l'opportunità era ovvia. Mike sapeva esattamente cosa era rotto. Oby sapeva esattamente come risolverlo.",
       "originParagraph4": "UnionEyes è ciò che è successo dopo.",
       "missionHeading": "La nostra missione",
@@ -7361,6 +7372,15 @@
         "heading": "Richiesta pilota ricevuta!",
         "body": "Grazie per il tuo interesse in UnionEyes. Il nostro team di implementazione esaminerà la tua richiesta e ti contatterà entro 2–3 giorni lavorativi per discutere l'ambito."
       },
+      "phase6": {
+        "leadershipTitle": "Scenari di continuita nelle transizioni di leadership",
+        "frictionTitle": "Flussi di simulazione delle frizioni di governance",
+        "onboardingTitle": "Intelligenza di continuita per onboarding",
+        "federationTitle": "Scenari di continuita su scala federativa",
+        "decisionTitle": "Sistemi di percorso decisionale executive",
+        "stabilizationMoveLabel": "Mossa di stabilizzazione:",
+        "manageThroughLabel": "Gestire tramite:"
+      },
       "sectors": {
         "Healthcare": "Sanità",
         "Education": "Istruzione",
@@ -7410,10 +7430,31 @@
     "footer": {
       "description": "Un sistema operativo governato per i sindacati canadesi.",
       "platform": "Moduli",
+      "solutions": "Soluzioni",
+      "governanceAndTrust": "Governance e fiducia",
       "product": "Prodotto",
       "resources": "Risorse",
       "company": "Azienda",
       "legal": "Legale",
+      "institutionalContinuity": "Continuità istituzionale",
+      "governanceIntelligence": "Intelligenza di governance",
+      "organizationalMemory": "Memoria collettiva",
+      "corporateMemory": "Memoria collettiva",
+      "executiveIntelligence": "Intelligenza esecutiva",
+      "operationalCoherence": "Coerenza operativa",
+      "explainableIntelligence": "Intelligenza spiegabile",
+      "executiveLeadership": "Leadership esecutiva",
+      "governanceLeadership": "Leadership di governance",
+      "operationsLeadership": "Leadership operativa",
+      "technologyLeadership": "Leadership tecnologica",
+      "policyAndLabour": "Politica e lavoro",
+      "procurement": "Approvvigionamento",
+      "trustCenter": "Centro fiducia",
+      "governanceStructure": "Struttura di governance",
+      "labourSafeAi": "IA sicura per il lavoro",
+      "explainabilityStandards": "Standard di spiegabilità",
+      "insights": "Approfondimenti",
+      "institutionalProof": "Prove istituzionali",
       "governance": "Governance e supervisione",
       "grievanceTracking": "Gestione casi e reclami",
       "memberPortal": "Portale membri",
@@ -7699,7 +7740,19 @@
       "entitlementTitle": "Controllo delle Funzionalità Basato sui Diritti",
       "entitlementDesc": "I moduli e le funzionalità sono attivati tramite il contratto di distribuzione. Nulla è attivo per impostazione predefinita. Gli amministratori dell'organizzazione controllano ciò che è disponibile e a chi.",
       "defensibilityTitle": "Difendibile per Progettazione",
-      "defensibilityDesc": "Sigillatura delle prove, catena di custodia dei reclami e registri a prova di manomissione. Quando le tue decisioni vengono contestate, la piattaforma fornisce le prove."
+      "defensibilityDesc": "Sigillatura delle prove, catena di custodia dei reclami e registri a prova di manomissione. Quando le tue decisioni vengono contestate, la piattaforma fornisce le prove.",
+      "phase6": {
+        "tabScenario": "Intelligenza scenari",
+        "leadershipTitle": "Scenari di continuita nelle transizioni di leadership",
+        "leadershipDesc": "Questi scenari riflettono transizioni istituzionali reali e mostrano risposte calme che preservano la coerenza di governance.",
+        "frictionTitle": "Flussi di simulazione delle frizioni di governance",
+        "disruptionTitle": "Modellazione delle interruzioni operative",
+        "stabilizationTitle": "Simulazione di stabilizzazione organizzativa",
+        "committeeTitle": "Simulazioni di coordinamento dei comitati",
+        "stabilizationMoveLabel": "Mossa di stabilizzazione:",
+        "manageThroughLabel": "Gestire tramite:",
+        "stabilizeWithLabel": "Stabilizzare con:"
+      }
     },
     "statusBody": {
       "systemStatus": "Stato del Sistema",

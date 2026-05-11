@@ -463,16 +463,16 @@ class EnvironmentManager {
         // Check for potentially unsafe configurations
         if (this.environment.NODE_ENV === 'production') {
           if (!this.environment.SENTRY_DSN) {
-            warnings.push('ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â SENTRY_DSN not configured - error tracking disabled');
+            warnings.push('[WARN] SENTRY_DSN not configured - error tracking disabled');
           }
           if (!this.environment.STRIPE_SECRET_KEY && !this.environment.WHOP_WEBHOOK_SECRET) {
-            warnings.push('ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Neither STRIPE nor WHOP webhook secrets configured');
+            warnings.push('[WARN] Neither STRIPE nor WHOP webhook secrets configured');
           }
           if (this.environment.EMAIL_PROVIDER === 'resend' && !this.environment.RESEND_API_KEY) {
-            warnings.push('ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â RESEND_API_KEY missing for EMAIL_PROVIDER=resend');
+            warnings.push('[WARN] RESEND_API_KEY missing for EMAIL_PROVIDER=resend');
           }
           if (this.environment.EMAIL_PROVIDER === 'resend' && !this.environment.EMAIL_FROM) {
-            warnings.push('ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â EMAIL_FROM missing for Resend delivery');
+            warnings.push('[WARN] EMAIL_FROM missing for Resend delivery');
           }
         }
 

@@ -1,8 +1,8 @@
 openapi: "3.0.3"
 info:
-  title: CBA Intelligence API
+  title: Labor Continuity Intelligence API
   description: |
-    Public-source CBA Intelligence subsystem for Union-Eyes.
+    Governance-safe labor continuity intelligence subsystem for Union-Eyes.
     Provides endpoints for managing data sources, ingestion pipelines,
     document management, review workflows, freshness monitoring,
     agreement exploration, and benchmark computation.

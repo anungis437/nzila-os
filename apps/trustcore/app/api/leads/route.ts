@@ -39,8 +39,7 @@ export async function POST(req: NextRequest) {
   try {
     await upsertTrustcoreLead(parsed.data)
     return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('[api/leads] upsert failed', err)
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 })
   }
 }

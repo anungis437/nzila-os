@@ -75,8 +75,8 @@ export const SETUP_STEPS: SetupStep[] = [
   },
   {
     id: 'invite-steward',
-    title: 'Invite at least one steward',
-    description: 'Invite a union steward who will triage and manage cases.',
+    title: 'Invite at least one representative',
+    description: 'Invite a union representative who will triage and manage cases.',
     category: 'users',
     required: true,
     checkFn: (ctx) => ctx.usersInvited >= 1,

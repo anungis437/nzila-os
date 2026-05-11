@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Union Eyes — Institutional Operating Intelligence Finalization v1
+- **New kernel package** `@nzila/institutional-cognition-core`: pure, deterministic, organizationally-scoped institutional cognition primitives. 10 canonical cognition domains; explainability envelopes; intelligent + context-aware orchestration; deep-semantics taxonomy with lifecycle/drift validation.
+- **Deep ontology governance**: canonical institutional taxonomy with parent inheritance, lifecycle status (active/deprecated/replaced), vocabulary bindings, breaking-drift detection. New CI violation code `ontology_lifecycle` enforces structural integrity in `tooling/governance/cognition-governance-ci.ts`.
+- **Context-aware orchestration**: closed `COGNITION_EXECUTION_CONTEXTS` set (executive_briefing, governance_review, continuity_planning, incident_triage, longitudinal_review, standard) with deterministic per-context priority/budget/skipIfFeedersFailed policies. NO autonomous decisions — orchestration tunes scheduling only.
+- **Institutional storytelling**: `composeInstitutionalStorybook()` projects multi-engine envelope sets into domain-grouped longitudinal narratives with chapters, taxonomy anchors, executive summaries, deduplicated review signals. Hard-fails on forbidden vocabulary.
+- **Longitudinal cognition surface** (`/dashboard/longitudinal-cognition`): calm, anti-surveillance executive view of organizational story over time with confidence chips, taxonomy anchor pills, collapsible per-domain review signals.
+- **Cognition route convergence**: 15 single-engine routes refactored to `cognitionRoute()`; 18 CRUD/parameterized routes pragma'd with `allow-route-bypass` rationale; full governance CI clean.
+- **Wellbeing-framed organizer support**: relabeled organizer-support predictor outputs from "retention risk" → "burnout signal" to align with the file's stated "predict to support, not surveil" philosophy and labor-safe vocabulary policy.
+- **Verification**: 29/29 kernel tests; 972/972 unit test files (17,076 tests) passing; full repo typecheck clean (208/208); lint clean (0 errors); governance:cognition CI clean.
+
 ### ABR Sprint 4 (Final-Delta)
 - **Intelligence Persistence**: Converted intelligence from seeded-only to persistent runtime storage (sources, cases, ingest_jobs, review_queue tables).
 - **Ingest Jobs**: CSV/JSON import wrapper with duplicate handling, confidence scoring, and review queue integration.

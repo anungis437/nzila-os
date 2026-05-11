@@ -1,10 +1,11 @@
 /**
- * AI Steward Copilot
+ * Steward Continuity Cognition — Query Endpoint
  *
- * POST /api/ai/copilot/query → Execute a copilot action
- * GET  /api/ai/copilot/history → Get copilot session history
+ * POST /api/ai/copilot/query → Execute a bounded institutional cognition action
+ * GET  /api/ai/copilot/history → Get cognition session history
  *
  * Feature-gated: AI_STEWARD_COPILOT
+ * All outputs are advisory and require human steward confirmation.
  */
 
 import { NextRequest } from 'next/server';

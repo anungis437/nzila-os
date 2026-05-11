@@ -92,7 +92,7 @@ No `apps/abr-insights/`, `verticals/`, or `cloned/` directories exist.
 | Check | Status | Evidence | PR |
 |-------|--------|----------|----|
 | No raw DB imports | **PASS** | Django ORM exclusively. No raw SQL, no direct postgres client. | — |
-| Org context server-side | **PASS** | `_get_org_id()` now derives org exclusively from `user.organization_id` (Clerk JWT). Query-param fallback removed. PermissionDenied on missing org. | PR-ABR-01 |
+| Org context server-side | **PASS** | `_get_org_id()` now derives org exclusively from `user.organization_id` (authenticated session JWT). Query-param fallback removed. PermissionDenied on missing org. | PR-ABR-01 |
 | Org-scoped registry | **PASS** | `packages/db/src/org-registry.ts` — 48 tables with `org_id`. Contract test enforced. | — |
 
 ### UnionEyes — ALL PASS

@@ -1,14 +1,18 @@
 /**
- * Employer Risk Scoring AI Service
+ * Employer Compliance Posture Service
  *
  * Aggregates signals (grievance frequency, compliance alerts,
  * dispatch non-compliance, arbitration history) and produces
- * an AI-powered risk score + band for each employer.
+ * a bounded compliance posture reading and contextual band per employer.
+ *
+ * This is institutional monitoring for governance continuity —
+ * not workforce surveillance. The system supports steward decision-making;
+ * it does not make determinations or apply consequences autonomously.
  *
  * CONSTRAINTS:
  * - Every output: confidence + explanation
  * - Org-scoped, audited
- * - Advisory only — no automatic sanctions
+ * - Advisory only — no automatic sanctions or escalations
  *
  * @module lib/ai/employer-risk
  */

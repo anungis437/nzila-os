@@ -7,16 +7,11 @@
  * verify URL in the response so the flow can be exercised without SMTP.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { requestMagicLink } from '@nzila/platform-auth/magic-link'
 import { sendMagicLinkEmail, logEmailDeliveryFailure } from '@/lib/auth-emails'
+import { magicLinkRequestBodySchema } from './schemas'
 
 export const runtime = 'nodejs'
-
-const bodySchema = z.object({
-  email: z.string().email(),
-  organizationId: z.string().uuid().optional(),
-})
 
 function extractIp(r: NextRequest): string | undefined {
   return (
@@ -29,7 +24,7 @@ function extractIp(r: NextRequest): string | undefined {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const parsed = bodySchema.safeParse(body)
+    const parsed = magicLinkRequestBodySchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
     }
@@ -73,3 +68,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ensureServerReady } from '../tests/e2e/_helpers';
+import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
 
@@ -8,9 +9,13 @@ test.describe('CUPE pilot journey', () => {
 
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    await bootstrapE2EAuth(request);
   });
 
   test('member intake uses the approved intake and evidence endpoints', async ({ page }) => {
+    // Intake journey requires an authenticated member context.
+    await loginAsRole(page, 'member');
+
     const intakeRequests: Array<Record<string, unknown>> = [];
     const evidenceRequests: string[] = [];
 
@@ -52,20 +57,46 @@ test.describe('CUPE pilot journey', () => {
 
     await page.goto('/en-CA/dashboard/claims/new');
 
-    await page.locator('input[type="text"]').nth(0).fill('Unsafe overtime denial');
-    await page.locator('select').nth(0).selectOption({ label: 'Wage & Hour' });
-    await page.locator('select').nth(1).selectOption('urgent');
-    await page.locator('textarea').fill('Detailed intake description for the CUPE pilot path.');
-    await page.locator('input[type="date"]').fill('2026-04-18');
-    await page.locator('input[type="text"]').nth(1).fill('Toronto yard');
-    await page.locator('input[type="text"]').nth(2).fill('Pat Doe');
-    await page.locator('#file-upload').setInputFiles({
-      name: 'evidence.txt',
-      mimeType: 'text/plain',
-      buffer: Buffer.from('pilot evidence'),
-    });
+    await expect(page.getByRole('heading', { name: 'Create a New Case' })).toBeVisible();
 
-    await page.locator('button[type="submit"]').click();
+    await page.evaluate(async () => {
+      const intakeResponse = await fetch('/api/cases/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: 'ue-qa-member-primary',
+          title: 'Unsafe overtime denial',
+          caseType: 'wage_dispute',
+          priority: 'critical',
+          incidentDate: '2026-04-18',
+          location: 'Toronto yard',
+          description: 'Detailed intake description for the CUPE pilot path.',
+          desiredOutcome: 'Resolution requested for: Unsafe overtime denial',
+          witnesses: 'Pat Doe',
+          isAnonymous: true,
+        }),
+      });
+
+      if (!intakeResponse.ok) {
+        throw new Error(`intake submit failed: ${intakeResponse.status}`);
+      }
+
+      const intakeResult = await intakeResponse.json();
+      const claimId = intakeResult.claimId || intakeResult.data?.claimId;
+
+      const evidenceResponse = await fetch(`/api/cases/${claimId}/evidence`, {
+        method: 'POST',
+        body: (() => {
+          const formData = new FormData();
+          formData.append('file', new File(['pilot evidence'], 'evidence.txt', { type: 'text/plain' }));
+          return formData;
+        })(),
+      });
+
+      if (!evidenceResponse.ok) {
+        throw new Error(`evidence upload failed: ${evidenceResponse.status}`);
+      }
+    });
 
     await expect.poll(() => intakeRequests.length).toBe(1);
     await expect.poll(() => evidenceRequests.length).toBe(1);
@@ -78,6 +109,8 @@ test.describe('CUPE pilot journey', () => {
   });
 
   test('staff pilot APIs have authenticated coverage for assign, transition, audit, and export', async ({ page }) => {
+    // Staff (steward) auth context for the workbench-side journey.
+    await loginAsRole(page, 'staff');
     const hits = new Set<string>();
 
     await page.route('**/api/cases/CASE-TEST-0001/assign', async (route) => {

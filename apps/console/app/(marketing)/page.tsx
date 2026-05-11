@@ -38,7 +38,7 @@ const capabilities = [
   {
     title: "Team & Access",
     description:
-      "Role-based access control, SSO configuration, audit logging, and team member management via Clerk.",
+      "Role-based access control, SSO configuration, audit logging, and team member management via Nzila Platform Auth.",
     icon: "🔐",
   },
 ];

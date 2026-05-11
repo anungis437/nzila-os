@@ -16,7 +16,7 @@
 - **Database Entities:** 337
 - **Algorithm:** Multi-carrier rate optimization (parallel API requests, 20+ carriers)
 - **Integrations:** FedEx API, UPS API, DHL API, Canada Border Services Agency (CBSA), USMCA tariff database
-- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle, Clerk (Profile: nodeapi-aca-azurepg-clerk)
+- **Tech Stack:** Node.js API + Next.js, Azure PostgreSQL, Drizzle, Nzila Platform Auth (Profile: nodeapi-aca-azurepg-auth)
 - **Migration Timeline:** 18-22 weeks manual → 10-12 weeks automated
 
 ### **Market Opportunity**
@@ -62,7 +62,7 @@
 
 ### **Technical Specifications**
 - **Database Entities:** 93
-- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle, Clerk (Profile: nextjs-aca-azurepg-clerk)
+- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle, Nzila Platform Auth (Profile: nextjs-aca-azurepg-auth)
 - **Revenue Target:** $180K ARR (2030), 40 corporate clients
 
 ---

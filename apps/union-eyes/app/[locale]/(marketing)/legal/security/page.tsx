@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Shield, Lock, Eye, Server, Key, Bug, Mail } from 'lucide-react';
+import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({
   params,
@@ -12,7 +13,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.legal.security' });
-  return { title: t('pageTitle'), description: t('pageDescription') };
+  return {
+    title: t('pageTitle'),
+    description: t('pageDescription'),
+    alternates: buildLocaleAlternates(locale, '/legal/security'),
+  };
 }
 
 export default async function SecurityPage({

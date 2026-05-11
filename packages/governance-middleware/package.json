@@ -1,0 +1,23 @@
+{
+  "name": "@nzila/governance-middleware",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Runtime governance middleware: emitter, route gates, doctrine assertions, and Next.js / Node helpers wiring the governance packages into product code.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./emitter": "./src/emitter.ts",
+    "./gates": "./src/gates.ts",
+    "./next": "./src/next.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": { "vitest": "^4.1.2" }
+}

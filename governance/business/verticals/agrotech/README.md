@@ -16,7 +16,7 @@
 - **Database Entities:** 80+ (comprehensive AgTech platform)
 - **Algorithm:** Multi-stakeholder matching (farmers + cooperatives + grain elevators optimization)
 - **Integrations:** Agriculture and Agri-Food Canada APIs,Port of Vancouver, Thunder Bay, commodity exchanges
-- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle ORM, Clerk auth (Profile: nextjs-aca-azurepg-clerk)
+- **Tech Stack:** Next.js 14+, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth (Profile: nextjs-aca-azurepg-auth)
 - **Migration Timeline:** 16-20 weeks manual → 8-10 weeks automated (Backbone leverage 50%)
 
 ### **Market Opportunity**

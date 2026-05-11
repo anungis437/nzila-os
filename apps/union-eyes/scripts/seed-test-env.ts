@@ -1,9 +1,14 @@
+import { createHash } from 'crypto'
 import { inArray, sql } from 'drizzle-orm'
+import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
+
+assertNotProduction('seed-test-env')
 import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
 import { users, organizationUsers } from '@/db/schema/domains/member/user-management'
+import { profiles } from '@/db/schema/profiles-schema'
 import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
@@ -43,6 +48,30 @@ function isMissingColumnError(error: unknown): boolean {
   return cause?.code === '42703'
 }
 
+function isMissingRelationError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const cause = (error as { cause?: { code?: string } }).cause
+  return cause?.code === '42P01'
+}
+
+// Per docs/nzila-runtime-integrity/full-seeded-persona-legitimacy-hardening.md and
+// docs/nzila-runtime-integrity/full-dashboard-runtime-failure-integrity.md, silent
+// collapse must become observable evidence — log the underlying PG error code,
+// message, and (if available) the offending column so the next CI run reveals the
+// actual schema-drift cause rather than masking it behind a generic warning.
+function describePgError(error: unknown): string {
+  if (!error || typeof error !== 'object') return String(error)
+  const cause = (error as { cause?: { code?: string; message?: string; column?: string; detail?: string; table?: string } }).cause
+  if (!cause) return (error as { message?: string }).message ?? String(error)
+  const parts: string[] = []
+  if (cause.code) parts.push(`code=${cause.code}`)
+  if (cause.table) parts.push(`table=${cause.table}`)
+  if (cause.column) parts.push(`column=${cause.column}`)
+  if (cause.message) parts.push(`message=${cause.message}`)
+  if (cause.detail) parts.push(`detail=${cause.detail}`)
+  return parts.join(' ')
+}
+
 function assertDeterministicInputs(): void {
   const orgIds = Object.values(UE_TEST_ORGS).map((o) => o.id)
   const userIds = Object.values(UE_TEST_USERS).map((u) => u.userId)
@@ -70,9 +99,35 @@ async function seed(): Promise<void> {
 
   // Main transaction: wipe and reseed core tables
   await db.transaction(async (tx) => {
+    const safeCleanup = async (label: string, fn: () => Promise<void>): Promise<void> => {
+      try {
+        await fn()
+      } catch (error) {
+        if (isMissingRelationError(error)) {
+          console.warn(`[ue:seed:test-env] cleanup skipped, relation missing: ${label}`)
+          return
+        }
+        throw error
+      }
+    }
+
+    const tableExists = async (qualifiedName: string): Promise<boolean> => {
+      const result = await tx.execute(sql`select to_regclass(${qualifiedName}) as regclass`)
+      const row = (result as unknown as Array<{ regclass?: string | null }>)[0]
+      return Boolean(row?.regclass)
+    }
+
     // Wipe deterministic test footprint only.
-    await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
-    await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+    if (await tableExists('claim_updates')) {
+      await safeCleanup('claim_updates', async () => {
+        await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, claimIds))
+      })
+    }
+    if (await tableExists('claims')) {
+      await safeCleanup('claims', async () => {
+        await tx.delete(claims).where(inArray(claims.claimId, claimIds))
+      })
+    }
 
     await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
     await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
@@ -80,6 +135,14 @@ async function seed(): Promise<void> {
 
     await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
     await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    const profilesAvailable = await tableExists('profiles')
+    if (profilesAvailable) {
+      await safeCleanup('profiles', async () => {
+        await tx.delete(profiles).where(inArray(profiles.userId, userIds))
+      })
+    } else {
+      console.warn('[ue:seed:test-env] profiles table absent in this environment; skipping profile seed')
+    }
 
     // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
     await tx.execute(sql`delete from audit_security.security_events`)
@@ -210,6 +273,26 @@ async function seed(): Promise<void> {
         },
       })
 
+    // Seed one deterministic localhost session per user to keep risk scoring
+    // in low tier for QA E2E password logins.
+    await tx.insert(authUserSessions).values(
+      usersFixture.map((u) => {
+        const rawToken = `ue-seed-session-${u.userId}`
+        return {
+          userId: u.userId,
+          organizationId: u.orgId,
+          sessionToken: rawToken,
+          sessionTokenHash: createHash('sha256').update(rawToken).digest('hex'),
+          ipAddress: '127.0.0.1',
+          userAgent: 'playwright-e2e-auth',
+          expiresAt: new Date('2099-01-01T00:00:00.000Z'),
+          isActive: true,
+          createdAt: NOW,
+          lastUsedAt: NOW,
+        }
+      }),
+    )
+
     await tx.insert(authOrgPolicies).values(
       orgs.map((org) => ({
         organizationId: org.id,
@@ -226,6 +309,33 @@ async function seed(): Promise<void> {
         createdAt: NOW,
       })),
     )
+
+    // Seed profiles deterministically so dashboard layout's profile lookup
+    // resolves on the first request. Without this, the layout takes the
+    // auto-create branch which races dashboard/page.tsx in parallel and can
+    // leave the role redirect un-issued (institutional identity substrate gap).
+    if (profilesAvailable) {
+      await tx
+        .insert(profiles)
+        .values(
+          usersFixture.map((u) => ({
+            userId: u.userId,
+            email: u.email,
+            membership: 'free' as const,
+            status: u.status,
+            createdAt: NOW,
+            updatedAt: NOW,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: profiles.userId,
+          set: {
+            email: sql`excluded.email`,
+            status: sql`excluded.status`,
+            updatedAt: NOW,
+          },
+        })
+    }
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
@@ -255,6 +365,10 @@ async function seed(): Promise<void> {
       await tx.insert(organizationMembers).values(
         usersFixture.map((u) => ({
           userId: u.userId,
+          // organization_members.organization_id is uuid in the canonical Drizzle
+          // schema; pass the org UUID directly. (The slug variant lives in the
+          // legacy schema-organizations.ts mirror; the canonical schema wins for
+          // seed inserts so the seeded rows resolve under getUserRole().)
           organizationId: u.orgId,
           role: u.role,
           status: u.status,
@@ -270,7 +384,9 @@ async function seed(): Promise<void> {
     })
   } catch (error) {
     if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] organization_members insert skipped due schema drift (missing column)')
+    console.warn(
+      `[ue:seed:test-env] organization_members insert skipped due schema drift: ${describePgError(error)}`,
+    )
   }
 
   // Separate transaction for claim_updates (may fail due to schema drift)
@@ -296,7 +412,9 @@ async function seed(): Promise<void> {
     })
   } catch (error) {
     if (!isMissingColumnError(error)) throw error
-    console.warn('[ue:seed:test-env] claim_updates insert skipped due schema drift (missing column)')
+    console.warn(
+      `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
+    )
   }
 
   // Required containment artifacts for external UX tester access.

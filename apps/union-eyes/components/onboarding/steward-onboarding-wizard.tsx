@@ -1,7 +1,7 @@
 /**
- * Steward Onboarding Wizard
+ * Union Representative Onboarding Wizard
  * 
- * Multi-step onboarding flow for new union stewards:
+ * Multi-step onboarding flow for new union representatives:
  * - Step 1: Role Introduction & Responsibilities
  * - Step 2: Grievance Handling Basics
  * - Step 3: Rights & Management
@@ -45,7 +45,7 @@ export interface StewardOnboardingData {
 const STEPS = [
   {
     id: "introduction",
-    title: "Welcome, Steward!",
+    title: "Welcome, Union Representative!",
     description: "Understanding your vital role",
     icon: Shield,
   },
@@ -106,7 +106,7 @@ export function StewardOnboardingWizard() {
   };
 
   const handleComplete = async () => {
-    logger.info("Steward onboarding completed", { data });
+    logger.info("Union representative onboarding completed", { data });
     // Save completion status
     if (typeof window !== 'undefined') {
       localStorage.setItem('steward_onboarding_completed', new Date().toISOString());
@@ -115,7 +115,7 @@ export function StewardOnboardingWizard() {
   };
 
   const handleSkip = () => {
-    logger.info("Steward onboarding skipped");
+    logger.info("Union representative onboarding skipped");
     router.push(`/${locale}/dashboard`);
   };
 
@@ -127,10 +127,10 @@ export function StewardOnboardingWizard() {
           <Shield className="w-8 h-8 text-blue-600" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Steward Onboarding
+          Union Representative Onboarding
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Welcome to your role as a union steward. Let&apos;s get you prepared.
+          Welcome to your role as a union representative. Let&apos;s get you prepared.
         </p>
       </div>
 
@@ -206,9 +206,9 @@ function IntroductionStep({
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 rounded-lg p-4">
-        <h3 className="font-semibold text-blue-900 mb-2">Your Role as a Steward</h3>
+        <h3 className="font-semibold text-blue-900 mb-2">Your Role as a Union Representative</h3>
         <p className="text-blue-800 text-sm">
-          As a union steward, you are the front-line representative for your co-workers. 
+          As a union representative, you are the front-line representative for your co-workers. 
           You play a crucial role in enforcing our collective agreement and ensuring 
           {/* eslint-disable-next-line react/no-unescaped-entities */}
           members' rights are protected.
@@ -243,7 +243,7 @@ function IntroductionStep({
           <ul className="text-sm space-y-2 text-gray-600">
             <li className="flex items-start gap-2">
               <Clock className="w-4 h-4 text-blue-500 mt-0.5" />
-              Time for steward duties
+              Time for representative duties
             </li>
             <li className="flex items-start gap-2">
               <BookOpen className="w-4 h-4 text-blue-500 mt-0.5" />
@@ -501,8 +501,9 @@ function ResourcesStep() {
       <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
         <h4 className="font-medium text-yellow-900 mb-2">Need Help?</h4>
         <p className="text-yellow-800 text-sm">
-          Your AI assistant can help answer questions about grievance procedures, 
-          CBA interpretation, and member rights. Look for the chat icon in your dashboard!
+          Use continuity guidance in your dashboard for grievance procedure context,
+          agreement references, and member-rights workflow support. Escalate final
+          interpretation questions to your chief steward or governance reviewer.
         </p>
       </div>
     </div>

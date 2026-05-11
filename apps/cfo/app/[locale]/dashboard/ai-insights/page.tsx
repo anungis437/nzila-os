@@ -1,8 +1,9 @@
 /**
- * CFO — AI Insights Page.
+ * CFO — Financial Operational Interpretations Page.
  *
- * Dedicated view for ML-detected anomalies, trend analysis,
- * and proactive financial recommendations.
+ * Bounded continuity-safe interpretive surface presenting anomaly signals,
+ * trend interpretations, and operational continuity suggestions.
+ * Final authority remains with accountable financial operators.
  */
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
@@ -37,9 +38,9 @@ export default async function AIInsightsPage() {
           <Sparkles className="h-6 w-6" />
         </div>
         <div>
-          <h2 className="font-poppins text-2xl font-bold text-foreground">AI Insights</h2>
+          <h2 className="font-poppins text-2xl font-bold text-foreground">Financial Operational Interpretations</h2>
           <p className="text-sm text-muted-foreground">
-            Machine learning–detected patterns across your financial data
+            Bounded institutional interpretation of patterns across your financial data. Interpretive support only; final authority remains with accountable financial operators.
           </p>
         </div>
       </div>
@@ -47,9 +48,9 @@ export default async function AIInsightsPage() {
       {insights.length === 0 ? (
         <div className="flex flex-col items-center rounded-xl border border-dashed border-border py-16 text-center">
           <Sparkles className="mb-4 h-12 w-12 text-muted-foreground/40" />
-          <p className="font-poppins text-lg font-semibold text-foreground">No insights yet</p>
+          <p className="font-poppins text-lg font-semibold text-foreground">No interpretations yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            AI insights will appear as your financial data accumulates.
+            Bounded operational interpretations will appear as your financial continuity data accumulates.
           </p>
         </div>
       ) : (

@@ -1,12 +1,13 @@
 /**
- * @nzila/platform-intelligence-home — Executive Insight Service
+ * @nzila/platform-intelligence-home — Executive Continuity Signal Service
  *
- * Generates data-grounded executive insights from the live intelligence layer.
- * Insights are deterministic derivations of current pipeline, funding, partner,
- * and product scoring state — not LLM outputs.
+ * Produces governance-safe continuity readings from the live operational
+ * intelligence substrate. Readings are deterministic derivations of current
+ * pipeline, funding, partner, and product posture state — not LLM outputs.
  *
- * Each insight has a signal type, priority, confidence score, and clear body
- * text suitable for an executive dashboard.
+ * Each reading has a signal type, priority, confidence indicator, and clear body
+ * text suitable for an executive operational dashboard. All readings are
+ * interpretive support — no reading constitutes a binding operational directive.
  */
 import type { ExecutiveInsight } from './types'
 import { getFundingOpportunities, getUpcomingDeadlines } from './funding-service'

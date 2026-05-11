@@ -376,16 +376,9 @@ export function LoginForm() {
         </>
       )}
 
-      {!methods.inviteRequired ? (
-        <p className="text-center text-sm text-gray-500">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-electric hover:text-blue-700 font-medium transition-colors">Sign up</Link>
-        </p>
-      ) : (
-        <p className="text-center text-sm text-gray-500">
-          New accounts in this organization are invite-only. Ask an admin for an invitation.
-        </p>
-      )}
+      <p className="text-center text-sm text-gray-500">
+        Access is provisioned by your organization administrator.
+      </p>
     </div>
   );
 }

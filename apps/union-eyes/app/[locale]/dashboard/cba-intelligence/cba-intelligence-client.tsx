@@ -15,11 +15,17 @@ export function CbaIntelligenceClient() {
       <div className="flex items-center gap-3">
         <Database className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">CBA Intelligence</h1>
+          <h1 className="text-3xl font-bold">Institutional Labor Continuity Intelligence</h1>
           <p className="text-muted-foreground">
-            Collective bargaining agreement data sources, ingestion, and analysis
+            Governance-safe continuity operations for agreement sources, ingestion, review, and institutional memory support
           </p>
         </div>
+      </div>
+
+      <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
+        This surface supports continuity interpretation and stewardship operations. It does not
+        issue authoritative labor rulings. Escalate governance-sensitive conclusions to human
+        steward, committee, or executive review.
       </div>
 
       <Tabs defaultValue="sources" className="w-full">

@@ -1,0 +1,14 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@nzila/db": ["../db/src/index.ts"],
+      "@nzila/db/schema": ["../db/src/schema/index.ts"],
+      "@nzila/db/queries/trustcore": ["../db/src/queries/trustcore.ts"],
+      "@nzila/os-core": ["../os-core/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

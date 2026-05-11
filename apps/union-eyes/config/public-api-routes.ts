@@ -16,6 +16,16 @@ export interface PublicRouteConfig {
   category: 'health' | 'webhook' | 'public-content' | 'tracking' | 'payment' | 'dev-only';
 }
 
+const DEV_ONLY_PUBLIC_ROUTES: PublicRouteConfig[] = process.env.NODE_ENV === 'production'
+  ? []
+  : [
+      {
+        pattern: '/api/sentry-example-api',
+        reason: 'Sentry test endpoint (DEV ONLY)',
+        category: 'dev-only',
+      },
+    ];
+
 /**
  * Comprehensive list of public API routes with justifications
  */
@@ -112,13 +122,9 @@ export const PUBLIC_API_ROUTES: PublicRouteConfig[] = [
     reason: 'Email unsubscribe endpoint (requires unsubscribe token)',
     category: 'tracking',
   },
-  
-  // ========== DEV / TEST ONLY (remove in production) ==========
-  {
-    pattern: '/api/sentry-example-api',
-    reason: 'Sentry test endpoint (DEV ONLY - should be removed in production)',
-    category: 'dev-only',
-  },
+
+  // ========== DEV / TEST ONLY ==========
+  ...DEV_ONLY_PUBLIC_ROUTES,
 ];
 
 /**

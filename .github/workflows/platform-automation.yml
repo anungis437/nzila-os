@@ -257,8 +257,22 @@ jobs:
       - name: Enable corepack
         run: corepack enable
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies (retry on ENOENT)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          install_cmd='pnpm install --frozen-lockfile --child-concurrency=8'
+
+          if eval "$install_cmd"; then
+            exit 0
+          fi
+
+          echo "Initial pnpm install failed. Cleaning node_modules and retrying once..."
+          rm -rf node_modules
+          find apps packages services tooling -mindepth 2 -maxdepth 2 -type d -name node_modules -prune -exec rm -rf {} + || true
+
+          eval "$install_cmd"
 
       - name: Build decision-intelligence
         run: pnpm --filter @nzila/decision-intelligence build

@@ -19,7 +19,7 @@
 - **Row-Level Security Policies:** 238 (multi-org, 100+ unions per platform)
 - **ML Pipeline:** Pension forecasting, churn prediction, workload optimization
 - **Core Modules:** 10+ (Membership, Grievances, CBA Intelligence, Pension, Elections, Campaigns, Financial Management, Insurance Adapter, Settlement Tracker, Compliance Hub)
-- **Tech Stack:** Django 5, Azure PostgreSQL, Drizzle ORM, optional Clerk auth (Profile: django-aca-azurepg)
+- **Tech Stack:** Django 5, Azure PostgreSQL, Drizzle ORM, optional Nzila Platform Auth (Profile: django-aca-azurepg)
 - **Migration Complexity:** EXTREME (4,773 entities, 238 RLS policies, ML dependencies, fiduciary compliance)
 - **Migration Timeline:** 24-30 weeks manual → 12-16 weeks automated (Backbone leverage 40%)
 
@@ -132,7 +132,7 @@
 **Q2 2026 — Commercial Launch:**
 - ✅ Core modules in active development (Membership, Grievances, CBA, Pension, Elections, Financial)
 - ✅ Onboard 10 pilot unions (5 paying, 5 design partners)
-- ✅ Clerk auth integration (SSO, 2FA)
+- ✅ Nzila Platform Auth integration (SSO, 2FA)
 
 **Q3 2026 — ML Feature Rollout:**
 - 🚧 Pension Forecasting v1 (actuarial model + ML seasonal trends)
@@ -209,7 +209,7 @@
 ### **Technical Specifications**
 
 - **Database Entities:** 485 (comprehensive banking platform)
-- **Tech Stack:** Node.js API + Next.js frontend, Azure PostgreSQL, Drizzle ORM, Clerk auth (Profile: nodeapi-aca-azurepg-clerk)
+- **Tech Stack:** Node.js API + Next.js frontend, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth (Profile: nodeapi-aca-azurepg-auth)
 - **Migration Complexity:** EXTREME (KYC/AML, PCI-DSS, multi-currency, real-time payments)
 - **Migration Timeline:** 24-30 weeks manual → 14-18 weeks automated (Backbone leverage 40-50%)
 

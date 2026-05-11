@@ -129,7 +129,7 @@ jobs:
 
 ### Objectives
 - Build multi-tenant core with schema-based isolation
-- Integrate Clerk authentication
+- Integrate Nzila Platform Auth
 - Implement RBAC system across all services
 - Create audit logging infrastructure
 
@@ -322,7 +322,7 @@ class TenantIsolationTestCase(TestCase):
 
 ### Deliverables
 - ✅ Multi-tenant core with automated provisioning
-- ✅ Clerk authentication integrated
+- ✅ Nzila Platform Auth integrated
 - ✅ RBAC system with permission inheritance
 - ✅ Audit logging capturing all sensitive events
 - ✅ API gateway with tenant routing

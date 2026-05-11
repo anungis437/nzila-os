@@ -1,0 +1,14 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@nzila/trustcore-contracts": ["../trustcore-contracts/src/index.ts"],
+      "@nzila/trustcore-contracts/*": ["../trustcore-contracts/src/*/index.ts"],
+      "@nzila/trustcore-trustops": ["../trustcore-trustops/src/index.ts"],
+      "@nzila/trustcore-trustops/*": ["../trustcore-trustops/src/*/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

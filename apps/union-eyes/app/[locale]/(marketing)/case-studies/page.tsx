@@ -13,6 +13,8 @@ import { useTranslations } from 'next-intl';
 import { CaseStudy } from '@/types/marketing';
 import { CaseStudyGrid } from '@/components/marketing/case-study-card';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
+import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
+import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { logger } from '@/lib/logger';
 
 const CASE_STUDIES_COPY: Record<string, {
@@ -130,12 +132,14 @@ export default function LocaleCaseStudiesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('heroHeading')}</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{t('heroDescription')}</p>
-        </div>
+      {/* Hero Section with Imagery */}
+      <MarketingHeroSection
+        imageUrl={heroImagery.caseStudies}
+        heading={t('heroHeading')}
+        description={t('heroDescription')}
+      />
+
+      <div className="max-w-7xl mx-auto mt-12">
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-8 justify-center">

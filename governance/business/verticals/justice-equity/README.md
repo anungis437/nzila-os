@@ -20,7 +20,7 @@
 - **Companion Prompt Library:** 200+ curated GPT-4 prompts (trade secret, copyright registered Canada)
 - **Gamification Engine:** 18 tables (XP, badges, leaderboards, streaks, study buddies, adaptive progression curve)
 - **CE Credits:** CPHR (28,000+ members), OAHPP (6,000+ health professionals) accredited continuing education
-- **Tech Stack:** Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Clerk auth (Profile: nextjs-aca-azurepg-clerk)
+- **Tech Stack:** Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Nzila Platform Auth (Profile: nextjs-aca-azurepg-auth)
 - **Migration Complexity:** HIGH (132 tables, Azure GPT-4 integration, pgVector, CE credit tracking)
 - **Migration Timeline:** 20-24 weeks manual → 10-12 weeks automated (Backbone leverage 50%)
 
