@@ -1161,7 +1161,7 @@ toast.error("Failed to optimize database");
                       <p className="text-xl font-bold text-green-600">Secure</p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600">All systems operational</p>
+                  <p className="text-xs text-gray-600">No degradation reported</p>
                 </div>
 
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
