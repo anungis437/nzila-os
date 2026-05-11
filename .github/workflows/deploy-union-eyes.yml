@@ -227,10 +227,24 @@ jobs:
             exit 1
           fi
 
-          RESPONSE=$(curl -fsSL \
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w "%{http_code}" \
             -H "Authorization: Bearer $DNS_API_TOKEN" \
             -H "Content-Type: application/json" \
-            "https://api.cloudflare.com/client/v4/zones/$DNS_ZONE_ID")
+            "https://api.cloudflare.com/client/v4/zones/$DNS_ZONE_ID" || true)
+
+          if [ "$HTTP_STATUS" = "401" ] || [ "$HTTP_STATUS" = "403" ]; then
+            echo "::warning::Cloudflare preflight returned HTTP $HTTP_STATUS. Continuing deploy; DNS post-deploy checks remain enforced."
+            exit 0
+          fi
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Cloudflare zone preflight request failed with HTTP $HTTP_STATUS"
+            cat "$RESPONSE_FILE"
+            exit 1
+          fi
+
+          RESPONSE=$(cat "$RESPONSE_FILE")
 
           SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
           ACTUAL_ZONE=$(echo "$RESPONSE" | jq -r '.result.name')

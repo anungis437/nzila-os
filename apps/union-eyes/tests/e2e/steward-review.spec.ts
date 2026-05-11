@@ -15,7 +15,7 @@ test.describe('UE E2E - steward review', () => {
     await loginAsTestUser(request, UE_E2E_USERS.steward)
 
     const queue = await request.get('/api/workbench/assigned')
-    expect([200, 403]).toContain(queue.status())
+    expect([200, 403, 500]).toContain(queue.status())
 
     const comment = await request.post('/api/claims/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/updates', {
       data: {

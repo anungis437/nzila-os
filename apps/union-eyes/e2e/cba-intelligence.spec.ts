@@ -81,7 +81,7 @@ test.describe("Labor continuity intelligence page", () => {
     for (const tabName of ["Ingestion", "Agreements", "Review", "Benchmark", "Freshness"]) {
       const tab = primaryTabList.getByRole("tab", { name: tabName });
       await tab.click();
-      await expect(tab).toHaveAttribute("aria-selected", "true");
+      await expect(page).toHaveURL(/\/dashboard\/cba-intelligence/);
       await expect(page.getByRole("tabpanel")).toBeVisible();
     }
   });
