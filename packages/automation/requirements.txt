@@ -32,5 +32,5 @@ azure-mgmt-rdbms>=10.0.0
 gitpython>=3.1.43
 
 # Progress & State Management
-tqdm>=4.66.3
+tqdm>=4.67.3
 filelock>=3.20.3
