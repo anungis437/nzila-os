@@ -35,7 +35,7 @@ export interface StatusLabels {
 const defaultStatusLabels: StatusLabels = {
   systemStatus: "System Status",
   statusDescription: "Current operational status of all services",
-  allOperational: "All Systems Operational",
+  allOperational: "No Degradation Reported",
   someDegraded: "Degraded Performance",
   systemIssues: "System Issues",
   systemInformation: "System Information",

@@ -15,6 +15,12 @@ django-redis>=5.4.0
 django-celery-beat>=2.6.0
 django-celery-results>=2.5.1
 
+# Upstash Redis REST client (parallel path to native rediss://; lets us
+# verify the REST token end-to-end without coupling Celery's RESP broker
+# to the same credential surface). See docs/nzila-residual-closure/
+# r1-pilot-django-sidecar-binding-log.md (2026-05-10T02:05Z entry).
+upstash-redis>=1.1.0
+
 # Azure integrations
 azure-identity>=1.16.1
 azure-storage-blob>=12.19.0
