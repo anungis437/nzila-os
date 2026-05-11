@@ -2345,33 +2345,9 @@ importers:
       '@nzila/platform-cognition-core':
         specifier: workspace:*
         version: link:../../packages/platform-cognition-core
-      '@nzila/platform-data-fabric':
-        specifier: workspace:*
-        version: link:../../packages/platform-data-fabric
-      '@nzila/platform-decision-graph':
-        specifier: workspace:*
-        version: link:../../packages/platform-decision-graph
-      '@nzila/platform-event-fabric':
-        specifier: workspace:*
-        version: link:../../packages/platform-event-fabric
-      '@nzila/platform-governed-ai':
-        specifier: workspace:*
-        version: link:../../packages/platform-governed-ai
-      '@nzila/platform-knowledge-registry':
-        specifier: workspace:*
-        version: link:../../packages/platform-knowledge-registry
-      '@nzila/platform-ontology':
-        specifier: workspace:*
-        version: link:../../packages/platform-ontology
       '@nzila/platform-pilot-metrics':
         specifier: workspace:*
         version: link:../../packages/platform-pilot-metrics
-      '@nzila/platform-reasoning-engine':
-        specifier: workspace:*
-        version: link:../../packages/platform-reasoning-engine
-      '@nzila/platform-semantic-search':
-        specifier: workspace:*
-        version: link:../../packages/platform-semantic-search
       '@nzila/platform-shell':
         specifier: workspace:*
         version: link:../../packages/platform-shell
