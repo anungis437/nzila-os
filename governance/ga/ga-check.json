@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-05-07T22:03:20.770Z",
-  "commitSha": "2077023af",
+  "timestamp": "2026-05-11T04:51:45.081Z",
+  "commitSha": "de9d036ab",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,7 +14,7 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 1625
+      "durationMs": 1790
     },
     {
       "id": "ORG-REGISTRY",
@@ -35,7 +35,7 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUTH-MIDDLEWARE",
@@ -58,7 +58,7 @@
       "name": "Audited writes: Audit module blocks on failure",
       "status": "PASS",
       "details": "Audit emission is mandatory (blocks on failure)",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-SEALING",
@@ -72,7 +72,7 @@
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 2
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 6
+      "durationMs": 11
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -127,14 +127,14 @@
       "status": "PASS",
       "details": "All 4 apps enforce 3 boundary rules",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 2
     },
     {
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "234 contract test files (require ≥20)",
-      "durationMs": 4
+      "details": "248 contract test files (require ≥20)",
+      "durationMs": 6
     },
     {
       "id": "CODEOWNERS",
@@ -164,7 +164,7 @@
       "status": "PASS",
       "details": "All 26 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 11
+      "durationMs": 17
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -172,7 +172,7 @@
       "status": "PASS",
       "details": "All apps with AI claims have runtime ai-sdk wiring",
       "violations": [],
-      "durationMs": 8
+      "durationMs": 13
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -180,7 +180,7 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 1679
+      "durationMs": 4491
     }
   ],
   "environment": {
@@ -189,5 +189,5 @@
     "ci": false,
     "cwd": "C:/APPS/nzila-automation"
   },
-  "totalDurationMs": 3417
+  "totalDurationMs": 6454
 }

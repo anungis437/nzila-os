@@ -1,0 +1,346 @@
+{
+  "generatedAt": "2026-05-11T04:58:06.835Z",
+  "source": "governance/release/app-ownership.json",
+  "seriousAppCount": 21,
+  "coveragePct": 100,
+  "missingApps": [],
+  "roleCoverageFailures": [],
+  "registry": [
+    {
+      "app": "abr",
+      "name": "FairCase",
+      "tier": "tier-1",
+      "releaseStatus": "staging-only",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-faircase-business@nzila.ai",
+        "technicalOwner": "team-faircase-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-faircase@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "agrimo",
+      "name": "Agrimo",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "business-hours",
+      "owners": {
+        "businessOwner": "team-agrimo-business@nzila.ai",
+        "technicalOwner": "team-agrimo-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-agrimo@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "cfo",
+      "name": "CFO",
+      "tier": "tier-1",
+      "releaseStatus": "staging-only",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-cfo-business@nzila.ai",
+        "technicalOwner": "team-cfo-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-cfo@nzila.ai",
+        "escalation": "director-finance-systems@nzila.ai"
+      }
+    },
+    {
+      "app": "console",
+      "name": "Console",
+      "tier": "internal",
+      "releaseStatus": "internal-only",
+      "track": "internal",
+      "supportModel": "business-hours + after-hours p1",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
+      "app": "control-plane",
+      "name": "Control Plane",
+      "tier": "internal",
+      "releaseStatus": "internal-only",
+      "track": "internal",
+      "supportModel": "business-hours + after-hours p1",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
+      "app": "cora",
+      "name": "Cora",
+      "tier": "tier-2",
+      "releaseStatus": "incubating",
+      "track": "pilot",
+      "supportModel": "business-hours",
+      "owners": {
+        "businessOwner": "team-cora-business@nzila.ai",
+        "technicalOwner": "team-cora-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-cora@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "faircase",
+      "name": "faircase",
+      "tier": "tier-1",
+      "releaseStatus": "blocked",
+      "track": "pilot",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-faircase-business@nzila.ai",
+        "technicalOwner": "team-faircase-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-faircase@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "flow",
+      "name": "Flow",
+      "tier": "tier-1",
+      "releaseStatus": "staging-only",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-flow-business@nzila.ai",
+        "technicalOwner": "team-flow-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-flow@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "mobility",
+      "name": "Mobility",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "business-hours",
+      "owners": {
+        "businessOwner": "team-mobility-business@nzila.ai",
+        "technicalOwner": "team-mobility-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-mobility@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "mobility-client-portal",
+      "name": "mobility-client-portal",
+      "tier": "frozen",
+      "releaseStatus": "frozen",
+      "track": "legacy",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-mobility-business@nzila.ai",
+        "technicalOwner": "team-mobility-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-mobility@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "nacp-exams",
+      "name": "nacp-exams",
+      "tier": "tier-2",
+      "releaseStatus": "blocked",
+      "track": "pilot",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-nacp-business@nzila.ai",
+        "technicalOwner": "team-nacp-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "orchestrator-api",
+      "name": "Orchestrator API",
+      "tier": "internal",
+      "releaseStatus": "staging-only",
+      "track": "internal",
+      "supportModel": "business-hours + after-hours p1",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
+      "app": "partners",
+      "name": "Partners",
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-partners-business@nzila.ai",
+        "technicalOwner": "team-partners-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-partners@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "platform-admin",
+      "name": "platform-admin",
+      "tier": "frozen",
+      "releaseStatus": "frozen",
+      "track": "legacy",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-platform-admin@nzila.ai",
+        "technicalOwner": "team-platform-admin@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-platform@nzila.ai",
+        "escalation": "vp-platform@nzila.ai"
+      }
+    },
+    {
+      "app": "trade",
+      "name": "Trade",
+      "tier": "tier-2",
+      "releaseStatus": "incubating",
+      "track": "pilot",
+      "supportModel": "business-hours",
+      "owners": {
+        "businessOwner": "team-trade-business@nzila.ai",
+        "technicalOwner": "team-trade-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-trade@nzila.ai",
+        "escalation": "director-product@nzila.ai"
+      }
+    },
+    {
+      "app": "union-eyes",
+      "name": "Union Eyes",
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-union-eyes-business@nzila.ai",
+        "technicalOwner": "team-union-eyes-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-union-eyes@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "veridian-admin",
+      "name": "veridian-admin",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-veridian-business@nzila.ai",
+        "technicalOwner": "team-veridian-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-veridian@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "veridian-care",
+      "name": "veridian-care",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-veridian-business@nzila.ai",
+        "technicalOwner": "team-veridian-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-veridian@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "veridian-site",
+      "name": "veridian-site",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "unknown",
+      "owners": {
+        "businessOwner": "team-veridian-business@nzila.ai",
+        "technicalOwner": "team-veridian-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-veridian@nzila.ai",
+        "escalation": "director-portfolio@nzila.ai"
+      }
+    },
+    {
+      "app": "web",
+      "name": "Web",
+      "tier": "tier-1",
+      "releaseStatus": "prod-approved",
+      "track": "external",
+      "supportModel": "24x7",
+      "owners": {
+        "businessOwner": "team-web-business@nzila.ai",
+        "technicalOwner": "team-web-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-web@nzila.ai",
+        "escalation": "director-engineering@nzila.ai"
+      }
+    },
+    {
+      "app": "zonga",
+      "name": "Zonga",
+      "tier": "tier-2",
+      "releaseStatus": "staging-only",
+      "track": "pilot",
+      "supportModel": "business-hours + after-hours p1",
+      "owners": {
+        "businessOwner": "team-zonga-business@nzila.ai",
+        "technicalOwner": "team-zonga-engineering@nzila.ai",
+        "runtimeOwner": "team-platform-ops@nzila.ai",
+        "releaseOwner": "team-platform-ops@nzila.ai",
+        "supportPrimary": "oncall-zonga@nzila.ai",
+        "escalation": "head-of-growth-platform@nzila.ai"
+      }
+    }
+  ]
+}

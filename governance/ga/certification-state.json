@@ -8,7 +8,7 @@
     "certificationSigned": false
   },
   "evidence": {
-    "gateDoc": "docs/ga/GA_READINESS_GATE.md",
-    "certificationReport": "docs/ga/GA_CERTIFICATION_REPORT.md"
+    "gateDoc": "docs/categories/platform-and-operations/ga/GA_READINESS_GATE.md",
+    "certificationReport": "docs/categories/platform-and-operations/ga/GA_CERTIFICATION_REPORT.md"
   }
 }

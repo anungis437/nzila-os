@@ -1,0 +1,15 @@
+app,tier,monthlyRevenueUsd,monthlyCostUsd,grossMarginPct,contributionMarginPct,infraCostPerCustomerUsd,supportCostPerCustomerUsd,cacUsd,ltvUsd,paybackMonths,burnMultiple,arrEfficiency,budgetStatus
+union-eyes,tier1,26000,42480,-50.31,-63.38,1338.12,127.5,4200,26208,3.23,0.44,0.61,approval-required
+abr,tier1,18000,39520,-99.8,-119.56,1284.4,114.75,4200,18360,4.67,0.51,0.46,approval-required
+flow,tier1,21000,38520,-61.42,-83.43,24652.8,2380,4200,423360,0.2,0.59,0.55,approval-required
+web,tier1,0,21680,-100,-100,12140.8,1360,4200,0,99,6.5,0,approval-required
+partners,tier1,5000,23720,-289.01,-374.4,13283.2,1700,4200,100800,0.84,1.4,0.21,warn
+cfo,tier1,8000,27640,-176.4,-245.5,15478.4,1870,4200,161280,0.53,1.16,0.29,approval-required
+zonga,tier2,0,21640,-100,-100,15797.2,680,2600,0,99,2.73,0,hard-stop
+agrimo,tier2,0,16800,-100,-100,9912,680,2600,0,99,4.48,0,approval-required
+cora,tier2,0,14840,-100,-100,8458.8,680,2600,0,99,3.96,0,approval-required
+trade,tier2,0,13840,-100,-100,7750.4,680,2600,0,99,3.69,0,approval-required
+mobility,tier2,0,12840,-100,-100,6933.6,680,2600,0,99,3.42,0,approval-required
+console,internal,0,19800,-100,-100,10890,1190,900,0,99,9.5,0,warn
+control-plane,internal,0,19300,-100,-100,10422,1020,900,0,99,11.58,0,warn
+orchestrator-api,internal,0,12380,-100,-100,7180.4,1360,900,0,99,3.71,0,warn

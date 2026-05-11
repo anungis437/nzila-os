@@ -16,6 +16,11 @@ import { join } from 'node:path'
 
 const ROOT = join(__dirname, '..', '..')
 
+// Relocated paths after docs reorg: prefer canonical locations under
+// docs/categories/platform-and-operations/platform and governance/foundations/resilience.
+const PLATFORM_DOCS = join(ROOT, 'docs', 'categories', 'platform-and-operations', 'platform')
+const RESILIENCE_DIR = join(ROOT, 'governance', 'foundations', 'resilience')
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 interface CheckResult {
@@ -183,9 +188,9 @@ check('GOV-GATE-011: Vitest config includes governance packages', () => {
 })
 
 check('GOV-GATE-012: Evidence lifecycle policy exists and is structured', () => {
-  const policyPath = join(ROOT, 'docs', 'platform', 'EVIDENCE_LIFECYCLE_POLICY.md')
+  const policyPath = join(PLATFORM_DOCS, 'EVIDENCE_LIFECYCLE_POLICY.md')
   if (!existsSync(policyPath)) {
-    throw new Error('docs/platform/EVIDENCE_LIFECYCLE_POLICY.md not found')
+    throw new Error(`${policyPath} not found`)
   }
   const content = readFileSync(policyPath, 'utf-8')
   const required = [
@@ -203,15 +208,15 @@ check('GOV-GATE-012: Evidence lifecycle policy exists and is structured', () => 
 
 check('GOV-GATE-013: AI incident playbooks exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DATA_POISONING.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_HALLUCINATION.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md'),
-    join(ROOT, 'docs', 'platform', 'AI_INCIDENT_DRILL_RUNBOOK.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_PROMPT_INJECTION.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_DATA_POISONING.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_MODEL_DRIFT_COMPROMISE.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_MODEL_INVERSION.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_ADVERSARIAL_INPUTS.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_HALLUCINATION.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_POST_QUANTUM_MIGRATION.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_PLAYBOOK_DEPENDENCY_CONFUSION.md'),
+    join(PLATFORM_DOCS, 'AI_INCIDENT_DRILL_RUNBOOK.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -222,8 +227,8 @@ check('GOV-GATE-013: AI incident playbooks exist', () => {
 
 check('GOV-GATE-014: Strategic telemetry and command catalog exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'STRATEGIC_TELEMETRY.md'),
-    join(ROOT, 'docs', 'platform', 'COMMAND_CATALOG.md'),
+    join(PLATFORM_DOCS, 'STRATEGIC_TELEMETRY.md'),
+    join(PLATFORM_DOCS, 'COMMAND_CATALOG.md'),
     join(ROOT, 'tooling', 'scripts', 'generate-quarterly-strategic-scorecard.mjs'),
     join(ROOT, 'tooling', 'scripts', 'show-command-catalog.mjs'),
   ]
@@ -235,8 +240,8 @@ check('GOV-GATE-014: Strategic telemetry and command catalog exist', () => {
 })
 
 check('GOV-GATE-015: Onboarding guide exists', () => {
-  const path = join(ROOT, 'docs', 'platform', 'ONBOARDING.md')
-  if (!existsSync(path)) throw new Error('docs/platform/ONBOARDING.md not found')
+  const path = join(PLATFORM_DOCS, 'ONBOARDING.md')
+  if (!existsSync(path)) throw new Error(`${path} not found`)
   const content = readFileSync(path, 'utf-8')
   const required = ['## Prerequisites', '## Making Your First PR', '## Common First-Week Pitfalls']
   const missing = required.filter((h) => !content.includes(h))
@@ -246,9 +251,9 @@ check('GOV-GATE-015: Onboarding guide exists', () => {
 
 check('GOV-GATE-016: SLO policy, data residency, and alerting runbook exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'SLO_ERROR_BUDGET_POLICY.md'),
-    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
-    join(ROOT, 'docs', 'platform', 'ALERTING_RUNBOOK.md'),
+    join(PLATFORM_DOCS, 'SLO_ERROR_BUDGET_POLICY.md'),
+    join(PLATFORM_DOCS, 'DATA_RESIDENCY_POLICY.md'),
+    join(PLATFORM_DOCS, 'ALERTING_RUNBOOK.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -311,8 +316,8 @@ check('GOV-GATE-018: Container seccomp profile exists', () => {
 })
 
 check('GOV-GATE-019: Third-party risk register exists', () => {
-  const path = join(ROOT, 'docs', 'platform', 'THIRD_PARTY_RISK_REGISTER.md')
-  if (!existsSync(path)) throw new Error('docs/platform/THIRD_PARTY_RISK_REGISTER.md not found')
+  const path = join(PLATFORM_DOCS, 'THIRD_PARTY_RISK_REGISTER.md')
+  if (!existsSync(path)) throw new Error(`${path} not found`)
   const content = readFileSync(path, 'utf-8')
   const required = ['## Cloud Infrastructure', '## Supply Chain Controls', '## Vendor Incident Notification']
   const missing = required.filter((h) => !content.includes(h))
@@ -322,8 +327,8 @@ check('GOV-GATE-019: Third-party risk register exists', () => {
 
 check('GOV-GATE-020: Domain expertise map and turbo cache strategy exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'DOMAIN_EXPERTISE_MAP.md'),
-    join(ROOT, 'docs', 'platform', 'TURBO_CACHE_STRATEGY.md'),
+    join(PLATFORM_DOCS, 'DOMAIN_EXPERTISE_MAP.md'),
+    join(PLATFORM_DOCS, 'TURBO_CACHE_STRATEGY.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -339,8 +344,8 @@ check('GOV-GATE-020: Domain expertise map and turbo cache strategy exist', () =>
 
 check('GOV-GATE-021: Vendor diversification strategy and registry exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'VENDOR_DIVERSIFICATION_STRATEGY.md'),
-    join(ROOT, 'governance', 'resilience', 'vendor-diversification-registry.json'),
+    join(PLATFORM_DOCS, 'VENDOR_DIVERSIFICATION_STRATEGY.md'),
+    join(RESILIENCE_DIR, 'vendor-diversification-registry.json'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -362,8 +367,8 @@ check('GOV-GATE-021: Vendor diversification strategy and registry exist', () => 
 
 check('GOV-GATE-022: Emerging threat model covers hallucination, quantum, and dependency confusion', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'EMERGING_THREAT_MODEL.md'),
-    join(ROOT, 'governance', 'resilience', 'emerging-threat-register.json'),
+    join(PLATFORM_DOCS, 'EMERGING_THREAT_MODEL.md'),
+    join(RESILIENCE_DIR, 'emerging-threat-register.json'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -384,7 +389,7 @@ check('GOV-GATE-022: Emerging threat model covers hallucination, quantum, and de
 check('GOV-GATE-023: Runtime data residency verifier exists', () => {
   const required = [
     join(ROOT, 'tooling', 'scripts', 'verify-data-residency-runtime.mjs'),
-    join(ROOT, 'docs', 'platform', 'DATA_RESIDENCY_POLICY.md'),
+    join(PLATFORM_DOCS, 'DATA_RESIDENCY_POLICY.md'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -400,7 +405,7 @@ check('GOV-GATE-023: Runtime data residency verifier exists', () => {
 check('GOV-GATE-024: Human-factor resilience automation exists', () => {
   const required = [
     join(ROOT, 'tooling', 'scripts', 'collect-onboarding-kpis.mjs'),
-    join(ROOT, 'governance', 'resilience', 'succession-and-cross-training.json'),
+    join(RESILIENCE_DIR, 'succession-and-cross-training.json'),
   ]
   const missing = required.filter((p) => !existsSync(p))
   if (missing.length > 0) {
@@ -427,8 +432,8 @@ check('GOV-GATE-024: Human-factor resilience automation exists', () => {
 
 check('GOV-GATE-025: Regulatory monitoring artifacts exist', () => {
   const required = [
-    join(ROOT, 'docs', 'platform', 'REGULATORY_CHANGE_MONITORING.md'),
-    join(ROOT, 'governance', 'resilience', 'regulatory-watchlist.json'),
+    join(PLATFORM_DOCS, 'REGULATORY_CHANGE_MONITORING.md'),
+    join(RESILIENCE_DIR, 'regulatory-watchlist.json'),
     join(ROOT, 'tooling', 'scripts', 'validate-strategic-resilience.mjs'),
   ]
   const missing = required.filter((p) => !existsSync(p))
@@ -442,9 +447,9 @@ check('GOV-GATE-025: Regulatory monitoring artifacts exist', () => {
 })
 
 check('GOV-GATE-026: Disaster recovery region-loss playbook exists', () => {
-  const path = join(ROOT, 'docs', 'platform', 'DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md')
+  const path = join(PLATFORM_DOCS, 'DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md')
   if (!existsSync(path)) {
-    throw new Error('docs/platform/DISASTER_RECOVERY_PLAYBOOK_AZURE_REGION_LOSS.md not found')
+    throw new Error(`${path} not found`)
   }
   const content = readFileSync(path, 'utf-8')
   const required = ['## Trigger Conditions', '## Containment and Failover', '## Recovery']

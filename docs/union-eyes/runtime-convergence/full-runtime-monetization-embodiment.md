@@ -20,10 +20,10 @@ Align across `apps/union-eyes/`:
 
 ## Tier Anchors
 
-- [Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- [Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- [Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- [Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
+- [Institutional Continuity Core](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)
+- [Governance & Continuity Operations](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)
+- [Institutional Operating Infrastructure](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
+- [Institutional Sovereignty Layer](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
 
 ## Required Implementation
 

@@ -2,7 +2,14 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const root = process.cwd()
-const policyPath = join(root, 'docs', 'platform', 'EVIDENCE_LIFECYCLE_POLICY.md')
+const policyPath = join(
+  root,
+  'docs',
+  'categories',
+  'platform-and-operations',
+  'platform',
+  'EVIDENCE_LIFECYCLE_POLICY.md',
+)
 
 function fail(msg: string): never {
   console.error(`ERROR: ${msg}`)
@@ -10,7 +17,7 @@ function fail(msg: string): never {
 }
 
 if (!existsSync(policyPath)) {
-  fail('docs/platform/EVIDENCE_LIFECYCLE_POLICY.md is missing')
+  fail(`${policyPath} is missing`)
 }
 
 const body = readFileSync(policyPath, 'utf8')

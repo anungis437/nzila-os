@@ -6,14 +6,14 @@ This layer exists because the prior layers — doctrine, governance, cognition, 
 
 ## Authority Layers (Upstream)
 
-- [Final Navigation & Monetization Access Matrix](../navigation-monetization-matrix/README.md)
-- [Institutional Operating Infrastructure](../institutional-operating-infrastructure/README.md)
-- [Tier 1 — Institutional Continuity Core](../navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- [Tier 2 — Governance & Continuity Operations](../navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- [Tier 3 — Institutional Operating Infrastructure](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- [Tier 4 — Institutional Sovereignty Layer](../navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
-- [Final Gating Philosophy](../navigation-monetization-matrix/final-gating-philosophy.md)
-- [FSM & Pilot Module Reconvergence (architecture)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)
+- [Final Navigation & Monetization Access Matrix](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/README.md)
+- [Institutional Operating Infrastructure](../../categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md)
+- [Tier 1 — Institutional Continuity Core](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)
+- [Tier 2 — Governance & Continuity Operations](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)
+- [Tier 3 — Institutional Operating Infrastructure](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
+- [Tier 4 — Institutional Sovereignty Layer](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
+- [Final Gating Philosophy](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
+- [FSM & Pilot Module Reconvergence (architecture)](../../categories/products-and-market/union-eyes/institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md)
 
 ## Documents in This Layer
 

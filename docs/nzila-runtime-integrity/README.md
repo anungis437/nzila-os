@@ -21,13 +21,13 @@ The runtime must increasingly feel:
 ## Authority Layers (Upstream)
 
 - [Final Runtime Convergence (Union Eyes)](../union-eyes/runtime-convergence/README.md)
-- [Final Navigation & Monetization Access Matrix](../union-eyes/navigation-monetization-matrix/README.md)
-- [Institutional Operating Infrastructure](../union-eyes/institutional-operating-infrastructure/README.md)
-- [Tier 1 — Institutional Continuity Core](../union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)
-- [Tier 2 — Governance & Continuity Operations](../union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)
-- [Tier 3 — Institutional Operating Infrastructure](../union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
-- [Tier 4 — Institutional Sovereignty Layer](../union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
-- [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
+- [Final Navigation & Monetization Access Matrix](../categories/products-and-market/union-eyes/navigation-monetization-matrix/README.md)
+- [Institutional Operating Infrastructure](../categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md)
+- [Tier 1 — Institutional Continuity Core](../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier1-institutional-continuity-core.md)
+- [Tier 2 — Governance & Continuity Operations](../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier2-governance-continuity-operations.md)
+- [Tier 3 — Institutional Operating Infrastructure](../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md)
+- [Tier 4 — Institutional Sovereignty Layer](../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier4-institutional-sovereignty-layer.md)
+- [Final Gating Philosophy](../categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
 
 ## Documents in This Layer
 

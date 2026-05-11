@@ -32,7 +32,7 @@ Actually refactor:
 
 ## Demo Script Anchors
 
-Existing demo scripts under [docs/union-eyes/clc/demo-scripts/](../clc/demo-scripts/) must be re-aligned with this layer:
+Existing demo scripts under [docs/union-eyes/clc/demo-scripts/](../../categories/products-and-market/union-eyes/clc/demo-scripts/) must be re-aligned with this layer:
 
 - executive-demo
 - governance-demo

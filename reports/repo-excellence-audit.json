@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2026-05-11T04:58:14.112Z",
+  "overallScore": 7.2,
+  "categories": {
+    "runtime_proof": {
+      "score": 6,
+      "findings": [
+        "MTTR is still missing live incident feed integration.",
+        "Deploy success rate is not yet backfilled from production telemetry.",
+        "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+      ]
+    },
+    "duplication": {
+      "score": 8,
+      "findings": [
+        "Duplicate script bodies remain: contract-tests, contract:test",
+        "Duplicate script bodies remain: inventory:check, docs:sync"
+      ]
+    },
+    "script_sprawl": {
+      "score": 2.8,
+      "findings": [
+        "Root script count is 284.",
+        "Root command surface is still dense and benefits from continued pruning."
+      ]
+    },
+    "hidden_fragility": {
+      "score": 5.8,
+      "findings": [
+        "Complete live synthetic probe rollout for all Tier 1 endpoints.",
+        "Integrate incident tracker feed for MTTR and monthly incident count.",
+        "Backfill per-app uptime and deployment success from production telemetry.",
+        "17 apps still have unresolved live cost attribution."
+      ]
+    },
+    "docs_truth": {
+      "score": 9,
+      "findings": []
+    },
+    "naming_consistency": {
+      "score": 10,
+      "findings": []
+    },
+    "ci_efficiency": {
+      "score": 7.3,
+      "findings": [
+        "Emergency/manual app-specific deploy workflows still exist: deploy-console.yml, deploy-partners.yml, deploy-union-eyes.yml, deploy-web.yml",
+        "Workflow count remains 48."
+      ]
+    },
+    "overengineering": {
+      "score": 6.2,
+      "findings": [
+        "Workflow surface remains larger than ideal for a disciplined canonical release path."
+      ]
+    },
+    "dead_assets": {
+      "score": 6.8,
+      "findings": [
+        "Legacy app-specific deployment entry points remain present and should stay demoted to emergency/manual use only."
+      ]
+    },
+    "ownership": {
+      "score": 10,
+      "findings": []
+    }
+  },
+  "blockers": [
+    {
+      "category": "runtime_proof",
+      "finding": "MTTR is still missing live incident feed integration."
+    },
+    {
+      "category": "runtime_proof",
+      "finding": "Deploy success rate is not yet backfilled from production telemetry."
+    },
+    {
+      "category": "runtime_proof",
+      "finding": "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+    },
+    {
+      "category": "duplication",
+      "finding": "Duplicate script bodies remain: contract-tests, contract:test"
+    },
+    {
+      "category": "duplication",
+      "finding": "Duplicate script bodies remain: inventory:check, docs:sync"
+    },
+    {
+      "category": "script_sprawl",
+      "finding": "Root script count is 284."
+    },
+    {
+      "category": "script_sprawl",
+      "finding": "Root command surface is still dense and benefits from continued pruning."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Complete live synthetic probe rollout for all Tier 1 endpoints."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Integrate incident tracker feed for MTTR and monthly incident count."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Backfill per-app uptime and deployment success from production telemetry."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "17 apps still have unresolved live cost attribution."
+    },
+    {
+      "category": "ci_efficiency",
+      "finding": "Emergency/manual app-specific deploy workflows still exist: deploy-console.yml, deploy-partners.yml, deploy-union-eyes.yml, deploy-web.yml"
+    },
+    {
+      "category": "ci_efficiency",
+      "finding": "Workflow count remains 48."
+    },
+    {
+      "category": "overengineering",
+      "finding": "Workflow surface remains larger than ideal for a disciplined canonical release path."
+    },
+    {
+      "category": "dead_assets",
+      "finding": "Legacy app-specific deployment entry points remain present and should stay demoted to emergency/manual use only."
+    }
+  ]
+}

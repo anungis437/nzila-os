@@ -14,7 +14,7 @@ This document is the canonical provider key rotation cadence for Nzila OS. Every
 | **Resend** (email dispatch) | quarterly | suspected key leak, deliverability incident | per-env KV (`*/secrets/resend-api-key`) | R4 notification degradation drill |
 | **Stripe** (billing) | semi-annual | webhook signing secret compromise, account ownership change | per-env KV (`*/secrets/stripe-secret-key`, `*/secrets/stripe-webhook-secret`) | end-to-end checkout drill |
 | **Telemetry providers** (Sentry, OpenTelemetry collector keys) | semi-annual | new collector deploy, suspected leak | per-env KV (`*/secrets/sentry-dsn`, `*/secrets/otel-exporter-key`) | error-event ingestion smoke |
-| **Clerk** | n/a | **Clerk migration complete; legacy keys purged 2026-04-05.** Documented under [Migration history](#migration-history). | n/a | n/a |
+| **Clerk** | n/a | **Clerk migration complete; legacy keys purged 2026-04-05.** Documented under [Migration history](#2-migration-history). | n/a | n/a |
 
 ## 2. Migration history
 

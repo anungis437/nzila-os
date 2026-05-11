@@ -138,6 +138,30 @@
       "supportPrimary": "oncall-union-eyes@nzila.ai",
       "escalation": "director-portfolio@nzila.ai"
     },
+    "veridian-admin": {
+      "businessOwner": "team-veridian-business@nzila.ai",
+      "technicalOwner": "team-veridian-engineering@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-veridian@nzila.ai",
+      "escalation": "director-portfolio@nzila.ai"
+    },
+    "veridian-care": {
+      "businessOwner": "team-veridian-business@nzila.ai",
+      "technicalOwner": "team-veridian-engineering@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-veridian@nzila.ai",
+      "escalation": "director-portfolio@nzila.ai"
+    },
+    "veridian-site": {
+      "businessOwner": "team-veridian-business@nzila.ai",
+      "technicalOwner": "team-veridian-engineering@nzila.ai",
+      "runtimeOwner": "team-platform-ops@nzila.ai",
+      "releaseOwner": "team-platform-ops@nzila.ai",
+      "supportPrimary": "oncall-veridian@nzila.ai",
+      "escalation": "director-portfolio@nzila.ai"
+    },
     "web": {
       "businessOwner": "team-web-business@nzila.ai",
       "technicalOwner": "team-web-engineering@nzila.ai",

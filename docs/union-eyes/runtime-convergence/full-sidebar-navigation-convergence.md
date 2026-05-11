@@ -44,7 +44,7 @@ Actually refactor:
 
 ## Canonical Surface Inventory
 
-The runtime sidebar must express the seventeen institutional surfaces enumerated in [tier3-institutional-operating-infrastructure.md](../navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md):
+The runtime sidebar must express the seventeen institutional surfaces enumerated in [tier3-institutional-operating-infrastructure.md](../../categories/products-and-market/union-eyes/navigation-monetization-matrix/tier3-institutional-operating-infrastructure.md):
 
 home, work, priority, outcomes, continuity, governance, cadence, onboarding, intelligence (renamed → cognition), executive, operations, assurance, memory, sovereignty, trust center, strategic operations, settings.
 

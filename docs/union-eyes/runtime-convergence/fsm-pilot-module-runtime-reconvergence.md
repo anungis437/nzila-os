@@ -8,7 +8,7 @@ This phase must **reduce experiential fragmentation**. Every surviving module mu
 
 ## Upstream Authority
 
-[fsm-pilot-module-reconvergence.md (architecture layer)](../institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md) — this document authorizes the **runtime** execution of that architectural decision.
+[fsm-pilot-module-reconvergence.md (architecture layer)](../../categories/products-and-market/union-eyes/institutional-operating-infrastructure/fsm-pilot-module-reconvergence.md) — this document authorizes the **runtime** execution of that architectural decision.
 
 ## Required Targets
 

@@ -6,7 +6,7 @@
 
 - [Runtime Integrity README](README.md)
 - [Final Runtime Convergence (Union Eyes)](../union-eyes/runtime-convergence/README.md)
-- [Final Gating Philosophy](../union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
+- [Final Gating Philosophy](../categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md)
 
 ## Posture
 
