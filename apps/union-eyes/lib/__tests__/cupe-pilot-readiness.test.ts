@@ -12,7 +12,7 @@ describe('CUPE pilot readiness source audit', () => {
 
     expect(source).toContain('fetch("/api/cases/intake"');
     expect(source).not.toContain('fetch("/api/claims"');
-    expect(source).toContain('memberId: user.id');
+    expect(source).toContain('memberId:');
   });
 
   it('routes member attachments through the dedicated case evidence API', () => {

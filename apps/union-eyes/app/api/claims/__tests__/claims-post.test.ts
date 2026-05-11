@@ -68,19 +68,21 @@ const { POST } = await import('@/app/api/claims/route');
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function makeCtx(overrides: Record<string, unknown> = {}) {
+  const body = {
+    claimType: 'grievance_discipline',
+    incidentDate: '2026-03-27',
+    description: 'Main floor altercation on March 27th',
+    location: 'Main Floor',
+    desiredOutcome: 'Written apology and policy change',
+    witnessesPresent: false,
+    witnessDetails: '',
+  };
   return {
     organizationId: '9210418f-6a4f-4dab-a7d2-4450d581dc81',
     userId: 'user_3BP6IlC0zg9MwHJDDNn7KCcR0MV',
+    body,
     request: {
-      json: vi.fn().mockResolvedValue({
-        claimType: 'grievance_discipline',
-        incidentDate: '2026-03-27',
-        description: 'Main floor altercation on March 27th',
-        location: 'Main Floor',
-        desiredOutcome: 'Written apology and policy change',
-        witnessesPresent: false,
-        witnessDetails: '',
-      }),
+      json: vi.fn().mockResolvedValue(body),
     },
     ...overrides,
   };

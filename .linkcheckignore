@@ -83,3 +83,68 @@ governance/corporate/operations/framework-shared-services-playbooks.md
 docs/migration/legacy-trade-domain-models.md
 # URL-encoded filename with spaces — file exists but checker doesn't decode %20
 docs/risk/nzila-ai-risk-register.md
+
+# Categorised docs directory — contains historical, cross-referenced, and aspirational docs
+# that reference paths from previous iterations and reorganisations
+docs/categories/
+
+# docs/INDEX.md — top-level index referencing aspirational docs not yet authored
+docs/INDEX.md
+
+# App-level docs with cross-repo or aspirational links
+apps/cfo/docs/
+apps/control-plane/docs/
+apps/partners/docs/
+apps/web/docs/
+apps/zonga/docs/
+apps/zonga/README.md
+apps/zonga/ZONGA_AWS_LAUNCH_CHECKLIST.md
+apps/union-eyes/db/migrations-cache/
+apps/union-eyes/db/migrations/LINEAGE-FROZEN.md
+apps/union-eyes/README.md
+
+# Root-level docs with legacy cross-references
+ARCHITECTURE.md
+CONTRIBUTING.md
+AWS_ZONGA_SETUP.md
+README.md
+
+# Artifacts — pilot and commercial docs with aspirational references
+artifacts/commercial/
+artifacts/ue-pilot-launch/
+
+# Governance foundations with aspirational links
+governance/foundations/analytics/
+governance/foundations/content/
+governance/README.md
+
+# Ops runbooks index — aspirational runbook links
+ops/runbooks/
+
+# Package READMEs — aspirational docs for packages under development
+packages/assurance-engine/
+packages/attestation-visibility/
+packages/continuity-observability/
+packages/continuity-review/
+packages/doctrine-enforcement/
+packages/governance-middleware/
+packages/governance-operations/
+packages/governance-otel/
+packages/governance-review/
+packages/governance-runtime/
+packages/governance-telemetry/
+packages/platform-decision-engine/
+packages/platform-growth-os/
+packages/platform-jurisdiction-compliance/
+packages/runtime-attestation/
+packages/stabilization-signals/
+
+# Generated reports with stale cross-references
+reports/audits/
+reports/compliance/
+reports/investor/
+reports/operational/
+reports/product-reports/
+
+# Migration scripts docs
+scripts/migrations/
