@@ -72,9 +72,9 @@ describe('getAppManifest', () => {
 describe('getAppsByTier', () => {
   it('returns all production apps', () => {
     const prod = getAppsByTier('PRODUCTION')
-    expect(prod.length).toBe(4)
+    expect(prod.length).toBe(3)
     const ids = prod.map(a => a.id).sort()
-    expect(ids).toEqual(['console', 'flow', 'union-eyes', 'web'])
+    expect(ids).toEqual(['console', 'union-eyes', 'web'])
   })
 
   it('returns pilot apps', () => {
