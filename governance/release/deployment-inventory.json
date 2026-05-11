@@ -619,6 +619,60 @@
         "demoBanner": "internal-demo",
         "phiMode": "disabled"
       }
+    },
+    "trustcore": {
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-3 / gtm hold / lifecycle incubating. No staging or production container app provisioned. Excluded from runtime gate until promoted."
+    },
+    "trustcore-trustops": {
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-3 / gtm hold / lifecycle incubating. Companion ops surface for trustcore; not provisioned."
+    },
+    "maestria": {
+      "tier": "tier-4",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-4 / gtm internal-only / lifecycle incubating. Local development only."
+    },
+    "nzila-hq": {
+      "tier": "tier-3",
+      "releaseStatus": "not-deployed",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-3 / gtm internal-only / lifecycle incubating. Internal HQ surface; not provisioned in ACA."
+    },
+    "weekone": {
+      "tier": "tier-4",
+      "releaseStatus": "frozen",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-4 / gtm internal-only / lifecycle frozen. Frozen onboarding artifact; no deployment expected."
+    },
+    "test-scaffold-gp": {
+      "tier": "tier-5",
+      "releaseStatus": "deprecated",
+      "track": "internal",
+      "prodPromotionEligible": false,
+      "outOfScopeForRuntimeChecks": true,
+      "owners": ["platform-core"],
+      "rationale": "Catalog tier-5 / gtm sunset / lifecycle frozen. Scaffold template only; never deployed."
     }
   },
   "domainPolicy": {

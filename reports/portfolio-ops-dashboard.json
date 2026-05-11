@@ -177,7 +177,7 @@
       "recommendation": "KEEP",
       "weighted_score": 7,
       "readiness_tier": "pilot-safe",
-      "registry_tier": "PRODUCTION",
+      "registry_tier": "PILOT",
       "dev_port": 3003
     },
     {

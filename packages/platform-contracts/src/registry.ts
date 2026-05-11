@@ -79,7 +79,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     name: 'Flow',
     description: 'Commerce engine — quotes, orders, invoices, fulfillment, Shopify/Zoho sync',
     basePath: '/flow',
-    tier: 'PRODUCTION',
+    tier: 'PILOT',
     appType: 'web-app',
     iconToken: 'shopping-cart',
     enabledByDefault: false,
