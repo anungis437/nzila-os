@@ -37,7 +37,7 @@
 
 | Product | Registry Tier | Readiness | Deployment | Recommendation |
 | --- | --- | --- | --- | --- |
-| FAIRCASE | PILOT | pilot-safe | internal | KEEP |
+| FAIRCASE | EXPERIMENTAL | pilot-safe | internal | KEEP |
 | Flow | PILOT | pilot-safe | internal | KEEP |
 | Union Eyes | PRODUCTION | pilot-safe | internal | KEEP |
 | CFO | PILOT | pilot-safe | internal | HOLD |

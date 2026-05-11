@@ -165,7 +165,7 @@
       "recommendation": "KEEP",
       "weighted_score": 8,
       "readiness_tier": "pilot-safe",
-      "registry_tier": "PILOT",
+      "registry_tier": "EXPERIMENTAL",
       "dev_port": 3014
     },
     {

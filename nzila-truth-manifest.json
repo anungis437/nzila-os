@@ -134,7 +134,7 @@
   },
   "app_status": {
     "abr": {
-      "registry_tier": "PILOT",
+      "registry_tier": "EXPERIMENTAL",
       "deployment_status": "pilot",
       "readiness_tier": "pilot-safe",
       "exposure": "internal",
