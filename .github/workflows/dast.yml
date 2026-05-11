@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: ZAP Baseline Scan — ${{ matrix.target.name }}
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ matrix.target.url }}
           rules_file_name: '.zap/rules.tsv'
