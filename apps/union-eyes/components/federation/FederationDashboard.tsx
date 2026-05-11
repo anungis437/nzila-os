@@ -398,7 +398,7 @@ export function FederationDashboard({
                   <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-950/20 rounded-md">
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-green-600">
-                      All systems operational
+                      No degradation reported
                     </span>
                   </div>
                 )}

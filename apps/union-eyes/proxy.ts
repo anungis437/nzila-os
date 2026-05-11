@@ -359,6 +359,29 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     return withRequestId(NextResponse.next(), requestId);
   }
 
+  // ── R5: Locale alias normalization (single-hop, deterministic) ──────────
+  // Configured locales are en-CA / fr-CA / it / pt. Short aliases /en and /fr
+  // (without the -CA region tag) are NOT in the locale list, which causes
+  // next-intl to treat them as non-prefixed paths and prepend the default
+  // locale — producing the double-prefix /en-CA/en/X. We normalize here with
+  // a single 308 (permanent, method-preserving) redirect to the canonical
+  // regional locale. Bounded: at most one redirect; never recursive.
+  const _localeAliasMap: Readonly<Record<string, string>> = Object.freeze({
+    en: 'en-CA',
+    fr: 'fr-CA',
+  });
+  const _firstSegment = req.nextUrl.pathname.split('/')[1] ?? '';
+  const _aliasTarget = _localeAliasMap[_firstSegment];
+  if (_aliasTarget) {
+    const _normalized = req.nextUrl.pathname.replace(
+      new RegExp(`^/${_firstSegment}(?=/|$)`),
+      `/${_aliasTarget}`,
+    );
+    const _url = req.nextUrl.clone();
+    _url.pathname = _normalized;
+    return withRequestId(NextResponse.redirect(_url, 308), requestId);
+  }
+
   // For non-API routes, run i18n middleware and return its response
   const intlResponse = intlMiddleware(req);
   // intlMiddleware returns a Response; wrap it so we can attach our header

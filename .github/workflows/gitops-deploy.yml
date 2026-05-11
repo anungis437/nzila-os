@@ -21,6 +21,7 @@ on:
         options:
           - development
           - staging
+          - pilot
         default: staging
       version:
         description: 'Image tag / version to deploy'

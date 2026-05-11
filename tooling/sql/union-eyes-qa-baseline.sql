@@ -227,6 +227,13 @@ CREATE TABLE IF NOT EXISTS user_management.mfa_challenges (
   created_at timestamptz DEFAULT now()
 );
 
+-- member_category enum required by organization_members.member_category
+DO $$ BEGIN
+  CREATE TYPE member_category AS ENUM ('full_member', 'associate', 'honorary', 'retired');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS public.organization_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id text NOT NULL,
@@ -235,13 +242,44 @@ CREATE TABLE IF NOT EXISTS public.organization_members (
   status text NOT NULL,
   name text,
   email text,
+  phone text,
+  department text,
+  membership_number text,
+  position text,
+  location text,
+  hire_date timestamptz,
+  seniority integer,
+  union_join_date timestamptz,
   metadata jsonb,
   is_primary boolean,
+  member_category member_category,
+  exempt_from_per_capita boolean,
+  exemption_reason text,
+  exemption_approved_by varchar(255),
+  exemption_approved_at timestamptz,
+  search_vector text,
   joined_at timestamptz,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz,
   deleted_at timestamptz
 );
+
+-- Add columns idempotently for environments where the table already exists
+-- with the older 14-column shape (governance-safe schema convergence).
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS department text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS membership_number text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS position text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS location text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS hire_date timestamptz;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS seniority integer;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS union_join_date timestamptz;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS member_category member_category;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exempt_from_per_capita boolean;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_reason text;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_approved_by varchar(255);
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS exemption_approved_at timestamptz;
+ALTER TABLE public.organization_members ADD COLUMN IF NOT EXISTS search_vector text;
 
 CREATE TABLE IF NOT EXISTS public.claims (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

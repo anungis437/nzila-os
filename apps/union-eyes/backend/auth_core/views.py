@@ -988,7 +988,28 @@ def health_check(request):
     except Exception:
         checks["celery_broker"] = False
 
-    all_healthy = all(checks.values())
+    # Upstash REST — independent verification of the REST token. Only runs
+    # when both creds are configured (keeps backward compat for non-Upstash
+    # deployments). Surfaced as a separate field; does NOT affect overall
+    # status (the rotation script reads it explicitly).
+    from django.conf import settings as _settings
+
+    rest_url = getattr(_settings, "UPSTASH_REDIS_REST_URL", "")
+    rest_token = getattr(_settings, "UPSTASH_REDIS_REST_TOKEN", "")
+    if rest_url and rest_token:
+        try:
+            from upstash_redis import Redis as UpstashRedis
+
+            _u = UpstashRedis(url=rest_url, token=rest_token)
+            _u.set("_health_rest", "1", ex=10)
+            checks["upstash_rest"] = _u.get("_health_rest") == "1"
+        except Exception:
+            checks["upstash_rest"] = False
+
+    # Overall status ignores upstash_rest (parallel verification path,
+    # not a runtime dependency for Django itself).
+    _core_checks = {k: v for k, v in checks.items() if k != "upstash_rest"}
+    all_healthy = all(_core_checks.values())
     status_code = 200 if all_healthy else 503
 
     return Response(
