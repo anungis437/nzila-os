@@ -18,9 +18,9 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: 'Union Eyes | Institutional Continuity for Labour Organizations',
+    title: 'Union Eyes | Institutional Labour Operating Infrastructure',
     description:
-      'Governance-safe intelligence, institutional memory, and operational coherence for labour organizations.',
+      'Continuity-safe institutional labour operations: governance-safe cognition, institutional memory, stewardship continuity, and anti-surveillance posture as one operating environment.',
     alternates: buildLocaleAlternates(locale),
   };
 }
@@ -31,16 +31,16 @@ const outcomes = [
     desc: 'Leadership transitions retain strategic memory, governance context, and operational direction.',
   },
   {
-    title: 'Governance intelligence',
-    desc: 'Every recommendation is explainable, auditable, and built for democratic oversight.',
+    title: 'Governance-safe cognition',
+    desc: 'Every interpretation is bounded, evidence-anchored, and reviewer-of-record resolved.',
   },
   {
     title: 'Operational coherence',
     desc: 'Distributed teams work from one shared operating view instead of fragmented systems.',
   },
   {
-    title: 'Labour-safe intelligence',
-    desc: 'Anti-surveillance design and human oversight are structurally enforced at every layer.',
+    title: 'Anti-surveillance posture',
+    desc: 'Continuity-safe modernization, anti-surveillance design, and human oversight enforced structurally at every layer.',
   },
 ];
 
@@ -90,21 +90,20 @@ export default async function LocaleRootPage({
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
             <ScrollReveal>
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-                Institutional Continuity for Labour Organizations
+                Institutional Labor Operating Infrastructure
               </span>
             </ScrollReveal>
 
             <ScrollReveal delay={0.08}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-                Hide complexity.<br />
-                <span className="gradient-text">Expose outcomes.</span>
+                Continuity-safe<br />
+                <span className="gradient-text">institutional labour operations.</span>
               </h1>
             </ScrollReveal>
 
             <ScrollReveal delay={0.16}>
               <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-                Union Eyes brings governance-safe intelligence, institutional memory, and
-                operational coherence into one executive operating surface built for modern labour institutions.
+                Union Eyes is the operational infrastructure layer for institutional labour continuity — governance-safe cognition, institutional memory, stewardship continuity, and anti-surveillance posture, embodied as one operating environment.
               </p>
             </ScrollReveal>
 
