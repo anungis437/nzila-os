@@ -13,6 +13,8 @@
  * an authorized doctrine amendment.
  */
 
+import { logger as appLogger } from '../logger';
+
 export type ContractKey =
   | 'auth.next.secret'
   | 'auth.django.secret'
@@ -140,13 +142,13 @@ export interface EnforceLogger {
   error: (msg: string) => void;
 }
 
-const consoleLogger: EnforceLogger = {
-  info: (m) => console.info(m),
-  warn: (m) => console.warn(m),
-  error: (m) => console.error(m),
+const defaultLogger: EnforceLogger = {
+  info: (m) => appLogger.info(m),
+  warn: (m) => appLogger.warn(m),
+  error: (m) => appLogger.error(m),
 };
 
-export function enforceRuntimeFailClosed(logger: EnforceLogger = consoleLogger): FailClosedReport {
+export function enforceRuntimeFailClosed(logger: EnforceLogger = defaultLogger): FailClosedReport {
   const report = assessRuntimeContracts();
 
   if (report.failClosedEnabled && report.unmetRequired.length > 0) {

@@ -13,6 +13,7 @@
     "./integrity": "./src/integrity.ts"
   },
   "scripts": {
+    "build": "pnpm typecheck",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint src/"
