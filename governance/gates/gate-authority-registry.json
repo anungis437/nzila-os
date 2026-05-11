@@ -1,0 +1,339 @@
+{
+  "$schema": "gate-authority-registry/v1",
+  "version": "2026-05-11",
+  "asOfDate": "2026-05-11",
+  "scope": "Authority classification for governance validators across the Nzila OS monorepo.",
+  "classifications": {
+    "blocking": "Failure must fail CI / block the release. Output is authoritative.",
+    "advisory": "Failure is reported but does not block; signal-only or budget-tracking.",
+    "deprecated": "Superseded by a newer validator. Kept for back-compat or audit replay; output not authoritative.",
+    "future_doctrine": "Doctrine validator whose evidence model is not yet wired/sealed; runs in non-enforcing mode until promoted."
+  },
+  "notes": [
+    "This registry is the SINGLE SOURCE OF TRUTH for which validators carry release authority.",
+    "Adding a new validator requires an entry here with explicit classification + rationale.",
+    "Promoting future_doctrine -> blocking requires: (1) evidence model documented, (2) green run on main for >= 7 days, (3) PR updating this registry."
+  ],
+  "gates": [
+    {
+      "id": "validate-canonical-truth",
+      "command": "pnpm validate:canonical-truth",
+      "path": "scripts/validate-canonical-truth.ts",
+      "purpose": "Enforce coherence of nzila-truth-manifest.json against product catalog and registry.",
+      "classification": "blocking",
+      "rationale": "Truth manifest is the cross-cutting authority for app status; drift here invalidates downstream gates.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-truth-authority",
+      "command": "pnpm validate:truth-authority",
+      "path": "scripts/validate-truth-authority.ts",
+      "purpose": "Verify every product/app has an authoritative source-of-truth pointer.",
+      "classification": "blocking",
+      "rationale": "Prevents orphan truth records and silent authority drift.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-product-catalog",
+      "command": "pnpm validate:product-catalog",
+      "path": "scripts/validate-product-catalog.ts",
+      "purpose": "Schema + invariant checks on governance/portfolio/product-catalog.json.",
+      "classification": "blocking",
+      "rationale": "Catalog is the canonical product list; malformed entries break inventory sync and registry coherence.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-portfolio",
+      "command": "pnpm validate:portfolio",
+      "path": "scripts/validate-portfolio.ts",
+      "purpose": "Portfolio-level invariants across catalog, registry, capital allocation.",
+      "classification": "blocking",
+      "rationale": "Portfolio drift produces misleading capital / commercial reports.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "inventory-check",
+      "command": "pnpm inventory:check",
+      "path": "packages/repo-inventory (check)",
+      "purpose": "Verify deployment-inventory and repo inventory are in sync with workspace state.",
+      "classification": "blocking",
+      "rationale": "Inventory is the source of truth for app topology, deploy targets, and runtime checks. Drift here was the immediate trigger for PR #497.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-auth-authority",
+      "command": "pnpm validate:auth-authority",
+      "path": "scripts/validate-auth-authority.ts",
+      "purpose": "Confirm @nzila/platform-auth is the single auth authority; no stray Clerk imports or competing providers.",
+      "classification": "blocking",
+      "rationale": "Auth authority drift is a security regression class; must block.",
+      "owner": "platform-auth"
+    },
+    {
+      "id": "validate-ga-state",
+      "command": "pnpm validate:ga-state",
+      "path": "scripts/validate-ga-state.ts",
+      "purpose": "Validate GA-state declarations against actual deploy/runtime evidence.",
+      "classification": "blocking",
+      "rationale": "Prevents apps from claiming GA without supporting evidence.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-evidence-lifecycle",
+      "command": "pnpm validate:evidence:lifecycle",
+      "path": "scripts/validate-evidence-lifecycle-policy.ts",
+      "purpose": "Enforce freshness/provenance/retention policy on evidence artifacts.",
+      "classification": "blocking",
+      "rationale": "Stale evidence presented as fresh undermines every downstream report.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "release-migration-safety",
+      "command": "pnpm release:migration:safety",
+      "path": "scripts/release/validate-migration-safety.ts",
+      "purpose": "Block destructive/unsafe SQL migrations from reaching staging/prod.",
+      "classification": "blocking",
+      "rationale": "Data-loss prevention; non-negotiable.",
+      "owner": "platform-data"
+    },
+    {
+      "id": "db-drift-check",
+      "command": "pnpm db:drift:check",
+      "path": "scripts/db/drift-check.ts",
+      "purpose": "Detect schema drift between Drizzle schema and live DB.",
+      "classification": "blocking",
+      "rationale": "Drift produces 'Failed query' runtime errors (see drizzle memory note).",
+      "owner": "platform-data"
+    },
+    {
+      "id": "validate-governance-gate",
+      "command": "pnpm validate:governance:gate",
+      "path": "tooling/governance/validate-governance-gate.ts",
+      "purpose": "Composite gate: orchestrates the blocking validators below into a single CI signal.",
+      "classification": "blocking",
+      "rationale": "Single composite entrypoint for the Governance Gates workflow.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-control-manifests",
+      "command": "pnpm validate:control:manifests",
+      "path": "tooling/governance/validate-control-manifests.ts",
+      "purpose": "Validate control-plane manifests (jobs, schedules, budgets) for required fields.",
+      "classification": "blocking",
+      "rationale": "Bad control manifests silently disable critical jobs.",
+      "owner": "control-plane"
+    },
+    {
+      "id": "ga-check",
+      "command": "pnpm ga-check",
+      "path": "tooling/ga-check/ga-check.ts",
+      "purpose": "GA readiness checklist runner.",
+      "classification": "blocking",
+      "rationale": "Top-level entry for governance composite (see validate:governance script).",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "contract-tests",
+      "command": "pnpm contract-tests",
+      "path": "vitest --project contract-tests",
+      "purpose": "Cross-package contract assertions (truth manifest coherence, no fake production behavior, evidence chain integrity, etc).",
+      "classification": "blocking",
+      "rationale": "Contract suite encodes invariants assumed by every other gate.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-runtime-truth",
+      "command": "pnpm validate:runtime-truth",
+      "path": "tooling/contract-tests/* (curated subset)",
+      "purpose": "Subset of contract tests that guard against fake/placeholder runtime behavior.",
+      "classification": "blocking",
+      "rationale": "Directly enforces the no-placeholder-evidence invariant.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-maturity",
+      "command": "pnpm validate:maturity",
+      "path": "tooling/contract-tests/app-maturity-enforcement.test.ts",
+      "purpose": "Enforce per-app maturity.json invariants and truth-manifest coherence.",
+      "classification": "blocking",
+      "rationale": "Maturity drift is how UE/flagship overstatement enters the system.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-governance-runtime-budget",
+      "command": "pnpm validate:governance:runtime-budget",
+      "path": "tooling/scripts/check-governance-runtime-budget.mjs",
+      "purpose": "Track total wall-clock and resource budget for governance jobs.",
+      "classification": "advisory",
+      "rationale": "Budget signal for SRE; should not block release. Note: script invokes with --enforce by default; the --enforce mode is itself currently treated as a soft signal pending budget calibration.",
+      "owner": "platform-sre"
+    },
+    {
+      "id": "validate-runtime-integrity",
+      "command": "pnpm validate:runtime-integrity",
+      "path": "tooling/scripts/validate-runtime-integrity.mjs",
+      "purpose": "Cross-checks runtime evidence (health-latest, failure matrix) against declared topology.",
+      "classification": "advisory",
+      "rationale": "Runtime evidence is staging-only and currently bootstrapEvidence:true; treating as blocking would create false negatives. Promote to blocking once evidence-authority sidecar (reports/runtime/evidence-authority.json) is consumed by this validator.",
+      "owner": "platform-sre",
+      "promotionCriteria": [
+        "Validator reads reports/runtime/evidence-authority.json",
+        "asOfDate freshness window enforced (<= 24h)",
+        "scope=staging is acknowledged in output"
+      ]
+    },
+    {
+      "id": "validate-runtime-authority",
+      "command": "pnpm validate:runtime-authority",
+      "path": "tooling/scripts/validate-runtime-authority-audit.mjs",
+      "purpose": "Audits runtime authority pointers across apps.",
+      "classification": "advisory",
+      "rationale": "Useful for drift detection; not yet calibrated for blocking.",
+      "owner": "platform-sre"
+    },
+    {
+      "id": "validate-runtime-convergence",
+      "command": "pnpm validate:runtime-convergence",
+      "path": "tooling/scripts/validate-runtime-convergence.mjs",
+      "purpose": "Convergence checks across runtime declarations.",
+      "classification": "deprecated",
+      "rationale": "Superseded by validate-runtime-integrity + truth-manifest coherence; retained for audit replay only. Schedule for removal once historical reports no longer reference it.",
+      "supersededBy": "validate-runtime-integrity",
+      "owner": "platform-sre"
+    },
+    {
+      "id": "validate-final-convergence",
+      "command": "pnpm validate:final-convergence",
+      "path": "tooling/scripts/validate-final-convergence.mjs",
+      "purpose": "Historical 'final convergence' ladder.",
+      "classification": "deprecated",
+      "rationale": "Authority subsumed by validate-canonical-truth + validate-truth-authority + validate-maturity. Remove after Q2 2026 audit cycle.",
+      "supersededBy": "validate-canonical-truth+validate-truth-authority+validate-maturity",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-maturity-elevation",
+      "command": "pnpm validate:maturity-elevation",
+      "path": "tooling/scripts/validate-maturity-convergence.mjs",
+      "purpose": "Earlier maturity convergence ladder.",
+      "classification": "deprecated",
+      "rationale": "Replaced by validate:maturity (contract tests).",
+      "supersededBy": "validate-maturity",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-cognition",
+      "command": "pnpm validate:cognition",
+      "path": "tooling/scripts/validate-institutional-cognition-convergence.mjs",
+      "purpose": "Doctrine convergence for institutional cognition layer.",
+      "classification": "future_doctrine",
+      "rationale": "Doctrine concept; evidence model not yet sealed. Runs but is not authoritative until promoted.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-labor-continuity",
+      "command": "pnpm validate:labor-continuity",
+      "path": "tooling/scripts/validate-labor-continuity-governance.mjs",
+      "purpose": "Labor-continuity governance ladder (UE-adjacent).",
+      "classification": "future_doctrine",
+      "rationale": "Domain doctrine; not yet wired to release authority.",
+      "owner": "union-eyes"
+    },
+    {
+      "id": "validate-tier2-hardening",
+      "command": "pnpm validate:tier2-hardening",
+      "path": "tooling/scripts/validate-tier2-hardening.mjs",
+      "purpose": "Tier-2 hardening convergence checks.",
+      "classification": "future_doctrine",
+      "rationale": "No tier-2 apps in inventory at GA boundary; promote once any app is classified tier-2.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-sovereignty-proving",
+      "command": "pnpm validate:sovereignty-proving",
+      "path": "tooling/scripts/validate-sovereignty-proving.mjs",
+      "purpose": "Sovereignty proving doctrine.",
+      "classification": "future_doctrine",
+      "rationale": "Doctrine; evidence model pending. Not authoritative.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-residual-closure",
+      "command": "pnpm validate:residual-closure",
+      "path": "tooling/scripts/validate-residual-closure.mjs",
+      "purpose": "Residual-closure ladder.",
+      "classification": "future_doctrine",
+      "rationale": "Doctrine; pending closure model.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-operational-honesty-guardrail",
+      "command": "pnpm validate:operational-honesty-guardrail",
+      "path": "tooling/scripts/validate-operational-honesty-guardrail.mjs",
+      "purpose": "Guardrail against overstated operational claims.",
+      "classification": "advisory",
+      "rationale": "Aligned with truth-manifest coherence; promote to blocking once it consumes truth manifest directly rather than ad-hoc claim scraping.",
+      "owner": "platform-governance"
+    },
+    {
+      "id": "validate-org-resolver-guardrail",
+      "command": "pnpm validate:org-resolver-guardrail",
+      "path": "tooling/scripts/validate-org-resolver-guardrail.mjs",
+      "purpose": "Prevents misuse of auth().orgId for app-level org lookups (see Entra Auth Gotchas).",
+      "classification": "blocking",
+      "rationale": "Encodes a known security/correctness footgun documented in user memory.",
+      "owner": "platform-auth"
+    },
+    {
+      "id": "validate-live-readiness",
+      "command": "pnpm validate:live-readiness",
+      "path": "tooling/scripts/validate-live-operational-readiness.mjs",
+      "purpose": "Live operational readiness signal aggregation.",
+      "classification": "advisory",
+      "rationale": "Useful operational dashboard; not authoritative for release blocking.",
+      "owner": "platform-sre"
+    },
+    {
+      "id": "validate-infra-convergence",
+      "command": "pnpm validate:infra-convergence",
+      "path": "tooling/scripts/validate-live-infrastructure-convergence.mjs",
+      "purpose": "Live infrastructure convergence signal.",
+      "classification": "advisory",
+      "rationale": "Diagnostic; promote when paired with live-readiness contract.",
+      "owner": "platform-sre"
+    },
+    {
+      "id": "validate-ue-infrastructure",
+      "command": "pnpm validate:ue-infrastructure",
+      "path": "tooling/scripts/validate-ue-infrastructure.mjs",
+      "purpose": "UE-specific infrastructure ladder.",
+      "classification": "advisory",
+      "rationale": "UE-scoped; complements but does not gate the platform composite.",
+      "owner": "union-eyes"
+    },
+    {
+      "id": "validate-navigation-monetization",
+      "command": "pnpm validate:navigation-monetization",
+      "path": "tooling/scripts/validate-navigation-monetization.mjs",
+      "purpose": "Navigation/monetization coherence checks.",
+      "classification": "advisory",
+      "rationale": "Commercial signal; promote when revenue contracts are sealed.",
+      "owner": "commercial"
+    },
+    {
+      "id": "validate-portfolio-governance",
+      "command": "pnpm validate:portfolio-governance",
+      "path": "composite (brand-leakage + product-catalog + portfolio + canonical-truth + truth-authority)",
+      "purpose": "Composite portfolio governance gate.",
+      "classification": "blocking",
+      "rationale": "Composite of blocking validators; stays blocking.",
+      "owner": "platform-governance"
+    }
+  ],
+  "summary": {
+    "blocking": 16,
+    "advisory": 9,
+    "deprecated": 3,
+    "future_doctrine": 5
+  }
+}

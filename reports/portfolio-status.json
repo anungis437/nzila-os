@@ -205,7 +205,7 @@
         "readiness": 4,
         "margin_potential": 4
       },
-      "registry_tier": "EXPERIMENTAL",
+      "registry_tier": "PILOT",
       "dev_port": 3014
     },
     {
@@ -278,7 +278,7 @@
         "readiness": 3,
         "margin_potential": 4
       },
-      "registry_tier": "PRODUCTION",
+      "registry_tier": "PILOT",
       "dev_port": 3003
     },
     {

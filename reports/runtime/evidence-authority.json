@@ -1,0 +1,36 @@
+{
+  "$schema": "evidence-authority/v1",
+  "asOfDate": "2026-05-11",
+  "scope": "staging-only",
+  "topologyStrategy": "shared-resource-group-environment",
+  "ownedDomains": ["nzilaventures.com", "unioneyes.app"],
+  "authorityLevel": "advisory",
+  "bootstrapEvidence": true,
+  "rationale": "Runtime reports under reports/runtime/ are advisory inputs to governance gates; they reflect last-known staging probes against the shared ACA environment. They are NOT the truth source for productCatalog/inventory/registry alignment. Production runtime authority requires live, signed probes against owned production domains and is currently out of scope (no production environment provisioned).",
+  "reports": {
+    "live-health-failure-matrix.json": {
+      "format": "array",
+      "entryCount": 20,
+      "scope": "staging-only",
+      "policyCriticalCount": 0,
+      "classification": "advisory fallback diagnostics",
+      "consumedBy": [],
+      "notes": "Bare JSON array of failure observations from staging probes. All entries are policyCritical=false advisory classifications. No code consumers detected; surface used for governance reporting only."
+    },
+    "health-latest.json": {
+      "format": "object",
+      "endpointCount": 44,
+      "failureCount": 0,
+      "bootstrapEvidence": true,
+      "overallStatus": "unknown",
+      "scope": "staging-only",
+      "classification": "bootstrap probe ledger",
+      "notes": "Embedded bootstrapEvidence=true flag confirms this is a seeded baseline, not a live signed probe. Used for governance display; not a gate authority."
+    }
+  },
+  "gateImpact": {
+    "blocking": false,
+    "advisory": true,
+    "rationale": "These artifacts inform but do not block release gates until a runtime authority pipeline is operational against owned production domains."
+  }
+}

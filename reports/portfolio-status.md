@@ -56,8 +56,8 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 
 | Product | Weighted Score | Recommendation | Operational Tier | Readiness |
 | --- | ---: | --- | --- | --- |
-| FAIRCASE | 8.0 | KEEP | EXPERIMENTAL | pilot-safe |
-| Flow | 7.0 | KEEP | PRODUCTION | pilot-safe |
+| FAIRCASE | 8.0 | KEEP | PILOT | pilot-safe |
+| Flow | 7.0 | KEEP | PILOT | pilot-safe |
 | Union Eyes | 8.0 | KEEP | PRODUCTION | pilot-safe |
 | CFO | 5.6 | HOLD | PILOT | pilot-safe |
 | Partners | 4.8 | HOLD | PILOT | pilot-safe |
