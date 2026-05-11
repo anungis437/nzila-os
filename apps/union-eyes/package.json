@@ -33,7 +33,7 @@
     "evidence:all": "pnpm evidence:collect && pnpm evidence:seal && pnpm evidence:verify"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.985.0",
+    "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/client-textract": "^3.985.0",
     "@aws-sdk/s3-request-presigner": "^3.985.0",
     "@azure/cognitiveservices-computervision": "^8.2.0",
