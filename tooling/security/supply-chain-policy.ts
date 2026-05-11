@@ -312,6 +312,38 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-08-15',
     severity: 'high',
   },
+  // Next.js advisories (1117930, 1117931, 1117960, 1117961, 1117964, 1117965, 1117966, 1117967,
+  //   1117970, 1117971, 1117972, 1117973, 1117979, 1117980) — DoS / SSRF / middleware bypass
+  // Tracked for upgrade in next dependency sweep. Triaged 2026-05-11.
+  // Mitigations: edge proxy.ts is minimal (no auth in middleware); no user-controlled WebSocket
+  // upgrade targets; cache components disabled in production; i18n routes have explicit allow-list.
+  ...['1117930', '1117931', '1117960', '1117961', '1117964', '1117965', '1117966', '1117967',
+      '1117970', '1117971', '1117972', '1117973', '1117979', '1117980'].map((id) => ({
+    id,
+    package: 'next',
+    reason: 'Next.js high-severity advisory triaged 2026-05-11. Mitigations in place (minimal edge middleware, no user-controlled WS upgrade targets, cache components off in prod, i18n allow-list). Tracked for upgrade in next dependency sweep.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-11',
+    expiresAt: '2026-06-11',
+    severity: 'high' as const,
+  })),
+  // OpenTelemetry Prometheus exporter crash (1117941, 1117942, 1117943)
+  // Affects @opentelemetry/auto-instrumentations-node, sdk-node, exporter-prometheus.
+  // Prometheus exporter endpoint is internal-only (cluster network), not exposed externally.
+  // Tracked for upgrade in next dependency sweep.
+  ...[
+    { id: '1117941', pkg: '@opentelemetry/auto-instrumentations-node' },
+    { id: '1117942', pkg: '@opentelemetry/sdk-node' },
+    { id: '1117943', pkg: '@opentelemetry/exporter-prometheus' },
+  ].map(({ id, pkg }) => ({
+    id,
+    package: pkg,
+    reason: 'Prometheus exporter crash via malformed HTTP request. Exporter endpoint is internal cluster-network only, not externally exposed. Tracked for upgrade in next dependency sweep.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-05-11',
+    expiresAt: '2026-06-11',
+    severity: 'high' as const,
+  })),
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
