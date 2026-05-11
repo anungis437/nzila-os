@@ -86,6 +86,26 @@ export async function register() {
         logger.info('Environment validation passed');
       }
 
+      // ── Tier 2 fail-closed runtime gate ───────────────────────────
+      // Doctrine: docs/nzila-tier2-hardening/full-fail-closed-runtime-architecture.md
+      // Refuses boot under RUNTIME_FAIL_CLOSED=true when any required
+      // runtime contract is unmet. Otherwise emits an advisory banner.
+      try {
+        const { enforceRuntimeFailClosed, RuntimeContractError } = await import('./lib/runtime/fail-closed');
+        enforceRuntimeFailClosed({
+          info: (m) => logger.info(m),
+          warn: (m) => logger.warn(m),
+          error: (m) => logger.error(m),
+        });
+        void RuntimeContractError; // re-export side-effect for downstream consumers
+      } catch (gateError) {
+        if (gateError instanceof Error && gateError.name === 'RuntimeContractError') {
+          logger.error(`FATAL: ${gateError.message}`);
+          throw gateError;
+        }
+        logger.warn('Fail-closed runtime gate could not run', { error: gateError });
+      }
+
       // Print warnings if any
       if (envValidation.warnings.length > 0) {
         logger.warn('⚠️  [WARN] Environment warnings:');

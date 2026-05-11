@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, BaseAuthContext } from "@/lib/api-auth-guard";
-import { getOrganizationIdForUser } from "@/lib/organization-utils";
+import { resolveOrgIdFromContext } from "@/lib/org-id-from-context";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -25,8 +25,8 @@ export const GET = withApiAuth(
           "Authentication required",
         );
       }
-      const orgId =
-        context.organizationId || (await getOrganizationIdForUser(userId));
+      // R9: helper enforces app-org UUID shape; rejects Entra group GUIDs.
+      const orgId = await resolveOrgIdFromContext(context, userId);
 
       if (!orgId) {
         return standardErrorResponse(

@@ -4,9 +4,10 @@ on:
   pull_request:
     paths:
       - docs/ops/pilots/flow-pilot/**
+      - apps/flow/**
       - scripts/flow-shopmoica-cutover-check.ts
+      - scripts/flow-*.ts
       - scripts/pilot-check.ts
-      - package.json
       - .github/workflows/flow-shopmoica-cutover-gate.yml
   workflow_dispatch:
     inputs:

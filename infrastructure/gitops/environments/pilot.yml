@@ -1,0 +1,61 @@
+# Pilot Environment Configuration
+# Nzila OS — GitOps
+#
+# Substrate sovereignty: dedicated RG, dedicated ACA env, sovereign KV,
+# sovereign Postgres, sovereign domain. Image substrate is shared via ACR.
+#
+# Doctrine anchor: docs/nzila-tier2-hardening/full-pilot-fabric-legitimacy.md
+
+environment: pilot
+region: canadacentral
+resource_group: nzila-canada-pilot-rg
+dr_region: canadaeast
+
+container_apps:
+  environment: nzila-canada-pilot-env
+  revision_mode: Single
+  min_replicas: 0
+  max_replicas: 2
+
+apps:
+  union-eyes:
+    image_tag: "${VERSION}"
+    port: 3000
+    cpu: 0.5
+    memory: 1.0Gi
+    scale_rules:
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: NEXT_PUBLIC_APP_ENV
+        value: pilot
+      - name: NZILA_MODE
+        value: pilot
+      - name: ENVIRONMENT_ISOLATION
+        value: full
+      - name: SECRET_TOPOLOGY
+        value: isolated
+      - name: SECRET_AUTHORITY
+        value: nzila-canada-pilot-kv
+      - name: RUNTIME_FAIL_CLOSED
+        value: "true"
+      - name: UE_PILOT_APP_DOMAIN
+        value: pilot.unioneyes.app
+
+database:
+  name: nzila-canada-pilot-db
+  sku: Standard_B1ms
+  tier: Burstable
+  version: '16'
+  storage_gb: 32
+  backup_retention_days: 7
+  high_availability: false
+
+acr:
+  name: nzilacanadaacr
+  sku: Basic
