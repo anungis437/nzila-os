@@ -184,7 +184,7 @@ test.describe("Pilot readiness checklist", () => {
   });
 
   test("checklist displays all 7 expected items", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/admin/onboarding");
+    await page.goto("/en-CA/dashboard/admin/onboarding", { waitUntil: "networkidle" });
     await expect(
       page.getByRole("heading", { name: /Administrator Onboarding/i })
     ).toBeVisible({ timeout: 15_000 });
@@ -193,8 +193,16 @@ test.describe("Pilot readiness checklist", () => {
 
     // Deterministic progression smoke check: one continue advances to step 2.
     // The Continue button is unique on the page (only the wizard nav renders one).
-    await page.getByRole('button', { name: /^Continue$/i }).click();
-    await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 10_000 });
+    // CI hydration race: React may not have attached onClick yet, so the first click
+    // can be silently dropped. Retry the click until the step indicator advances.
+    const continueBtn = page.getByRole("button", { name: /^Continue$/i });
+    await expect(continueBtn).toBeEnabled({ timeout: 10_000 });
+    await expect(async () => {
+      if (!(await page.getByText(/Step 2 of 5/i).isVisible())) {
+        await continueBtn.click({ timeout: 5_000 });
+      }
+      await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000, intervals: [500, 1000, 2000] });
   });
 
   test("pilot onboarding API returns valid checklist state", async ({

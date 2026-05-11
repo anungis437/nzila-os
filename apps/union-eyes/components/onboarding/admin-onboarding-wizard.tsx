@@ -169,12 +169,12 @@ export function AdminOnboardingWizard() {
         </Button>
         <div className="flex gap-3">
           {currentStep > 0 && (
-            <Button variant="outline" onClick={handleBack}>
+            <Button variant="outline" onClick={handleBack} type="button">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
           )}
-          <Button onClick={handleNext}>
+          <Button onClick={handleNext} type="button">
             {currentStep === STEPS.length - 1 ? (
               <>Complete Onboarding</>
             ) : (
