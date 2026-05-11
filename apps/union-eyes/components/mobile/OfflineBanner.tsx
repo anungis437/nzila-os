@@ -106,7 +106,7 @@ export function OfflineBanner({ className }: OfflineBannerProps) {
             <span>
               {pendingCount > 0
                 ? `${pendingCount} changes pending sync`
-                : 'Back online! Syncing...'}
+                : 'Connection restored — syncing pending changes'}
             </span>
           </>
         )}

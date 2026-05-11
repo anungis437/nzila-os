@@ -138,16 +138,22 @@ Provisioning steps (executed in the PR):
 
 ## 8. Verdict (live, May 9, 2026)
 
-| Surface          | Status     | Verdict                              |
-| ---------------- | ---------- | ------------------------------------ |
-| Resource group   | not present | NO-GO (deferred to authorized PR)    |
-| ACA environment  | not present | NO-GO (deferred to authorized PR)    |
-| Container app    | not present | NO-GO (deferred to authorized PR)    |
-| Key Vault        | not present | NO-GO (deferred to authorized PR)    |
-| Postgres         | not present | NO-GO (deferred to authorized PR)    |
-| Custom domain    | not bound   | NO-GO (DNS to be created in PR)      |
-| E2E traversals   | not run     | NO-GO (depends on fabric)            |
+| Surface             | Status                                                                                                            | Verdict          |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Resource group      | `nzila-canada-pilot-rg` provisioned                                                                               | GO               |
+| ACA environment     | `nzila-canada-pilot-env` Succeeded; defaultDomain `thankfulpebble-f9ca792c.canadacentral.azurecontainerapps.io`   | GO               |
+| Container app       | `nzila-os-union-eyes-pilot--0000002` Healthy/Running, 2 replicas, system identity `c5636777-b248-4284-ab01-1d3d9091e971` | GO               |
+| Key Vault           | `nzila-canada-pilot-kv` (16 sovereign secrets, RBAC, pilot identity has `Key Vault Secrets User`)                 | GO               |
+| Postgres            | `nzila-canada-pilot-db` Ready (Burstable B1ms, sovereign admin password in pilot KV)                              | GO               |
+| Custom domain       | `pilot.unioneyes.app` bound, managed cert `mc-nzila-canada-p-pilot-unioneyes--9483` SniEnabled, live probe 200 OK | GO               |
+| GitOps registration | `pilot` env wired in `gitops-deploy.yml` + `infrastructure/gitops/environments/pilot.yml` + `resolve-deploy-apps.ts` | GO               |
+| E2E traversals      | deferred to `chore/live-runtime-sovereignty-traversal` (doc 09)                                                   | CONDITIONAL GO   |
 
-Pilot terminal verdict: **NO-GO until `feat/pilot-fabric-provisioning`
-executes**. The doctrine is in place; the substrate is not. This is
-operationally honest.
+Pilot terminal verdict: **GO for substrate sovereignty; CONDITIONAL GO for
+full operational sovereignty until E2E traversal evidence (doc 09) is
+emitted.** The fabric is institutionally distinct, sovereign at the
+substrate layer, and live-bound. Cognition / notification / payment
+provider keys are mirrored from staging KV today (these are platform-wide
+app credentials, not environment-bound by nature); rotation to
+pilot-sovereign provider keys is a follow-on stewardship cadence item, not
+a substrate gate.

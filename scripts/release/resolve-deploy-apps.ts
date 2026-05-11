@@ -4,7 +4,7 @@ import * as path from 'node:path'
 const ROOT = path.resolve(__dirname, '..', '..')
 const INVENTORY_PATH = path.join(ROOT, 'governance', 'release', 'deployment-inventory.json')
 
-type Env = 'development' | 'staging' | 'production'
+type Env = 'development' | 'staging' | 'pilot' | 'production'
 
 type AppConfig = {
   releaseStatus: 'prod-approved' | 'staging-only' | 'internal-only' | 'frozen' | 'incubating' | 'blocked'
@@ -35,6 +35,12 @@ function eligibleForEnv(app: string, env: Env, cfg: AppConfig, zongaOverride: bo
     return cfg.releaseStatus === 'prod-approved' || cfg.releaseStatus === 'staging-only' || cfg.releaseStatus === 'internal-only' || cfg.releaseStatus === 'incubating'
   }
 
+  if (env === 'pilot') {
+    // Pilot fabric currently runs union-eyes only; gating mirrors staging
+    // sovereign-substrate posture per docs/nzila-tier2-hardening/full-pilot-fabric-legitimacy.md
+    return app === 'union-eyes' && (cfg.releaseStatus === 'prod-approved' || cfg.releaseStatus === 'staging-only' || cfg.releaseStatus === 'internal-only' || cfg.releaseStatus === 'incubating')
+  }
+
   if (app === 'zonga') {
     return zongaOverride
   }
@@ -47,8 +53,8 @@ function main() {
   const requestedRaw = parseArg('--apps') ?? 'all'
   const zongaOverride = (parseArg('--zonga-override') ?? 'false').toLowerCase() === 'true'
 
-  if (!['development', 'staging', 'production'].includes(env)) {
-    throw new Error('Invalid --env value. Use development|staging|production')
+  if (!['development', 'staging', 'pilot', 'production'].includes(env)) {
+    throw new Error('Invalid --env value. Use development|staging|pilot|production')
   }
 
   const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, 'utf8')) as Inventory

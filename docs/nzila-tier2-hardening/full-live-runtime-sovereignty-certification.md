@@ -84,18 +84,19 @@ Live evidence:
 
 ### 2.4 pilot
 
-| Axis                    | Verdict | Evidence                                                  |
-| ----------------------- | ------- | --------------------------------------------------------- |
-| environment sovereignty | NO-GO   | `nzila-canada-pilot-rg` not provisioned                    |
-| runtime sovereignty     | NO-GO   | no container app                                          |
-| identity sovereignty    | NO-GO   | no pilot seed                                             |
-| secret sovereignty      | NO-GO   | no pilot KV                                               |
-| pilot sovereignty       | NO-GO   | depends on `feat/pilot-fabric-provisioning`               |
-| mode sovereignty        | NO-GO   | no runtime to resolve `NZILA_MODE=pilot`                   |
-| degradation sovereignty | NO-GO   | no fabric to traverse                                     |
+| Axis                    | Verdict        | Evidence                                                                                                  |
+| ----------------------- | -------------- | --------------------------------------------------------------------------------------------------------- |
+| environment sovereignty | GO             | `nzila-canada-pilot-rg` provisioned (canadacentral)                                                       |
+| runtime sovereignty     | GO             | `nzila-os-union-eyes-pilot--0000002` Healthy/Running, 2 replicas                                          |
+| identity sovereignty    | CONDITIONAL GO | sovereign system identity `c5636777-b248-4284-ab01-1d3d9091e971`; persona seed deferred to traversal PR    |
+| secret sovereignty      | GO             | `nzila-canada-pilot-kv` (16 sovereign secrets, RBAC, pilot identity has Secrets User)                     |
+| pilot sovereignty       | GO             | sovereign fabric live; `pilot.unioneyes.app` 200 OK with managed cert `mc-nzila-canada-p-pilot-unioneyes--9483` |
+| mode sovereignty        | GO             | `NZILA_MODE=pilot`, `RUNTIME_FAIL_CLOSED=true`, `SECRET_AUTHORITY=nzila-canada-pilot-kv` resolved at boot |
+| degradation sovereignty | CONDITIONAL GO | fail-closed gate wired; live env-loss traversal evidence deferred to doc 09                               |
 
-**pilot terminal verdict: NO-GO** (until `feat/pilot-fabric-provisioning`
-executes)
+**pilot terminal verdict: GO for substrate; CONDITIONAL GO for full
+operational sovereignty until E2E + degradation traversal evidence (doc
+09) is emitted.**
 
 ### 2.5 prod (out of Tier 2 scope, recorded for honesty)
 
@@ -107,20 +108,20 @@ purely so the matrix is enumerated end-to-end.
 
 ## 3. Aggregate Tier 2 verdict
 
-| Sovereignty axis        | Aggregate verdict (across dev/staging/demo) |
-| ----------------------- | ------------------------------------------- |
-| environment sovereignty | GO                                          |
-| runtime sovereignty     | CONDITIONAL GO                              |
-| identity sovereignty    | CONDITIONAL GO                              |
-| secret sovereignty      | CONDITIONAL GO                              |
-| pilot sovereignty       | NO-GO (no fabric)                           |
-| mode sovereignty        | CONDITIONAL GO                              |
-| degradation sovereignty | CONDITIONAL GO                              |
+| Sovereignty axis        | Aggregate verdict (across dev/staging/demo/pilot) |
+| ----------------------- | ------------------------------------------------- |
+| environment sovereignty | GO                                                |
+| runtime sovereignty     | CONDITIONAL GO                                    |
+| identity sovereignty    | CONDITIONAL GO                                    |
+| secret sovereignty      | CONDITIONAL GO                                    |
+| pilot sovereignty       | GO (substrate); CONDITIONAL GO (E2E)              |
+| mode sovereignty        | CONDITIONAL GO                                    |
+| degradation sovereignty | CONDITIONAL GO                                    |
 
 **Aggregate Tier 2 verdict: CONDITIONAL GO** — substrate is sovereign in
-demo, conditionally sovereign across dev / staging, and pending in pilot.
-The seven downstream PRs enumerated in the index close every conditional
-row; the doctrine is in place.
+demo and pilot, conditionally sovereign across dev / staging. The remaining
+downstream PRs enumerated in the index close every conditional row; the
+doctrine is in place and the pilot fabric is now live.
 
 ---
 
