@@ -204,7 +204,9 @@ test.describe("Pilot readiness checklist", () => {
       });
 
     // Confirm OverviewStep content has hydrated before interacting.
-    await expect(page.getByText(/Admin Capabilities/i)).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Admin Capabilities" }),
+    ).toBeVisible({
       timeout: 10_000,
     });
 
