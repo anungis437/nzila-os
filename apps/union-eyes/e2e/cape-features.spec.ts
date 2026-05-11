@@ -192,8 +192,8 @@ test.describe("Pilot readiness checklist", () => {
     await expect(page.getByText(/Step 1 of 5/i)).toBeVisible({ timeout: 10_000 });
 
     // Deterministic progression smoke check: one continue advances to step 2.
-    const wizardNav = page.locator('div.flex.justify-between').first();
-    await wizardNav.getByRole('button', { name: /^Continue$/i }).click();
+    // The Continue button is unique on the page (only the wizard nav renders one).
+    await page.getByRole('button', { name: /^Continue$/i }).click();
     await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 10_000 });
   });
 
