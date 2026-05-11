@@ -191,18 +191,35 @@ test.describe("Pilot readiness checklist", () => {
 
     await expect(page.getByText(/Step 1 of 5/i)).toBeVisible({ timeout: 10_000 });
 
-    // Deterministic progression smoke check: one continue advances to step 2.
-    // The Continue button is unique on the page (only the wizard nav renders one).
-    // CI hydration race: React may not have attached onClick yet, so the first click
-    // can be silently dropped. Retry the click until the step indicator advances.
+    // Wait for full client hydration. The header renders an org-selector whose
+    // "Loading..." placeholder only disappears once client components have
+    // mounted. While it is present, React handlers on the wizard may not yet
+    // be attached and clicks get silently dropped (observed in CI).
+    await page
+      .locator('text=/^Loading\\.\\.\\.$/')
+      .first()
+      .waitFor({ state: "hidden", timeout: 15_000 })
+      .catch(() => {
+        // Selector may simply not exist if header hydrates fast — that's fine.
+      });
+
     const continueBtn = page.getByRole("button", { name: /^Continue$/i });
     await expect(continueBtn).toBeEnabled({ timeout: 10_000 });
+
+    // Extra buffer: even after the "Loading..." disappears, React may still be
+    // committing the wizard tree. Give the event loop a beat before clicking.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(750);
+
+    // Retry-on-no-advance: click Continue and verify Step 2 appears. If not,
+    // the next iteration clicks again. Wider intervals give React time to
+    // bind handlers and run the state update commit phase between attempts.
     await expect(async () => {
       if (!(await page.getByText(/Step 2 of 5/i).isVisible())) {
         await continueBtn.click({ timeout: 5_000 });
       }
-      await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 20_000, intervals: [500, 1000, 2000] });
+      await expect(page.getByText(/Step 2 of 5/i)).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000, intervals: [1500, 2500, 3500] });
   });
 
   test("pilot onboarding API returns valid checklist state", async ({
