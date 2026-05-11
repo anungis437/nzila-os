@@ -277,6 +277,17 @@ jobs:
       - name: Build decision-intelligence
         run: pnpm --filter @nzila/decision-intelligence build
 
+      - name: Apply platform migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(ls migrations/platform/*.sql | sort); do
+            echo "Applying migration: $f"
+            psql "$DATABASE_URL" -f "$f"
+          done
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Materialize decision aggregates (incremental)
         run: pnpm aggregates:materialize -- --mode=incremental
         env:

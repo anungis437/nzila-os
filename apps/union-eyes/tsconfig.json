@@ -30,6 +30,14 @@
       "@nzila/cupe-vocabulary": ["../../packages/cupe-vocabulary/src/index.ts"],
       "@nzila/cupe-vocabulary/types": ["../../packages/cupe-vocabulary/src/types.ts"],
       "@nzila/policies": ["../../packages/policies/src/index.ts"]
+      ,"@nzila/platform-ontology/schema": ["../../packages/platform-ontology/src/schema.ts"]
+      ,"@nzila/platform-event-fabric/schema": ["../../packages/platform-event-fabric/src/schema.ts"]
+      ,"@nzila/platform-knowledge-registry/schema": ["../../packages/platform-knowledge-registry/src/schema.ts"]
+      ,"@nzila/platform-data-fabric/schema": ["../../packages/platform-data-fabric/src/schema.ts"]
+      ,"@nzila/platform-decision-graph/schema": ["../../packages/platform-decision-graph/src/schema.ts"]
+      ,"@nzila/platform-semantic-search/schema": ["../../packages/platform-semantic-search/src/schema.ts"]
+      ,"@nzila/platform-governed-ai/schema": ["../../packages/platform-governed-ai/src/schema.ts"]
+      ,"@nzila/platform-reasoning-engine/schema": ["../../packages/platform-reasoning-engine/src/schema.ts"]
     }
   },
   "include": [
