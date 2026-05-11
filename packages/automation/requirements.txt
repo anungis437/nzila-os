@@ -29,7 +29,7 @@ azure-mgmt-containerinstance>=10.1.0
 azure-mgmt-rdbms>=10.0.0
 
 # Version Control
-gitpython>=3.1.47
+gitpython>=3.1.50
 
 # Progress & State Management
 tqdm>=4.67.3
