@@ -66,6 +66,8 @@
     "field-ops:validate": "node tooling/scripts/validate-field-operations-legitimacy.mjs",
     "ops:prove": "node tooling/scripts/validate-operational-proving.mjs",
     "final:go": "node tooling/scripts/validate-final-go-status.mjs",
+    "runtime:health:generate": "node tooling/scripts/generate-runtime-health-status.mjs",
+    "runtime:health:validate": "node tooling/scripts/validate-runtime-health-status.mjs",
     "flow:shopmoica:cutover:check": "tsx scripts/flow-shopmoica-cutover-check.ts",
     "flow:shopmoica:cutover:check:enforce": "tsx scripts/flow-shopmoica-cutover-check.ts --enforce",
     "rfp:generate": "tsx scripts/rfp-generate.ts --out docs/rfp/answers.md",
