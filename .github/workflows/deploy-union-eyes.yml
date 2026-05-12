@@ -28,9 +28,6 @@ permissions:
 env:
   IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
   BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   plan:
@@ -118,12 +115,37 @@ jobs:
           RELEASE_ID="UE-$(date -u +%Y-%m-%d)-${GITHUB_SHA:0:7}"
           BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-          if [ -z "$RESOURCE_GROUP" ]; then
-            RESOURCE_GROUP="nzila-canada-staging-rg"
+          # Per-environment fallback: never silently route prod/demo/pilot to staging.
+          if [ -z "$RESOURCE_GROUP" ] || [ -z "$CONTAINERAPP_ENVIRONMENT" ]; then
+            case "$DEPLOY_ENV" in
+              production)
+                RESOURCE_GROUP="${RESOURCE_GROUP:-nzila-canada-prod-rg}"
+                CONTAINERAPP_ENVIRONMENT="${CONTAINERAPP_ENVIRONMENT:-nzila-canada-prod-env}"
+                ;;
+              demo)
+                RESOURCE_GROUP="${RESOURCE_GROUP:-nzila-canada-demo-rg}"
+                CONTAINERAPP_ENVIRONMENT="${CONTAINERAPP_ENVIRONMENT:-nzila-canada-demo-env}"
+                ;;
+              pilot)
+                RESOURCE_GROUP="${RESOURCE_GROUP:-nzila-canada-pilot-rg}"
+                CONTAINERAPP_ENVIRONMENT="${CONTAINERAPP_ENVIRONMENT:-nzila-canada-pilot-env}"
+                ;;
+              *)
+                RESOURCE_GROUP="${RESOURCE_GROUP:-nzila-canada-staging-rg}"
+                CONTAINERAPP_ENVIRONMENT="${CONTAINERAPP_ENVIRONMENT:-nzila-canada-staging-env}"
+                ;;
+            esac
+            echo "::warning::Deployment topology vars missing for $DEPLOY_ENV; defaulted to RG=$RESOURCE_GROUP ENV=$CONTAINERAPP_ENVIRONMENT"
           fi
 
-          if [ -z "$CONTAINERAPP_ENVIRONMENT" ]; then
-            CONTAINERAPP_ENVIRONMENT="nzila-canada-staging-env"
+          # Hard guard: never let production resolve to staging-named infra (env-scoped vars
+          # have historically been misconfigured to point at staging RG/env).
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            if echo "$RESOURCE_GROUP" | grep -qiE 'staging|demo|pilot' \
+              || echo "$CONTAINERAPP_ENVIRONMENT" | grep -qiE 'staging|demo|pilot'; then
+              echo "::error::Production deploy resolved to non-prod infra: RG=$RESOURCE_GROUP ENV=$CONTAINERAPP_ENVIRONMENT. Fix vars.AZURE_RESOURCE_GROUP_PRODUCTION / vars.AZURE_CONTAINERAPPS_ENVIRONMENT_PRODUCTION (repo and 'production' GH environment)."
+              exit 1
+            fi
           fi
 
           ACR_NAME="${{ vars.AZURE_ACR_NAME }}"
@@ -334,16 +356,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Azure Login (OIDC)
-        if: env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
-        uses: azure/login@v3
-        with:
-          client-id: ${{ env.AZURE_CLIENT_ID }}
-          tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Azure Login (Credentials Fallback)
-        if: env.AZURE_CLIENT_ID == '' || env.AZURE_TENANT_ID == '' || env.AZURE_SUBSCRIPTION_ID == ''
+      - name: Azure Login
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -388,19 +401,48 @@ jobs:
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
           TARGET_ENV="${{ needs.plan.outputs.containerapp_environment }}"
+          DEPLOY_ENV="${{ needs.plan.outputs.environment }}"
 
-          if az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>/dev/null; then
-            echo "Container App $TARGET_APP already exists."
-            exit 0
-          fi
+          echo "Checking Container App existence: app=$TARGET_APP rg=$TARGET_RG env=$TARGET_ENV deploy_env=$DEPLOY_ENV"
 
-          if [ "${{ needs.plan.outputs.environment }}" = "production" ]; then
-            echo "Container App $TARGET_APP is missing in PRODUCTION context. Refusing to auto-create."
-            echo "Production Container Apps must be provisioned via apps/union-eyes/infra Bicep + manual approval."
+          # Pre-flight: confirm we have an authenticated Azure context.
+          if ! az account show --output none 2>/dev/null; then
+            echo "::error::Azure CLI is not authenticated. Check the 'Azure Login' step and AZURE_CREDENTIALS secret."
             exit 1
           fi
 
-          echo "Creating missing ${{ needs.plan.outputs.environment }} Container App $TARGET_APP..."
+          # Probe existence without swallowing the real error (RBAC vs NotFound vs other).
+          SHOW_ERR=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>&1) && SHOW_RC=0 || SHOW_RC=$?
+
+          if [ "$SHOW_RC" = "0" ]; then
+            echo "Container App $TARGET_APP already exists in $TARGET_RG."
+            exit 0
+          fi
+
+          # Distinguish the failure modes so we never misdiagnose RBAC as missing.
+          if echo "$SHOW_ERR" | grep -qiE 'AuthorizationFailed|does not have authorization|Forbidden|insufficient privileges'; then
+            echo "::error::Service principal lacks RBAC to read Container App '$TARGET_APP' in resource group '$TARGET_RG'."
+            echo "::error::Grant Contributor (or at least Reader + Container Apps Contributor) on the RG, then retry."
+            echo "--- raw az error ---"
+            echo "$SHOW_ERR"
+            exit 1
+          fi
+
+          if ! echo "$SHOW_ERR" | grep -qiE 'ResourceNotFound|was not found|could not be found|NotFound'; then
+            echo "::error::Unexpected error probing Container App '$TARGET_APP' in '$TARGET_RG':"
+            echo "$SHOW_ERR"
+            exit 1
+          fi
+
+          # Confirmed NotFound from this point on.
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            echo "::error::Container App $TARGET_APP confirmed missing in PRODUCTION (resource group $TARGET_RG). Refusing to auto-create."
+            echo "::error::Production Container Apps must be provisioned via apps/union-eyes/infra Bicep + manual approval."
+            echo "::error::If the app already exists in a different RG, fix vars.AZURE_RESOURCE_GROUP_PRODUCTION (currently='$TARGET_RG')."
+            exit 1
+          fi
+
+          echo "Creating missing $DEPLOY_ENV Container App $TARGET_APP..."
           az containerapp create \
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
@@ -419,10 +461,12 @@ jobs:
           TARGET_APP="${{ needs.plan.outputs.app_name }}"
           TARGET_RG="${{ needs.plan.outputs.resource_group }}"
 
-          if ! az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>/dev/null; then
-            echo "Container App $TARGET_APP does not exist and could not be provisioned."
+          SHOW_ERR=$(az containerapp show --name "$TARGET_APP" --resource-group "$TARGET_RG" --output none 2>&1) || {
+            echo "::error::Container App $TARGET_APP cannot be updated in $TARGET_RG."
+            echo "--- raw az error ---"
+            echo "$SHOW_ERR"
             exit 1
-          fi
+          }
 
           az containerapp update \
             --name "$TARGET_APP" \

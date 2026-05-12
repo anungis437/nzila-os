@@ -148,3 +148,8 @@ reports/product-reports/
 
 # Migration scripts docs
 scripts/migrations/
+
+# Pre-existing index READMEs referencing dynamically-created subdirs
+artifacts/README.md
+proof-artifacts/README.md
+
