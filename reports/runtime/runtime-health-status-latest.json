@@ -1,0 +1,280 @@
+{
+  "asOfDate": "2026-05-11",
+  "scope": "portfolio-runtime-health",
+  "authorityLevel": "current-runtime-remediation",
+  "sourceFiles": [
+    "governance/release/deployment-inventory.json",
+    "reports/runtime/live-health-failure-matrix.json",
+    "reports/runtime/runtime-health-status-2026-05-11.json"
+  ],
+  "summary": {
+    "totalAppsReviewed": 20,
+    "healthy": 6,
+    "degraded": 3,
+    "failing": 5,
+    "notInstrumented": 6,
+    "requiresRedeploy": 1,
+    "requiresDnsOrInfra": 3,
+    "stagedOrIncubating": 4
+  },
+  "apps": [
+    {
+      "app": "abr",
+      "productLayer": "product",
+      "currentRuntimeClassification": "degraded",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Public product name: FairCase (deployment-inventory.json `faircase` is an alias of this container).",
+        "Only the advisory root probe timed out; `/api/health` did not fail.",
+        "Treated as `degraded` (HTTP 200 retained) per RuntimeHealthResponse `ok` semantics."
+      ]
+    },
+    {
+      "app": "agrimo",
+      "productLayer": "product",
+      "currentRuntimeClassification": "failing",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Fallback ACA `/api/health` returns HTTP 503 in live-health-failure-matrix.json.",
+        "App is incubating (tier-2 staging-only) and is NOT a Union Eyes pilot dependency.",
+        "Adopting `@nzila/os-core/health` helper will reclassify to `degraded`/`healthy`."
+      ]
+    },
+    {
+      "app": "cfo",
+      "productLayer": "product",
+      "currentRuntimeClassification": "degraded",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Only the advisory root probe timed out; `/api/health` did not fail.",
+        "Treated as `degraded` (HTTP 200 retained) per RuntimeHealthResponse `ok` semantics."
+      ]
+    },
+    {
+      "app": "console",
+      "productLayer": "internal",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=internal-only with live ingress; no failure-matrix entries."
+      ]
+    },
+    {
+      "app": "control-plane",
+      "productLayer": "infrastructure",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=internal-only with live ingress; no failure-matrix entries."
+      ]
+    },
+    {
+      "app": "cora",
+      "productLayer": "product",
+      "currentRuntimeClassification": "failing",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Fallback ACA `/api/health` returns HTTP 503 in live-health-failure-matrix.json.",
+        "App is incubating (tier-2 staging-only) and is NOT a Union Eyes pilot dependency.",
+        "Adopting `@nzila/os-core/health` helper will reclassify to `degraded`/`healthy`."
+      ]
+    },
+    {
+      "app": "flow",
+      "productLayer": "product",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Custom domain probe failed; ACA fallback domain healthy.",
+        "Advisory only — runtime classification remains `healthy` per dual-status helper."
+      ]
+    },
+    {
+      "app": "mobility",
+      "productLayer": "product",
+      "currentRuntimeClassification": "degraded",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Only the advisory root probe timed out; `/api/health` did not fail.",
+        "Treated as `degraded` (HTTP 200 retained) per RuntimeHealthResponse `ok` semantics."
+      ]
+    },
+    {
+      "app": "mobility-client-portal",
+      "productLayer": "product",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=frozen; not instrumented for runtime health."
+      ]
+    },
+    {
+      "app": "nacp-exams",
+      "productLayer": "product",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=blocked; no live runtime evidence available."
+      ]
+    },
+    {
+      "app": "orchestrator-api",
+      "productLayer": "infrastructure",
+      "currentRuntimeClassification": "failing",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": true,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Three ACA fallback failures (root, health, ready) recorded in live-health-failure-matrix.json.",
+        "Source fix shipped in commit 4ad83815f (apps/orchestrator-api/src/routes/health.ts critical/non-critical split).",
+        "Classification clears to `healthy` only after post-redeploy ACA probe re-test (see post-delta-2-redeploy-proof-plan-2026-05-11.md)."
+      ]
+    },
+    {
+      "app": "partners",
+      "productLayer": "product",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=prod-approved with live ingress; no failure-matrix entries."
+      ]
+    },
+    {
+      "app": "platform-admin",
+      "productLayer": "internal",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=frozen; not instrumented for runtime health."
+      ]
+    },
+    {
+      "app": "trade",
+      "productLayer": "product",
+      "currentRuntimeClassification": "failing",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Fallback ACA `/api/health` returns HTTP 503 in live-health-failure-matrix.json.",
+        "App is incubating (tier-2 staging-only) and is NOT a Union Eyes pilot dependency.",
+        "Adopting `@nzila/os-core/health` helper will reclassify to `degraded`/`healthy`."
+      ]
+    },
+    {
+      "app": "union-eyes",
+      "productLayer": "product",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=prod-approved with live ingress; no failure-matrix entries."
+      ]
+    },
+    {
+      "app": "veridian-admin",
+      "productLayer": "product",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": true,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "DNS lookup failed for staging custom domain; no ACA app deployed (synthetic demo profile).",
+        "Not blocking Union Eyes pilot — Veridian is staged-only and does not host PHI."
+      ]
+    },
+    {
+      "app": "veridian-care",
+      "productLayer": "product",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": true,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "DNS lookup failed for staging custom domain; no ACA app deployed (synthetic demo profile).",
+        "Not blocking Union Eyes pilot — Veridian is staged-only and does not host PHI."
+      ]
+    },
+    {
+      "app": "veridian-site",
+      "productLayer": "product",
+      "currentRuntimeClassification": "not_instrumented",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": true,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "DNS lookup failed for staging custom domain; no ACA app deployed (synthetic demo profile).",
+        "Not blocking Union Eyes pilot — Veridian is staged-only and does not host PHI."
+      ]
+    },
+    {
+      "app": "web",
+      "productLayer": "platform",
+      "currentRuntimeClassification": "healthy",
+      "evidenceBasis": "inventory",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Inventory: releaseStatus=prod-approved with live ingress; no failure-matrix entries."
+      ]
+    },
+    {
+      "app": "zonga",
+      "productLayer": "product",
+      "currentRuntimeClassification": "failing",
+      "evidenceBasis": "live_failure_matrix",
+      "clearsAfterRedeploy": false,
+      "requiresDnsOrInfra": false,
+      "blocksUnionEyesPilot": false,
+      "notes": [
+        "Fallback ACA `/api/health` returns HTTP 503 in live-health-failure-matrix.json.",
+        "App is incubating (tier-2 staging-only) and is NOT a Union Eyes pilot dependency.",
+        "Adopting `@nzila/os-core/health` helper will reclassify to `degraded`/`healthy`."
+      ]
+    }
+  ]
+}

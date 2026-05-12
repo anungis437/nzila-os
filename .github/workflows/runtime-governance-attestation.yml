@@ -50,6 +50,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate runtime health status (deterministic, offline)
+        run: pnpm runtime:health:generate
+
+      - name: Validate runtime health status
+        run: pnpm runtime:health:validate
+
       - name: Validate doctrine enforcement contracts
         run: pnpm --filter @nzila/doctrine-enforcement test
 
@@ -91,5 +97,6 @@ jobs:
           path: |
             proof-artifacts/attestations/**
             proof-artifacts/evidence/**
+            reports/runtime/runtime-health-status-latest.json
           if-no-files-found: error
           retention-days: 90
