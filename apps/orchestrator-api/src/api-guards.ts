@@ -5,7 +5,12 @@ import { timingSafeEqual } from 'node:crypto'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export function isPublicOrchestratorRoute(url: string): boolean {
-  return url === '/health' || url === '/health/deep' || url === '/metrics'
+  return (
+    url === '/health' ||
+    url === '/health/deep' ||
+    url === '/ready' ||
+    url === '/metrics'
+  )
 }
 
 function matchesApiKey(provided: string | undefined, expected: string): boolean {
