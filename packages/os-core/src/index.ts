@@ -58,7 +58,13 @@ export {
   isReadyFromChecks,
   healthStatusFromChecks,
   getBuildMetadata,
+  runtimeStatusFromChecks,
+  buildRuntimeHealthResponse,
   type HealthCheckState,
   type RawHealthCheck,
   type BuildMetadata,
+  type RuntimeHealthStatus,
+  type RuntimeHealthCheck,
+  type RuntimeHealthResponse,
+  type BuildRuntimeHealthInput,
 } from './health'
