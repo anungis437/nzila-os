@@ -1,6 +1,6 @@
 {
   "$schema": "evidence-authority/v1",
-  "asOfDate": "2026-05-11",
+  "asOfDate": "2026-05-12",
   "scope": "staging-only",
   "topologyStrategy": "shared-resource-group-environment",
   "ownedDomains": ["nzilaventures.com", "unioneyes.app"],
@@ -26,6 +26,24 @@
       "scope": "staging-only",
       "classification": "bootstrap probe ledger",
       "notes": "Embedded bootstrapEvidence=true flag confirms this is a seeded baseline, not a live signed probe. Used for governance display; not a gate authority."
+    },
+    "post-redeploy-runtime-attestation-2026-05-12.json": {
+      "format": "object",
+      "schema": "post-redeploy-runtime-attestation/v1",
+      "scope": "orchestrator-api / staging / canadacentral",
+      "authorityLevel": "current-runtime-remediation",
+      "classification": "post-redeploy attestation (Delta-2 redeploy proof)",
+      "consumedBy": ["generator", "validator"],
+      "supersedes": ["live-health-failure-matrix.json (orchestrator-api rows)"],
+      "notes": "Attests orchestrator-api revision --0000022 reached Running/Healthy with /health=200 status=degraded, /ready=503 (readiness follow-up), /=404 (no root route by design). Generator reclassifies orchestrator-api from failing\u2192degraded; validator inverse invariant 5b enforces this supersession."
+    },
+    "live-health-post-redeploy-2026-05-12.json": {
+      "format": "object",
+      "scope": "orchestrator-api / staging / canadacentral",
+      "authorityLevel": "current-runtime-remediation",
+      "classification": "live probe capture (paired with attestation)",
+      "consumedBy": ["generator", "validator"],
+      "notes": "Raw probe capture from 2026-05-12T06:39:15Z paired with the attestation file. Both share the same revision (--0000022) and image digest."
     }
   },
   "gateImpact": {

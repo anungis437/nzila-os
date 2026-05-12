@@ -30,10 +30,14 @@ const SOURCE_FILES = {
   failureMatrix: 'reports/runtime/live-health-failure-matrix.json',
   delta2Sidecar: 'reports/runtime/runtime-health-status-2026-05-11.json',
   inventory: 'governance/release/deployment-inventory.json',
+  postRedeployProbes: 'reports/runtime/live-health-post-redeploy-2026-05-12.json',
+  postRedeployAttestation:
+    'reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json',
+  evidenceAuthority: 'reports/runtime/evidence-authority.json',
 };
 
 const OUTPUT_RELATIVE = 'reports/runtime/runtime-health-status-latest.json';
-const AS_OF_DATE = '2026-05-11';
+const AS_OF_DATE = '2026-05-12';
 
 /**
  * Apps explicitly classified as out-of-scope for runtime health checks via
@@ -84,6 +88,7 @@ const VALID_EVIDENCE = new Set([
   'health_latest',
   'inventory',
   'manual_delta_2_report',
+  'live_post_redeploy',
 ]);
 
 async function readJson(rel) {
@@ -103,13 +108,43 @@ function indexFailuresByApp(matrix) {
 }
 
 function classifyApp(app, ctx) {
-  const { failures, sidecar, inventoryEntry } = ctx;
+  const { failures, sidecar, inventoryEntry, postRedeployAttestation, postRedeployProbes } = ctx;
   const sidecarEntry = sidecar.apps.find((a) => a.key === app);
   const notes = [];
 
   // Out-of-scope apps are filtered before reaching here.
 
   if (app === 'orchestrator-api') {
+    // Delta-5: post-redeploy attestation + live probes for the same revision
+    // SUPERSEDE the prior live-health-failure-matrix entries (root/health/ready).
+    // Authority order: post-redeploy attestation > live-health-failure-matrix.
+    const attestationApp = postRedeployAttestation?.scope?.app;
+    const newClass = postRedeployAttestation?.outcome?.newClassification;
+    if (
+      attestationApp === 'orchestrator-api' &&
+      (newClass === 'degraded' || newClass === 'healthy')
+    ) {
+      const revision = postRedeployAttestation?.revision?.name ?? 'unknown';
+      const healthStatus = postRedeployAttestation?.probes?.health?.status;
+      const readyStatus = postRedeployAttestation?.probes?.ready?.status;
+      const rootStatus = postRedeployAttestation?.probes?.root?.status;
+      notes.push(
+        `Supersedes prior live failure matrix entries (root/health/ready) for orchestrator-api after revision ${revision}.`,
+        `/health returned HTTP ${healthStatus ?? 'unknown'} with runtime status degraded (db ok ms=2, github degraded due to missing GITHUB_TOKEN).`,
+        `/ready returned HTTP ${readyStatus ?? 'unknown'} and remains a readiness follow-up (queue/storage unknown, thirdParty degraded). Not faked to 200.`,
+        `Root route returned HTTP ${rootStatus ?? 'unknown'} by design (api-only); product decision pending if root response required.`,
+        `Evidence: ${SOURCE_FILES.postRedeployAttestation} + ${SOURCE_FILES.postRedeployProbes}.`,
+      );
+      return {
+        currentRuntimeClassification: newClass,
+        evidenceBasis: 'live_post_redeploy',
+        clearsAfterRedeploy: false,
+        requiresRedeploy: false,
+        requiresDnsOrInfra: false,
+        blocksUnionEyesPilot: false,
+        notes,
+      };
+    }
     notes.push(
       'Three ACA fallback failures (root, health, ready) recorded in live-health-failure-matrix.json.',
       'Source fix shipped in commit 4ad83815f (apps/orchestrator-api/src/routes/health.ts critical/non-critical split).',
@@ -320,11 +355,14 @@ function summarize(apps) {
 }
 
 async function build() {
-  const [matrix, sidecar, inventory] = await Promise.all([
-    readJson(SOURCE_FILES.failureMatrix),
-    readJson(SOURCE_FILES.delta2Sidecar),
-    readJson(SOURCE_FILES.inventory),
-  ]);
+  const [matrix, sidecar, inventory, postRedeployProbes, postRedeployAttestation] =
+    await Promise.all([
+      readJson(SOURCE_FILES.failureMatrix),
+      readJson(SOURCE_FILES.delta2Sidecar),
+      readJson(SOURCE_FILES.inventory),
+      readJson(SOURCE_FILES.postRedeployProbes),
+      readJson(SOURCE_FILES.postRedeployAttestation),
+    ]);
 
   const failuresByApp = indexFailuresByApp(matrix);
 
@@ -339,6 +377,8 @@ async function build() {
       failures: failuresByApp.get(app) ?? [],
       sidecar,
       inventoryEntry: inventoryApps[app],
+      postRedeployAttestation,
+      postRedeployProbes,
     }),
   );
 

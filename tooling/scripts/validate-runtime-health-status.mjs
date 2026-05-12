@@ -12,7 +12,12 @@
  *   4. No app may be `healthy` while its evidenceBasis is `live_failure_matrix`
  *      with a DNS-unresolved / timeout / non-2xx live signal.
  *   5. orchestrator-api MUST NOT be classified `healthy` until a post-redeploy
- *      proof artifact under reports/runtime/post-redeploy/ exists.
+ *      proof artifact (post-redeploy-runtime-attestation-*.json) exists.
+ *  5b. INVERSE: when a post-redeploy attestation for orchestrator-api exists,
+ *      orchestrator-api MUST NOT be classified `failing` and `clearsAfterRedeploy`
+ *      MUST be false (the redeploy already happened — the matrix row is stale).
+ *      Notes MUST mention both /ready (503/readiness follow-up) and root
+ *      (404/by design) when classification is `degraded` with `live_post_redeploy`.
  *   6. UE pilot MUST NOT be reported as blocked by an `incubating` product;
  *      `blocksUnionEyesPilot=true` is only permitted with policyCritical-bearing
  *      classifications (`fixed_at_source_pending_redeploy` or
@@ -41,7 +46,11 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 
 const LATEST_RELATIVE = 'reports/runtime/runtime-health-status-latest.json';
 const FAILURE_MATRIX_RELATIVE = 'reports/runtime/live-health-failure-matrix.json';
-const POST_REDEPLOY_DIR = 'reports/runtime/post-redeploy';
+const POST_REDEPLOY_DIR = 'reports/runtime';
+const POST_REDEPLOY_PATTERNS = [
+  /^post-redeploy-runtime-attestation-.*\.json$/,
+  /^live-health-post-redeploy-.*\.json$/,
+];
 
 const REQUIRED_SUMMARY_FIELDS = [
   'totalAppsReviewed',
@@ -75,15 +84,34 @@ async function pathExists(rel) {
   }
 }
 
-async function postRedeployProofExists(app) {
+async function findPostRedeployArtifacts(app) {
   try {
     const entries = await fs.readdir(path.join(repoRoot, POST_REDEPLOY_DIR));
-    return entries.some(
-      (name) => name.toLowerCase().includes(app.toLowerCase()) && name.endsWith('.json'),
+    const candidates = entries.filter((name) =>
+      POST_REDEPLOY_PATTERNS.some((re) => re.test(name)),
     );
+    const matched = [];
+    for (const name of candidates) {
+      try {
+        const doc = await readJson(path.posix.join(POST_REDEPLOY_DIR, name));
+        const scopeApp =
+          doc?.scope?.app ?? doc?.app ?? doc?.target?.app ?? null;
+        if (scopeApp === app) {
+          matched.push({ name, doc });
+        }
+      } catch {
+        // ignore unreadable / non-conforming files
+      }
+    }
+    return matched;
   } catch {
-    return false;
+    return [];
   }
+}
+
+async function postRedeployProofExists(app) {
+  const matched = await findPostRedeployArtifacts(app);
+  return matched.length > 0;
 }
 
 async function main() {
@@ -180,8 +208,52 @@ async function main() {
       if (!proof) {
         fail(
           'orchestrator-api: classified healthy but no post-redeploy proof artifact ' +
-            `found under ${POST_REDEPLOY_DIR}/`,
+            `found under ${POST_REDEPLOY_DIR}/ (expected post-redeploy-runtime-attestation-*.json)`,
         );
+      }
+    }
+
+    // Invariant 5b: INVERSE — when a post-redeploy attestation exists, the
+    // orchestrator-api row must be reclassified off `failing` and must not
+    // claim it still clears after redeploy (the redeploy already happened).
+    if (app.app === 'orchestrator-api') {
+      const attestations = await findPostRedeployArtifacts('orchestrator-api');
+      const attestation = attestations.find(
+        (m) => m.doc?.schema === 'post-redeploy-runtime-attestation/v1',
+      );
+      if (attestation) {
+        if (app.currentRuntimeClassification === 'failing') {
+          fail(
+            'orchestrator-api: post-redeploy attestation exists ' +
+              `(${attestation.name}) but classification is still "failing"; ` +
+              'the failure-matrix row is stale and must be superseded.',
+          );
+        }
+        if (app.clearsAfterRedeploy === true) {
+          fail(
+            'orchestrator-api: post-redeploy attestation exists ' +
+              `(${attestation.name}) but clearsAfterRedeploy=true; ` +
+              'the redeploy has already occurred — this flag must be false.',
+          );
+        }
+        if (
+          app.currentRuntimeClassification === 'degraded' &&
+          app.evidenceBasis === 'live_post_redeploy'
+        ) {
+          const noteText = (app.notes ?? []).join(' ');
+          if (!/\/ready/i.test(noteText) || !/503|readiness/i.test(noteText)) {
+            fail(
+              'orchestrator-api: degraded via live_post_redeploy but notes do not ' +
+                'justify /ready (expected mention of /ready and 503 or readiness follow-up).',
+            );
+          }
+          if (!/\/(?:\b|\s|$)|root/i.test(noteText) || !/404|by design/i.test(noteText)) {
+            fail(
+              'orchestrator-api: degraded via live_post_redeploy but notes do not ' +
+                'justify root route (expected mention of root and 404 / by design).',
+            );
+          }
+        }
       }
     }
 

@@ -1,19 +1,22 @@
 {
-  "asOfDate": "2026-05-11",
+  "asOfDate": "2026-05-12",
   "scope": "portfolio-runtime-health",
   "authorityLevel": "current-runtime-remediation",
   "sourceFiles": [
     "governance/release/deployment-inventory.json",
+    "reports/runtime/evidence-authority.json",
     "reports/runtime/live-health-failure-matrix.json",
+    "reports/runtime/live-health-post-redeploy-2026-05-12.json",
+    "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json",
     "reports/runtime/runtime-health-status-2026-05-11.json"
   ],
   "summary": {
     "totalAppsReviewed": 20,
     "healthy": 6,
-    "degraded": 3,
-    "failing": 5,
+    "degraded": 4,
+    "failing": 4,
     "notInstrumented": 6,
-    "requiresRedeploy": 1,
+    "requiresRedeploy": 0,
     "requiresDnsOrInfra": 3,
     "stagedOrIncubating": 4
   },
@@ -150,15 +153,18 @@
     {
       "app": "orchestrator-api",
       "productLayer": "infrastructure",
-      "currentRuntimeClassification": "failing",
-      "evidenceBasis": "live_failure_matrix",
-      "clearsAfterRedeploy": true,
+      "currentRuntimeClassification": "degraded",
+      "evidenceBasis": "live_post_redeploy",
+      "clearsAfterRedeploy": false,
+      "requiresRedeploy": false,
       "requiresDnsOrInfra": false,
       "blocksUnionEyesPilot": false,
       "notes": [
-        "Three ACA fallback failures (root, health, ready) recorded in live-health-failure-matrix.json.",
-        "Source fix shipped in commit 4ad83815f (apps/orchestrator-api/src/routes/health.ts critical/non-critical split).",
-        "Classification clears to `healthy` only after post-redeploy ACA probe re-test (see post-delta-2-redeploy-proof-plan-2026-05-11.md)."
+        "Supersedes prior live failure matrix entries (root/health/ready) for orchestrator-api after revision nzila-os-orchestrator-api--0000022.",
+        "/health returned HTTP 200 with runtime status degraded (db ok ms=2, github degraded due to missing GITHUB_TOKEN).",
+        "/ready returned HTTP 503 and remains a readiness follow-up (queue/storage unknown, thirdParty degraded). Not faked to 200.",
+        "Root route returned HTTP 404 by design (api-only); product decision pending if root response required.",
+        "Evidence: reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json + reports/runtime/live-health-post-redeploy-2026-05-12.json."
       ]
     },
     {
