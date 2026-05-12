@@ -29,7 +29,14 @@ type RuntimeCheck = {
 
 const SCRIPT_DIR = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = join(SCRIPT_DIR, '..')
-const CHECKLIST_PATH = join(ROOT, 'docs', 'ops', 'pilots', 'flow-pilot', 'shopmoica-cutover-checklist.json')
+// The checklist was relocated when docs were reorganized into 4-tier categories
+// (commit 91d6469). We try the new canonical path first, then fall back to the
+// legacy location so external consumers / older branches continue to work.
+const CHECKLIST_CANDIDATES = [
+  join(ROOT, 'docs', 'categories', 'platform-and-operations', 'ops', 'pilots', 'flow-pilot', 'shopmoica-cutover-checklist.json'),
+  join(ROOT, 'docs', 'ops', 'pilots', 'flow-pilot', 'shopmoica-cutover-checklist.json'),
+]
+const CHECKLIST_PATH = CHECKLIST_CANDIDATES.find((p) => existsSync(p)) ?? CHECKLIST_CANDIDATES[0]
 const OUTPUT_DIR = join(ROOT, 'ops', 'outputs')
 const REPORT_JSON = join(OUTPUT_DIR, 'flow-shopmoica-cutover-report.json')
 const REPORT_MD = join(OUTPUT_DIR, 'flow-shopmoica-cutover-report.md')
