@@ -42,7 +42,7 @@ test.describe("Labor continuity intelligence page", () => {
 
   test("authenticated user can navigate protected continuity route without auth failure", async ({ page }) => {
     await authenticateExecutiveSession(page);
-    await page.goto(PAGE_URL, { waitUntil: "networkidle" });
+    await page.goto(PAGE_URL, { waitUntil: "domcontentloaded" });
 
     // Core auth assertion: session is honored and we are not bounced to sign-in.
     await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
@@ -57,7 +57,7 @@ test.describe("Labor continuity intelligence page", () => {
     // tabbed workflow always renders for any authorized role.
     await hasCommercialReportingAccess(page);
 
-    await page.goto(PAGE_URL, { waitUntil: "networkidle" });
+    await page.goto(PAGE_URL, { waitUntil: "domcontentloaded" });
     const onContinuityRoute = page.url().includes("/dashboard/cba-intelligence");
 
     if (!onContinuityRoute) {
