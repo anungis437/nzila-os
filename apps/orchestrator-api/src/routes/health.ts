@@ -4,55 +4,59 @@ import { sql } from 'drizzle-orm'
 import { nowISO } from '@nzila/platform-utils/time'
 import { getEventBus } from '../platform.js'
 import { getOperatingEvidenceService } from '@nzila/operating-evidence'
+import { buildRuntimeHealthResponse, type RuntimeHealthCheck } from '@nzila/os-core/health'
 
 export async function healthRoutes(app: FastifyInstance) {
   app.get('/health', async (_req, reply) => {
-    const checks: Record<string, { status: string; ms?: number; error?: string }> = {}
+    const checks: Record<string, RuntimeHealthCheck> = {}
 
-    // ── DB connectivity ─────────────────────────────────────────────
+    // ── DB connectivity (CRITICAL) ──────────────────────────────────
     const dbStart = Date.now()
     try {
       const { db } = getDb()
       await db.execute(sql`SELECT 1`)
-      checks.database = { status: 'ok', ms: Date.now() - dbStart }
+      checks.database = { status: 'ok', critical: true, ms: Date.now() - dbStart }
     } catch (err) {
       checks.database = {
-        status: 'degraded',
+        status: 'fail',
+        critical: true,
         ms: Date.now() - dbStart,
         error: err instanceof Error ? err.message : 'Unknown DB error',
       }
     }
 
-    // ── GitHub token validity ───────────────────────────────────────
+    // ── GitHub token presence (NON-CRITICAL) ────────────────────────
+    // Absence degrades dispatch capability but must not turn /health into a
+    // permanent 503 (that would fail ACA readiness probes for an outage that
+    // has not yet occurred).
     const ghToken = process.env.GITHUB_TOKEN
     checks.github = ghToken
       ? { status: 'ok' }
-      : { status: 'degraded', error: 'GITHUB_TOKEN not set — dispatches will fail' }
+      : {
+          status: 'degraded',
+          note: 'GITHUB_TOKEN not set — dispatches will fail when invoked',
+        }
 
-    // ── Overall ─────────────────────────────────────────────────────
-    const allOk = Object.values(checks).every((c) => c.status === 'ok')
-    const status = allOk ? 'ok' : 'degraded'
-
-    return reply.status(allOk ? 200 : 503).send({
-      status,
+    const payload = buildRuntimeHealthResponse({
       app: 'orchestrator-api',
-      timestamp: nowISO(),
-      version: process.env.npm_package_version ?? '0.0.0',
       checks,
+      timestamp: nowISO(),
     })
+    return reply.status(payload.ok ? 200 : 503).send(payload)
   })
 
   app.get('/health/deep', async (_req, reply) => {
-    const checks: Record<string, { status: string; ms?: number; error?: string }> = {}
+    const checks: Record<string, RuntimeHealthCheck> = {}
 
     const dbStart = Date.now()
     try {
       const { db } = getDb()
       await db.execute(sql`SELECT 1`)
-      checks.database = { status: 'ok', ms: Date.now() - dbStart }
+      checks.database = { status: 'ok', critical: true, ms: Date.now() - dbStart }
     } catch (err) {
       checks.database = {
-        status: 'degraded',
+        status: 'fail',
+        critical: true,
         ms: Date.now() - dbStart,
         error: err instanceof Error ? err.message : 'Unknown DB error',
       }
@@ -61,15 +65,19 @@ export async function healthRoutes(app: FastifyInstance) {
     const ghToken = process.env.GITHUB_TOKEN
     checks.github = ghToken
       ? { status: 'ok' }
-      : { status: 'degraded', error: 'GITHUB_TOKEN not set — dispatches will fail' }
+      : {
+          status: 'degraded',
+          note: 'GITHUB_TOKEN not set — dispatches will fail when invoked',
+        }
 
     const busStart = Date.now()
     try {
       getEventBus()
-      checks.eventBus = { status: 'ok', ms: Date.now() - busStart }
+      checks.eventBus = { status: 'ok', critical: true, ms: Date.now() - busStart }
     } catch (err) {
       checks.eventBus = {
-        status: 'degraded',
+        status: 'fail',
+        critical: true,
         ms: Date.now() - busStart,
         error: err instanceof Error ? err.message : 'Event bus unavailable',
       }
@@ -93,16 +101,14 @@ export async function healthRoutes(app: FastifyInstance) {
       }
     }
 
-    const allOk = Object.values(checks).every((c) => c.status === 'ok')
-    const status = allOk ? 'ok' : 'degraded'
-
-    return reply.status(allOk ? 200 : 503).send({
-      status,
-      app: 'orchestrator-api',
-      mode: 'deep',
-      timestamp: nowISO(),
-      version: process.env.npm_package_version ?? '0.0.0',
-      checks,
-    })
+    const payload = {
+      ...buildRuntimeHealthResponse({
+        app: 'orchestrator-api',
+        checks,
+        timestamp: nowISO(),
+      }),
+      mode: 'deep' as const,
+    }
+    return reply.status(payload.ok ? 200 : 503).send(payload)
   })
 }

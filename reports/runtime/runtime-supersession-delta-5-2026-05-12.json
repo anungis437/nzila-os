@@ -1,0 +1,155 @@
+{
+  "schema": "runtime-supersession/v1",
+  "delta": "delta-5",
+  "asOfDate": "2026-05-12",
+  "branch": "chore/runtime-health-delta-2-3",
+  "pullRequest": "https://github.com/anungis437/nzila-os/pull/509",
+  "authorityLevel": "current-runtime-remediation",
+  "scope": {
+    "app": "orchestrator-api",
+    "environment": "staging",
+    "region": "canadacentral",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "containerApp": "nzila-os-orchestrator-api",
+    "revision": "nzila-os-orchestrator-api--0000022",
+    "imageDigest": "sha256:a21ff762162c877ba1ff85d2e9a96291910c8bd1d95ab3169535f95ac2ff6856",
+    "commit": "ceedbcb46"
+  },
+  "supersession": {
+    "before": {
+      "asOfDate": "2026-05-11",
+      "evidenceBasis": "live_failure_matrix",
+      "classification": "failing",
+      "clearsAfterRedeploy": true,
+      "requiresRedeploy": true,
+      "summary": {
+        "healthy": 6,
+        "degraded": 3,
+        "failing": 5,
+        "notInstrumented": 6,
+        "requiresRedeploy": 1
+      },
+      "evidenceArtifacts": [
+        "reports/runtime/live-health-failure-matrix.json"
+      ]
+    },
+    "after": {
+      "asOfDate": "2026-05-12",
+      "evidenceBasis": "live_post_redeploy",
+      "classification": "degraded",
+      "clearsAfterRedeploy": false,
+      "requiresRedeploy": false,
+      "summary": {
+        "healthy": 6,
+        "degraded": 4,
+        "failing": 4,
+        "notInstrumented": 6,
+        "requiresRedeploy": 0
+      },
+      "evidenceArtifacts": [
+        "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json",
+        "reports/runtime/live-health-post-redeploy-2026-05-12.json"
+      ]
+    }
+  },
+  "evidenceChain": [
+    {
+      "step": 1,
+      "date": "2026-05-11",
+      "kind": "baseline",
+      "artifact": "reports/runtime/live-health-failure-matrix.json",
+      "summary": "Pre-fix probes against revision --0000021 returned /=404 /health=404 /ready=404."
+    },
+    {
+      "step": 2,
+      "date": "2026-05-11",
+      "kind": "source-fix",
+      "artifact": "Delta-2 commit 4ad83815f",
+      "summary": "os-core health helper landed; orchestrator-api wired to @nzila/os-core/health."
+    },
+    {
+      "step": 3,
+      "date": "2026-05-11",
+      "kind": "pipeline",
+      "artifact": "reports/runtime/runtime-health-proof-delta-3-2026-05-11.md",
+      "summary": "Generator + validator + CI wiring + post-redeploy proof plan published. Reclassification gated on live evidence."
+    },
+    {
+      "step": 4,
+      "date": "2026-05-12",
+      "kind": "redeploy",
+      "artifact": "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json",
+      "summary": "Revision --0000022 reached Running/Healthy. Live probes captured (live-health-post-redeploy-2026-05-12.json) and codified into the v1 attestation."
+    },
+    {
+      "step": 5,
+      "date": "2026-05-12",
+      "kind": "supersede",
+      "artifact": "reports/runtime/runtime-health-status-latest.json",
+      "summary": "Generator regenerated latest JSON consuming the attestation; orchestrator-api moved failing→degraded with evidenceBasis=live_post_redeploy and clearsAfterRedeploy=false."
+    }
+  ],
+  "validatorInvariants": {
+    "added": [
+      {
+        "id": "5b",
+        "name": "post-redeploy-attestation-supersession",
+        "rationale": "Inverse of generator's live_post_redeploy classification path. Prevents the latest JSON from regressing back to failing/clearsAfterRedeploy=true while a v1 attestation artifact exists for the app, and forces the open follow-ups (/ready=503, /=404) to remain mentioned in notes so they cannot be silently dropped.",
+        "trigger": "any file matching /^post-redeploy-runtime-attestation-.*\\.json$/ or /^live-health-post-redeploy-.*\\.json$/ under reports/runtime/ for the app",
+        "assertions": [
+          "classification != 'failing'",
+          "clearsAfterRedeploy != true",
+          "if classification == 'degraded' AND evidenceBasis == 'live_post_redeploy', notes MUST mention '/ready' and '503' (or 'readiness') AND must mention root and '404' (or 'by design')"
+        ]
+      }
+    ]
+  },
+  "probeJustifications": {
+    "ready": {
+      "observed": 503,
+      "faked": false,
+      "rationale": "queue and storage probes return 'unknown' (not yet wired) and thirdParty.github is 'degraded' (no GITHUB_TOKEN in staging). Per @nzila/os-core/health semantics, this collapses to /ready=503. Truthful by design.",
+      "remediation": "Wire real queue/storage probes or mark not-applicable; provision non-secret GITHUB_TOKEN. Tracked as Delta-6 candidate. Does not block UE pilot."
+    },
+    "root": {
+      "observed": 404,
+      "faked": false,
+      "rationale": "orchestrator-api is API-only Fastify; no root route registered. Framework default 404 is expected.",
+      "remediation": "Optional product decision on registering a root JSON banner. Out of scope for Delta-5; tracked as Delta-6 candidate."
+    }
+  },
+  "filesChanged": [
+    "tooling/scripts/generate-runtime-health-status.mjs",
+    "tooling/scripts/validate-runtime-health-status.mjs",
+    "reports/runtime/evidence-authority.json",
+    "reports/runtime/runtime-health-status-latest.json",
+    "reports/runtime/runtime-supersession-delta-5-2026-05-12.md",
+    "reports/runtime/runtime-supersession-delta-5-2026-05-12.json"
+  ],
+  "constraintsHonoured": {
+    "noSecretsLogged": true,
+    "noTenantLanguage": true,
+    "noOrTrueSoftening": true,
+    "noLiveNetworkInCi": true,
+    "noPushToMain": true,
+    "noFakedProbeResults": true,
+    "noApplicationSourceChange": true
+  },
+  "verification": {
+    "generate": {
+      "command": "pnpm runtime:health:generate",
+      "result": "wrote reports/runtime/runtime-health-status-latest.json apps:20 healthy=6 degraded=4 failing=4 not_instrumented=6"
+    },
+    "validate": {
+      "command": "pnpm runtime:health:validate",
+      "result": "validate-runtime-health-status: OK"
+    }
+  },
+  "followUps": [
+    "Wire orchestrator-api /ready queue + storage probes (or mark not-applicable in RuntimeHealthResponse).",
+    "Provision non-secret GITHUB_TOKEN in staging ACA env so thirdParty.github != degraded.",
+    "Product decision on root '/' JSON banner for API-only services.",
+    "Reclassify agrimo / cora once they adopt @nzila/os-core/health.",
+    "veridian-{admin,care,site} DNS/infra remediation (separate track)."
+  ]
+}

@@ -1,0 +1,1 @@
+{"ok":true,"status":"degraded","app":"orchestrator-api","environment":"staging","timestamp":"2026-05-12T06:44:08Z","version":"0.0.0","checks":{"database":{"status":"ok","critical":true,"ms":2},"github":{"status":"degraded","note":"GITHUB_TOKEN not set — dispatches will fail when invoked"}}}

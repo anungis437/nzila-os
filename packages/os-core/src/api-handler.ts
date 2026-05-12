@@ -20,7 +20,10 @@
  *   })
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+// next/server is type-only at module load so this package can be imported by
+// non-Next runtimes (e.g. Fastify services like orchestrator-api). The runtime
+// value is lazily loaded inside the handler via dynamic import.
+import type { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 import {
   ApiError,
@@ -87,6 +90,9 @@ export function apiHandler<T = unknown>(
     req: NextRequest,
     routeCtx?: { params?: Promise<Record<string, string | string[]>> },
   ): Promise<NextResponse> => {
+    // Lazily load next/server so this module can be statically imported by
+    // non-Next runtimes without forcing `next` to resolve at module load time.
+    const { NextResponse } = await import('next/server')
     const requestId =
       req.headers.get('x-request-id') ?? crypto.randomUUID()
 
