@@ -41,6 +41,30 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
+            // Skip the gate for dependabot PRs that only modify dependency manifests
+            // (package.json / pnpm-lock.yaml / yarn.lock / package-lock.json).
+            // Source code in security-sensitive paths is unchanged, so design review is not required.
+            const actor = context.payload.pull_request?.user?.login || '';
+            if (actor === 'dependabot[bot]' || actor === 'dependabot-preview[bot]') {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                per_page: 100,
+              });
+              const manifestOnly = files.every(f => {
+                const name = f.filename.split('/').pop() || '';
+                return name === 'package.json'
+                  || name === 'pnpm-lock.yaml'
+                  || name === 'yarn.lock'
+                  || name === 'package-lock.json';
+              });
+              if (manifestOnly) {
+                core.info(`✅ Dependabot manifest-only PR (${files.length} files) — skipping security design review gate.`);
+                return;
+              }
+            }
+
             const { data: labels } = await github.rest.issues.listLabelsOnIssue({
               owner: context.repo.owner,
               repo: context.repo.repo,
