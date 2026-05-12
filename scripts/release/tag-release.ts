@@ -119,6 +119,9 @@ function main(): void {
   // Determine the base version: when bumping, prefer the latest semver git tag over
   // package.json so the workflow stays correct even when --skip-branch-push prevents
   // the version-bump commit from reaching the remote.
+  // Sync remote tags first so CI shallow checkouts see the true latest tag and we
+  // don't accidentally re-mint a version that already exists on origin.
+  exec('git fetch --tags --force origin', { capture: true })
   const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')) as { version: string }
   const latestTag = exec(
     'git tag --list "v*" --sort=-version:refname',
@@ -151,14 +154,16 @@ function main(): void {
     process.exit(1)
   }
 
-  // Check if tag already exists
+  // Check if tag already exists (locally or on origin)
   const existingTags = exec('git tag --list', { capture: true }).split('\n').map((t) => t.trim())
-  if (existingTags.includes(tag)) {
+  const remoteTagRef = exec(`git ls-remote --tags origin "refs/tags/${tag}"`, { capture: true })
+  const tagExistsRemotely = remoteTagRef.length > 0
+  if (existingTags.includes(tag) || tagExistsRemotely) {
     if (skipIfExists) {
-      console.log(`ℹ Tag ${tag} already exists — skipping (--skip-if-exists).`)
+      console.log(`ℹ Tag ${tag} already exists${tagExistsRemotely ? ' on origin' : ''} — skipping (--skip-if-exists).`)
       process.exit(0)
     }
-    console.error(`✗ Tag ${tag} already exists. Did you mean to bump further?`)
+    console.error(`✗ Tag ${tag} already exists${tagExistsRemotely ? ' on origin' : ''}. Did you mean to bump further?`)
     process.exit(1)
   }
 
