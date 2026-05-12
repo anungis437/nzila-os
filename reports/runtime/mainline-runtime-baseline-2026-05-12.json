@@ -1,0 +1,83 @@
+{
+  "asOfDate": "2026-05-12",
+  "scope": "mainline-runtime-baseline",
+  "authorityLevel": "mainline-post-merge-baseline",
+  "supersedes": [],
+  "supersededBy": null,
+  "pr": {
+    "number": 509,
+    "title": "chore(runtime-health): Delta-2/3 health contract, evidence automation, and CI attestation",
+    "merged": true,
+    "mergedAt": "2026-05-12T14:19:43Z",
+    "mergeCommit": "ba1f58004971f6ebc3d332ab351a469fc2dad567",
+    "branch": "chore/runtime-health-delta-2-3",
+    "mergeStrategy": "squash-admin",
+    "branchProtectionBypass": "enforce_admins=false; admin merge used to satisfy required_approving_review_count=1 with no available reviewer"
+  },
+  "sourceFiles": [
+    "reports/runtime/runtime-health-status-latest.json",
+    "reports/runtime/runtime-supersession-delta-5-2026-05-12.json",
+    "reports/runtime/post-redeploy-runtime-attestation-2026-05-12.json",
+    "reports/runtime/live-health-post-redeploy-2026-05-12.json",
+    "tooling/scripts/generate-runtime-health-status.mjs",
+    "tooling/scripts/validate-runtime-health-status.mjs"
+  ],
+  "summary": {
+    "totalAppsReviewed": 20,
+    "healthy": 6,
+    "degraded": 4,
+    "failing": 4,
+    "notInstrumented": 6,
+    "requiresRedeploy": 0,
+    "requiresDnsOrInfra": 3,
+    "stagedOrIncubating": 4
+  },
+  "verdicts": {
+    "pr509Merge": "GO",
+    "unionEyesPilot": "GO",
+    "orchestratorApi": "CONDITIONAL",
+    "platform": "CONDITIONAL",
+    "portfolio": "NO-GO",
+    "ga": "NO-GO"
+  },
+  "verdictRationale": {
+    "pr509Merge": "All required CI checks green (Doc Hygiene, Trivy, Governance Gates, Repo Inventory drift). Squash-merged to main as ba1f5800. Delta-2/3 health contract + automation now mainline.",
+    "unionEyesPilot": "union-eyes classified healthy; no orchestrator-api dependency blocks pilot per evidenceBasis=inventory + post-redeploy attestation. blocksUnionEyesPilot=false across portfolio.",
+    "orchestratorApi": "/health=200 (degraded; github degraded for missing GITHUB_TOKEN), /ready=503 explicitly retained (queue/storage unknown, thirdParty degraded). Root /=404 by design. Not healthy. Readiness follow-up tracked. Probe semantics not faked.",
+    "platform": "6 healthy + 4 degraded + 4 failing + 6 not_instrumented. Failing tier-2 incubators (agrimo, cora, zonga) and not-instrumented Veridian trio (DNS/infra pending) prevent platform-wide healthy state.",
+    "portfolio": "4 failing apps and 6 not-instrumented apps prevent portfolio production claim. Veridian trio still requires DNS/infra. Tier-2 incubators have not adopted @nzila/os-core/health helper.",
+    "ga": "GA requires (a) zero failing, (b) all critical apps instrumented, (c) orchestrator-api /ready=200 with all checks ok, (d) Veridian DNS resolved, (e) tier-2 incubators promoted with health contract adoption. None of these are met."
+  },
+  "remainingRisks": [
+    {
+      "id": "orchestrator-ready-503",
+      "severity": "medium",
+      "description": "/ready=503 due to queue/storage unknown + thirdParty degraded. Not blocking UE pilot but blocks orchestrator-api healthy classification.",
+      "owner": "platform"
+    },
+    {
+      "id": "veridian-dns-pending",
+      "severity": "medium",
+      "description": "veridian-care, veridian-site, veridian-admin remain not_instrumented pending DNS/infra resolution.",
+      "owner": "infra"
+    },
+    {
+      "id": "tier2-incubators-failing",
+      "severity": "low",
+      "description": "agrimo, cora, zonga return /api/health=503 (fallback). Tier-2 staging-only; no UE pilot impact. Adoption of @nzila/os-core/health helper required to clear.",
+      "owner": "tier-2 owners"
+    },
+    {
+      "id": "github-token-missing",
+      "severity": "low",
+      "description": "orchestrator-api /health degraded due to missing GITHUB_TOKEN env var. Cosmetic for non-GH workflows but should be set for completeness.",
+      "owner": "platform"
+    }
+  ],
+  "checksRun": {
+    "runtimeHealthGenerate": "ok (apps=20 healthy=6 degraded=4 failing=4 not_instrumented=6)",
+    "runtimeHealthValidate": "ok",
+    "mergePostState": "main fast-forwarded 94dc1af42..ba1f58004 (4 commits)"
+  },
+  "nextRecommendedDelta": "Delta-7: orchestrator-api /ready remediation (queue/storage probe wiring) + tier-2 incubator health helper adoption (agrimo, cora, zonga)."
+}
