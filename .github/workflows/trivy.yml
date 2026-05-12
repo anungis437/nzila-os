@@ -36,9 +36,11 @@ jobs:
           - target: monorepo
             dockerfile: Dockerfile
             image: nzila-web
+            stage: base
           - target: orchestrator
             dockerfile: apps/orchestrator-api/Dockerfile
             image: nzila-orchestrator
+            stage: runtime
 
     steps:
       - uses: actions/checkout@v5
@@ -51,7 +53,7 @@ jobs:
           docker buildx build \
             -f ${{ matrix.dockerfile }} \
             -t ${{ matrix.image }}:scan \
-            --target base \
+            --target ${{ matrix.stage }} \
             --load \
             .
 
