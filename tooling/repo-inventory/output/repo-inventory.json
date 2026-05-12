@@ -5,7 +5,7 @@
   "workspacePackageCount": 245,
   "workflowCount": 48,
   "contractTestCount": 248,
-  "tsTestFileCount": 1382,
+  "tsTestFileCount": 1383,
   "pythonTestFileCount": 31,
   "apps": [
     {
@@ -453,7 +453,7 @@
         "policies"
       ],
       "purpose": "Fastify-based API server for workflow orchestration, job dispatch, and platform proof-center operations.",
-      "codeFileCount": 30
+      "codeFileCount": 32
     },
     {
       "name": "partners",

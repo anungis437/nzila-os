@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 245 |
 | GitHub Workflows | 48 |
 | Contract Test Files | 248 |
-| TS/JS Test Files | 1382 |
+| TS/JS Test Files | 1383 |
 | Python Test Files | 31 |
 
 ## Apps
@@ -30,7 +30,7 @@
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
 | nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 61 | National Anti-Corruption Programme examination and assessment platform. |
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
-| orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 30 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
+| orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 32 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 107 | Partner portal for managing deals, commissions, certifications, and go-to-market |
 | platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 37 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |

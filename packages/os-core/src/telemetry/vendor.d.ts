@@ -22,6 +22,7 @@ declare module '@opentelemetry/exporter-trace-otlp-http' {
 
 declare module '@opentelemetry/resources' {
   export const Resource: any
+  export function resourceFromAttributes(attrs: Record<string, unknown>): any
 }
 
 declare module '@opentelemetry/semantic-conventions' {

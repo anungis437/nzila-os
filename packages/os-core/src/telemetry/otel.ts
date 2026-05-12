@@ -34,8 +34,8 @@ export async function initOtel(config: OtelConfig): Promise<void> {
     const { NodeSDK } = await import('@opentelemetry/sdk-node')
     const { getNodeAutoInstrumentations } = await import('@opentelemetry/auto-instrumentations-node')
     const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http')
-    const { Resource } = await import('@opentelemetry/resources')
-    const { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } = await import(
+    const { resourceFromAttributes } = await import('@opentelemetry/resources')
+    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = await import(
       '@opentelemetry/semantic-conventions'
     )
 
@@ -45,9 +45,9 @@ export async function initOtel(config: OtelConfig): Promise<void> {
       'http://localhost:4318'
 
     const sdk = new NodeSDK({
-      resource: new Resource({
-        [SEMRESATTRS_SERVICE_NAME]: config.appName,
-        [SEMRESATTRS_SERVICE_VERSION]: config.version ?? process.env.npm_package_version ?? '0.0.0',
+      resource: resourceFromAttributes({
+        [ATTR_SERVICE_NAME]: config.appName,
+        [ATTR_SERVICE_VERSION]: config.version ?? process.env.npm_package_version ?? '0.0.0',
         'deployment.environment': process.env.NODE_ENV ?? 'development',
         ...config.attributes,
       }),
