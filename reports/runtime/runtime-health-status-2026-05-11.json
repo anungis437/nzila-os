@@ -1,0 +1,96 @@
+{
+  "asOfDate": "2026-05-11",
+  "scope": "Delta-2 runtime health contract + orchestrator-api hardening",
+  "authorityLevel": "code-level (deployment of commit 4ad83815f pending)",
+  "commit": "4ad83815f",
+  "branch": "feat/ue-kt-handover-lifecycle",
+  "summary": {
+    "contract": "shared via @nzila/os-core/health (RuntimeHealthStatus, RuntimeHealthCheck, RuntimeHealthResponse, buildRuntimeHealthResponse)",
+    "okSemantics": "ok === true when status is healthy | degraded | not_instrumented; HTTP 503 only when status === 'failing'",
+    "criticalSplit": "non-critical dependency outage downgrades to 'degraded' with HTTP 200 — preserves ACA liveness probes"
+  },
+  "apps": [
+    {
+      "key": "orchestrator-api",
+      "runtimeStatus": "healthy",
+      "classification": "fixed_at_source_pending_redeploy",
+      "evidence": "apps/orchestrator-api/src/routes/health.ts now splits critical (db, eventBus) vs non-critical (github, evidence). Missing GITHUB_TOKEN no longer 503s the ACA healthcheck. Three failing rows in live-health-failure-matrix.json (staging:orchestrator-api:fallback:{root,health,ready}) will clear on next ACA revision promotion."
+    },
+    {
+      "key": "flow",
+      "runtimeStatus": "healthy",
+      "customDomainStatus": "failing",
+      "fallbackRuntimeStatus": "healthy",
+      "classification": "custom_domain_advisory",
+      "evidence": "live-health-failure-matrix.json staging:flow:root aborted at custom domain; fallback ACA domain passing. Helper now supports the customDomainStatus/fallbackRuntimeStatus split so flow can adopt without inventing a new shape."
+    },
+    {
+      "key": "veridian-site",
+      "runtimeStatus": "not_instrumented",
+      "customDomainStatus": "failing",
+      "classification": "staged_not_resolvable",
+      "evidence": "DNS lookup failed for staging-veridian-site.nzilaventures.com; no ACA app deployed (live-health-stabilization-report.md infra evidence)."
+    },
+    {
+      "key": "veridian-care",
+      "runtimeStatus": "not_instrumented",
+      "customDomainStatus": "failing",
+      "classification": "staged_not_resolvable",
+      "evidence": "DNS lookup failed for staging-veridian-care.nzilaventures.com; no ACA app deployed."
+    },
+    {
+      "key": "veridian-admin",
+      "runtimeStatus": "not_instrumented",
+      "customDomainStatus": "failing",
+      "classification": "staged_not_resolvable",
+      "evidence": "DNS lookup failed for staging-veridian-admin.nzilaventures.com; no ACA app deployed."
+    },
+    {
+      "key": "zonga",
+      "runtimeStatus": "failing",
+      "classification": "app_readiness_defect",
+      "evidence": "live-health-failure-matrix.json staging:zonga:fallback:health returns HTTP 503; helper not yet adopted in apps/zonga/app/api/health/route.ts."
+    },
+    {
+      "key": "agrimo",
+      "runtimeStatus": "failing",
+      "classification": "app_readiness_defect",
+      "evidence": "live-health-failure-matrix.json staging:agrimo:fallback:health returns HTTP 503; root endpoint advisory aborted."
+    },
+    {
+      "key": "cora",
+      "runtimeStatus": "failing",
+      "classification": "app_readiness_defect",
+      "evidence": "live-health-failure-matrix.json staging:cora:fallback:health returns HTTP 503; root endpoint advisory aborted."
+    },
+    {
+      "key": "trade",
+      "runtimeStatus": "failing",
+      "classification": "app_readiness_defect",
+      "evidence": "live-health-failure-matrix.json staging:trade:fallback:health returns HTTP 503; root endpoint advisory aborted."
+    },
+    {
+      "key": "cfo",
+      "runtimeStatus": "degraded",
+      "classification": "advisory_fallback_ingress_timeout",
+      "evidence": "live-health-failure-matrix.json staging:cfo:fallback:root aborted; no /api/health probe failure recorded."
+    },
+    {
+      "key": "mobility",
+      "runtimeStatus": "degraded",
+      "classification": "advisory_fallback_ingress_timeout",
+      "evidence": "live-health-failure-matrix.json staging:mobility:fallback:root aborted."
+    },
+    {
+      "key": "abr",
+      "runtimeStatus": "degraded",
+      "classification": "advisory_fallback_ingress_timeout",
+      "evidence": "live-health-failure-matrix.json staging:abr:fallback:root aborted."
+    }
+  ],
+  "references": {
+    "failureMatrix": "reports/runtime/live-health-failure-matrix.json",
+    "stabilizationReport": "reports/runtime/live-health-stabilization-report.md",
+    "deltaReport": "reports/runtime/runtime-health-contract-delta-2026-05-11.md"
+  }
+}
