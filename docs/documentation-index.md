@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-05-11T04:58:08.644Z
+Generated: 2026-05-12T12:33:26.882Z
 
 Total documents indexed: 1001
 Stale documents (>90 days since repo validation): 0
@@ -1012,7 +1012,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-05-11 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-05-11 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-05-11 | current |
-| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-11 | current |
+| [docs/platform/portfolio-matrix.md](docs/platform/portfolio-matrix.md) | platform | 2026-05-12 | current |
 | [docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md](docs/platform/VENDOR_DIVERSIFICATION_STRATEGY.md) | platform | 2026-05-11 | current |
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-05-11 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | current |

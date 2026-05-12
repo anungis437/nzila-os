@@ -8,7 +8,7 @@
 - **Image digest:** `sha256:a21ff762162c877ba1ff85d2e9a96291910c8bd1d95ab3169535f95ac2ff6856` (v4 build).
 - **Active revision:** `nzila-os-orchestrator-api--0000022` (Running / Healthy).
 
-This attestation supersedes the live failure observations recorded in [reports/runtime/live-health-failure-matrix.json](reports/runtime/live-health-failure-matrix.json) for `orchestrator-api` only, because the live re-probe captured here (2026-05-12) is the most recent observation against the new revision.
+This attestation supersedes the live failure observations recorded in [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json) for `orchestrator-api` only, because the live re-probe captured here (2026-05-12) is the most recent observation against the new revision.
 
 ---
 

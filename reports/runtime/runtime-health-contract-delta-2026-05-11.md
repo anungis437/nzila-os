@@ -22,12 +22,12 @@ Flow staging custom domain) remain explicitly classified and surfaced.
 
 | Path | Change |
 |---|---|
-| [packages/os-core/src/health.ts](packages/os-core/src/health.ts) | +runtime contract types & helpers (additive) |
-| [packages/os-core/src/index.ts](packages/os-core/src/index.ts) | re-export new symbols |
-| [apps/orchestrator-api/src/routes/health.ts](apps/orchestrator-api/src/routes/health.ts) | rewritten to use helper; critical/non-critical split |
-| [packages/os-core/src/__tests__/runtime-health.test.ts](packages/os-core/src/__tests__/runtime-health.test.ts) | new — 12 unit tests |
-| [apps/orchestrator-api/Dockerfile](apps/orchestrator-api/Dockerfile) | reviewed only — `HEALTHCHECK` already targets `/health` (no change needed) |
-| [apps/orchestrator-api/src/api-guards.ts](apps/orchestrator-api/src/api-guards.ts) | reviewed only — `/health` & `/health/deep` already public (no change needed) |
+| [packages/os-core/src/health.ts](../../packages/os-core/src/health.ts) | +runtime contract types & helpers (additive) |
+| [packages/os-core/src/index.ts](../../packages/os-core/src/index.ts) | re-export new symbols |
+| [apps/orchestrator-api/src/routes/health.ts](../../apps/orchestrator-api/src/routes/health.ts) | rewritten to use helper; critical/non-critical split |
+| [packages/os-core/src/__tests__/runtime-health.test.ts](../../packages/os-core/src/__tests__/runtime-health.test.ts) | new — 12 unit tests |
+| [apps/orchestrator-api/Dockerfile](../../apps/orchestrator-api/Dockerfile) | reviewed only — `HEALTHCHECK` already targets `/health` (no change needed) |
+| [apps/orchestrator-api/src/api-guards.ts](../../apps/orchestrator-api/src/api-guards.ts) | reviewed only — `/health` & `/health/deep` already public (no change needed) |
 
 ## Health Contract Implemented
 
@@ -58,7 +58,7 @@ returned HTTP 503, the ACA `HEALTHCHECK wget … /health` failed, the revision
 went unhealthy, ingress dropped, and **all** orchestrator endpoints
 (`/`, `/health`, `/ready`) reported `"This operation was aborted"` to the
 synthetic prober. That accounts for the three `staging:orchestrator-api:fallback:*`
-rows in [reports/runtime/live-health-failure-matrix.json](reports/runtime/live-health-failure-matrix.json).
+rows in [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json).
 
 After this delta:
 
@@ -111,6 +111,6 @@ at code level. Deployment of the new revision will retire the three
 
 ## References
 
-- Live failure matrix: [reports/runtime/live-health-failure-matrix.json](reports/runtime/live-health-failure-matrix.json)
-- Stabilization snapshot: [reports/runtime/live-health-stabilization-report.md](reports/runtime/live-health-stabilization-report.md)
-- Sidecar status JSON: [reports/runtime/runtime-health-status-2026-05-11.json](reports/runtime/runtime-health-status-2026-05-11.json)
+- Live failure matrix: [reports/runtime/live-health-failure-matrix.json](live-health-failure-matrix.json)
+- Stabilization snapshot: [reports/runtime/live-health-stabilization-report.md](live-health-stabilization-report.md)
+- Sidecar status JSON: [reports/runtime/runtime-health-status-2026-05-11.json](runtime-health-status-2026-05-11.json)
