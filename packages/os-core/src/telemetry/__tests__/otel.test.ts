@@ -37,13 +37,11 @@ describe('otel', () => {
         OTLPTraceExporter: class {},
       }))
       vi.doMock('@opentelemetry/resources', () => ({
-        Resource: class {
-          constructor(public attrs: Record<string, string>) {}
-        },
+        resourceFromAttributes: (attrs: Record<string, unknown>) => ({ attributes: attrs }),
       }))
       vi.doMock('@opentelemetry/semantic-conventions', () => ({
-        SEMRESATTRS_SERVICE_NAME: 'service.name',
-        SEMRESATTRS_SERVICE_VERSION: 'service.version',
+        ATTR_SERVICE_NAME: 'service.name',
+        ATTR_SERVICE_VERSION: 'service.version',
       }))
 
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -100,13 +98,11 @@ describe('otel', () => {
         },
       }))
       vi.doMock('@opentelemetry/resources', () => ({
-        Resource: class {
-          constructor(public attrs: Record<string, string>) {}
-        },
+        resourceFromAttributes: (attrs: Record<string, unknown>) => ({ attributes: attrs }),
       }))
       vi.doMock('@opentelemetry/semantic-conventions', () => ({
-        SEMRESATTRS_SERVICE_NAME: 'service.name',
-        SEMRESATTRS_SERVICE_VERSION: 'service.version',
+        ATTR_SERVICE_NAME: 'service.name',
+        ATTR_SERVICE_VERSION: 'service.version',
       }))
 
       vi.spyOn(console, 'log').mockImplementation(() => {})

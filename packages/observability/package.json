@@ -24,12 +24,12 @@
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-node": "^0.217.0",
-    "@opentelemetry/sdk-trace-node": "^2.6.1",
-    "@opentelemetry/resources": "^1.30.0",
-    "@opentelemetry/semantic-conventions": "^1.28.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
-    "@opentelemetry/instrumentation-http": "^0.57.0",
-    "@opentelemetry/context-async-hooks": "^1.30.0",
+    "@opentelemetry/sdk-trace-node": "^2.7.0",
+    "@opentelemetry/resources": "^2.7.0",
+    "@opentelemetry/semantic-conventions": "^1.36.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.217.0",
+    "@opentelemetry/instrumentation-http": "^0.217.0",
+    "@opentelemetry/context-async-hooks": "^2.0.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
