@@ -614,24 +614,24 @@ export function OnboardingWizard({ orgId }: { orgId: string }) {
   const router = useRouter()
   const storageKey = `tc_onboarding_${orgId}`
 
-  const [state, setState] = useState<WizardState>(DEFAULT_STATE)
+  const [state, setState] = useState<WizardState>(() => {
+    if (typeof window === 'undefined') return DEFAULT_STATE
+    try {
+      const saved = window.localStorage.getItem(`tc_onboarding_${orgId}`)
+      if (saved) return JSON.parse(saved) as WizardState
+    } catch {
+      // ignore
+    }
+    return DEFAULT_STATE
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Hydrate from localStorage on mount
+  // Track onboarding start once per mount
   useEffect(() => {
     trackEvent('onboarding_started', { orgId })
-    try {
-      const saved = localStorage.getItem(storageKey)
-      if (saved) {
-        const parsed = JSON.parse(saved) as WizardState
-        setState(parsed)
-      }
-    } catch {
-      // ignore
-    }
-  }, [storageKey, orgId])
+  }, [orgId])
 
   // Auto-save to localStorage on every state change
   const persistState = useCallback(
