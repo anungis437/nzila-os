@@ -1,0 +1,44 @@
+{
+  "delta": "orchestrator-readiness-delta-7",
+  "date": "2026-05-12",
+  "branch": "chore/orchestrator-readiness-delta-7",
+  "scope": ["apps/orchestrator-api"],
+  "hardRule": "never weaken readiness for optics; missing GITHUB_TOKEN must NOT cause not_ready",
+  "summary": "Codified orchestrator-api dependency criticality and rewrote /ready to mirror /health semantics: only critical failures flip readiness; optional degradation reports degraded_ready (HTTP 200).",
+  "dependencies": [
+    { "id": "database", "criticality": "critical", "description": "Postgres connection (drizzle/postgres-js); required for command persistence and run state." },
+    { "id": "github",   "criticality": "optional", "description": "GITHUB_TOKEN for workflow_dispatch; absence degrades dispatch capability but does not block readiness." }
+  ],
+  "decisions": {
+    "readyRoute": "critical-aware (mirrors /health envelope, adds ready/readiness/criticalFailures/degradedDependencies/dependencyCatalog)",
+    "rootRoute": "keep 404 (api-only surface; probes must use /health or /ready)",
+    "runtimeGeneratorValidator": "deferred — current attestation truthful; redeploy refreshes naturally"
+  },
+  "filesChanged": [
+    "apps/orchestrator-api/src/runtime-dependencies.ts",
+    "apps/orchestrator-api/src/routes/ready.ts",
+    "apps/orchestrator-api/src/api-guards.ts",
+    "apps/orchestrator-api/src/routes/__tests__/ready.test.ts",
+    "reports/runtime/orchestrator-readiness-delta-7-2026-05-12.md",
+    "reports/runtime/orchestrator-readiness-delta-7-2026-05-12.json"
+  ],
+  "checks": {
+    "typecheck": "pass",
+    "test": { "files": 6, "tests": 27, "passed": 27, "newReadyCases": 3 },
+    "lint": "no-lint-script (workspace-level only)"
+  },
+  "decisionTable": [
+    { "db": "ok",   "githubToken": "set",     "http": 200, "ready": true,  "readiness": "ready",          "criticalFailures": [],            "degradedDependencies": [] },
+    { "db": "ok",   "githubToken": "missing", "http": 200, "ready": true,  "readiness": "degraded_ready", "criticalFailures": [],            "degradedDependencies": ["github"] },
+    { "db": "fail", "githubToken": "any",     "http": 503, "ready": false, "readiness": "not_ready",      "criticalFailures": ["database"], "degradedDependencies": [] }
+  ],
+  "remainingRisks": [
+    "Staging /ready remains not_ready until new image is deployed (expected, not regression).",
+    "`important` criticality tier defined but unused; first consumer must verify behaviour.",
+    "Runtime attestation generator/validator do not yet consume new readiness fields."
+  ],
+  "nextRecommendedDelta": [
+    "Promote eventBus and evidence from /health/deep into the dependency catalog with explicit criticality.",
+    "Teach runtime attestation generator to ingest dependencyCatalog and degradedDependencies."
+  ]
+}
