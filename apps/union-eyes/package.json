@@ -232,7 +232,7 @@
     "@typescript-eslint/parser": "^8.54.0",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.0.18",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^10.1.0",
     "eslint-config-next": "16.2.2",
