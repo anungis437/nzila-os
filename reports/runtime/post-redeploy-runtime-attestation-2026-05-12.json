@@ -1,0 +1,101 @@
+{
+  "schema": "post-redeploy-runtime-attestation/v1",
+  "asOfDate": "2026-05-12",
+  "scope": {
+    "app": "orchestrator-api",
+    "environment": "staging",
+    "region": "canadacentral",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "managedEnvironment": "jollydune-88c1e97f"
+  },
+  "authorityLevel": "current-runtime-remediation",
+  "branch": "chore/runtime-health-delta-2-3",
+  "pr": 509,
+  "commit": "ceedbcb46",
+  "image": {
+    "registry": "nzilacanadaacr.azurecr.io",
+    "digest": "sha256:a21ff762162c877ba1ff85d2e9a96291910c8bd1d95ab3169535f95ac2ff6856",
+    "build": "v4"
+  },
+  "revision": {
+    "name": "nzila-os-orchestrator-api--0000022",
+    "state": "Running",
+    "health": "Healthy"
+  },
+  "outcome": {
+    "previousClassification": "failing",
+    "newClassification": "degraded",
+    "reachedHealthy": false,
+    "rationale": "/health=200 ok=true status=degraded satisfies §5 sub-rule for degraded; /ready=503 and /=404 prevent strict healthy."
+  },
+  "bootBlockerRemediations": [
+    { "issue": "NODE_ENV concatenation + api-handler eager import", "fixedAt": "ceedbcb46", "method": "code+Dockerfile" },
+    { "issue": "ORCHESTRATOR_API_KEY missing", "method": "set ACA secret orchestrator-api-key with random 64-char URL-safe base64 (value undisclosed)" },
+    { "issue": "DATABASE_URL host missing", "method": "in-place secret repair to inject nzila-staging-db.postgres.database.azure.com host; revision restart confirmed database.status=ok ms=2" }
+  ],
+  "probes": {
+    "capturedAt": "2026-05-12T06:44:08Z",
+    "evidenceDir": "reports/runtime/post-delta-2/2026-05-12/orchestrator-api/",
+    "root": { "path": "/", "status": 404, "totalSeconds": 0.295, "note": "no root route registered (by design)" },
+    "health": {
+      "path": "/health",
+      "status": 200,
+      "auth": false,
+      "body": {
+        "ok": true,
+        "status": "degraded",
+        "checks": {
+          "database": { "status": "ok", "critical": true, "ms": 2 },
+          "github": { "status": "degraded", "note": "GITHUB_TOKEN not set — dispatches will fail when invoked" }
+        }
+      }
+    },
+    "ready": {
+      "path": "/ready",
+      "status": 503,
+      "auth": true,
+      "body": {
+        "ready": false,
+        "status": "not_ready",
+        "checks": {
+          "process": { "status": "ok" },
+          "queue": { "status": "unknown" },
+          "storage": { "status": "unknown" },
+          "thirdParty": { "status": "degraded" },
+          "database": { "status": "ok" }
+        }
+      }
+    }
+  },
+  "aggregator": {
+    "file": "reports/runtime/runtime-health-status-latest.json",
+    "totals": { "apps": 20, "healthy": 6, "degraded": 3, "failing": 5, "not_instrumented": 6 },
+    "orchestratorApiClassification": "failing",
+    "supersededBy": "this attestation",
+    "supersessionNote": "Generator authority list does not yet reference this attestation; reclassification PR is Delta-5 scope."
+  },
+  "acceptance": {
+    "healthHttp200OkDegradedOrHealthy": "PASS",
+    "readyHttp200": "FAIL",
+    "rootHttp200": "FAIL",
+    "evidenceCompleteSameRevision": "PASS",
+    "noNewFailureMatrixEntries": "PASS",
+    "twoPersonReclassification": "DEFERRED to PR #509 review"
+  },
+  "compliance": {
+    "noStaleEvidence": true,
+    "noOrTrueMasking": true,
+    "noDirectPushToMain": true,
+    "noTenantLanguage": true,
+    "noLiveNetworkInCI": true,
+    "noSecretsDisclosed": true
+  },
+  "followUps": [
+    "Set GITHUB_TOKEN ACA secret to clear /health github=degraded.",
+    "Wire real queue/storage/thirdParty checks so /ready can return 200.",
+    "Decide on root route vs. dropping / from §5 acceptance.",
+    "Commit Dockerfile cache-mount removal (apps/orchestrator-api/Dockerfile).",
+    "Update generator authority list to consume this attestation (Delta-5)."
+  ],
+  "rollback": "See §7 of post-delta-2-redeploy-proof-plan-2026-05-11.md. Not exercised."
+}

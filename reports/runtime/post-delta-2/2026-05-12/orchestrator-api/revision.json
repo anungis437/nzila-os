@@ -1,0 +1,87 @@
+{
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-os-orchestrator-api/revisions/nzila-os-orchestrator-api--0000022",
+  "name": "nzila-os-orchestrator-api--0000022",
+  "properties": {
+    "active": true,
+    "createdTime": "2026-05-12T06:36:13+00:00",
+    "fqdn": "nzila-os-orchestrator-api--0000022.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "healthState": "Healthy",
+    "provisioningState": "Provisioned",
+    "replicas": 1,
+    "runningState": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "NEXT_TELEMETRY_DISABLED",
+              "value": "1"
+            },
+            {
+              "name": "AZURE_AD_CLIENT_ID",
+              "value": "b7b0cb9a-110d-4bf4-baa7-d936d7450181"
+            },
+            {
+              "name": "AZURE_AD_TENANT_ID",
+              "value": "5082b8be-b04d-4a13-b61c-b6397670177b"
+            },
+            {
+              "name": "ROLLBACK_MARKER",
+              "value": "20260501150000"
+            },
+            {
+              "name": "PORT",
+              "value": "4000"
+            },
+            {
+              "name": "AUTH_SECRET",
+              "secretRef": "auth-secret"
+            },
+            {
+              "name": "DATABASE_URL",
+              "secretRef": "database-url"
+            },
+            {
+              "name": "AZURE_AD_CLIENT_SECRET",
+              "secretRef": "azure-ad-client-secret"
+            },
+            {
+              "name": "NEXT_PUBLIC_APP_ENV",
+              "value": "staging"
+            },
+            {
+              "name": "ORCHESTRATOR_API_KEY",
+              "secretRef": "orchestrator-api-key"
+            }
+          ],
+          "image": "nzilacanadaacr.azurecr.io/nzila/orchestrator-api:delta4-ceedbcb46-v4",
+          "name": "nzila-os-orchestrator-api",
+          "probes": [],
+          "resources": {
+            "cpu": 0.5,
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": null,
+      "scale": {
+        "cooldownPeriod": null,
+        "maxReplicas": 2,
+        "minReplicas": 1,
+        "pollingInterval": null,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "trafficWeight": 100
+  },
+  "resourceGroup": "nzila-canada-staging-rg",
+  "type": "Microsoft.App/containerapps/revisions"
+}

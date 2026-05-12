@@ -1,0 +1,67 @@
+{
+  "capturedAt": "2026-05-12T06:39:15Z",
+  "host": "https://nzila-os-orchestrator-api.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+  "revision": "nzila-os-orchestrator-api--0000022",
+  "imageDigest": "sha256:a21ff762162c877ba1ff85d2e9a96291910c8bd1d95ab3169535f95ac2ff6856",
+  "probes": {
+    "/health": {
+      "status": 200,
+      "authenticated": false,
+      "body": {
+        "ok": true,
+        "status": "degraded",
+        "app": "orchestrator-api",
+        "environment": "staging",
+        "timestamp": "2026-05-12T06:39:19Z",
+        "version": "0.0.0",
+        "checks": {
+          "database": {
+            "status": "ok",
+            "critical": true,
+            "ms": 2
+          },
+          "github": {
+            "status": "degraded",
+            "note": "GITHUB_TOKEN not set — dispatches will fail when invoked"
+          }
+        }
+      }
+    },
+    "/ready": {
+      "status": 503,
+      "authenticated": true,
+      "body": {
+        "ready": false,
+        "status": "not_ready",
+        "app": "orchestrator-api",
+        "timestamp": "2026-05-12T06:39:19Z",
+        "checks": {
+          "process": {
+            "status": "ok"
+          },
+          "queue": {
+            "status": "unknown"
+          },
+          "storage": {
+            "status": "unknown"
+          },
+          "thirdParty": {
+            "status": "degraded"
+          },
+          "database": {
+            "status": "ok"
+          }
+        }
+      }
+    },
+    "/": {
+      "status": 404,
+      "authenticated": true,
+      "body": {
+        "message": "Route GET:/ not found",
+        "error": "Not Found",
+        "statusCode": 404
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"ready":false,"status":"not_ready","app":"orchestrator-api","timestamp":"2026-05-12T06:44:08Z","checks":{"process":{"status":"ok"},"queue":{"status":"unknown"},"storage":{"status":"unknown"},"thirdParty":{"status":"degraded"},"database":{"status":"ok"}}}
