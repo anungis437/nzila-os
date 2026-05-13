@@ -4,8 +4,12 @@
  * LocaleSiteNavigation — Enterprise institutional navigation for UnionEyes (locale-aware)
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  *
- * Enterprise IA (Phase 1 Operational Convergence):
- *   Solutions | Platform | Governance & Trust | Insights | Pilot Program | Contact
+ * Institutional IA (Phase 4 alignment — institutional infrastructure with operational modules):
+ *   Solutions | Platform | Trust | Insights | Proof | Pricing | Contact
+ *
+ * Trust is a top-level institutional pillar (audit, sovereignty, explainability) and
+ * intentionally surfaced alongside Platform rather than nested inside it, signalling
+ * that institutional trust is a first-class concern — not a sub-module.
  */
 
 import Image from 'next/image';
@@ -53,8 +57,9 @@ export default function LocaleSiteNavigation() {
   ];
 
   const primaryNav = [
+    { name: t('trust'),    href: `/${locale}/trust` },
     { name: t('insights'), href: `/${locale}/insights` },
-    { name: t('proof'), href: `/${locale}/proof` },
+    { name: t('proof'),    href: `/${locale}/proof` },
     { name: t('pricing'),  href: `/${locale}/pricing` },
     { name: t('contact'),  href: `/${locale}/contact` },
   ];
