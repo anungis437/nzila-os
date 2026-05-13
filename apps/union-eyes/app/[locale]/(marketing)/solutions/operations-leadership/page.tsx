@@ -63,7 +63,7 @@ export default function OperationsLeadershipPage() {
               Request an Institutional Briefing
             </Link>
             <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
-              Operational Coherence Platform
+              Operational Coherence Architecture
             </Link>
           </div>
         }

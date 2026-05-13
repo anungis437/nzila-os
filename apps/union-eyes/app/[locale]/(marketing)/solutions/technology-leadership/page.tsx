@@ -35,7 +35,7 @@ const outcomes = [
   { icon: Lock,        title: 'Enterprise security & data residency',   desc: 'Canadian data residency, SOC 2-aligned infrastructure, and full audit capabilities for compliance and regulatory requirements.' },
   { icon: Eye,         title: 'Full explainability guarantees',         desc: 'Every intelligence output is traceable to source evidence. No black-box outputs in a labour environment.' },
   { icon: Cpu,         title: 'Modular, safe deployment architecture',  desc: 'Deploy the modules your organization needs, in the sequence that matches your readiness — no big-bang implementations.' },
-  { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or worker conduct grading. Enforced architecturally.' },
+  { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the operating architecture can be repurposed for individual monitoring or worker conduct grading. Enforced architecturally.' },
 ];
 
 const technicalPrinciples = [
@@ -122,7 +122,7 @@ export default function TechnologyLeadershipPage() {
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">AI your institution can trust</h2>
-          <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
+          <p className="text-white/70 mb-8">Request a technical briefing or live institutional walkthrough.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
             Request an Institutional Briefing
           </Link>

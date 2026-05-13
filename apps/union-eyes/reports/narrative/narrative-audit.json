@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T07:54:35.762Z",
+  "generatedAt": "2026-05-13T11:25:56.664Z",
   "files": [
     {
       "ctx": {
@@ -6826,15 +6826,6 @@
           },
           "line": 65,
           "excerpt": "<Link href=\"../platform/operational-coherence\" className=\"inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 66,
-          "excerpt": "Operational Coherence Platform"
         }
       ],
       "ruleResults": [
@@ -6925,26 +6916,7 @@
         "isPublicSurface": true,
         "label": "marketing/solutions"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 18,
-          "excerpt": "* Solutions — Stakeholder-Oriented Platform Journeys"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 21,
-          "excerpt": "* Hides platform sophistication. Exposes institutional outcomes."
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -7137,26 +7109,7 @@
         "isPublicSurface": true,
         "label": "marketing/solutions/technology-leadership"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 38,
-          "excerpt": "{ icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or worker conduct grading. Enforced archite"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 125,
-          "excerpt": "<p className=\"text-white/70 mb-8\">Request a technical briefing or platform demonstration.</p>"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -9730,7 +9683,7 @@
     "totalFiles": 87,
     "publicFiles": 87,
     "hardFails": 0,
-    "warnings": 212,
+    "warnings": 207,
     "ruleFailures": 0,
     "averageMaturity": 87
   }

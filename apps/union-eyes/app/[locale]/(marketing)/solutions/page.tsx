@@ -15,10 +15,10 @@
  * institutional trust for democratic infrastructure.
  */
 /**
- * Solutions — Stakeholder-Oriented Platform Journeys
+ * Solutions — Stakeholder-Oriented Institutional Journeys
  *
  * Enterprise IA: Solutions hub surfacing each stakeholder journey.
- * Hides platform sophistication. Exposes institutional outcomes.
+ * Hides operating-architecture sophistication. Exposes institutional outcomes.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';

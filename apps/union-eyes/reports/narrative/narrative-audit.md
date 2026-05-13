@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T07:54:35.762Z
+Generated: 2026-05-13T11:25:56.664Z
 
 ## Summary
 
 - Files scanned: **87**
 - Hard-fail violations: **0**
-- Warning violations: **212**
+- Warning violations: **207**
 - Rule failures: **0**
 - Average Institutional Maturity: **87/100**
 
@@ -1048,7 +1048,6 @@ Generated: 2026-05-13T07:54:35.762Z
 
 **Vocabulary violations:**
 - L65 [warning/warning] `platform` — <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t
-- L66 [warning/warning] `platform` — Operational Coherence Platform
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
@@ -1064,13 +1063,6 @@ Generated: 2026-05-13T07:54:35.762Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-- L18 [warning/warning] `platform` — * Solutions — Stakeholder-Oriented Platform Journeys
-- L21 [warning/warning] `platform` — * Hides platform sophistication. Exposes institutional outcomes.
-
-**Recommendations:**
-- Remove or rephrase "platform" (warning).
 
 ### marketing/solutions/procurement
 
@@ -1106,15 +1098,10 @@ Generated: 2026-05-13T07:54:35.762Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
-**Vocabulary violations:**
-- L38 [warning/warning] `platform` — { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or worker conduct grading. Enforced archite
-- L125 [warning/warning] `platform` — <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 10.6% (target 30%).
 
 **Recommendations:**
-- Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
 
 ### marketing/status
