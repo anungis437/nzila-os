@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T11:25:56.664Z",
+  "generatedAt": "2026-05-13T11:33:42.047Z",
   "files": [
     {
       "ctx": {
@@ -4063,21 +4063,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 71,
+          "score": 84,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 6,
-              "continuity": 11,
-              "coordination": 6,
+              "governance": 13,
+              "continuity": 18,
+              "coordination": 15,
               "trust": 11
             },
-            "total": 34,
+            "total": 57,
             "shares": {
-              "governance": 0.17647058823529413,
-              "continuity": 0.3235294117647059,
-              "coordination": 0.17647058823529413,
-              "trust": 0.3235294117647059
+              "governance": 0.22807017543859648,
+              "continuity": 0.3157894736842105,
+              "coordination": 0.2631578947368421,
+              "trust": 0.19298245614035087
             }
           }
         },
@@ -4139,7 +4139,7 @@
           }
         }
       ],
-      "maturity": 93
+      "maturity": 96
     },
     {
       "ctx": {
@@ -4152,21 +4152,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -4228,7 +4228,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -4241,21 +4241,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -4317,7 +4317,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -4330,21 +4330,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -4406,7 +4406,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -4419,21 +4419,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -4495,7 +4495,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -9685,6 +9685,6 @@
     "hardFails": 0,
     "warnings": 207,
     "ruleFailures": 0,
-    "averageMaturity": 87
+    "averageMaturity": 88
   }
 }

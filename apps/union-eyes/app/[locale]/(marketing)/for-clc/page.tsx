@@ -13,6 +13,17 @@
  *
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * institutional trust for democratic infrastructure.
+ *
+ * Role coordination surface
+ *
+ * Coordination posture: representation workflow, case management, intake choreography,
+ * and operational coordination across federation, leadership, member, and staff touchpoints.
+ *
+ * Governance posture: bylaw-aligned procedural cadence, constitutional consistency,
+ * accountability surfaces, and compliance choreography across jurisdictions and mandates.
+ *
+ * Continuity posture: institutional memory preservation, succession-aware handoff,
+ * stewardship of representational records, and procedural continuity across mandates.
  */
 /**
  * Locale-aware For CLC page.

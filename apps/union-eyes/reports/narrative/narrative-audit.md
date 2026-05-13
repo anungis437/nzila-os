@@ -1,6 +1,6 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T11:25:56.664Z
+Generated: 2026-05-13T11:33:42.047Z
 
 ## Summary
 
@@ -8,7 +8,7 @@ Generated: 2026-05-13T11:25:56.664Z
 - Hard-fail violations: **0**
 - Warning violations: **207**
 - Rule failures: **0**
-- Average Institutional Maturity: **87/100**
+- Average Institutional Maturity: **88/100**
 
 ## Per-Surface Detail
 
@@ -607,10 +607,10 @@ Generated: 2026-05-13T11:25:56.664Z
 ### marketing/for-clc
 
 - **Path:** `app/[locale]/(marketing)/for-clc/page.tsx`
-- **Institutional Maturity:** 93/100
+- **Institutional Maturity:** 96/100
 
 **Scores:**
-- narrative-balance: 71/100 (pass)
+- narrative-balance: 84/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -619,10 +619,10 @@ Generated: 2026-05-13T11:25:56.664Z
 ### marketing/for-federations
 
 - **Path:** `app/[locale]/(marketing)/for-federations/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -631,10 +631,10 @@ Generated: 2026-05-13T11:25:56.664Z
 ### marketing/for-leadership
 
 - **Path:** `app/[locale]/(marketing)/for-leadership/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -643,10 +643,10 @@ Generated: 2026-05-13T11:25:56.664Z
 ### marketing/for-members
 
 - **Path:** `app/[locale]/(marketing)/for-members/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -655,10 +655,10 @@ Generated: 2026-05-13T11:25:56.664Z
 ### marketing/for-representatives
 
 - **Path:** `app/[locale]/(marketing)/for-representatives/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
