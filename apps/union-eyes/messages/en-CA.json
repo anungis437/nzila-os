@@ -2507,11 +2507,11 @@
   },
   "knowledgePage": {
     "metaTitle": "Knowledge | UnionEyes",
-    "metaDescription": "Search agreements, learning resources, clauses, precedents, and calendar knowledge"
+    "metaDescription": "Search agreements, clauses, precedents, and institutional memory references."
   },
   "knowledgeBasePage": {
     "metaTitle": "Knowledge Base | UnionEyes",
-    "metaDescription": "Browse the union documents library and reference materials"
+    "metaDescription": "Browse the institutional memory of union documents and reference materials."
   },
   "notificationsPage": {
     "metaTitle": "Notifications | UnionEyes",
@@ -4184,9 +4184,9 @@
   },
   "auditsPage": {
     "metaTitle": "Audits & Compliance | UnionEyes",
-    "metaDescription": "Financial audits and compliance tracking",
+    "metaDescription": "Financial audits and chronological compliance record.",
     "title": "Audits & Compliance",
-    "subtitle": "Financial audits, compliance reviews, and organizational oversight",
+    "subtitle": "Financial audits, compliance reviews, and chronological institutional oversight.",
     "scheduleAudit": "Schedule Audit",
     "summary": {
       "totalAudits": "Total Audits",
@@ -5135,7 +5135,7 @@
   },
   "complianceAdminPage": {
     "title": "Compliance & Audit",
-    "subtitle": "Monitor compliance status, audit logs, and regulatory requirements",
+    "subtitle": "Maintain compliance posture, audit chronology, and regulatory commitments.",
     "tabOverview": "Overview",
     "tabAuditLogs": "Audit Logs",
     "tabReports": "Reports",
@@ -8409,7 +8409,7 @@
   },
   "trust": {
     "title": "Trust & Sovereignty",
-    "subtitle": "Transparency, verification, and institutional accountability for members.",
+    "subtitle": "Transparent chronology, verifiable safeguards, and institutional accountability for members.",
     "exportReport": "Export Report",
     "lastUpdated": "Last updated:",
     "statImmutability": "Immutability",
@@ -9076,7 +9076,7 @@
   },
   "securityPage": {
     "title": "Security Operations",
-    "subtitle": "Monitor security events, threats, and access patterns",
+    "subtitle": "Maintain safeguards posture: events, threats, and access chronology.",
     "tabOverview": "Overview",
     "tabAlerts": "Alerts",
     "tabThreats": "Threats ({count})",
@@ -9184,8 +9184,8 @@
     "emptyDash": "—"
   },
   "operationsPage": {
-    "title": "Platform Operations",
-    "subtitle": "Real-time platform health, incidents, and operational metrics",
+    "title": "Continuity Operations",
+    "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
     "tabOverview": "Overview",
     "tabIncidents": "Incidents",
     "tabSla": "SLA & Performance",
@@ -9194,7 +9194,7 @@
     "systemHealthTitle": "System Health",
     "degradedServicesLabel": "{count} degraded",
     "allServicesHealthy": "All services healthy",
-    "activeIncidentsTitle": "Active Incidents",
+    "activeIncidentsTitle": "Active Continuity Events",
     "highSeverityLabel": "{count} high severity",
     "noHighSeverity": "No high severity",
     "platformUptimeTitle": "Platform Uptime",

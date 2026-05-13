@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T15:57:26.109Z
+Generated: 2026-05-13T17:24:53.330Z
 
 ## Summary
 
 - Files scanned: **88**
 - Hard-fail violations: **0**
-- Warning violations: **219**
+- Warning violations: **217**
 - Rule failures: **0**
 - Average Institutional Maturity: **85/100**
 
@@ -1156,10 +1156,10 @@ Generated: 2026-05-13T15:57:26.109Z
 ### messages/en-CA.json
 
 - **Path:** `messages/en-CA.json`
-- **Institutional Maturity:** 90/100
+- **Institutional Maturity:** 91/100
 
 **Scores:**
-- narrative-balance: 60/100 (warn)
+- narrative-balance: 62/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1223,8 +1223,7 @@ Generated: 2026-05-13T15:57:26.109Z
 - L8872 [warning/warning] `platform` — "platformHealth": "Platform Health",
 - L8879 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
 - L8886 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
-- L9187 [warning/warning] `platform` — "title": "Platform Operations",
-- L9188 [warning/warning] `platform` — "subtitle": "Real-time platform health, incidents, and operational metrics",
+- L9188 [warning/warning] `platform` — "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
 - L9200 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
 - L9261 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
 - L9262 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
@@ -1232,7 +1231,7 @@ Generated: 2026-05-13T15:57:26.109Z
 - L10618 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.8% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
@@ -1247,10 +1246,10 @@ Generated: 2026-05-13T15:57:26.109Z
 ### messages/en.json
 
 - **Path:** `messages/en.json`
-- **Institutional Maturity:** 90/100
+- **Institutional Maturity:** 91/100
 
 **Scores:**
-- narrative-balance: 60/100 (warn)
+- narrative-balance: 62/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1315,15 +1314,14 @@ Generated: 2026-05-13T15:57:26.109Z
 - L9158 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
 - L9165 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
 - L10270 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
-- L10944 [warning/warning] `platform` — "title": "Platform Operations",
-- L10945 [warning/warning] `platform` — "subtitle": "Real-time platform health, incidents, and operational metrics",
+- L10945 [warning/warning] `platform` — "subtitle": "Continuity-aware health, continuity events, and operational chronology of the institutional platform.",
 - L10957 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
 - L11018 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
 - L11019 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
 - L11055 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.8% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).

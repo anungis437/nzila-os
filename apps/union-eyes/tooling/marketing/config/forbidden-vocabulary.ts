@@ -104,6 +104,27 @@ const surveillanceAi: ForbiddenTerm[] = [
   { term: "behavioral optimization", severity: "hard-fail", category: "surveillance-ai" },
   { term: "influence analysis", severity: "hard-fail", category: "surveillance-ai" },
   { term: "organizer scoring", severity: "hard-fail", category: "surveillance-ai" },
+  // Workstream E: Continuity / trust / chronology semantic alignment — reject autonomous-AI oversight framing
+  { term: "AI-led oversight", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-led oversight assisted by governed reasoning" },
+  { term: "predictive governance", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance of record | continuity-aware governance" },
+  { term: "AI conclusions", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-confirmed conclusions | governed reasoning outputs" },
+  { term: "automated governance interpretation", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "autonomous institutional reasoning", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted institutional reasoning under human oversight" },
+];
+
+// Workstream E: Continuity / operations-centre framing guards.
+// These reject industrial command-centre / optimization-engine framing on
+// public marketing surfaces. They are publicOnly to avoid disturbing internal
+// runtime telemetry copy.
+const continuitySaas: ForbiddenTerm[] = [
+  { term: "monitoring engine", severity: "hard-fail", category: "startup-saas", publicOnly: true, suggestion: "continuity safeguards | chronology of record" },
+  { term: "optimization layer", severity: "hard-fail", category: "startup-saas", publicOnly: true },
+  { term: "operational command center", severity: "hard-fail", category: "startup-saas", publicOnly: true, suggestion: "continuity console | continuity operations" },
+  { term: "operational control room", severity: "hard-fail", category: "startup-saas", publicOnly: true },
+  { term: "executive optimization", severity: "hard-fail", category: "startup-saas", publicOnly: true },
+  { term: "governance management system", severity: "hard-fail", category: "startup-saas", publicOnly: true, suggestion: "governance of record" },
+  { term: "governance optimization engine", severity: "hard-fail", category: "startup-saas", publicOnly: true },
+  { term: "event stream optimization", severity: "hard-fail", category: "startup-saas", publicOnly: true },
 ];
 
 const political: ForbiddenTerm[] = [
@@ -145,6 +166,17 @@ const warningLevel: ForbiddenTerm[] = [
   // Workstream D: AI credit framing drifts toward consumer-SaaS posture
   { term: "AI credits", severity: "warning", category: "warning" },
   { term: "credits per billing cycle", severity: "warning", category: "warning" },
+  // Workstream E: Continuity-drift warnings — counted toward maturity score
+  { term: "knowledge management", severity: "warning", category: "warning" },
+  { term: "document repository", severity: "warning", category: "warning", publicOnly: true },
+  { term: "enterprise wiki", severity: "warning", category: "warning" },
+  { term: "content library", severity: "warning", category: "warning" },
+  { term: "process acceleration", severity: "warning", category: "warning" },
+  { term: "operational sequencing", severity: "warning", category: "warning" },
+  { term: "activity analytics", severity: "warning", category: "warning" },
+  { term: "audit engine", severity: "warning", category: "warning" },
+  { term: "compliance monitor", severity: "warning", category: "warning" },
+  { term: "operational oversight", severity: "warning", category: "warning" },
   // "governance" intentionally excluded from warning — counted via balance rule.
 ];
 
@@ -152,6 +184,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...startupSaas,
   ...ripAndReplace,
   ...surveillanceAi,
+  ...continuitySaas,
   ...political,
   ...founderOptics,
   ...warningLevel,

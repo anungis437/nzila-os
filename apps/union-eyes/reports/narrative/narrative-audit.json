@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T15:57:26.109Z",
+  "generatedAt": "2026-05-13T17:24:53.330Z",
   "files": [
     {
       "ctx": {
@@ -8066,17 +8066,8 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9187,
-          "excerpt": "\"title\": \"Platform Operations\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
           "line": 9188,
-          "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
+          "excerpt": "\"subtitle\": \"Continuity-aware health, continuity events, and operational chronology of the institutional platform.\","
         },
         {
           "term": {
@@ -8128,26 +8119,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 60,
+          "score": 62,
           "flags": [
             {
-              "message": "Continuity language under-represented: 10.1% (target 30%).",
+              "message": "Continuity language under-represented: 10.8% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
               "governance": 274,
-              "continuity": 76,
+              "continuity": 82,
               "coordination": 158,
-              "trust": 244
+              "trust": 243
             },
-            "total": 752,
+            "total": 757,
             "shares": {
-              "governance": 0.36436170212765956,
-              "continuity": 0.10106382978723404,
-              "coordination": 0.21010638297872342,
-              "trust": 0.324468085106383
+              "governance": 0.3619550858652576,
+              "continuity": 0.1083223249669749,
+              "coordination": 0.20871862615587847,
+              "trust": 0.32100396301188905
             }
           }
         },
@@ -8217,7 +8208,7 @@
           }
         }
       ],
-      "maturity": 90
+      "maturity": 91
     },
     {
       "ctx": {
@@ -8755,17 +8746,8 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10944,
-          "excerpt": "\"title\": \"Platform Operations\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
           "line": 10945,
-          "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
+          "excerpt": "\"subtitle\": \"Continuity-aware health, continuity events, and operational chronology of the institutional platform.\","
         },
         {
           "term": {
@@ -8808,26 +8790,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 60,
+          "score": 62,
           "flags": [
             {
-              "message": "Continuity language under-represented: 10.1% (target 30%).",
+              "message": "Continuity language under-represented: 10.8% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
               "governance": 273,
-              "continuity": 76,
+              "continuity": 82,
               "coordination": 159,
-              "trust": 244
+              "trust": 243
             },
-            "total": 752,
+            "total": 757,
             "shares": {
-              "governance": 0.363031914893617,
-              "continuity": 0.10106382978723404,
-              "coordination": 0.21143617021276595,
-              "trust": 0.324468085106383
+              "governance": 0.3606340819022457,
+              "continuity": 0.1083223249669749,
+              "coordination": 0.21003963011889035,
+              "trust": 0.32100396301188905
             }
           }
         },
@@ -8897,7 +8879,7 @@
           }
         }
       ],
-      "maturity": 90
+      "maturity": 91
     },
     {
       "ctx": {
@@ -9666,7 +9648,7 @@
     "totalFiles": 88,
     "publicFiles": 85,
     "hardFails": 0,
-    "warnings": 219,
+    "warnings": 217,
     "ruleFailures": 0,
     "averageMaturity": 85
   }
