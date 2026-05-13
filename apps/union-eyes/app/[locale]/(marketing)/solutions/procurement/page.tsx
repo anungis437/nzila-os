@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Briefcase, FileCheck, CheckCircle2, BarChart3, Layers, ArrowRight } from 'lucide-react';
@@ -58,7 +74,7 @@ const challenges = [
   'Procurement processes often miss governance and labour-safety requirements unique to unions',
   'Vendors present broad AI claims without explainability or audit-ready evidence',
   'Implementation risk rises when rollout plans ignore organizational readiness',
-  'Stakeholders struggle to compare options without clear continuity and trust criteria',
+  'Stakeholders find it difficult to compare options without clear continuity and trust criteria',
 ];
 
 export default function ProcurementPage() {

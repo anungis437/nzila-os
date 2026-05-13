@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * Trust & Compliance page.
  * Accessible at /{locale}/trust — fully translated.
  *
@@ -167,7 +183,7 @@ export default async function TrustPage({
           </p>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { label: 'Zero worker surveillance',          desc: 'No worker behavioural scoring, monitoring, or performance tracking.' },
+              { label: 'Zero worker surveillance',          desc: 'No worker conduct grading, monitoring, or performance tracking.' },
               { label: 'No workforce analytics',             desc: 'Intelligence is institutional, not individual. Workers are never the subject of analysis.' },
               { label: 'Human oversight required',           desc: 'All intelligence recommendations require human review before any action.' },
               { label: 'Democratic governance controls',     desc: 'AI systems operate within democratic governance structures, never replacing them.' },

@@ -1,4 +1,20 @@
 /**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
+/**
  * Institutional Continuity — Core platform capability page
  *
  * Positions UE as the institutional continuity intelligence platform.
@@ -215,7 +231,7 @@ export default async function InstitutionalContinuityPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-6 text-center">
             {[
-              { label: 'Labour-safe by design',     sub: 'Zero individual behavioural scoring or monitoring' },
+              { label: 'Labour-safe by design',     sub: 'Zero individual conduct grading or monitoring' },
               { label: 'Human oversight required',  sub: 'All intelligence is human-reviewed' },
               { label: 'Explainable intelligence',  sub: 'Every insight is evidence-traceable' },
             ].map((item) => (

@@ -1,3 +1,19 @@
+/**
+ * Institutional Positioning Manifest (UnionEyes marketing surface)
+ *
+ * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
+ * coordination (operational workflow, intake, case management, representation),
+ * trust (audit, transparency, evidence, oversight, explainability).
+ *
+ * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
+ * not replacing. Operates alongside existing systems and respects existing tools.
+ *
+ * AI policy: assistive intelligence with human oversight, explainability, reviewability,
+ * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ *
+ * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
+ * institutional trust for democratic infrastructure.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Cpu, ShieldCheck, Lock, Eye, CheckCircle, ArrowRight } from 'lucide-react';
@@ -19,7 +35,7 @@ const outcomes = [
   { icon: Lock,        title: 'Enterprise security & data residency',   desc: 'Canadian data residency, SOC 2-aligned infrastructure, and full audit capabilities for compliance and regulatory requirements.' },
   { icon: Eye,         title: 'Full explainability guarantees',         desc: 'Every intelligence output is traceable to source evidence. No black-box outputs in a labour environment.' },
   { icon: Cpu,         title: 'Modular, safe deployment architecture',  desc: 'Deploy the modules your organization needs, in the sequence that matches your readiness — no big-bang implementations.' },
-  { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or behavioural scoring. Enforced architecturally.' },
+  { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or worker conduct grading. Enforced architecturally.' },
 ];
 
 const technicalPrinciples = [

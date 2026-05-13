@@ -11044,7 +11044,7 @@
     "surfaces": {
       "cognition": {
         "name": "Cognition",
-        "posture": "Bounded reasoning over institutional memory; outputs are recommendations for the reviewer of record, not autonomous decisions."
+        "posture": "Bounded reasoning over institutional memory; outputs are recommendations for the reviewer of record, never operator-bypassing actions."
       },
       "longitudinalCognition": {
         "name": "Longitudinal cognition",
