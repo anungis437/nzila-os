@@ -1,109 +1,145 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import {
+  Home,
+  Briefcase,
+  Inbox,
+  Users,
+  MessageSquare,
+  FileText,
+  BarChart3,
+  ShieldCheck,
+  Building2,
+  Settings,
+  Activity,
+  Award,
+  Bell,
+  CircleDot,
+  Menu,
+  type LucideIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  getDashboardExperience,
+  getNavigationForExperience,
+  type NavigationItem,
+} from '@/lib/dashboard/role-experience';
 
 interface BottomNavProps {
   className?: string;
+  /**
+   * Server-resolved role for the current user. When omitted, falls back to
+   * the 'member' experience via {@link getDashboardExperience}.
+   */
+  userRole?: string;
 }
 
-const navItems = [
-  {
-    href: '/dashboard',
-    label: 'Home',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9,22 9,12 15,12 15,22" />
-      </svg>
-    ),
-  },
-  {
-    href: '/claims',
-    label: 'Claims',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14,2 14,8 20,8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <line x1="10" y1="9" x2="8" y2="9" />
-      </svg>
-    ),
-  },
-  {
-    href: '/members',
-    label: 'Members',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-  },
-  {
-    href: '/messages',
-    label: 'Messages',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/more',
-    label: 'More',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
-    ),
-  },
-];
+/**
+ * Map a SOT navigation label to a lucide icon. Unknown labels fall back to
+ * a neutral `CircleDot` so the bar always renders. Keep this map narrow:
+ * label-to-icon is a presentation concern of BottomNav, not of the SOT.
+ */
+const ICON_BY_LABEL: Record<string, LucideIcon> = {
+  Home: Home,
+  'My Cases': Briefcase,
+  Cases: Briefcase,
+  Workbench: Briefcase,
+  Inbox: Inbox,
+  'Submit Request': FileText,
+  Members: Users,
+  Messages: MessageSquare,
+  Communications: MessageSquare,
+  Documents: FileText,
+  Reports: BarChart3,
+  Priorities: Activity,
+  'Executive Overview': BarChart3,
+  'Continuity Insights': Activity,
+  'Operational Health': Activity,
+  'Governance Visibility': ShieldCheck,
+  'Governance Overview': ShieldCheck,
+  'Trust & Explainability': ShieldCheck,
+  'Operational Review': Briefcase,
+  'Policy Alignment': ShieldCheck,
+  'Continuity Signals': Activity,
+  'Audit & Evidence': ShieldCheck,
+  Outcomes: Award,
+  'Leadership Continuity': Users,
+  'Trust & Oversight': ShieldCheck,
+  Notifications: Bell,
+  Organization: Building2,
+  'Users & Roles': Users,
+  'Profile & Settings': Settings,
+  'Help & Support': MessageSquare,
+};
+
+function iconFor(label: string): LucideIcon {
+  return ICON_BY_LABEL[label] ?? CircleDot;
+}
 
 /**
- * Bottom navigation bar for mobile devices
- * Provides quick access to main app sections
+ * Bottom navigation bar for mobile devices.
+ *
+ * Drives entries from the role-experience SOT (`getNavigationForExperience`)
+ * so the mobile surface always matches the desktop sidebar taxonomy. The bar
+ * shows the first four entries plus an always-visible "More" link to settings
+ * (the universal overflow surface across every experience). A future workstream
+ * can replace the static overflow with a sheet revealing the full SOT list.
  */
-export function BottomNav({ className }: BottomNavProps) {
+export function BottomNav({ className, userRole }: BottomNavProps) {
   const pathname = usePathname();
+  const locale = useLocale();
+
+  const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
+
+  const items = useMemo<NavigationItem[]>(() => {
+    const nav = getNavigationForExperience(experience);
+    const primary = nav.slice(0, 4);
+    return [...primary, { label: 'More', href: '/dashboard/settings' }];
+  }, [experience]);
+
+  const withLocale = (href: string) => `/${locale}${href}`;
+
+  const isActive = (href: string) => {
+    const hrefPath = href.split('?')[0];
+    const localizedPath = withLocale(hrefPath);
+    if (pathname === localizedPath) return true;
+    return hrefPath !== '/dashboard' && pathname.startsWith(`${localizedPath}/`);
+  };
 
   return (
     <nav
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-pb',
         'flex items-center justify-around py-2 px-4 shadow-lg',
-        className
+        className,
       )}
+      aria-label="Primary mobile navigation"
     >
-      {navItems.map((item) => {
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        
+      {items.map((item) => {
+        const Icon = item.label === 'More' ? Menu : iconFor(item.label);
+        const active = isActive(item.href);
+
         return (
           <Link
-            key={item.href}
-            href={item.href}
+            key={`${item.label}:${item.href}`}
+            href={withLocale(item.href)}
             className={cn(
               'flex flex-col items-center justify-center py-1 px-3 rounded-lg',
               'transition-colors duration-200',
-              isActive
-                ? 'text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+              active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700',
             )}
+            aria-current={active ? 'page' : undefined}
           >
-            <div className="relative">
-              <span className="block w-6 h-6">{item.icon}</span>
-              {item.label === 'Messages' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-              )}
-            </div>
-            <span className="text-xs mt-1 font-medium">{item.label}</span>
+            <span className="block w-6 h-6">
+              <Icon className="w-6 h-6" aria-hidden />
+            </span>
+            <span className="text-xs mt-1 font-medium truncate max-w-16">
+              {item.label}
+            </span>
           </Link>
         );
       })}
