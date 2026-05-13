@@ -1178,8 +1178,8 @@
     "executeReport": "Execute Report"
   },
   "reportsCenter": {
-    "title": "Reports",
-    "subtitle": "Create custom reports, schedule exports, and share insights",
+    "title": "Institutional Reports",
+    "subtitle": "Reports of record across representation, governance, and continuity. Create custom reports, schedule exports, and share insights.",
     "createReport": "Create Report",
     "tabs": {
       "myReports": "My Reports",
@@ -1453,10 +1453,10 @@
     "loading": "Loading..."
   },
   "governancePage": {
-    "metaTitle": "Governance | UnionEyes",
-    "metaDescription": "Manage bylaws, policies, and organizational governance",
-    "title": "Governance",
-    "subtitle": "Manage organizational bylaws, policies, and authorized signatories",
+    "metaTitle": "Governance of Record | UnionEyes",
+    "metaDescription": "Maintain charter, motions, bylaws, policies, and decisions of record.",
+    "title": "Governance of Record",
+    "subtitle": "Maintain bylaws, policies, and authorized signatories of record.",
     "tabs": {
       "bylaws": "Bylaws",
       "policies": "Policies",
@@ -2366,20 +2366,20 @@
     "metaDescription": "Governed labor continuity operations for sources, ingestion, review, and benchmarks"
   },
   "intelligencePage": {
-    "metaTitle": "Intelligence | UnionEyes",
-    "metaDescription": "Research, analysis, and scoped strategic intelligence for union operations"
+    "metaTitle": "Institutional Intelligence | UnionEyes",
+    "metaDescription": "Reviewer-assisted insights across representation, governance, and continuity."
   },
   "inboxPage": {
-    "metaTitle": "Inbox | UnionEyes",
-    "metaDescription": "Unified signal feed - everything that needs your attention"
+    "metaTitle": "Intake & Coordination | UnionEyes",
+    "metaDescription": "Unified intake of requests, notices, and coordination items requiring attention."
   },
   "prioritiesPage": {
-    "metaTitle": "Priorities | UnionEyes",
-    "metaDescription": "Top-priority items and next-best actions for representatives and officers"
+    "metaTitle": "Commitments & Deadlines | UnionEyes",
+    "metaDescription": "Top commitments, deadlines, and next-best actions for representatives and officers."
   },
   "outcomesPage": {
-    "metaTitle": "Outcomes | UnionEyes",
-    "metaDescription": "Results, financial outcomes, and member-impact reporting"
+    "metaTitle": "Member Outcomes Ledger | UnionEyes",
+    "metaDescription": "Outcomes of record across representation, finance, and member impact."
   },
   "committeesPage": {
     "metaTitle": "Committees | UnionEyes",
@@ -2589,8 +2589,8 @@
     "metaDescription": "Track performance targets, entitlement-backed objectives, and progress"
   },
   "workPage": {
-    "metaTitle": "Work | UnionEyes",
-    "metaDescription": "Coordinate cases, grievances, and bargaining work from one surface"
+    "metaTitle": "Casework Continuity | UnionEyes",
+    "metaDescription": "Active representation work and follow-through across cases, grievances, and bargaining."
   },
   "strikeFundPage": {
     "metaTitle": "Strike Fund | UnionEyes",
@@ -2601,8 +2601,8 @@
     "metaDescription": "Inspect strike fund status, payouts, and supporting records"
   },
   "workbenchPage": {
-    "metaTitle": "LRO Workbench | UnionEyes",
-    "metaDescription": "Case queue for union labour relations officers"
+    "metaTitle": "Casework Console | UnionEyes",
+    "metaDescription": "Coordinate active member representation, evidence, and procedural follow-through."
   },
   "portalClaimsPage": {
     "metaTitle": "Claims Portal Redirect | UnionEyes",
@@ -3446,16 +3446,16 @@
   },
   "cognitionPage": {
     "metadata": {
-      "title": "Cognition Operations",
-      "description": "Predictive operational intelligence across grievances, stewards, and members."
+      "title": "Governed Reasoning | UnionEyes",
+      "description": "Reviewer-assisted reasoning across cases, stewards, and members; advisory only with human override required."
     },
     "states": {
       "signInRequired": "Sign-in required.",
       "noOrganizationContext": "No organization context."
     },
     "header": {
-      "title": "Cognition Operations",
-      "description": "Predictive operational intelligence across grievances, stewards, and members. All recommendations are advisory - human override is required for every action."
+      "title": "Governed Reasoning",
+      "description": "Reviewer-assisted reasoning across cases, stewards, and members. All recommendations are advisory — human override is required for every action."
     },
     "kpis": {
       "title": "Operational KPIs (last 30 days)",
@@ -4912,8 +4912,8 @@
     }
   },
   "workbench": {
-    "title": "Case Workbench",
-    "subtitle": "Manage your case queues, assignments, and escalations",
+    "title": "Casework Console",
+    "subtitle": "Coordinate active member representation, evidence, and procedural follow-through.",
     "underReview": "Under Review",
     "urgentCases": "Urgent Cases",
     "avgDaysOpen": "Avg. Days Open",
@@ -4974,8 +4974,8 @@
     },
     "clearFilters": "Clear All Filters",
     "empty": {
-      "noCasesFiledTitle": "No Cases Filed",
-      "noCasesAssignedTitle": "No Cases Assigned",
+      "noCasesFiledTitle": "No representation cases on file",
+      "noCasesAssignedTitle": "No cases assigned to you yet",
       "noCasesFiledBody": "No cases have been filed across the platform yet.",
       "noCasesAssignedBody": "You don't have any cases assigned to you yet.",
       "platformHint": "Cases from all organizations will appear here once members submit them.",
@@ -8408,8 +8408,8 @@
     }
   },
   "trust": {
-    "title": "Trust Infrastructure Dashboard",
-    "subtitle": "Real-time verification of UnionEyes security and governance safeguards",
+    "title": "Trust & Sovereignty",
+    "subtitle": "Transparency, verification, and institutional accountability for members.",
     "exportReport": "Export Report",
     "lastUpdated": "Last updated:",
     "statImmutability": "Immutability",
