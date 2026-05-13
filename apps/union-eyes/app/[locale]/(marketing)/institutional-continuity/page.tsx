@@ -215,7 +215,7 @@ export default async function InstitutionalContinuityPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-6 text-center">
             {[
-              { label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },
+              { label: 'Labour-safe by design',     sub: 'Zero individual behavioural scoring or monitoring' },
               { label: 'Human oversight required',  sub: 'All intelligence is human-reviewed' },
               { label: 'Explainable intelligence',  sub: 'Every insight is evidence-traceable' },
             ].map((item) => (

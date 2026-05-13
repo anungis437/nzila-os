@@ -84,7 +84,7 @@ const solutions = [
     href: 'solutions/labour-leadership',
     challenge: 'AI adoption in labour environments requires unambiguous labour-safe postures and human oversight.',
     outcomes: [
-      'Anti-surveillance by design — no worker scoring or monitoring',
+      'Anti-monitoring by design — no individual behavioural scoring',
       'Human oversight in all intelligence recommendations',
       'Labour-safe modernization with democratic governance controls',
     ],

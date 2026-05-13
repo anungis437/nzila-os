@@ -172,7 +172,7 @@ export default async function TrustPage({
               { label: 'Human oversight required',           desc: 'All intelligence recommendations require human review before any action.' },
               { label: 'Democratic governance controls',     desc: 'AI systems operate within democratic governance structures, never replacing them.' },
               { label: 'Transparent data use',               desc: 'What data is used, how it is used, and why — documented and available for review.' },
-              { label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },
+              { label: 'Anti-monitoring by design',           desc: 'No capability path in the platform can be re-purposed for individual monitoring.' },
             ].map((item) => (
               <div key={item.label} className="p-5 rounded-xl border border-slate-200 bg-slate-50">
                 <div className="text-sm font-bold text-slate-900 mb-1">{item.label}</div>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:22:51.469Z",
+  "generatedAt": "2026-05-13T05:24:06.800Z",
   "files": [
     {
       "ctx": {
@@ -2517,24 +2517,6 @@
       "violations": [
         {
           "term": {
-            "term": "worker scoring",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 62,
-          "excerpt": "{ label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },"
-        },
-        {
-          "term": {
-            "term": "workforce surveillance",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 62,
-          "excerpt": "{ label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -2644,9 +2626,14 @@
         },
         {
           "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"behavioural scoring\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
@@ -2668,7 +2655,7 @@
           }
         }
       ],
-      "maturity": 78
+      "maturity": 62
     },
     {
       "ctx": {
@@ -4326,15 +4313,6 @@
         },
         {
           "term": {
-            "term": "worker scoring",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 218,
-          "excerpt": "{ label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },"
-        },
-        {
-          "term": {
             "term": "transformation",
             "severity": "warning",
             "category": "warning"
@@ -4412,9 +4390,20 @@
         },
         {
           "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": []
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"behavioural scoring\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
+          "detail": {
+            "mentionsAi": false,
+            "matchedRequired": [
+              "human oversight"
+            ]
+          }
         },
         {
           "rule": "canadian-positioning",
@@ -4432,7 +4421,7 @@
           }
         }
       ],
-      "maturity": 81
+      "maturity": 65
     },
     {
       "ctx": {
@@ -6055,15 +6044,6 @@
         },
         {
           "term": {
-            "term": "worker scoring",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 87,
-          "excerpt": "'Anti-surveillance by design — no worker scoring or monitoring',"
-        },
-        {
-          "term": {
             "term": "request a demo",
             "severity": "hard-fail",
             "category": "startup-saas",
@@ -6145,9 +6125,14 @@
         },
         {
           "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"behavioural scoring\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
@@ -6172,7 +6157,7 @@
           }
         }
       ],
-      "maturity": 78
+      "maturity": 62
     },
     {
       "ctx": {
@@ -6327,30 +6312,12 @@
       "violations": [
         {
           "term": {
-            "term": "worker scoring",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 22,
-          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
-        },
-        {
-          "term": {
-            "term": "workforce surveillance",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 22,
-          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 22,
-          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
+          "excerpt": "{ icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or behavioural scoring. Enforced architectu"
         },
         {
           "term": {
@@ -6449,9 +6416,14 @@
         },
         {
           "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"behavioural scoring\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
@@ -6475,7 +6447,7 @@
           }
         }
       ],
-      "maturity": 61
+      "maturity": 45
     },
     {
       "ctx": {
@@ -6649,21 +6621,12 @@
         },
         {
           "term": {
-            "term": "workforce surveillance",
-            "severity": "hard-fail",
-            "category": "surveillance-ai"
-          },
-          "line": 175,
-          "excerpt": "{ label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 175,
-          "excerpt": "{ label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },"
+          "excerpt": "{ label: 'Anti-monitoring by design',           desc: 'No capability path in the platform can be re-purposed for individual monitoring.' },"
         },
         {
           "term": {
@@ -9187,9 +9150,9 @@
   "summary": {
     "totalFiles": 87,
     "publicFiles": 87,
-    "hardFails": 51,
+    "hardFails": 44,
     "warnings": 261,
-    "ruleFailures": 10,
+    "ruleFailures": 14,
     "averageMaturity": 67
   }
 }

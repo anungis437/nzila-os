@@ -59,7 +59,7 @@ const principles = [
   { label: 'Strategic',         desc: 'Focused on organizational direction and continuity' },
   { label: 'Explainable',       desc: 'Every summary traces back to evidence' },
   { label: 'Governance-safe',   desc: 'Full human oversight at all decision points' },
-  { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
+  { label: 'Labour-safe',       desc: 'Zero individual monitoring or behavioural scoring' },
   { label: 'Enterprise-grade',  desc: 'Built for institutional trust, not startup dashboards' },
 ];
 

@@ -1,13 +1,13 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:22:51.469Z
+Generated: 2026-05-13T05:24:06.800Z
 
 ## Summary
 
 - Files scanned: **87**
-- Hard-fail violations: **51**
+- Hard-fail violations: **44**
 - Warning violations: **261**
-- Rule failures: **10**
+- Rule failures: **14**
 - Average Institutional Maturity: **67/100**
 
 ## Per-Surface Detail
@@ -635,18 +635,16 @@ Generated: 2026-05-13T05:22:51.469Z
 ### marketing/executive-intelligence
 
 - **Path:** `app/[locale]/(marketing)/executive-intelligence/page.tsx`
-- **Institutional Maturity:** 78/100
+- **Institutional Maturity:** 62/100
 
 **Scores:**
 - narrative-balance: 64/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
+- labour-safe-ai: 20/100 (fail)
 - canadian-positioning: 80/100 (pass)
 
 **Vocabulary violations:**
-- L62 [hard-fail/surveillance-ai] `worker scoring` — { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
-- L62 [hard-fail/surveillance-ai] `workforce surveillance` — { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
 - L75 [warning/warning] `platform` — Platform · Executive Intelligence
 - L85 [hard-fail/startup-saas] `request a demo` — Request a Demo
 - L85 [warning/warning] `request a demo` — Request a Demo
@@ -657,14 +655,14 @@ Generated: 2026-05-13T05:22:51.469Z
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
 
 **Recommendations:**
-- Remove or rephrase "worker scoring" (surveillance-ai).
-- Remove or rephrase "workforce surveillance" (surveillance-ai).
 - Remove or rephrase "platform" (warning).
 - Replace "request a demo" → request an institutional briefing | request executive walkthrough
 - Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Reframe as assistive intelligence under human oversight.
 
 ### marketing/features/ai-workbench
 
@@ -1114,13 +1112,13 @@ Generated: 2026-05-13T05:22:51.469Z
 ### marketing/institutional-continuity
 
 - **Path:** `app/[locale]/(marketing)/institutional-continuity/page.tsx`
-- **Institutional Maturity:** 81/100
+- **Institutional Maturity:** 65/100
 
 **Scores:**
 - narrative-balance: 75/100 (pass)
 - coexistence-positioning: 70/100 (pass)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
+- labour-safe-ai: 20/100 (fail)
 - canadian-positioning: 55/100 (warn)
 
 **Vocabulary violations:**
@@ -1131,21 +1129,21 @@ Generated: 2026-05-13T05:22:51.469Z
 - L102 [hard-fail/startup-saas] `request a demo` — Request a Demo
 - L102 [warning/warning] `request a demo` — Request a Demo
 - L196 [warning/warning] `platform` — unified institutional continuity platform.
-- L218 [hard-fail/surveillance-ai] `worker scoring` — { label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },
 - L355 [warning/warning] `transformation` — <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
 - L398 [hard-fail/startup-saas] `request a demo` — Request a Demo
 - L398 [warning/warning] `request a demo` — Request a Demo
 - L401 [warning/warning] `platform` — href={`/${locale}/platform/organizational-memory`}
 
 **Flags:**
+- (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Replace "request a demo" → request an institutional briefing | request executive walkthrough
 - Remove or rephrase "request a demo" (warning).
-- Remove or rephrase "worker scoring" (surveillance-ai).
 - Remove or rephrase "transformation" (warning).
+- Reframe as assistive intelligence under human oversight.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
 ### locale/(marketing)
@@ -1538,19 +1536,18 @@ Generated: 2026-05-13T05:22:51.469Z
 ### marketing/solutions
 
 - **Path:** `app/[locale]/(marketing)/solutions/page.tsx`
-- **Institutional Maturity:** 78/100
+- **Institutional Maturity:** 62/100
 
 **Scores:**
 - narrative-balance: 64/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
+- labour-safe-ai: 20/100 (fail)
 - canadian-positioning: 83/100 (pass)
 
 **Vocabulary violations:**
 - L2 [warning/warning] `platform` — * Solutions — Stakeholder-Oriented Platform Journeys
 - L5 [warning/warning] `platform` — * Hides platform sophistication. Exposes institutional outcomes.
-- L87 [hard-fail/surveillance-ai] `worker scoring` — 'Anti-surveillance by design — no worker scoring or monitoring',
 - L167 [hard-fail/startup-saas] `request a demo` — Request a demo tailored to your role and institutional context.
 - L167 [warning/warning] `request a demo` — Request a demo tailored to your role and institutional context.
 - L173 [hard-fail/startup-saas] `request a demo` — Request a Demo
@@ -1558,13 +1555,14 @@ Generated: 2026-05-13T05:22:51.469Z
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "worker scoring" (surveillance-ai).
 - Replace "request a demo" → request an institutional briefing | request executive walkthrough
 - Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Reframe as assistive intelligence under human oversight.
 
 ### marketing/solutions/procurement
 
@@ -1605,19 +1603,17 @@ Generated: 2026-05-13T05:22:51.469Z
 ### marketing/solutions/technology-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/technology-leadership/page.tsx`
-- **Institutional Maturity:** 61/100
+- **Institutional Maturity:** 45/100
 
 **Scores:**
 - narrative-balance: 0/100 (warn)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
+- labour-safe-ai: 20/100 (fail)
 - canadian-positioning: 76/100 (pass)
 
 **Vocabulary violations:**
-- L22 [hard-fail/surveillance-ai] `worker scoring` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
-- L22 [hard-fail/surveillance-ai] `workforce surveillance` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
-- L22 [warning/warning] `platform` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
+- L22 [warning/warning] `platform` — { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or behavioural scoring. Enforced architectu
 - L49 [hard-fail/startup-saas] `request a demo` — Request a Demo
 - L49 [warning/warning] `request a demo` — Request a Demo
 - L109 [warning/warning] `platform` — <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
@@ -1627,15 +1623,15 @@ Generated: 2026-05-13T05:22:51.469Z
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
 
 **Recommendations:**
-- Remove or rephrase "worker scoring" (surveillance-ai).
-- Remove or rephrase "workforce surveillance" (surveillance-ai).
 - Remove or rephrase "platform" (warning).
 - Replace "request a demo" → request an institutional briefing | request executive walkthrough
 - Remove or rephrase "request a demo" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Reframe as assistive intelligence under human oversight.
 
 ### marketing/status
 
@@ -1693,8 +1689,7 @@ Generated: 2026-05-13T05:22:51.469Z
 **Vocabulary violations:**
 - L5 [warning/warning] `platform` — * Demonstrates governance-first platform design: audit trails,
 - L166 [warning/warning] `platform` — enforced at every layer of the platform.
-- L175 [hard-fail/surveillance-ai] `workforce surveillance` — { label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },
-- L175 [warning/warning] `platform` — { label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },
+- L175 [warning/warning] `platform` — { label: 'Anti-monitoring by design',           desc: 'No capability path in the platform can be re-purposed for individual monitoring.' },
 - L427 [warning/warning] `platform` — Real-time operational status of UnionEyes platform services.
 
 **Flags:**
@@ -1704,7 +1699,6 @@ Generated: 2026-05-13T05:22:51.469Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "workforce surveillance" (surveillance-ai).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Reframe as assistive intelligence under human oversight.
