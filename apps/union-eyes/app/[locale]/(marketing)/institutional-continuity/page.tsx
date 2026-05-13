@@ -18,7 +18,7 @@ import {
   institutionalRolloutSimulationFlow,
   operationalMaturityPathway,
   organizationalTransformationPathway,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {

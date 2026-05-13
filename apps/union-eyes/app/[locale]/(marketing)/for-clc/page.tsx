@@ -20,7 +20,7 @@ import {
   procurementFollowUpInfrastructure,
   qrJourneyArchitecture,
   stakeholderTalkTrackSystem,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const CLC_COPY = {

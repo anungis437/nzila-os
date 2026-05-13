@@ -33,7 +33,7 @@ import {
   institutionalRolloutPathway,
   executiveBriefingFlows,
   pilotSimulationArtifacts,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 
 // Canonical (English) values stored in form data, but rendered via t().
 const SECTORS = [

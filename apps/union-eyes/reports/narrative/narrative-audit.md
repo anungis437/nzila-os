@@ -1,6 +1,6 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:19:36.755Z
+Generated: 2026-05-13T05:22:51.469Z
 
 ## Summary
 
@@ -835,10 +835,10 @@ Generated: 2026-05-13T05:19:36.755Z
 ### marketing/for-clc
 
 - **Path:** `app/[locale]/(marketing)/for-clc/page.tsx`
-- **Institutional Maturity:** 71/100
+- **Institutional Maturity:** 68/100
 
 **Scores:**
-- narrative-balance: 51/100 (pass)
+- narrative-balance: 40/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1117,7 +1117,7 @@ Generated: 2026-05-13T05:19:36.755Z
 - **Institutional Maturity:** 81/100
 
 **Scores:**
-- narrative-balance: 76/100 (pass)
+- narrative-balance: 75/100 (pass)
 - coexistence-positioning: 70/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1188,10 +1188,10 @@ Generated: 2026-05-13T05:19:36.755Z
 ### marketing/pilot-request
 
 - **Path:** `app/[locale]/(marketing)/pilot-request/page.tsx`
-- **Institutional Maturity:** 73/100
+- **Institutional Maturity:** 72/100
 
 **Scores:**
-- narrative-balance: 57/100 (pass)
+- narrative-balance: 55/100 (pass)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1569,10 +1569,10 @@ Generated: 2026-05-13T05:19:36.755Z
 ### marketing/solutions/procurement
 
 - **Path:** `app/[locale]/(marketing)/solutions/procurement/page.tsx`
-- **Institutional Maturity:** 66/100
+- **Institutional Maturity:** 65/100
 
 **Scores:**
-- narrative-balance: 52/100 (warn)
+- narrative-balance: 49/100 (warn)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 80/100 (fail)
 - labour-safe-ai: 92/100 (pass)
@@ -1586,8 +1586,8 @@ Generated: 2026-05-13T05:19:36.755Z
 - L277 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
-- (narrative-balance) Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).
-- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
+- (narrative-balance) Governance saturation detected: 44.9% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 10.2% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (procedural-neutrality) Non-neutral framing detected (activist framing).
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
@@ -1684,7 +1684,7 @@ Generated: 2026-05-13T05:19:36.755Z
 - **Institutional Maturity:** 60/100
 
 **Scores:**
-- narrative-balance: 59/100 (warn)
+- narrative-balance: 60/100 (warn)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 20/100 (fail)
@@ -1698,7 +1698,7 @@ Generated: 2026-05-13T05:19:36.755Z
 - L427 [warning/warning] `platform` — Real-time operational status of UnionEyes platform services.
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 10.4% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.5% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
 

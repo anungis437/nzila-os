@@ -32,7 +32,7 @@ import {
   organizationalMaturitySnapshots,
   pilotSimulationArtifacts,
   procurementEvidenceBinder,
-} from '@/lib/operational-legitimacy';
+} from '@/lib/institutional-legitimacy';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const PROOF_COPY = {

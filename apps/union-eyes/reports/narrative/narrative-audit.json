@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:19:36.755Z",
+  "generatedAt": "2026-05-13T05:22:51.469Z",
   "files": [
     {
       "ctx": {
@@ -3272,21 +3272,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 51,
+          "score": 40,
           "flags": [],
           "detail": {
             "counts": {
               "governance": 3,
               "continuity": 6,
-              "coordination": 1,
+              "coordination": 0,
               "trust": 1
             },
-            "total": 11,
+            "total": 10,
             "shares": {
-              "governance": 0.2727272727272727,
-              "continuity": 0.5454545454545454,
-              "coordination": 0.09090909090909091,
-              "trust": 0.09090909090909091
+              "governance": 0.3,
+              "continuity": 0.6,
+              "coordination": 0,
+              "trust": 0.1
             }
           }
         },
@@ -3332,7 +3332,7 @@
           }
         }
       ],
-      "maturity": 71
+      "maturity": 68
     },
     {
       "ctx": {
@@ -4375,21 +4375,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 76,
+          "score": 75,
           "flags": [],
           "detail": {
             "counts": {
               "governance": 14,
               "continuity": 32,
-              "coordination": 15,
+              "coordination": 14,
               "trust": 15
             },
-            "total": 76,
+            "total": 75,
             "shares": {
-              "governance": 0.18421052631578946,
-              "continuity": 0.42105263157894735,
-              "coordination": 0.19736842105263158,
-              "trust": 0.19736842105263158
+              "governance": 0.18666666666666668,
+              "continuity": 0.4266666666666667,
+              "coordination": 0.18666666666666668,
+              "trust": 0.2
             }
           }
         },
@@ -4590,21 +4590,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 57,
+          "score": 55,
           "flags": [],
           "detail": {
             "counts": {
               "governance": 16,
               "continuity": 34,
-              "coordination": 4,
+              "coordination": 3,
               "trust": 12
             },
-            "total": 66,
+            "total": 65,
             "shares": {
-              "governance": 0.24242424242424243,
-              "continuity": 0.5151515151515151,
-              "coordination": 0.06060606060606061,
-              "trust": 0.18181818181818182
+              "governance": 0.24615384615384617,
+              "continuity": 0.5230769230769231,
+              "coordination": 0.046153846153846156,
+              "trust": 0.18461538461538463
             }
           }
         },
@@ -4650,7 +4650,7 @@
           }
         }
       ],
-      "maturity": 73
+      "maturity": 72
     },
     {
       "ctx": {
@@ -5429,15 +5429,15 @@
             "counts": {
               "governance": 130,
               "continuity": 150,
-              "coordination": 131,
+              "coordination": 130,
               "trust": 81
             },
-            "total": 492,
+            "total": 491,
             "shares": {
-              "governance": 0.26422764227642276,
-              "continuity": 0.3048780487804878,
-              "coordination": 0.266260162601626,
-              "trust": 0.16463414634146342
+              "governance": 0.26476578411405294,
+              "continuity": 0.3054989816700611,
+              "coordination": 0.26476578411405294,
+              "trust": 0.164969450101833
             }
           }
         },
@@ -6233,14 +6233,14 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 52,
+          "score": 49,
           "flags": [
             {
-              "message": "Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).",
+              "message": "Governance saturation detected: 44.9% of pillar terms (target 30%, threshold 40%).",
               "suggestion": "Rebalance toward continuity, coordination, and trust language."
             },
             {
-              "message": "Continuity language under-represented: 10.0% (target 30%).",
+              "message": "Continuity language under-represented: 10.2% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
@@ -6248,15 +6248,15 @@
             "counts": {
               "governance": 22,
               "continuity": 5,
-              "coordination": 8,
+              "coordination": 7,
               "trust": 15
             },
-            "total": 50,
+            "total": 49,
             "shares": {
-              "governance": 0.44,
-              "continuity": 0.1,
-              "coordination": 0.16,
-              "trust": 0.3
+              "governance": 0.4489795918367347,
+              "continuity": 0.10204081632653061,
+              "coordination": 0.14285714285714285,
+              "trust": 0.30612244897959184
             }
           }
         },
@@ -6316,7 +6316,7 @@
           }
         }
       ],
-      "maturity": 66
+      "maturity": 65
     },
     {
       "ctx": {
@@ -6679,10 +6679,10 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 59,
+          "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 10.4% (target 30%).",
+              "message": "Continuity language under-represented: 10.5% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
@@ -6690,15 +6690,15 @@
             "counts": {
               "governance": 28,
               "continuity": 10,
-              "coordination": 20,
+              "coordination": 19,
               "trust": 38
             },
-            "total": 96,
+            "total": 95,
             "shares": {
-              "governance": 0.2916666666666667,
-              "continuity": 0.10416666666666667,
-              "coordination": 0.20833333333333334,
-              "trust": 0.3958333333333333
+              "governance": 0.29473684210526313,
+              "continuity": 0.10526315789473684,
+              "coordination": 0.2,
+              "trust": 0.4
             }
           }
         },
