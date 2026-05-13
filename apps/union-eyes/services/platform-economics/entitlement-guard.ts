@@ -55,6 +55,139 @@ export const PLATFORM_MODULES = {
 export type PlatformModuleKey = (typeof PLATFORM_MODULES)[keyof typeof PLATFORM_MODULES];
 
 // ============================================================================
+// Module Display Layer (Workstream B5)
+// ============================================================================
+//
+// Identifiers above (e.g. 'governance_suite', 'ai_advanced_insights') remain
+// the canonical wire format used by entitlements, contracts, audit logs, and
+// API responses. They MUST stay stable.
+//
+// The display layer below is the institutional naming surface — what staff,
+// executives, and members read in dashboards, settings panes, and contract
+// summaries. Each module gets:
+//   - displayName: short institutional title
+//   - narrativeTagline: one-line statement of what the module delivers, in
+//     procedural, member-outcomes-oriented language (no founder-optics, no
+//     marketing flourish).
+//
+
+export interface ModuleDisplay {
+  displayName: string;
+  narrativeTagline: string;
+}
+
+export const PLATFORM_MODULE_DISPLAY: Record<PlatformModuleKey, ModuleDisplay> = {
+  governance_suite: {
+    displayName: 'Governance of Record',
+    narrativeTagline:
+      'Constitutional, by-law, and resolution records maintained as the institution’s authoritative governance trail.',
+  },
+  grievance_case_suite: {
+    displayName: 'Representation Case Suite',
+    narrativeTagline:
+      'End-to-end intake, casework, and resolution tracking for every member representation matter.',
+  },
+  financial_intelligence_suite: {
+    displayName: 'Financial Stewardship Intelligence',
+    narrativeTagline:
+      'Continuous review of dues, allocations, and disbursements to support disciplined financial stewardship.',
+  },
+  ai_advanced_insights: {
+    displayName: 'Reviewer-Assisted Intelligence',
+    narrativeTagline:
+      'Reasoning support that surfaces patterns and prior precedent for human reviewers — never autonomous decisions.',
+  },
+  allocation_engine: {
+    displayName: 'Allocation Engine',
+    narrativeTagline:
+      'Rule-based distribution of contributions and benefits across members and obligations with full audit lineage.',
+  },
+  transaction_fees: {
+    displayName: 'Transaction Fee Ledger',
+    narrativeTagline:
+      'Transparent recording and reconciliation of platform transaction fees against contracted terms.',
+  },
+  commercial_reporting: {
+    displayName: 'Institutional Reporting',
+    narrativeTagline:
+      'Periodic and on-demand institutional reports prepared for boards, regulators, and member assemblies.',
+  },
+  export_suite: {
+    displayName: 'Records Export',
+    narrativeTagline:
+      'Authorised export of institutional records in regulator- and counterparty-ready formats with retention metadata.',
+  },
+  health_safety: {
+    displayName: 'Health & Safety Register',
+    narrativeTagline:
+      'Workplace health and safety incident intake, tracking, and follow-through under regulated cadence.',
+  },
+  performance_targets: {
+    displayName: 'Performance Commitments',
+    narrativeTagline:
+      'Service-level commitments and member outcome targets tracked against contracted thresholds.',
+  },
+  employer_execution: {
+    displayName: 'Employer Execution',
+    narrativeTagline:
+      'Coordinated execution of employer-side payroll, remittance, and compliance obligations under union oversight.',
+  },
+  employer_timesheet_ingest: {
+    displayName: 'Timesheet Intake',
+    narrativeTagline:
+      'Structured intake and validation of employer timesheets as the source record for downstream payroll preparation.',
+  },
+  employer_payroll_preview: {
+    displayName: 'Payroll Preview',
+    narrativeTagline:
+      'Pre-finalisation review of computed payroll figures with reconciliation against contractual rates and deductions.',
+  },
+  employer_payroll_official: {
+    displayName: 'Official Payroll Run',
+    narrativeTagline:
+      'Authorised, immutable payroll run of record, generating the binding employer obligation.',
+  },
+  employer_remittance_generation: {
+    displayName: 'Remittance Generation',
+    narrativeTagline:
+      'Generation of dues and statutory remittance instructions tied to the official payroll run.',
+  },
+  employer_execution_replay: {
+    displayName: 'Execution Replay',
+    narrativeTagline:
+      'Reconstruction of past payroll and remittance runs from source records for review, audit, and dispute resolution.',
+  },
+  employer_execution_compliance: {
+    displayName: 'Execution Compliance',
+    narrativeTagline:
+      'Continuous compliance verification of employer execution against regulatory and contractual obligations.',
+  },
+  union_knowledge_suite: {
+    displayName: 'Institutional Memory',
+    narrativeTagline:
+      'Curated institutional knowledge — by-laws, precedent, prior resolutions — kept retrievable across generations of stewards.',
+  },
+};
+
+/**
+ * Resolve a feature-key to its institutional display surface.
+ * Falls back to a humanised key + neutral tagline when the module is not
+ * yet in the display registry, so new entitlements never break the UI.
+ */
+export function getModuleDisplay(featureKey: string): ModuleDisplay {
+  const known = (PLATFORM_MODULE_DISPLAY as Record<string, ModuleDisplay | undefined>)[featureKey];
+  if (known) return known;
+  const humanised = featureKey
+    .split('_')
+    .map((part) => (part.length === 0 ? part : part[0].toUpperCase() + part.slice(1)))
+    .join(' ');
+  return {
+    displayName: humanised,
+    narrativeTagline: `Platform module ${humanised} — institutional capability registered for this organisation.`,
+  };
+}
+
+// ============================================================================
 // Entitlement Check Result
 // ============================================================================
 
