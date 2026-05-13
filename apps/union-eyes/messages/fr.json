@@ -7150,7 +7150,17 @@
         "procurement": { "name": "Parties prenantes en approvisionnement", "desc": "Préparation au déploiement" }
       },
       "story": "Notre histoire",
-      "modules": "Modules",
+      "platform": "Plateforme",
+      "platformItems": {
+        "inbox": { "name": "Réception et coordination", "desc": "Canal unifié pour la correspondance des membres et les dossiers" },
+        "work": { "name": "Continuité des dossiers", "desc": "Espace de travail actif pour griefs et représentation" },
+        "priorities": { "name": "Engagements et échéances", "desc": "Délais statutaires, obligations et prochaines actions institutionnelles" },
+        "intelligence": { "name": "Intelligence institutionnelle", "desc": "Surfaces exécutives, fédérales et analytiques" },
+        "cognition": { "name": "Raisonnement gouverné", "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle" },
+        "governance": { "name": "Gouvernance officielle", "desc": "Charte, motions et décisions officielles" },
+        "memory": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archives de continuité" },
+        "trust": { "name": "Confiance et souveraineté", "desc": "Audit, explicabilité et souveraineté canadienne" }
+      },
       "pricing": "Tarification",
       "trust": "Confiance & Conformité",
       "caseStudies": "Études de cas",

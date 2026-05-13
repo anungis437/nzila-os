@@ -7151,7 +7151,17 @@
         "procurement": { "name": "Partes interessadas em compras", "desc": "Prontidão para implantação" }
       },
       "story": "Nossa historia",
-      "modules": "Modulos",
+      "platform": "Plataforma",
+      "platformItems": {
+        "inbox": { "name": "Recepção e coordenação", "desc": "Canal unificado para correspondência dos membros e processos" },
+        "work": { "name": "Continuidade dos processos", "desc": "Espaço de trabalho ativo para reclamações e representação" },
+        "priorities": { "name": "Compromissos e prazos", "desc": "Prazos estatutários, obrigações e próximas ações institucionais" },
+        "intelligence": { "name": "Inteligência institucional", "desc": "Superfícies executivas, federais e analíticas" },
+        "cognition": { "name": "Raciocínio governado", "desc": "Raciocínio soberano ancorado na doutrina institucional" },
+        "governance": { "name": "Governança oficial", "desc": "Carta, moções e decisões oficiais" },
+        "memory": { "name": "Memória institucional", "desc": "Doutrina, precedentes e arquivo de continuidade" },
+        "trust": { "name": "Confiança e soberania", "desc": "Auditoria, explicabilidade e soberania canadense" }
+      },
       "pricing": "Precos",
       "trust": "Confianca e conformidade",
       "caseStudies": "Estudos de caso",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T04:45:30.535Z",
+  "generatedAt": "2026-05-13T05:15:55.590Z",
   "files": [
     {
       "ctx": {
@@ -2541,6 +2541,63 @@
           },
           "line": 75,
           "excerpt": "Platform · Executive Intelligence"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 85,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 85,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 182,
+          "excerpt": "Request a demo to see Executive Intelligence in action for your organization."
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 182,
+          "excerpt": "Request a demo to see Executive Intelligence in action for your organization."
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 188,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 188,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -2619,7 +2676,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/ai-workbench"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 164,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 164,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2701,7 +2778,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/analytics"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 151,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 151,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2774,7 +2871,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/grievance-tracking"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 172,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 172,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2861,7 +2978,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/inbox"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 125,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 125,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2939,7 +3076,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/member-portal"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 139,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 139,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -3017,7 +3174,27 @@
         "isPublicSurface": true,
         "label": "marketing/features/priorities"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 122,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 122,
+          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -4121,6 +4298,25 @@
         },
         {
           "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 102,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 102,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -4145,6 +4341,25 @@
           },
           "line": 355,
           "excerpt": "<div>              <h2 className=\"text-2xl font-bold text-navy mb-3\">Operational transformation as a gradual pathway</h2>"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 398,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 398,
+          "excerpt": "Request a Demo"
         },
         {
           "term": {
@@ -5283,7 +5498,65 @@
         "isPublicSurface": true,
         "label": "marketing/solutions/executive-leadership"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 45,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 45,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 116,
+          "excerpt": "<p className=\"text-white/70 mb-8\">Request a demo tailored to your executive leadership context.</p>"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 116,
+          "excerpt": "<p className=\"text-white/70 mb-8\">Request a demo tailored to your executive leadership context.</p>"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 118,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 118,
+          "excerpt": "Request a Demo"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5359,6 +5632,25 @@
       "violations": [
         {
           "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 47,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 47,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -5374,6 +5666,25 @@
           },
           "line": 50,
           "excerpt": "Governance Intelligence Platform"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 129,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 129,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5466,6 +5777,44 @@
           },
           "line": 64,
           "excerpt": "description=\"UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform.\""
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 68,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 68,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 131,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 131,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5558,6 +5907,25 @@
       "violations": [
         {
           "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 47,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 47,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -5573,6 +5941,25 @@
           },
           "line": 50,
           "excerpt": "Operational Coherence Platform"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 110,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 110,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5674,6 +6061,44 @@
           },
           "line": 87,
           "excerpt": "'Anti-surveillance by design — no worker scoring or monitoring',"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 167,
+          "excerpt": "Request a demo tailored to your role and institutional context."
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 167,
+          "excerpt": "Request a demo tailored to your role and institutional context."
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 173,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 173,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5758,12 +6183,50 @@
       "violations": [
         {
           "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 79,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 79,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
             "term": "disruption",
             "severity": "warning",
             "category": "warning"
           },
           "line": 124,
           "excerpt": "Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption."
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 277,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 277,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5891,12 +6354,50 @@
         },
         {
           "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 49,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 49,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 109,
           "excerpt": "<p className=\"text-white/70 mb-8\">Request a technical briefing or platform demonstration.</p>"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "request an institutional briefing | request executive walkthrough"
+          },
+          "line": 111,
+          "excerpt": "Request a Demo"
+        },
+        {
+          "term": {
+            "term": "request a demo",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 111,
+          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -6624,7 +7125,35 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7184,
+          "line": 7172,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "operating system for unions",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "institutional continuity infrastructure for unions"
+          },
+          "line": 7192,
+          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7192,
+          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7194,
           "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
         },
         {
@@ -6633,17 +7162,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7186,
+          "line": 7196,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
           "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
+            "term": "modules available",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "continuity layers | governance domains"
           },
-          "line": 7197,
-          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+          "line": 7198,
+          "excerpt": "\"unionEntities\": \"Modules Available\","
         },
         {
           "term": {
@@ -6651,7 +7181,56 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7217,
+          "line": 7207,
+          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+        },
+        {
+          "term": {
+            "term": "another SaaS tool",
+            "severity": "hard-fail",
+            "category": "startup-saas"
+          },
+          "line": 7208,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "another saas",
+            "severity": "hard-fail",
+            "category": "startup-saas"
+          },
+          "line": 7208,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "SaaS tool",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "exceptions": [
+              "not a saas tool",
+              "unlike saas tools"
+            ]
+          },
+          "line": 7208,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7208,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7227,
           "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
         },
         {
@@ -6660,8 +7239,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7226,
+          "line": 7236,
           "excerpt": "\"modulesBadge\": \"Platform Modules\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7248,
+          "excerpt": "\"module5Desc\": \"AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.\","
         },
         {
           "term": {
@@ -6669,8 +7258,17 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7248,
+          "line": 7258,
           "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7270,
+          "excerpt": "\"heroDescription\": \"A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.\","
         },
         {
           "term": {
@@ -6678,7 +7276,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7422,
+          "line": 7432,
           "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
         },
         {
@@ -6687,7 +7285,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7444,
+          "line": 7454,
           "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
         },
         {
@@ -6696,26 +7294,74 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7446,
+          "line": 7456,
           "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
         },
         {
           "term": {
+            "term": "module-level entitlements",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "contractual scope | institutional licensing"
+          },
+          "line": 7459,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7459,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
+            "term": "module-level",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7459,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7450,
+          "line": 7460,
           "excerpt": "\"platform\": \"Capabilities\","
         },
         {
           "term": {
-            "term": "platform",
+            "term": "operating system for unions",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "institutional continuity infrastructure for unions"
+          },
+          "line": 7506,
+          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
+        },
+        {
+          "term": {
+            "term": "operating system",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7502,
-          "excerpt": "\"badge\": \"Platform Module\","
+          "line": 7506,
+          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7511,
+          "excerpt": "\"pageDescription\": \"End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.\","
         },
         {
           "term": {
@@ -6723,8 +7369,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7536,
+          "line": 7512,
           "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7525,
+          "excerpt": "\"feat6Title\": \"AI-Assisted Triage\","
         },
         {
           "term": {
@@ -6732,8 +7388,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7571,
+          "line": 7546,
           "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7580,
+          "excerpt": "\"pageDescription\": \"AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.\","
         },
         {
           "term": {
@@ -6741,7 +7407,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7601,
+          "line": 7581,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -6751,6 +7417,15 @@
             "category": "warning"
           },
           "line": 7611,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7621,
           "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
         },
         {
@@ -6759,7 +7434,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7661,
+          "line": 7671,
           "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
         },
         {
@@ -6768,7 +7443,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7675,
+          "line": 7685,
           "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
         },
         {
@@ -6777,7 +7452,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7678,
+          "line": 7688,
           "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
         },
         {
@@ -6786,7 +7461,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7680,
+          "line": 7690,
           "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
         },
         {
@@ -6795,7 +7470,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7684,
+          "line": 7694,
           "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
         },
         {
@@ -6804,7 +7479,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7696,
+          "line": 7706,
           "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
         },
         {
@@ -6813,7 +7488,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7739,
+          "line": 7749,
           "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
         },
         {
@@ -6822,7 +7497,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7741,
+          "line": 7751,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -6831,7 +7506,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7751,
+          "line": 7761,
           "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
         },
         {
@@ -6840,7 +7515,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7757,
+          "line": 7767,
           "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
         },
         {
@@ -6849,7 +7524,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7761,
+          "line": 7771,
           "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
         },
         {
@@ -6858,7 +7533,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7767,
+          "line": 7777,
           "excerpt": "\"disruptionTitle\": \"Operational disruption modeling\","
         },
         {
@@ -6867,7 +7542,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7905,
+          "line": 7915,
           "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
         },
         {
@@ -6876,7 +7551,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8651,
+          "line": 8661,
           "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
         },
         {
@@ -6885,7 +7560,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8803,
+          "line": 8813,
           "excerpt": "\"platform\": {"
         },
         {
@@ -6894,7 +7569,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8807,
+          "line": 8817,
           "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
         },
         {
@@ -6903,7 +7578,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8823,
+          "line": 8833,
           "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
         },
         {
@@ -6912,7 +7587,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8828,
+          "line": 8838,
           "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
         },
         {
@@ -6921,7 +7596,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8835,
+          "line": 8845,
           "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
         },
         {
@@ -6930,7 +7605,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8838,
+          "line": 8848,
           "excerpt": "\"platformHealth\": \"Platform Health\","
         },
         {
@@ -6939,7 +7614,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8845,
+          "line": 8855,
           "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
         },
         {
@@ -6948,7 +7623,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8852,
+          "line": 8862,
           "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
         },
         {
@@ -6957,7 +7632,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9153,
+          "line": 9163,
           "excerpt": "\"title\": \"Platform Operations\","
         },
         {
@@ -6966,7 +7641,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9154,
+          "line": 9164,
           "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
         },
         {
@@ -6975,7 +7650,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9166,
+          "line": 9176,
           "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
         },
         {
@@ -6984,7 +7659,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9227,
+          "line": 9237,
           "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
         },
         {
@@ -6993,7 +7668,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9228,
+          "line": 9238,
           "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
         },
         {
@@ -7002,7 +7677,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9264,
+          "line": 9274,
           "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
         },
         {
@@ -7011,7 +7686,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10584,
+          "line": 10594,
           "excerpt": "\"description\": \"AI-powered recommendations\""
         }
       ],
@@ -7022,23 +7697,23 @@
           "score": 59,
           "flags": [
             {
-              "message": "Continuity language under-represented: 9.3% (target 30%).",
+              "message": "Continuity language under-represented: 9.6% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 261,
-              "continuity": 66,
-              "coordination": 145,
-              "trust": 237
+              "governance": 263,
+              "continuity": 69,
+              "coordination": 149,
+              "trust": 241
             },
-            "total": 709,
+            "total": 722,
             "shares": {
-              "governance": 0.36812411847672777,
-              "continuity": 0.0930888575458392,
-              "coordination": 0.20451339915373765,
-              "trust": 0.3342736248236953
+              "governance": 0.36426592797783935,
+              "continuity": 0.09556786703601108,
+              "coordination": 0.20637119113573407,
+              "trust": 0.3337950138504155
             }
           }
         },
@@ -7327,7 +8002,35 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7228,
+          "line": 7216,
+          "excerpt": "\"platform\": \"Platform\","
+        },
+        {
+          "term": {
+            "term": "operating system for unions",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "institutional continuity infrastructure for unions"
+          },
+          "line": 7236,
+          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7236,
+          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7238,
           "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
         },
         {
@@ -7336,17 +8039,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7230,
+          "line": 7240,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
           "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
+            "term": "modules available",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "continuity layers | governance domains"
           },
-          "line": 7241,
-          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+          "line": 7242,
+          "excerpt": "\"unionEntities\": \"Modules Available\","
         },
         {
           "term": {
@@ -7354,7 +8058,56 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7261,
+          "line": 7251,
+          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
+        },
+        {
+          "term": {
+            "term": "another SaaS tool",
+            "severity": "hard-fail",
+            "category": "startup-saas"
+          },
+          "line": 7252,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "another saas",
+            "severity": "hard-fail",
+            "category": "startup-saas"
+          },
+          "line": 7252,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "SaaS tool",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "exceptions": [
+              "not a saas tool",
+              "unlike saas tools"
+            ]
+          },
+          "line": 7252,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7252,
+          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7271,
           "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
         },
         {
@@ -7363,8 +8116,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7270,
+          "line": 7280,
           "excerpt": "\"modulesBadge\": \"Platform Modules\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7292,
+          "excerpt": "\"module5Desc\": \"AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.\","
         },
         {
           "term": {
@@ -7372,8 +8135,17 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7292,
+          "line": 7302,
           "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7314,
+          "excerpt": "\"heroDescription\": \"A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.\","
         },
         {
           "term": {
@@ -7381,7 +8153,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7457,
+          "line": 7467,
           "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
         },
         {
@@ -7390,7 +8162,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7479,
+          "line": 7489,
           "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
         },
         {
@@ -7399,7 +8171,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7481,
+          "line": 7491,
           "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
         },
         {
@@ -7408,26 +8180,74 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7591,
+          "line": 7601,
           "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
         },
         {
           "term": {
+            "term": "module-level entitlements",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "contractual scope | institutional licensing"
+          },
+          "line": 7636,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
+            "term": "operating system",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7636,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
+            "term": "module-level",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7636,
+          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7627,
+          "line": 7637,
           "excerpt": "\"platform\": \"Capabilities\","
         },
         {
           "term": {
-            "term": "platform",
+            "term": "operating system for unions",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "institutional continuity infrastructure for unions"
+          },
+          "line": 7682,
+          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
+        },
+        {
+          "term": {
+            "term": "operating system",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7678,
-          "excerpt": "\"badge\": \"Platform Module\","
+          "line": 7682,
+          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7687,
+          "excerpt": "\"pageDescription\": \"End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.\","
         },
         {
           "term": {
@@ -7435,8 +8255,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7712,
+          "line": 7688,
           "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7701,
+          "excerpt": "\"feat6Title\": \"AI-Assisted Triage\","
         },
         {
           "term": {
@@ -7444,8 +8274,18 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7747,
+          "line": 7722,
           "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "AI-assisted triage",
+            "severity": "hard-fail",
+            "category": "startup-saas",
+            "suggestion": "reviewer-assisted intake under human oversight"
+          },
+          "line": 7756,
+          "excerpt": "\"pageDescription\": \"AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.\","
         },
         {
           "term": {
@@ -7453,7 +8293,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7777,
+          "line": 7757,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -7463,6 +8303,15 @@
             "category": "warning"
           },
           "line": 7787,
+          "excerpt": "\"badge\": \"Platform Module\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7797,
           "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
         },
         {
@@ -7471,7 +8320,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7837,
+          "line": 7847,
           "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
         },
         {
@@ -7480,7 +8329,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7851,
+          "line": 7861,
           "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
         },
         {
@@ -7489,7 +8338,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7854,
+          "line": 7864,
           "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
         },
         {
@@ -7498,7 +8347,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7856,
+          "line": 7866,
           "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
         },
         {
@@ -7507,7 +8356,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7860,
+          "line": 7870,
           "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
         },
         {
@@ -7516,7 +8365,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7872,
+          "line": 7882,
           "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
         },
         {
@@ -7525,7 +8374,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7915,
+          "line": 7925,
           "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
         },
         {
@@ -7534,7 +8383,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7917,
+          "line": 7927,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -7543,7 +8392,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7927,
+          "line": 7937,
           "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
         },
         {
@@ -7552,7 +8401,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7933,
+          "line": 7943,
           "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
         },
         {
@@ -7561,7 +8410,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7937,
+          "line": 7947,
           "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\""
         },
         {
@@ -7570,7 +8419,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8889,
+          "line": 8899,
           "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
         },
         {
@@ -7579,7 +8428,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9041,
+          "line": 9051,
           "excerpt": "\"platform\": {"
         },
         {
@@ -7588,7 +8437,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9045,
+          "line": 9055,
           "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
         },
         {
@@ -7597,7 +8446,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9061,
+          "line": 9071,
           "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
         },
         {
@@ -7606,7 +8455,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9066,
+          "line": 9076,
           "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
         },
         {
@@ -7615,7 +8464,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9073,
+          "line": 9083,
           "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
         },
         {
@@ -7624,7 +8473,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9076,
+          "line": 9086,
           "excerpt": "\"platformHealth\": \"Platform Health\","
         },
         {
@@ -7633,7 +8482,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9083,
+          "line": 9093,
           "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
         },
         {
@@ -7642,7 +8491,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9090,
+          "line": 9100,
           "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
         },
         {
@@ -7651,7 +8500,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10195,
+          "line": 10205,
           "excerpt": "\"description\": \"AI-powered recommendations\""
         },
         {
@@ -7660,7 +8509,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10871,
+          "line": 10881,
           "excerpt": "\"title\": \"Platform Operations\","
         },
         {
@@ -7669,7 +8518,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10872,
+          "line": 10882,
           "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
         },
         {
@@ -7678,7 +8527,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10884,
+          "line": 10894,
           "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
         },
         {
@@ -7687,7 +8536,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10946,
+          "line": 10956,
           "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
         },
         {
@@ -7696,7 +8545,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10947,
+          "line": 10957,
           "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
         },
         {
@@ -7705,7 +8554,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10983,
+          "line": 10993,
           "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
         }
       ],
@@ -7713,26 +8562,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 48,
+          "score": 49,
           "flags": [
             {
-              "message": "Continuity language under-represented: 4.2% (target 30%).",
+              "message": "Continuity language under-represented: 4.6% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 222,
-              "continuity": 24,
-              "coordination": 129,
-              "trust": 203
+              "governance": 224,
+              "continuity": 27,
+              "coordination": 133,
+              "trust": 207
             },
-            "total": 578,
+            "total": 591,
             "shares": {
-              "governance": 0.38408304498269896,
-              "continuity": 0.04152249134948097,
-              "coordination": 0.2231833910034602,
-              "trust": 0.35121107266435986
+              "governance": 0.3790186125211506,
+              "continuity": 0.04568527918781726,
+              "coordination": 0.22504230118443316,
+              "trust": 0.350253807106599
             }
           }
         },
@@ -7854,7 +8703,16 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7450,
+          "line": 7172,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7460,
           "excerpt": "\"platform\": \"Capacités\","
         },
         {
@@ -7863,7 +8721,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8803,
+          "line": 8813,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -7871,7 +8729,7 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 40,
+          "score": 41,
           "flags": [
             {
               "message": "Continuity language under-represented: 3.3% (target 30%).",
@@ -7880,17 +8738,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 75,
+              "governance": 76,
               "continuity": 8,
-              "coordination": 41,
-              "trust": 118
+              "coordination": 42,
+              "trust": 120
             },
-            "total": 242,
+            "total": 246,
             "shares": {
-              "governance": 0.30991735537190085,
-              "continuity": 0.03305785123966942,
-              "coordination": 0.16942148760330578,
-              "trust": 0.48760330578512395
+              "governance": 0.3089430894308943,
+              "continuity": 0.032520325203252036,
+              "coordination": 0.17073170731707318,
+              "trust": 0.4878048780487805
             }
           }
         },
@@ -8001,7 +8859,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7422,
+          "line": 7153,
           "excerpt": "\"platform\": \"Plateforme\","
         },
         {
@@ -8010,7 +8868,16 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8762,
+          "line": 7432,
+          "excerpt": "\"platform\": \"Plateforme\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8772,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -8018,7 +8885,7 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 31,
+          "score": 32,
           "flags": [
             {
               "message": "Continuity language under-represented: 0.9% (target 30%).",
@@ -8027,17 +8894,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 74,
+              "governance": 75,
               "continuity": 2,
-              "coordination": 32,
-              "trust": 110
+              "coordination": 33,
+              "trust": 112
             },
-            "total": 218,
+            "total": 222,
             "shares": {
-              "governance": 0.3394495412844037,
-              "continuity": 0.009174311926605505,
-              "coordination": 0.14678899082568808,
-              "trust": 0.5045871559633027
+              "governance": 0.33783783783783783,
+              "continuity": 0.009009009009009009,
+              "coordination": 0.14864864864864866,
+              "trust": 0.5045045045045045
             }
           }
         },
@@ -8089,7 +8956,7 @@
           }
         }
       ],
-      "maturity": 65
+      "maturity": 66
     },
     {
       "ctx": {
@@ -8150,7 +9017,16 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7432,
+          "line": 7154,
+          "excerpt": "\"platform\": \"Piattaforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7442,
           "excerpt": "\"platform\": \"Moduli\","
         },
         {
@@ -8159,7 +9035,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8785,
+          "line": 8795,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -8167,7 +9043,7 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 26,
+          "score": 25,
           "flags": [
             {
               "message": "Governance saturation detected: 47.4% of pillar terms (target 30%, threshold 40%).",
@@ -8180,17 +9056,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 118,
+              "governance": 120,
               "continuity": 1,
               "coordination": 31,
-              "trust": 99
+              "trust": 101
             },
-            "total": 249,
+            "total": 253,
             "shares": {
-              "governance": 0.4738955823293173,
-              "continuity": 0.004016064257028112,
-              "coordination": 0.12449799196787148,
-              "trust": 0.39759036144578314
+              "governance": 0.4743083003952569,
+              "continuity": 0.003952569169960474,
+              "coordination": 0.1225296442687747,
+              "trust": 0.39920948616600793
             }
           }
         },
@@ -8303,7 +9179,16 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7432,
+          "line": 7154,
+          "excerpt": "\"platform\": \"Plataforma\","
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7442,
           "excerpt": "\"platform\": \"Modulos\","
         },
         {
@@ -8312,7 +9197,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8785,
+          "line": 8795,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -8329,17 +9214,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 74,
+              "governance": 75,
               "continuity": 1,
               "coordination": 27,
-              "trust": 121
+              "trust": 123
             },
-            "total": 223,
+            "total": 226,
             "shares": {
-              "governance": 0.33183856502242154,
-              "continuity": 0.004484304932735426,
-              "coordination": 0.1210762331838565,
-              "trust": 0.5426008968609866
+              "governance": 0.33185840707964603,
+              "continuity": 0.004424778761061947,
+              "coordination": 0.11946902654867257,
+              "trust": 0.5442477876106194
             }
           }
         },
@@ -8396,8 +9281,8 @@
   "summary": {
     "totalFiles": 87,
     "publicFiles": 87,
-    "hardFails": 7,
-    "warnings": 223,
+    "hardFails": 55,
+    "warnings": 267,
     "ruleFailures": 10,
     "averageMaturity": 67
   }

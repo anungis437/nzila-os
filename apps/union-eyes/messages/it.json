@@ -7151,7 +7151,17 @@
         "procurement": { "name": "Stakeholder degli acquisti", "desc": "Prontezza al deployment" }
       },
       "story": "La nostra storia",
-      "modules": "Moduli",
+      "platform": "Piattaforma",
+      "platformItems": {
+        "inbox": { "name": "Ricezione e coordinamento", "desc": "Canale unificato per corrispondenza dei membri e fascicoli" },
+        "work": { "name": "Continuità dei fascicoli", "desc": "Banco di lavoro attivo per reclami e rappresentanza" },
+        "priorities": { "name": "Impegni e scadenze", "desc": "Termini statutari, obblighi e prossime azioni istituzionali" },
+        "intelligence": { "name": "Intelligenza istituzionale", "desc": "Superfici esecutive, federali e analitiche" },
+        "cognition": { "name": "Ragionamento governato", "desc": "Ragionamento sovrano ancorato alla dottrina istituzionale" },
+        "governance": { "name": "Governance ufficiale", "desc": "Statuto, mozioni e decisioni ufficiali" },
+        "memory": { "name": "Memoria istituzionale", "desc": "Dottrina, precedenti e archivio di continuità" },
+        "trust": { "name": "Fiducia e sovranità", "desc": "Audit, spiegabilità e sovranità canadese" }
+      },
       "pricing": "Prezzi",
       "trust": "Fiducia e conformita",
       "caseStudies": "Casi studio",
