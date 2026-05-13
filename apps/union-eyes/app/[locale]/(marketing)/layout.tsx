@@ -32,8 +32,14 @@ export default function LocaleMarketingLayout({
 }) {
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:rounded-md focus:bg-navy focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-electric"
+      >
+        Skip to main content
+      </a>
       <LocaleSiteNavigation />
-      <main className="pt-16 md:pt-20">{children}</main>
+      <main id="main-content" tabIndex={-1} className="pt-16 md:pt-20">{children}</main>
       <LocaleSiteFooter />
     </>
   );

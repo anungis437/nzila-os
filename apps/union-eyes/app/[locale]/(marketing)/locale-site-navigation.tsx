@@ -257,8 +257,10 @@ export default function LocaleSiteNavigation() {
             <LanguageSwitcher />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-700' : 'text-white'}`}
-              aria-label="Toggle menu"
+              className={`p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 ${scrolled ? 'text-gray-700 focus-visible:ring-offset-white' : 'text-white focus-visible:ring-offset-navy'}`}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="ue-mobile-drawer"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -270,6 +272,7 @@ export default function LocaleSiteNavigation() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            id="ue-mobile-drawer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}

@@ -5,7 +5,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -30,6 +30,7 @@ export default function ScrollReveal({
   once = true,
   tempo = 'default',
 }: ScrollRevealProps) {
+  const prefersReducedMotion = useReducedMotion();
   const pace =
     tempo === 'conference'
       ? {
@@ -45,9 +46,11 @@ export default function ScrollReveal({
           easing: [0.16, 1, 0.3, 1] as const,
         };
 
-  const resolvedDistance = Math.max(0, Math.round(distance * pace.distanceMultiplier));
-  const resolvedDuration = duration * pace.durationMultiplier;
-  const resolvedDelay = delay * pace.delayMultiplier;
+  const resolvedDistance = prefersReducedMotion
+    ? 0
+    : Math.max(0, Math.round(distance * pace.distanceMultiplier));
+  const resolvedDuration = prefersReducedMotion ? 0.01 : duration * pace.durationMultiplier;
+  const resolvedDelay = prefersReducedMotion ? 0 : delay * pace.delayMultiplier;
 
   const offsets = {
     up: { y: resolvedDistance, x: 0 },
