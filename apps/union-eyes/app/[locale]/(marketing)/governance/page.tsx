@@ -9,7 +9,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: 'Governance & Continuity | UnionEyes',
     description:
-      'Our governance commitments: the principles UnionEyes is being built around to stay worker-first as the platform grows.',
+      'How UnionEyes is governed today and the labour-side controls being put in place to keep the platform worker-first.',
     alternates: buildLocaleAlternates(locale, '/governance'),
   };
 }
@@ -18,22 +18,22 @@ const commitments = [
   {
     icon: Vote,
     title: 'Worker consent on change of control',
-    body: 'We are designing the company so that any sale, merger, or transfer of controlling interest will require affirmative consent from labour-elected representatives before it can proceed.',
+    body: 'Any sale, merger, or transfer of controlling interest will require affirmative consent from labour-elected representatives. The instrument that binds this is in development with partner unions.',
   },
   {
     icon: Shield,
     title: 'Mission lock',
-    body: 'We intend to bind changes to the company mission to labour approval, so worker-first purpose cannot be quietly redefined by investors or executives.',
+    body: 'Changes to the company mission will require labour-side approval, so worker-first purpose cannot be quietly redefined by investors or executives.',
   },
   {
     icon: Users,
     title: 'Labour-elected oversight seats',
-    body: 'Our target governance structure includes reserved seats for labour-elected representatives with full voting rights on strategic decisions.',
+    body: 'The governance structure will include reserved seats for labour-elected representatives with full voting rights on strategic decisions.',
   },
   {
     icon: FileText,
     title: 'Reserved matters',
-    body: 'Critical decisions — major pricing changes, data-sharing policy, data residency shifts — are intended to require labour-side approval rather than executive discretion alone.',
+    body: 'Critical decisions — major pricing changes, data-sharing policy, data residency shifts — will require labour-side approval rather than executive discretion alone.',
   },
 ];
 
@@ -48,22 +48,22 @@ export default function GovernancePage() {
           </span>
         }
         heading="Governance & continuity"
-        description="The commitments UnionEyes is being built around so the platform stays worker-first as it scales."
+        description="How UnionEyes is governed today, and the labour-side controls being put in place to keep the platform worker-first."
       />
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-4">Where we are today</h2>
+          <h2 className="text-2xl font-bold text-navy mb-4">Where things stand today</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            UnionEyes is in its early stage. The labour-side governance structures described on this page are commitments we are working toward — not bodies that exist today. We are publishing them now so that partner unions and stewards can hold us to them as the company is formalised.
+            UnionEyes is an incorporated company operating under standard corporate governance. The labour-side controls described on this page — worker consent on change of control, mission lock, reserved oversight seats, and reserved matters — are not yet adopted. They are the controls we have publicly committed to put in place, and which partner unions are entitled to hold us to.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            As specific governance instruments — such as labour-elected oversight seats, reserved-matters lists, and continuity protections — are formally established, we will document them here with effective dates and source agreements.
+            Each instrument will be documented here with its effective date and the underlying agreement once adopted. Until then, this page reflects commitments rather than ratified governance.
           </p>
         </div>
 
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-8">Our governance commitments</h2>
+          <h2 className="text-2xl font-bold text-navy mb-8">Labour-side controls being put in place</h2>
           <div className="space-y-6">
             {commitments.map((c) => (
               <div key={c.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -84,16 +84,16 @@ export default function GovernancePage() {
           <div className="space-y-6 divide-y divide-gray-100">
             {[
               {
-                q: 'Are these governance structures in place today?',
-                a: 'No. They are commitments that will be formalised as the company is incorporated and partner unions come on board. We will update this page when each protection is in force, with a clear effective date.',
+                q: 'Are these labour-side controls in force today?',
+                a: 'No. UnionEyes is incorporated and operating, but the labour-side controls listed above have not yet been adopted into our governing instruments. Each will be added here with its effective date once in force.',
               },
               {
-                q: 'What if UnionEyes raises venture capital?',
-                a: 'Our intent is that investor capital sits alongside — not above — labour-side governance. Any capital raise will be designed so worker oversight cannot be diluted away.',
+                q: 'What if UnionEyes raises outside capital?',
+                a: 'Investor capital is expected to sit alongside — not above — labour-side governance. Any capital raise will be structured so worker oversight cannot be diluted away.',
               },
               {
-                q: 'How will partner unions hold UnionEyes to these commitments?',
-                a: 'By treating this page as a public promise. We invite partner unions to review and comment on each commitment as it is formalised, and to push back if execution drifts from intent.',
+                q: 'How can partner unions hold UnionEyes to these commitments?',
+                a: 'By treating this page as a public undertaking. Partner unions are invited to review the wording of each control as it is drafted and to challenge execution that drifts from intent.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="pt-6 first:pt-0">
