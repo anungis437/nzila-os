@@ -292,8 +292,6 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
 }
 
 export function InsightsMethodologyPageView({ locale, contextMode = 'executive' }: InsightSectionPageProps) {
-  const profile = getInstitutionalModeProfile(contextMode);
-
   return (
     <div className="institution-shell min-h-screen">
       <MarketingHeroSection
@@ -302,44 +300,9 @@ export function InsightsMethodologyPageView({ locale, contextMode = 'executive' 
         revealTempo="conference"
         heading={<>Continuity flow, transformation rhythm, and governance symbolism</>}
         description="This page holds the visual frameworks that make the insights doctrine legible: structure, continuity, and calm institutional motion."
-        contextKicker={`${profile.label} context`}
-        contextNote={(
-          <>
-            <span className="block font-semibold">Primary concern: {profile.concern}</span>
-            <span className="block mt-1">Priority framework: {profile.methodologyFocus}. {profile.continuityCallout}</span>
-          </>
-        )}
       />
 
       <InsightsHubSubmenu locale={locale} active="methodology" contextMode={contextMode} />
-
-      <section className="py-16 bg-white border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={0.85} distance={12} tempo="conference">          </ScrollReveal>
-          <ScrollReveal delay={0.06} duration={0.95} distance={14} tempo="conference">
-            <h2 className="text-3xl font-semibold text-navy mb-4">Operational frameworks visualized for governance use</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.12} duration={0.95} distance={14} tempo="conference">
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
-              The doctrine system translates methodology into deployment-ready guidance with implementation sequencing, governance checkpoints, and explainability boundaries.
-            </p>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      <section className="py-12 bg-[#f8f6f2] border-b border-slate-200/70">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal duration={0.82} distance={12} tempo="conference">
-            <article className="institution-panel p-5">
-              <p className="institution-kicker mb-2">Adaptive Methodology Emphasis</p>
-              <h3 className="text-lg font-semibold text-navy mb-2">{profile.methodologyFocus}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                This emphasis changes presentation order only. Core doctrine remains consistent and governance-safe for all stakeholders.
-              </p>
-            </article>
-          </ScrollReveal>
-        </div>
-      </section>
 
       <MethodologyVisualizationSystem />
 
