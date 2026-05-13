@@ -37,3 +37,6 @@ export * from './governance/continuity.js'
 
 // Phase 4 — trust & explainability (read-only provenance convergence layer).
 export * from './governance/trust.js'
+
+// Phase 4 — read-only institutional observability (counts-only, gated).
+export * from './observability/snapshot.js'

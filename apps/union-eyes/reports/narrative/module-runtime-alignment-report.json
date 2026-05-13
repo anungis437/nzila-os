@@ -1,0 +1,219 @@
+{
+  "report": "module-runtime-alignment",
+  "workstream": "A",
+  "mode": "audit-only",
+  "generatedAt": "2026-05-13T00:00:00Z",
+  "scope": {
+    "apps": ["apps/union-eyes"],
+    "packagesSampled": ["packages/clc-executive-intelligence"],
+    "surfaceTypes": ["sidebar-nav", "mobile-nav", "platform-modules", "lint-coverage", "package-domain"]
+  },
+  "summary": {
+    "surfacesInventoried": 9,
+    "matrixRows": 34,
+    "hardFails": 0,
+    "warnings": 33,
+    "averageInstitutionalMaturity": 62,
+    "marketingMaturity": 67,
+    "alignmentTermHitsMarketing": 50,
+    "alignmentTermHitsRuntime": 0
+  },
+  "driftDistribution": {
+    "fullyAligned": 8,
+    "mostlyAligned": 9,
+    "operationalSaasDrift": 15,
+    "highRiskCategoryDrift": 6,
+    "renameRefactorCandidate": 3
+  },
+  "surfaces": [
+    {
+      "key": "sidebar/member-nav",
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "lineRange": [78, 92],
+      "maturity": 78,
+      "scores": {
+        "narrative-balance": 80,
+        "coexistence-positioning": 90,
+        "procedural-neutrality": 70,
+        "labour-safe-ai": 100,
+        "canadian-positioning": 60
+      },
+      "actionRows": [11, 12]
+    },
+    {
+      "key": "sidebar/staff-nav",
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "lineRange": [94, 110],
+      "maturity": 48,
+      "scores": {
+        "narrative-balance": 40,
+        "coexistence-positioning": 60,
+        "procedural-neutrality": 50,
+        "labour-safe-ai": 90,
+        "canadian-positioning": 50
+      },
+      "actionRows": [1, 2, 3, 4, 5, 6, 7]
+    },
+    {
+      "key": "sidebar/executive-nav",
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "lineRange": [112, 132],
+      "maturity": 75,
+      "scores": {
+        "narrative-balance": 80,
+        "coexistence-positioning": 85,
+        "procedural-neutrality": 70,
+        "labour-safe-ai": 90,
+        "canadian-positioning": 60
+      },
+      "actionRows": [8, 9, 10]
+    },
+    {
+      "key": "sidebar/governance-nav",
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "lineRange": [134, 154],
+      "maturity": 88,
+      "scores": {
+        "narrative-balance": 95,
+        "coexistence-positioning": 90,
+        "procedural-neutrality": 90,
+        "labour-safe-ai": 95,
+        "canadian-positioning": 70
+      },
+      "actionRows": [13, 14]
+    },
+    {
+      "key": "sidebar/admin-nav",
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "lineRange": [156, 176],
+      "maturity": 70,
+      "scores": {
+        "narrative-balance": 75,
+        "coexistence-positioning": 70,
+        "procedural-neutrality": 75,
+        "labour-safe-ai": 100,
+        "canadian-positioning": 60
+      },
+      "actionRows": [15]
+    },
+    {
+      "key": "mobile/bottom-nav",
+      "path": "apps/union-eyes/components/mobile/BottomNav.tsx",
+      "lineRange": [12, 40],
+      "maturity": 35,
+      "scores": {
+        "narrative-balance": 30,
+        "coexistence-positioning": 50,
+        "procedural-neutrality": 40,
+        "labour-safe-ai": 100,
+        "canadian-positioning": 50
+      },
+      "structuralNotes": ["hrefs missing /dashboard prefix", "labels not driven by getNavigationForExperience()"],
+      "actionRows": [16, 17, 18, 19, 20, 21]
+    },
+    {
+      "key": "platform-economics/modules",
+      "path": "apps/union-eyes/services/platform-economics/entitlement-guard.ts",
+      "lineRange": [1, 120],
+      "maturity": 58,
+      "scores": {
+        "narrative-balance": 55,
+        "coexistence-positioning": 65,
+        "procedural-neutrality": 60,
+        "labour-safe-ai": 50,
+        "canadian-positioning": 60
+      },
+      "actionRows": [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
+    },
+    {
+      "key": "narrative-vocabulary/runtime-coverage",
+      "path": "apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts",
+      "lineRange": [1, 200],
+      "maturity": 55,
+      "scores": {
+        "narrative-balance": 60,
+        "coexistence-positioning": 70,
+        "procedural-neutrality": 50,
+        "labour-safe-ai": 60,
+        "canadian-positioning": 40
+      },
+      "actionRows": [34]
+    },
+    {
+      "key": "packages/clc-executive-intelligence",
+      "path": "packages/clc-executive-intelligence/src/index.ts",
+      "lineRange": [1, 20],
+      "maturity": 80,
+      "scores": {
+        "narrative-balance": 85,
+        "coexistence-positioning": 80,
+        "procedural-neutrality": 80,
+        "labour-safe-ai": 75,
+        "canadian-positioning": 70
+      },
+      "actionRows": []
+    }
+  ],
+  "matrix": [
+    { "id": 1, "surface": "sidebar/staff-nav", "currentLabel": "Workbench", "proposedLabel": "Casework Console", "driftRisk": "high", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 2, "surface": "sidebar/staff-nav", "currentLabel": "Cases", "proposedLabel": "Representation Cases", "driftRisk": "med", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 3, "surface": "sidebar/staff-nav", "currentLabel": "Priorities", "proposedLabel": "Commitments & Deadlines", "driftRisk": "med", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 4, "surface": "sidebar/staff-nav", "currentLabel": "Members", "proposedLabel": "Member Register", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 5, "surface": "sidebar/staff-nav", "currentLabel": "Documents", "proposedLabel": "Institutional Records", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 6, "surface": "sidebar/staff-nav", "currentLabel": "Communications", "proposedLabel": "Representational Communications", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 7, "surface": "sidebar/staff-nav", "currentLabel": "Reports", "proposedLabel": "Institutional Reports", "driftRisk": "med", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 8, "surface": "sidebar/executive-nav", "currentLabel": "Operational Health", "proposedLabel": "Continuity Operations", "driftRisk": "med", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 9, "surface": "sidebar/executive-nav", "currentLabel": "Outcomes", "proposedLabel": "Member Outcomes Ledger", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 10, "surface": "sidebar/executive-nav", "currentLabel": "Reports", "proposedLabel": "Leadership Briefings", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 11, "surface": "sidebar/member-nav", "currentLabel": "Submit Request", "proposedLabel": "Open Representation Case", "driftRisk": "med", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 12, "surface": "sidebar/member-nav", "currentLabel": "My Cases", "proposedLabel": "My Representation", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 13, "surface": "sidebar/governance-nav", "currentLabel": "Operational Review", "proposedLabel": "Procedural Review", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 14, "surface": "sidebar/governance-nav", "currentLabel": "Reports", "proposedLabel": "Governance Briefings", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 15, "surface": "sidebar/admin-nav", "currentLabel": "Pilot Configuration", "proposedLabel": "Continuity Pilot Setup", "driftRisk": "low", "fixLevel": "L1", "file": "apps/union-eyes/lib/dashboard/role-experience.ts" },
+    { "id": 16, "surface": "mobile/bottom-nav", "currentLabel": "Claims", "currentHref": "/claims", "proposedLabel": "Cases", "proposedHref": "/dashboard/cases", "driftRisk": "category", "fixLevel": "L1+L2", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 17, "surface": "mobile/bottom-nav", "currentLabel": "Members", "currentHref": "/members", "proposedLabel": "Members", "proposedHref": "/dashboard/members", "driftRisk": "med", "fixLevel": "L2", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 18, "surface": "mobile/bottom-nav", "currentLabel": "Messages", "currentHref": "/messages", "proposedLabel": "Communications", "proposedHref": "/dashboard/communications", "driftRisk": "med", "fixLevel": "L1+L2", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 19, "surface": "mobile/bottom-nav", "currentLabel": "More", "currentHref": "/more", "proposedLabel": "More", "proposedHref": "/dashboard/more", "driftRisk": "low", "fixLevel": "L2", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 20, "surface": "mobile/bottom-nav", "currentLabel": "Home", "currentHref": "/dashboard", "proposedLabel": "Home", "proposedHref": "/dashboard", "driftRisk": "low", "fixLevel": "none", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 21, "surface": "mobile/bottom-nav", "concern": "BottomNav not driven by getNavigationForExperience()", "proposal": "Refactor to consume role-experience source of truth", "driftRisk": "category", "fixLevel": "L3", "file": "apps/union-eyes/components/mobile/BottomNav.tsx" },
+    { "id": 22, "surface": "platform-economics/modules", "identifier": "governance_suite", "proposedDisplayName": "Governance of Record", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 23, "surface": "platform-economics/modules", "identifier": "grievance_case_suite", "proposedDisplayName": "Representation Continuity", "driftRisk": "med", "fixLevel": "L1" },
+    { "id": 24, "surface": "platform-economics/modules", "identifier": "financial_intelligence_suite", "proposedDisplayName": "Financial Stewardship", "driftRisk": "med", "fixLevel": "L1" },
+    { "id": 25, "surface": "platform-economics/modules", "identifier": "ai_advanced_insights", "proposedDisplayName": "Reviewer-Assisted Intelligence", "driftRisk": "category", "fixLevel": "L1" },
+    { "id": 26, "surface": "platform-economics/modules", "identifier": "allocation_engine", "proposedDisplayName": "Allocation Stewardship", "driftRisk": "med", "fixLevel": "L1" },
+    { "id": 27, "surface": "platform-economics/modules", "identifier": "transaction_fees", "proposedDisplayName": "Transaction Reconciliation", "driftRisk": "med", "fixLevel": "L1" },
+    { "id": 28, "surface": "platform-economics/modules", "identifier": "commercial_reporting", "proposedDisplayName": "Institutional Reporting", "driftRisk": "high", "fixLevel": "L1" },
+    { "id": 29, "surface": "platform-economics/modules", "identifier": "export_suite", "proposedDisplayName": "Evidence Export", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 30, "surface": "platform-economics/modules", "identifier": "health_safety", "proposedDisplayName": "Health & Safety Continuity", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 31, "surface": "platform-economics/modules", "identifier": "performance_targets", "proposedDisplayName": "Operational Commitments", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 32, "surface": "platform-economics/modules", "identifier": "employer_execution", "proposedDisplayName": "Employer Coordination", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 33, "surface": "platform-economics/modules", "identifier": "union_knowledge_suite", "proposedDisplayName": "Institutional Memory", "driftRisk": "low", "fixLevel": "L1" },
+    { "id": 34, "surface": "narrative-vocabulary/runtime-coverage", "concern": "publicOnly: true exempts runtime from forbidden-vocab linting", "proposal": "Add runtime scope and lint lib/dashboard/**, components/**, services/platform-economics/**", "driftRisk": "high", "fixLevel": "L2", "file": "apps/union-eyes/tooling/marketing/config/forbidden-vocabulary.ts" }
+  ],
+  "alreadyAlignedRoutes": [
+    "/dashboard/cognition",
+    "/dashboard/institutional-intelligence",
+    "/dashboard/institutional-operating-intelligence",
+    "/dashboard/longitudinal-cognition",
+    "/dashboard/continuity-simulation",
+    "/dashboard/movement-insights",
+    "/dashboard/cross-union-analytics",
+    "/dashboard/executive-operating-intelligence"
+  ],
+  "recommendedWorkstreamBSequence": [
+    { "step": 1, "target": "mobile/bottom-nav", "rows": [16, 17, 18, 19, 21] },
+    { "step": 2, "target": "sidebar/staff-nav", "rows": [1, 2, 3, 7] },
+    { "step": 3, "target": "sidebar/executive-nav + member-nav nudges", "rows": [8, 11] },
+    { "step": 4, "target": "forbidden-vocabulary runtime scope", "rows": [34] },
+    { "step": 5, "target": "PLATFORM_MODULES display names", "rows": [22, 23, 24, 25, 26, 27, 28, 33] }
+  ],
+  "validationPlan": {
+    "deferredTo": "Workstream I",
+    "commands": [
+      "pnpm --filter @nzila/union-eyes narrative:check --ci",
+      "pnpm --filter @nzila/union-eyes typecheck",
+      "pnpm --filter @nzila/union-eyes build"
+    ],
+    "successCriterion": "runtime maturity >= 80 after Workstream B"
+  }
+}
