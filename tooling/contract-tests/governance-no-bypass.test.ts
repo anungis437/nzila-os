@@ -267,6 +267,8 @@ describe('GOV-BYPASS-006 — No process.exit in app code', () => {
     'db/seeds',
     'db\\seeds',
     'scripts',
+    'tooling/',
+    'tooling\\',
     'services/financial-service',
     'services\\financial-service',
     'lib/demoSeed',
