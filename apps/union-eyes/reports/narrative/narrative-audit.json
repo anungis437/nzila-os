@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T18:38:31.481Z",
+  "generatedAt": "2026-05-13T21:06:34.613Z",
   "files": [
     {
       "ctx": {
@@ -9742,6 +9742,16 @@
     },
     {
       "ctx": {
+        "path": "app/[locale]/dashboard/institutional-observability/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/institutional-observability/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
         "path": "app/[locale]/dashboard/longitudinal-cognition/page.tsx",
         "isPublicSurface": false,
         "label": "internal/app/[locale]/dashboard/longitudinal-cognition/page.tsx"
@@ -9827,7 +9837,7 @@
     }
   ],
   "summary": {
-    "totalFiles": 95,
+    "totalFiles": 96,
     "publicFiles": 85,
     "hardFails": 0,
     "warnings": 229,

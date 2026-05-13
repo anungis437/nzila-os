@@ -36,6 +36,24 @@ export const LABOUR_SAFE_AI_REQUIRED: RewardTerm[] = [
   { term: "procedural transparency", weight: 2 },
 ];
 
+// Workstream G: Institutional Observability Surfaces.
+// Reward terms that signal the doctrine-aligned posture: chronology / lineage /
+// provenance over scoring. Used by observability-surface narrative checks so
+// the views earn maturity for naming what they are (institutional memory,
+// procedural traceability) instead of borrowing operational-analytics framing.
+export const OBSERVABILITY_DOCTRINE_REQUIRED: RewardTerm[] = [
+  { term: "chronology", weight: 2 },
+  { term: "lineage", weight: 3 },
+  { term: "continuity pathways", weight: 3 },
+  { term: "provenance", weight: 3 },
+  { term: "explainability", weight: 2 },
+  { term: "institutional memory", weight: 3 },
+  { term: "procedural traceability", weight: 3 },
+  { term: "governance-safe transparency", weight: 3 },
+  { term: "continuity safeguards", weight: 2 },
+  { term: "inspectable institutional states", weight: 3 },
+];
+
 export const LABOUR_SAFE_AI_FORBIDDEN: string[] = [
   "autonomous decisions",
   "AI-led governance",

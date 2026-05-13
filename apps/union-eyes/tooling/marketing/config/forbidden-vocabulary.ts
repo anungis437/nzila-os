@@ -21,6 +21,7 @@ export type Category =
   | "surveillance-ai"
   | "political"
   | "founder-optics"
+  | "observability-guard"
   | "warning";
 
 export interface ForbiddenTerm {
@@ -193,6 +194,42 @@ const warningLevel: ForbiddenTerm[] = [
   // "governance" intentionally excluded from warning — counted via balance rule.
 ];
 
+// Workstream G: Institutional Observability Surfaces.
+// Observability surfaces must answer "how did this institutional state emerge?" —
+// NEVER "how do we optimize institutional behaviour?". The following compound
+// terms are scoring / ranking / prediction / behavioural-analytics framings that
+// would re-introduce surveillance posture into observability views. Hard-fail on
+// every surface. Compound phrases are used (instead of bare "score", "rank",
+// "average", etc.) to avoid false positives in unrelated marketing copy while
+// still catching the doctrine-violating constructions.
+const observabilityGuards: ForbiddenTerm[] = [
+  { term: "trust score", severity: "hard-fail", category: "observability-guard", suggestion: "explainability record | provenance coverage" },
+  { term: "trustscore", severity: "hard-fail", category: "observability-guard" },
+  { term: "influence score", severity: "hard-fail", category: "observability-guard" },
+  { term: "influence ranking", severity: "hard-fail", category: "observability-guard" },
+  { term: "behavioural prediction", severity: "hard-fail", category: "observability-guard" },
+  { term: "behavioral prediction", severity: "hard-fail", category: "observability-guard" },
+  { term: "behaviour forecast", severity: "hard-fail", category: "observability-guard" },
+  { term: "behavior forecast", severity: "hard-fail", category: "observability-guard" },
+  { term: "behavioural scoring", severity: "hard-fail", category: "observability-guard" },
+  { term: "behavioral scoring", severity: "hard-fail", category: "observability-guard" },
+  { term: "decision recommendation", severity: "hard-fail", category: "observability-guard", suggestion: "explainability record" },
+  { term: "automated recommendation", severity: "hard-fail", category: "observability-guard" },
+  { term: "predictive influence", severity: "hard-fail", category: "observability-guard" },
+  { term: "stability index", severity: "hard-fail", category: "observability-guard" },
+  { term: "stability score", severity: "hard-fail", category: "observability-guard" },
+  { term: "efficiency rating", severity: "hard-fail", category: "observability-guard" },
+  { term: "efficiency score", severity: "hard-fail", category: "observability-guard" },
+  { term: "governance score", severity: "hard-fail", category: "observability-guard" },
+  { term: "institutional ranking", severity: "hard-fail", category: "observability-guard" },
+  { term: "caucus tracker", severity: "hard-fail", category: "observability-guard" },
+  { term: "member sentiment score", severity: "hard-fail", category: "observability-guard" },
+  { term: "engagement score", severity: "hard-fail", category: "observability-guard" },
+  { term: "weighted decision", severity: "hard-fail", category: "observability-guard" },
+  { term: "compliance percent", severity: "hard-fail", category: "observability-guard" },
+  { term: "average compliance", severity: "hard-fail", category: "observability-guard" },
+];
+
 export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...startupSaas,
   ...ripAndReplace,
@@ -200,6 +237,7 @@ export const FORBIDDEN_VOCABULARY: ForbiddenTerm[] = [
   ...continuitySaas,
   ...political,
   ...founderOptics,
+  ...observabilityGuards,
   ...warningLevel,
 ];
 

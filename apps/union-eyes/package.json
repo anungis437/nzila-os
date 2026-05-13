@@ -65,6 +65,7 @@
     "@nzila/governance-otel": "workspace:*",
     "@nzila/governance-review": "workspace:*",
     "@nzila/institutional-cognition-core": "workspace:*",
+    "@nzila/institutional-governance-graph": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
     "@nzila/nar": "workspace:*",
     "@nzila/operational-convergence": "workspace:*",

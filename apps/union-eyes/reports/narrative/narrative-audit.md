@@ -1,10 +1,10 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T18:38:31.481Z
+Generated: 2026-05-13T21:06:34.613Z
 
 ## Summary
 
-- Files scanned: **95**
+- Files scanned: **96**
 - Hard-fail violations: **0**
 - Warning violations: **229**
 - Rule failures: **0**
@@ -1538,6 +1538,13 @@ Generated: 2026-05-13T18:38:31.481Z
 ### internal/app/[locale]/dashboard/institutional-memory/page.tsx
 
 - **Path:** `app/[locale]/dashboard/institutional-memory/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/institutional-observability/page.tsx
+
+- **Path:** `app/[locale]/dashboard/institutional-observability/page.tsx`
 - **Institutional Maturity:** 0/100
 
 **Scores:**

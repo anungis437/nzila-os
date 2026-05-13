@@ -92,6 +92,9 @@ const INTERNAL_NARRATIVE_GLOBS = [
   "app/[[]locale[]]/dashboard/longitudinal-cognition/**/page.tsx",
   "app/[[]locale[]]/dashboard/executive-operating-intelligence/**/page.tsx",
   "app/[[]locale[]]/dashboard/institutional-memory/**/page.tsx",
+  // Workstream G: institutional observability surfaces.
+  "app/[[]locale[]]/dashboard/institutional-observability/**/page.tsx",
+  "app/[[]locale[]]/dashboard/institutional-observability/**/layout.tsx",
   "lib/dashboard/role-experience.ts",
   "lib/dashboard/**/labels.ts",
   "services/platform-economics/entitlement-guard.ts",
