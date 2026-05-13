@@ -57,6 +57,14 @@ const startupSaas: ForbiddenTerm[] = [
   { term: "task management", severity: "hard-fail", category: "startup-saas" },
   { term: "team productivity", severity: "hard-fail", category: "startup-saas" },
   { term: "business optimization", severity: "hard-fail", category: "startup-saas" },
+  // Phase 3: Conventions & Federated Governance — institutional framing guards
+  { term: "transformation-first", severity: "hard-fail", category: "startup-saas" },
+  { term: "event management", severity: "hard-fail", category: "startup-saas", suggestion: "convention coordination | governance coordination" },
+  { term: "productivity optimization", severity: "hard-fail", category: "startup-saas" },
+  { term: "automate governance", severity: "hard-fail", category: "startup-saas" },
+  { term: "AI-led operations", severity: "hard-fail", category: "startup-saas" },
+  { term: "workflow automation", severity: "hard-fail", category: "startup-saas" },
+  { term: "attendee management", severity: "hard-fail", category: "startup-saas", suggestion: "delegate continuity" },
 ];
 
 const ripAndReplace: ForbiddenTerm[] = [

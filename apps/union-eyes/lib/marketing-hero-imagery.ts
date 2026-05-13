@@ -29,6 +29,7 @@ export const heroImagery = {
   operationalCoherenceModule: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80&auto=format',
   explainableIntelligenceModule: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80&auto=format',
   platform: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80&auto=format',
+  conventions: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=1920&q=80&auto=format',
 } as const;
 
 export type HeroImageKey = keyof typeof heroImagery;

@@ -45,6 +45,7 @@ const PUBLIC_MARKETING_ROUTES = [
   "executive-intelligence",
   "insights",
   "institutional-continuity",
+  "conventions",
   "for-clc",
   "for-federations",
   "for-leadership",
@@ -55,13 +56,13 @@ const PUBLIC_MARKETING_ROUTES = [
 const MARKETING_GLOBS = [
   "app/[[]locale[]]/page.tsx",
   "app/[[]locale[]]/layout.tsx",
-  "app/[[]locale[]]/(marketing)/layout.tsx",
-  "app/[[]locale[]]/(marketing)/page.tsx",
+  "app/[[]locale[]]/[(]marketing[)]/layout.tsx",
+  "app/[[]locale[]]/[(]marketing[)]/page.tsx",
   ...PUBLIC_MARKETING_ROUTES.filter(Boolean).map(
-    (r) => `app/[[]locale[]]/(marketing)/${r}/**/page.tsx`,
+    (r) => `app/[[]locale[]]/[(]marketing[)]/${r}/**/page.tsx`,
   ),
   ...PUBLIC_MARKETING_ROUTES.filter(Boolean).map(
-    (r) => `app/[[]locale[]]/(marketing)/${r}/**/layout.tsx`,
+    (r) => `app/[[]locale[]]/[(]marketing[)]/${r}/**/layout.tsx`,
   ),
   // Legacy fallback: top-level (marketing) and direct [locale] routes
   ...PUBLIC_MARKETING_ROUTES.filter(Boolean).map(
@@ -70,8 +71,8 @@ const MARKETING_GLOBS = [
   ...PUBLIC_MARKETING_ROUTES.filter(Boolean).map(
     (r) => `app/[[]locale[]]/${r}/**/layout.tsx`,
   ),
-  "app/(marketing)/**/page.tsx",
-  "app/(marketing)/**/layout.tsx",
+  "app/[(]marketing[)]/**/page.tsx",
+  "app/[(]marketing[)]/**/layout.tsx",
 ];
 const MESSAGES_GLOB = "messages/*.json";
 

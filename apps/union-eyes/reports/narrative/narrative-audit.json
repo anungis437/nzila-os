@@ -1,6 +1,6259 @@
 {
-  "generatedAt": "2026-05-13T03:48:20.347Z",
+  "generatedAt": "2026-05-13T04:45:30.535Z",
   "files": [
+    {
+      "ctx": {
+        "path": "app/(marketing)/[...slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/[...slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/case-studies/[slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/case-studies/[slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/case-studies/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/case-studies"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/contact/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/contact"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/executive-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/executive-intelligence"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/ai-workbench/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/ai-workbench"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 40,
+          "flags": [
+            {
+              "message": "AI is referenced without labour-safe framing (oversight / explainability / reviewability).",
+              "suggestion": "Add human-oversight, explainability, or governance-safe AI framing."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": []
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/analytics/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/analytics"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/grievance-tracking/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/grievance-tracking"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/inbox/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/inbox"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/member-portal/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/member-portal"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/features/priorities/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/priorities"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/governance/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/governance"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/insights/[slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/[slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/insights/category/[slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/category/[slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/insights/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/institutional-continuity/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/institutional-continuity"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 2,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 2,
+            "shares": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/layout.tsx",
+        "isPublicSurface": true,
+        "label": "app/(marketing)/layout.tsx"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/page.tsx",
+        "isPublicSurface": true,
+        "label": "app/(marketing)/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/pilot-request/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/pilot-request"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/platform/explainable-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/explainable-intelligence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "redirect('/en-CA/platform/explainable-intelligence');"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/platform/governance-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/governance-intelligence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "redirect('/en-CA/platform/governance-intelligence');"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/platform/operational-coherence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/operational-coherence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "redirect('/en-CA/platform/operational-coherence');"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/platform/organizational-memory/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/organizational-memory"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "redirect('/en-CA/platform/organizational-memory');"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/pricing/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/pricing"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/executive-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/executive-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/governance-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/governance-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/labour-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/labour-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/operations-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/operations-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/procurement/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/procurement"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/solutions/technology-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/technology-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/status/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/status"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/story/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/story"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/(marketing)/trust/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/trust"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 50,
+          "flags": [],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/case-studies/layout.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/case-studies"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 60,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 1,
+              "coordination": 1,
+              "trust": 0
+            },
+            "total": 3,
+            "shares": {
+              "governance": 0.3333333333333333,
+              "continuity": 0.3333333333333333,
+              "coordination": 0.3333333333333333,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 76
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/case-studies/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/case-studies"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 40,
+          "flags": [
+            {
+              "message": "AI is referenced without labour-safe framing (oversight / explainability / reviewability).",
+              "suggestion": "Add human-oversight, explainability, or governance-safe AI framing."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": []
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 59
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/contact/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/contact"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/conventions/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/conventions"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 95,
+          "excerpt": "Platform · Conventions & Federated Governance"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 44,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 57.8% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 89,
+              "continuity": 32,
+              "coordination": 18,
+              "trust": 15
+            },
+            "total": 154,
+            "shares": {
+              "governance": 0.577922077922078,
+              "continuity": 0.2077922077922078,
+              "coordination": 0.11688311688311688,
+              "trust": 0.09740259740259741
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "coexistence",
+              "non-disruptive implementation",
+              "alongside existing systems",
+              "augments existing"
+            ]
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first"
+            ],
+            "generalCanadianHits": [
+              "canadian",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 86
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/executive-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/executive-intelligence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "worker scoring",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 62,
+          "excerpt": "{ label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },"
+        },
+        {
+          "term": {
+            "term": "workforce surveillance",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 62,
+          "excerpt": "{ label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 75,
+          "excerpt": "Platform · Executive Intelligence"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 64,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 9,
+              "continuity": 14,
+              "coordination": 5,
+              "trust": 16
+            },
+            "total": 44,
+            "shares": {
+              "governance": 0.20454545454545456,
+              "continuity": 0.3181818181818182,
+              "coordination": 0.11363636363636363,
+              "trust": 0.36363636363636365
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 80,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "institutional trust"
+            ],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 78
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/ai-workbench/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/ai-workbench"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 40,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 1,
+              "trust": 1
+            },
+            "total": 3,
+            "shares": {
+              "governance": 0,
+              "continuity": 0.3333333333333333,
+              "coordination": 0.3333333333333333,
+              "trust": 0.3333333333333333
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 40,
+          "flags": [
+            {
+              "message": "AI is referenced without labour-safe framing (oversight / explainability / reviewability).",
+              "suggestion": "Add human-oversight, explainability, or governance-safe AI framing."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": []
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 56
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/analytics/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/analytics"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 3,
+              "trust": 0
+            },
+            "total": 4,
+            "shares": {
+              "governance": 0.25,
+              "continuity": 0,
+              "coordination": 0.75,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/grievance-tracking/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/grievance-tracking"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 2,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 2,
+              "continuity": 0,
+              "coordination": 10,
+              "trust": 6
+            },
+            "total": 18,
+            "shares": {
+              "governance": 0.1111111111111111,
+              "continuity": 0,
+              "coordination": 0.5555555555555556,
+              "trust": 0.3333333333333333
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 40,
+          "flags": [
+            {
+              "message": "AI is referenced without labour-safe framing (oversight / explainability / reviewability).",
+              "suggestion": "Add human-oversight, explainability, or governance-safe AI framing."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": []
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 47
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/inbox/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/inbox"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 9,
+              "trust": 0
+            },
+            "total": 9,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/member-portal/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/member-portal"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 10.5% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 2,
+              "coordination": 16,
+              "trust": 1
+            },
+            "total": 19,
+            "shares": {
+              "governance": 0,
+              "continuity": 0.10526315789473684,
+              "coordination": 0.8421052631578947,
+              "trust": 0.05263157894736842
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/features/priorities/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/features/priorities"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 60,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 1,
+              "coordination": 1,
+              "trust": 0
+            },
+            "total": 3,
+            "shares": {
+              "governance": 0.3333333333333333,
+              "continuity": 0.3333333333333333,
+              "coordination": 0.3333333333333333,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/for-clc/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/for-clc"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 51,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 3,
+              "continuity": 6,
+              "coordination": 1,
+              "trust": 1
+            },
+            "total": 11,
+            "shares": {
+              "governance": 0.2727272727272727,
+              "continuity": 0.5454545454545454,
+              "coordination": 0.09090909090909091,
+              "trust": 0.09090909090909091
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/for-federations/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/for-federations"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/for-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/for-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/for-members/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/for-members"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/for-representatives/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/for-representatives"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/governance/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/governance"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 12,
+          "excerpt": "'How UnionEyes is governed today and the labour-side controls being put in place to keep the platform worker-first.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 51,
+          "excerpt": "description=\"How UnionEyes is governed today, and the labour-side controls being put in place to keep the platform worker-first.\""
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 24,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 58.8% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 11.8% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 10,
+              "continuity": 2,
+              "coordination": 0,
+              "trust": 5
+            },
+            "total": 17,
+            "shares": {
+              "governance": 0.5882352941176471,
+              "continuity": 0.11764705882352941,
+              "coordination": 0,
+              "trust": 0.29411764705882354
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 64
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/[slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/[slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 10,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 3,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 4,
+            "shares": {
+              "governance": 0.25,
+              "continuity": 0.75,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/categories/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/categories"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/category/[slug]/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/category/[slug]"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 50.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 1,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 2,
+            "shares": {
+              "governance": 0.5,
+              "continuity": 0.5,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 63
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/doctrine/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/doctrine"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/methodology/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/methodology"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 63,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 5,
+              "continuity": 6,
+              "coordination": 1,
+              "trust": 2
+            },
+            "total": 14,
+            "shares": {
+              "governance": 0.35714285714285715,
+              "continuity": 0.42857142857142855,
+              "coordination": 0.07142857142857142,
+              "trust": 0.14285714285714285
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 40,
+          "flags": [
+            {
+              "message": "AI is referenced without labour-safe framing (oversight / explainability / reviewability).",
+              "suggestion": "Add human-oversight, explainability, or governance-safe AI framing."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": []
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 62
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/insights/resonance/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/insights/resonance"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 1,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/institutional-continuity/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/institutional-continuity"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* Institutional Continuity — Core platform capability page"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 4,
+          "excerpt": "* Positions UE as the institutional continuity intelligence platform."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 29,
+          "excerpt": "'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 91,
+          "excerpt": "Platform · Institutional Continuity"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 196,
+          "excerpt": "unified institutional continuity platform."
+        },
+        {
+          "term": {
+            "term": "worker scoring",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 218,
+          "excerpt": "{ label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },"
+        },
+        {
+          "term": {
+            "term": "transformation",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 355,
+          "excerpt": "<div>              <h2 className=\"text-2xl font-bold text-navy mb-3\">Operational transformation as a gradual pathway</h2>"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 401,
+          "excerpt": "href={`/${locale}/platform/organizational-memory`}"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 14,
+              "continuity": 32,
+              "coordination": 15,
+              "trust": 15
+            },
+            "total": 76,
+            "shares": {
+              "governance": 0.18421052631578946,
+              "continuity": 0.42105263157894735,
+              "coordination": 0.19736842105263158,
+              "trust": 0.19736842105263158
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "institutional evolution"
+            ]
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 81
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/layout.tsx",
+        "isPublicSurface": true,
+        "label": "locale/(marketing)"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/pilot-request/layout.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/pilot-request"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            },
+            "total": 1,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 70,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/pilot-request/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/pilot-request"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "centralized",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 62,
+          "excerpt": "{ value: 'No centralized governance oversight', key: 'noGovernanceOversight' },"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 57,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 16,
+              "continuity": 34,
+              "coordination": 4,
+              "trust": 12
+            },
+            "total": 66,
+            "shares": {
+              "governance": 0.24242424242424243,
+              "continuity": 0.5151515151515151,
+              "coordination": 0.06060606060606061,
+              "trust": 0.18181818181818182
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 73
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/platform/explainable-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/explainable-intelligence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* /platform/explainable-intelligence — Wave 6 ontology collapse."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "* Canonical: /platform#trust (audit/explainability pillar)."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 14,
+          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 15,
+          "excerpt": "description: 'This route redirects to the canonical platform section.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 20,
+          "excerpt": "alternates: buildLocaleAlternates(locale, '/platform/explainable-intelligence'),"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 30,
+          "excerpt": "redirect(`/${locale}/platform#trust`);"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 7
+            },
+            "total": 7,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 1
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/platform/governance-intelligence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/governance-intelligence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* /platform/governance-intelligence — Wave 6 ontology collapse."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "* Canonical: /platform#governance (eight-pillar overview)."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 14,
+          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 15,
+          "excerpt": "description: 'This route redirects to the canonical platform section.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 20,
+          "excerpt": "alternates: buildLocaleAlternates(locale, '/platform/governance-intelligence'),"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 30,
+          "excerpt": "redirect(`/${locale}/platform#governance`);"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 5,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 5,
+            "shares": {
+              "governance": 1,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/platform/operational-coherence/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/operational-coherence"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* /platform/operational-coherence — Wave 6 ontology collapse."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "* Canonical: /platform#priorities (operational cadence pillar)."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 14,
+          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 15,
+          "excerpt": "description: 'This route redirects to the canonical platform section.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 20,
+          "excerpt": "alternates: buildLocaleAlternates(locale, '/platform/operational-coherence'),"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 30,
+          "excerpt": "redirect(`/${locale}/platform#priorities`);"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 4,
+              "trust": 0
+            },
+            "total": 4,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/platform/organizational-memory/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform/organizational-memory"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* /platform/organizational-memory — Wave 6 ontology collapse."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3,
+          "excerpt": "* Canonical: /platform#institutional-memory (eight-pillar overview)."
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 14,
+          "excerpt": "title: 'Redirecting | UnionEyes Platform',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 15,
+          "excerpt": "description: 'This route redirects to the canonical platform section.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 20,
+          "excerpt": "alternates: buildLocaleAlternates(locale, '/platform/organizational-memory'),"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 30,
+          "excerpt": "redirect(`/${locale}/platform#institutional-memory`);"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/platform/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/platform"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 23,
+          "excerpt": "title: 'The Platform | Eight Canonical Operational Surfaces | UnionEyes',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 26,
+          "excerpt": "alternates: buildLocaleAlternates(locale, '/platform'),"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 121,
+          "excerpt": "badge={<span className=\"text-xs uppercase tracking-wider text-white/80\">The Platform</span>}"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 124,
+          "excerpt": "imageUrl={heroImagery.platform}"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 74,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
+              "trust": 10
+            },
+            "total": 47,
+            "shares": {
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 73,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canadian"
+            ]
+          }
+        }
+      ],
+      "maturity": 75
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/pricing/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/pricing"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 63,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 33,
+              "continuity": 40,
+              "coordination": 41,
+              "trust": 4
+            },
+            "total": 118,
+            "shares": {
+              "governance": 0.2796610169491525,
+              "continuity": 0.3389830508474576,
+              "coordination": 0.3474576271186441,
+              "trust": 0.03389830508474576
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 84,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "governance-safe AI"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 73,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canadian"
+            ]
+          }
+        }
+      ],
+      "maturity": 74
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/proof/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/proof"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "transformation",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 59,
+          "excerpt": "beforeAfterTitle: 'Operational transformation over time',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 104,
+          "excerpt": "scenarioTitle: 'How the platform behaves inside an organization',"
+        },
+        {
+          "term": {
+            "term": "transformation",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 126,
+          "excerpt": "'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',"
+        },
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 1103,
+          "excerpt": "<h3 className=\"text-xl font-bold text-navy mb-3\">Operational disruption modeling</h3>"
+        },
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 1166,
+          "excerpt": "<h3 className=\"text-xl font-bold text-navy mb-3\">Institutional memory disruption models</h3>"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 86,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 130,
+              "continuity": 150,
+              "coordination": 131,
+              "trust": 81
+            },
+            "total": 492,
+            "shares": {
+              "governance": 0.26422764227642276,
+              "continuity": 0.3048780487804878,
+              "coordination": 0.266260162601626,
+              "trust": 0.16463414634146342
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 92,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability",
+              "reviewability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 78
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/executive-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/executive-leadership"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 49,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 7,
+              "continuity": 11,
+              "coordination": 1,
+              "trust": 2
+            },
+            "total": 21,
+            "shares": {
+              "governance": 0.3333333333333333,
+              "continuity": 0.5238095238095238,
+              "coordination": 0.047619047619047616,
+              "trust": 0.09523809523809523
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/governance-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/governance-leadership"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 49,
+          "excerpt": "<Link href=\"../platform/governance-intelligence\" className=\"inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 50,
+          "excerpt": "Governance Intelligence Platform"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 8,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 58.8% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 3.9% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 30,
+              "continuity": 2,
+              "coordination": 0,
+              "trust": 19
+            },
+            "total": 51,
+            "shares": {
+              "governance": 0.5882352941176471,
+              "continuity": 0.0392156862745098,
+              "coordination": 0,
+              "trust": 0.37254901960784315
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 60
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/labour-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/labour-leadership"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 64,
+          "excerpt": "description=\"UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform.\""
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 45.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 9,
+              "continuity": 0,
+              "coordination": 2,
+              "trust": 9
+            },
+            "total": 20,
+            "shares": {
+              "governance": 0.45,
+              "continuity": 0,
+              "coordination": 0.1,
+              "trust": 0.45
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 84,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 60
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/operations-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/operations-leadership"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 49,
+          "excerpt": "<Link href=\"../platform/operational-coherence\" className=\"inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 50,
+          "excerpt": "Operational Coherence Platform"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 4,
+              "coordination": 14,
+              "trust": 0
+            },
+            "total": 18,
+            "shares": {
+              "governance": 0,
+              "continuity": 0.2222222222222222,
+              "coordination": 0.7777777777777778,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 2,
+          "excerpt": "* Solutions — Stakeholder-Oriented Platform Journeys"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 5,
+          "excerpt": "* Hides platform sophistication. Exposes institutional outcomes."
+        },
+        {
+          "term": {
+            "term": "worker scoring",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 87,
+          "excerpt": "'Anti-surveillance by design — no worker scoring or monitoring',"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 64,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 12,
+              "continuity": 9,
+              "coordination": 5,
+              "trust": 16
+            },
+            "total": 42,
+            "shares": {
+              "governance": 0.2857142857142857,
+              "continuity": 0.21428571428571427,
+              "coordination": 0.11904761904761904,
+              "trust": 0.38095238095238093
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "governance-safe AI"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 83,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "institutional trust"
+            ],
+            "generalCanadianHits": [
+              "canadian"
+            ]
+          }
+        }
+      ],
+      "maturity": 78
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/procurement/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/procurement"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 124,
+          "excerpt": "Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption."
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 52,
+          "flags": [
+            {
+              "message": "Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).",
+              "suggestion": "Rebalance toward continuity, coordination, and trust language."
+            },
+            {
+              "message": "Continuity language under-represented: 10.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 22,
+              "continuity": 5,
+              "coordination": 8,
+              "trust": 15
+            },
+            "total": 50,
+            "shares": {
+              "governance": 0.44,
+              "continuity": 0.1,
+              "coordination": 0.16,
+              "trust": 0.3
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "fail",
+          "score": 80,
+          "flags": [
+            {
+              "message": "Non-neutral framing detected (activist framing).",
+              "line": 61,
+              "excerpt": "'Stakeholders struggle to compare options without clear continuity and trust criteria',",
+              "suggestion": "Rephrase in procedural / institutional terms."
+            }
+          ]
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 92,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "explainability",
+              "reviewability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 66
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/solutions/technology-leadership/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/solutions/technology-leadership"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "worker scoring",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 22,
+          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
+        },
+        {
+          "term": {
+            "term": "workforce surveillance",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 22,
+          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 22,
+          "excerpt": "{ icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 109,
+          "excerpt": "<p className=\"text-white/70 mb-8\">Request a technical briefing or platform demonstration.</p>"
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 0,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 0.0% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 7,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 16
+            },
+            "total": 23,
+            "shares": {
+              "governance": 0.30434782608695654,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0.6956521739130435
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "governance-safe AI"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 76,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canada",
+              "canadian"
+            ]
+          }
+        }
+      ],
+      "maturity": 61
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/status/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/status"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 0,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 2,
+              "trust": 0
+            },
+            "total": 2,
+            "shares": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 1,
+              "trust": 0
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 58
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/story/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/story"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No narrative-pillar vocabulary detected."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 0,
+              "continuity": 0,
+              "coordination": 0,
+              "trust": 0
+            },
+            "total": 0,
+            "shares": {}
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "warn",
+          "score": 55,
+          "flags": [
+            {
+              "message": "No Canadian-positioning vocabulary detected on a substantive public page.",
+              "suggestion": "Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing."
+            }
+          ],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": []
+          }
+        }
+      ],
+      "maturity": 71
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/trust/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/trust"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 5,
+          "excerpt": "* Demonstrates governance-first platform design: audit trails,"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 166,
+          "excerpt": "enforced at every layer of the platform."
+        },
+        {
+          "term": {
+            "term": "workforce surveillance",
+            "severity": "hard-fail",
+            "category": "surveillance-ai"
+          },
+          "line": 175,
+          "excerpt": "{ label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 175,
+          "excerpt": "{ label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 427,
+          "excerpt": "Real-time operational status of UnionEyes platform services."
+        }
+      ],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "warn",
+          "score": 59,
+          "flags": [
+            {
+              "message": "Continuity language under-represented: 10.4% (target 30%).",
+              "suggestion": "Add institutional-continuity framing."
+            }
+          ],
+          "detail": {
+            "counts": {
+              "governance": 28,
+              "continuity": 10,
+              "coordination": 20,
+              "trust": 38
+            },
+            "total": 96,
+            "shares": {
+              "governance": 0.2916666666666667,
+              "continuity": 0.10416666666666667,
+              "coordination": 0.20833333333333334,
+              "trust": 0.3958333333333333
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "warn",
+          "score": 50,
+          "flags": [
+            {
+              "message": "No coexistence / overlay framing detected.",
+              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
+            }
+          ],
+          "detail": {
+            "matched": []
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "fail",
+          "score": 20,
+          "flags": [
+            {
+              "message": "Forbidden AI framing: \"behavioural scoring\".",
+              "suggestion": "Reframe as assistive intelligence under human oversight."
+            }
+          ],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 73,
+          "flags": [],
+          "detail": {
+            "matched": [],
+            "generalCanadianHits": [
+              "canadian"
+            ]
+          }
+        }
+      ],
+      "maturity": 60
+    },
     {
       "ctx": {
         "path": "app/[locale]/layout.tsx",
@@ -2141,11 +8394,11 @@
     }
   ],
   "summary": {
-    "totalFiles": 8,
-    "publicFiles": 8,
-    "hardFails": 0,
-    "warnings": 160,
-    "ruleFailures": 3,
+    "totalFiles": 87,
+    "publicFiles": 87,
+    "hardFails": 7,
+    "warnings": 223,
+    "ruleFailures": 10,
     "averageMaturity": 67
   }
 }

@@ -1,16 +1,1617 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T03:48:20.347Z
+Generated: 2026-05-13T04:45:30.535Z
 
 ## Summary
 
-- Files scanned: **8**
-- Hard-fail violations: **0**
-- Warning violations: **160**
-- Rule failures: **3**
+- Files scanned: **87**
+- Hard-fail violations: **7**
+- Warning violations: **223**
+- Rule failures: **10**
 - Average Institutional Maturity: **67/100**
 
 ## Per-Surface Detail
+
+### marketing/[...slug]
+
+- **Path:** `app/(marketing)/[...slug]/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/case-studies/[slug]
+
+- **Path:** `app/(marketing)/case-studies/[slug]/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/case-studies
+
+- **Path:** `app/(marketing)/case-studies/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/contact
+
+- **Path:** `app/(marketing)/contact/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/executive-intelligence
+
+- **Path:** `app/(marketing)/executive-intelligence/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/features/ai-workbench
+
+- **Path:** `app/(marketing)/features/ai-workbench/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 40/100 (fail)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
+
+**Recommendations:**
+- Add human-oversight, explainability, or governance-safe AI framing.
+
+### marketing/features/analytics
+
+- **Path:** `app/(marketing)/features/analytics/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/features/grievance-tracking
+
+- **Path:** `app/(marketing)/features/grievance-tracking/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/features/inbox
+
+- **Path:** `app/(marketing)/features/inbox/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/features/member-portal
+
+- **Path:** `app/(marketing)/features/member-portal/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/features/priorities
+
+- **Path:** `app/(marketing)/features/priorities/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/governance
+
+- **Path:** `app/(marketing)/governance/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).
+
+**Recommendations:**
+- Rebalance toward continuity, coordination, and trust language.
+
+### marketing/insights/[slug]
+
+- **Path:** `app/(marketing)/insights/[slug]/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/insights/category/[slug]
+
+- **Path:** `app/(marketing)/insights/category/[slug]/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/insights
+
+- **Path:** `app/(marketing)/insights/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/institutional-continuity
+
+- **Path:** `app/(marketing)/institutional-continuity/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+### app/(marketing)/layout.tsx
+
+- **Path:** `app/(marketing)/layout.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### app/(marketing)/page.tsx
+
+- **Path:** `app/(marketing)/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/pilot-request
+
+- **Path:** `app/(marketing)/pilot-request/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/platform/explainable-intelligence
+
+- **Path:** `app/(marketing)/platform/explainable-intelligence/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Vocabulary violations:**
+- L3 [warning/warning] `platform` — redirect('/en-CA/platform/explainable-intelligence');
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+
+### marketing/platform/governance-intelligence
+
+- **Path:** `app/(marketing)/platform/governance-intelligence/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Vocabulary violations:**
+- L3 [warning/warning] `platform` — redirect('/en-CA/platform/governance-intelligence');
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+
+### marketing/platform/operational-coherence
+
+- **Path:** `app/(marketing)/platform/operational-coherence/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Vocabulary violations:**
+- L3 [warning/warning] `platform` — redirect('/en-CA/platform/operational-coherence');
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+
+### marketing/platform/organizational-memory
+
+- **Path:** `app/(marketing)/platform/organizational-memory/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Vocabulary violations:**
+- L3 [warning/warning] `platform` — redirect('/en-CA/platform/organizational-memory');
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+
+### marketing/pricing
+
+- **Path:** `app/(marketing)/pricing/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions/executive-leadership
+
+- **Path:** `app/(marketing)/solutions/executive-leadership/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions/governance-leadership
+
+- **Path:** `app/(marketing)/solutions/governance-leadership/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).
+
+**Recommendations:**
+- Rebalance toward continuity, coordination, and trust language.
+
+### marketing/solutions/labour-leadership
+
+- **Path:** `app/(marketing)/solutions/labour-leadership/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions/operations-leadership
+
+- **Path:** `app/(marketing)/solutions/operations-leadership/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions
+
+- **Path:** `app/(marketing)/solutions/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions/procurement
+
+- **Path:** `app/(marketing)/solutions/procurement/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/solutions/technology-leadership
+
+- **Path:** `app/(marketing)/solutions/technology-leadership/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/status
+
+- **Path:** `app/(marketing)/status/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/story
+
+- **Path:** `app/(marketing)/story/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+
+### marketing/trust
+
+- **Path:** `app/(marketing)/trust/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+### marketing/case-studies
+
+- **Path:** `app/[locale]/(marketing)/case-studies/layout.tsx`
+- **Institutional Maturity:** 76/100
+
+**Scores:**
+- narrative-balance: 60/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/case-studies
+
+- **Path:** `app/[locale]/(marketing)/case-studies/page.tsx`
+- **Institutional Maturity:** 59/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 40/100 (fail)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Add human-oversight, explainability, or governance-safe AI framing.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/contact
+
+- **Path:** `app/[locale]/(marketing)/contact/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/conventions
+
+- **Path:** `app/[locale]/(marketing)/conventions/page.tsx`
+- **Institutional Maturity:** 86/100
+
+**Scores:**
+- narrative-balance: 44/100 (warn)
+- coexistence-positioning: 100/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 100/100 (pass)
+
+**Vocabulary violations:**
+- L95 [warning/warning] `platform` — Platform · Conventions & Federated Governance
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 57.8% of pillar terms (target 30%, threshold 40%).
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+
+### marketing/executive-intelligence
+
+- **Path:** `app/[locale]/(marketing)/executive-intelligence/page.tsx`
+- **Institutional Maturity:** 78/100
+
+**Scores:**
+- narrative-balance: 64/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 80/100 (pass)
+
+**Vocabulary violations:**
+- L62 [hard-fail/surveillance-ai] `worker scoring` — { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
+- L62 [hard-fail/surveillance-ai] `workforce surveillance` — { label: 'Labour-safe',       desc: 'Zero workforce surveillance or worker scoring' },
+- L75 [warning/warning] `platform` — Platform · Executive Intelligence
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Remove or rephrase "worker scoring" (surveillance-ai).
+- Remove or rephrase "workforce surveillance" (surveillance-ai).
+- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/features/ai-workbench
+
+- **Path:** `app/[locale]/(marketing)/features/ai-workbench/page.tsx`
+- **Institutional Maturity:** 56/100
+
+**Scores:**
+- narrative-balance: 40/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 40/100 (fail)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Add human-oversight, explainability, or governance-safe AI framing.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/features/analytics
+
+- **Path:** `app/[locale]/(marketing)/features/analytics/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/features/grievance-tracking
+
+- **Path:** `app/[locale]/(marketing)/features/grievance-tracking/page.tsx`
+- **Institutional Maturity:** 47/100
+
+**Scores:**
+- narrative-balance: 2/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 40/100 (fail)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Add human-oversight, explainability, or governance-safe AI framing.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/features/inbox
+
+- **Path:** `app/[locale]/(marketing)/features/inbox/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/features/member-portal
+
+- **Path:** `app/[locale]/(marketing)/features/member-portal/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 10.5% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/features/priorities
+
+- **Path:** `app/[locale]/(marketing)/features/priorities/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 60/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/for-clc
+
+- **Path:** `app/[locale]/(marketing)/for-clc/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 51/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/for-federations
+
+- **Path:** `app/[locale]/(marketing)/for-federations/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/for-leadership
+
+- **Path:** `app/[locale]/(marketing)/for-leadership/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/for-members
+
+- **Path:** `app/[locale]/(marketing)/for-members/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/for-representatives
+
+- **Path:** `app/[locale]/(marketing)/for-representatives/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/governance
+
+- **Path:** `app/[locale]/(marketing)/governance/page.tsx`
+- **Institutional Maturity:** 64/100
+
+**Scores:**
+- narrative-balance: 24/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L12 [warning/warning] `platform` — 'How UnionEyes is governed today and the labour-side controls being put in place to keep the platform worker-first.',
+- L51 [warning/warning] `platform` — description="How UnionEyes is governed today, and the labour-side controls being put in place to keep the platform worker-first."
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 58.8% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 11.8% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/[slug]
+
+- **Path:** `app/[locale]/(marketing)/insights/[slug]/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 10/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/categories
+
+- **Path:** `app/[locale]/(marketing)/insights/categories/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Rebalance toward continuity, coordination, and trust language.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/category/[slug]
+
+- **Path:** `app/[locale]/(marketing)/insights/category/[slug]/page.tsx`
+- **Institutional Maturity:** 63/100
+
+**Scores:**
+- narrative-balance: 20/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 50.0% of pillar terms (target 30%, threshold 40%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Rebalance toward continuity, coordination, and trust language.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/doctrine
+
+- **Path:** `app/[locale]/(marketing)/insights/doctrine/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/methodology
+
+- **Path:** `app/[locale]/(marketing)/insights/methodology/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights
+
+- **Path:** `app/[locale]/(marketing)/insights/page.tsx`
+- **Institutional Maturity:** 62/100
+
+**Scores:**
+- narrative-balance: 63/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 40/100 (fail)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Add human-oversight, explainability, or governance-safe AI framing.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/insights/resonance
+
+- **Path:** `app/[locale]/(marketing)/insights/resonance/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/institutional-continuity
+
+- **Path:** `app/[locale]/(marketing)/institutional-continuity/page.tsx`
+- **Institutional Maturity:** 81/100
+
+**Scores:**
+- narrative-balance: 76/100 (pass)
+- coexistence-positioning: 70/100 (pass)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * Institutional Continuity — Core platform capability page
+- L4 [warning/warning] `platform` — * Positions UE as the institutional continuity intelligence platform.
+- L29 [warning/warning] `platform` — 'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
+- L91 [warning/warning] `platform` — Platform · Institutional Continuity
+- L196 [warning/warning] `platform` — unified institutional continuity platform.
+- L218 [hard-fail/surveillance-ai] `worker scoring` — { label: 'Labour-safe by design',     sub: 'Zero worker scoring or surveillance' },
+- L355 [warning/warning] `transformation` — <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
+- L401 [warning/warning] `platform` — href={`/${locale}/platform/organizational-memory`}
+
+**Flags:**
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Remove or rephrase "worker scoring" (surveillance-ai).
+- Remove or rephrase "transformation" (warning).
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### locale/(marketing)
+
+- **Path:** `app/[locale]/(marketing)/layout.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/pilot-request
+
+- **Path:** `app/[locale]/(marketing)/pilot-request/layout.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 70/100 (pass)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/pilot-request
+
+- **Path:** `app/[locale]/(marketing)/pilot-request/page.tsx`
+- **Institutional Maturity:** 73/100
+
+**Scores:**
+- narrative-balance: 57/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L62 [warning/warning] `centralized` — { value: 'No centralized governance oversight', key: 'noGovernanceOversight' },
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "centralized" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/platform/explainable-intelligence
+
+- **Path:** `app/[locale]/(marketing)/platform/explainable-intelligence/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * /platform/explainable-intelligence — Wave 6 ontology collapse.
+- L3 [warning/warning] `platform` — * Canonical: /platform#trust (audit/explainability pillar).
+- L14 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
+- L15 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
+- L20 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/explainable-intelligence'),
+- L30 [warning/warning] `platform` — redirect(`/${locale}/platform#trust`);
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/platform/governance-intelligence
+
+- **Path:** `app/[locale]/(marketing)/platform/governance-intelligence/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * /platform/governance-intelligence — Wave 6 ontology collapse.
+- L3 [warning/warning] `platform` — * Canonical: /platform#governance (eight-pillar overview).
+- L14 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
+- L15 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
+- L20 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/governance-intelligence'),
+- L30 [warning/warning] `platform` — redirect(`/${locale}/platform#governance`);
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 100.0% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/platform/operational-coherence
+
+- **Path:** `app/[locale]/(marketing)/platform/operational-coherence/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * /platform/operational-coherence — Wave 6 ontology collapse.
+- L3 [warning/warning] `platform` — * Canonical: /platform#priorities (operational cadence pillar).
+- L14 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
+- L15 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
+- L20 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/operational-coherence'),
+- L30 [warning/warning] `platform` — redirect(`/${locale}/platform#priorities`);
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/platform/organizational-memory
+
+- **Path:** `app/[locale]/(marketing)/platform/organizational-memory/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * /platform/organizational-memory — Wave 6 ontology collapse.
+- L3 [warning/warning] `platform` — * Canonical: /platform#institutional-memory (eight-pillar overview).
+- L14 [warning/warning] `platform` — title: 'Redirecting | UnionEyes Platform',
+- L15 [warning/warning] `platform` — description: 'This route redirects to the canonical platform section.',
+- L20 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform/organizational-memory'),
+- L30 [warning/warning] `platform` — redirect(`/${locale}/platform#institutional-memory`);
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/platform
+
+- **Path:** `app/[locale]/(marketing)/platform/page.tsx`
+- **Institutional Maturity:** 75/100
+
+**Scores:**
+- narrative-balance: 74/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 76/100 (pass)
+- canadian-positioning: 73/100 (pass)
+
+**Vocabulary violations:**
+- L23 [warning/warning] `platform` — title: 'The Platform | Eight Canonical Operational Surfaces | UnionEyes',
+- L26 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform'),
+- L121 [warning/warning] `platform` — badge={<span className="text-xs uppercase tracking-wider text-white/80">The Platform</span>}
+- L124 [warning/warning] `platform` — imageUrl={heroImagery.platform}
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/pricing
+
+- **Path:** `app/[locale]/(marketing)/pricing/page.tsx`
+- **Institutional Maturity:** 74/100
+
+**Scores:**
+- narrative-balance: 63/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 84/100 (pass)
+- canadian-positioning: 73/100 (pass)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/proof
+
+- **Path:** `app/[locale]/(marketing)/proof/page.tsx`
+- **Institutional Maturity:** 78/100
+
+**Scores:**
+- narrative-balance: 86/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 92/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L59 [warning/warning] `transformation` — beforeAfterTitle: 'Operational transformation over time',
+- L104 [warning/warning] `platform` — scenarioTitle: 'How the platform behaves inside an organization',
+- L126 [warning/warning] `transformation` — 'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
+- L1103 [warning/warning] `disruption` — <h3 className="text-xl font-bold text-navy mb-3">Operational disruption modeling</h3>
+- L1166 [warning/warning] `disruption` — <h3 className="text-xl font-bold text-navy mb-3">Institutional memory disruption models</h3>
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "transformation" (warning).
+- Remove or rephrase "platform" (warning).
+- Remove or rephrase "disruption" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions/executive-leadership
+
+- **Path:** `app/[locale]/(marketing)/solutions/executive-leadership/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 49/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions/governance-leadership
+
+- **Path:** `app/[locale]/(marketing)/solutions/governance-leadership/page.tsx`
+- **Institutional Maturity:** 60/100
+
+**Scores:**
+- narrative-balance: 8/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L49 [warning/warning] `platform` — <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25
+- L50 [warning/warning] `platform` — Governance Intelligence Platform
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 58.8% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 3.9% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions/labour-leadership
+
+- **Path:** `app/[locale]/(marketing)/solutions/labour-leadership/page.tsx`
+- **Institutional Maturity:** 60/100
+
+**Scores:**
+- narrative-balance: 20/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 84/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L64 [warning/warning] `platform` — description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 45.0% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions/operations-leadership
+
+- **Path:** `app/[locale]/(marketing)/solutions/operations-leadership/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L49 [warning/warning] `platform` — <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t
+- L50 [warning/warning] `platform` — Operational Coherence Platform
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions
+
+- **Path:** `app/[locale]/(marketing)/solutions/page.tsx`
+- **Institutional Maturity:** 78/100
+
+**Scores:**
+- narrative-balance: 64/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 83/100 (pass)
+
+**Vocabulary violations:**
+- L2 [warning/warning] `platform` — * Solutions — Stakeholder-Oriented Platform Journeys
+- L5 [warning/warning] `platform` — * Hides platform sophistication. Exposes institutional outcomes.
+- L87 [hard-fail/surveillance-ai] `worker scoring` — 'Anti-surveillance by design — no worker scoring or monitoring',
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Remove or rephrase "worker scoring" (surveillance-ai).
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/solutions/procurement
+
+- **Path:** `app/[locale]/(marketing)/solutions/procurement/page.tsx`
+- **Institutional Maturity:** 66/100
+
+**Scores:**
+- narrative-balance: 52/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 80/100 (fail)
+- labour-safe-ai: 92/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Vocabulary violations:**
+- L124 [warning/warning] `disruption` — Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption.
+
+**Flags:**
+- (narrative-balance) Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (procedural-neutrality) Non-neutral framing detected (activist framing).
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Remove or rephrase "disruption" (warning).
+- Rebalance toward continuity, coordination, and trust language.
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Rephrase in procedural / institutional terms.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/solutions/technology-leadership
+
+- **Path:** `app/[locale]/(marketing)/solutions/technology-leadership/page.tsx`
+- **Institutional Maturity:** 61/100
+
+**Scores:**
+- narrative-balance: 0/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 76/100 (pass)
+
+**Vocabulary violations:**
+- L22 [hard-fail/surveillance-ai] `worker scoring` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
+- L22 [hard-fail/surveillance-ai] `workforce surveillance` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
+- L22 [warning/warning] `platform` — { icon: CheckCircle,'title': 'Anti-surveillance by design',           desc: 'No capability path in the platform can be repurposed for workforce surveillance or worker scoring. Enforced architecturally
+- L109 [warning/warning] `platform` — <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+
+**Recommendations:**
+- Remove or rephrase "worker scoring" (surveillance-ai).
+- Remove or rephrase "workforce surveillance" (surveillance-ai).
+- Remove or rephrase "platform" (warning).
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+
+### marketing/status
+
+- **Path:** `app/[locale]/(marketing)/status/page.tsx`
+- **Institutional Maturity:** 58/100
+
+**Scores:**
+- narrative-balance: 0/100 (pass)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/story
+
+- **Path:** `app/[locale]/(marketing)/story/page.tsx`
+- **Institutional Maturity:** 71/100
+
+**Scores:**
+- narrative-balance: 50/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 55/100 (warn)
+
+**Flags:**
+- (narrative-balance) No narrative-pillar vocabulary detected.
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
+
+**Recommendations:**
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
+
+### marketing/trust
+
+- **Path:** `app/[locale]/(marketing)/trust/page.tsx`
+- **Institutional Maturity:** 60/100
+
+**Scores:**
+- narrative-balance: 59/100 (warn)
+- coexistence-positioning: 50/100 (warn)
+- procedural-neutrality: 100/100 (pass)
+- labour-safe-ai: 20/100 (fail)
+- canadian-positioning: 73/100 (pass)
+
+**Vocabulary violations:**
+- L5 [warning/warning] `platform` — * Demonstrates governance-first platform design: audit trails,
+- L166 [warning/warning] `platform` — enforced at every layer of the platform.
+- L175 [hard-fail/surveillance-ai] `workforce surveillance` — { label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },
+- L175 [warning/warning] `platform` — { label: 'Anti-surveillance by design',        desc: 'No capability path in the platform can be re-purposed for workforce surveillance.' },
+- L427 [warning/warning] `platform` — Real-time operational status of UnionEyes platform services.
+
+**Flags:**
+- (narrative-balance) Continuity language under-represented: 10.4% (target 30%).
+- (coexistence-positioning) No coexistence / overlay framing detected.
+- (labour-safe-ai) Forbidden AI framing: "behavioural scoring".
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+- Remove or rephrase "workforce surveillance" (surveillance-ai).
+- Add institutional-continuity framing.
+- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- Reframe as assistive intelligence under human oversight.
 
 ### app/[locale]/layout.tsx
 
