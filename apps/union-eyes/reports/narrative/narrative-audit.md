@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:15:55.590Z
+Generated: 2026-05-13T05:19:36.755Z
 
 ## Summary
 
 - Files scanned: **87**
-- Hard-fail violations: **55**
-- Warning violations: **267**
+- Hard-fail violations: **51**
+- Warning violations: **261**
 - Rule failures: **10**
 - Average Institutional Maturity: **67/100**
 
@@ -1758,7 +1758,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - **Institutional Maturity:** 74/100
 
 **Scores:**
-- narrative-balance: 59/100 (warn)
+- narrative-balance: 60/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 20/100 (fail)
@@ -1806,12 +1806,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - L7432 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
 - L7454 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
 - L7456 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7459 [hard-fail/startup-saas] `module-level entitlements` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-- L7459 [warning/warning] `operating system` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-- L7459 [warning/warning] `module-level` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
 - L7460 [warning/warning] `platform` — "platform": "Capabilities",
-- L7506 [hard-fail/startup-saas] `operating system for unions` — "tagline": "A governed operating system for unions."
-- L7506 [warning/warning] `operating system` — "tagline": "A governed operating system for unions."
 - L7511 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
 - L7512 [warning/warning] `platform` — "badge": "Platform Module",
 - L7525 [hard-fail/startup-saas] `AI-assisted triage` — "feat6Title": "AI-Assisted Triage",
@@ -1851,7 +1846,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - L10594 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 9.6% (target 30%).
+- (narrative-balance) Continuity language under-represented: 9.8% (target 30%).
 - (labour-safe-ai) Forbidden AI framing: "autonomous decisions".
 
 **Recommendations:**
@@ -1865,8 +1860,6 @@ Generated: 2026-05-13T05:15:55.590Z
 - Remove or rephrase "SaaS tool" (startup-saas).
 - Replace "AI-assisted triage" → reviewer-assisted intake under human oversight
 - Remove or rephrase "centralized" (warning).
-- Replace "module-level entitlements" → contractual scope | institutional licensing
-- Remove or rephrase "module-level" (warning).
 - Remove or rephrase "disruption" (warning).
 - Add institutional-continuity framing.
 - Reframe as assistive intelligence under human oversight.
@@ -1874,10 +1867,10 @@ Generated: 2026-05-13T05:15:55.590Z
 ### messages/en.json
 
 - **Path:** `messages/en.json`
-- **Institutional Maturity:** 61/100
+- **Institutional Maturity:** 62/100
 
 **Scores:**
-- narrative-balance: 49/100 (warn)
+- narrative-balance: 50/100 (warn)
 - coexistence-positioning: 50/100 (warn)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 20/100 (fail)
@@ -1926,12 +1919,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - L7489 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
 - L7491 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
 - L7601 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
-- L7636 [hard-fail/startup-saas] `module-level entitlements` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-- L7636 [warning/warning] `operating system` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
-- L7636 [warning/warning] `module-level` — "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
 - L7637 [warning/warning] `platform` — "platform": "Capabilities",
-- L7682 [hard-fail/startup-saas] `operating system for unions` — "tagline": "A governed operating system for unions."
-- L7682 [warning/warning] `operating system` — "tagline": "A governed operating system for unions."
 - L7687 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
 - L7688 [warning/warning] `platform` — "badge": "Platform Module",
 - L7701 [hard-fail/startup-saas] `AI-assisted triage` — "feat6Title": "AI-Assisted Triage",
@@ -1969,7 +1957,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - L10993 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 4.6% (target 30%).
+- (narrative-balance) Continuity language under-represented: 4.9% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (labour-safe-ai) Forbidden AI framing: "autonomous decisions".
 
@@ -1984,8 +1972,6 @@ Generated: 2026-05-13T05:15:55.590Z
 - Remove or rephrase "SaaS tool" (startup-saas).
 - Replace "AI-assisted triage" → reviewer-assisted intake under human oversight
 - Remove or rephrase "centralized" (warning).
-- Replace "module-level entitlements" → contractual scope | institutional licensing
-- Remove or rephrase "module-level" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Reframe as assistive intelligence under human oversight.
@@ -2073,7 +2059,7 @@ Generated: 2026-05-13T05:15:55.590Z
 - L8795 [warning/warning] `platform` — "platform": {
 
 **Flags:**
-- (narrative-balance) Governance saturation detected: 47.4% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Governance saturation detected: 47.8% of pillar terms (target 30%, threshold 40%).
 - (narrative-balance) Continuity language under-represented: 0.4% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 

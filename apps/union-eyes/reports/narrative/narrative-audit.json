@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:15:55.590Z",
+  "generatedAt": "2026-05-13T05:19:36.755Z",
   "files": [
     {
       "ctx": {
@@ -7299,59 +7299,12 @@
         },
         {
           "term": {
-            "term": "module-level entitlements",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "contractual scope | institutional licensing"
-          },
-          "line": 7459,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7459,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
-            "term": "module-level",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7459,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7460,
           "excerpt": "\"platform\": \"Capabilities\","
-        },
-        {
-          "term": {
-            "term": "operating system for unions",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "institutional continuity infrastructure for unions"
-          },
-          "line": 7506,
-          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7506,
-          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
         },
         {
           "term": {
@@ -7694,26 +7647,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 59,
+          "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 9.6% (target 30%).",
+              "message": "Continuity language under-represented: 9.8% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 263,
-              "continuity": 69,
+              "governance": 265,
+              "continuity": 71,
               "coordination": 149,
               "trust": 241
             },
-            "total": 722,
+            "total": 726,
             "shares": {
-              "governance": 0.36426592797783935,
-              "continuity": 0.09556786703601108,
-              "coordination": 0.20637119113573407,
-              "trust": 0.3337950138504155
+              "governance": 0.3650137741046832,
+              "continuity": 0.09779614325068871,
+              "coordination": 0.20523415977961432,
+              "trust": 0.3319559228650138
             }
           }
         },
@@ -8185,59 +8138,12 @@
         },
         {
           "term": {
-            "term": "module-level entitlements",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "contractual scope | institutional licensing"
-          },
-          "line": 7636,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7636,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
-            "term": "module-level",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7636,
-          "excerpt": "\"description\": \"A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7637,
           "excerpt": "\"platform\": \"Capabilities\","
-        },
-        {
-          "term": {
-            "term": "operating system for unions",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "institutional continuity infrastructure for unions"
-          },
-          "line": 7682,
-          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7682,
-          "excerpt": "\"tagline\": \"A governed operating system for unions.\""
         },
         {
           "term": {
@@ -8562,26 +8468,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 49,
+          "score": 50,
           "flags": [
             {
-              "message": "Continuity language under-represented: 4.6% (target 30%).",
+              "message": "Continuity language under-represented: 4.9% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 224,
-              "continuity": 27,
+              "governance": 226,
+              "continuity": 29,
               "coordination": 133,
               "trust": 207
             },
-            "total": 591,
+            "total": 595,
             "shares": {
-              "governance": 0.3790186125211506,
-              "continuity": 0.04568527918781726,
-              "coordination": 0.22504230118443316,
-              "trust": 0.350253807106599
+              "governance": 0.3798319327731092,
+              "continuity": 0.04873949579831933,
+              "coordination": 0.2235294117647059,
+              "trust": 0.34789915966386553
             }
           }
         },
@@ -8642,7 +8548,7 @@
           }
         }
       ],
-      "maturity": 61
+      "maturity": 62
     },
     {
       "ctx": {
@@ -9046,7 +8952,7 @@
           "score": 25,
           "flags": [
             {
-              "message": "Governance saturation detected: 47.4% of pillar terms (target 30%, threshold 40%).",
+              "message": "Governance saturation detected: 47.8% of pillar terms (target 30%, threshold 40%).",
               "suggestion": "Rebalance toward continuity, coordination, and trust language."
             },
             {
@@ -9056,17 +8962,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 120,
+              "governance": 122,
               "continuity": 1,
               "coordination": 31,
               "trust": 101
             },
-            "total": 253,
+            "total": 255,
             "shares": {
-              "governance": 0.4743083003952569,
-              "continuity": 0.003952569169960474,
-              "coordination": 0.1225296442687747,
-              "trust": 0.39920948616600793
+              "governance": 0.47843137254901963,
+              "continuity": 0.00392156862745098,
+              "coordination": 0.12156862745098039,
+              "trust": 0.396078431372549
             }
           }
         },
@@ -9281,8 +9187,8 @@
   "summary": {
     "totalFiles": 87,
     "publicFiles": 87,
-    "hardFails": 55,
-    "warnings": 267,
+    "hardFails": 51,
+    "warnings": 261,
     "ruleFailures": 10,
     "averageMaturity": 67
   }

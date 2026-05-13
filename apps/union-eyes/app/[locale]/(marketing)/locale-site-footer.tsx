@@ -27,28 +27,40 @@ const FOOTER_COPY: Record<string, {
   canadaBadge: string;
 }> = {
   'en-CA': {
-    ctaHeading: 'Ready to lead with clarity?',
-    ctaBody: 'See how UnionEyes turns casework into confident, data-backed decisions. Request a demo - no commitment.',
+    ctaHeading: 'Ready to lead with institutional clarity?',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
+    pilotBadge: 'Pilot Active',
+    canadaBadge: 'Canadian Made',
+  },
+  en: {
+    ctaHeading: 'Ready to lead with institutional clarity?',
+    ctaBody: 'See how UnionEyes turns casework, governance, and continuity into a defensible institutional record. Request an institutional briefing.',
     pilotBadge: 'Pilot Active',
     canadaBadge: 'Canadian Made',
   },
   'fr-CA': {
-    ctaHeading: 'Pret a diriger avec clarte?',
-    ctaBody: 'Decouvrez comment UnionEyes transforme le travail syndical en decisions eclairees.',
+    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
+    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
+    pilotBadge: 'Pilote actif',
+    canadaBadge: 'Fait au Canada',
+  },
+  fr: {
+    ctaHeading: 'Prêt à diriger avec clarté institutionnelle?',
+    ctaBody: 'Découvrez comment UnionEyes transforme le travail syndical, la gouvernance et la continuité en un dossier institutionnel défendable. Demandez une séance d\'orientation institutionnelle.',
     pilotBadge: 'Pilote actif',
     canadaBadge: 'Fait au Canada',
   },
   it: {
-    ctaHeading: 'Pronto a guidare con chiarezza?',
-    ctaBody: 'Scopri come UnionEyes trasforma il lavoro sindacale in decisioni sicure e supportate dai dati. Richiedi una demo senza impegno.',
+    ctaHeading: 'Pronto a guidare con chiarezza istituzionale?',
+    ctaBody: 'Scopri come UnionEyes trasforma casework, governance e continuità in un registro istituzionale difendibile. Richiedi una sessione di orientamento istituzionale.',
     pilotBadge: 'Pilota attivo',
     canadaBadge: 'Creato in Canada',
   },
   pt: {
-    ctaHeading: 'Pronto para liderar com clareza?',
-    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical em decisoes confiantes e orientadas por dados. Solicite uma demonstracao sem compromisso.',
+    ctaHeading: 'Pronto para liderar com clareza institucional?',
+    ctaBody: 'Veja como o UnionEyes transforma o trabalho sindical, a governança e a continuidade em um registro institucional defensável. Solicite uma sessão de orientação institucional.',
     pilotBadge: 'Piloto ativo',
-    canadaBadge: 'Feito no Canada',
+    canadaBadge: 'Feito no Canadá',
   },
 };
 

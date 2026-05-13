@@ -7456,7 +7456,7 @@
       "pageDescription": "État en temps réel des services d'UnionEyes."
     },
     "footer": {
-      "description": "Un système d'exploitation gouverné pour les syndicats canadiens — déployé par contrat, activé par module et conçu pour la reddition de comptes.",
+      "description": "Infrastructure institutionnelle de gouvernance et de continuité pour les syndicats canadiens — déployée par contrat, encadrée par habilitations et conçue pour la reddition de comptes.",
       "platform": "Capacités",
       "solutions": "Solutions",
       "governanceAndTrust": "Gouvernance et confiance",
@@ -7503,7 +7503,7 @@
       "accessibility": "Accessibilité",
       "trust": "Confiance et conformité",
       "rights": "Tous droits réservés.",
-      "tagline": "Un système d'exploitation gouverné pour les syndicats."
+      "tagline": "Infrastructure institutionnelle de gouvernance et de continuité pour les syndicats canadiens."
     },
     "features": {
       "grievanceTracking": {

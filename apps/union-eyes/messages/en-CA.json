@@ -7456,7 +7456,7 @@
       "pageDescription": "Real-time status of UnionEyes platform services."
     },
     "footer": {
-      "description": "A governed operating system for Canadian unions — contract-based deployment, module-level entitlements, and audit-ready operations.",
+      "description": "Institutional governance & continuity infrastructure for Canadian unions — contract-based deployment, governed access scopes, and audit-ready operations of record.",
       "platform": "Capabilities",
       "solutions": "Solutions",
       "governanceAndTrust": "Governance & Trust",
@@ -7503,7 +7503,7 @@
       "accessibility": "Accessibility",
       "trust": "Trust & Compliance",
       "rights": "All rights reserved.",
-      "tagline": "A governed operating system for unions."
+      "tagline": "Institutional governance & continuity infrastructure for Canadian unions."
     },
     "features": {
       "grievanceTracking": {
