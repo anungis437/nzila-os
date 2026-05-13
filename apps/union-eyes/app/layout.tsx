@@ -28,35 +28,35 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = getUnionEyesSiteTopology();
+  const institutionalDescription =
+    'Institutional governance and continuity infrastructure for unions and democratic organizations — bylaw-aligned procedural cadence, institutional memory preservation, representational coordination, and audit-grade transparency. Canadian-hosted, bilingual-first, sovereignty-conscious.';
+  const institutionalTitle = `UnionEyes | Institutional Governance & Continuity Infrastructure for Unions${site.titleSuffix}`;
 
   return {
     title: {
-      default: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
+      default: institutionalTitle,
       template: `%s | UnionEyes${site.titleSuffix}`,
     },
-    description:
-      'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+    description: institutionalDescription,
     metadataBase: new URL(site.marketingUrl),
     openGraph: {
       type: 'website',
       siteName: 'UnionEyes',
-      title: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
-      description:
-        'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+      title: institutionalTitle,
+      description: institutionalDescription,
       images: [
         {
           url: '/images/og-default.png',
           width: 1200,
           height: 630,
-          alt: 'UnionEyes — Modern Operating System for Unions',
+          alt: 'UnionEyes — Institutional Governance & Continuity Infrastructure for Unions',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
-      description:
-        'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
+      title: institutionalTitle,
+      description: institutionalDescription,
       images: ['/images/og-default.png'],
     },
     icons: {
@@ -81,8 +81,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'UnionEyes',
+    alternateName: 'UnionEyes Institutional Continuity Infrastructure',
     url: site.marketingUrl,
     logo: `${site.marketingUrl}/icon.svg`,
+    description:
+      'Institutional governance and continuity infrastructure for unions and democratic organizations — procedural coordination, institutional memory preservation, representational workflow, and audit-grade transparency. Canadian-hosted, bilingual-first.',
+    slogan: 'Institutional governance, continuity, and representational coordination for democratic organizations.',
+    knowsAbout: [
+      'institutional governance',
+      'institutional continuity',
+      'institutional memory preservation',
+      'procedural cadence',
+      'bylaw-aligned compliance',
+      'representational coordination',
+      'case management workflow',
+      'audit-grade transparency',
+      'explainable assistive intelligence',
+      'Canadian sovereignty-conscious infrastructure',
+    ],
   };
 
   const websiteSchema = {
@@ -91,6 +107,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     name: 'UnionEyes',
     url: site.marketingUrl,
     inLanguage: locale,
+    description:
+      'Institutional governance and continuity infrastructure for unions — procedural coordination, institutional memory, and audit-grade transparency.',
     publisher: {
       '@type': 'Organization',
       name: 'UnionEyes',
