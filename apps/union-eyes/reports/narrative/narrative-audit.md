@@ -1,6 +1,6 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T11:33:42.047Z
+Generated: 2026-05-13T11:36:26.925Z
 
 ## Summary
 
@@ -27,10 +27,10 @@ Generated: 2026-05-13T11:33:42.047Z
 ### marketing/case-studies/[slug]
 
 - **Path:** `app/(marketing)/case-studies/[slug]/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -39,10 +39,10 @@ Generated: 2026-05-13T11:33:42.047Z
 ### marketing/case-studies
 
 - **Path:** `app/(marketing)/case-studies/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -447,28 +447,22 @@ Generated: 2026-05-13T11:33:42.047Z
 ### marketing/case-studies
 
 - **Path:** `app/[locale]/(marketing)/case-studies/layout.tsx`
-- **Institutional Maturity:** 76/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 60/100 (pass)
-- coexistence-positioning: 50/100 (warn)
+- narrative-balance: 76/100 (pass)
+- coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 70/100 (pass)
-
-**Flags:**
-- (coexistence-positioning) No coexistence / overlay framing detected.
-
-**Recommendations:**
-- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
+- canadian-positioning: 100/100 (pass)
 
 ### marketing/case-studies
 
 - **Path:** `app/[locale]/(marketing)/case-studies/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 94/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)

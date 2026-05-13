@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T11:33:42.047Z",
+  "generatedAt": "2026-05-13T11:36:26.925Z",
   "files": [
     {
       "ctx": {
@@ -101,21 +101,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -177,7 +177,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -190,21 +190,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 74,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
               "trust": 10
             },
-            "total": 24,
+            "total": 47,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
             }
           }
         },
@@ -266,7 +266,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
     },
     {
       "ctx": {
@@ -3072,89 +3072,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 60,
+          "score": 76,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 1,
-              "continuity": 1,
-              "coordination": 1,
-              "trust": 0
+              "governance": 11,
+              "continuity": 14,
+              "coordination": 16,
+              "trust": 11
             },
-            "total": 3,
+            "total": 52,
             "shares": {
-              "governance": 0.3333333333333333,
-              "continuity": 0.3333333333333333,
-              "coordination": 0.3333333333333333,
-              "trust": 0
-            }
-          }
-        },
-        {
-          "rule": "coexistence-positioning",
-          "status": "warn",
-          "score": 50,
-          "flags": [
-            {
-              "message": "No coexistence / overlay framing detected.",
-              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
-            }
-          ],
-          "detail": {
-            "matched": []
-          }
-        },
-        {
-          "rule": "procedural-neutrality",
-          "status": "pass",
-          "score": 100,
-          "flags": []
-        },
-        {
-          "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": []
-        },
-        {
-          "rule": "canadian-positioning",
-          "status": "pass",
-          "score": 70,
-          "flags": [],
-          "detail": {
-            "matched": [],
-            "generalCanadianHits": []
-          }
-        }
-      ],
-      "maturity": 76
-    },
-    {
-      "ctx": {
-        "path": "app/[locale]/(marketing)/case-studies/page.tsx",
-        "isPublicSurface": true,
-        "label": "marketing/case-studies"
-      },
-      "violations": [],
-      "ruleResults": [
-        {
-          "rule": "narrative-balance",
-          "status": "pass",
-          "score": 47,
-          "flags": [],
-          "detail": {
-            "counts": {
-              "governance": 3,
-              "continuity": 5,
-              "coordination": 6,
-              "trust": 10
-            },
-            "total": 24,
-            "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.21153846153846154,
+              "continuity": 0.2692307692307692,
+              "coordination": 0.3076923076923077,
+              "trust": 0.21153846153846154
             }
           }
         },
@@ -3216,7 +3148,96 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 94
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(marketing)/case-studies/page.tsx",
+        "isPublicSurface": true,
+        "label": "marketing/case-studies"
+      },
+      "violations": [],
+      "ruleResults": [
+        {
+          "rule": "narrative-balance",
+          "status": "pass",
+          "score": 74,
+          "flags": [],
+          "detail": {
+            "counts": {
+              "governance": 10,
+              "continuity": 12,
+              "coordination": 15,
+              "trust": 10
+            },
+            "total": 47,
+            "shares": {
+              "governance": 0.2127659574468085,
+              "continuity": 0.2553191489361702,
+              "coordination": 0.3191489361702128,
+              "trust": 0.2127659574468085
+            }
+          }
+        },
+        {
+          "rule": "coexistence-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "alongside existing systems",
+              "non-displacing",
+              "respects existing tools"
+            ]
+          }
+        },
+        {
+          "rule": "procedural-neutrality",
+          "status": "pass",
+          "score": 100,
+          "flags": []
+        },
+        {
+          "rule": "labour-safe-ai",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "mentionsAi": true,
+            "matchedRequired": [
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
+            ]
+          }
+        },
+        {
+          "rule": "canadian-positioning",
+          "status": "pass",
+          "score": 100,
+          "flags": [],
+          "detail": {
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "institutional trust",
+              "democratic infrastructure"
+            ],
+            "generalCanadianHits": [
+              "canadian",
+              "bilingual"
+            ]
+          }
+        }
+      ],
+      "maturity": 94
     },
     {
       "ctx": {
