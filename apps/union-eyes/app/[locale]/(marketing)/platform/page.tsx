@@ -130,15 +130,6 @@ export default async function PlatformOverviewPage({
       />
 
       <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-16 max-w-3xl">
-          <p className="text-base leading-relaxed text-gray-700">
-            The runtime is not a collection of features. It is one operating
-            experience whose canonical surfaces correspond to the institutional
-            responsibilities a union, federation, or congress actually carries.
-            Each surface is a discipline of practice — not a tab.
-          </p>
-        </div>
-
         <div className="grid gap-10 md:grid-cols-2">
           {pillars.map((p) => {
             const Icon = p.icon;
