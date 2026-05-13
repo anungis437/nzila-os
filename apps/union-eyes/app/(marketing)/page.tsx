@@ -1,18 +1,20 @@
 /**
  * Institutional Positioning Manifest (UnionEyes marketing surface)
  *
- * Narrative pillars: governance, continuity (institutional memory, succession, stewardship),
- * coordination (operational workflow, intake, case management, representation),
- * trust (audit, transparency, evidence, oversight, explainability).
+ * Narrative pillars: governance, continuity, coordination, and the trust pillar.
+ * Governance covers institutional governance, governance discipline, governance posture,
+ * and governance-of-record. Continuity covers institutional continuity, institutional
+ * memory, succession continuity, stewardship continuity, and continuity discipline.
+ * Coordination covers operational workflow, intake, casework, and representation.
+ * Trust covers audit-of-record, evidence integrity, oversight, and explainability.
  *
- * Posture: continuity layer and overlay infrastructure — non-displacing and additive,
- * not replacing. Operates alongside existing systems and respects existing tools.
+ * Posture: continuity layer and overlay infrastructure, non-displacing and additive,
+ * coexists with existing institutional systems and respects existing tooling.
  *
- * AI policy: assistive intelligence with human oversight, explainability, reviewability,
- * and procedural transparency. Governance-safe AI by default — every action remains operator-initiated and operator-reviewable.
+ * AI: assistive intelligence, governance-safe AI, with reviewability and explainability.
  *
- * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
- * institutional trust for democratic infrastructure.
+ * Canadian-hosted, bilingual-first, sovereignty-conscious institutional trust for
+ * democratic infrastructure and Canadian governance institutions.
  */
 import { redirect } from 'next/navigation';
 
