@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:26:12.271Z
+Generated: 2026-05-13T05:27:07.332Z
 
 ## Summary
 
 - Files scanned: **87**
-- Hard-fail violations: **18**
-- Warning violations: **235**
+- Hard-fail violations: **0**
+- Warning violations: **231**
 - Rule failures: **14**
 - Average Institutional Maturity: **67/100**
 
@@ -1686,30 +1686,19 @@ Generated: 2026-05-13T05:26:12.271Z
 - L7110 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
 - L7111 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
 - L7172 [warning/warning] `platform` — "platform": "Platform",
-- L7192 [hard-fail/startup-saas] `operating system for unions` — "badge": "A Governed Operating System for Unions",
-- L7192 [warning/warning] `operating system` — "badge": "A Governed Operating System for Unions",
 - L7194 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
 - L7196 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7198 [hard-fail/startup-saas] `modules available` — "unionEntities": "Modules Available",
 - L7207 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
-- L7208 [hard-fail/startup-saas] `another SaaS tool` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7208 [hard-fail/startup-saas] `another saas` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7208 [hard-fail/startup-saas] `SaaS tool` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7208 [warning/warning] `operating system` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
 - L7227 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
 - L7236 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
-- L7248 [hard-fail/startup-saas] `AI-assisted triage` — "module5Desc": "AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.",
 - L7258 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
 - L7270 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
 - L7432 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
 - L7454 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
 - L7456 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
 - L7460 [warning/warning] `platform` — "platform": "Capabilities",
-- L7511 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
 - L7512 [warning/warning] `platform` — "badge": "Platform Module",
-- L7525 [hard-fail/startup-saas] `AI-assisted triage` — "feat6Title": "AI-Assisted Triage",
 - L7546 [warning/warning] `platform` — "badge": "Platform Module",
-- L7580 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.",
 - L7581 [warning/warning] `platform` — "badge": "Platform Module",
 - L7611 [warning/warning] `platform` — "badge": "Platform Module",
 - L7621 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
@@ -1750,13 +1739,7 @@ Generated: 2026-05-13T05:26:12.271Z
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Remove or rephrase "AI-powered" (warning).
-- Replace "operating system for unions" → institutional continuity infrastructure for unions
 - Remove or rephrase "operating system" (warning).
-- Replace "modules available" → continuity layers | governance domains
-- Remove or rephrase "another SaaS tool" (startup-saas).
-- Remove or rephrase "another saas" (startup-saas).
-- Remove or rephrase "SaaS tool" (startup-saas).
-- Replace "AI-assisted triage" → reviewer-assisted intake under human oversight
 - Remove or rephrase "centralized" (warning).
 - Remove or rephrase "disruption" (warning).
 - Add institutional-continuity framing.
@@ -1798,19 +1781,11 @@ Generated: 2026-05-13T05:26:12.271Z
 - L7173 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
 - L7174 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
 - L7216 [warning/warning] `platform` — "platform": "Platform",
-- L7236 [hard-fail/startup-saas] `operating system for unions` — "badge": "A Governed Operating System for Unions",
-- L7236 [warning/warning] `operating system` — "badge": "A Governed Operating System for Unions",
 - L7238 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
 - L7240 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7242 [hard-fail/startup-saas] `modules available` — "unionEntities": "Modules Available",
 - L7251 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
-- L7252 [hard-fail/startup-saas] `another SaaS tool` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7252 [hard-fail/startup-saas] `another saas` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7252 [hard-fail/startup-saas] `SaaS tool` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
-- L7252 [warning/warning] `operating system` — "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f
 - L7271 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
 - L7280 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
-- L7292 [hard-fail/startup-saas] `AI-assisted triage` — "module5Desc": "AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.",
 - L7302 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
 - L7314 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
 - L7467 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
@@ -1818,11 +1793,8 @@ Generated: 2026-05-13T05:26:12.271Z
 - L7491 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
 - L7601 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
 - L7637 [warning/warning] `platform` — "platform": "Capabilities",
-- L7687 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
 - L7688 [warning/warning] `platform` — "badge": "Platform Module",
-- L7701 [hard-fail/startup-saas] `AI-assisted triage` — "feat6Title": "AI-Assisted Triage",
 - L7722 [warning/warning] `platform` — "badge": "Platform Module",
-- L7756 [hard-fail/startup-saas] `AI-assisted triage` — "pageDescription": "AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.",
 - L7757 [warning/warning] `platform` — "badge": "Platform Module",
 - L7787 [warning/warning] `platform` — "badge": "Platform Module",
 - L7797 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
@@ -1862,13 +1834,7 @@ Generated: 2026-05-13T05:26:12.271Z
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Remove or rephrase "AI-powered" (warning).
-- Replace "operating system for unions" → institutional continuity infrastructure for unions
 - Remove or rephrase "operating system" (warning).
-- Replace "modules available" → continuity layers | governance domains
-- Remove or rephrase "another SaaS tool" (startup-saas).
-- Remove or rephrase "another saas" (startup-saas).
-- Remove or rephrase "SaaS tool" (startup-saas).
-- Replace "AI-assisted triage" → reviewer-assisted intake under human oversight
 - Remove or rephrase "centralized" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.

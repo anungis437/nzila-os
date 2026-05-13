@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:26:12.271Z",
+  "generatedAt": "2026-05-13T05:27:07.332Z",
   "files": [
     {
       "ctx": {
@@ -6592,25 +6592,6 @@
         },
         {
           "term": {
-            "term": "operating system for unions",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "institutional continuity infrastructure for unions"
-          },
-          "line": 7192,
-          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7192,
-          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -6629,62 +6610,12 @@
         },
         {
           "term": {
-            "term": "modules available",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "continuity layers | governance domains"
-          },
-          "line": 7198,
-          "excerpt": "\"unionEntities\": \"Modules Available\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7207,
           "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
-        },
-        {
-          "term": {
-            "term": "another SaaS tool",
-            "severity": "hard-fail",
-            "category": "startup-saas"
-          },
-          "line": 7208,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "another saas",
-            "severity": "hard-fail",
-            "category": "startup-saas"
-          },
-          "line": 7208,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "SaaS tool",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "exceptions": [
-              "not a saas tool",
-              "unlike saas tools"
-            ]
-          },
-          "line": 7208,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7208,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
         },
         {
           "term": {
@@ -6703,16 +6634,6 @@
           },
           "line": 7236,
           "excerpt": "\"modulesBadge\": \"Platform Modules\","
-        },
-        {
-          "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7248,
-          "excerpt": "\"module5Desc\": \"AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.\","
         },
         {
           "term": {
@@ -6770,16 +6691,6 @@
         },
         {
           "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7511,
-          "excerpt": "\"pageDescription\": \"End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -6789,32 +6700,12 @@
         },
         {
           "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7525,
-          "excerpt": "\"feat6Title\": \"AI-Assisted Triage\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7546,
           "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7580,
-          "excerpt": "\"pageDescription\": \"AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.\","
         },
         {
           "term": {
@@ -7118,17 +7009,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 265,
+              "governance": 267,
               "continuity": 71,
               "coordination": 149,
               "trust": 241
             },
-            "total": 726,
+            "total": 728,
             "shares": {
-              "governance": 0.3650137741046832,
-              "continuity": 0.09779614325068871,
-              "coordination": 0.20523415977961432,
-              "trust": 0.3319559228650138
+              "governance": 0.36675824175824173,
+              "continuity": 0.09752747252747253,
+              "coordination": 0.20467032967032966,
+              "trust": 0.33104395604395603
             }
           }
         },
@@ -7422,25 +7313,6 @@
         },
         {
           "term": {
-            "term": "operating system for unions",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "institutional continuity infrastructure for unions"
-          },
-          "line": 7236,
-          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7236,
-          "excerpt": "\"badge\": \"A Governed Operating System for Unions\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -7459,62 +7331,12 @@
         },
         {
           "term": {
-            "term": "modules available",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "continuity layers | governance domains"
-          },
-          "line": 7242,
-          "excerpt": "\"unionEntities\": \"Modules Available\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7251,
           "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
-        },
-        {
-          "term": {
-            "term": "another SaaS tool",
-            "severity": "hard-fail",
-            "category": "startup-saas"
-          },
-          "line": 7252,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "another saas",
-            "severity": "hard-fail",
-            "category": "startup-saas"
-          },
-          "line": 7252,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "SaaS tool",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "exceptions": [
-              "not a saas tool",
-              "unlike saas tools"
-            ]
-          },
-          "line": 7252,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
-        },
-        {
-          "term": {
-            "term": "operating system",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7252,
-          "excerpt": "\"solutionDescription\": \"UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged f"
         },
         {
           "term": {
@@ -7533,16 +7355,6 @@
           },
           "line": 7280,
           "excerpt": "\"modulesBadge\": \"Platform Modules\","
-        },
-        {
-          "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7292,
-          "excerpt": "\"module5Desc\": \"AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.\","
         },
         {
           "term": {
@@ -7609,16 +7421,6 @@
         },
         {
           "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7687,
-          "excerpt": "\"pageDescription\": \"End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -7628,32 +7430,12 @@
         },
         {
           "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7701,
-          "excerpt": "\"feat6Title\": \"AI-Assisted Triage\","
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 7722,
           "excerpt": "\"badge\": \"Platform Module\","
-        },
-        {
-          "term": {
-            "term": "AI-assisted triage",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "reviewer-assisted intake under human oversight"
-          },
-          "line": 7756,
-          "excerpt": "\"pageDescription\": \"AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.\","
         },
         {
           "term": {
@@ -7939,17 +7721,17 @@
           ],
           "detail": {
             "counts": {
-              "governance": 226,
+              "governance": 228,
               "continuity": 29,
               "coordination": 133,
               "trust": 207
             },
-            "total": 595,
+            "total": 597,
             "shares": {
-              "governance": 0.3798319327731092,
-              "continuity": 0.04873949579831933,
-              "coordination": 0.2235294117647059,
-              "trust": 0.34789915966386553
+              "governance": 0.38190954773869346,
+              "continuity": 0.048576214405360134,
+              "coordination": 0.22278056951423786,
+              "trust": 0.34673366834170855
             }
           }
         },
@@ -8649,8 +8431,8 @@
   "summary": {
     "totalFiles": 87,
     "publicFiles": 87,
-    "hardFails": 18,
-    "warnings": 235,
+    "hardFails": 0,
+    "warnings": 231,
     "ruleFailures": 14,
     "averageMaturity": 67
   }

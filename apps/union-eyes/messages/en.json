@@ -7233,13 +7233,13 @@
       "signIn": "Sign In"
     },
     "home": {
-      "badge": "A Governed Operating System for Unions",
+      "badge": "Institutional Governance Infrastructure for Unions",
       "heroHeading": "Command every dimension of your union.",
       "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
       "ctaPrimary": "Start a Controlled Pilot",
       "ctaSecondary": "View Platform Overview",
       "statsLabel": {
-        "unionEntities": "Modules Available",
+        "unionEntities": "Capabilities",
         "timeSaved": "Languages Supported",
         "fasterResponses": "Compliance Standard",
         "platformUptime": "Active Pilots"
@@ -7249,7 +7249,7 @@
       "problemDescription": "Grievances tracked in notebooks. Finances reconciled in spreadsheets. Member records scattered across drives. Employers have million-dollar HR systems — unions have manual processes that lose cases, delay reports, and erode trust.",
       "solutionBadge": "The Solution",
       "solutionHeading": "A Platform Built for How Unions Actually Operate",
-      "solutionDescription": "UnionEyes is a governed operating system — not another SaaS tool. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
+      "solutionDescription": "UnionEyes is institutional governance infrastructure — not generic workplace software. Every deployment is scoped by contract, every module is activated by entitlement, and every action is logged for audit. Billing flows from the parent organization down. Data stays in Canadian jurisdiction.",
       "pillar1": "Contract-Governed Deployment",
       "pillar2": "Financial Accountability",
       "pillar3": "Operational Transparency",
@@ -7289,7 +7289,7 @@
       "module4": "Member Portal & Engagement",
       "module4Desc": "Self-service claims, dues visibility, document management, and communications.",
       "module5": "Intelligence & Insights",
-      "module5Desc": "AI-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.",
+      "module5Desc": "intelligence-assisted triage, custom reports, trend analysis, and executive dashboards — always optional, always governed.",
       "socialProofBadge": "In Production",
       "socialProofHeading": "Trusted by Canadian Unions",
       "socialProofDescription": "UnionEyes is in controlled pilot deployment with Canadian labour organizations. Every rollout follows a structured contract, readiness assessment, and phased activation.",
@@ -7684,7 +7684,7 @@
     "features": {
       "grievanceTracking": {
         "pageTitle": "Case & Grievance Management | UnionEyes",
-        "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and AI-assisted triage with full audit trails.",
+        "pageDescription": "End-to-end grievance lifecycle — from intake to arbitration. Evidence packs, precedent research, and intelligence-assisted triage with full audit trails.",
         "badge": "Platform Module",
         "heroHeading": "Grievance management with a defensible evidence chain",
         "heroDescription": "Track every case from intake to resolution with tamper-evident evidence packs, precedent research, and structured workflows — all audit-logged and role-controlled.",
@@ -7698,7 +7698,7 @@
         "feat4Desc": "Bundle documents into evidence packs with SHA-256 hash chain verification stored in immutable cloud storage. Built for arbitration defensibility.",
         "feat5Title": "Smart Case Queue",
         "feat5Desc": "Filter by status, priority, employer, or representative. See workload at a glance — active cases, overdue items, and average days in each stage.",
-        "feat6Title": "AI-Assisted Triage",
+        "feat6Title": "Intelligence-Assisted Triage",
         "feat6Desc": "Optional AI scoring for priority, complexity, and category. Suggests relevant CBA clauses and precedents. Always under human control — enabled per organization via entitlement.",
         "howItWorksHeading": "How a grievance moves through the system",
         "step1Label": "File",
@@ -7753,7 +7753,7 @@
       },
       "aiWorkbench": {
         "pageTitle": "Intelligence & Insights | UnionEyes",
-        "pageDescription": "AI-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.",
+        "pageDescription": "intelligence-assisted triage, precedent research, CBA extraction, custom reports, and executive dashboards — always governed, always optional, always audited.",
         "badge": "Platform Module",
         "heroHeading": "Intelligence tools that representatives control — not the other way around",
         "heroDescription": "Research precedents in minutes. Get suggested arguments from case history. Generate reports for your executive board. All governed by entitlements, all audit-logged, all optional.",
