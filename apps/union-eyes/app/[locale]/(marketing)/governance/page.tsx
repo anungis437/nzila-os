@@ -9,31 +9,31 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: 'Governance & Continuity | UnionEyes',
     description:
-      'How UnionEyes is governed: labour-elected oversight, reserved decisions, and continuity protections that keep the platform worker-first.',
+      'Our governance commitments: the principles UnionEyes is being built around to stay worker-first as the platform grows.',
     alternates: buildLocaleAlternates(locale, '/governance'),
   };
 }
 
-const provisions = [
+const commitments = [
   {
     icon: Vote,
     title: 'Worker consent on change of control',
-    body: 'Any sale, merger, or transfer of controlling interest requires affirmative consent from labour-elected representatives before it can proceed.',
+    body: 'We are designing the company so that any sale, merger, or transfer of controlling interest will require affirmative consent from labour-elected representatives before it can proceed.',
   },
   {
     icon: Shield,
     title: 'Mission lock',
-    body: 'Changes to the company mission require labour-council approval, protecting worker-first purpose against investor or executive drift.',
+    body: 'We intend to bind changes to the company mission to labour approval, so worker-first purpose cannot be quietly redefined by investors or executives.',
   },
   {
     icon: Users,
-    title: 'Labour-elected council seats',
-    body: 'Reserved board seats are held by labour-elected representatives with full voting rights on strategic decisions.',
+    title: 'Labour-elected oversight seats',
+    body: 'Our target governance structure includes reserved seats for labour-elected representatives with full voting rights on strategic decisions.',
   },
   {
     icon: FileText,
     title: 'Reserved matters',
-    body: 'Critical decisions such as major pricing changes, data-sharing policy, and data residency shifts require labour-council approval.',
+    body: 'Critical decisions — major pricing changes, data-sharing policy, data residency shifts — are intended to require labour-side approval rather than executive discretion alone.',
   },
 ];
 
@@ -48,31 +48,31 @@ export default function GovernancePage() {
           </span>
         }
         heading="Governance & continuity"
-        description="How UnionEyes stays worker-first: labour-elected oversight, reserved decisions, and continuity protections written into the structure."
+        description="The commitments UnionEyes is being built around so the platform stays worker-first as it scales."
       />
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-4">How UnionEyes is governed</h2>
+          <h2 className="text-2xl font-bold text-navy mb-4">Where we are today</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            UnionEyes is governed by a Labour Council elected by partner unions. The council holds reserved powers over a defined set of strategic decisions — independent of ordinary share distribution.
+            UnionEyes is in its early stage. The labour-side governance structures described on this page are commitments we are working toward — not bodies that exist today. We are publishing them now so that partner unions and stewards can hold us to them as the company is formalised.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            This structure was established at incorporation and is documented in the constitutional agreements. It cannot be removed or weakened without affirmative labour consent.
+            As specific governance instruments — such as labour-elected oversight seats, reserved-matters lists, and continuity protections — are formally established, we will document them here with effective dates and source agreements.
           </p>
         </div>
 
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-8">What labour governance protects</h2>
+          <h2 className="text-2xl font-bold text-navy mb-8">Our governance commitments</h2>
           <div className="space-y-6">
-            {provisions.map((p) => (
-              <div key={p.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {commitments.map((c) => (
+              <div key={c.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div className="shrink-0 w-12 h-12 rounded-xl bg-electric/10 text-electric flex items-center justify-center">
-                  <p.icon className="h-6 w-6" />
+                  <c.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-navy mb-2">{p.title}</h3>
-                  <p className="text-gray-700 leading-relaxed">{p.body}</p>
+                  <h3 className="text-lg font-semibold text-navy mb-2">{c.title}</h3>
+                  <p className="text-gray-700 leading-relaxed">{c.body}</p>
                 </div>
               </div>
             ))}
@@ -84,16 +84,16 @@ export default function GovernancePage() {
           <div className="space-y-6 divide-y divide-gray-100">
             {[
               {
+                q: 'Are these governance structures in place today?',
+                a: 'No. They are commitments that will be formalised as the company is incorporated and partner unions come on board. We will update this page when each protection is in force, with a clear effective date.',
+              },
+              {
                 q: 'What if UnionEyes raises venture capital?',
-                a: 'Investors can hold ordinary shares. Labour governance powers are separate, non-dilutive, and remain in force regardless of capital structure.',
+                a: 'Our intent is that investor capital sits alongside — not above — labour-side governance. Any capital raise will be designed so worker oversight cannot be diluted away.',
               },
               {
-                q: 'Can the governance model be changed later?',
-                a: 'Only with affirmative labour consent. The protections are designed specifically to prevent unilateral changes by investors or executives.',
-              },
-              {
-                q: 'Who provides governance oversight?',
-                a: 'A labour-elected council with reserved powers and documented oversight responsibilities, supported by independent audit and reporting.',
+                q: 'How will partner unions hold UnionEyes to these commitments?',
+                a: 'By treating this page as a public promise. We invite partner unions to review and comment on each commitment as it is formalised, and to push back if execution drifts from intent.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="pt-6 first:pt-0">
