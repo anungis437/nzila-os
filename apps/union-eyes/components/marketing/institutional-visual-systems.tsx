@@ -3,14 +3,14 @@ import ScrollReveal from '@/components/public/scroll-reveal';
 
 interface VisualPanelProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: ReactNode;
 }
 
 function VisualPanel({ title, subtitle, children }: VisualPanelProps) {
   return (
     <article className="institution-panel calm-elevation narrative-step p-5">
-      <p className="institution-kicker mb-2">{subtitle}</p>
+      {subtitle ? <p className="institution-kicker mb-2">{subtitle}</p> : null}
       <h3 className="text-base font-semibold text-navy mb-4 leading-tight">{title}</h3>
       {children}
     </article>
@@ -292,7 +292,7 @@ export function ContinuityMappingLanguage() {
         <div className="grid md:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: '110ms' }}>
           {maps.map((map) => (
             <ScrollReveal key={map.title} duration={0.9} distance={16}>
-              <VisualPanel title={map.title} subtitle="Continuity Visual">
+              <VisualPanel title={map.title}>
                 <p className="text-sm text-slate-600 leading-relaxed">{map.detail}</p>
               </VisualPanel>
             </ScrollReveal>
