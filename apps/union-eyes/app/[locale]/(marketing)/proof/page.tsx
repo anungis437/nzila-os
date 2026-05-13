@@ -55,11 +55,11 @@ const PROOF_COPY = {
   'en-CA': {
     title: 'Institutional Proof | UnionEyes',
     description:
-      'Operational proof architecture for deployment walkthroughs, pilot simulation artifacts, executive scenario modeling, and governance evidence.',
+      'Institutional proof architecture for deployment walkthroughs, pilot simulation artifacts, executive scenario modeling, and governance evidence.',
     badge: 'Institutional Proof',
-    heroHeading: 'Operational proof systems for real deployment review.',
+    heroHeading: 'Institutional proof systems for real deployment review.',
     heroDescription:
-      'UnionEyes now surfaces evidence architecture, walkthroughs, simulations, and executive-grade proof packs so modernization can be reviewed as a real operating change, not a promise.',
+      'UnionEyes surfaces evidence architecture, walkthroughs, simulations, and executive-grade proof packs so institutional modernization can be reviewed as a real governance change, not a promise.',
     pilotCta: 'Request a Pilot',
     trustCta: 'Review Trust Center',
     tabOverview: 'Overview',
@@ -72,7 +72,7 @@ const PROOF_COPY = {
     walkthroughLabel: 'Governance Operational Walkthroughs',
     walkthroughTitle: 'How governance modernization operates in practice',
     beforeAfterLabel: 'Institutional Before/After Map',
-    beforeAfterTitle: 'Operational transformation over time',
+    beforeAfterTitle: 'Institutional evolution over time',
     binderTitle: 'Procurement Evidence Binder',
     briefingIntro:
       'Briefings are designed as strategic operating materials: calm, deployment-aware, and reviewable by executive and governance stakeholders.',
@@ -89,10 +89,10 @@ const PROOF_COPY = {
     resilienceDirectionDesc:
       'Provides phased recommendations and modernization sequencing for continuity stabilization.',
     evidenceLabel: 'Institutional Evidence Architecture',
-    evidenceTitle: 'Operational proof density for executive and procurement review',
+    evidenceTitle: 'Institutional proof density for executive and procurement review',
     evidenceDesc:
       'Evidence is arranged to feel calm, reviewable, and institutionally mature. Each proof type supports a specific part of the deployment conversation.',
-    deploymentLabel: 'Operational Deployment Walkthrough',
+    deploymentLabel: 'Institutional Deployment Walkthrough',
     deploymentTitle: 'What deployment actually looks like',
     phaseLabel: 'Phase',
     safeguardLabel: 'Safeguard',
@@ -108,16 +108,16 @@ const PROOF_COPY = {
     rolloutScopeLabel: 'Rollout scope',
     stabilizationOutcomesLabel: 'Stabilization outcomes',
     organizationalImprovementsLabel: 'Organizational improvements',
-    operationalSimulationLabel: 'Operational Continuity Simulation Artifacts',
+    operationalSimulationLabel: 'Institutional Continuity Simulation Artifacts',
     operationalSimulationTitle: 'Continuity simulation outputs for executive review',
     continuityPostureLabel: 'Continuity posture',
     governanceObservationLabel: 'Governance maturity observation',
-    fragmentationOperationalLabel: 'Operational fragmentation visibility',
+    fragmentationOperationalLabel: 'Institutional fragmentation visibility',
     memoryIndicatorLabel: 'Institutional memory indicator',
     rolloutGuidanceLabel: 'Rollout guidance',
     resilienceDirectionLabel: 'Resilience direction',
     scenarioLabel: 'Executive Scenario Modeling',
-    scenarioTitle: 'How the platform behaves inside an organization',
+    scenarioTitle: 'How institutional infrastructure operates inside an organization',
     stepWord: 'Step',
     maturityLabel: 'Maturity Snapshots',
     maturityTitle: 'Directional maturity without ranking',
@@ -135,20 +135,20 @@ const PROOF_COPY = {
       'Onboarding stability improves when continuity transfer routines are documented before expansion phases begin.',
     reviewLayersTitle: 'Governance review simulation layers',
     binderIntro: 'Binder content is structured for due diligence review, not sales framing.',
-    dashboardTitle: 'Executive Operational Dashboard Signals',
+    dashboardTitle: 'Executive Continuity Dashboard Signals',
     proofPackLabel: 'Proof Pack Orientation',
     proofPackTitle: 'Evidence is meant to help reviewers make a real decision',
     proofPackDesc:
-      'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
+      'This page is intentionally practical. It does not promise modernization by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
   },
   'fr-CA': {
     title: 'Preuves institutionnelles | UnionEyes',
     description:
-      'Architecture de preuve opérationnelle pour les parcours de déploiement, les artefacts de simulation pilote et les revues de gouvernance.',
+      'Architecture de preuve institutionnelle pour les parcours de deploiement, les artefacts de simulation pilote et les revues de gouvernance.',
     badge: 'Preuves institutionnelles',
-    heroHeading: 'Des systemes de preuve operationnelle pour un examen reel du deploiement.',
+    heroHeading: 'Des systemes de preuve institutionnelle pour un examen reel du deploiement.',
     heroDescription:
-      'UnionEyes presente maintenant une architecture de preuves, des parcours operationnels et des simulations afin que la modernisation soit examinee comme un changement reel.',
+      'UnionEyes presente une architecture de preuves, des parcours institutionnels et des simulations afin que la modernisation soit examinee comme un changement reel de gouvernance.',
     pilotCta: 'Demander un pilote',
     trustCta: 'Voir le centre de confiance',
     tabOverview: 'Apercu',
@@ -158,10 +158,10 @@ const PROOF_COPY = {
     tabProcurement: 'Achats',
     briefingLabel: 'Systeme de briefing de continuite executive',
     briefingTitle: 'Briefings de continuite de niveau executif',
-    walkthroughLabel: 'Parcours operationnels de gouvernance',
+    walkthroughLabel: 'Parcours institutionnels de gouvernance',
     walkthroughTitle: 'Comment la modernisation de la gouvernance fonctionne en pratique',
     beforeAfterLabel: 'Carte institutionnelle avant/apres',
-    beforeAfterTitle: 'Evolution operationnelle dans le temps',
+    beforeAfterTitle: 'Evolution institutionnelle dans le temps',
     binderTitle: 'Dossier de preuve pour les achats',
     briefingIntro:
       'Les briefings sont rediges comme des materiaux operationnels strategiques, calmes et exploitables pour les equipes executives et de gouvernance.',
@@ -178,10 +178,10 @@ const PROOF_COPY = {
     resilienceDirectionDesc:
       'Propose des recommandations phasees et un sequencement de modernisation pour stabiliser la continuite.',
     evidenceLabel: 'Architecture de preuve institutionnelle',
-    evidenceTitle: 'Densite de preuve operationnelle pour les revues executives et achats',
+    evidenceTitle: 'Densite de preuve institutionnelle pour les revues executives et achats',
     evidenceDesc:
       'La preuve est organisee pour etre calme, examinable et institutionnellement mature. Chaque type soutient une partie concrete du deploiement.',
-    deploymentLabel: 'Parcours operationnel de deploiement',
+    deploymentLabel: 'Parcours institutionnel de deploiement',
     deploymentTitle: 'A quoi ressemble concretement le deploiement',
     phaseLabel: 'Phase',
     safeguardLabel: 'Garde-fou',
@@ -197,16 +197,16 @@ const PROOF_COPY = {
     rolloutScopeLabel: 'Perimetre de deploiement',
     stabilizationOutcomesLabel: 'Resultats de stabilisation',
     organizationalImprovementsLabel: 'Ameliorations organisationnelles',
-    operationalSimulationLabel: 'Artefacts de simulation operationnelle de continuite',
+    operationalSimulationLabel: 'Artefacts de simulation institutionnelle de continuite',
     operationalSimulationTitle: 'Sorties de simulation de continuite pour revue executive',
     continuityPostureLabel: 'Posture de continuite',
     governanceObservationLabel: 'Observation de maturite de gouvernance',
-    fragmentationOperationalLabel: 'Visibilite de la fragmentation operationnelle',
+    fragmentationOperationalLabel: 'Visibilite de la fragmentation institutionnelle',
     memoryIndicatorLabel: 'Indicateur de memoire institutionnelle',
     rolloutGuidanceLabel: 'Orientation de deploiement',
     resilienceDirectionLabel: 'Orientation de resilience',
     scenarioLabel: 'Modelisation de scenarios executives',
-    scenarioTitle: 'Comment la plateforme agit dans une organisation reelle',
+    scenarioTitle: 'Comment l infrastructure institutionnelle agit dans une organisation reelle',
     stepWord: 'Etape',
     maturityLabel: 'Instantanes de maturite',
     maturityTitle: 'Maturite directionnelle sans classement',
@@ -224,7 +224,7 @@ const PROOF_COPY = {
       'La stabilite de l integration s ameliore lorsque les routines de transfert de continuite sont documentees avant l expansion.',
     reviewLayersTitle: 'Couches de simulation de revue de gouvernance',
     binderIntro: 'Le dossier est structure pour la diligence raisonnable et non comme support commercial.',
-    dashboardTitle: 'Signaux du tableau operationnel executif',
+    dashboardTitle: 'Signaux du tableau de continuite executive',
     proofPackLabel: 'Orientation du dossier de preuves',
     proofPackTitle: 'La preuve aide les decideurs a prendre une decision reelle',
     proofPackDesc:
@@ -1116,7 +1116,7 @@ export default async function ProofPage({
 
             <section className="grid lg:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Operational disruption modeling</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">Continuity stress modeling</h3>
                 <div className="space-y-3">
                   {localizedOperationalDisruptionModels.map((item) => (
                     <article key={item.area} className="p-4 rounded-xl border border-gray-100 bg-white">
@@ -1179,7 +1179,7 @@ export default async function ProofPage({
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-navy mb-3">Institutional memory disruption models</h3>
+                <h3 className="text-xl font-bold text-navy mb-3">Institutional memory stress models</h3>
                 <div className="space-y-3">
                   {localizedInstitutionalMemoryDisruptionModels.map((item) => (
                     <article key={item.area} className="p-4 rounded-xl border border-gray-100 bg-white">

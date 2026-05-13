@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T07:07:16.103Z",
+  "generatedAt": "2026-05-13T07:22:47.070Z",
   "files": [
     {
       "ctx": {
@@ -6441,72 +6441,26 @@
         "isPublicSurface": true,
         "label": "marketing/proof"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "transformation",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 75,
-          "excerpt": "beforeAfterTitle: 'Operational transformation over time',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 120,
-          "excerpt": "scenarioTitle: 'How the platform behaves inside an organization',"
-        },
-        {
-          "term": {
-            "term": "transformation",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 142,
-          "excerpt": "'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',"
-        },
-        {
-          "term": {
-            "term": "disruption",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 1119,
-          "excerpt": "<h3 className=\"text-xl font-bold text-navy mb-3\">Operational disruption modeling</h3>"
-        },
-        {
-          "term": {
-            "term": "disruption",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 1182,
-          "excerpt": "<h3 className=\"text-xl font-bold text-navy mb-3\">Institutional memory disruption models</h3>"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 87,
+          "score": 88,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 133,
-              "continuity": 155,
-              "coordination": 136,
+              "governance": 134,
+              "continuity": 157,
+              "coordination": 127,
               "trust": 91
             },
-            "total": 515,
+            "total": 509,
             "shares": {
-              "governance": 0.258252427184466,
-              "continuity": 0.30097087378640774,
-              "coordination": 0.26407766990291265,
-              "trust": 0.1766990291262136
+              "governance": 0.2632612966601179,
+              "continuity": 0.30844793713163066,
+              "coordination": 0.24950884086444008,
+              "trust": 0.1787819253438114
             }
           }
         },
@@ -6519,6 +6473,7 @@
             "matched": [
               "overlay infrastructure",
               "continuity layer",
+              "institutional evolution",
               "alongside existing systems",
               "non-displacing",
               "respects existing tools"
@@ -9907,7 +9862,7 @@
     "totalFiles": 87,
     "publicFiles": 87,
     "hardFails": 0,
-    "warnings": 231,
+    "warnings": 226,
     "ruleFailures": 0,
     "averageMaturity": 87
   }
