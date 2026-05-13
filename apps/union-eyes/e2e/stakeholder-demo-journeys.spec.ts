@@ -22,7 +22,7 @@ async function getVisiblePageText(page: Parameters<typeof assertNoTextExposure>[
   ).toLowerCase();
 }
 
-test.describe('Union Eyes stakeholder demo journeys', () => {
+test.describe('UnionEyes stakeholder demo journeys', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
   });

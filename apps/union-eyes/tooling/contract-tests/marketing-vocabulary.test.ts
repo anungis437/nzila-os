@@ -1,5 +1,5 @@
 /**
- * Contract test: hard-fail vocabulary must not appear on Union Eyes public
+ * Contract test: hard-fail vocabulary must not appear on UnionEyes public
  * marketing surfaces. This is the CI hard-stop for narrative drift.
  */
 

@@ -8,7 +8,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Policy & Labour Leadership | Solutions | Union Eyes',
+    title: 'Policy & Labour Leadership | Solutions | UnionEyes',
     description:
       'Advance labour-safe modernization with human oversight, anti-surveillance safeguards, and democratic governance controls.',
     alternates: buildLocaleAlternates(locale, '/solutions/labour-leadership'),
@@ -61,7 +61,7 @@ export default function LabourLeadershipPage() {
           </span>
         }
         heading={<>Labour-safe modernization<br />without compromise.</>}
-        description="Union Eyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
+        description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">

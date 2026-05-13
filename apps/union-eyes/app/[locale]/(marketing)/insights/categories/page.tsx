@@ -10,8 +10,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: 'Categories | Insights | Union Eyes',
-    description: 'Browse the governance domains and topic pathways in the Union Eyes Insights system.',
+    title: 'Categories | Insights | UnionEyes',
+    description: 'Browse the governance domains and topic pathways in the UnionEyes Insights system.',
     alternates: buildLocaleAlternates(locale, '/insights/categories'),
   };
 }

@@ -22,7 +22,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Solutions | Union Eyes',
+    title: 'Solutions | UnionEyes',
     description:
       'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
     alternates: buildLocaleAlternates(locale, '/solutions'),
@@ -117,7 +117,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
           </span>
         }
         heading="Built for every institutional stakeholder"
-        description="Union Eyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role."
+        description="UnionEyes organizes around institutional stakeholder journeys — not engineering systems. Every capability surfaces the outcomes that matter for your role."
       />
 
       {/* ── Solutions Grid ── */}

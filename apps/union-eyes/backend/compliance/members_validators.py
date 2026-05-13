@@ -1,5 +1,5 @@
 """
-Union Eyes Member & Employment Validators
+UnionEyes Member & Employment Validators
 
 Validates member records, employment terms, benefits, and pension contributions
 against jurisdiction-specific labor law requirements.

@@ -19,7 +19,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Procurement Stakeholders | Solutions | Union Eyes',
+    title: 'Procurement Stakeholders | Solutions | UnionEyes',
     description:
       'Procurement-ready governance, clear implementation scope, and measurable value for institutional deployments.',
     alternates: buildLocaleAlternates(locale, '/solutions/procurement'),
@@ -72,7 +72,7 @@ export default function ProcurementPage() {
           </span>
         }
         heading={<>Procurement clarity for<br />institutional deployment.</>}
-        description="Union Eyes gives procurement teams a practical, defensible path to selection: clear scope, governance-ready controls, and measurable outcomes for leadership confidence."
+        description="UnionEyes gives procurement teams a practical, defensible path to selection: clear scope, governance-ready controls, and measurable outcomes for leadership confidence."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">

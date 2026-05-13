@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the Union Eyes implementation for:
+This document defines the UnionEyes implementation for:
 
 1. Secondary LRO case access with primary ownership retained.
 2. Governed document repository with mandatory privacy labels.

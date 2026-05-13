@@ -75,7 +75,7 @@ function renderFile(file: FileAuditResult): string {
 function renderMarkdown(report: AuditReport): string {
   const { summary } = report;
   const out: string[] = [];
-  out.push("# Union Eyes — Narrative CI Report");
+  out.push("# UnionEyes — Narrative CI Report");
   out.push("");
   out.push(`Generated: ${report.generatedAt}`);
   out.push("");

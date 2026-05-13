@@ -1,8 +1,8 @@
 /**
- * Integration Fabric Hooks for Union Eyes
+ * Integration Fabric Hooks for UnionEyes
  *
  * Bridges @nzila/platform-integrations (the platform-level fabric)
- * into Union Eyes' domain: case management, grievances, members, etc.
+ * into UnionEyes' domain: case management, grievances, members, etc.
  *
  * This module provides:
  *  1. UE-specific connector setup (registers built-in connectors)
@@ -84,7 +84,7 @@ export interface UeIntegrationFabricDeps {
 }
 
 /**
- * Core facade for Union Eyes integration operations.
+ * Core facade for UnionEyes integration operations.
  * Wraps the platform fabric with UE-specific domain logic.
  */
 export class UeIntegrationFabric {

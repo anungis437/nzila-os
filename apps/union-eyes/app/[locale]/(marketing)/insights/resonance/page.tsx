@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: 'Resonance | Insights | Union Eyes',
+    title: 'Resonance | Insights | UnionEyes',
     description: 'Executive emotional resonance, conference memory anchors, and continuity symbolism.',
     alternates: buildLocaleAlternates(locale, '/insights/resonance'),
   };

@@ -2,7 +2,7 @@
 title: The Operational Cost of Governance Fragmentation in Distributed Labour Organizations
 slug: governance-fragmentation-costs
 category: Operational Fragility
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 8 min
 format: Policy Note

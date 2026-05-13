@@ -1,7 +1,7 @@
 /**
  * Phase A canonical environment-mode model.
  *
- * Single source of truth for runtime classification of Union Eyes deployments.
+ * Single source of truth for runtime classification of UnionEyes deployments.
  * Read this from server code; never branch on raw `process.env.NODE_ENV`.
  *
  * Variables (set by deploy-union-eyes.yml `plan` step):

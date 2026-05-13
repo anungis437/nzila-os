@@ -24,9 +24,9 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Institutional Continuity | Union Eyes',
+    title: 'Institutional Continuity | UnionEyes',
     description:
-      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. Union Eyes Institutional Continuity platform.',
+      'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
     alternates: buildLocaleAlternates(locale, '/institutional-continuity'),
   };
 }
@@ -92,7 +92,7 @@ export default async function InstitutionalContinuityPage({
           </span>
         }
         heading={<>Preserve what your organization<br />knows. Protect what it can do.</>}
-        description="Institutional Continuity is the Union Eyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader."
+        description="Institutional Continuity is the UnionEyes capability that preserves organizational memory, strengthens resilience through transitions, and ensures governance structures survive beyond any individual leader."
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -145,7 +145,7 @@ export default async function InstitutionalContinuityPage({
               that knowledge walks out with them.
             </p>
             <p className="text-gray-700 text-lg leading-relaxed">
-              Union Eyes Institutional Continuity transforms fragmented institutional knowledge
+              UnionEyes Institutional Continuity transforms fragmented institutional knowledge
               into governed, accessible, and explainable organizational intelligence — so your
               organization is stronger through every leadership transition.
             </p>
@@ -234,7 +234,7 @@ export default async function InstitutionalContinuityPage({
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">          <h2 className="text-3xl font-bold text-navy mb-3">Canonical deployment pathway for governed adoption</h2>
           <p className="text-gray-600 max-w-3xl mb-8">
-            Union Eyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
+            UnionEyes rollout sequencing is intentionally calm, reviewable, and operationally realistic for institutional modernization environments.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-7 gap-3">
             {institutionalRolloutPathway.map((stage, idx) => (
@@ -281,7 +281,7 @@ export default async function InstitutionalContinuityPage({
 
             <div>              <h3 className="text-2xl font-bold text-navy mb-3">Stabilizing institutional evolution sequence</h3>
               <p className="text-sm text-gray-600 mb-6">
-                Union Eyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
+                UnionEyes focuses on coherent progression from fragmentation risk to continuity-centered resilience.
               </p>
               <div className="space-y-3">
                 {organizationalTransformationPathway.map((stage, idx) => (
@@ -387,7 +387,7 @@ export default async function InstitutionalContinuityPage({
             Ready to strengthen institutional continuity?
           </h2>
           <p className="text-white/70 mb-8">
-            See how Union Eyes preserves organizational memory and builds resilience
+            See how UnionEyes preserves organizational memory and builds resilience
             through your leadership transitions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

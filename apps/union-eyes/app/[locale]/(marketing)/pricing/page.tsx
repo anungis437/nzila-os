@@ -22,9 +22,9 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Pricing | Union Eyes',
+    title: 'Pricing | UnionEyes',
     description:
-      'Union Eyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
+      'UnionEyes is institutional operational infrastructure. Pricing is organized as operational maturity states — Foundation, Governance Operations, Institutional Continuity, Sovereignty Layer — not seat-based SaaS tiers.',
     alternates: buildLocaleAlternates(locale, '/pricing'),
   };
 }
@@ -261,7 +261,7 @@ export default async function LocalePricingPage({
           </ScrollReveal>
           <ScrollReveal delay={0.14} duration={0.9} distance={14} tempo="conference">
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
-              Institutions adopt Union Eyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.
+              Institutions adopt UnionEyes when operational reality outgrows informal coordination. The conditions below consistently determine the right maturity tier.
             </p>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence">

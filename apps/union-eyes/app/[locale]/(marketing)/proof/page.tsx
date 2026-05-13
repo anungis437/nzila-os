@@ -37,13 +37,13 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const PROOF_COPY = {
   'en-CA': {
-    title: 'Institutional Proof | Union Eyes',
+    title: 'Institutional Proof | UnionEyes',
     description:
       'Operational proof architecture for deployment walkthroughs, pilot simulation artifacts, executive scenario modeling, and governance evidence.',
     badge: 'Institutional Proof',
     heroHeading: 'Operational proof systems for real deployment review.',
     heroDescription:
-      'Union Eyes now surfaces evidence architecture, walkthroughs, simulations, and executive-grade proof packs so modernization can be reviewed as a real operating change, not a promise.',
+      'UnionEyes now surfaces evidence architecture, walkthroughs, simulations, and executive-grade proof packs so modernization can be reviewed as a real operating change, not a promise.',
     pilotCta: 'Request a Pilot',
     trustCta: 'Review Trust Center',
     tabOverview: 'Overview',
@@ -126,13 +126,13 @@ const PROOF_COPY = {
       'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
   },
   'fr-CA': {
-    title: 'Preuves institutionnelles | Union Eyes',
+    title: 'Preuves institutionnelles | UnionEyes',
     description:
       'Architecture de preuve opérationnelle pour les parcours de déploiement, les artefacts de simulation pilote et les revues de gouvernance.',
     badge: 'Preuves institutionnelles',
     heroHeading: 'Des systemes de preuve operationnelle pour un examen reel du deploiement.',
     heroDescription:
-      'Union Eyes presente maintenant une architecture de preuves, des parcours operationnels et des simulations afin que la modernisation soit examinee comme un changement reel.',
+      'UnionEyes presente maintenant une architecture de preuves, des parcours operationnels et des simulations afin que la modernisation soit examinee comme un changement reel.',
     pilotCta: 'Demander un pilote',
     trustCta: 'Voir le centre de confiance',
     tabOverview: 'Apercu',
@@ -215,13 +215,13 @@ const PROOF_COPY = {
       'Cette page est volontairement pratique. Elle montre les surfaces de preuve, la sequence de mise en oeuvre et les structures de revue qui rendent le deploiement credible.',
   },
   it: {
-    title: 'Prove istituzionali | Union Eyes',
+    title: 'Prove istituzionali | UnionEyes',
     description:
       'Architettura di prove operative per walkthrough di deployment, artefatti pilota e simulazioni di governance.',
     badge: 'Prove istituzionali',
     heroHeading: 'Sistemi di prova operativa per una revisione reale del deployment.',
     heroDescription:
-      'Union Eyes rende visibili architettura delle prove, walkthrough e simulazioni per revisioni esecutive e di procurement.',
+      'UnionEyes rende visibili architettura delle prove, walkthrough e simulazioni per revisioni esecutive e di procurement.',
     pilotCta: 'Richiedi un pilota',
     trustCta: 'Rivedi il Trust Center',
     tabOverview: 'Panoramica',
@@ -304,13 +304,13 @@ const PROOF_COPY = {
       'Questa pagina e intenzionalmente pratica. Mostra superfici di prova, sequenza di implementazione e strutture di review che rendono credibile il deployment.',
   },
   pt: {
-    title: 'Provas institucionais | Union Eyes',
+    title: 'Provas institucionais | UnionEyes',
     description:
       'Arquitetura de prova operacional para walkthroughs de implantacao, artefatos de piloto e simulacoes de governanca.',
     badge: 'Provas institucionais',
     heroHeading: 'Sistemas de prova operacional para revisao real de implantacao.',
     heroDescription:
-      'O Union Eyes exibe arquitetura de evidencia, walkthroughs e simulacoes para revisao executiva e de compras.',
+      'O UnionEyes exibe arquitetura de evidencia, walkthroughs e simulacoes para revisao executiva e de compras.',
     pilotCta: 'Solicitar piloto',
     trustCta: 'Revisar centro de confianca',
     tabOverview: 'Visao geral',

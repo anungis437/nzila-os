@@ -172,7 +172,7 @@ export function ContinuityFlowSignature() {
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            Union Eyes uses continuity flow to communicate a simple institutional truth: governance knowledge should move safely through time, never breaking at moments of transition.
+            UnionEyes uses continuity flow to communicate a simple institutional truth: governance knowledge should move safely through time, never breaking at moments of transition.
           </p>
         </ScrollReveal>
 
@@ -212,7 +212,7 @@ export function FragmentationToCoherenceSequence() {
         </ScrollReveal>
         <ScrollReveal delay={0.12} duration={0.9} distance={16}>
           <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
-            The Union Eyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce institutional trust.
+            The UnionEyes modernization rhythm is calm and stabilizing: create visibility, align governance, protect continuity, and reinforce institutional trust.
           </p>
         </ScrollReveal>
 

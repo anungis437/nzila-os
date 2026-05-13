@@ -1,5 +1,5 @@
 /**
- * Pilot Governance — Union Eyes operational surface.
+ * Pilot Governance — UnionEyes operational surface.
  *
  * Institutionally governable, not beta-software administration.
  *
@@ -15,7 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Pilot Governance — Union Eyes',
+  title: 'Pilot Governance — UnionEyes',
   description:
     'Pilot legitimacy, onboarding readiness, continuity posture, and attestation readiness.',
 };

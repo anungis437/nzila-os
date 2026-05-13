@@ -1,4 +1,4 @@
-// Union Eyes - API Client (client-safe)
+// UnionEyes - API Client (client-safe)
 //
 // This module is imported by both server and client components.
 // For server-side auth token injection, use lib/api-server.ts instead.
@@ -12,7 +12,7 @@ const logger = createClientLogger('api');
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
- * API client for Union Eyes backend.
+ * API client for UnionEyes backend.
  * 
  * On the client side, authentication works via session cookies
  * (withCredentials: true sends cookies automatically).

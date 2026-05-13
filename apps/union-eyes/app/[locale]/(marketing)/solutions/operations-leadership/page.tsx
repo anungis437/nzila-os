@@ -8,8 +8,8 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Operations Leadership | Solutions | Union Eyes',
-    description: 'Maintain operational coherence across distributed teams and leadership transitions. Union Eyes for operations leaders.',
+    title: 'Operations Leadership | Solutions | UnionEyes',
+    description: 'Maintain operational coherence across distributed teams and leadership transitions. UnionEyes for operations leaders.',
     alternates: buildLocaleAlternates(locale, '/solutions/operations-leadership'),
   };
 }
@@ -40,7 +40,7 @@ export default function OperationsLeadershipPage() {
           </span>
         }
         heading={<>Operational coherence that<br />survives any transition.</>}
-        description="Union Eyes Operational Coherence gives operations leaders the institutional memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change."
+        description="UnionEyes Operational Coherence gives operations leaders the institutional memory, fragmentation visibility, and continuity planning tools to keep distributed organizations aligned through any change."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
@@ -71,7 +71,7 @@ export default function OperationsLeadershipPage() {
 
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What operations leaders gain with Union Eyes</h2>
+          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What operations leaders gain with UnionEyes</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {outcomes.map((o) => (
               <div key={o.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">

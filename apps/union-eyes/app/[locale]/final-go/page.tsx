@@ -1,5 +1,5 @@
 /**
- * Final GO — Union Eyes pilot summary.
+ * Final GO — UnionEyes pilot summary.
  *
  * Pilot-focused single-screen GO posture for the pilot operator.
  *
@@ -11,7 +11,7 @@ import path from 'node:path';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Final GO — Union Eyes',
+  title: 'Final GO — UnionEyes',
   description: 'Pilot-focused Final GO summary.',
 };
 

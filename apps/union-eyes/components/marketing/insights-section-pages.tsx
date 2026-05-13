@@ -133,7 +133,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         tone="dark"
         revealTempo="conference"
         heading={<>Editorial standards and canonical story architecture</>}
-        description="The doctrine layer defines how Union Eyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
+        description="The doctrine layer defines how UnionEyes frames governance-safe modernization, executive readability, and continuity-centered publication design."
       />
 
       <InsightsHubSubmenu locale={locale} active="doctrine" contextMode={contextMode} />
@@ -146,7 +146,7 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
             <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
-              Union Eyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
+              UnionEyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
             </p>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>

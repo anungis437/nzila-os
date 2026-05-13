@@ -11002,11 +11002,11 @@
   "continuityNotes": {
     "trust": {
       "label": "Posture de confiance",
-      "posture": "La confiance envers Union Eyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
+      "posture": "La confiance envers UnionEyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
     },
     "procurement": {
       "label": "Posture d'approvisionnement",
-      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'Union Eyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
+      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'UnionEyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
     },
     "pilot": {
       "label": "Posture pilote",
@@ -11014,7 +11014,7 @@
     },
     "ontology": {
       "label": "Ontologie institutionnelle",
-      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter Union Eyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
+      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter UnionEyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
     }
   },
   "sovereignty": {

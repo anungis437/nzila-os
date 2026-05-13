@@ -11005,11 +11005,11 @@
   "continuityNotes": {
     "trust": {
       "label": "Trust posture",
-      "posture": "Trust in Union Eyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
+      "posture": "Trust in UnionEyes is operational, not symbolic. The surfaces below describe how explainability, governance review, sovereignty boundaries, and continuity-safe operation are enforced at runtime — not aspirations to be achieved later. Each pillar is reviewable by the institution's reviewer of record before any deployment commitment."
     },
     "procurement": {
       "label": "Procurement posture",
-      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities Union Eyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
+      "posture": "Programs are operational commitments, not subscriptions. Each maturity state names the institutional responsibilities UnionEyes will hold on the institution's behalf and the continuity-safe operating record it will maintain. Procurement reviewers are encouraged to read the maturity tiers as the institutional shape of the engagement — not as a feature ladder."
     },
     "pilot": {
       "label": "Pilot posture",
@@ -11017,7 +11017,7 @@
     },
     "ontology": {
       "label": "Institutional ontology",
-      "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting Union Eyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
+      "posture": "The eight surfaces below are not a feature list. They name the operational responsibilities a union, federation, or congress already carries. Adopting UnionEyes does not introduce new responsibilities — it gives the existing ones a continuity-safe operating record. Each pillar links to the runtime surface that fulfils it."
     }
   },
   "sovereignty": {

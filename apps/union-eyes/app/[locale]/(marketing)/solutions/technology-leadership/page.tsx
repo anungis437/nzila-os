@@ -8,8 +8,8 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Technology Leadership | Solutions | Union Eyes',
-    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. Union Eyes for technology leaders in labour organizations.',
+    title: 'Technology Leadership | Solutions | UnionEyes',
+    description: 'Governance-safe AI with full explainability, enterprise security, and Canadian data residency. UnionEyes for technology leaders in labour organizations.',
     alternates: buildLocaleAlternates(locale, '/solutions/technology-leadership'),
   };
 }
@@ -42,7 +42,7 @@ export default function TechnologyLeadershipPage() {
           </span>
         }
         heading={<>Enterprise-safe AI that your<br />institution can trust.</>}
-        description="Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. Union Eyes is built to meet that standard at every architectural layer."
+        description="Labour organizations need AI that is explainable, governed, labour-safe, and institutionally trustworthy — not experimental. UnionEyes is built to meet that standard at every architectural layer."
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
@@ -72,7 +72,7 @@ export default function TechnologyLeadershipPage() {
 
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What technology leaders gain with Union Eyes</h2>
+          <h2 className="text-2xl font-bold text-navy mb-10 text-center">What technology leaders gain with UnionEyes</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {outcomes.map((o) => (
               <div key={o.title} className="p-6 rounded-2xl bg-gray-50 border border-gray-100">

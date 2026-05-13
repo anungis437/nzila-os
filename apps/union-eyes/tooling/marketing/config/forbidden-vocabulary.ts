@@ -1,5 +1,5 @@
 /**
- * Forbidden / discouraged vocabulary for Union Eyes public marketing surfaces.
+ * Forbidden / discouraged vocabulary for UnionEyes public marketing surfaces.
  *
  * This is the central narrative-CI ruleset. Hard-fail terms must never appear on
  * public marketing surfaces (`app/[locale]/(marketing)/**`, `messages/*.json`).

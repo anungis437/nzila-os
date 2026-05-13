@@ -23,9 +23,9 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Insights | Union Eyes',
+    title: 'Insights | UnionEyes',
     description:
-      'Institutional continuity, governance modernization, and labour-safe organizational intelligence — thought leadership from Union Eyes.',
+      'Institutional continuity, governance modernization, and labour-safe organizational intelligence — thought leadership from UnionEyes.',
     alternates: buildLocaleAlternates(locale, '/insights'),
   };
 }

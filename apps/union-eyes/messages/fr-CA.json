@@ -11043,11 +11043,11 @@
   "continuityNotes": {
     "trust": {
       "label": "Posture de confiance",
-      "posture": "La confiance envers Union Eyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
+      "posture": "La confiance envers UnionEyes est opérationnelle, non symbolique. Les surfaces ci-dessous décrivent comment l'explicabilité, l'examen de gouvernance, les frontières de souveraineté et l'opération continue sont appliqués à l'exécution — non des aspirations à atteindre ultérieurement. Chaque pilier peut être examiné par le responsable institutionnel avant tout engagement de déploiement."
     },
     "procurement": {
       "label": "Posture d'approvisionnement",
-      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'Union Eyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
+      "posture": "Les programmes sont des engagements opérationnels, non des abonnements. Chaque niveau de maturité nomme les responsabilités institutionnelles qu'UnionEyes assumera au nom de l'institution et le registre opérationnel sécurisé pour la continuité qu'il maintiendra. Les responsables d'approvisionnement sont invités à lire les niveaux de maturité comme la forme institutionnelle de l'engagement — non comme une échelle de fonctionnalités."
     },
     "pilot": {
       "label": "Posture pilote",
@@ -11055,7 +11055,7 @@
     },
     "ontology": {
       "label": "Ontologie institutionnelle",
-      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter Union Eyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
+      "posture": "Les huit surfaces ci-dessous ne sont pas une liste de fonctionnalités. Elles nomment les responsabilités opérationnelles qu'un syndicat, une fédération ou un congrès assume déjà. Adopter UnionEyes n'introduit pas de nouvelles responsabilités — cela donne aux existantes un registre opérationnel sécurisé pour la continuité. Chaque pilier renvoie à la surface d'exécution qui l'incarne."
     }
   },
   "sovereignty": {
@@ -11098,11 +11098,11 @@
   },
   "homePage": {
     "meta": {
-      "title": "Union Eyes | Continuité institutionnelle et infrastructure de gouvernance",
-      "description": "Union Eyes est la couche de continuité pour les institutions fédérées — préservant la mémoire institutionnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
+      "title": "UnionEyes | Continuité institutionnelle et infrastructure de gouvernance",
+      "description": "UnionEyes est la couche de continuité pour les institutions fédérées — préservant la mémoire institutionnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "jsonLd": {
-      "name": "Union Eyes",
+      "name": "UnionEyes",
       "description": "Couche de continuité institutionnelle et infrastructure de gouvernance pour les organisations fédérées. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
     },
     "hero": {
@@ -11110,7 +11110,7 @@
       "headlineLine1": "La certitude que la mémoire institutionnelle",
       "headlineLine2": "survivra à toute personne.",
       "imageAlt": "Gouvernance institutionnelle et infrastructure de continuité",
-      "subhead": "Union Eyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
+      "subhead": "UnionEyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
       "ctaPrimary": "Planifier une découverte stratégique",
       "ctaSecondary": "Découvrir l’infrastructure de continuité"
     },
@@ -11166,7 +11166,7 @@
       "eyebrow": "Coordination fédérée",
       "heading": "Une coordination respectueuse de la gouvernance entre sections locales, conseils et fédérations.",
       "body1": "Les fédérations ne sont pas des organigrammes. Ce sont des institutions à plusieurs niveaux, avec une autorité procédurale, des règlements et des structures de comités distincts.",
-      "body2": "Union Eyes assure l’alignement opérationnel et la visibilité institutionnelle au sein de la fédération, sans la réduire à une hiérarchie unique ni contourner l’autorité locale."
+      "body2": "UnionEyes assure l’alignement opérationnel et la visibilité institutionnelle au sein de la fédération, sans la réduire à une hiérarchie unique ni contourner l’autorité locale."
     },
     "procedural": {
       "eyebrow": "Confiance procédurale",
@@ -11177,7 +11177,7 @@
     "coexistence": {
       "eyebrow": "Modernisation non perturbatrice",
       "heading": "Une infrastructure de superposition — non un remplacement.",
-      "lede": "Les institutions se modernisent au rythme institutionnel. Union Eyes se déploie comme couche de continuité aux côtés des systèmes existants.",
+      "lede": "Les institutions se modernisent au rythme institutionnel. UnionEyes se déploie comme couche de continuité aux côtés des systèmes existants.",
       "points": [
         "Une infrastructure de superposition qui renforce les systèmes existants — aucun remplacement requis.",
         "Adoption modulaire : déployez une couche de continuité un flux de travail à la fois.",
@@ -11251,7 +11251,7 @@
         "existingCrm": "CRM existant",
         "existingCase": "Outils de dossiers existants",
         "existingRecords": "Archives existantes",
-        "layerTitle": "Couche de continuité Union Eyes (infrastructure de superposition)",
+        "layerTitle": "Couche de continuité UnionEyes (infrastructure de superposition)",
         "layerSubtitle": "Renforce les systèmes existants · mise en œuvre non perturbatrice"
       }
     }

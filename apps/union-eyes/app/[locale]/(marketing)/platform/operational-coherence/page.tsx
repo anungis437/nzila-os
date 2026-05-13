@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Redirecting | Union Eyes Platform',
+    title: 'Redirecting | UnionEyes Platform',
     description: 'This route redirects to the canonical platform section.',
     robots: {
       index: false,

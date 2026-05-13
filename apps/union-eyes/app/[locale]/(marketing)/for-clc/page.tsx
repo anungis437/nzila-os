@@ -25,7 +25,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
 const CLC_COPY = {
   'en-CA': {
-    title: 'CLC Field Activation | Union Eyes',
+    title: 'CLC Field Activation | UnionEyes',
     description:
       'Convention-ready executive engagement, QR journeys, and procurement-safe follow-up architecture for CLC field conversion.',
     badge: 'CLC Conversion System',
@@ -38,7 +38,7 @@ const CLC_COPY = {
     tabFollowUp: 'Follow-Up',
   },
   'fr-CA': {
-    title: 'Activation terrain CLC | Union Eyes',
+    title: 'Activation terrain CLC | UnionEyes',
     description:
       'Architecture de conversion conventionnelle avec engagement executif, parcours QR et suivi achats gouvernable.',
     badge: 'Systeme de conversion CLC',
@@ -51,7 +51,7 @@ const CLC_COPY = {
     tabFollowUp: 'Suivi',
   },
   it: {
-    title: 'Attivazione campo CLC | Union Eyes',
+    title: 'Attivazione campo CLC | UnionEyes',
     description:
       'Architettura convention-ready con engagement executive, percorsi QR e follow-up procurement governance-safe.',
     badge: 'Sistema conversione CLC',
@@ -64,7 +64,7 @@ const CLC_COPY = {
     tabFollowUp: 'Follow-up',
   },
   pt: {
-    title: 'Ativacao de campo CLC | Union Eyes',
+    title: 'Ativacao de campo CLC | UnionEyes',
     description:
       'Arquitetura pronta para convencao com engajamento executivo, jornadas QR e follow-up de compras governance-safe.',
     badge: 'Sistema de conversao CLC',

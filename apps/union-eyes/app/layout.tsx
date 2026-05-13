@@ -31,16 +31,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
-      template: `%s | Union Eyes${site.titleSuffix}`,
+      default: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
+      template: `%s | UnionEyes${site.titleSuffix}`,
     },
     description:
       'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
     metadataBase: new URL(site.marketingUrl),
     openGraph: {
       type: 'website',
-      siteName: 'Union Eyes',
-      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
+      siteName: 'UnionEyes',
+      title: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
       description:
         'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
       images: [
@@ -48,13 +48,13 @@ export async function generateMetadata(): Promise<Metadata> {
           url: '/images/og-default.png',
           width: 1200,
           height: 630,
-          alt: 'Union Eyes — Modern Operating System for Unions',
+          alt: 'UnionEyes — Modern Operating System for Unions',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Union Eyes | Modern Operating System for Unions${site.titleSuffix}`,
+      title: `UnionEyes | Modern Operating System for Unions${site.titleSuffix}`,
       description:
         'Grievances, governance, member communications, elections, intelligence, and defensible operations for modern unions.',
       images: ['/images/og-default.png'],
@@ -80,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     url: site.marketingUrl,
     logo: `${site.marketingUrl}/icon.svg`,
   };
@@ -88,12 +88,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     url: site.marketingUrl,
     inLanguage: locale,
     publisher: {
       '@type': 'Organization',
-      name: 'Union Eyes',
+      name: 'UnionEyes',
       url: site.marketingUrl,
     },
     potentialAction: {

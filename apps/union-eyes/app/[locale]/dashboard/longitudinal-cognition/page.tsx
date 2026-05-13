@@ -18,7 +18,7 @@ import { runFullInstitutionalCognition } from '@/lib/institutional-operating-int
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Longitudinal Institutional Cognition · Union Eyes',
+  title: 'Longitudinal Institutional Cognition · UnionEyes',
   description:
     'Calm, domain-grouped institutional storytelling: governance evolution, continuity maturity, resilience progression, organizational adaptation.',
 };

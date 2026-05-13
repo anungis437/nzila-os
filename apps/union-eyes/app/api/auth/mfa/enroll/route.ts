@@ -31,7 +31,7 @@ export async function POST(_request: NextRequest) {
   const result = await enrollMfa({
     userId,
     userEmail: user.email,
-    issuer: 'Union Eyes',
+    issuer: 'UnionEyes',
   })
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 409 })

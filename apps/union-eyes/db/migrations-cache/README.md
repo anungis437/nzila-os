@@ -1,6 +1,6 @@
-# Scoped Drizzle migrations — Union Eyes (cache / runtime support)
+# Scoped Drizzle migrations — UnionEyes (cache / runtime support)
 
-This directory is the **active** Drizzle migration root for Union Eyes.
+This directory is the **active** Drizzle migration root for UnionEyes.
 
 It is intentionally **empty at the time of reconciliation** because the
 historical Drizzle migrations under `../migrations/` have been formally

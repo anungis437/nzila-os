@@ -14,7 +14,7 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'Executive Intelligence | Union Eyes',
+    title: 'Executive Intelligence | UnionEyes',
     description:
       'Calm, executive-grade strategic summaries and leadership continuity intelligence for union executives. Operational clarity without technical complexity.',
     alternates: buildLocaleAlternates(locale, '/executive-intelligence'),

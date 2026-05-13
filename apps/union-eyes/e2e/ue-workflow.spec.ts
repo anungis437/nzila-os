@@ -9,7 +9,7 @@ import {
 } from '../tests/e2e/_helpers'
 import { UE_TEST_USERS } from '../tests/fixtures/test-users'
 
-test.describe('Union Eyes QA E2E Flows', () => {
+test.describe('UnionEyes QA E2E Flows', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request)
     await seedOrVerifyTestState(request)

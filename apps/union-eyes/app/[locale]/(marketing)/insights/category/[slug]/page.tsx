@@ -34,14 +34,14 @@ export async function generateMetadata({ params }: InsightCategoryPageProps): Pr
 
   if (!category) {
     return {
-      title: 'Category Not Found | Insights | Union Eyes',
+      title: 'Category Not Found | Insights | UnionEyes',
       description: 'The requested insight category could not be found.',
       alternates: buildLocaleAlternates(locale, `/insights/category/${slug}`),
     };
   }
 
   return {
-    title: `${category.name} | Insights | Union Eyes`,
+    title: `${category.name} | Insights | UnionEyes`,
     description: category.description,
     alternates: buildLocaleAlternates(locale, `/insights/category/${slug}`),
   };

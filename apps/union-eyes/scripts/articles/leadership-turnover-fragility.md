@@ -2,7 +2,7 @@
 title: Leadership Turnover Is Not the Problem. Continuity Fragility Is.
 slug: leadership-turnover-fragility
 category: Governance Resilience
-author: Union Eyes Research Team
+author: UnionEyes Research Team
 publishedOn: 2026-05-08
 readTime: 7 min
 format: Executive Brief

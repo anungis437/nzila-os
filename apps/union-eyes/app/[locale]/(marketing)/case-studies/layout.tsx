@@ -10,7 +10,7 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: 'Case Studies | Union Eyes',
+    title: 'Case Studies | UnionEyes',
     description:
       'Real labour-organization outcomes using governance-safe intelligence, institutional memory, and operational coherence.',
     alternates: buildLocaleAlternates(locale, '/case-studies'),

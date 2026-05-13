@@ -1,5 +1,5 @@
 /**
- * Required / rewarded vocabulary for Union Eyes public marketing surfaces.
+ * Required / rewarded vocabulary for UnionEyes public marketing surfaces.
  * Used by positive rules (coexistence, labour-safe AI, Canadian positioning).
  */
 

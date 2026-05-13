@@ -21,7 +21,7 @@ import { requireUser } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Governance Center · Union Eyes',
+  title: 'Governance Center · UnionEyes',
   description:
     'Institutional cognition governance, ontology integrity, anti-surveillance guarantees, and human oversight controls.',
 };
@@ -73,7 +73,7 @@ export default async function GovernanceCenterPage() {
           </p>
           <h1 className="text-3xl font-semibold text-slate-900">Governance Center</h1>
           <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
-            A transparent view of the institutional cognition substrate that powers Union Eyes —
+            A transparent view of the institutional cognition substrate that powers UnionEyes —
             its ontology, its governance posture, the engines registered against it, and the
             guarantees procurement, governance, and human-oversight reviewers depend on.
           </p>

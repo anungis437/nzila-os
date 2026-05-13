@@ -1,5 +1,5 @@
 /**
- * Narrative-CI orchestrator for Union Eyes public marketing surfaces.
+ * Narrative-CI orchestrator for UnionEyes public marketing surfaces.
  *
  * Walks `app/[locale]/(marketing)/**` plus `messages/*.json`, runs the forbidden-
  * vocabulary check and all five rule modules, and produces:
@@ -214,7 +214,7 @@ export async function runAudit(): Promise<AuditReport> {
 function printSummary(report: AuditReport): void {
   const { summary } = report;
   // eslint-disable-next-line no-console
-  console.log("\nUnion Eyes — Narrative CI Audit");
+  console.log("\nUnionEyes — Narrative CI Audit");
   // eslint-disable-next-line no-console
   console.log("=".repeat(60));
   // eslint-disable-next-line no-console

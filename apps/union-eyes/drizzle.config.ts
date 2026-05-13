@@ -1,5 +1,5 @@
 /**
- * Drizzle ORM — Union Eyes runtime support / cache schema (scoped).
+ * Drizzle ORM — UnionEyes runtime support / cache schema (scoped).
  *
  * SCOPE GOVERNANCE
  * ----------------

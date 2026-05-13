@@ -186,7 +186,7 @@ async function seed() {
       language: "en",
       employerName: "Marathon Underground Ltd.",
       employerId: EMPLOYER_ID,
-      unionName: "Union Eyes Pilot Local",
+      unionName: "UnionEyes Pilot Local",
       unionLocal: "UE-100",
       effectiveDate: new Date("2026-01-01"),
       expiryDate: new Date("2028-12-31"),

@@ -161,7 +161,7 @@ export default async function TrustPage({
         <section id="labour-safe" className="mb-20 scroll-mt-24">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">Labour-Safe AI</h2>
           <p className="text-slate-600 mb-6 max-w-2xl leading-relaxed">
-            Union Eyes is designed from the ground up for deployment in labour environments.
+            UnionEyes is designed from the ground up for deployment in labour environments.
             Our labour-safe posture is not a policy addendum — it is an architectural commitment
             enforced at every layer of the platform.
           </p>
@@ -186,7 +186,7 @@ export default async function TrustPage({
         <section id="explainability" className="mb-20 scroll-mt-24">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">Explainability Standards</h2>
           <p className="text-slate-600 mb-6 max-w-2xl leading-relaxed">
-            Every Union Eyes intelligence output is traceable to its source evidence and
+            Every UnionEyes intelligence output is traceable to its source evidence and
             explainable in plain institutional language. Explainability is enforced — not
             aspirational.
           </p>
@@ -214,7 +214,7 @@ export default async function TrustPage({
         <section id="trust-operationalization" className="mb-20 scroll-mt-24">
           <h2 className="text-2xl font-bold text-slate-900 mb-3">Trust-Center Operationalization</h2>
           <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
-            Trust in Union Eyes is operational, not symbolic. Institutions can review how explainability,
+            Trust in UnionEyes is operational, not symbolic. Institutions can review how explainability,
             governance checkpoints, and oversight pathways are executed in deployment practice.
           </p>
           <div className="grid md:grid-cols-3 gap-4">

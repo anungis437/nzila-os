@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: `Doctrine | Insights | Union Eyes`,
+    title: `Doctrine | Insights | UnionEyes`,
     description: `Editorial standards and narrative architecture for institutional continuity insights.`,
     alternates: buildLocaleAlternates(locale, '/insights/doctrine'),
   };

@@ -35,7 +35,7 @@ export function EmployerExecutionDashboard() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Employer Execution</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Contractor-grade execution for employer payroll and remittance compliance inside Union Eyes.
+          Contractor-grade execution for employer payroll and remittance compliance inside UnionEyes.
         </p>
       </div>
 
