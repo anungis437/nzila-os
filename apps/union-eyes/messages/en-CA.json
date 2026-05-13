@@ -7171,14 +7171,38 @@
       "story": "Our Story",
       "platform": "Platform",
       "platformItems": {
-        "inbox": { "name": "Intake & Coordination", "desc": "Unified intake for member correspondence and case channels" },
-        "work": { "name": "Casework Continuity", "desc": "Active grievance and representation workbench" },
-        "priorities": { "name": "Commitments & Deadlines", "desc": "Statutory clocks, obligations, and institutional next actions" },
-        "intelligence": { "name": "Institutional Intelligence", "desc": "Executive, federation, and analytical surfaces" },
-        "cognition": { "name": "Governed Reasoning", "desc": "Sovereign reasoning bound to institutional doctrine" },
-        "governance": { "name": "Governance of Record", "desc": "Charter, motions, and decisions of record" },
-        "memory": { "name": "Institutional Memory", "desc": "Doctrine, precedents, and continuity archive" },
-        "trust": { "name": "Trust & Sovereignty", "desc": "Audit, explainability, and Canadian sovereignty" }
+        "inbox": {
+          "name": "Intake & Coordination",
+          "desc": "Unified intake for member correspondence and case channels"
+        },
+        "work": {
+          "name": "Casework Continuity",
+          "desc": "Active grievance and representation workbench"
+        },
+        "priorities": {
+          "name": "Commitments & Deadlines",
+          "desc": "Statutory clocks, obligations, and institutional next actions"
+        },
+        "intelligence": {
+          "name": "Institutional Intelligence",
+          "desc": "Executive, federation, and analytical surfaces"
+        },
+        "cognition": {
+          "name": "Governed Reasoning",
+          "desc": "Sovereign reasoning bound to institutional doctrine"
+        },
+        "governance": {
+          "name": "Governance of Record",
+          "desc": "Charter, motions, and decisions of record"
+        },
+        "memory": {
+          "name": "Institutional Memory",
+          "desc": "Doctrine, precedents, and continuity archive"
+        },
+        "trust": {
+          "name": "Trust & Sovereignty",
+          "desc": "Audit, explainability, and Canadian sovereignty"
+        }
       },
       "pricing": "Pricing",
       "trust": "Trust & Compliance",

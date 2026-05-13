@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T11:45:29.896Z",
+  "generatedAt": "2026-05-13T11:54:50.339Z",
   "files": [
     {
       "ctx": {
@@ -7938,7 +7938,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7270,
+          "line": 7294,
           "excerpt": "\"heroDescription\": \"A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.\","
         },
         {
@@ -7947,7 +7947,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7432,
+          "line": 7456,
           "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
         },
         {
@@ -7956,7 +7956,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7454,
+          "line": 7478,
           "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
         },
         {
@@ -7965,7 +7965,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7456,
+          "line": 7480,
           "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
         },
         {
@@ -7974,7 +7974,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7460,
+          "line": 7484,
           "excerpt": "\"platform\": \"Capabilities\","
         },
         {
@@ -7983,7 +7983,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7512,
+          "line": 7536,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -7992,7 +7992,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7546,
+          "line": 7570,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8001,7 +8001,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7581,
+          "line": 7605,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8010,7 +8010,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7611,
+          "line": 7635,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8019,7 +8019,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7621,
+          "line": 7645,
           "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
         },
         {
@@ -8028,7 +8028,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7671,
+          "line": 7695,
           "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
         },
         {
@@ -8037,7 +8037,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7685,
+          "line": 7709,
           "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
         },
         {
@@ -8046,7 +8046,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7688,
+          "line": 7712,
           "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
         },
         {
@@ -8055,7 +8055,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7690,
+          "line": 7714,
           "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
         },
         {
@@ -8064,7 +8064,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7694,
+          "line": 7718,
           "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
         },
         {
@@ -8073,7 +8073,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7706,
+          "line": 7730,
           "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
         },
         {
@@ -8082,7 +8082,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7749,
+          "line": 7773,
           "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
         },
         {
@@ -8091,7 +8091,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7751,
+          "line": 7775,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -8100,7 +8100,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7761,
+          "line": 7785,
           "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
         },
         {
@@ -8109,7 +8109,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7767,
+          "line": 7791,
           "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
         },
         {
@@ -8118,7 +8118,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7771,
+          "line": 7795,
           "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
         },
         {
@@ -8127,7 +8127,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7777,
+          "line": 7801,
           "excerpt": "\"disruptionTitle\": \"Operational disruption modeling\","
         },
         {
@@ -8136,7 +8136,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7915,
+          "line": 7939,
           "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
         },
         {
@@ -8145,7 +8145,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8661,
+          "line": 8685,
           "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
         },
         {
@@ -8154,7 +8154,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8813,
+          "line": 8837,
           "excerpt": "\"platform\": {"
         },
         {
@@ -8163,7 +8163,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8817,
+          "line": 8841,
           "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
         },
         {
@@ -8172,7 +8172,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8833,
+          "line": 8857,
           "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
         },
         {
@@ -8181,7 +8181,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8838,
+          "line": 8862,
           "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
         },
         {
@@ -8190,7 +8190,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8845,
+          "line": 8869,
           "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
         },
         {
@@ -8199,7 +8199,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8848,
+          "line": 8872,
           "excerpt": "\"platformHealth\": \"Platform Health\","
         },
         {
@@ -8208,7 +8208,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8855,
+          "line": 8879,
           "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
         },
         {
@@ -8217,7 +8217,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8862,
+          "line": 8886,
           "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
         },
         {
@@ -8226,7 +8226,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9163,
+          "line": 9187,
           "excerpt": "\"title\": \"Platform Operations\","
         },
         {
@@ -8235,7 +8235,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9164,
+          "line": 9188,
           "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
         },
         {
@@ -8244,7 +8244,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9176,
+          "line": 9200,
           "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
         },
         {
@@ -8253,7 +8253,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9237,
+          "line": 9261,
           "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
         },
         {
@@ -8262,7 +8262,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9238,
+          "line": 9262,
           "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
         },
         {
@@ -8271,7 +8271,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9274,
+          "line": 9298,
           "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
         },
         {
@@ -8280,7 +8280,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10594,
+          "line": 10618,
           "excerpt": "\"description\": \"AI-powered recommendations\""
         }
       ],
@@ -8591,7 +8591,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7234,
+          "line": 7235,
           "excerpt": "\"platform\": \"Platform\","
         },
         {
@@ -8600,7 +8600,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7356,
+          "line": 7357,
           "excerpt": "\"heroDescription\": \"A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.\","
         },
         {
@@ -8609,7 +8609,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7509,
+          "line": 7519,
           "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
         },
         {
@@ -8618,7 +8618,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7531,
+          "line": 7541,
           "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
         },
         {
@@ -8627,7 +8627,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7533,
+          "line": 7543,
           "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
         },
         {
@@ -8636,7 +8636,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7643,
+          "line": 7653,
           "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
         },
         {
@@ -8645,7 +8645,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7679,
+          "line": 7689,
           "excerpt": "\"platform\": \"Capabilities\","
         },
         {
@@ -8654,7 +8654,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7730,
+          "line": 7741,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8663,7 +8663,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7764,
+          "line": 7775,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8672,7 +8672,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7799,
+          "line": 7810,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8681,7 +8681,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7829,
+          "line": 7840,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8690,7 +8690,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7839,
+          "line": 7850,
           "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
         },
         {
@@ -8699,7 +8699,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7889,
+          "line": 7900,
           "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
         },
         {
@@ -8708,7 +8708,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7903,
+          "line": 7914,
           "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
         },
         {
@@ -8717,7 +8717,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7906,
+          "line": 7917,
           "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
         },
         {
@@ -8726,7 +8726,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7908,
+          "line": 7919,
           "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
         },
         {
@@ -8735,7 +8735,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7912,
+          "line": 7923,
           "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
         },
         {
@@ -8744,7 +8744,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7924,
+          "line": 7935,
           "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
         },
         {
@@ -8753,7 +8753,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7967,
+          "line": 7978,
           "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
         },
         {
@@ -8762,7 +8762,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7969,
+          "line": 7980,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -8771,7 +8771,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7979,
+          "line": 7990,
           "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
         },
         {
@@ -8780,7 +8780,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7985,
+          "line": 7996,
           "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
         },
         {
@@ -8789,8 +8789,17 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7989,
-          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\""
+          "line": 8000,
+          "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\","
+        },
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8006,
+          "excerpt": "\"disruptionTitle\": \"Operational disruption modeling\","
         },
         {
           "term": {
@@ -8798,7 +8807,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8941,
+          "line": 8964,
           "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
         },
         {
@@ -8807,7 +8816,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9093,
+          "line": 9116,
           "excerpt": "\"platform\": {"
         },
         {
@@ -8816,7 +8825,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9097,
+          "line": 9120,
           "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
         },
         {
@@ -8825,7 +8834,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9113,
+          "line": 9136,
           "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
         },
         {
@@ -8834,7 +8843,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9118,
+          "line": 9141,
           "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
         },
         {
@@ -8843,7 +8852,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9125,
+          "line": 9148,
           "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
         },
         {
@@ -8852,7 +8861,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9128,
+          "line": 9151,
           "excerpt": "\"platformHealth\": \"Platform Health\","
         },
         {
@@ -8861,7 +8870,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9135,
+          "line": 9158,
           "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
         },
         {
@@ -8870,7 +8879,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9142,
+          "line": 9165,
           "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
         },
         {
@@ -8879,7 +8888,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10247,
+          "line": 10270,
           "excerpt": "\"description\": \"AI-powered recommendations\""
         },
         {
@@ -8888,7 +8897,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10921,
+          "line": 10944,
           "excerpt": "\"title\": \"Platform Operations\","
         },
         {
@@ -8897,7 +8906,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10922,
+          "line": 10945,
           "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
         },
         {
@@ -8906,7 +8915,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10934,
+          "line": 10957,
           "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
         },
         {
@@ -8915,7 +8924,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10995,
+          "line": 11018,
           "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
         },
         {
@@ -8924,7 +8933,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10996,
+          "line": 11019,
           "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
         },
         {
@@ -8933,7 +8942,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 11032,
+          "line": 11055,
           "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
         }
       ],
@@ -8941,26 +8950,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 59,
+          "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 9.4% (target 30%).",
+              "message": "Continuity language under-represented: 10.0% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 266,
-              "continuity": 68,
-              "coordination": 148,
+              "governance": 269,
+              "continuity": 73,
+              "coordination": 150,
               "trust": 241
             },
-            "total": 723,
+            "total": 733,
             "shares": {
-              "governance": 0.367911479944675,
-              "continuity": 0.09405255878284924,
-              "coordination": 0.20470262793914246,
-              "trust": 0.3333333333333333
+              "governance": 0.3669849931787176,
+              "continuity": 0.09959072305593451,
+              "coordination": 0.20463847203274216,
+              "trust": 0.32878581173260574
             }
           }
         },
@@ -9100,7 +9109,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7460,
+          "line": 7484,
           "excerpt": "\"platform\": \"Capacités\","
         },
         {
@@ -9109,7 +9118,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8813,
+          "line": 8837,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -9247,7 +9256,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7171,
+          "line": 7172,
           "excerpt": "\"platform\": \"Plateforme\","
         },
         {
@@ -9256,7 +9265,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7474,
+          "line": 7484,
           "excerpt": "\"platform\": \"Plateforme\","
         },
         {
@@ -9265,7 +9274,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8814,
+          "line": 8837,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -9273,7 +9282,7 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 40,
+          "score": 41,
           "flags": [
             {
               "message": "Continuity language under-represented: 3.3% (target 30%).",
@@ -9284,15 +9293,15 @@
             "counts": {
               "governance": 76,
               "continuity": 8,
-              "coordination": 41,
+              "coordination": 42,
               "trust": 118
             },
-            "total": 243,
+            "total": 244,
             "shares": {
-              "governance": 0.31275720164609055,
-              "continuity": 0.03292181069958848,
-              "coordination": 0.16872427983539096,
-              "trust": 0.48559670781893005
+              "governance": 0.3114754098360656,
+              "continuity": 0.03278688524590164,
+              "coordination": 0.1721311475409836,
+              "trust": 0.48360655737704916
             }
           }
         },
@@ -9704,7 +9713,7 @@
     "totalFiles": 87,
     "publicFiles": 87,
     "hardFails": 0,
-    "warnings": 207,
+    "warnings": 208,
     "ruleFailures": 0,
     "averageMaturity": 88
   }

@@ -7204,6 +7204,7 @@
       "home": "Home",
       "solutions": "Solutions",
       "insights": "Insights",
+      "proof": "Proof",
       "solutionsItems": {
         "executive": {
           "name": "Union Executive Leadership",
@@ -7486,6 +7487,15 @@
         "heading": "Executive briefing request received",
         "body": "Thank you for your interest in UnionEyes. Our institutional modernization team will review your submission and connect within 2–3 business days to discuss program scope."
       },
+      "phase6": {
+        "leadershipTitle": "Leadership transition continuity scenarios",
+        "frictionTitle": "Governance friction simulation flows",
+        "onboardingTitle": "Onboarding continuity intelligence",
+        "federationTitle": "Federation-scale continuity scenarios",
+        "decisionTitle": "Executive decision pathway systems",
+        "stabilizationMoveLabel": "Stabilization move:",
+        "manageThroughLabel": "Manage through:"
+      },
       "sectors": {
         "Healthcare": "Healthcare",
         "Education": "Education",
@@ -7701,6 +7711,7 @@
       "labourSafeAi": "Labour-Safe AI",
       "explainabilityStandards": "Explainability Standards",
       "insights": "Insights",
+      "institutionalProof": "Institutional Proof",
       "governance": "Governance & Oversight",
       "grievanceTracking": "Case & Grievance Management",
       "memberPortal": "Member Portal & Engagement",
@@ -7986,7 +7997,19 @@
       "entitlementTitle": "Entitlement-Based Feature Control",
       "entitlementDesc": "Modules and capabilities are activated through the deployment contract. Nothing is on by default. Organization admins control what is available and to whom.",
       "defensibilityTitle": "Defensible by Design",
-      "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof."
+      "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
+      "phase6": {
+        "tabScenario": "Scenario Intelligence",
+        "leadershipTitle": "Leadership transition continuity scenarios",
+        "leadershipDesc": "These scenarios model familiar institutional transition moments and show calm continuity responses that preserve governance coherence.",
+        "frictionTitle": "Governance friction simulation flows",
+        "disruptionTitle": "Operational disruption modeling",
+        "stabilizationTitle": "Organizational stabilization simulation",
+        "committeeTitle": "Committee coordination simulations",
+        "stabilizationMoveLabel": "Stabilization move:",
+        "manageThroughLabel": "Manage through:",
+        "stabilizeWithLabel": "Stabilize with:"
+      }
     },
     "statusBody": {
       "systemStatus": "System Status",

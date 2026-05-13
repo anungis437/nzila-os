@@ -7141,6 +7141,7 @@
       "home": "Accueil",
       "solutions": "Solutions",
       "insights": "Perspectives",
+      "proof": "Preuves",
       "solutionsItems": {
         "executive": {
           "name": "Direction exécutive syndicale",
@@ -7423,6 +7424,15 @@
         "heading": "Demande de pilote reçue !",
         "body": "Merci pour votre intérêt pour UnionEyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter de la portée."
       },
+      "phase6": {
+        "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "onboardingTitle": "Intelligence de continuité pour l’intégration",
+        "federationTitle": "Scénarios de continuité à l’échelle fédérative",
+        "decisionTitle": "Systèmes de parcours de décision exécutive",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gérer par :"
+      },
       "sectors": {
         "Healthcare": "Soins de santé",
         "Education": "Éducation",
@@ -7496,6 +7506,7 @@
       "labourSafeAi": "IA sécuritaire pour le travail",
       "explainabilityStandards": "Normes d'explicabilité",
       "insights": "Perspectives",
+      "institutionalProof": "Preuves institutionnelles",
       "governance": "Gouvernance & Surveillance",
       "grievanceTracking": "Suivi des griefs",
       "memberPortal": "Portail des membres",
@@ -7781,7 +7792,19 @@
       "entitlementTitle": "Contrôle des Fonctionnalités Basé sur les Droits",
       "entitlementDesc": "Les modules et capacités sont activés via le contrat de déploiement. Rien n'est activé par défaut. Les administrateurs de l'organisation contrôlent ce qui est disponible et pour qui.",
       "defensibilityTitle": "Défendable par Conception",
-      "defensibilityDesc": "Scellage des preuves, chaîne de garde des griefs et enregistrements à preuve de falsification. Lorsque vos décisions sont contestées, la plateforme fournit la preuve."
+      "defensibilityDesc": "Scellage des preuves, chaîne de garde des griefs et enregistrements à preuve de falsification. Lorsque vos décisions sont contestées, la plateforme fournit la preuve.",
+      "phase6": {
+        "tabScenario": "Intelligence de scénarios",
+        "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
+        "leadershipDesc": "Ces scénarios reflètent des transitions institutionnelles réelles et montrent des réponses calmes qui préservent la cohérence de gouvernance.",
+        "frictionTitle": "Flux de simulation des frictions de gouvernance",
+        "disruptionTitle": "Modélisation des perturbations opérationnelles",
+        "stabilizationTitle": "Simulation de stabilisation organisationnelle",
+        "committeeTitle": "Simulations de coordination des comités",
+        "stabilizationMoveLabel": "Action de stabilisation :",
+        "manageThroughLabel": "Gérer par :",
+        "stabilizeWithLabel": "Stabiliser avec :"
+      }
     },
     "statusBody": {
       "systemStatus": "État du système",

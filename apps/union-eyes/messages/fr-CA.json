@@ -7171,14 +7171,38 @@
       "story": "Notre histoire",
       "platform": "Plateforme",
       "platformItems": {
-        "inbox": { "name": "Réception et coordination", "desc": "Canal unifié pour la correspondance des membres et les dossiers" },
-        "work": { "name": "Continuité des dossiers", "desc": "Espace de travail actif pour griefs et représentation" },
-        "priorities": { "name": "Engagements et échéances", "desc": "Délais statutaires, obligations et prochaines actions institutionnelles" },
-        "intelligence": { "name": "Intelligence institutionnelle", "desc": "Surfaces exécutives, fédérales et analytiques" },
-        "cognition": { "name": "Raisonnement gouverné", "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle" },
-        "governance": { "name": "Gouvernance officielle", "desc": "Charte, motions et décisions officielles" },
-        "memory": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archives de continuité" },
-        "trust": { "name": "Confiance et souveraineté", "desc": "Audit, explicabilité et souveraineté canadienne" }
+        "inbox": {
+          "name": "Réception et coordination",
+          "desc": "Canal unifié pour la correspondance des membres et les dossiers"
+        },
+        "work": {
+          "name": "Continuité des dossiers",
+          "desc": "Espace de travail actif pour griefs et représentation"
+        },
+        "priorities": {
+          "name": "Engagements et échéances",
+          "desc": "Délais statutaires, obligations et prochaines actions institutionnelles"
+        },
+        "intelligence": {
+          "name": "Intelligence institutionnelle",
+          "desc": "Surfaces exécutives, fédérales et analytiques"
+        },
+        "cognition": {
+          "name": "Raisonnement gouverné",
+          "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle"
+        },
+        "governance": {
+          "name": "Gouvernance officielle",
+          "desc": "Charte, motions et décisions officielles"
+        },
+        "memory": {
+          "name": "Mémoire institutionnelle",
+          "desc": "Doctrine, précédents et archives de continuité"
+        },
+        "trust": {
+          "name": "Confiance et souveraineté",
+          "desc": "Audit, explicabilité et souveraineté canadienne"
+        }
       },
       "pricing": "Tarification",
       "trust": "Confiance et conformité",
@@ -7401,13 +7425,13 @@
         "body": "Merci pour votre intérêt envers UnionEyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter de la portée."
       },
       "phase6": {
-        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
+        "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
         "frictionTitle": "Flux de simulation des frictions de gouvernance",
-        "onboardingTitle": "Intelligence de continuite pour l integration",
-        "federationTitle": "Scenarios de continuite a echelle federative",
-        "decisionTitle": "Systemes de parcours de decision executive",
+        "onboardingTitle": "Intelligence de continuité pour l’intégration",
+        "federationTitle": "Scénarios de continuité à l’échelle fédérative",
+        "decisionTitle": "Systèmes de parcours de décision exécutive",
         "stabilizationMoveLabel": "Action de stabilisation :",
-        "manageThroughLabel": "Gerer par :"
+        "manageThroughLabel": "Gérer par :"
       },
       "sectors": {
         "Healthcare": "Soins de santé",
@@ -7770,15 +7794,15 @@
       "defensibilityTitle": "Défensibilité juridique",
       "defensibilityDesc": "Les décisions de griefs, les allocations financières et les changements de droits sont enregistrés avec attribution, horodatage et justification — prêts pour examen.",
       "phase6": {
-        "tabScenario": "Intelligence de scenarios",
-        "leadershipTitle": "Scenarios de continuite lors des transitions de leadership",
-        "leadershipDesc": "Ces scenarios reflettent des transitions institutionnelles reelles et montrent des reponses calmes qui preservent la coherence de gouvernance.",
+        "tabScenario": "Intelligence de scénarios",
+        "leadershipTitle": "Scénarios de continuité lors des transitions de leadership",
+        "leadershipDesc": "Ces scénarios reflètent des transitions institutionnelles réelles et montrent des réponses calmes qui préservent la cohérence de gouvernance.",
         "frictionTitle": "Flux de simulation des frictions de gouvernance",
-        "disruptionTitle": "Modelisation des perturbations operationnelles",
+        "disruptionTitle": "Modélisation des perturbations opérationnelles",
         "stabilizationTitle": "Simulation de stabilisation organisationnelle",
-        "committeeTitle": "Simulations de coordination des comites",
+        "committeeTitle": "Simulations de coordination des comités",
         "stabilizationMoveLabel": "Action de stabilisation :",
-        "manageThroughLabel": "Gerer par :",
+        "manageThroughLabel": "Gérer par :",
         "stabilizeWithLabel": "Stabiliser avec :"
       }
     },
