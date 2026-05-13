@@ -12,11 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// NOTE: `it` and `pt` remain valid routes but are hidden from the picker
+// until their translations are complete. Keep in sync with
+// `apps/union-eyes/i18n/config.ts` -> `visibleLocales`.
 const locales = [
   { code: "en-CA", label: "English", flag: "🇨🇦" },
   { code: "fr-CA", label: "Français", flag: "🇨🇦" },
-  { code: "it", label: "Italiano", flag: "🇮🇹" },
-  { code: "pt", label: "Português", flag: "🇵🇹" },
 ] as const;
 
 type LocaleCode = (typeof locales)[number]["code"];
