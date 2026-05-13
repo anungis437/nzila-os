@@ -36,13 +36,36 @@ import {
 } from '@/lib/insights-content';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
+  const title = 'Insights | Institutional Governance & Continuity Library — UnionEyes';
+  const description =
+    'A doctrine library for unions and democratic organizations: institutional governance, continuity preservation, representational coordination, and audit-grade transparency. Bilingual, sovereignty-conscious, executive-grade.';
   return {
-    title: 'Insights | UnionEyes',
-    description:
-      'Institutional continuity, governance modernization, and labour-safe organizational intelligence — thought leadership from UnionEyes.',
+    title,
+    description,
+    keywords: [
+      'institutional governance',
+      'institutional continuity',
+      'institutional memory',
+      'representational coordination',
+      'union governance doctrine',
+      'audit-grade transparency',
+      'explainable assistive intelligence',
+      'bilingual continuity infrastructure',
+    ],
     alternates: buildLocaleAlternates(locale, '/insights'),
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 
@@ -59,8 +82,58 @@ export default async function InsightsPage({
   const featuredInsights = getFeaturedInsights();
   const quickLinks = insightsHubSections.filter((section) => section.key !== 'overview');
 
+  const pillars = [
+    {
+      eyebrow: 'Governance',
+      title: 'Bylaw-aligned procedural cadence',
+      body: 'Constitutional fidelity, motion lifecycle, quorum integrity, and decision provenance — modernization without rupture.',
+    },
+    {
+      eyebrow: 'Continuity',
+      title: 'Institutional memory preservation',
+      body: 'Succession-safe knowledge, doctrine archives, and representational lineage that survive turnover and political cycles.',
+    },
+    {
+      eyebrow: 'Coordination',
+      title: 'Representational workflow integrity',
+      body: 'Intake, casework, grievance lifecycle, and steward operations woven into a single coherent operational fabric.',
+    },
+    {
+      eyebrow: 'Trust',
+      title: 'Audit-grade transparency',
+      body: 'Evidence trails, oversight ergonomics, and explainable assistive intelligence — every action operator-initiated and reviewable.',
+    },
+  ];
+
+  const collectionLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'UnionEyes Institutional Governance & Continuity Library',
+    description:
+      'Institutional doctrine, governance modernization, continuity preservation, and representational coordination — executive-grade publications for democratic organizations.',
+    inLanguage: locale,
+    isPartOf: { '@type': 'WebSite', name: 'UnionEyes' },
+    about: [
+      'Institutional governance',
+      'Institutional continuity',
+      'Representational coordination',
+      'Audit-grade transparency',
+    ],
+    hasPart: featuredInsights.map((insight) => ({
+      '@type': 'Article',
+      headline: insight.title,
+      description: insight.excerpt,
+      url: getInsightHref(insight.slug, locale),
+      articleSection: insight.categoryName,
+    })),
+  };
+
   return (
     <div className="institution-shell min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
+      />
 
       {/* ── Hero ── */}
       <MarketingHeroSection
@@ -82,6 +155,28 @@ export default async function InsightsPage({
       />
 
       <InsightsHubSubmenu locale={locale} active="overview" contextMode={contextMode} />
+
+      {/* ── Four institutional pillars (thematic spine) ── */}
+      <section className="py-14 bg-[#f8f6f2] border-b border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal delay={0.04} duration={0.85} distance={14} tempo="conference">
+            <p className="text-xs tracking-[0.2em] uppercase text-slate-500 mb-3">Doctrine spine</p>
+            <h2 className="text-3xl font-semibold text-navy mb-4">Four pillars organizing every publication</h2>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-10">
+              Every doctrine brief, methodology guide, and resonance essay is anchored in one of four institutional pillars. The library reads as a continuity instrument — not a content marketing surface.
+            </p>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 narrative-sequence">
+            {pillars.map((pillar) => (
+              <article key={pillar.eyebrow} className="institution-panel calm-elevation p-5">
+                <p className="text-[11px] tracking-[0.18em] uppercase text-[#1f5b84] mb-2">{pillar.eyebrow}</p>
+                <h3 className="text-sm font-semibold text-navy mb-2 leading-snug">{pillar.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{pillar.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="py-12 bg-white border-b border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

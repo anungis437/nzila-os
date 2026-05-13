@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T11:42:39.787Z",
+  "generatedAt": "2026-05-13T11:45:29.896Z",
   "files": [
     {
       "ctx": {
@@ -5086,17 +5086,17 @@
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 8,
-              "continuity": 11,
-              "coordination": 7,
-              "trust": 12
+              "governance": 18,
+              "continuity": 25,
+              "coordination": 21,
+              "trust": 25
             },
-            "total": 38,
+            "total": 89,
             "shares": {
-              "governance": 0.21052631578947367,
-              "continuity": 0.2894736842105263,
-              "coordination": 0.18421052631578946,
-              "trust": 0.3157894736842105
+              "governance": 0.20224719101123595,
+              "continuity": 0.2808988764044944,
+              "coordination": 0.23595505617977527,
+              "trust": 0.2808988764044944
             }
           }
         },
