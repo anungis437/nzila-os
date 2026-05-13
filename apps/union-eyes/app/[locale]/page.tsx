@@ -18,9 +18,9 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: 'Union Eyes | Institutional Labour Operating Infrastructure',
+    title: 'Union Eyes | Institutional Governance & Continuity Infrastructure',
     description:
-      'Continuity-safe institutional labour operations: governance-safe cognition, institutional memory, stewardship continuity, and anti-surveillance posture as one operating environment.',
+      'Institutional governance & continuity infrastructure for federated democratic organizations: governance-safe cognition, institutional memory, stewardship continuity, and anti-surveillance posture as one operating environment.',
     alternates: buildLocaleAlternates(locale),
   };
 }
@@ -90,14 +90,14 @@ export default async function LocaleRootPage({
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
             <ScrollReveal>
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-                Institutional Labor Operating Infrastructure
+                Institutional Governance & Continuity Infrastructure
               </span>
             </ScrollReveal>
 
             <ScrollReveal delay={0.08}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-                Continuity-safe<br />
-                <span className="gradient-text">institutional labour operations.</span>
+                Confidence that<br />
+                <span className="gradient-text">institutional memory will outlive any individual.</span>
               </h1>
             </ScrollReveal>
 

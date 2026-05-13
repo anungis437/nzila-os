@@ -1,40 +1,55 @@
+/**
+ * Governance & Continuity (customer-institutional).
+ *
+ * Per realignment directive, "governance" on UnionEyes public surfaces refers
+ * to the CUSTOMER's institutional governance ecosystem: constitutional
+ * operations, resolutions, committees, delegate coordination, and continuity
+ * of mandate across leadership transitions.
+ *
+ * Vendor-side corporate stewardship mechanics live exclusively at
+ * /trust/stewardship-appendix and are not surfaced here.
+ */
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Shield, Users, FileText, Vote } from 'lucide-react';
+import { Landmark, ScrollText, Network, Infinity as InfinityIcon } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
-  const {locale} = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   return {
-    title: 'Governance Structure | UnionEyes',
+    title: 'Governance & Continuity | UnionEyes',
     description:
-      'How the UnionEyes golden share works and how labour governance protections are enforced.',
+      'Constitutional operations infrastructure for federated democratic organizations \u2014 resolutions, committees, mandates, and continuity of institutional memory across leadership transitions.',
     alternates: buildLocaleAlternates(locale, '/governance'),
   };
 }
 
-const provisions = [
+const pillars = [
   {
-    icon: Vote,
-    title: 'Veto on change of control',
-    body: 'The golden share gives the Labour Council authority to block any sale, merger, or transfer of controlling interest without affirmative labour consent.',
+    icon: Landmark,
+    title: 'Constitutional operations',
+    body: 'Constitutions, bylaws, and standing orders are first-class operational artifacts \u2014 versioned, queryable, and enforced through procedural workflow rather than tribal knowledge.',
   },
   {
-    icon: Shield,
-    title: 'Mission lock',
-    body: 'Changes to the company mission require golden share consent, protecting worker-first purpose against investor or executive drift.',
+    icon: ScrollText,
+    title: 'Resolutions & mandate lifecycle',
+    body: 'Every motion, amendment, vote, and ratification flows through an auditable lifecycle. Mandates are tracked from adoption through expiration, with explicit ownership at every stage.',
   },
   {
-    icon: Users,
-    title: 'Labour-elected council seats',
-    body: 'Reserved board seats are held by labour-elected representatives with full voting rights on strategic decisions.',
+    icon: Network,
+    title: 'Committees & delegate coordination',
+    body: 'Standing committees, ad-hoc working groups, and delegate bodies operate inside the same governance fabric \u2014 with explicit reporting lines, scoped authority, and traceable deliverables.',
   },
   {
-    icon: FileText,
-    title: 'Reserved matters',
-    body: 'Critical decisions such as major pricing changes, data-sharing policy, and data residency shifts require golden share approval.',
+    icon: InfinityIcon,
+    title: 'Continuity beyond any individual',
+    body: 'Decisions, deliberation context, and institutional reasoning survive every leadership transition. New officers inherit the full body of work, not a blank desk and a pile of binders.',
   },
 ];
 
@@ -45,29 +60,38 @@ export default function GovernancePage() {
         imageUrl={heroImagery.governance}
         badge={
           <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white backdrop-blur-sm">
-            Governance
+            Governance &amp; Continuity
           </span>
         }
-        heading="The golden share, explained"
-        description="This is a legal governance structure, not a brand claim. Here is what it protects and how."
+        heading="Constitutional operations for federated organizations."
+        description="UnionEyes turns your constitution, resolutions, and mandates into operational infrastructure \u2014 so institutional reasoning survives every leadership transition."
       />
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-4">What is a golden share?</h2>
+          <h2 className="text-2xl font-bold text-navy mb-4">
+            Why institutional governance is operational infrastructure
+          </h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            A golden share is a special class of equity with veto rights over defined decisions, regardless of ordinary share distribution.
+            For federated democratic organizations, governance is not paperwork or quarterly
+            ritual. It is the protocol that determines what the organization is allowed to
+            decide, who is allowed to decide it, and what happens when an officer&rsquo;s term
+            ends.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            In UnionEyes, this share is held by a Labour Council elected by partner unions. The structure was established at incorporation and cannot be removed without golden-shareholder consent.
+            UnionEyes treats that protocol as production infrastructure: durable, versioned,
+            queryable, and continuously auditable.
           </p>
         </div>
 
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-navy mb-8">What the golden share protects</h2>
+          <h2 className="text-2xl font-bold text-navy mb-8">The four governance pillars</h2>
           <div className="space-y-6">
-            {provisions.map((p) => (
-              <div key={p.title} className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm">
+            {pillars.map((p) => (
+              <div
+                key={p.title}
+                className="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm"
+              >
                 <div className="shrink-0 w-12 h-12 rounded-xl bg-electric/10 text-electric flex items-center justify-center">
                   <p.icon className="h-6 w-6" />
                 </div>
@@ -85,16 +109,20 @@ export default function GovernancePage() {
           <div className="space-y-6 divide-y divide-gray-100">
             {[
               {
-                q: 'What if UnionEyes raises venture capital?',
-                a: 'Investors can hold ordinary shares. The golden share is separate, non-dilutive, and remains in force.',
+                q: 'Is this a document management system?',
+                a: 'No. Documents are an artifact of governance, not its substance. UnionEyes models the procedural mechanics \u2014 motions, amendments, votes, mandates, committee authority \u2014 as first-class state, with documents attached as evidence.',
               },
               {
-                q: 'Can the governance model be changed later?',
-                a: 'Only with golden share consent. The protection is designed specifically to prevent unilateral changes.',
+                q: 'How does this handle federated structures?',
+                a: 'Local, regional, and national bodies each carry their own governance state, with explicit delegation, escalation, and ratification pathways. Cross-tier resolutions are coordinated through the same protocol \u2014 not over email threads.',
               },
               {
-                q: 'Who provides governance oversight?',
-                a: 'A labour-elected council structure with reserved powers and documented oversight responsibilities.',
+                q: 'What happens when leadership changes?',
+                a: 'Incoming officers inherit complete deliberation history, active mandates, pending motions, and committee state. Procedural neutrality is enforced by the platform, not by trust in the outgoing officer.',
+              },
+              {
+                q: 'How is UnionEyes itself governed?',
+                a: 'UnionEyes operates under a documented corporate stewardship structure designed to keep platform neutrality and labour alignment durable across ownership transitions. Procurement reviewers can find structural details in the stewardship appendix.',
               },
             ].map(({ q, a }) => (
               <div key={q} className="pt-6 first:pt-0">
@@ -106,11 +134,14 @@ export default function GovernancePage() {
         </div>
 
         <div className="border-t border-gray-100 pt-10 flex flex-col sm:flex-row items-center gap-4">
-          <Link href="../story" className="text-sm text-electric font-semibold hover:underline">
-            ← Back to Our Story
+          <Link
+            href="../institutional-continuity"
+            className="text-sm text-electric font-semibold hover:underline"
+          >
+            Institutional Memory →
           </Link>
           <Link href="../trust" className="text-sm text-electric font-semibold hover:underline">
-            View Trust Center →
+            Trust &amp; Stewardship →
           </Link>
         </div>
       </section>
