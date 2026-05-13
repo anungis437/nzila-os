@@ -1,14 +1,14 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T17:24:53.330Z
+Generated: 2026-05-13T18:38:31.481Z
 
 ## Summary
 
-- Files scanned: **88**
+- Files scanned: **95**
 - Hard-fail violations: **0**
-- Warning violations: **217**
+- Warning violations: **229**
 - Rule failures: **0**
-- Average Institutional Maturity: **85/100**
+- Average Institutional Maturity: **88/100**
 
 ## Per-Surface Detail
 
@@ -491,9 +491,11 @@ Generated: 2026-05-13T17:24:53.330Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
+- L58 [warning/warning] `governance intelligence` — title: 'Governance Intelligence Briefings',
 - L91 [warning/warning] `platform` — Platform · Executive Intelligence
 
 **Recommendations:**
+- Remove or rephrase "governance intelligence" (warning).
 - Remove or rephrase "platform" (warning).
 
 ### marketing/features/ai-workbench
@@ -724,6 +726,12 @@ Generated: 2026-05-13T17:24:53.330Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
+
+**Vocabulary violations:**
+- L143 [warning/warning] `governance intelligence` — heading={<>Institutional continuity and governance intelligence</>}
+
+**Recommendations:**
+- Remove or rephrase "governance intelligence" (warning).
 
 ### marketing/insights/resonance
 
@@ -957,6 +965,12 @@ Generated: 2026-05-13T17:24:53.330Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
+**Vocabulary violations:**
+- L59 [warning/warning] `governance intelligence` — description="UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance intelligence to lead confidently through any transition — without wading throu
+
+**Recommendations:**
+- Remove or rephrase "governance intelligence" (warning).
+
 ### marketing/solutions/governance-leadership
 
 - **Path:** `app/[locale]/(marketing)/solutions/governance-leadership/page.tsx`
@@ -970,14 +984,19 @@ Generated: 2026-05-13T17:24:53.330Z
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
+- L36 [warning/warning] `governance intelligence` — { icon: FileCheck,   title: 'Audit-ready governance intelligence',       desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },
+- L59 [warning/warning] `governance intelligence` — description="UnionEyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic l
 - L65 [warning/warning] `platform` — <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25
 - L66 [warning/warning] `platform` — Governance Intelligence Platform
+- L66 [warning/warning] `governance intelligence` — Governance Intelligence Platform
+- L143 [warning/warning] `governance intelligence` — <p className="text-white/70 mb-8">See Governance Intelligence in a live pilot demonstration.</p>
 
 **Flags:**
 - (narrative-balance) Governance saturation detected: 44.0% of pillar terms (target 30%, threshold 40%).
 - (narrative-balance) Continuity language under-represented: 9.3% (target 30%).
 
 **Recommendations:**
+- Remove or rephrase "governance intelligence" (warning).
 - Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
@@ -1033,6 +1052,13 @@ Generated: 2026-05-13T17:24:53.330Z
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
+
+**Vocabulary violations:**
+- L43 [warning/warning] `governance intelligence` — 'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',
+- L67 [warning/warning] `governance intelligence` — 'Explainable governance intelligence with human oversight',
+
+**Recommendations:**
+- Remove or rephrase "governance intelligence" (warning).
 
 ### marketing/solutions/procurement
 
@@ -1195,6 +1221,7 @@ Generated: 2026-05-13T17:24:53.330Z
 - L7478 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
 - L7480 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
 - L7484 [warning/warning] `platform` — "platform": "Capabilities",
+- L7492 [warning/warning] `governance intelligence` — "governanceIntelligence": "Governance Intelligence",
 - L7536 [warning/warning] `platform` — "badge": "Platform Module",
 - L7570 [warning/warning] `platform` — "badge": "Platform Module",
 - L7605 [warning/warning] `platform` — "badge": "Platform Module",
@@ -1239,6 +1266,7 @@ Generated: 2026-05-13T17:24:53.330Z
 - Remove or rephrase "credits per billing cycle" (warning).
 - Remove or rephrase "operating system" (warning).
 - Remove or rephrase "centralized" (warning).
+- Remove or rephrase "governance intelligence" (warning).
 - Remove or rephrase "disruption" (warning).
 - Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
@@ -1286,6 +1314,7 @@ Generated: 2026-05-13T17:24:53.330Z
 - L7543 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
 - L7653 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
 - L7689 [warning/warning] `platform` — "platform": "Capabilities",
+- L7697 [warning/warning] `governance intelligence` — "governanceIntelligence": "Governance Intelligence",
 - L7741 [warning/warning] `platform` — "badge": "Platform Module",
 - L7775 [warning/warning] `platform` — "badge": "Platform Module",
 - L7810 [warning/warning] `platform` — "badge": "Platform Module",
@@ -1329,6 +1358,7 @@ Generated: 2026-05-13T17:24:53.330Z
 - Remove or rephrase "credits per billing cycle" (warning).
 - Remove or rephrase "operating system" (warning).
 - Remove or rephrase "centralized" (warning).
+- Remove or rephrase "governance intelligence" (warning).
 - Remove or rephrase "disruption" (warning).
 - Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
@@ -1463,6 +1493,61 @@ Generated: 2026-05-13T17:24:53.330Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
+
+### internal/app/[locale]/dashboard/continuity-intelligence/page.tsx
+
+- **Path:** `app/[locale]/dashboard/continuity-intelligence/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/continuity-planning/page.tsx
+
+- **Path:** `app/[locale]/dashboard/continuity-planning/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/continuity-simulation/page.tsx
+
+- **Path:** `app/[locale]/dashboard/continuity-simulation/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+**Vocabulary violations:**
+- L11 [warning/warning] `disruption` — 'Reviewer-led workspace to explore institutional continuity fragility, simulate disruption scenarios, and compare continuity safeguard strategies.',
+
+**Recommendations:**
+- Remove or rephrase "disruption" (warning).
+
+### internal/app/[locale]/dashboard/executive-operating-intelligence/page.tsx
+
+- **Path:** `app/[locale]/dashboard/executive-operating-intelligence/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/governance-center/page.tsx
+
+- **Path:** `app/[locale]/dashboard/governance-center/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/institutional-memory/page.tsx
+
+- **Path:** `app/[locale]/dashboard/institutional-memory/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/app/[locale]/dashboard/longitudinal-cognition/page.tsx
+
+- **Path:** `app/[locale]/dashboard/longitudinal-cognition/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
 
 ### internal/lib/dashboard/role-experience.ts
 

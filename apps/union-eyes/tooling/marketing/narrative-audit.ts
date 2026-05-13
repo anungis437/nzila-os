@@ -82,6 +82,16 @@ const MESSAGES_GLOB = "messages/*.json";
 const INTERNAL_NARRATIVE_GLOBS = [
   "app/[[]locale[]]/[(]dashboard[)]/**/page.tsx",
   "app/[[]locale[]]/[(]dashboard[)]/**/layout.tsx",
+  // Workstream F: priority dashboard routes live under the plain `dashboard/` segment
+  // (not the `(dashboard)` route group). Sweep them explicitly so internal runtime
+  // copy stays aligned with the institutional continuity ontology.
+  "app/[[]locale[]]/dashboard/governance-center/**/page.tsx",
+  "app/[[]locale[]]/dashboard/continuity-intelligence/**/page.tsx",
+  "app/[[]locale[]]/dashboard/continuity-planning/**/page.tsx",
+  "app/[[]locale[]]/dashboard/continuity-simulation/**/page.tsx",
+  "app/[[]locale[]]/dashboard/longitudinal-cognition/**/page.tsx",
+  "app/[[]locale[]]/dashboard/executive-operating-intelligence/**/page.tsx",
+  "app/[[]locale[]]/dashboard/institutional-memory/**/page.tsx",
   "lib/dashboard/role-experience.ts",
   "lib/dashboard/**/labels.ts",
   "services/platform-economics/entitlement-guard.ts",
@@ -236,10 +246,15 @@ export async function runAudit(): Promise<AuditReport> {
     (n, f) => n + f.ruleResults.filter((r) => r.status === "fail").length,
     0,
   );
-  const averageMaturity =
-    out.length === 0
-      ? 0
-      : Math.round(out.reduce((n, f) => n + f.maturity, 0) / out.length);
+  const averageMaturity = (() => {
+    // Maturity is only meaningful for files actually scored by rule modules
+    // (public marketing surfaces). Internal narrative surfaces are vocabulary-
+    // checked only — they always carry maturity = 0 and would otherwise
+    // dilute the average as the internal sweep grows.
+    const scored = out.filter((f) => f.ruleResults.length > 0);
+    if (scored.length === 0) return 0;
+    return Math.round(scored.reduce((n, f) => n + f.maturity, 0) / scored.length);
+  })();
 
   const publicFiles = out.filter((f) => f.ctx.isPublicSurface).length;
 

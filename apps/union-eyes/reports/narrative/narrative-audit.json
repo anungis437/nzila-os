@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T17:24:53.330Z",
+  "generatedAt": "2026-05-13T18:38:31.481Z",
   "files": [
     {
       "ctx": {
@@ -3266,6 +3266,15 @@
       "violations": [
         {
           "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 58,
+          "excerpt": "title: 'Governance Intelligence Briefings',"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -4899,7 +4908,17 @@
         "isPublicSurface": true,
         "label": "marketing/insights"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 143,
+          "excerpt": "heading={<>Institutional continuity and governance intelligence</>}"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -6350,7 +6369,17 @@
         "isPublicSurface": true,
         "label": "marketing/solutions/executive-leadership"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 59,
+          "excerpt": "description=\"UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance intelligence to lead confidently through any transition — without wading throu"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -6442,6 +6471,24 @@
       "violations": [
         {
           "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 36,
+          "excerpt": "{ icon: FileCheck,   title: 'Audit-ready governance intelligence',       desc: 'Complete audit trails for all governance decisions, intelligence actions, and human review outcomes.' },"
+        },
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 59,
+          "excerpt": "description=\"UnionEyes Governance Intelligence gives governance leaders the explainability, audit trails, and institutional context to modernize governance operations without compromising democratic l"
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -6457,6 +6504,24 @@
           },
           "line": 66,
           "excerpt": "Governance Intelligence Platform"
+        },
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 66,
+          "excerpt": "Governance Intelligence Platform"
+        },
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 143,
+          "excerpt": "<p className=\"text-white/70 mb-8\">See Governance Intelligence in a live pilot demonstration.</p>"
         }
       ],
       "ruleResults": [
@@ -6759,7 +6824,26 @@
         "isPublicSurface": true,
         "label": "marketing/solutions"
       },
-      "violations": [],
+      "violations": [
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 43,
+          "excerpt": "'Institutional continuity and governance intelligence solutions for every stakeholder: union executives, governance leaders, operations, technology, policy, and procurement.',"
+        },
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 67,
+          "excerpt": "'Explainable governance intelligence with human oversight',"
+        }
+      ],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -7810,6 +7894,15 @@
         },
         {
           "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7492,
+          "excerpt": "\"governanceIntelligence\": \"Governance Intelligence\","
+        },
+        {
+          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -8487,6 +8580,15 @@
           },
           "line": 7689,
           "excerpt": "\"platform\": \"Capabilities\","
+        },
+        {
+          "term": {
+            "term": "governance intelligence",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 7697,
+          "excerpt": "\"governanceIntelligence\": \"Governance Intelligence\","
         },
         {
           "term": {
@@ -9570,6 +9672,86 @@
     },
     {
       "ctx": {
+        "path": "app/[locale]/dashboard/continuity-intelligence/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/continuity-intelligence/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/continuity-planning/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/continuity-planning/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/continuity-simulation/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/continuity-simulation/page.tsx"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "disruption",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 11,
+          "excerpt": "'Reviewer-led workspace to explore institutional continuity fragility, simulate disruption scenarios, and compare continuity safeguard strategies.',"
+        }
+      ],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/executive-operating-intelligence/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/executive-operating-intelligence/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/governance-center/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/governance-center/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/institutional-memory/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/institutional-memory/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/dashboard/longitudinal-cognition/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/dashboard/longitudinal-cognition/page.tsx"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
         "path": "lib/dashboard/role-experience.ts",
         "isPublicSurface": false,
         "label": "internal/lib/dashboard/role-experience.ts"
@@ -9645,11 +9827,11 @@
     }
   ],
   "summary": {
-    "totalFiles": 88,
+    "totalFiles": 95,
     "publicFiles": 85,
     "hardFails": 0,
-    "warnings": 217,
+    "warnings": 229,
     "ruleFailures": 0,
-    "averageMaturity": 85
+    "averageMaturity": 88
   }
 }

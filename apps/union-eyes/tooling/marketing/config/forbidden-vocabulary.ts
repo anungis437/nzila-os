@@ -110,6 +110,13 @@ const surveillanceAi: ForbiddenTerm[] = [
   { term: "AI conclusions", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-confirmed conclusions | governed reasoning outputs" },
   { term: "automated governance interpretation", severity: "hard-fail", category: "surveillance-ai" },
   { term: "autonomous institutional reasoning", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted institutional reasoning under human oversight" },
+  // Workstream F: Inline runtime copy convergence — reject behavioural / scoring / war-room framing on internal surfaces
+  { term: "behavioural governance", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance of record | reviewer-led governance" },
+  { term: "behavioral governance", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance of record | reviewer-led governance" },
+  { term: "organizational analytics", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional intelligence | continuity-aware reporting" },
+  { term: "leadership analytics", severity: "hard-fail", category: "surveillance-ai", suggestion: "institutional intelligence" },
+  { term: "institutional scoring", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted institutional intelligence" },
+  { term: "operational war room", severity: "hard-fail", category: "surveillance-ai", suggestion: "continuity console | continuity operations" },
 ];
 
 // Workstream E: Continuity / operations-centre framing guards.
@@ -177,6 +184,12 @@ const warningLevel: ForbiddenTerm[] = [
   { term: "audit engine", severity: "warning", category: "warning" },
   { term: "compliance monitor", severity: "warning", category: "warning" },
   { term: "operational oversight", severity: "warning", category: "warning" },
+  // Workstream F: Inline runtime copy convergence — soft warnings for command / intelligence drift
+  { term: "decision intelligence", severity: "warning", category: "warning" },
+  { term: "fragility analysis", severity: "warning", category: "warning" },
+  { term: "governance intelligence", severity: "warning", category: "warning" },
+  { term: "intelligence cockpit", severity: "warning", category: "warning" },
+  { term: "executive command", severity: "warning", category: "warning" },
   // "governance" intentionally excluded from warning — counted via balance rule.
 ];
 

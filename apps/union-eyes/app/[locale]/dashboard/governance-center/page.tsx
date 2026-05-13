@@ -32,7 +32,7 @@ const GUARANTEES: Array<{ title: string; body: string }> = [
     body: 'All cognition operates at organizational, departmental, role-cohort, or process scope. Individual-level observation is rejected at the kernel.',
   },
   {
-    title: 'No workforce optimization',
+    title: 'No employee-level optimization',
     body: 'No employee scoring, retention prediction, or discipline modeling. Forbidden vocabulary is enforced repo-wide via CI.',
   },
   {
