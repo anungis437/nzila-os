@@ -35,8 +35,8 @@ test.describe('UnionEyes stakeholder demo journeys', () => {
       { label: 'Executive Overview', href: '/dashboard/intelligence?scope=executive' },
       { label: 'Continuity Insights', href: '/dashboard/continuity-intelligence' },
       { label: 'Leadership Continuity', href: '/dashboard/leadership' },
-      { label: 'Operational Health', href: '/dashboard/executive-operating-intelligence' },
-      { label: 'Outcomes', href: '/dashboard/outcomes' },
+      { label: 'Continuity Operations', href: '/dashboard/executive-operating-intelligence' },
+      { label: 'Member Outcomes Ledger', href: '/dashboard/outcomes' },
     ];
 
     for (const step of path) {
@@ -54,8 +54,8 @@ test.describe('UnionEyes stakeholder demo journeys', () => {
     await gotoDashboardAsRole(page, 'steward');
 
     const path: Array<{ label: string; href: string }> = [
-      { label: 'Workbench', href: '/dashboard/work' },
-      { label: 'Cases', href: '/dashboard/inbox?type=intake' },
+      { label: 'Casework Console', href: '/dashboard/work' },
+      { label: 'Representation Cases', href: '/dashboard/inbox?type=intake' },
       { label: 'Communications', href: '/dashboard/correspondence' },
       { label: 'Assignments', href: '/dashboard/priorities' },
       { label: 'Documents', href: '/dashboard/documents' },
@@ -98,7 +98,7 @@ test.describe('UnionEyes stakeholder demo journeys', () => {
 
     const path: Array<{ label: string; href: string }> = [
       { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Submit Request', href: '/dashboard/claims/new' },
+      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
       { label: 'Messages', href: '/dashboard/inbox?type=message' },
       { label: 'Documents', href: '/dashboard/documents' },
     ];
