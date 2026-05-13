@@ -164,13 +164,13 @@ export default async function SolutionsPage({ params }: { params: Promise<{ loca
             Ready to explore your stakeholder journey?
           </h2>
           <p className="text-white/70 mb-8">
-            Request a demo tailored to your role and institutional context.
+            Request an institutional briefing tailored to your role and institutional context.
           </p>
           <Link
             href={`/${locale}/pilot-request`}
             className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

@@ -82,7 +82,7 @@ export default function ExecutiveIntelligencePage() {
             href="/pilot-request"
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         }
       />
@@ -179,13 +179,13 @@ export default function ExecutiveIntelligencePage() {
             Ready to lead with institutional clarity?
           </h2>
           <p className="text-white/70 mb-8">
-            Request a demo to see Executive Intelligence in action for your organization.
+            Request an institutional briefing to see Executive Intelligence in action for your organization.
           </p>
           <Link
             href="/pilot-request"
             className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
           >
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

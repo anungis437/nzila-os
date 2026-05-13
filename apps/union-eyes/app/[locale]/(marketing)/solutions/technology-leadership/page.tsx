@@ -46,7 +46,7 @@ export default function TechnologyLeadershipPage() {
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               View Trust Center
@@ -108,7 +108,7 @@ export default function TechnologyLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">AI your institution can trust</h2>
           <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

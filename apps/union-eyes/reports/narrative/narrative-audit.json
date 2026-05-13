@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:24:06.800Z",
+  "generatedAt": "2026-05-13T05:26:12.271Z",
   "files": [
     {
       "ctx": {
@@ -2523,63 +2523,6 @@
           },
           "line": 75,
           "excerpt": "Platform · Executive Intelligence"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 85,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 85,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 182,
-          "excerpt": "Request a demo to see Executive Intelligence in action for your organization."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 182,
-          "excerpt": "Request a demo to see Executive Intelligence in action for your organization."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 188,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 188,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -2663,27 +2606,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/ai-workbench"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 164,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 164,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2765,27 +2688,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/analytics"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 151,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 151,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2858,27 +2761,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/grievance-tracking"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 172,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 172,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -2965,27 +2848,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/inbox"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 125,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 125,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -3063,27 +2926,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/member-portal"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 139,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 139,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -3161,27 +3004,7 @@
         "isPublicSurface": true,
         "label": "marketing/features/priorities"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 122,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 122,
-          "excerpt": "Request a Demo <ArrowRight className=\"h-4 w-4\" />"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -4285,25 +4108,6 @@
         },
         {
           "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 102,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 102,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -4319,25 +4123,6 @@
           },
           "line": 355,
           "excerpt": "<div>              <h2 className=\"text-2xl font-bold text-navy mb-3\">Operational transformation as a gradual pathway</h2>"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 398,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 398,
-          "excerpt": "Request a Demo"
         },
         {
           "term": {
@@ -5487,65 +5272,7 @@
         "isPublicSurface": true,
         "label": "marketing/solutions/executive-leadership"
       },
-      "violations": [
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 45,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 45,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 116,
-          "excerpt": "<p className=\"text-white/70 mb-8\">Request a demo tailored to your executive leadership context.</p>"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 116,
-          "excerpt": "<p className=\"text-white/70 mb-8\">Request a demo tailored to your executive leadership context.</p>"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 118,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 118,
-          "excerpt": "Request a Demo"
-        }
-      ],
+      "violations": [],
       "ruleResults": [
         {
           "rule": "narrative-balance",
@@ -5621,25 +5348,6 @@
       "violations": [
         {
           "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 47,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 47,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -5655,25 +5363,6 @@
           },
           "line": 50,
           "excerpt": "Governance Intelligence Platform"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 129,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 129,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5766,44 +5455,6 @@
           },
           "line": 64,
           "excerpt": "description=\"UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform.\""
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 68,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 68,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 131,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 131,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -5896,25 +5547,6 @@
       "violations": [
         {
           "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 47,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 47,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
@@ -5930,25 +5562,6 @@
           },
           "line": 50,
           "excerpt": "Operational Coherence Platform"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 110,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 110,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -6041,44 +5654,6 @@
           },
           "line": 5,
           "excerpt": "* Hides platform sophistication. Exposes institutional outcomes."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 167,
-          "excerpt": "Request a demo tailored to your role and institutional context."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 167,
-          "excerpt": "Request a demo tailored to your role and institutional context."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 173,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 173,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -6168,50 +5743,12 @@
       "violations": [
         {
           "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 79,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 79,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
             "term": "disruption",
             "severity": "warning",
             "category": "warning"
           },
           "line": 124,
           "excerpt": "Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption."
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 277,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 277,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -6321,50 +5858,12 @@
         },
         {
           "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 49,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 49,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
             "term": "platform",
             "severity": "warning",
             "category": "warning"
           },
           "line": 109,
           "excerpt": "<p className=\"text-white/70 mb-8\">Request a technical briefing or platform demonstration.</p>"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "hard-fail",
-            "category": "startup-saas",
-            "suggestion": "request an institutional briefing | request executive walkthrough"
-          },
-          "line": 111,
-          "excerpt": "Request a Demo"
-        },
-        {
-          "term": {
-            "term": "request a demo",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 111,
-          "excerpt": "Request a Demo"
         }
       ],
       "ruleResults": [
@@ -9150,8 +8649,8 @@
   "summary": {
     "totalFiles": 87,
     "publicFiles": 87,
-    "hardFails": 44,
-    "warnings": 261,
+    "hardFails": 18,
+    "warnings": 235,
     "ruleFailures": 14,
     "averageMaturity": 67
   }

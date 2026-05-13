@@ -161,7 +161,7 @@ export default async function LocaleAIWorkbenchPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm"
             >
-              Request a Demo <ArrowRight className="h-4 w-4" />
+              Request an Institutional Briefing <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={`/${locale}/features/analytics`}

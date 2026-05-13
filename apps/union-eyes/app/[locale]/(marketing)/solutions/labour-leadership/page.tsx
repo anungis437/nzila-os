@@ -65,7 +65,7 @@ export default function LabourLeadershipPage() {
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../trust" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               View Governance & Trust
@@ -128,7 +128,7 @@ export default function LabourLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Build member trust into modernization</h2>
           <p className="text-white/70 mb-8">See a labour-safe implementation path in a guided demo.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

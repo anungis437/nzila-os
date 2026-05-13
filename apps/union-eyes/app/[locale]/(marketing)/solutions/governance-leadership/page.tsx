@@ -44,7 +44,7 @@ export default function GovernanceLeadershipPage() {
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Governance Intelligence Platform
@@ -126,7 +126,7 @@ export default function GovernanceLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Modernize governance with confidence</h2>
           <p className="text-white/70 mb-8">See Governance Intelligence in a live pilot demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

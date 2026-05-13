@@ -42,7 +42,7 @@ export default function ExecutiveLeadershipPage() {
         heading={<>Lead with the full weight of<br />institutional history behind you.</>}
         description="UnionEyes gives executive leaders the institutional continuity visibility, strategic clarity, and governance intelligence to lead confidently through any transition — without wading through operational complexity."
         cta={<Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>}
       />
 
@@ -113,9 +113,9 @@ export default function ExecutiveLeadershipPage() {
       <section className="py-16 bg-navy text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to lead with institutional clarity?</h2>
-          <p className="text-white/70 mb-8">Request a demo tailored to your executive leadership context.</p>
+          <p className="text-white/70 mb-8">Request an institutional briefing tailored to your executive leadership context.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>

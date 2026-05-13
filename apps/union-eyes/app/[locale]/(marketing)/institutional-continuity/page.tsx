@@ -99,7 +99,7 @@ export default async function InstitutionalContinuityPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30"
             >
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link
               href={`/${locale}/governance`}
@@ -395,7 +395,7 @@ export default async function InstitutionalContinuityPage({
               href={`/${locale}/pilot-request`}
               className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
             >
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link
               href={`/${locale}/platform/organizational-memory`}

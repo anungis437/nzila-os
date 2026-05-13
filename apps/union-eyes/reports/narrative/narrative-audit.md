@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:24:06.800Z
+Generated: 2026-05-13T05:26:12.271Z
 
 ## Summary
 
 - Files scanned: **87**
-- Hard-fail violations: **44**
-- Warning violations: **261**
+- Hard-fail violations: **18**
+- Warning violations: **235**
 - Rule failures: **14**
 - Average Institutional Maturity: **67/100**
 
@@ -646,12 +646,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Vocabulary violations:**
 - L75 [warning/warning] `platform` — Platform · Executive Intelligence
-- L85 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L85 [warning/warning] `request a demo` — Request a Demo
-- L182 [hard-fail/startup-saas] `request a demo` — Request a demo to see Executive Intelligence in action for your organization.
-- L182 [warning/warning] `request a demo` — Request a demo to see Executive Intelligence in action for your organization.
-- L188 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L188 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
@@ -659,8 +653,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Reframe as assistive intelligence under human oversight.
 
@@ -676,18 +668,12 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 40/100 (fail)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L164 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L164 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (labour-safe-ai) AI is referenced without labour-safe framing (oversight / explainability / reviewability).
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Add human-oversight, explainability, or governance-safe AI framing.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
@@ -704,17 +690,11 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L151 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L151 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
@@ -730,10 +710,6 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 40/100 (fail)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L172 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L172 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
@@ -741,8 +717,6 @@ Generated: 2026-05-13T05:24:06.800Z
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Add human-oversight, explainability, or governance-safe AI framing.
@@ -760,18 +734,12 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L125 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L125 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
@@ -788,18 +756,12 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L139 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L139 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 10.5% (target 30%).
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
@@ -816,17 +778,11 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L122 [hard-fail/startup-saas] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-- L122 [warning/warning] `request a demo` — Request a Demo <ArrowRight className="h-4 w-4" />
-
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
@@ -1126,12 +1082,8 @@ Generated: 2026-05-13T05:24:06.800Z
 - L4 [warning/warning] `platform` — * Positions UE as the institutional continuity intelligence platform.
 - L29 [warning/warning] `platform` — 'Preserve organizational memory, strengthen institutional resilience, and maintain continuity through leadership transitions. UnionEyes Institutional Continuity platform.',
 - L91 [warning/warning] `platform` — Platform · Institutional Continuity
-- L102 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L102 [warning/warning] `request a demo` — Request a Demo
 - L196 [warning/warning] `platform` — unified institutional continuity platform.
 - L355 [warning/warning] `transformation` — <div>              <h2 className="text-2xl font-bold text-navy mb-3">Operational transformation as a gradual pathway</h2>
-- L398 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L398 [warning/warning] `request a demo` — Request a Demo
 - L401 [warning/warning] `platform` — href={`/${locale}/platform/organizational-memory`}
 
 **Flags:**
@@ -1140,8 +1092,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Remove or rephrase "transformation" (warning).
 - Reframe as assistive intelligence under human oversight.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
@@ -1415,21 +1365,11 @@ Generated: 2026-05-13T05:24:06.800Z
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 55/100 (warn)
 
-**Vocabulary violations:**
-- L45 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L45 [warning/warning] `request a demo` — Request a Demo
-- L116 [hard-fail/startup-saas] `request a demo` — <p className="text-white/70 mb-8">Request a demo tailored to your executive leadership context.</p>
-- L116 [warning/warning] `request a demo` — <p className="text-white/70 mb-8">Request a demo tailored to your executive leadership context.</p>
-- L118 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L118 [warning/warning] `request a demo` — Request a Demo
-
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
 
@@ -1446,12 +1386,8 @@ Generated: 2026-05-13T05:24:06.800Z
 - canadian-positioning: 55/100 (warn)
 
 **Vocabulary violations:**
-- L47 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L47 [warning/warning] `request a demo` — Request a Demo
 - L49 [warning/warning] `platform` — <Link href="../platform/governance-intelligence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25
 - L50 [warning/warning] `platform` — Governance Intelligence Platform
-- L129 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L129 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (narrative-balance) Governance saturation detected: 58.8% of pillar terms (target 30%, threshold 40%).
@@ -1460,8 +1396,6 @@ Generated: 2026-05-13T05:24:06.800Z
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
@@ -1482,10 +1416,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Vocabulary violations:**
 - L64 [warning/warning] `platform` — description="UnionEyes gives policy and labour leaders a governance-safe path to modernization: explainable outputs, human oversight, and anti-surveillance protections built into the platform."
-- L68 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L68 [warning/warning] `request a demo` — Request a Demo
-- L131 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L131 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (narrative-balance) Governance saturation detected: 45.0% of pillar terms (target 30%, threshold 40%).
@@ -1495,8 +1425,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
@@ -1515,20 +1443,14 @@ Generated: 2026-05-13T05:24:06.800Z
 - canadian-positioning: 55/100 (warn)
 
 **Vocabulary violations:**
-- L47 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L47 [warning/warning] `request a demo` — Request a Demo
 - L49 [warning/warning] `platform` — <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 t
 - L50 [warning/warning] `platform` — Operational Coherence Platform
-- L110 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L110 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Remove or rephrase "platform" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Where appropriate, surface Canadian-hosted / bilingual-first / sovereignty-conscious framing.
@@ -1548,10 +1470,6 @@ Generated: 2026-05-13T05:24:06.800Z
 **Vocabulary violations:**
 - L2 [warning/warning] `platform` — * Solutions — Stakeholder-Oriented Platform Journeys
 - L5 [warning/warning] `platform` — * Hides platform sophistication. Exposes institutional outcomes.
-- L167 [hard-fail/startup-saas] `request a demo` — Request a demo tailored to your role and institutional context.
-- L167 [warning/warning] `request a demo` — Request a demo tailored to your role and institutional context.
-- L173 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L173 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (coexistence-positioning) No coexistence / overlay framing detected.
@@ -1559,8 +1477,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Reframe as assistive intelligence under human oversight.
 
@@ -1577,11 +1493,7 @@ Generated: 2026-05-13T05:24:06.800Z
 - canadian-positioning: 55/100 (warn)
 
 **Vocabulary violations:**
-- L79 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L79 [warning/warning] `request a demo` — Request a Demo
 - L124 [warning/warning] `disruption` — Procurement teams can evaluate deployment safety through explicit implementation boundaries, governance checkpoints, and rollout pacing that avoids institutional disruption.
-- L277 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L277 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (narrative-balance) Governance saturation detected: 44.9% of pillar terms (target 30%, threshold 40%).
@@ -1591,8 +1503,6 @@ Generated: 2026-05-13T05:24:06.800Z
 - (canadian-positioning) No Canadian-positioning vocabulary detected on a substantive public page.
 
 **Recommendations:**
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Remove or rephrase "disruption" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
@@ -1614,11 +1524,7 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Vocabulary violations:**
 - L22 [warning/warning] `platform` — { icon: CheckCircle,'title': 'Anti-monitoring by design',              desc: 'No capability path in the platform can be repurposed for individual monitoring or behavioural scoring. Enforced architectu
-- L49 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L49 [warning/warning] `request a demo` — Request a Demo
 - L109 [warning/warning] `platform` — <p className="text-white/70 mb-8">Request a technical briefing or platform demonstration.</p>
-- L111 [hard-fail/startup-saas] `request a demo` — Request a Demo
-- L111 [warning/warning] `request a demo` — Request a Demo
 
 **Flags:**
 - (narrative-balance) Continuity language under-represented: 0.0% (target 30%).
@@ -1627,8 +1533,6 @@ Generated: 2026-05-13T05:24:06.800Z
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Replace "request a demo" → request an institutional briefing | request executive walkthrough
-- Remove or rephrase "request a demo" (warning).
 - Add institutional-continuity framing.
 - Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 - Reframe as assistive intelligence under human oversight.

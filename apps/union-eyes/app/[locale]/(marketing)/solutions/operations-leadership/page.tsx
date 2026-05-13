@@ -44,7 +44,7 @@ export default function OperationsLeadershipPage() {
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">
-              Request a Demo
+              Request an Institutional Briefing
             </Link>
             <Link href="../platform/operational-coherence" className="inline-flex items-center justify-center px-7 py-3.5 bg-white/15 text-white font-semibold rounded-xl border border-white/30 hover:bg-white/25 transition-all">
               Operational Coherence Platform
@@ -107,7 +107,7 @@ export default function OperationsLeadershipPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Maintain coherence through every change</h2>
           <p className="text-white/70 mb-8">See Operational Coherence in a live pilot demonstration.</p>
           <Link href="/pilot-request" className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all">
-            Request a Demo
+            Request an Institutional Briefing
           </Link>
         </div>
       </section>
