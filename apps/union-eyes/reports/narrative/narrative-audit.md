@@ -1,14 +1,14 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T12:35:50.975Z
+Generated: 2026-05-13T15:57:26.109Z
 
 ## Summary
 
-- Files scanned: **85**
+- Files scanned: **88**
 - Hard-fail violations: **0**
-- Warning violations: **208**
+- Warning violations: **219**
 - Rule failures: **0**
-- Average Institutional Maturity: **88/100**
+- Average Institutional Maturity: **85/100**
 
 ## Per-Surface Detail
 
@@ -1179,7 +1179,8 @@ Generated: 2026-05-13T12:35:50.975Z
 - L3199 [warning/warning] `platform` — "metaDescription": "Create your UnionEyes account - join the intelligent labour relations platform.",
 - L3245 [warning/warning] `platform` — "metaDescription": "Manage platform and organization configuration settings"
 - L3590 [warning/warning] `platform` — "setupBillingDescription": "Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).",
-- L3825 [warning/warning] `AI-powered` — "aiTriage": "AI-powered case triage & drafting",
+- L3824 [warning/warning] `AI credits` — "aiCredits": "1,000 AI credits per billing cycle",
+- L3824 [warning/warning] `credits per billing cycle` — "aiCredits": "1,000 AI credits per billing cycle",
 - L4506 [warning/warning] `platform` — "activityTrackingDescription": "Help improve the platform with usage data",
 - L4608 [warning/warning] `platform` — "platformLabel": "Platform & Goals (Optional)",
 - L4979 [warning/warning] `platform` — "noCasesFiledBody": "No cases have been filed across the platform yet.",
@@ -1212,7 +1213,8 @@ Generated: 2026-05-13T12:35:50.975Z
 - L7795 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
 - L7801 [warning/warning] `disruption` — "disruptionTitle": "Operational disruption modeling",
 - L7939 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
-- L8685 [warning/warning] `AI-powered` — "benefit2": "AI-powered grievance triage & drafting",
+- L8684 [warning/warning] `AI credits` — "benefit1": "1,000 AI credits per billing cycle",
+- L8684 [warning/warning] `credits per billing cycle` — "benefit1": "1,000 AI credits per billing cycle",
 - L8837 [warning/warning] `platform` — "platform": {
 - L8841 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
 - L8857 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
@@ -1230,14 +1232,16 @@ Generated: 2026-05-13T12:35:50.975Z
 - L10618 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "AI-powered" (warning).
+- Remove or rephrase "AI credits" (warning).
+- Remove or rephrase "credits per billing cycle" (warning).
 - Remove or rephrase "operating system" (warning).
 - Remove or rephrase "centralized" (warning).
 - Remove or rephrase "disruption" (warning).
+- Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
 
 ### messages/en.json
@@ -1266,7 +1270,8 @@ Generated: 2026-05-13T12:35:50.975Z
 - L3262 [warning/warning] `platform` — "metaDescription": "Create your UnionEyes account - join the intelligent labour relations platform.",
 - L3308 [warning/warning] `platform` — "metaDescription": "Manage platform and organization configuration settings"
 - L3653 [warning/warning] `platform` — "setupBillingDescription": "Create a billing account to enable platform invoicing and cost allocation. All billing is processed in Canadian Dollars (CAD).",
-- L3888 [warning/warning] `AI-powered` — "aiTriage": "AI-powered case triage & drafting",
+- L3887 [warning/warning] `AI credits` — "aiCredits": "1,000 AI credits per billing cycle",
+- L3887 [warning/warning] `credits per billing cycle` — "aiCredits": "1,000 AI credits per billing cycle",
 - L4569 [warning/warning] `platform` — "activityTrackingDescription": "Help improve the platform with usage data",
 - L4671 [warning/warning] `platform` — "platformLabel": "Platform & Goals (Optional)",
 - L5042 [warning/warning] `platform` — "noCasesFiledBody": "No cases have been filed across the platform yet.",
@@ -1299,7 +1304,8 @@ Generated: 2026-05-13T12:35:50.975Z
 - L7996 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
 - L8000 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.",
 - L8006 [warning/warning] `disruption` — "disruptionTitle": "Operational disruption modeling",
-- L8964 [warning/warning] `AI-powered` — "benefit2": "AI-powered grievance triage & drafting",
+- L8963 [warning/warning] `AI credits` — "benefit1": "1,000 AI credits per billing cycle",
+- L8963 [warning/warning] `credits per billing cycle` — "benefit1": "1,000 AI credits per billing cycle",
 - L9116 [warning/warning] `platform` — "platform": {
 - L9120 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
 - L9136 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
@@ -1317,14 +1323,16 @@ Generated: 2026-05-13T12:35:50.975Z
 - L11055 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
-- Remove or rephrase "AI-powered" (warning).
+- Remove or rephrase "AI credits" (warning).
+- Remove or rephrase "credits per billing cycle" (warning).
 - Remove or rephrase "operating system" (warning).
 - Remove or rephrase "centralized" (warning).
 - Remove or rephrase "disruption" (warning).
+- Remove or rephrase "AI-powered" (warning).
 - Add institutional-continuity framing.
 
 ### messages/fr-CA.json
@@ -1444,3 +1452,41 @@ Generated: 2026-05-13T12:35:50.975Z
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
+
+### internal/app/[locale]/(dashboard)/analytics/page.tsx
+
+- **Path:** `app/[locale]/(dashboard)/analytics/page.tsx`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+**Vocabulary violations:**
+- L13 [warning/warning] `platform` — import { auth } from '@nzila/platform-auth/entra/server';
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).
+
+### internal/lib/dashboard/role-experience.ts
+
+- **Path:** `lib/dashboard/role-experience.ts`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+### internal/services/platform-economics/entitlement-guard.ts
+
+- **Path:** `services/platform-economics/entitlement-guard.ts`
+- **Institutional Maturity:** 0/100
+
+**Scores:**
+
+**Vocabulary violations:**
+- L9 [warning/warning] `platform` — *   import { requireEntitlement, withEntitlement } from '@/services/platform-economics/entitlement-guard';
+- L17 [warning/warning] `platform` — * @domain platform-economics
+- L122 [warning/warning] `platform` — 'Treasurers reconcile platform billing against internal ledgers and surface variance ahead of audit cadence.',
+- L147 [warning/warning] `platform` — 'Transparent recording and reconciliation of platform transaction fees against contracted terms.',
+- L149 [warning/warning] `platform` — 'Maintains a transparent ledger of platform transaction fees so that contracted terms can be verified at any point in the institution’s audit cycle.',
+- L277 [warning/warning] `platform` — narrativeTagline: `Platform module ${humanised} — institutional capability registered for this organisation.`,
+
+**Recommendations:**
+- Remove or rephrase "platform" (warning).

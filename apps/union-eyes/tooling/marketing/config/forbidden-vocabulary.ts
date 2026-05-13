@@ -95,6 +95,15 @@ const surveillanceAi: ForbiddenTerm[] = [
   { term: "predictive worker monitoring", severity: "hard-fail", category: "surveillance-ai" },
   { term: "engagement optimization", severity: "hard-fail", category: "surveillance-ai" },
   { term: "attention tracking", severity: "hard-fail", category: "surveillance-ai" },
+  // Workstream D: AI semantic alignment — reject autonomous-AI framing
+  { term: "AI-powered case triage", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted case triage under entitlement governance" },
+  { term: "AI-powered grievance triage", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-assisted grievance triage" },
+  { term: "AI-led decisioning", severity: "hard-fail", category: "surveillance-ai", suggestion: "reviewer-led decisions assisted by governed reasoning" },
+  { term: "governance automation", severity: "hard-fail", category: "surveillance-ai", suggestion: "governance of record | governed reasoning" },
+  { term: "behavioural optimization", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "behavioral optimization", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "influence analysis", severity: "hard-fail", category: "surveillance-ai" },
+  { term: "organizer scoring", severity: "hard-fail", category: "surveillance-ai" },
 ];
 
 const political: ForbiddenTerm[] = [
@@ -133,6 +142,9 @@ const warningLevel: ForbiddenTerm[] = [
   { term: "request a demo", severity: "warning", category: "warning" },
   { term: "casework into", severity: "warning", category: "warning" },
   { term: "no commitment", severity: "warning", category: "warning" },
+  // Workstream D: AI credit framing drifts toward consumer-SaaS posture
+  { term: "AI credits", severity: "warning", category: "warning" },
+  { term: "credits per billing cycle", severity: "warning", category: "warning" },
   // "governance" intentionally excluded from warning — counted via balance rule.
 ];
 

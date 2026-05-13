@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T12:35:50.975Z",
+  "generatedAt": "2026-05-13T15:57:26.109Z",
   "files": [
     {
       "ctx": {
@@ -7666,12 +7666,21 @@
         },
         {
           "term": {
-            "term": "AI-powered",
+            "term": "AI credits",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 3825,
-          "excerpt": "\"aiTriage\": \"AI-powered case triage & drafting\","
+          "line": 3824,
+          "excerpt": "\"aiCredits\": \"1,000 AI credits per billing cycle\","
+        },
+        {
+          "term": {
+            "term": "credits per billing cycle",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3824,
+          "excerpt": "\"aiCredits\": \"1,000 AI credits per billing cycle\","
         },
         {
           "term": {
@@ -7963,12 +7972,21 @@
         },
         {
           "term": {
-            "term": "AI-powered",
+            "term": "AI credits",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8685,
-          "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
+          "line": 8684,
+          "excerpt": "\"benefit1\": \"1,000 AI credits per billing cycle\","
+        },
+        {
+          "term": {
+            "term": "credits per billing cycle",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8684,
+          "excerpt": "\"benefit1\": \"1,000 AI credits per billing cycle\","
         },
         {
           "term": {
@@ -8113,23 +8131,23 @@
           "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 10.0% (target 30%).",
+              "message": "Continuity language under-represented: 10.1% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 270,
-              "continuity": 73,
-              "coordination": 149,
-              "trust": 241
+              "governance": 274,
+              "continuity": 76,
+              "coordination": 158,
+              "trust": 244
             },
-            "total": 733,
+            "total": 752,
             "shares": {
-              "governance": 0.3683492496589359,
-              "continuity": 0.09959072305593451,
-              "coordination": 0.20327421555252387,
-              "trust": 0.32878581173260574
+              "governance": 0.36436170212765956,
+              "continuity": 0.10106382978723404,
+              "coordination": 0.21010638297872342,
+              "trust": 0.324468085106383
             }
           }
         },
@@ -8328,12 +8346,21 @@
         },
         {
           "term": {
-            "term": "AI-powered",
+            "term": "AI credits",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 3888,
-          "excerpt": "\"aiTriage\": \"AI-powered case triage & drafting\","
+          "line": 3887,
+          "excerpt": "\"aiCredits\": \"1,000 AI credits per billing cycle\","
+        },
+        {
+          "term": {
+            "term": "credits per billing cycle",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 3887,
+          "excerpt": "\"aiCredits\": \"1,000 AI credits per billing cycle\","
         },
         {
           "term": {
@@ -8625,12 +8652,21 @@
         },
         {
           "term": {
-            "term": "AI-powered",
+            "term": "AI credits",
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8964,
-          "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
+          "line": 8963,
+          "excerpt": "\"benefit1\": \"1,000 AI credits per billing cycle\","
+        },
+        {
+          "term": {
+            "term": "credits per billing cycle",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 8963,
+          "excerpt": "\"benefit1\": \"1,000 AI credits per billing cycle\","
         },
         {
           "term": {
@@ -8775,23 +8811,23 @@
           "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 10.0% (target 30%).",
+              "message": "Continuity language under-represented: 10.1% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 269,
-              "continuity": 73,
-              "coordination": 150,
-              "trust": 241
+              "governance": 273,
+              "continuity": 76,
+              "coordination": 159,
+              "trust": 244
             },
-            "total": 733,
+            "total": 752,
             "shares": {
-              "governance": 0.3669849931787176,
-              "continuity": 0.09959072305593451,
-              "coordination": 0.20463847203274216,
-              "trust": 0.32878581173260574
+              "governance": 0.363031914893617,
+              "continuity": 0.10106382978723404,
+              "coordination": 0.21143617021276595,
+              "trust": 0.324468085106383
             }
           }
         },
@@ -9529,14 +9565,109 @@
         }
       ],
       "maturity": 87
+    },
+    {
+      "ctx": {
+        "path": "app/[locale]/(dashboard)/analytics/page.tsx",
+        "isPublicSurface": false,
+        "label": "internal/app/[locale]/(dashboard)/analytics/page.tsx"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 13,
+          "excerpt": "import { auth } from '@nzila/platform-auth/entra/server';"
+        }
+      ],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "lib/dashboard/role-experience.ts",
+        "isPublicSurface": false,
+        "label": "internal/lib/dashboard/role-experience.ts"
+      },
+      "violations": [],
+      "ruleResults": [],
+      "maturity": 0
+    },
+    {
+      "ctx": {
+        "path": "services/platform-economics/entitlement-guard.ts",
+        "isPublicSurface": false,
+        "label": "internal/services/platform-economics/entitlement-guard.ts"
+      },
+      "violations": [
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 9,
+          "excerpt": "*   import { requireEntitlement, withEntitlement } from '@/services/platform-economics/entitlement-guard';"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 17,
+          "excerpt": "* @domain platform-economics"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 122,
+          "excerpt": "'Treasurers reconcile platform billing against internal ledgers and surface variance ahead of audit cadence.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 147,
+          "excerpt": "'Transparent recording and reconciliation of platform transaction fees against contracted terms.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 149,
+          "excerpt": "'Maintains a transparent ledger of platform transaction fees so that contracted terms can be verified at any point in the institution’s audit cycle.',"
+        },
+        {
+          "term": {
+            "term": "platform",
+            "severity": "warning",
+            "category": "warning"
+          },
+          "line": 277,
+          "excerpt": "narrativeTagline: `Platform module ${humanised} — institutional capability registered for this organisation.`,"
+        }
+      ],
+      "ruleResults": [],
+      "maturity": 0
     }
   ],
   "summary": {
-    "totalFiles": 85,
+    "totalFiles": 88,
     "publicFiles": 85,
     "hardFails": 0,
-    "warnings": 208,
+    "warnings": 219,
     "ruleFailures": 0,
-    "averageMaturity": 88
+    "averageMaturity": 85
   }
 }
