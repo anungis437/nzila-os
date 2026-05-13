@@ -150,8 +150,6 @@ export function InsightArticleView({
         }
         heading={<>{article.title}</>}
         description={article.excerpt}
-        contextKicker={`${profile.label} lens`}
-        contextNote={profile.heroFraming}
       />
 
       <div className="bg-white border-b border-slate-200/80">
