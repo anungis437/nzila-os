@@ -18,6 +18,13 @@ export const COEXISTENCE_TERMS: RewardTerm[] = [
   { term: "non-disruptive implementation", weight: 3 },
   { term: "alongside existing systems", weight: 2 },
   { term: "augments existing", weight: 2 },
+  // Phase 4: coexistence-positioning bonus phrases
+  { term: "non-displacing", weight: 3 },
+  { term: "works with your existing stack", weight: 2 },
+  { term: "preserves your existing systems", weight: 2 },
+  { term: "respects existing tools", weight: 2 },
+  { term: "interoperates with", weight: 1 },
+  { term: "additive, not replacing", weight: 2 },
 ];
 
 export const LABOUR_SAFE_AI_REQUIRED: RewardTerm[] = [

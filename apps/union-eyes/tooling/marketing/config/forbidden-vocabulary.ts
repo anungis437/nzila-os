@@ -65,6 +65,16 @@ const startupSaas: ForbiddenTerm[] = [
   { term: "AI-led operations", severity: "hard-fail", category: "startup-saas" },
   { term: "workflow automation", severity: "hard-fail", category: "startup-saas" },
   { term: "attendee management", severity: "hard-fail", category: "startup-saas", suggestion: "delegate continuity" },
+  // Phase 4: Buyer-facing SaaS-positioning guards (institutional infrastructure framing)
+  { term: "operating system for unions", severity: "hard-fail", category: "startup-saas", suggestion: "institutional continuity infrastructure for unions" },
+  { term: "another SaaS tool", severity: "hard-fail", category: "startup-saas" },
+  { term: "another saas", severity: "hard-fail", category: "startup-saas" },
+  { term: "SaaS tool", severity: "hard-fail", category: "startup-saas", exceptions: ["not a saas tool", "unlike saas tools"] },
+  { term: "modules available", severity: "hard-fail", category: "startup-saas", suggestion: "continuity layers | governance domains" },
+  { term: "module-level entitlements", severity: "hard-fail", category: "startup-saas", suggestion: "contractual scope | institutional licensing" },
+  { term: "request a demo", severity: "hard-fail", category: "startup-saas", suggestion: "request an institutional briefing | request executive walkthrough" },
+  { term: "book a demo", severity: "hard-fail", category: "startup-saas", suggestion: "book an institutional briefing" },
+  { term: "AI-assisted triage", severity: "hard-fail", category: "startup-saas", suggestion: "reviewer-assisted intake under human oversight" },
 ];
 
 const ripAndReplace: ForbiddenTerm[] = [
@@ -113,6 +123,12 @@ const warningLevel: ForbiddenTerm[] = [
   { term: "disruption", severity: "warning", category: "warning" },
   { term: "platform", severity: "warning", category: "warning" },
   { term: "ecosystem", severity: "warning", category: "warning" },
+  // Phase 4: Buyer-tone warnings (counted toward maturity drift; not hard-fails)
+  { term: "operating system", severity: "warning", category: "warning" },
+  { term: "module-level", severity: "warning", category: "warning" },
+  { term: "request a demo", severity: "warning", category: "warning" },
+  { term: "casework into", severity: "warning", category: "warning" },
+  { term: "no commitment", severity: "warning", category: "warning" },
   // "governance" intentionally excluded from warning — counted via balance rule.
 ];
 
