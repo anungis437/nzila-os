@@ -25,7 +25,8 @@
  * Continuity posture: institutional memory preservation, succession-aware handoff,
  * stewardship of representational records, and procedural continuity across mandates.
  */
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
+import { CASE_STUDIES_VISIBLE } from '@/lib/marketing-feature-flags';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,9 @@ type PageProps = {
 };
 
 export default async function Page({ params }: PageProps) {
-  const { slug } = await params;
-  redirect(`/en-CA/case-studies/${slug}`);
+  await params;
+  if (!CASE_STUDIES_VISIBLE) {
+    notFound();
+  }
+  notFound();
 }

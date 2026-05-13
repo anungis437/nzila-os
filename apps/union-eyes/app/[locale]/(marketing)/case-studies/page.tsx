@@ -35,9 +35,10 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CaseStudy } from '@/types/marketing';
+import { CASE_STUDIES_VISIBLE } from '@/lib/marketing-feature-flags';
 import { CaseStudyGrid } from '@/components/marketing/case-study-card';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
@@ -102,6 +103,9 @@ const CASE_STUDIES_COPY: Record<string, {
 };
 
 export default function LocaleCaseStudiesPage() {
+  if (!CASE_STUDIES_VISIBLE) {
+    notFound();
+  }
   const params = useParams();
   const locale = (params.locale as string) ?? 'en-CA';
   const t = useTranslations('marketing.caseStudies');

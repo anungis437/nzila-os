@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T12:07:26.696Z",
+  "generatedAt": "2026-05-13T12:35:50.975Z",
   "files": [
     {
       "ctx": {
@@ -3060,184 +3060,6 @@
         }
       ],
       "maturity": 97
-    },
-    {
-      "ctx": {
-        "path": "app/[locale]/(marketing)/case-studies/layout.tsx",
-        "isPublicSurface": true,
-        "label": "marketing/case-studies"
-      },
-      "violations": [],
-      "ruleResults": [
-        {
-          "rule": "narrative-balance",
-          "status": "pass",
-          "score": 76,
-          "flags": [],
-          "detail": {
-            "counts": {
-              "governance": 11,
-              "continuity": 14,
-              "coordination": 16,
-              "trust": 11
-            },
-            "total": 52,
-            "shares": {
-              "governance": 0.21153846153846154,
-              "continuity": 0.2692307692307692,
-              "coordination": 0.3076923076923077,
-              "trust": 0.21153846153846154
-            }
-          }
-        },
-        {
-          "rule": "coexistence-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "overlay infrastructure",
-              "continuity layer",
-              "alongside existing systems",
-              "non-displacing",
-              "respects existing tools"
-            ]
-          }
-        },
-        {
-          "rule": "procedural-neutrality",
-          "status": "pass",
-          "score": 100,
-          "flags": []
-        },
-        {
-          "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "mentionsAi": true,
-            "matchedRequired": [
-              "human oversight",
-              "explainability",
-              "reviewability",
-              "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
-            ]
-          }
-        },
-        {
-          "rule": "canadian-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "Canadian-hosted",
-              "bilingual-first",
-              "sovereignty-conscious",
-              "institutional trust",
-              "democratic infrastructure"
-            ],
-            "generalCanadianHits": [
-              "canadian",
-              "bilingual"
-            ]
-          }
-        }
-      ],
-      "maturity": 94
-    },
-    {
-      "ctx": {
-        "path": "app/[locale]/(marketing)/case-studies/page.tsx",
-        "isPublicSurface": true,
-        "label": "marketing/case-studies"
-      },
-      "violations": [],
-      "ruleResults": [
-        {
-          "rule": "narrative-balance",
-          "status": "pass",
-          "score": 74,
-          "flags": [],
-          "detail": {
-            "counts": {
-              "governance": 10,
-              "continuity": 12,
-              "coordination": 15,
-              "trust": 10
-            },
-            "total": 47,
-            "shares": {
-              "governance": 0.2127659574468085,
-              "continuity": 0.2553191489361702,
-              "coordination": 0.3191489361702128,
-              "trust": 0.2127659574468085
-            }
-          }
-        },
-        {
-          "rule": "coexistence-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "overlay infrastructure",
-              "continuity layer",
-              "alongside existing systems",
-              "non-displacing",
-              "respects existing tools"
-            ]
-          }
-        },
-        {
-          "rule": "procedural-neutrality",
-          "status": "pass",
-          "score": 100,
-          "flags": []
-        },
-        {
-          "rule": "labour-safe-ai",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "mentionsAi": true,
-            "matchedRequired": [
-              "human oversight",
-              "explainability",
-              "reviewability",
-              "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
-            ]
-          }
-        },
-        {
-          "rule": "canadian-positioning",
-          "status": "pass",
-          "score": 100,
-          "flags": [],
-          "detail": {
-            "matched": [
-              "Canadian-hosted",
-              "bilingual-first",
-              "sovereignty-conscious",
-              "institutional trust",
-              "democratic infrastructure"
-            ],
-            "generalCanadianHits": [
-              "canadian",
-              "bilingual"
-            ]
-          }
-        }
-      ],
-      "maturity": 94
     },
     {
       "ctx": {
@@ -9710,8 +9532,8 @@
     }
   ],
   "summary": {
-    "totalFiles": 87,
-    "publicFiles": 87,
+    "totalFiles": 85,
+    "publicFiles": 85,
     "hardFails": 0,
     "warnings": 208,
     "ruleFailures": 0,

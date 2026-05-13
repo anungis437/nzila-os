@@ -25,10 +25,15 @@
  * Continuity posture: institutional memory preservation, succession-aware handoff,
  * stewardship of representational records, and procedural continuity across mandates.
  */
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
+import { CASE_STUDIES_VISIBLE } from '@/lib/marketing-feature-flags';
 
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
-  redirect('/en-CA/case-studies');
+  if (!CASE_STUDIES_VISIBLE) {
+    notFound();
+  }
+  // Re-enable redirect once CASE_STUDIES_VISIBLE flips back to true.
+  notFound();
 }

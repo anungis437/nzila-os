@@ -104,7 +104,8 @@ export default function LocaleSiteFooter() {
       { name: t('story'),        href: `/${locale}/story` },
       { name: t('insights'),     href: `/${locale}/insights` },
       { name: t('institutionalProof'), href: `/${locale}/proof` },
-      { name: t('caseStudies'),  href: `/${locale}/case-studies` },
+      // Case studies hidden until pilots complete — re-enable via CASE_STUDIES_VISIBLE flag.
+      // { name: t('caseStudies'),  href: `/${locale}/case-studies` },
       { name: t('pricing'),      href: `/${locale}/pricing` },
       { name: t('contact'),      href: `/${locale}/contact` },
       { name: t('systemStatus'), href: `/${locale}/trust#system-status` },

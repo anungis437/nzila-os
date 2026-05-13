@@ -36,7 +36,7 @@ const PUBLIC_MARKETING_ROUTES = [
   "governance",
   "contact",
   "pilot-request",
-  "case-studies",
+  // "case-studies", // hidden until pilots complete — re-add when CASE_STUDIES_VISIBLE flips true
   "pricing",
   "solutions",
   "status",

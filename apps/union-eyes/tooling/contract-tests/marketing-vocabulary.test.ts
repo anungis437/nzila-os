@@ -18,7 +18,7 @@ const PUBLIC_MARKETING_ROUTES = [
   "governance",
   "contact",
   "pilot-request",
-  "case-studies",
+  // "case-studies", // hidden until pilots complete
   "pricing",
   "solutions",
   "status",

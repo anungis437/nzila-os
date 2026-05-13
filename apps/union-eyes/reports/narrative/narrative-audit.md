@@ -1,10 +1,10 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T12:07:26.696Z
+Generated: 2026-05-13T12:35:50.975Z
 
 ## Summary
 
-- Files scanned: **87**
+- Files scanned: **85**
 - Hard-fail violations: **0**
 - Warning violations: **208**
 - Rule failures: **0**
@@ -439,30 +439,6 @@ Generated: 2026-05-13T12:07:26.696Z
 
 **Scores:**
 - narrative-balance: 87/100 (pass)
-- coexistence-positioning: 100/100 (pass)
-- procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
-
-### marketing/case-studies
-
-- **Path:** `app/[locale]/(marketing)/case-studies/layout.tsx`
-- **Institutional Maturity:** 94/100
-
-**Scores:**
-- narrative-balance: 76/100 (pass)
-- coexistence-positioning: 100/100 (pass)
-- procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 100/100 (pass)
-- canadian-positioning: 100/100 (pass)
-
-### marketing/case-studies
-
-- **Path:** `app/[locale]/(marketing)/case-studies/page.tsx`
-- **Institutional Maturity:** 94/100
-
-**Scores:**
-- narrative-balance: 74/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
