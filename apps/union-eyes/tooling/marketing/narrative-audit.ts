@@ -76,6 +76,17 @@ const MARKETING_GLOBS = [
 ];
 const MESSAGES_GLOB = "messages/*.json";
 
+// Workstream B4 — internal runtime-narrative surfaces. Vocabulary-only sweep
+// (no public-marketing rule modules). Keeps the institutional posture
+// consistent inside dashboards, taxonomy files, and platform services.
+const INTERNAL_NARRATIVE_GLOBS = [
+  "app/[[]locale[]]/[(]dashboard[)]/**/page.tsx",
+  "app/[[]locale[]]/[(]dashboard[)]/**/layout.tsx",
+  "lib/dashboard/role-experience.ts",
+  "lib/dashboard/**/labels.ts",
+  "services/platform-economics/entitlement-guard.ts",
+];
+
 const RULES: RuleModule[] = [
   narrativeBalanceRule,
   coexistencePositioningRule,
@@ -151,6 +162,16 @@ async function collectFiles(): Promise<string[]> {
   return [...marketing, ...messages].sort();
 }
 
+async function collectInternalFiles(): Promise<string[]> {
+  return (
+    await fg(INTERNAL_NARRATIVE_GLOBS, {
+      cwd: APP_ROOT,
+      absolute: true,
+      dot: false,
+    })
+  ).sort();
+}
+
 export async function runAudit(): Promise<AuditReport> {
   const files = await collectFiles();
   const out: FileAuditResult[] = [];
@@ -181,6 +202,28 @@ export async function runAudit(): Promise<AuditReport> {
     });
   }
 
+  // Workstream B4 — internal narrative pass: vocabulary check only, no rule
+  // modules (those target public-marketing tone). Surfaces are flagged
+  // isPublicSurface=false so the future warning/hard-fail switch in
+  // procedural-neutrality etc. continues to behave correctly.
+  const internalFiles = await collectInternalFiles();
+  for (const abs of internalFiles) {
+    const rel = path.relative(APP_ROOT, abs).replace(/\\/g, "/");
+    const ctx: PageContext = {
+      path: rel,
+      isPublicSurface: false,
+      label: `internal/${rel}`,
+    };
+    const content = await readSurface(abs);
+    const violations = findViolations(content, { isPublicSurface: false });
+    out.push({
+      ctx,
+      violations,
+      ruleResults: [],
+      maturity: 0,
+    });
+  }
+
   const hardFails = out.reduce(
     (n, f) => n + f.violations.filter((v) => v.term.severity === "hard-fail").length,
     0,
@@ -198,12 +241,14 @@ export async function runAudit(): Promise<AuditReport> {
       ? 0
       : Math.round(out.reduce((n, f) => n + f.maturity, 0) / out.length);
 
+  const publicFiles = out.filter((f) => f.ctx.isPublicSurface).length;
+
   return {
     generatedAt: new Date().toISOString(),
     files: out,
     summary: {
       totalFiles: out.length,
-      publicFiles: out.length,
+      publicFiles,
       hardFails,
       warnings,
       ruleFailures,

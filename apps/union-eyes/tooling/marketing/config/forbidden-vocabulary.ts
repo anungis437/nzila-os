@@ -105,12 +105,16 @@ const political: ForbiddenTerm[] = [
   { term: "governance reform engine", severity: "hard-fail", category: "political" },
 ];
 
+// Founder-optics terms are now enforced **globally** (public marketing AND
+// internal runtime surfaces). The narrative posture is institutional from the
+// inside out — staff-facing dashboards, services, and lib copy must not lapse
+// into founder-control framing either. Workstream B4.
 const founderOptics: ForbiddenTerm[] = [
-  { term: "golden share", severity: "hard-fail", category: "founder-optics", publicOnly: true },
-  { term: "governance lock", severity: "hard-fail", category: "founder-optics", publicOnly: true },
-  { term: "founder control", severity: "hard-fail", category: "founder-optics", publicOnly: true },
-  { term: "ownership protection structure", severity: "hard-fail", category: "founder-optics", publicOnly: true },
-  { term: "control mechanism", severity: "hard-fail", category: "founder-optics", publicOnly: true },
+  { term: "golden share", severity: "hard-fail", category: "founder-optics" },
+  { term: "governance lock", severity: "hard-fail", category: "founder-optics" },
+  { term: "founder control", severity: "hard-fail", category: "founder-optics" },
+  { term: "ownership protection structure", severity: "hard-fail", category: "founder-optics" },
+  { term: "control mechanism", severity: "hard-fail", category: "founder-optics" },
 ];
 
 const warningLevel: ForbiddenTerm[] = [
