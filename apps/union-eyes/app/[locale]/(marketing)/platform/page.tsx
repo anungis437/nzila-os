@@ -36,9 +36,9 @@ import { buildLocaleAlternates } from '@/lib/marketing-seo';
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
   return {
-    title: 'The Platform | Eight Canonical Operational Surfaces | UnionEyes',
+    title: 'The Operating Architecture | Eight Canonical Institutional Surfaces | UnionEyes',
     description:
-      'UnionEyes is organized as eight canonical operational surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Institutional Memory, and Trust — composed into one institutional operating experience.',
+      'UnionEyes is organized as eight canonical institutional surfaces — Inbox, Work, Priorities, Intelligence, Cognition, Governance, Corporate Memory, and Trust — composed into one continuous institutional operating record.',
     alternates: buildLocaleAlternates(locale, '/platform'),
   };
 }
@@ -134,9 +134,9 @@ export default async function PlatformOverviewPage({
   return (
     <main className="min-h-screen bg-white">
       <MarketingHeroSection
-        badge={<span className="text-xs uppercase tracking-wider text-white/80">The Platform</span>}
+        badge={<span className="text-xs uppercase tracking-wider text-white/80">The Operating Architecture</span>}
         heading="One institutional operating experience."
-        description="UnionEyes is organized as eight canonical operational surfaces — composed, not bundled — into one continuous institutional operating record."
+        description="UnionEyes is organized as eight canonical institutional surfaces — composed, not bundled — into one continuous operating record of governance, continuity, and trust."
         imageUrl={heroImagery.platform}
       />
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T07:22:47.070Z",
+  "generatedAt": "2026-05-13T07:54:35.762Z",
   "files": [
     {
       "ctx": {
@@ -1525,21 +1525,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 47,
+          "score": 88,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
+              "governance": 8,
+              "continuity": 9,
               "coordination": 6,
-              "trust": 10
+              "trust": 8
             },
-            "total": 24,
+            "total": 31,
             "shares": {
-              "governance": 0.125,
-              "continuity": 0.20833333333333334,
-              "coordination": 0.25,
-              "trust": 0.4166666666666667
+              "governance": 0.25806451612903225,
+              "continuity": 0.2903225806451613,
+              "coordination": 0.1935483870967742,
+              "trust": 0.25806451612903225
             }
           }
         },
@@ -1552,9 +1552,7 @@
             "matched": [
               "overlay infrastructure",
               "continuity layer",
-              "alongside existing systems",
-              "non-displacing",
-              "respects existing tools"
+              "non-displacing"
             ]
           }
         },
@@ -1572,12 +1570,10 @@
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
-              "human oversight",
               "explainability",
               "reviewability",
               "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
+              "assistive intelligence"
             ]
           }
         },
@@ -1601,7 +1597,7 @@
           }
         }
       ],
-      "maturity": 87
+      "maturity": 97
     },
     {
       "ctx": {
@@ -2989,21 +2985,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 44,
+          "score": 87,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 3,
-              "continuity": 5,
+              "governance": 7,
+              "continuity": 8,
               "coordination": 6,
-              "trust": 11
+              "trust": 7
             },
-            "total": 25,
+            "total": 28,
             "shares": {
-              "governance": 0.12,
-              "continuity": 0.2,
-              "coordination": 0.24,
-              "trust": 0.44
+              "governance": 0.25,
+              "continuity": 0.2857142857142857,
+              "coordination": 0.21428571428571427,
+              "trust": 0.25
             }
           }
         },
@@ -3036,12 +3032,10 @@
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
-              "human oversight",
               "explainability",
               "reviewability",
               "governance-safe AI",
-              "assistive intelligence",
-              "procedural transparency"
+              "assistive intelligence"
             ]
           }
         },
@@ -3065,7 +3059,7 @@
           }
         }
       ],
-      "maturity": 86
+      "maturity": 97
     },
     {
       "ctx": {
@@ -6233,26 +6227,8 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 39,
-          "excerpt": "title: 'The Platform | Eight Canonical Operational Surfaces | UnionEyes',"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
           "line": 42,
           "excerpt": "alternates: buildLocaleAlternates(locale, '/platform'),"
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 137,
-          "excerpt": "badge={<span className=\"text-xs uppercase tracking-wider text-white/80\">The Platform</span>}"
         },
         {
           "term": {
@@ -6268,21 +6244,21 @@
         {
           "rule": "narrative-balance",
           "status": "pass",
-          "score": 65,
+          "score": 69,
           "flags": [],
           "detail": {
             "counts": {
-              "governance": 13,
+              "governance": 14,
               "continuity": 17,
-              "coordination": 21,
-              "trust": 20
+              "coordination": 18,
+              "trust": 21
             },
-            "total": 71,
+            "total": 70,
             "shares": {
-              "governance": 0.18309859154929578,
-              "continuity": 0.23943661971830985,
-              "coordination": 0.29577464788732394,
-              "trust": 0.28169014084507044
+              "governance": 0.2,
+              "continuity": 0.24285714285714285,
+              "coordination": 0.2571428571428571,
+              "trust": 0.3
             }
           }
         },
@@ -6344,7 +6320,7 @@
           }
         }
       ],
-      "maturity": 91
+      "maturity": 92
     },
     {
       "ctx": {
@@ -7984,60 +7960,6 @@
         },
         {
           "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7194,
-          "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7196,
-          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7207,
-          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7227,
-          "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7236,
-          "excerpt": "\"modulesBadge\": \"Platform Modules\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7258,
-          "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
-        },
-        {
-          "term": {
             "term": "operating system",
             "severity": "warning",
             "category": "warning"
@@ -8395,23 +8317,23 @@
           "score": 60,
           "flags": [
             {
-              "message": "Continuity language under-represented: 9.8% (target 30%).",
+              "message": "Continuity language under-represented: 10.0% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 267,
-              "continuity": 71,
+              "governance": 270,
+              "continuity": 73,
               "coordination": 149,
               "trust": 241
             },
-            "total": 728,
+            "total": 733,
             "shares": {
-              "governance": 0.36675824175824173,
-              "continuity": 0.09752747252747253,
-              "coordination": 0.20467032967032966,
-              "trust": 0.33104395604395603
+              "governance": 0.3683492496589359,
+              "continuity": 0.09959072305593451,
+              "coordination": 0.20327421555252387,
+              "trust": 0.32878581173260574
             }
           }
         },
@@ -8697,60 +8619,6 @@
           },
           "line": 7234,
           "excerpt": "\"platform\": \"Platform\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7280,
-          "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7282,
-          "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7293,
-          "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7313,
-          "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7322,
-          "excerpt": "\"modulesBadge\": \"Platform Modules\","
-        },
-        {
-          "term": {
-            "term": "platform",
-            "severity": "warning",
-            "category": "warning"
-          },
-          "line": 7344,
-          "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
         },
         {
           "term": {
@@ -9099,26 +8967,26 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 58,
+          "score": 59,
           "flags": [
             {
-              "message": "Continuity language under-represented: 9.2% (target 30%).",
+              "message": "Continuity language under-represented: 9.4% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 263,
-              "continuity": 66,
+              "governance": 266,
+              "continuity": 68,
               "coordination": 148,
               "trust": 241
             },
-            "total": 718,
+            "total": 723,
             "shares": {
-              "governance": 0.36629526462395545,
-              "continuity": 0.09192200557103064,
-              "coordination": 0.20612813370473537,
-              "trust": 0.33565459610027853
+              "governance": 0.367911479944675,
+              "continuity": 0.09405255878284924,
+              "coordination": 0.20470262793914246,
+              "trust": 0.3333333333333333
             }
           }
         },
@@ -9587,30 +9455,30 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 45,
+          "score": 44,
           "flags": [
             {
-              "message": "Governance saturation detected: 41.8% of pillar terms (target 30%, threshold 40%).",
+              "message": "Governance saturation detected: 42.2% of pillar terms (target 30%, threshold 40%).",
               "suggestion": "Rebalance toward continuity, coordination, and trust language."
             },
             {
-              "message": "Continuity language under-represented: 10.1% (target 30%).",
+              "message": "Continuity language under-represented: 10.0% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 157,
+              "governance": 160,
               "continuity": 38,
               "coordination": 46,
               "trust": 135
             },
-            "total": 376,
+            "total": 379,
             "shares": {
-              "governance": 0.4175531914893617,
-              "continuity": 0.10106382978723404,
-              "coordination": 0.12234042553191489,
-              "trust": 0.35904255319148937
+              "governance": 0.42216358839050133,
+              "continuity": 0.10026385224274406,
+              "coordination": 0.12137203166226913,
+              "trust": 0.3562005277044855
             }
           }
         },
@@ -9862,7 +9730,7 @@
     "totalFiles": 87,
     "publicFiles": 87,
     "hardFails": 0,
-    "warnings": 226,
+    "warnings": 212,
     "ruleFailures": 0,
     "averageMaturity": 87
   }

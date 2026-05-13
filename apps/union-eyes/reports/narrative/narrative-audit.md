@@ -1,12 +1,12 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T07:07:16.103Z
+Generated: 2026-05-13T07:54:35.762Z
 
 ## Summary
 
 - Files scanned: **87**
 - Hard-fail violations: **0**
-- Warning violations: **231**
+- Warning violations: **212**
 - Rule failures: **0**
 - Average Institutional Maturity: **87/100**
 
@@ -219,10 +219,10 @@ Generated: 2026-05-13T07:07:16.103Z
 ### app/(marketing)/page.tsx
 
 - **Path:** `app/(marketing)/page.tsx`
-- **Institutional Maturity:** 87/100
+- **Institutional Maturity:** 97/100
 
 **Scores:**
-- narrative-balance: 47/100 (pass)
+- narrative-balance: 88/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -435,10 +435,10 @@ Generated: 2026-05-13T07:07:16.103Z
 ### marketing/trust
 
 - **Path:** `app/(marketing)/trust/page.tsx`
-- **Institutional Maturity:** 86/100
+- **Institutional Maturity:** 97/100
 
 **Scores:**
-- narrative-balance: 44/100 (pass)
+- narrative-balance: 87/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -935,19 +935,17 @@ Generated: 2026-05-13T07:07:16.103Z
 ### marketing/platform
 
 - **Path:** `app/[locale]/(marketing)/platform/page.tsx`
-- **Institutional Maturity:** 91/100
+- **Institutional Maturity:** 92/100
 
 **Scores:**
-- narrative-balance: 65/100 (pass)
+- narrative-balance: 69/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
-- L39 [warning/warning] `platform` — title: 'The Platform | Eight Canonical Operational Surfaces | UnionEyes',
 - L42 [warning/warning] `platform` — alternates: buildLocaleAlternates(locale, '/platform'),
-- L137 [warning/warning] `platform` — badge={<span className="text-xs uppercase tracking-wider text-white/80">The Platform</span>}
 - L140 [warning/warning] `platform` — imageUrl={heroImagery.platform}
 
 **Recommendations:**
@@ -971,23 +969,11 @@ Generated: 2026-05-13T07:07:16.103Z
 - **Institutional Maturity:** 97/100
 
 **Scores:**
-- narrative-balance: 87/100 (pass)
+- narrative-balance: 88/100 (pass)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
-
-**Vocabulary violations:**
-- L75 [warning/warning] `transformation` — beforeAfterTitle: 'Operational transformation over time',
-- L120 [warning/warning] `platform` — scenarioTitle: 'How the platform behaves inside an organization',
-- L142 [warning/warning] `transformation` — 'This page is intentionally practical. It does not promise transformation by rhetoric. It shows the evidence surfaces, implementation sequence, and review structures that make deployment credible.',
-- L1119 [warning/warning] `disruption` — <h3 className="text-xl font-bold text-navy mb-3">Operational disruption modeling</h3>
-- L1182 [warning/warning] `disruption` — <h3 className="text-xl font-bold text-navy mb-3">Institutional memory disruption models</h3>
-
-**Recommendations:**
-- Remove or rephrase "transformation" (warning).
-- Remove or rephrase "platform" (warning).
-- Remove or rephrase "disruption" (warning).
 
 ### marketing/solutions/executive-leadership
 
@@ -1246,12 +1232,6 @@ Generated: 2026-05-13T07:07:16.103Z
 - L7110 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
 - L7111 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
 - L7172 [warning/warning] `platform` — "platform": "Platform",
-- L7194 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
-- L7196 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7207 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
-- L7227 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
-- L7236 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
-- L7258 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
 - L7270 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
 - L7432 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
 - L7454 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
@@ -1293,7 +1273,7 @@ Generated: 2026-05-13T07:07:16.103Z
 - L10594 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 9.8% (target 30%).
+- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
@@ -1309,7 +1289,7 @@ Generated: 2026-05-13T07:07:16.103Z
 - **Institutional Maturity:** 90/100
 
 **Scores:**
-- narrative-balance: 58/100 (warn)
+- narrative-balance: 59/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1339,12 +1319,6 @@ Generated: 2026-05-13T07:07:16.103Z
 - L7173 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
 - L7174 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
 - L7234 [warning/warning] `platform` — "platform": "Platform",
-- L7280 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
-- L7282 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7293 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
-- L7313 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
-- L7322 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
-- L7344 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
 - L7356 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
 - L7509 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
 - L7531 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
@@ -1385,7 +1359,7 @@ Generated: 2026-05-13T07:07:16.103Z
 - L11032 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 9.2% (target 30%).
+- (narrative-balance) Continuity language under-represented: 9.4% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
@@ -1458,7 +1432,7 @@ Generated: 2026-05-13T07:07:16.103Z
 - **Institutional Maturity:** 86/100
 
 **Scores:**
-- narrative-balance: 45/100 (warn)
+- narrative-balance: 44/100 (warn)
 - coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
@@ -1475,8 +1449,8 @@ Generated: 2026-05-13T07:07:16.103Z
 - L8837 [warning/warning] `platform` — "platform": {
 
 **Flags:**
-- (narrative-balance) Governance saturation detected: 41.8% of pillar terms (target 30%, threshold 40%).
-- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
+- (narrative-balance) Governance saturation detected: 42.2% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 10.0% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
