@@ -7063,7 +7063,7 @@
     "memberManagement": "Membres",
     "rewardsAdministration": "Récompenses",
     "scheduledReports": "Rapports",
-      "aiUsage": "Utilisation IA",
+    "aiUsage": "Utilisation IA",
     "complianceAudit": "Conformité",
     "complianceReports": "Conformité",
     "sectorAnalytics": "Secteurs",
@@ -7142,24 +7142,66 @@
       "solutions": "Solutions",
       "insights": "Perspectives",
       "solutionsItems": {
-        "executive": { "name": "Direction exécutive syndicale", "desc": "Continuité stratégique" },
-        "governance": { "name": "Leadership de gouvernance", "desc": "Modernisation de la gouvernance" },
-        "operations": { "name": "Leadership des opérations", "desc": "Coordination interéquipes" },
-        "technology": { "name": "Leadership technologique", "desc": "IA sécuritaire en entreprise" },
-        "labour": { "name": "Leadership politique et travail", "desc": "Supervision humaine" },
-        "procurement": { "name": "Parties prenantes en approvisionnement", "desc": "Préparation au déploiement" }
+        "executive": {
+          "name": "Direction exécutive syndicale",
+          "desc": "Continuité stratégique"
+        },
+        "governance": {
+          "name": "Leadership de gouvernance",
+          "desc": "Modernisation de la gouvernance"
+        },
+        "operations": {
+          "name": "Leadership des opérations",
+          "desc": "Coordination interéquipes"
+        },
+        "technology": {
+          "name": "Leadership technologique",
+          "desc": "IA sécuritaire en entreprise"
+        },
+        "labour": {
+          "name": "Leadership politique et travail",
+          "desc": "Supervision humaine"
+        },
+        "procurement": {
+          "name": "Parties prenantes en approvisionnement",
+          "desc": "Préparation au déploiement"
+        }
       },
       "story": "Notre histoire",
       "platform": "Plateforme",
       "platformItems": {
-        "inbox": { "name": "Réception et coordination", "desc": "Canal unifié pour la correspondance des membres et les dossiers" },
-        "work": { "name": "Continuité des dossiers", "desc": "Espace de travail actif pour griefs et représentation" },
-        "priorities": { "name": "Engagements et échéances", "desc": "Délais statutaires, obligations et prochaines actions institutionnelles" },
-        "intelligence": { "name": "Intelligence institutionnelle", "desc": "Surfaces exécutives, fédérales et analytiques" },
-        "cognition": { "name": "Raisonnement gouverné", "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle" },
-        "governance": { "name": "Gouvernance officielle", "desc": "Charte, motions et décisions officielles" },
-        "memory": { "name": "Mémoire institutionnelle", "desc": "Doctrine, précédents et archives de continuité" },
-        "trust": { "name": "Confiance et souveraineté", "desc": "Audit, explicabilité et souveraineté canadienne" }
+        "inbox": {
+          "name": "Réception et coordination",
+          "desc": "Canal unifié pour la correspondance des membres et les dossiers"
+        },
+        "work": {
+          "name": "Continuité des dossiers",
+          "desc": "Espace de travail actif pour griefs et représentation"
+        },
+        "priorities": {
+          "name": "Engagements et échéances",
+          "desc": "Délais statutaires, obligations et prochaines actions institutionnelles"
+        },
+        "intelligence": {
+          "name": "Intelligence institutionnelle",
+          "desc": "Surfaces exécutives, fédérales et analytiques"
+        },
+        "cognition": {
+          "name": "Raisonnement gouverné",
+          "desc": "Raisonnement souverain ancré dans la doctrine institutionnelle"
+        },
+        "governance": {
+          "name": "Gouvernance officielle",
+          "desc": "Charte, motions et décisions officielles"
+        },
+        "memory": {
+          "name": "Mémoire institutionnelle",
+          "desc": "Doctrine, précédents et archives de continuité"
+        },
+        "trust": {
+          "name": "Confiance et souveraineté",
+          "desc": "Audit, explicabilité et souveraineté canadienne"
+        }
       },
       "pricing": "Tarification",
       "trust": "Confiance & Conformité",
@@ -11062,6 +11104,166 @@
       "ops": {
         "name": "Ops souverains",
         "posture": "Contrôles d'exécution de la couche de souveraineté; chaque action est journalisée et affecte la continuité."
+      }
+    }
+  },
+  "homePage": {
+    "meta": {
+      "title": "UnionEyes | Continuité institutionnelle et infrastructure de gouvernance",
+      "description": "UnionEyes est la couche de continuité pour les institutions fédérées — préservant la mémoire institutionnelle, renforçant la coordination de gouvernance et modernisant la confiance opérationnelle par une mise en œuvre non perturbatrice aux côtés des systèmes existants. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
+    },
+    "jsonLd": {
+      "name": "UnionEyes",
+      "description": "Couche de continuité institutionnelle et infrastructure de gouvernance pour les organisations fédérées. Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté."
+    },
+    "hero": {
+      "eyebrow": "Gouvernance institutionnelle et infrastructure de continuité",
+      "headlineLine1": "La certitude que la mémoire institutionnelle",
+      "headlineLine2": "survivra à toute personne.",
+      "imageAlt": "Gouvernance institutionnelle et infrastructure de continuité",
+      "subhead": "UnionEyes aide les institutions fédérées à préserver la mémoire institutionnelle, à renforcer la coordination de gouvernance et à moderniser la confiance procédurale par une mise en œuvre non perturbatrice aux côtés des systèmes existants.",
+      "ctaPrimary": "Planifier une découverte stratégique",
+      "ctaSecondary": "Découvrir l’infrastructure de continuité"
+    },
+    "posture": {
+      "eyebrow": "Posture institutionnelle",
+      "points": [
+        {
+          "metric": "Hébergé au Canada",
+          "label": "Résidence respectueuse de la souveraineté",
+          "sub": "Bilingue d’abord, aucune sortie de données transfrontalière"
+        },
+        {
+          "metric": "Non perturbateur",
+          "label": "Coexistence par conception",
+          "sub": "Renforce les systèmes existants aux côtés de l’outillage actuel"
+        },
+        {
+          "metric": "Qualité d’audit",
+          "label": "Transparence procédurale",
+          "sub": "Chaque décision étayée par des preuves et révisable"
+        },
+        {
+          "metric": "Dirigé par l’humain",
+          "label": "Révisabilité et supervision",
+          "sub": "Intelligence d’assistance, jamais autonome"
+        }
+      ]
+    },
+    "continuity": {
+      "eyebrow": "Continuité institutionnelle",
+      "heading": "Une intendance qui survit aux changements de leadership.",
+      "lede": "La continuité n’est pas une fonctionnalité. C’est la discipline institutionnelle qui consiste à préserver le contexte procédural, les décisions et le raisonnement à chaque transition.",
+      "pillars": [
+        {
+          "title": "Préservation de la mémoire institutionnelle",
+          "desc": "Conserver le contexte de gouvernance, les décisions et le raisonnement à travers chaque succession de leadership et chaque transition. La continuité de l’intendance survit à toute personne."
+        },
+        {
+          "title": "Coordination de gouvernance fédérée",
+          "desc": "Renforcer la coordination procédurale entre sections locales, conseils et fédérations sans perturber les chaînes d’autorité ni les structures de règlements existantes."
+        },
+        {
+          "title": "Confiance procédurale et auditabilité",
+          "desc": "Des preuves de qualité d’audit, la transparence et l’explicabilité ancrent chaque décision de gestion de dossiers et de représentation."
+        },
+        {
+          "title": "Mise en œuvre non perturbatrice",
+          "desc": "Une infrastructure de superposition qui renforce les systèmes existants — une couche de continuité que votre institution peut adopter aux côtés de son outillage actuel."
+        }
+      ]
+    },
+    "federation": {
+      "eyebrow": "Coordination fédérée",
+      "heading": "Une coordination respectueuse de la gouvernance entre sections locales, conseils et fédérations.",
+      "body1": "Les fédérations ne sont pas des organigrammes. Ce sont des institutions à plusieurs niveaux, avec une autorité procédurale, des règlements et des structures de comités distincts.",
+      "body2": "UnionEyes assure l’alignement opérationnel et la visibilité institutionnelle au sein de la fédération, sans la réduire à une hiérarchie unique ni contourner l’autorité locale."
+    },
+    "procedural": {
+      "eyebrow": "Confiance procédurale",
+      "heading": "Chaque décision est traçable, révisable et redevable.",
+      "body1": "La traçabilité procédurale est le fondement de la confiance institutionnelle. Chaque dossier, recommandation et action de gouvernance est ancré à des preuves et à un réviseur attitré.",
+      "body2": "La transparence de qualité d’audit, l’explicabilité et la responsabilité opérationnelle sont structurelles — non ajoutées après coup."
+    },
+    "coexistence": {
+      "eyebrow": "Modernisation non perturbatrice",
+      "heading": "Une infrastructure de superposition — non un remplacement.",
+      "lede": "Les institutions se modernisent au rythme institutionnel. UnionEyes se déploie comme couche de continuité aux côtés des systèmes existants.",
+      "points": [
+        "Une infrastructure de superposition qui renforce les systèmes existants — aucun remplacement requis.",
+        "Adoption modulaire : déployez une couche de continuité un flux de travail à la fois.",
+        "La modernisation par couches s’exécute aux côtés des systèmes existants en pleine coexistence.",
+        "L’évolution institutionnelle se poursuit sans perturber les chaînes procédurales actuelles."
+      ]
+    },
+    "labourSafeAi": {
+      "eyebrow": "IA respectueuse du travail",
+      "heading": "Une intelligence d’assistance sous supervision humaine structurelle.",
+      "body1": "L’intelligence recommande. Les intendants et les représentants décident. La révisabilité, l’explicabilité et la transparence procédurale sont requises — non optionnelles.",
+      "body2": "Aucun classement individuel de performance. Aucun profilage comportemental. Aucune action procédurale autonome. Une IA respectueuse de la gouvernance par conception.",
+      "principles": [
+        "La supervision humaine est structurelle, non optionnelle — chaque recommandation est dirigée vers un réviseur attitré.",
+        "L’explicabilité et la révisabilité sont requises pour chaque résultat d’intelligence d’assistance.",
+        "IA respectueuse de la gouvernance : l’intelligence d’assistance soutient les intendants et les représentants, sans jamais s’y substituer.",
+        "Transparence procédurale : des chaînes de preuves complètes pour chaque interaction de gouvernance."
+      ]
+    },
+    "canadian": {
+      "eyebrow": "Infrastructure institutionnelle canadienne",
+      "heading": "Hébergé au Canada, bilingue d’abord, respectueux de la souveraineté.",
+      "lede": "Une infrastructure démocratique conçue pour les institutions qui façonnent la vie au travail au Canada.",
+      "pillars": [
+        {
+          "title": "Infrastructure hébergée au Canada",
+          "desc": "Résidence respectueuse de la souveraineté, sans sortie de données transfrontalière."
+        },
+        {
+          "title": "Bilingue d’abord par conception",
+          "desc": "Surfaces institutionnelles en français et en anglais dès le premier jour — jamais après coup."
+        },
+        {
+          "title": "Posture de confiance institutionnelle",
+          "desc": "Une infrastructure démocratique pour les fédérations, les conseils et les institutions dirigées par leurs membres."
+        },
+        {
+          "title": "Opérations respectueuses de la gouvernance",
+          "desc": "Neutralité procédurale, explicabilité et continuité de l’intendance dans chaque flux de travail."
+        }
+      ]
+    },
+    "finalCta": {
+      "heading": "Discutons d’une infrastructure de continuité pour votre institution.",
+      "body": "Une conversation consultative sur la continuité institutionnelle, la coordination de gouvernance et la confiance procédurale — au rythme de votre fédération, et non d’un cycle de vente.",
+      "ctaPrimary": "Planifier une découverte stratégique",
+      "ctaSecondary": "Voir la confiance et l’intendance"
+    },
+    "svg": {
+      "continuity": {
+        "ariaLabel": "Chronologie de continuité institutionnelle à travers la succession du leadership",
+        "stewardA": "Intendant·e A",
+        "handoff": "Transition",
+        "stewardB": "Intendant·e B",
+        "stewardC": "Intendant·e C",
+        "caption": "Mémoire institutionnelle préservée à travers la succession"
+      },
+      "federation": {
+        "ariaLabel": "Topologie de coordination fédérée",
+        "federation": "Fédération",
+        "council": "Conseil"
+      },
+      "evidence": {
+        "ariaLabel": "Chaîne de preuves et lignée procédurale",
+        "evidence": "Preuve",
+        "stepPrefix": "Étape",
+        "caption": "Chaque décision liée à une preuve révisable et à un réviseur attitré."
+      },
+      "coexistence": {
+        "ariaLabel": "Couche de continuité superposée aux systèmes existants",
+        "existingCrm": "CRM existant",
+        "existingCase": "Outils de dossiers existants",
+        "existingRecords": "Archives existantes",
+        "layerTitle": "Couche de continuité UnionEyes (infrastructure de superposition)",
+        "layerSubtitle": "Renforce les systèmes existants · mise en œuvre non perturbatrice"
       }
     }
   }
