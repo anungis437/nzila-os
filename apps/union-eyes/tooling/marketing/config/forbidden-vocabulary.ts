@@ -145,6 +145,7 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// ga-check:exempt — regex compile cache, not persistence
 const TERM_REGEX_CACHE = new Map<string, RegExp>();
 function regexFor(term: string): RegExp {
   let r = TERM_REGEX_CACHE.get(term);
