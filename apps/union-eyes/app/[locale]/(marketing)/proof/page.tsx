@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, FileText, ShieldCheck, ClipboardList, Clock3, GitBranch, Layers3 } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getInstitutionalModeProfile, parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
+import { parseInstitutionalMode, withInstitutionalContext } from '@/lib/institutional-context';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
 import {
   committeeCoordinationSimulations,
@@ -741,7 +741,6 @@ export default async function ProofPage({
   const { locale } = await params;
   const resolvedSearch = searchParams ? await searchParams : undefined;
   const contextMode = parseInstitutionalMode(resolvedSearch?.context);
-  const contextProfile = getInstitutionalModeProfile(contextMode);
   const localeKey: keyof typeof PROOF_COPY =
     locale in PROOF_COPY ? (locale as keyof typeof PROOF_COPY) : 'en-CA';
   const copy = PROOF_COPY[localeKey];
@@ -869,8 +868,6 @@ export default async function ProofPage({
         }
         heading={<>{copy.heroHeading}</>}
         description={copy.heroDescription}
-        contextKicker={`${contextProfile.label} context`}
-        contextNote={contextProfile.heroFraming}
         cta={
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/30">

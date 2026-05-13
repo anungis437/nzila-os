@@ -1,0 +1,1393 @@
+{
+  "generatedAt": "2026-05-12T12:33:24.871Z",
+  "totalPackages": 213,
+  "criticalPackages": 89,
+  "criticalMissing": [],
+  "criticalStub": [],
+  "nonCriticalMissing": [
+    "agri-adapters",
+    "agri-core",
+    "agri-db",
+    "agri-events",
+    "agri-forecasting",
+    "agri-intelligence",
+    "agri-provenance",
+    "agri-reporting",
+    "agri-supply-chain",
+    "agri-sync-contracts",
+    "agri-traceability",
+    "agrimo-core",
+    "agrimo-intelligence",
+    "audit",
+    "canadian-vocabulary",
+    "cfo-core",
+    "cfo-intelligence",
+    "chatops-slack",
+    "chatops-teams",
+    "clc-decision-intelligence",
+    "clc-executive-intelligence",
+    "cli",
+    "clinical-timeline",
+    "commerce-audit",
+    "commerce-core",
+    "commerce-db",
+    "commerce-events",
+    "commerce-evidence",
+    "commerce-governance",
+    "commerce-integration-tests",
+    "commerce-observability",
+    "commerce-services",
+    "commerce-state",
+    "comms-email",
+    "comms-push",
+    "comms-sms",
+    "consent-engine",
+    "crm-hubspot",
+    "data-lifecycle",
+    "deal-engine",
+    "decision-core",
+    "decision-intelligence",
+    "enforcement",
+    "executive-os",
+    "finance-analytics",
+    "finance-compliance",
+    "finance-core",
+    "finance-governance",
+    "finance-identity",
+    "finance-ledger",
+    "finops",
+    "flow-engine",
+    "fsm-core",
+    "fx",
+    "governance",
+    "governed-workflow",
+    "health-analytics",
+    "health-connectors",
+    "health-governance",
+    "health-ui",
+    "ingestion-core",
+    "intelligence",
+    "itsm-core",
+    "nacp-core",
+    "nar",
+    "onboarding-core",
+    "operational-convergence",
+    "patient-identity",
+    "pilot-mode",
+    "pipeline-alerting",
+    "policies",
+    "policy-intelligence",
+    "pricing-engine",
+    "quebec-vocabulary",
+    "schema-core",
+    "secrets",
+    "security",
+    "tax",
+    "tools-runtime",
+    "trade-adapters",
+    "trade-cars",
+    "trade-core",
+    "trade-db",
+    "trustcore-contracts",
+    "trustcore-core",
+    "trustcore-trustops",
+    "trustops-intelligence",
+    "ue-assistant",
+    "ue-cognition",
+    "union-claims-financial",
+    "webhooks",
+    "workload-intelligence",
+    "zonga-analytics",
+    "zonga-control-plane",
+    "zonga-core",
+    "zonga-economics",
+    "zonga-events",
+    "zonga-growth",
+    "zonga-intelligence",
+    "zonga-monetization",
+    "zonga-payments",
+    "zonga-rights",
+    "zonga-streaming",
+    "zonga-streaming-aws"
+  ],
+  "checks": [
+    {
+      "package": "agri-adapters",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-db",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-events",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-forecasting",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-provenance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-reporting",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-supply-chain",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-sync-contracts",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agri-traceability",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agrimo-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "agrimo-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ai-control",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 806
+    },
+    {
+      "package": "ai-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1527
+    },
+    {
+      "package": "ai-registry",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1272
+    },
+    {
+      "package": "ai-sdk",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1050
+    },
+    {
+      "package": "assurance-engine",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 613
+    },
+    {
+      "package": "attestation-visibility",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 564
+    },
+    {
+      "package": "audit",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "blob",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1097
+    },
+    {
+      "package": "canadian-vocabulary",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cfo-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cfo-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "chatops-slack",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "chatops-teams",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "clc-decision-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "clc-executive-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cli",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "clinical-timeline",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-audit",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-db",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-events",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-evidence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-governance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-integration-tests",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-observability",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-services",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "commerce-state",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "comms-email",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "comms-push",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "comms-sms",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "config",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 653
+    },
+    {
+      "package": "consent-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "continuity-observability",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 792
+    },
+    {
+      "package": "continuity-review",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 278
+    },
+    {
+      "package": "contracts",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 481
+    },
+    {
+      "package": "crm-hubspot",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "cupe-vocabulary",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 2197
+    },
+    {
+      "package": "data-lifecycle",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "db",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1322
+    },
+    {
+      "package": "deal-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "decision-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "decision-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "doctrine-enforcement",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 1250
+    },
+    {
+      "package": "enforcement",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "events",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 460
+    },
+    {
+      "package": "evidence",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 963
+    },
+    {
+      "package": "executive-os",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-analytics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-compliance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-governance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-identity",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finance-ledger",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "finops",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "flow-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "fsm-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "fx",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "governance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "governance-middleware",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 1255
+    },
+    {
+      "package": "governance-operations",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 648
+    },
+    {
+      "package": "governance-otel",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 727
+    },
+    {
+      "package": "governance-review",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 393
+    },
+    {
+      "package": "governance-runtime",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 767
+    },
+    {
+      "package": "governance-telemetry",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 1160
+    },
+    {
+      "package": "governed-workflow",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-analytics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-connectors",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-governance",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "health-ui",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "hq-domain",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 1240
+    },
+    {
+      "package": "ingestion-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "institutional-cognition-core",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 2107
+    },
+    {
+      "package": "integrations-calendar",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 645
+    },
+    {
+      "package": "integrations-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3373
+    },
+    {
+      "package": "integrations-db",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3572
+    },
+    {
+      "package": "integrations-hubspot",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2603
+    },
+    {
+      "package": "integrations-m365",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2273
+    },
+    {
+      "package": "integrations-pension",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 574
+    },
+    {
+      "package": "integrations-runtime",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 6306
+    },
+    {
+      "package": "integrations-whatsapp",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2176
+    },
+    {
+      "package": "intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "itsm-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ml-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 963
+    },
+    {
+      "package": "ml-sdk",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 752
+    },
+    {
+      "package": "mobility-ai",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 725
+    },
+    {
+      "package": "mobility-case-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2787
+    },
+    {
+      "package": "mobility-compliance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 666
+    },
+    {
+      "package": "mobility-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2725
+    },
+    {
+      "package": "mobility-family",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2605
+    },
+    {
+      "package": "mobility-programs",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1977
+    },
+    {
+      "package": "nacp-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "nar",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "observability",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 460
+    },
+    {
+      "package": "onboarding-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "operational-convergence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "org",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1841
+    },
+    {
+      "package": "os-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3480
+    },
+    {
+      "package": "otel-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1295
+    },
+    {
+      "package": "patient-identity",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "payments-stripe",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3542
+    },
+    {
+      "package": "pilot-mode",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "pipeline-alerting",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "platform-agent-workflows",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 750
+    },
+    {
+      "package": "platform-ai-contract",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 639
+    },
+    {
+      "package": "platform-ai-governance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1534
+    },
+    {
+      "package": "platform-ai-query",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 798
+    },
+    {
+      "package": "platform-anomaly-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 717
+    },
+    {
+      "package": "platform-assurance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2396
+    },
+    {
+      "package": "platform-auth",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 744
+    },
+    {
+      "package": "platform-billing",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 663
+    },
+    {
+      "package": "platform-change-management",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1164
+    },
+    {
+      "package": "platform-cognition-core",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 4135
+    },
+    {
+      "package": "platform-commerce-org",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1602
+    },
+    {
+      "package": "platform-compliance-snapshots",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 997
+    },
+    {
+      "package": "platform-context-orchestrator",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2483
+    },
+    {
+      "package": "platform-contracts",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1174
+    },
+    {
+      "package": "platform-cost",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 774
+    },
+    {
+      "package": "platform-data-fabric",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1838
+    },
+    {
+      "package": "platform-decision-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 6119
+    },
+    {
+      "package": "platform-decision-graph",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2458
+    },
+    {
+      "package": "platform-deploy",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2460
+    },
+    {
+      "package": "platform-entity-graph",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 985
+    },
+    {
+      "package": "platform-environment",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1042
+    },
+    {
+      "package": "platform-event-fabric",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 952
+    },
+    {
+      "package": "platform-events",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 856
+    },
+    {
+      "package": "platform-evidence-pack",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 982
+    },
+    {
+      "package": "platform-export",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 451
+    },
+    {
+      "package": "platform-feature-flags",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 489
+    },
+    {
+      "package": "platform-governance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 908
+    },
+    {
+      "package": "platform-governed-ai",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2159
+    },
+    {
+      "package": "platform-growth-os",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 4730
+    },
+    {
+      "package": "platform-integrations",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 925
+    },
+    {
+      "package": "platform-integrations-connectors",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 860
+    },
+    {
+      "package": "platform-integrations-control-plane",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1127
+    },
+    {
+      "package": "platform-integrations-types",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 828
+    },
+    {
+      "package": "platform-intelligence",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 778
+    },
+    {
+      "package": "platform-intelligence-home",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 264
+    },
+    {
+      "package": "platform-isolation",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1000
+    },
+    {
+      "package": "platform-jurisdiction-compliance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 845
+    },
+    {
+      "package": "platform-knowledge-registry",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1132
+    },
+    {
+      "package": "platform-lakehouse",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 247
+    },
+    {
+      "package": "platform-marketplace",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 808
+    },
+    {
+      "package": "platform-metrics",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1912
+    },
+    {
+      "package": "platform-notifications",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 677
+    },
+    {
+      "package": "platform-observability",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3672
+    },
+    {
+      "package": "platform-ontology",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1251
+    },
+    {
+      "package": "platform-ops",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3301
+    },
+    {
+      "package": "platform-performance",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 721
+    },
+    {
+      "package": "platform-pilot-metrics",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 785
+    },
+    {
+      "package": "platform-pilot-metrics-types",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 759
+    },
+    {
+      "package": "platform-policy-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1315
+    },
+    {
+      "package": "platform-procurement-proof",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3306
+    },
+    {
+      "package": "platform-proof",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2137
+    },
+    {
+      "package": "platform-reasoning-engine",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2083
+    },
+    {
+      "package": "platform-revenue",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 709
+    },
+    {
+      "package": "platform-rfp-generator",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 631
+    },
+    {
+      "package": "platform-rum",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 704
+    },
+    {
+      "package": "platform-semantic-search",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 1674
+    },
+    {
+      "package": "platform-shell",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 847
+    },
+    {
+      "package": "platform-utils",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 446
+    },
+    {
+      "package": "platform-validation",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 2178
+    },
+    {
+      "package": "policies",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "policy-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "pricing-engine",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "qbo",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 3459
+    },
+    {
+      "package": "quebec-vocabulary",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "runtime-attestation",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 878
+    },
+    {
+      "package": "schema-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "scripts-book",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 5129
+    },
+    {
+      "package": "secrets",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "security",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "stabilization-signals",
+      "critical": false,
+      "hasReadme": true,
+      "readmeLength": 400
+    },
+    {
+      "package": "tax",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "tools-runtime",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trade-adapters",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trade-cars",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trade-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trade-db",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trustcore-contracts",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trustcore-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trustcore-trustops",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "trustops-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ue-assistant",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ue-cognition",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "ui",
+      "critical": true,
+      "hasReadme": true,
+      "readmeLength": 790
+    },
+    {
+      "package": "union-claims-financial",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "webhooks",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "workload-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-analytics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-control-plane",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-core",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-economics",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-events",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-growth",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-intelligence",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-monetization",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-payments",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-rights",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-streaming",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    },
+    {
+      "package": "zonga-streaming-aws",
+      "critical": false,
+      "hasReadme": false,
+      "readmeLength": 0
+    }
+  ]
+}

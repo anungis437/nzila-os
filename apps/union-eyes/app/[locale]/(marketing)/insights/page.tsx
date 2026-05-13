@@ -10,7 +10,6 @@ import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSectio
 import { InsightsHubSubmenu, insightsHubSections } from '@/components/marketing/insights-hub-navigation';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import {
-  getInstitutionalModeProfile,
   parseInstitutionalMode,
   withInstitutionalContext,
 } from '@/lib/institutional-context';
@@ -41,7 +40,6 @@ export default async function InsightsPage({
   const { locale } = await params;
   const resolvedSearch = searchParams ? await searchParams : undefined;
   const contextMode = parseInstitutionalMode(resolvedSearch?.context);
-  const profile = getInstitutionalModeProfile(contextMode);
   const featuredInsights = getFeaturedInsights();
   const quickLinks = insightsHubSections.filter((section) => section.key !== 'overview');
 
@@ -55,8 +53,6 @@ export default async function InsightsPage({
         revealTempo="conference"
         heading={<>Institutional continuity and governance intelligence</>}
         description="A doctrine publication movement for executive teams preserving institutional memory, reducing fragmentation risk, and operationalizing explainable modernization with continuity confidence."
-        contextKicker={`${profile.label} context`}
-        contextNote={profile.heroFraming}
         cta={
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={withInstitutionalContext(`/${locale}/pilot-request`, contextMode)} className="inline-flex items-center justify-center px-7 py-3.5 bg-white text-navy font-semibold rounded-xl hover:bg-slate-100 transition-all">

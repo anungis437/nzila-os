@@ -171,7 +171,7 @@ export default function LocaleSiteNavigation() {
                         }`}
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -203,7 +203,7 @@ export default function LocaleSiteNavigation() {
                         className="block px-4 py-3 rounded-lg text-sm transition-colors text-gray-700 hover:bg-gray-50 hover:text-navy"
                       >
                         <span className="block font-medium leading-tight">{link.name}</span>
-                        <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                        <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                       </Link>
                     ))}
                   </motion.div>
@@ -286,7 +286,7 @@ export default function LocaleSiteNavigation() {
                   {solutionsLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight">{link.name}</span>
-                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                     </Link>
                   ))}
                 </div>
@@ -307,7 +307,7 @@ export default function LocaleSiteNavigation() {
                   {modulesLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="block px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                       <span className="block font-medium leading-tight">{link.name}</span>
-                      <span className="block text-xs text-gray-400 mt-0.5 leading-tight">{link.desc}</span>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-3">{link.desc}</span>
                     </Link>
                   ))}
                 </div>
