@@ -6,7 +6,6 @@ import {
   ConferenceStoryFlow,
   ContinuityFlowSignature,
   ContinuityMappingLanguage,
-  ExecutiveResonanceLayer,
   FragmentationToCoherenceSequence,
   MethodologyVisualizationSystem,
 } from '@/components/marketing/institutional-visual-systems';
@@ -152,10 +151,10 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">Designed for institutional adoption confidence</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">Designed for institutional adoption confidence</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mb-8">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-8">
               Union Eyes doctrine is structured for governance committees, executive leadership, operations stewards, and procurement stakeholders who require clarity before committing to modernization paths.
             </p>
           </ScrollReveal>
@@ -176,10 +175,10 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">From institutional fragmentation to operational trust</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">From institutional fragmentation to operational trust</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
               Every doctrine article follows a strategic sequence built for executive cognition: problem framing, governance risk, continuity implications, and explainable implementation outcomes.
             </p>
           </ScrollReveal>
@@ -205,10 +204,10 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-4">What leaders realize as visibility improves</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-4 text-center">What leaders realize as visibility improves</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center leading-relaxed">
               This sequencing is designed to reveal fragility without alarmism, then stabilize through explainable continuity pathways.
             </p>
           </ScrollReveal>
@@ -229,10 +228,10 @@ export function InsightsDoctrinePageView({ locale, contextMode = 'executive' }: 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-3">Executive publications in active use</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3 text-center">Executive publications in active use</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center">
               These publications are used in governance workshops, modernization committees, procurement reviews, and transition planning cycles.
             </p>
           </ScrollReveal>
@@ -361,8 +360,6 @@ export function InsightsResonancePageView({ locale, contextMode = 'executive' }:
 
       <InsightsHubSubmenu locale={locale} active="resonance" contextMode={contextMode} />
 
-      <ExecutiveResonanceLayer />
-
       <ContinuityMappingLanguage />
 
       {contextMode === 'conference' ? <ConferenceMemoryAnchors /> : null}
@@ -421,7 +418,7 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-8">Browse the doctrine library by category</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-8 text-center">Browse the doctrine library by category</h2>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 narrative-sequence" style={{ ['--sequence-step' as string]: INSIGHTS_RHYTHM.sequenceStep }}>
             {insightCategories.map((cat) => (
@@ -446,10 +443,10 @@ export function InsightsCategoriesPageView({ locale, contextMode = 'executive' }
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal duration={INSIGHTS_RHYTHM.kickerDuration} distance={INSIGHTS_RHYTHM.kickerDistance} tempo={INSIGHTS_RHYTHM.tempo}>          </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.titleDelay} duration={INSIGHTS_RHYTHM.titleDuration} distance={INSIGHTS_RHYTHM.titleDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <h2 className="text-3xl font-semibold text-navy mb-3">Next in doctrine development</h2>
+            <h2 className="text-3xl font-semibold text-navy mb-3 text-center">Next in doctrine development</h2>
           </ScrollReveal>
           <ScrollReveal delay={INSIGHTS_RHYTHM.bodyDelay} duration={INSIGHTS_RHYTHM.bodyDuration} distance={INSIGHTS_RHYTHM.bodyDistance} tempo={INSIGHTS_RHYTHM.tempo}>
-            <p className="text-sm text-slate-600 mb-8 max-w-3xl">
+            <p className="text-sm text-slate-600 mb-8 max-w-3xl mx-auto text-center">
               These topics are under active development with governance and operations partners across labour institutions.
             </p>
           </ScrollReveal>
