@@ -6,7 +6,7 @@
  */
 
 import { NARRATIVE_PILLARS, type Pillar } from "../config/required-vocabulary";
-import type { PageContext, RuleModule, RuleResult } from "./types";
+import type { PageContext, RuleFlag, RuleModule, RuleResult } from "./types";
 
 const TARGETS: Record<Pillar, number> = {
   governance: 0.3,
@@ -40,7 +40,7 @@ export const narrativeBalanceRule: RuleModule = {
       trust: countMatches(content, NARRATIVE_PILLARS.trust),
     };
     const total = counts.governance + counts.continuity + counts.coordination + counts.trust;
-    const flags = [];
+    const flags: RuleFlag[] = [];
     let score = 100;
 
     if (total === 0) {

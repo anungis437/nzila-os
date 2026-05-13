@@ -6,7 +6,7 @@
  */
 
 import { COEXISTENCE_TERMS, countRewards } from "../config/required-vocabulary";
-import type { PageContext, RuleModule, RuleResult } from "./types";
+import type { PageContext, RuleFlag, RuleModule, RuleResult } from "./types";
 
 const REPLACEMENT_HINTS = [
   "rip and replace",
@@ -23,7 +23,7 @@ export const coexistencePositioningRule: RuleModule = {
     const lower = content.toLowerCase();
     const replacementHits = REPLACEMENT_HINTS.filter((h) => lower.includes(h));
 
-    const flags = [];
+    const flags: RuleFlag[] = [];
     let status: RuleResult["status"] = "pass";
     let score = Math.min(100, 50 + rawScore * 10);
 

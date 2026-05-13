@@ -6,7 +6,7 @@
  */
 
 import { CANADIAN_POSITIONING_TERMS, countRewards } from "../config/required-vocabulary";
-import type { PageContext, RuleModule, RuleResult } from "./types";
+import type { PageContext, RuleFlag, RuleModule, RuleResult } from "./types";
 
 const STRONG_CANADIAN_HINTS = ["canada", "canadian", "québec", "quebec", "bilingual"];
 
@@ -17,7 +17,7 @@ export const canadianPositioningRule: RuleModule = {
     const { matched, score: rewardScore } = countRewards(content, CANADIAN_POSITIONING_TERMS);
     const generalCanadianHits = STRONG_CANADIAN_HINTS.filter((h) => lower.includes(h));
 
-    const flags = [];
+    const flags: RuleFlag[] = [];
     let status: RuleResult["status"] = "pass";
     let score = 70 + rewardScore * 5 + generalCanadianHits.length * 3;
     score = Math.min(100, score);

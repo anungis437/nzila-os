@@ -11,7 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { locales, localeNames, type Locale } from '@/i18n/config';
+import { locales, visibleLocales, localeNames, type Locale } from '@/i18n/config';
+// `locales` retained for type narrowing; only `visibleLocales` is rendered.
+void locales;
 
 export function LanguageToggle() {
   const t = useTranslations('common');
@@ -39,7 +41,7 @@ export function LanguageToggle() {
           <SelectValue placeholder={t('selectLanguage')} />
         </SelectTrigger>
         <SelectContent>
-          {locales.map((loc) => (
+          {visibleLocales.map((loc) => (
             <SelectItem key={loc} value={loc}>
               {localeNames[loc]}
             </SelectItem>

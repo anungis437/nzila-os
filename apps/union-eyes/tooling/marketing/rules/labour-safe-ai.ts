@@ -12,7 +12,7 @@ import {
   LABOUR_SAFE_AI_REQUIRED,
   countRewards,
 } from "../config/required-vocabulary";
-import type { PageContext, RuleModule, RuleResult } from "./types";
+import type { PageContext, RuleFlag, RuleModule, RuleResult } from "./types";
 
 const AI_TRIGGERS = ["ai ", " ai", "machine learning", "model", "automation", "intelligent"];
 
@@ -21,7 +21,7 @@ export const labourSafeAiRule: RuleModule = {
   evaluate(content: string, _ctx: PageContext): RuleResult {
     const lower = content.toLowerCase();
     const mentionsAi = AI_TRIGGERS.some((t) => lower.includes(t));
-    const flags = [];
+    const flags: RuleFlag[] = [];
 
     // Forbidden phrases — always fail when present.
     for (const term of LABOUR_SAFE_AI_FORBIDDEN) {

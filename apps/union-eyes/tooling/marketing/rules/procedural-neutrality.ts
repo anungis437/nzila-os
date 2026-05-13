@@ -5,7 +5,7 @@
  * politically-emotional framing on public surfaces. PASS / FAIL.
  */
 
-import type { PageContext, RuleModule, RuleResult } from "./types";
+import type { PageContext, RuleFlag, RuleModule, RuleResult } from "./types";
 
 interface Pattern {
   pattern: RegExp;
@@ -30,7 +30,7 @@ const PATTERNS: Pattern[] = [
 export const proceduralNeutralityRule: RuleModule = {
   name: "procedural-neutrality",
   evaluate(content: string, ctx: PageContext): RuleResult {
-    const flags = [];
+    const flags: RuleFlag[] = [];
     const lines = content.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       for (const p of PATTERNS) {
