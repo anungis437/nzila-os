@@ -1,6 +1,6 @@
 # UnionEyes — Narrative CI Report
 
-Generated: 2026-05-13T05:37:45.292Z
+Generated: 2026-05-13T07:07:16.103Z
 
 ## Summary
 
@@ -8,7 +8,7 @@ Generated: 2026-05-13T05:37:45.292Z
 - Hard-fail violations: **0**
 - Warning violations: **231**
 - Rule failures: **0**
-- Average Institutional Maturity: **86/100**
+- Average Institutional Maturity: **87/100**
 
 ## Per-Surface Detail
 
@@ -1306,11 +1306,11 @@ Generated: 2026-05-13T05:37:45.292Z
 ### messages/en.json
 
 - **Path:** `messages/en.json`
-- **Institutional Maturity:** 78/100
+- **Institutional Maturity:** 90/100
 
 **Scores:**
-- narrative-balance: 50/100 (warn)
-- coexistence-positioning: 50/100 (warn)
+- narrative-balance: 58/100 (warn)
+- coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 100/100 (pass)
 - canadian-positioning: 100/100 (pass)
@@ -1338,55 +1338,54 @@ Generated: 2026-05-13T05:37:45.292Z
 - L7113 [warning/warning] `platform` — "nzilaPlatform": "Platform",
 - L7173 [warning/warning] `platform` — "platformAdminView": "Platform Admin View",
 - L7174 [warning/warning] `platform` — "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
-- L7216 [warning/warning] `platform` — "platform": "Platform",
-- L7238 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
-- L7240 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7251 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
-- L7271 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
-- L7280 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
-- L7302 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
-- L7314 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
-- L7467 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
-- L7489 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
-- L7491 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
-- L7601 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
-- L7637 [warning/warning] `platform` — "platform": "Capabilities",
-- L7688 [warning/warning] `platform` — "badge": "Platform Module",
-- L7722 [warning/warning] `platform` — "badge": "Platform Module",
-- L7757 [warning/warning] `platform` — "badge": "Platform Module",
-- L7787 [warning/warning] `platform` — "badge": "Platform Module",
-- L7797 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
-- L7847 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
-- L7861 [warning/warning] `platform` — "pageDescription": "Terms and conditions governing the use of UnionEyes union management platform.",
-- L7864 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
-- L7866 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
-- L7870 [warning/warning] `platform` — "liabilityDesc": "UnionEyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to
-- L7882 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
-- L7925 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
-- L7927 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
-- L7937 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
-- L7943 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
-- L7947 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof."
-- L8899 [warning/warning] `AI-powered` — "benefit2": "AI-powered grievance triage & drafting",
-- L9051 [warning/warning] `platform` — "platform": {
-- L9055 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
-- L9071 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
-- L9076 [warning/warning] `platform` — "platformAnalytics": "Platform Analytics",
-- L9083 [warning/warning] `platform` — "platformSecurityPosture": "Platform security posture",
-- L9086 [warning/warning] `platform` — "platformHealth": "Platform Health",
-- L9093 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
-- L9100 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
-- L10205 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
-- L10881 [warning/warning] `platform` — "title": "Platform Operations",
-- L10882 [warning/warning] `platform` — "subtitle": "Real-time platform health, incidents, and operational metrics",
-- L10894 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
-- L10956 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
-- L10957 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
-- L10993 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
+- L7234 [warning/warning] `platform` — "platform": "Platform",
+- L7280 [warning/warning] `platform` — "heroDescription": "Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.",
+- L7282 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
+- L7293 [warning/warning] `platform` — "solutionHeading": "A Platform Built for How Unions Actually Operate",
+- L7313 [warning/warning] `platform` — "governanceDescription": "Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.",
+- L7322 [warning/warning] `platform` — "modulesBadge": "Platform Modules",
+- L7344 [warning/warning] `platform` — "missionDescription": "UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h
+- L7356 [warning/warning] `operating system` — "heroDescription": "A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.",
+- L7509 [warning/warning] `centralized` — "noGovernanceOversight": "No centralized governance oversight"
+- L7531 [warning/warning] `platform` — "heroDescription": "Real-time operational status of UnionEyes platform services",
+- L7533 [warning/warning] `platform` — "pageDescription": "Real-time status of UnionEyes platform services."
+- L7643 [warning/warning] `centralized` — "ba3After": "Centralized campaign tracking with real-time progress",
+- L7679 [warning/warning] `platform` — "platform": "Capabilities",
+- L7730 [warning/warning] `platform` — "badge": "Platform Module",
+- L7764 [warning/warning] `platform` — "badge": "Platform Module",
+- L7799 [warning/warning] `platform` — "badge": "Platform Module",
+- L7829 [warning/warning] `platform` — "badge": "Platform Module",
+- L7839 [warning/warning] `platform` — "feat4Desc": "Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.",
+- L7889 [warning/warning] `platform` — "collectDesc": "UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe
+- L7903 [warning/warning] `platform` — "pageDescription": "Terms and conditions governing the use of UnionEyes union management platform.",
+- L7906 [warning/warning] `platform` — "acceptanceDesc": "By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law.
+- L7908 [warning/warning] `platform` — "useDesc": "You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th
+- L7912 [warning/warning] `platform` — "liabilityDesc": "UnionEyes is provided \"as is\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to
+- L7924 [warning/warning] `platform` — "standardsDesc": "We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility
+- L7967 [warning/warning] `platform` — "ctaDescription": "Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.",
+- L7969 [warning/warning] `platform` — "ctaSecondary": "View Platform Overview",
+- L7979 [warning/warning] `platform` — "auditDesc": "Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.",
+- L7985 [warning/warning] `platform` — "reconDesc": "Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.",
+- L7989 [warning/warning] `platform` — "defensibilityDesc": "Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof."
+- L8941 [warning/warning] `AI-powered` — "benefit2": "AI-powered grievance triage & drafting",
+- L9093 [warning/warning] `platform` — "platform": {
+- L9097 [warning/warning] `platform` — "operationsOverview": "Nzila Platform Operations — here's your overview.",
+- L9113 [warning/warning] `platform` — "platformHealthIncidents": "Platform health & incidents",
+- L9118 [warning/warning] `platform` — "platformAnalytics": "Platform Analytics",
+- L9125 [warning/warning] `platform` — "platformSecurityPosture": "Platform security posture",
+- L9128 [warning/warning] `platform` — "platformHealth": "Platform Health",
+- L9135 [warning/warning] `platform` — "recentPlatformEvents": "Recent Platform Events",
+- L9142 [warning/warning] `platform` — "platformActivityAppears": "Platform activity will appear here",
+- L10247 [warning/warning] `AI-powered` — "description": "AI-powered recommendations"
+- L10921 [warning/warning] `platform` — "title": "Platform Operations",
+- L10922 [warning/warning] `platform` — "subtitle": "Real-time platform health, incidents, and operational metrics",
+- L10934 [warning/warning] `platform` — "platformUptimeTitle": "Platform Uptime",
+- L10995 [warning/warning] `platform` — "platformAdoptionTitle": "Platform Adoption",
+- L10996 [warning/warning] `platform` — "moduleUsageDescription": "Module usage across the platform",
+- L11032 [warning/warning] `platform` — "featureAdoptionDescription": "Usage across the platform by feature",
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 4.9% (target 30%).
-- (coexistence-positioning) No coexistence / overlay framing detected.
+- (narrative-balance) Continuity language under-represented: 9.2% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
@@ -1394,7 +1393,6 @@ Generated: 2026-05-13T05:37:45.292Z
 - Remove or rephrase "operating system" (warning).
 - Remove or rephrase "centralized" (warning).
 - Add institutional-continuity framing.
-- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 
 ### messages/fr-CA.json
 
@@ -1428,14 +1426,14 @@ Generated: 2026-05-13T05:37:45.292Z
 ### messages/fr.json
 
 - **Path:** `messages/fr.json`
-- **Institutional Maturity:** 66/100
+- **Institutional Maturity:** 72/100
 
 **Scores:**
-- narrative-balance: 32/100 (warn)
-- coexistence-positioning: 50/100 (warn)
+- narrative-balance: 40/100 (warn)
+- coexistence-positioning: 70/100 (pass)
 - procedural-neutrality: 100/100 (pass)
 - labour-safe-ai: 76/100 (pass)
-- canadian-positioning: 82/100 (pass)
+- canadian-positioning: 85/100 (pass)
 
 **Vocabulary violations:**
 - L2958 [warning/warning] `platform` — "platform": "Plateforme",
@@ -1443,30 +1441,28 @@ Generated: 2026-05-13T05:37:45.292Z
 - L3024 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
 - L3107 [warning/warning] `platform` — "platform": "Plateforme",
 - L3116 [warning/warning] `platform` — "platform": "Fournisseur de plateforme SaaS (Nzila Ventures)",
-- L7153 [warning/warning] `platform` — "platform": "Plateforme",
-- L7432 [warning/warning] `platform` — "platform": "Plateforme",
-- L8772 [warning/warning] `platform` — "platform": {
+- L7171 [warning/warning] `platform` — "platform": "Plateforme",
+- L7474 [warning/warning] `platform` — "platform": "Plateforme",
+- L8814 [warning/warning] `platform` — "platform": {
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 0.9% (target 30%).
-- (coexistence-positioning) No coexistence / overlay framing detected.
+- (narrative-balance) Continuity language under-represented: 3.3% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
-- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 
 ### messages/it.json
 
 - **Path:** `messages/it.json`
-- **Institutional Maturity:** 64/100
+- **Institutional Maturity:** 86/100
 
 **Scores:**
-- narrative-balance: 25/100 (warn)
-- coexistence-positioning: 50/100 (warn)
+- narrative-balance: 45/100 (warn)
+- coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 76/100 (pass)
-- canadian-positioning: 82/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
 - L2958 [warning/warning] `platform` — "platform": "Piattaforma",
@@ -1474,32 +1470,30 @@ Generated: 2026-05-13T05:37:45.292Z
 - L3024 [warning/warning] `platform` — "platform": "Fornitore di piattaforma SaaS (Nzila Ventures)",
 - L3107 [warning/warning] `platform` — "platform": "Piattaforma",
 - L3116 [warning/warning] `platform` — "platform": "Fornitore di piattaforma SaaS (Nzila Ventures)",
-- L7154 [warning/warning] `platform` — "platform": "Piattaforma",
-- L7442 [warning/warning] `platform` — "platform": "Moduli",
-- L8795 [warning/warning] `platform` — "platform": {
+- L7172 [warning/warning] `platform` — "platform": "Piattaforma",
+- L7484 [warning/warning] `platform` — "platform": "Moduli",
+- L8837 [warning/warning] `platform` — "platform": {
 
 **Flags:**
-- (narrative-balance) Governance saturation detected: 47.8% of pillar terms (target 30%, threshold 40%).
-- (narrative-balance) Continuity language under-represented: 0.4% (target 30%).
-- (coexistence-positioning) No coexistence / overlay framing detected.
+- (narrative-balance) Governance saturation detected: 41.8% of pillar terms (target 30%, threshold 40%).
+- (narrative-balance) Continuity language under-represented: 10.1% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Rebalance toward continuity, coordination, and trust language.
 - Add institutional-continuity framing.
-- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.
 
 ### messages/pt.json
 
 - **Path:** `messages/pt.json`
-- **Institutional Maturity:** 63/100
+- **Institutional Maturity:** 87/100
 
 **Scores:**
-- narrative-balance: 25/100 (warn)
-- coexistence-positioning: 50/100 (warn)
+- narrative-balance: 46/100 (warn)
+- coexistence-positioning: 100/100 (pass)
 - procedural-neutrality: 100/100 (pass)
-- labour-safe-ai: 76/100 (pass)
-- canadian-positioning: 79/100 (pass)
+- labour-safe-ai: 100/100 (pass)
+- canadian-positioning: 100/100 (pass)
 
 **Vocabulary violations:**
 - L2958 [warning/warning] `platform` — "platform": "Plataforma",
@@ -1507,15 +1501,13 @@ Generated: 2026-05-13T05:37:45.292Z
 - L3024 [warning/warning] `platform` — "platform": "Provedor de plataforma SaaS (Nzila Ventures)",
 - L3107 [warning/warning] `platform` — "platform": "Plataforma",
 - L3116 [warning/warning] `platform` — "platform": "Provedor de plataforma SaaS (Nzila Ventures)",
-- L7154 [warning/warning] `platform` — "platform": "Plataforma",
-- L7442 [warning/warning] `platform` — "platform": "Modulos",
-- L8795 [warning/warning] `platform` — "platform": {
+- L7172 [warning/warning] `platform` — "platform": "Plataforma",
+- L7484 [warning/warning] `platform` — "platform": "Modulos",
+- L8837 [warning/warning] `platform` — "platform": {
 
 **Flags:**
-- (narrative-balance) Continuity language under-represented: 0.4% (target 30%).
-- (coexistence-positioning) No coexistence / overlay framing detected.
+- (narrative-balance) Continuity language under-represented: 11.0% (target 30%).
 
 **Recommendations:**
 - Remove or rephrase "platform" (warning).
 - Add institutional-continuity framing.
-- Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'.

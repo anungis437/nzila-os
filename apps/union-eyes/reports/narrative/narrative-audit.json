@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T05:37:45.292Z",
+  "generatedAt": "2026-05-13T07:07:16.103Z",
   "files": [
     {
       "ctx": {
@@ -8740,7 +8740,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7216,
+          "line": 7234,
           "excerpt": "\"platform\": \"Platform\","
         },
         {
@@ -8749,7 +8749,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7238,
+          "line": 7280,
           "excerpt": "\"heroDescription\": \"Grievances. Finances. Membership. Compliance. One governed platform — total transparency, total accountability, zero guesswork.\","
         },
         {
@@ -8758,7 +8758,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7240,
+          "line": 7282,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -8767,7 +8767,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7251,
+          "line": 7293,
           "excerpt": "\"solutionHeading\": \"A Platform Built for How Unions Actually Operate\","
         },
         {
@@ -8776,7 +8776,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7271,
+          "line": 7313,
           "excerpt": "\"governanceDescription\": \"Union executives, finance officers, and legal teams need a platform they can defend — to their members, their boards, and their auditors.\","
         },
         {
@@ -8785,7 +8785,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7280,
+          "line": 7322,
           "excerpt": "\"modulesBadge\": \"Platform Modules\","
         },
         {
@@ -8794,7 +8794,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7302,
+          "line": 7344,
           "excerpt": "\"missionDescription\": \"UnionEyes was born when a healthcare representative lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She h"
         },
         {
@@ -8803,7 +8803,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7314,
+          "line": 7356,
           "excerpt": "\"heroDescription\": \"A Labour Relations Officer turned lawyer and a seasoned technologist — together they are building the operating system that unions have never had.\","
         },
         {
@@ -8812,7 +8812,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7467,
+          "line": 7509,
           "excerpt": "\"noGovernanceOversight\": \"No centralized governance oversight\""
         },
         {
@@ -8821,7 +8821,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7489,
+          "line": 7531,
           "excerpt": "\"heroDescription\": \"Real-time operational status of UnionEyes platform services\","
         },
         {
@@ -8830,7 +8830,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7491,
+          "line": 7533,
           "excerpt": "\"pageDescription\": \"Real-time status of UnionEyes platform services.\""
         },
         {
@@ -8839,7 +8839,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7601,
+          "line": 7643,
           "excerpt": "\"ba3After\": \"Centralized campaign tracking with real-time progress\","
         },
         {
@@ -8848,7 +8848,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7637,
+          "line": 7679,
           "excerpt": "\"platform\": \"Capabilities\","
         },
         {
@@ -8857,7 +8857,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7688,
+          "line": 7730,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8866,7 +8866,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7722,
+          "line": 7764,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8875,7 +8875,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7757,
+          "line": 7799,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8884,7 +8884,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7787,
+          "line": 7829,
           "excerpt": "\"badge\": \"Platform Module\","
         },
         {
@@ -8893,7 +8893,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7797,
+          "line": 7839,
           "excerpt": "\"feat4Desc\": \"Match platform billing against bank statements and internal ledgers. Flag discrepancies before they become audit findings.\","
         },
         {
@@ -8902,7 +8902,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7847,
+          "line": 7889,
           "excerpt": "\"collectDesc\": \"UnionEyes collects information necessary to provide union management services, including: name, email address, union membership details, and usage data. We collect this information whe"
         },
         {
@@ -8911,7 +8911,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7861,
+          "line": 7903,
           "excerpt": "\"pageDescription\": \"Terms and conditions governing the use of UnionEyes union management platform.\","
         },
         {
@@ -8920,7 +8920,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7864,
+          "line": 7906,
           "excerpt": "\"acceptanceDesc\": \"By accessing or using UnionEyes, you agree to be bound by these Terms of Service. UnionEyes is a platform designed for union organizations in Canada and is governed by Canadian law."
         },
         {
@@ -8929,7 +8929,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7866,
+          "line": 7908,
           "excerpt": "\"useDesc\": \"You may use UnionEyes solely for lawful union management purposes, including grievance tracking, member communication, voting, and organizational administration. You agree not to misuse th"
         },
         {
@@ -8938,7 +8938,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7870,
+          "line": 7912,
           "excerpt": "\"liabilityDesc\": \"UnionEyes is provided \\\"as is\\\" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our to"
         },
         {
@@ -8947,7 +8947,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7882,
+          "line": 7924,
           "excerpt": "\"standardsDesc\": \"We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA and comply with the Accessible Canada Act (ACA). Our platform is regularly audited for accessibility"
         },
         {
@@ -8956,7 +8956,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7925,
+          "line": 7967,
           "excerpt": "\"ctaDescription\": \"Every engagement starts with a controlled pilot. We work with your team to define scope, select modules, and validate the platform against your real workflows.\","
         },
         {
@@ -8965,7 +8965,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7927,
+          "line": 7969,
           "excerpt": "\"ctaSecondary\": \"View Platform Overview\","
         },
         {
@@ -8974,7 +8974,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7937,
+          "line": 7979,
           "excerpt": "\"auditDesc\": \"Every action on the platform is logged with who, what, when, and why. Audit logs are immutable, exportable, and available to authorized roles at any time.\","
         },
         {
@@ -8983,7 +8983,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7943,
+          "line": 7985,
           "excerpt": "\"reconDesc\": \"Platform billing reconciles against your internal ledgers. Allocation is transparent. Every dollar is accounted for from parent invoice to local cost centre.\","
         },
         {
@@ -8992,7 +8992,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7947,
+          "line": 7989,
           "excerpt": "\"defensibilityDesc\": \"Evidence sealing, grievance chain of custody, and tamper-evident records. When your decisions are challenged, the platform provides the proof.\""
         },
         {
@@ -9001,7 +9001,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8899,
+          "line": 8941,
           "excerpt": "\"benefit2\": \"AI-powered grievance triage & drafting\","
         },
         {
@@ -9010,7 +9010,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9051,
+          "line": 9093,
           "excerpt": "\"platform\": {"
         },
         {
@@ -9019,7 +9019,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9055,
+          "line": 9097,
           "excerpt": "\"operationsOverview\": \"Nzila Platform Operations — here's your overview.\","
         },
         {
@@ -9028,7 +9028,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9071,
+          "line": 9113,
           "excerpt": "\"platformHealthIncidents\": \"Platform health & incidents\","
         },
         {
@@ -9037,7 +9037,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9076,
+          "line": 9118,
           "excerpt": "\"platformAnalytics\": \"Platform Analytics\","
         },
         {
@@ -9046,7 +9046,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9083,
+          "line": 9125,
           "excerpt": "\"platformSecurityPosture\": \"Platform security posture\","
         },
         {
@@ -9055,7 +9055,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9086,
+          "line": 9128,
           "excerpt": "\"platformHealth\": \"Platform Health\","
         },
         {
@@ -9064,7 +9064,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9093,
+          "line": 9135,
           "excerpt": "\"recentPlatformEvents\": \"Recent Platform Events\","
         },
         {
@@ -9073,7 +9073,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 9100,
+          "line": 9142,
           "excerpt": "\"platformActivityAppears\": \"Platform activity will appear here\","
         },
         {
@@ -9082,7 +9082,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10205,
+          "line": 10247,
           "excerpt": "\"description\": \"AI-powered recommendations\""
         },
         {
@@ -9091,7 +9091,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10881,
+          "line": 10921,
           "excerpt": "\"title\": \"Platform Operations\","
         },
         {
@@ -9100,7 +9100,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10882,
+          "line": 10922,
           "excerpt": "\"subtitle\": \"Real-time platform health, incidents, and operational metrics\","
         },
         {
@@ -9109,7 +9109,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10894,
+          "line": 10934,
           "excerpt": "\"platformUptimeTitle\": \"Platform Uptime\","
         },
         {
@@ -9118,7 +9118,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10956,
+          "line": 10995,
           "excerpt": "\"platformAdoptionTitle\": \"Platform Adoption\","
         },
         {
@@ -9127,7 +9127,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10957,
+          "line": 10996,
           "excerpt": "\"moduleUsageDescription\": \"Module usage across the platform\","
         },
         {
@@ -9136,7 +9136,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 10993,
+          "line": 11032,
           "excerpt": "\"featureAdoptionDescription\": \"Usage across the platform by feature\","
         }
       ],
@@ -9144,41 +9144,46 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 50,
+          "score": 58,
           "flags": [
             {
-              "message": "Continuity language under-represented: 4.9% (target 30%).",
+              "message": "Continuity language under-represented: 9.2% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 228,
-              "continuity": 29,
-              "coordination": 133,
-              "trust": 207
+              "governance": 263,
+              "continuity": 66,
+              "coordination": 148,
+              "trust": 241
             },
-            "total": 597,
+            "total": 718,
             "shares": {
-              "governance": 0.38190954773869346,
-              "continuity": 0.048576214405360134,
-              "coordination": 0.22278056951423786,
-              "trust": 0.34673366834170855
+              "governance": 0.36629526462395545,
+              "continuity": 0.09192200557103064,
+              "coordination": 0.20612813370473537,
+              "trust": 0.33565459610027853
             }
           }
         },
         {
           "rule": "coexistence-positioning",
-          "status": "warn",
-          "score": 50,
-          "flags": [
-            {
-              "message": "No coexistence / overlay framing detected.",
-              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
-            }
-          ],
+          "status": "pass",
+          "score": 100,
+          "flags": [],
           "detail": {
-            "matched": []
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "coexistence",
+              "layered modernization",
+              "modular adoption",
+              "institutional evolution",
+              "non-disruptive implementation",
+              "alongside existing systems",
+              "augments existing"
+            ]
           }
         },
         {
@@ -9196,7 +9201,11 @@
             "mentionsAi": true,
             "matchedRequired": [
               "human oversight",
-              "explainability"
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
             ]
           }
         },
@@ -9207,7 +9216,12 @@
           "flags": [],
           "detail": {
             "matched": [
-              "Canadian-hosted"
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "institutional trust",
+              "democratic infrastructure",
+              "governance-safe operations"
             ],
             "generalCanadianHits": [
               "canada",
@@ -9219,7 +9233,7 @@
           }
         }
       ],
-      "maturity": 78
+      "maturity": 90
     },
     {
       "ctx": {
@@ -9436,7 +9450,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7153,
+          "line": 7171,
           "excerpt": "\"platform\": \"Plateforme\","
         },
         {
@@ -9445,7 +9459,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7432,
+          "line": 7474,
           "excerpt": "\"platform\": \"Plateforme\","
         },
         {
@@ -9454,7 +9468,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8772,
+          "line": 8814,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -9462,41 +9476,38 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 32,
+          "score": 40,
           "flags": [
             {
-              "message": "Continuity language under-represented: 0.9% (target 30%).",
+              "message": "Continuity language under-represented: 3.3% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 75,
-              "continuity": 2,
-              "coordination": 33,
-              "trust": 112
+              "governance": 76,
+              "continuity": 8,
+              "coordination": 41,
+              "trust": 118
             },
-            "total": 222,
+            "total": 243,
             "shares": {
-              "governance": 0.33783783783783783,
-              "continuity": 0.009009009009009009,
-              "coordination": 0.14864864864864866,
-              "trust": 0.5045045045045045
+              "governance": 0.31275720164609055,
+              "continuity": 0.03292181069958848,
+              "coordination": 0.16872427983539096,
+              "trust": 0.48559670781893005
             }
           }
         },
         {
           "rule": "coexistence-positioning",
-          "status": "warn",
-          "score": 50,
-          "flags": [
-            {
-              "message": "No coexistence / overlay framing detected.",
-              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
-            }
-          ],
+          "status": "pass",
+          "score": 70,
+          "flags": [],
           "detail": {
-            "matched": []
+            "matched": [
+              "coexistence"
+            ]
           }
         },
         {
@@ -9520,12 +9531,13 @@
         {
           "rule": "canadian-positioning",
           "status": "pass",
-          "score": 82,
+          "score": 85,
           "flags": [],
           "detail": {
             "matched": [],
             "generalCanadianHits": [
               "canada",
+              "canadian",
               "québec",
               "quebec",
               "bilingual"
@@ -9533,7 +9545,7 @@
           }
         }
       ],
-      "maturity": 66
+      "maturity": 72
     },
     {
       "ctx": {
@@ -9594,7 +9606,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7154,
+          "line": 7172,
           "excerpt": "\"platform\": \"Piattaforma\","
         },
         {
@@ -9603,7 +9615,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7442,
+          "line": 7484,
           "excerpt": "\"platform\": \"Moduli\","
         },
         {
@@ -9612,7 +9624,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8795,
+          "line": 8837,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -9620,45 +9632,50 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 25,
+          "score": 45,
           "flags": [
             {
-              "message": "Governance saturation detected: 47.8% of pillar terms (target 30%, threshold 40%).",
+              "message": "Governance saturation detected: 41.8% of pillar terms (target 30%, threshold 40%).",
               "suggestion": "Rebalance toward continuity, coordination, and trust language."
             },
             {
-              "message": "Continuity language under-represented: 0.4% (target 30%).",
+              "message": "Continuity language under-represented: 10.1% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 122,
-              "continuity": 1,
-              "coordination": 31,
-              "trust": 101
+              "governance": 157,
+              "continuity": 38,
+              "coordination": 46,
+              "trust": 135
             },
-            "total": 255,
+            "total": 376,
             "shares": {
-              "governance": 0.47843137254901963,
-              "continuity": 0.00392156862745098,
-              "coordination": 0.12156862745098039,
-              "trust": 0.396078431372549
+              "governance": 0.4175531914893617,
+              "continuity": 0.10106382978723404,
+              "coordination": 0.12234042553191489,
+              "trust": 0.35904255319148937
             }
           }
         },
         {
           "rule": "coexistence-positioning",
-          "status": "warn",
-          "score": 50,
-          "flags": [
-            {
-              "message": "No coexistence / overlay framing detected.",
-              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
-            }
-          ],
+          "status": "pass",
+          "score": 100,
+          "flags": [],
           "detail": {
-            "matched": []
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "coexistence",
+              "layered modernization",
+              "modular adoption",
+              "institutional evolution",
+              "non-disruptive implementation",
+              "alongside existing systems",
+              "augments existing"
+            ]
           }
         },
         {
@@ -9670,24 +9687,37 @@
         {
           "rule": "labour-safe-ai",
           "status": "pass",
-          "score": 76,
+          "score": 100,
           "flags": [],
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
-              "explainability"
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
             ]
           }
         },
         {
           "rule": "canadian-positioning",
           "status": "pass",
-          "score": 82,
+          "score": 100,
           "flags": [],
           "detail": {
-            "matched": [],
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "institutional trust",
+              "democratic infrastructure",
+              "governance-safe operations"
+            ],
             "generalCanadianHits": [
               "canada",
+              "canadian",
               "québec",
               "quebec",
               "bilingual"
@@ -9695,7 +9725,7 @@
           }
         }
       ],
-      "maturity": 64
+      "maturity": 86
     },
     {
       "ctx": {
@@ -9756,7 +9786,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7154,
+          "line": 7172,
           "excerpt": "\"platform\": \"Plataforma\","
         },
         {
@@ -9765,7 +9795,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 7442,
+          "line": 7484,
           "excerpt": "\"platform\": \"Modulos\","
         },
         {
@@ -9774,7 +9804,7 @@
             "severity": "warning",
             "category": "warning"
           },
-          "line": 8795,
+          "line": 8837,
           "excerpt": "\"platform\": {"
         }
       ],
@@ -9782,41 +9812,46 @@
         {
           "rule": "narrative-balance",
           "status": "warn",
-          "score": 25,
+          "score": 46,
           "flags": [
             {
-              "message": "Continuity language under-represented: 0.4% (target 30%).",
+              "message": "Continuity language under-represented: 11.0% (target 30%).",
               "suggestion": "Add institutional-continuity framing."
             }
           ],
           "detail": {
             "counts": {
-              "governance": 75,
-              "continuity": 1,
-              "coordination": 27,
-              "trust": 123
+              "governance": 110,
+              "continuity": 38,
+              "coordination": 42,
+              "trust": 157
             },
-            "total": 226,
+            "total": 347,
             "shares": {
-              "governance": 0.33185840707964603,
-              "continuity": 0.004424778761061947,
-              "coordination": 0.11946902654867257,
-              "trust": 0.5442477876106194
+              "governance": 0.3170028818443804,
+              "continuity": 0.10951008645533142,
+              "coordination": 0.12103746397694524,
+              "trust": 0.45244956772334294
             }
           }
         },
         {
           "rule": "coexistence-positioning",
-          "status": "warn",
-          "score": 50,
-          "flags": [
-            {
-              "message": "No coexistence / overlay framing detected.",
-              "suggestion": "Use phrases like 'continuity layer', 'overlay infrastructure', or 'alongside existing systems'."
-            }
-          ],
+          "status": "pass",
+          "score": 100,
+          "flags": [],
           "detail": {
-            "matched": []
+            "matched": [
+              "overlay infrastructure",
+              "continuity layer",
+              "coexistence",
+              "layered modernization",
+              "modular adoption",
+              "institutional evolution",
+              "non-disruptive implementation",
+              "alongside existing systems",
+              "augments existing"
+            ]
           }
         },
         {
@@ -9828,31 +9863,44 @@
         {
           "rule": "labour-safe-ai",
           "status": "pass",
-          "score": 76,
+          "score": 100,
           "flags": [],
           "detail": {
             "mentionsAi": true,
             "matchedRequired": [
-              "explainability"
+              "human oversight",
+              "explainability",
+              "reviewability",
+              "governance-safe AI",
+              "assistive intelligence",
+              "procedural transparency"
             ]
           }
         },
         {
           "rule": "canadian-positioning",
           "status": "pass",
-          "score": 79,
+          "score": 100,
           "flags": [],
           "detail": {
-            "matched": [],
+            "matched": [
+              "Canadian-hosted",
+              "bilingual-first",
+              "sovereignty-conscious",
+              "institutional trust",
+              "democratic infrastructure",
+              "governance-safe operations"
+            ],
             "generalCanadianHits": [
               "canada",
+              "canadian",
               "quebec",
               "bilingual"
             ]
           }
         }
       ],
-      "maturity": 63
+      "maturity": 87
     }
   ],
   "summary": {
@@ -9861,6 +9909,6 @@
     "hardFails": 0,
     "warnings": 231,
     "ruleFailures": 0,
-    "averageMaturity": 86
+    "averageMaturity": 87
   }
 }
